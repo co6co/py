@@ -1,7 +1,6 @@
 #! /usr/bin/env python
 # -*- coding: utf-8 -*-
 '''
-@Author: DEADF1SH_CAT
 @File: WebFinger.py
 @Time: 2019/11/08 20:26
 @About: 
