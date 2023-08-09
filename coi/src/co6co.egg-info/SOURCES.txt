@@ -1,0 +1,11 @@
+setup.py
+setup_3.3_b.py
+src/__init__.py
+src/co6co.egg-info/PKG-INFO
+src/co6co.egg-info/SOURCES.txt
+src/co6co.egg-info/dependency_links.txt
+src/co6co.egg-info/requires.txt
+src/co6co.egg-info/top_level.txt
+src/log/__init__.py
+src/log/log.py
+src/macpy/__init__.py
