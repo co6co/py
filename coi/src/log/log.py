@@ -24,7 +24,7 @@ elif os.name =="posix":folder="./log"
 for level in LEVEL_LIST:
     fileNamePart=f"{level}.log"
     p=os.path.join(folder,"loguru_{time:YY-MM}_"+fileNamePart)
-    logger.add(p ,rotation="5 MB",level=level,encoding="utf-8" ,retention='7 days' ,format="{time:YY-MM-DD HH:mm:ss}\t{level}\t{file}\t{line}\t{message}")
+    logger.add(p ,rotation="5 MB",level=level, encoding="utf-8" ,retention='7 days' ,format="{time:YY-MM-DD HH:mm:ss}\t{level}\t{file}\t{line}\t{message}")
  
 
 '''
