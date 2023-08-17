@@ -1,4 +1,8 @@
-import co6co
 
+import co6co.utils.log as log
+import Crypto
 
-print(dir(co6co))
+ 
+log.warn(dir( log))
+log( log.__version__)
+print(dir(Crypto)) 

@@ -2,6 +2,9 @@
 import datetime,sys,threading,os
 from loguru import logger
 
+'''
+loguru 日志配置
+'''
 logger.remove()
 logger.add(sys.stdout,level="INFO",format="{file}\t{line}\t{message}")
 '''
@@ -15,18 +18,19 @@ ERROR           40  error()
 CRITICAL        50  critical()
 '''
 
- 
 LEVEL_LIST=["TRACE","DEBUG","INFO","SUCCESS","WARNING","ERROR","CRITICAL"]
 folder="."
-if os.name =="nt":folder="c:\log\python"
-elif os.name =="posix":folder="./log"
+if os.name == "nt": folder = r"c:\log\python"
+elif os.name == "posix": folder = "./log"
  
 for level in LEVEL_LIST:
     fileNamePart=f"{level}.log"
     p=os.path.join(folder,"loguru_{time:YY-MM}_"+fileNamePart)
-    logger.add(p ,rotation="5 MB",level=level, encoding="utf-8" ,retention='7 days' ,format="{time:YY-MM-DD HH:mm:ss}\t{level}\t{file}\t{line}\t{message}")
+    logger.add(p, rotation="5 MB", level=level, encoding="utf-8", retention='7 days', format="{time:YY-MM-DD HH:mm:ss}\t{level}\t{file}\t{line}\t{message}")
  
-
+'''
+控制台日志 日志配置
+'''
 '''
 \033[显示方式;前景色；背景色m*******\033[0m
 \033[显示方式;前景色；背景色m*******\033[0m
@@ -47,31 +51,53 @@ for level in LEVEL_LIST:
  36           46        青蓝色
  37           47        白色
 '''
-def __log(msg,type:int=0,foregroundColor:int=37,bg=40,e=None,hasPrefix:bool=True):
+def __log(msg,type: int = 0,foregroundColor:int=37, bg=40, e=None, hasPrefix:bool=True):
     t=threading.currentThread()
     time = datetime.datetime.now() 
     err=e.__traceback__.tb_lineno if e !=None else ""
     prefix=f"['{time.strftime('%Y.%m.%d-%H:%M:%S')}'] [{t.ident}|{t.name}]\t"
     if not hasPrefix:prefix=""
     print(f"{prefix}\033[{type};{foregroundColor};{bg}m{msg}{err}\033[0m")
-def log(msg):__log(msg)
+def log(msg:str):__log(msg)
 
 
-def start_mark(msg,f="--",start:str="\r\n",end:str=">",num:int=36):
+def start_mark(msg:str,f:str="--",start:str="\r\n",end:str=">",num:int=36):
+    """
+    标记开始
+    """
     __log(start+f*num+ msg +f*num+end,hasPrefix=False)
-def end_mark(msg,f="==",start:str="\r\n<",end:str="\r\n\r\n",num:int=36):
+def end_mark(msg:str,f:str="==",start:str="\r\n<",end:str="\r\n\r\n",num:int=36):
+    """
+    标记结束
+    """
     __log(start+f*num+ msg +f*num+end,hasPrefix=False)
 
-def info(msg):__log(msg)
+def info(msg:str):__log(msg)
 
-def succ(msg): __log(msg,7,32,40)
+def succ(msg:str):
+    """
+    成功日志
+    """
+    __log(msg,7,32,40)
 
-def warn(msg):__log(msg,7,33,40)
+def warn(msg:str):
+    """
+    警告日志
+    """
+    __log(msg,7,33,40)
 
-def err(msg,e=None):__log(msg,7,31,40,e)
+def err(msg:str,e=None):
+    """
+    错误日志
+    """
+    __log(msg,7,31,40,e)
 
-def critical(msg):__log(msg,0,37,40)
+def critical(msg:str):
+    """
+    危急日志
+    """
+    __log(msg,0,37,40)
 
-if __name__ =="__main__":
-    logger.trace("123456asdf")
+if __name__ == "__main__" :
+    logger.trace("文件日志")
     logger.success("*arg:{}{}\t\t**kwargs:'ab:{ab},cd:{cd}'","元数据1","元数据2",ab="字典数据1",cd="字典数据2")
