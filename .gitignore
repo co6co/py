@@ -1,6 +1,5 @@
-/**/__pycache__
-/**/*.egg-info
+/**/__pycache__/
+/**/*.egg-info/
 /**/dist
 /coi/XXXX
-/**/.fleet
-/clash/co6co.clash.egg-info
+/**/.fleet/
