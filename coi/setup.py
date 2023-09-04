@@ -1,5 +1,6 @@
-from setuptools import setup, find_packages
+# -*- coding:utf-8 -*-
 
+from setuptools import setup, find_packages
 import  co6co
 VERSION = co6co.__version__
 

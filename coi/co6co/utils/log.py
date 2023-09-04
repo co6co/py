@@ -1,3 +1,4 @@
+# -*- coding:utf-8 -*-
 
 import datetime,sys,threading,os
 from loguru import logger

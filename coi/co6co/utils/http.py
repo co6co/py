@@ -1,6 +1,12 @@
+# -*- coding:utf-8 -*-
+
 import requests
  
-def get(url,timeout:int|tuple|None=None,proxy:str=None)->requests.Response:
+
+def download(url,timeout:int|tuple|None=None,proxy:str=None,header_dict:dict=None)->bytes:
+    return get(requests.utils.requote_uri(url),timeout,proxy,header_dict)
+    
+def get(url,timeout:int|tuple|None=None,proxy:str=None,header_dict:dict=None)->requests.Response:
     proxies={}
     if proxy!=None:
         proxies = {
@@ -24,6 +30,9 @@ def get(url,timeout:int|tuple|None=None,proxy:str=None)->requests.Response:
         "User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36"
         #'User-Agent':'BaiduSipder'
     }
+    if header_dict !=None:
+        header_dict.update(headers)
+        headers=header_dict
     if timeout == None:timeout=(5, 15)
     resp = requests.get(url,headers=headers, timeout=timeout,allow_redirects=True,proxies=proxies)
     if len(resp.history) > 0: # 存在302 跳转
