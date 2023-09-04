@@ -32,7 +32,7 @@ class File:
         encoding:文件编码
         return content 
         """
-        with open(filePathth,"r",encoding=encoding) as file: 
+        with open(filePath,"r",encoding=encoding) as file: 
             content=file.read() #.splitlines()# readlines() 会存在\n 
             return content
             
