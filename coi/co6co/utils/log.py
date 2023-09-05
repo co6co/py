@@ -32,9 +32,9 @@ for level in LEVEL_LIST:
 '''
 控制台日志 日志配置
 '''
-'''
-\033[显示方式;前景色；背景色m*******\033[0m
-\033[显示方式;前景色；背景色m*******\033[0m
+"""
+\033[显示方式;前景色;背景色m*******\033[0m
+\033[显示方式;前景色;背景色m*******\033[0m
 显示方式:    0:默认值
             1:高亮
             4:下划线
@@ -51,7 +51,7 @@ for level in LEVEL_LIST:
  35           45        紫红色
  36           46        青蓝色
  37           47        白色
-'''
+"""
 def __log(msg,type: int = 0,foregroundColor:int=37, bg=40, e=None, hasPrefix:bool=True):
     t=threading.currentThread()
     time = datetime.datetime.now() 
