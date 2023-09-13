@@ -1,12 +1,29 @@
 # -*- coding:utf-8 -*-
 
 import requests
- 
 
-def download(url,timeout:int|tuple|None=None,proxy:str=None,header_dict:dict=None)->bytes:
-    return get(requests.utils.requote_uri(url),timeout,proxy,header_dict)
+# 禁用安全请求警告 不验证 verify=False
+import urllib3 
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+
+"""
+使用socks代理方法
+pip install PySocks
+
+import socket
+import socks
+import requests
+
+socks.set_default_proxy(socks.SOCKS5, "127.0.0.1", 9050)
+socket.socket = socks.socksocket
+print(requests.get('http://ip-api.com/json').text)
+
+"""
+def download(url,timeout:int|tuple|None=None,proxy:str=None,header_dict:dict=None,verify:bool=True)->bytes:
+    #requests.utils.requote_uri(url) #url 编码
+    return get(url,timeout,proxy,header_dict,verify).content
     
-def get(url,timeout:int|tuple|None=None,proxy:str=None,header_dict:dict=None)->requests.Response:
+def get(url,timeout:int|tuple|None=None,proxy:str=None,header_dict:dict=None,verify:bool=True)->requests.Response:
     proxies={}
     if proxy!=None:
         proxies = {
@@ -34,9 +51,11 @@ def get(url,timeout:int|tuple|None=None,proxy:str=None,header_dict:dict=None)->r
         header_dict.update(headers)
         headers=header_dict
     if timeout == None:timeout=(5, 15)
-    resp = requests.get(url,headers=headers, timeout=timeout,allow_redirects=True,proxies=proxies)
+    resp = requests.get(url,headers=headers, timeout=timeout,allow_redirects=True,proxies=proxies,verify=verify)
     if len(resp.history) > 0: # 存在302 跳转
         location_url = resp.history[len(resp.history) - 1].headers.get('Location')
         resp=requests.get(location_url,headers=headers,timeout=(15, 30),proxies=proxies)
         return resp
     return resp
+
+
