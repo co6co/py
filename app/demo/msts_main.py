@@ -46,7 +46,7 @@ class msts:
             r=r[index+1:]
             index=r.index('"')
             r=r[0:index]  
-            #https://ai-m-5tps.iiszg.com/play-m.php?url=玄幻小说/末世之有靠山做女王/第351集_巨大改变.mp3&jiidx=/play_m/38400_50_1_352.html&jiids=/play_m/38400_50_1_350.html&id=38400&ji=351&said=50
+            
             deUrl=unquote_plus(r)
             data=parse_qsl(deUrl)
             mp3Url=data[0][1] 
@@ -84,7 +84,7 @@ if __name__ == '__main__' :
     parser.add_argument('--list' ,default=True, action=argparse.BooleanOptionalAction,help=f"Url 是列表页")
     parser.add_argument("-d","--folder",type=str,help=f"保存目录 [{default_save_dir}]",default=default_save_dir)
     args=parser.parse_args()
-    c=msts(args.url,mp3Url=args.murl,downloadDir=args.folder)#"https://m.5tps.vip/m_h/38400.html"
+    c=msts(args.url,mp3Url=args.murl,downloadDir=args.folder)
     if args.url ==None:
         parser.print_help()
         sys.exit(0)
