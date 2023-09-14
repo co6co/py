@@ -1,41 +1,40 @@
 
 import co6co.utils.http as http
 import co6co.utils.log as log 
-
+import socket,socks
 import re,requests,os,sys
 from urllib.parse import urlparse,unquote_plus,quote_plus,parse_qsl
 import concurrent.futures as futures
-import socket,socks
-socks.set_default_proxy(socks.SOCKS5, "127.0.0.1", 9666)
-socket.socket = socks.socksocket
-#from multiprocessing import cpu_count
-import argparse,time
+
+from multiprocessing import cpu_count
+import argparse
 
 class msts:
-    def __init__(self,listUrl:str,mp3Url:str,downloadDir="D:\\temp",thread_count=1) -> None:
+    @staticmethod
+    def set_proxy(ip:str, port:int):
+        socks.set_default_proxy(socks.SOCKS5, ip, port)
+        socket.socket = socks.socksocket
+
+    def __init__(self,listUrl:str,mp3Url:str,downloadDir="D:\\temp") -> None:
         self.url=listUrl
-        if mp3Url ==None:mp3Url="https://177h.wodeshougong.com/"
-        self.mp3host=mp3Url
+        self.mp3host="https://177h.wodeshougong.com/" if mp3Url ==None else mp3Url
         self.downloadFolder=downloadDir
-        self.thread_count=thread_count
         if not os.path.exists(self.downloadFolder):os.makedirs(self.downloadFolder)
         result=urlparse(listUrl)
         self.host=f"{result.scheme}://{result.netloc}"
         pass
     def _get(self,url)->str:
         headers={"User-Agent":"Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Mobile Safari/537.36"}
-        response=http.get(url,header_dict=headers, timeout=30, verify=False)
+        response=http.get(url,header_dict=headers,verify=False)
         response.encoding="utf-8"
         return response.text
-
-    
     def _getList(self)->list|None:
         text=self._get(self.url)
         f=r"/play_m/\d+_\d+_\d+_\d+.html"
         kk = re.compile(f)
         m=re.findall(kk,text)
         return m
-    def _parser(self,url:str)->(str,str):
+    def _parser(self,url)->(str,str):
         """
         url: 播放页 url
         Referer,mp3
@@ -45,39 +44,57 @@ class msts:
         m=re.search(f,text)
         if m!=None:
             r=m.group(0)
-            result=urlparse(url)
-            list_url=re.findall("\d+",result.path)
-             
-
             index=r.index('"')
             r=r[index+1:]
             index=r.index('"')
-            r=r[0:index]  
-            r=r.replace("html&id=&",f"html&id={list_url[0]}&")
-            deUrl=unquote_plus(r)
+            r=r[0:index]
+            
+            result=urlparse(url)
+            arr=re.findall("\d+",result.path)
+
+            r=r.replace("&id=&ji=",f"&id={arr[0]}&ji=")
+            deUrl=unquote_plus(r,encoding="utf-8")
+            log.warn(deUrl)
             data=parse_qsl(deUrl)
             mp3Url=data[0][1] 
-            log.info(f"{r},{mp3Url}")
             return (r,self.mp3host+mp3Url)
     
     def _download(self,itemUrl:str): 
-        try: 
-            log.start_mark(f"开始下载...{itemUrl}")
-            r,m=self._parser(itemUrl)
-            log.warn(f"{r}\r\n{m}\r\n{requests.utils.requote_uri(m)}")
-            fileName=os.path.basename(m)
-            header={"Referer":r}
-            
-            data=http.download(  requests.utils.requote_uri(m),timeout=30,header_dict=header,verify=False)
+        log.start_mark(f"开始下载...{itemUrl}")
+        r,m=self._parser(itemUrl)
+        log.warn(f"{r}\r\n{m}")
+        fileName=os.path.basename(m)
+
+        #header={"Accept": ""*/*","Referer":r,"Sec-Ch-Ua-Platform":"Android","Sec-Ch-Ua":'"Chromium";v="116", "Not)A;Brand";v="24", "Google Chrome";v="116"',"Sec-Fetch-Dest":"audio","User-Agent":"Mozilla/5.0 (Linux; Android) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.109 Safari/537.36 CrKey/1.54.248666"}
+        header={
+            "Accept": '*/*',
+            "Accept-Encoding": 'identity;q=1, *;q=0',
+            "Accept-Language": 'zh-CN,zh;q=0.9',
+            "Cache-Control": 'no-cache',
+            "Connection": 'keep-alive',
+            "Host": '177d.wodeshougong.com',
+            "Pragma": 'no-cache',
+            "Range": 'bytes=0-',
+            "Referer": 'https://ai-m-5tps.iiszg.com/play-m.php?url=%E7%8E%84%E5%B9%BB%E5%B0%8F%E8%AF%B4%2F%E8%B6%85%E7%BA%A7%E7%B3%BB%E7%BB%9F%2F032.mp3&jiidx=/play_m/18498_51_1_33.html&jiids=/play_m/18498_51_1_31.html&id=18498&ji=32&said=51',
+            "Sec-Fetch-Dest": 'audio',
+            "Sec-Fetch-Mode": 'no-cors',
+            "Sec-Fetch-Site": 'cross-site',
+            "User-Agent": 'Mozilla/5.0 (Linux; Android) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.109 Safari/537.36 CrKey/1.54.248666',
+            "sec-ch-ua": '"Chromium";v="116", "Not)A;Brand";v="24", "Google Chrome";v="116"',
+            "sec-ch-ua-mobile": '?0',
+            "sec-ch-ua-platform": '"Android"'
+
+        }
+
+        log.info(r+"\r\n"+m+"<-->"+requests.utils.requote_uri(m))
+        status,data=http.download(requests.utils.requote_uri(m),timeout=30,header_dict=header,verify=False)
+        if status == 200:
             log.warn(os.path.join(self.downloadFolder,fileName))
             File=open(os.path.join(self.downloadFolder,fileName),"wb") # Opens the file for writing.
             File.write(data)
             log.end_mark("开始下载.")
-            time.sleep(1)
-        except Exception as e:
-            log.err(f"下载'{itemUrl}'记录异常：{e}")
-            raise
-
+        else:
+            log.end_mark(f"下载出错.{status}")
 
     def downloads(self):
         log.start_mark("解析List...")
@@ -85,7 +102,7 @@ class msts:
         log.end_mark("解析List.")
         if list !=None:
             log.end_mark(f"解析List.{len(list)}")
-            with futures.ThreadPoolExecutor(max_workers=self.thread_count) as executor:
+            with futures.ThreadPoolExecutor(max_workers=cpu_count()) as executor:
                 futures_dict= {executor.submit(self._download,f"{self.host}{itemUrl}"):itemUrl for itemUrl in list } 
                 futures.wait(futures_dict)
 
@@ -93,18 +110,19 @@ class msts:
 if __name__ == '__main__' :
     default_save_dir=os.path.join(os.path.abspath("."),"Download") 
     parser=argparse.ArgumentParser(description="下载文件")
-    parser.add_argument("-u","--url",type=str, help="需要下载的URL 列表页")
+    parser.add_argument("-u","--url",type=str, help="需要下载的URL 列表页",default="https://m.5tps.vip/play_m/18498_51_1_32.html")
     parser.add_argument("-m","--murl",type=str, help="媒体主机",default=None)
-    parser.add_argument('--list' ,default=True, action=argparse.BooleanOptionalAction,help=f"Url 是列表页")
+    parser.add_argument("-p","--proxy",type=str, help="代理服务器，ip:port",default=None)
+    parser.add_argument('--list' ,default=False, action=argparse.BooleanOptionalAction,help=f"Url 是列表页")
     parser.add_argument("-d","--folder",type=str,help=f"保存目录 [{default_save_dir}]",default=default_save_dir)
     args=parser.parse_args()
     c=msts(args.url,mp3Url=args.murl,downloadDir=args.folder)
-    
-    if args.url ==None:
+    if args.proxy !=None:
+        arr = args.proxy.spit(":")
+        msts.set_proxy(arr[0],int(arr[1]))
+    if args.url == None:
         parser.print_help()
         sys.exit(0)
     if args.list: c.downloads()
-    else:  c._download(args.url)
-    #log.log( c._parser("https://m.ysts8.net/play_m/18498_51_1_1.html") )
-     
+    else: c._download(args.url)
 
