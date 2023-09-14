@@ -53,7 +53,8 @@ class msts:
             arr=re.findall("\d+",result.path)
 
             r=r.replace("&id=&ji=",f"&id={arr[0]}&ji=")
-            deUrl=unquote_plus(r)
+            deUrl=unquote_plus(r,encoding="utf-8")
+            log.warn(deUrl)
             data=parse_qsl(deUrl)
             mp3Url=data[0][1] 
             return (r,self.mp3host+mp3Url)
@@ -63,9 +64,29 @@ class msts:
         r,m=self._parser(itemUrl)
         log.warn(f"{r}\r\n{m}")
         fileName=os.path.basename(m)
-        header={"Referer":r}
-        
-        log.info(r+"\r\n"+m)
+
+        #header={"Accept": ""*/*","Referer":r,"Sec-Ch-Ua-Platform":"Android","Sec-Ch-Ua":'"Chromium";v="116", "Not)A;Brand";v="24", "Google Chrome";v="116"',"Sec-Fetch-Dest":"audio","User-Agent":"Mozilla/5.0 (Linux; Android) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.109 Safari/537.36 CrKey/1.54.248666"}
+        header={
+            "Accept": '*/*',
+            "Accept-Encoding": 'identity;q=1, *;q=0',
+            "Accept-Language": 'zh-CN,zh;q=0.9',
+            "Cache-Control": 'no-cache',
+            "Connection": 'keep-alive',
+            "Host": '177d.wodeshougong.com',
+            "Pragma": 'no-cache',
+            "Range": 'bytes=0-',
+            "Referer": 'https://ai-m-5tps.iiszg.com/play-m.php?url=%E7%8E%84%E5%B9%BB%E5%B0%8F%E8%AF%B4%2F%E8%B6%85%E7%BA%A7%E7%B3%BB%E7%BB%9F%2F032.mp3&jiidx=/play_m/18498_51_1_33.html&jiids=/play_m/18498_51_1_31.html&id=18498&ji=32&said=51',
+            "Sec-Fetch-Dest": 'audio',
+            "Sec-Fetch-Mode": 'no-cors',
+            "Sec-Fetch-Site": 'cross-site',
+            "User-Agent": 'Mozilla/5.0 (Linux; Android) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.109 Safari/537.36 CrKey/1.54.248666',
+            "sec-ch-ua": '"Chromium";v="116", "Not)A;Brand";v="24", "Google Chrome";v="116"',
+            "sec-ch-ua-mobile": '?0',
+            "sec-ch-ua-platform": '"Android"'
+
+        }
+
+        log.info(r+"\r\n"+m+"<-->"+requests.utils.requote_uri(m))
         status,data=http.download(requests.utils.requote_uri(m),timeout=30,header_dict=header,verify=False)
         if status == 200:
             log.warn(os.path.join(self.downloadFolder,fileName))
@@ -89,10 +110,10 @@ class msts:
 if __name__ == '__main__' :
     default_save_dir=os.path.join(os.path.abspath("."),"Download") 
     parser=argparse.ArgumentParser(description="下载文件")
-    parser.add_argument("-u","--url",type=str, help="需要下载的URL 列表页")
+    parser.add_argument("-u","--url",type=str, help="需要下载的URL 列表页",default="https://m.5tps.vip/play_m/18498_51_1_32.html")
     parser.add_argument("-m","--murl",type=str, help="媒体主机",default=None)
     parser.add_argument("-p","--proxy",type=str, help="代理服务器，ip:port",default=None)
-    parser.add_argument('--list' ,default=True, action=argparse.BooleanOptionalAction,help=f"Url 是列表页")
+    parser.add_argument('--list' ,default=False, action=argparse.BooleanOptionalAction,help=f"Url 是列表页")
     parser.add_argument("-d","--folder",type=str,help=f"保存目录 [{default_save_dir}]",default=default_save_dir)
     args=parser.parse_args()
     c=msts(args.url,mp3Url=args.murl,downloadDir=args.folder)

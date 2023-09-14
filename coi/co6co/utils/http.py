@@ -2,6 +2,7 @@
 
 import requests
 
+
 # 禁用安全请求警告 不验证 verify=False
 import urllib3 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
@@ -52,8 +53,7 @@ def get(url,timeout:int|tuple|None=None,proxy:str=None,header_dict:dict=None,ver
         #'User-Agent':'BaiduSipder'
     }
     if header_dict !=None:
-        header_dict.update(headers)
-        headers=header_dict
+        headers.update(header_dict)
     if timeout == None:timeout=(5, 15)
     resp = requests.get(url,headers=headers, timeout=timeout,allow_redirects=True,proxies=proxies,verify=verify)
     if len(resp.history) > 0: # 存在302 跳转
