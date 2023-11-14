@@ -1,4 +1,6 @@
 #-*- coding:utf-8 -*-
+from typing import TypeVar, List
+T = TypeVar('T')
 
 __all__ = ['utils'] #针对模块公开接口的一种约定，以提供了”白名单“的形式暴露接口。
                     #如果定义了__all__，
