@@ -55,7 +55,8 @@ class absFilterItems(ABC, Page_param):
         # []  获取的结果能重复 取*
 		else: return [ self. po_type.__dict__[key].desc() if it[key] and it[key].lower()=="desc" else  self. po_type.__dict__[key].asc()  for it in orderList for key in it.keys()]
 	
-	def checkFieldValue(selt,fielValue:Any):
-		if type(fielValue) ==str and fielValue:return True
-		if type(fielValue) ==int :return True
+	def checkFieldValue(self,fielValue:Any):
+		if type(fielValue) == str and fielValue:return True
+		if type(fielValue) == int :return True
+		if type(fielValue) == bool :return True
 		return False
