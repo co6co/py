@@ -17,19 +17,45 @@ from .db_filter import absFilterItems
 from co6co.utils import log
 
 class DbOperations:
+	# 实体类存在字段
+	__po_has_field__:str="_sa_instance_state"
 	def __init__(self,db_session:AsyncSession) -> None:
 		self.db_session = db_session
 		pass
 	@staticmethod
 	def remove_db_instance_state( poInstance_or_poList:Iterator| Any )->List[Dict]|Dict:
-		if  hasattr (poInstance_or_poList,"__iter__"): return [dict(filter(lambda k: k[0] !="_sa_instance_state", a1.__dict__.items())) for a1 in poInstance_or_poList]  
-		else: return dict(filter(lambda k: k[0] !="_sa_instance_state", poInstance_or_poList.__dict__.items()))
-
+		if  hasattr (poInstance_or_poList,"__iter__") and hasattr (poInstance_or_poList,"__dict__"): return [dict(filter(lambda k: k[0] !=DbOperations.__po_has_field__, a1.__dict__.items())) for a1 in poInstance_or_poList]  
+		elif hasattr (poInstance_or_poList,"__dict__"): return dict(filter(lambda k: k[0] !=DbOperations.__po_has_field__, poInstance_or_poList.__dict__.items()))
+		else: return poInstance_or_poList
+	@staticmethod
+	def row2dict(row:Row)->Dict:
+		"""
+		xxxxPO.id.label("xxx_id") 为数据取别名
+		出现重名覆盖
+		"""
+		d:dict={}
+		for i in range(0,len(row)):
+			c=row[i]
+			if hasattr(c,DbOperations.__po_has_field__):
+				dc=DbOperations.remove_db_instance_state(c)
+				d.update(dc)
+			else:
+				key=row._fields[i]
+				'''
+				j=1 
+				while key in d.keys():
+					key=f"{ row._fields[i]}_{str(j )}"
+					j+=1
+				'''
+				d.update({key:c})
+		return d 
 	async def _get_one(self, select:select, selectField:bool=True):
 		"""
 		获取一行数据
-		存在多行,返回第一行
+		存在多,返回第一行
 		为None 返回None
+		存在多列：返回 Row
+
 		""" 
 		try: 
 			data=await self.db_session.execute(select)
@@ -39,9 +65,10 @@ class DbOperations:
 				if row==None:return row 
 				return dict(zip(row._fields,row)) 
 			else:
-				row:Row=data.fetchone()  
-				if row==None:return row
-				return row[0]
+				row:Row=data.fetchone()   
+				if row==None:return row 
+				if len(row)==1:return row[0]
+				else:return row # 返回后面这个不好使用 [{row._fields[i]:row[i]} for i in range(0,len(row))]
 		except Exception as e:
 			log.warn(f"在未找到!\terror:{e}")
 			return None
@@ -50,12 +77,12 @@ class DbOperations:
 		data=await self.db_session.execute(select)
 		return data.scalar()
 	 
-	async def _get_tuple(self ,select:select)-> list:  
+	async def _get_tuple(self ,select:select)-> List[dict]:  
 		#sqlalchemy.engine.result.ChunkedIteratorResult
 		data=await self.db_session.execute(select) 
 		return [dict(zip(a._fields,a))  for a in  data]
 
-	async def _get_list(self, select:select)-> list:  
+	async def _get_list(self, select:select)-> List[dict]:  
 		data=await self.db_session.execute(select) 
 		return self.remove_db_instance_state(data.scalars().fetchall())  
 	
@@ -66,7 +93,7 @@ class DbOperations:
 		"""
 		'''result = await self.db_session.execute(text('select version()')) #通过conn对象就可对DB进行操作​ 
 		data=result.fetchone() '''
-		isTule,sml=self._create_select(selectColumnOrPo,*filters)
+		isTule,sml=self.create_select(selectColumnOrPo,*filters)
 		return  await self._get_one(sml,isTule) 
 
 	async def get_one_by_pk(self,po:TypeVar,pk:Union[Any, Tuple[Any, ...]]):
@@ -74,35 +101,40 @@ class DbOperations:
 		通过 主键 获取实体
 		"""
 		try:
-			one=await self.db_session.get_one(po,ident=pk) 
+			one=await self.db_session.get_one(po,ident=pk)
 			return one
 		except Exception as e:
 			log.warn(f"在{po},查找：pk:{pk} 未找到!\terror:{e}")
 			return None
-	
-	
-	
-	def _create_select(self,selectColumnOrPo:Tuple[InstrumentedAttribute]|TypeVar,*filters:ColumnElement[bool] ) ->  (bool,Select[Any]):
+	 
+	def create_select(self,selectColumnOrPo:Tuple[InstrumentedAttribute]|TypeVar,*filters:ColumnElement[bool] ) ->  Tuple[bool,Select[Any]]  :
 		isTule= type(selectColumnOrPo)==tuple or type(selectColumnOrPo)==list  
 		if isTule:
-			sml=select(*selectColumnOrPo).filter(and_(*filters))
+			sml=select(*selectColumnOrPo)  .filter(and_(*filters))
 		else:
 			# {type(selectColumnOrPo)} == sqlalchemy.orm.decl_api.DeclarativeMeta 
 			po:TypeVar=selectColumnOrPo
 			sml=select(po).filter(and_(*filters))
 		return isTule,sml 
+	
+	def join(self,select:Select[Any], tarGet:TypeVar ,*filters:ColumnElement[bool] ) ->   Select[Any]:
+		"""
+		join
+		"""
+		sml=select.join(tarGet,and_(*filters)) 
+		return sml
+	
 
-	async def _create_paged_select(self,filterItem:absFilterItems, selectColumnOrPo:Tuple[InstrumentedAttribute]|TypeVar=None,  allow_paged:bool=True, allow_order:bool=True)->  (bool,select):
+	async def _create_paged_select(self,filterItem:absFilterItems, selectColumnOrPo:Tuple[InstrumentedAttribute]|TypeVar=None,  allow_paged:bool=True, allow_order:bool=True)-> Tuple[bool,select] :
 		"""
 		创建 Column select
 		"""
 		filters=filterItem.filter()  
 		#* selectColumn 不会为 None
 		if selectColumnOrPo==None:selectColumnOrPo=filterItem.po_type 
-		isTule,sml = self._create_select(selectColumnOrPo,*filters)  
+		isTule,sml = self.create_select(selectColumnOrPo,*filters)  
 		
-		sml:Select[Any]=sml
-		
+		sml:Select[Any]=sml 
 		if allow_paged:
 			limit=filterItem.limit
 			offset=filterItem.offset
@@ -121,14 +153,14 @@ class DbOperations:
 		return [dict(zip(a._fields,a))  for a in  data] 
 	
 	async def get_list(self,selectColumnOrPo:Tuple[InstrumentedAttribute]|TypeVar,*filters:ColumnElement[bool]): 
-		isTule,sml=self._create_select(selectColumnOrPo,*filters)
+		isTule,sml=self.create_select(selectColumnOrPo,*filters)
 		if isTule:return await self._get_tuple(sml)
 		return await self._get_list(sml)
 	
 	async def count(self,*filters:ColumnElement[bool],column:InstrumentedAttribute="*" )->int:
 		return await self._get_scalar(select(func.count(column)).filter(and_(*filters))) 
 	
-	async def exist(self,*filters:ColumnElement[bool],column:InstrumentedAttribute="*" )->Any:
+	async def exist(self,*filters:ColumnElement[bool],column:InstrumentedAttribute="*" )->bool:
 		return await self.count(*filters,column=column)>0
 	
 class DbPagedOperations(DbOperations): 
@@ -166,7 +198,7 @@ class DbPagedOperations(DbOperations):
 		print(one) ''' 
 		return total
 	
-	async def get_paged (self ,selectColumnOrPo:Tuple[InstrumentedAttribute]|TypeVar=None)-> list:
+	async def get_paged (self ,selectColumnOrPo:Tuple[InstrumentedAttribute]|TypeVar=None)-> List[dict]:
 		"""
 		selectColumn:  实体对象或者 filed
 		返回列表
