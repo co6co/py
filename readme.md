@@ -24,3 +24,16 @@ rmvirtualenv venv
 python<version> -m venv <virtual-environment-name>
 pip freeze > requirements.txt  # 列出项目依赖 
 pip install -r requirements.txt
+
+# conda
+```
+conda create --name env_name python=3.11
+conda env list
+conda activate env_name
+conda deactivate
+
+conda list # 包管理
+
+
+
+```
