@@ -1,6 +1,8 @@
 # 安装虚环境
+## 1. virtualenv
 ```
 // 创建的虚拟环境的存放的路径 C:\Users\Administrator\Envs
+
 pip install virtualenv
 pip install virtualenvwrapper-win # 扩展包（指令便捷）
 #
@@ -25,8 +27,9 @@ pip freeze > requirements.txt  # 列出项目依赖
 pip install -r requirements.txt
 <<<<<<< HEAD
 
-# conda
+
 ```
+## 2. conda
 conda create --name env_name python=3.11
 conda env list
 conda activate env_name
@@ -35,7 +38,7 @@ conda deactivate
 conda list # 包管理
 
 
-
+# 包管理
 =======
 ```
 # 安装包和发布包

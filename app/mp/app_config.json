@@ -1,0 +1,19 @@
+
+{ 
+    "web_setting":{
+        "port":8084,
+        "host":"0.0.0.0",
+        "debug": "False",
+        "access_log":"True",
+        "dev":"False" 
+    },
+    "wx_config":[
+        {
+            "appid":"wxa96e7921ab04afab", 
+            "appSecret":"",
+            "token":"abc_cy",  
+            "encodingAESKey":"Rxsoy3HI275p1AcyHuw1VZXfAqy9meJ23kKNofF1xLI",	 
+            "encrypt_mode":"normal"
+        } 
+    ]
+}
