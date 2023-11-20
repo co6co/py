@@ -156,7 +156,7 @@ class DbOperations:
 		data=await self.db_session.execute(select(text))  
 		return [dict(zip(a._fields,a))  for a in  data] 
 	
-	async def get_list(self,selectColumnOrPo:Tuple[InstrumentedAttribute]|TypeVar,remove_instance_state:bool=True, *filters:ColumnElement[bool]): 
+	async def get_list(self,selectColumnOrPo:Tuple[InstrumentedAttribute]|TypeVar, *filters:ColumnElement[bool],remove_instance_state:bool=True): 
 		isTule,sml=self.create_select(selectColumnOrPo,*filters)
 		if isTule:return await self._get_tuple(sml)
 		return await self._get_list(sml,remove_instance_state)
@@ -215,7 +215,7 @@ class DbPagedOperations(DbOperations):
 		print(one) ''' 
 		return total
 	
-	async def get_paged (self ,selectColumnOrPo:Tuple[InstrumentedAttribute]|TypeVar=None,remove_instance_state:bool=True,)-> List[dict]:
+	async def get_paged (self ,selectColumnOrPo:Tuple[InstrumentedAttribute]|TypeVar=None,remove_instance_state:bool=True)-> List[dict]:
 		"""
 		selectColumn:  实体对象或者 filed
 		返回列表
