@@ -24,7 +24,8 @@ class DbOperations:
 		pass
 	@staticmethod
 	def remove_db_instance_state( poInstance_or_poList:Iterator| Any )->List[Dict]|Dict:
-		if  hasattr (poInstance_or_poList,"__iter__") and hasattr (poInstance_or_poList,"__dict__"): return [dict(filter(lambda k: k[0] !=DbOperations.__po_has_field__, a1.__dict__.items())) for a1 in poInstance_or_poList]  
+		if  hasattr (poInstance_or_poList,"__iter__") : return [dict(filter(lambda k: k[0] !=DbOperations.__po_has_field__, a1.__dict__.items())) for a1 in poInstance_or_poList]  
+		#and hasattr (poInstance_or_poList,"__dict__")
 		elif hasattr (poInstance_or_poList,"__dict__"): return dict(filter(lambda k: k[0] !=DbOperations.__po_has_field__, poInstance_or_poList.__dict__.items()))
 		else: return poInstance_or_poList
 	@staticmethod
@@ -82,9 +83,12 @@ class DbOperations:
 		data=await self.db_session.execute(select) 
 		return [dict(zip(a._fields,a))  for a in  data]
 
-	async def _get_list(self, select:select)-> List[dict]:  
+	async def _get_list(self, select:select,remove_instance_state:bool=True)-> List[dict]|List[TypeVar]:  
 		data=await self.db_session.execute(select) 
-		return self.remove_db_instance_state(data.scalars().fetchall())  
+		if remove_instance_state:
+			return DbOperations.remove_db_instance_state(data.scalars().fetchall())  
+		else:
+			return data.scalars().fetchall() 
 	
 	async def get_one(self,selectColumnOrPo:TypeVar|Tuple[InstrumentedAttribute],*filters:ColumnElement[bool])->Any|None:
 		"""
@@ -152,16 +156,29 @@ class DbOperations:
 		data=await self.db_session.execute(select(text))  
 		return [dict(zip(a._fields,a))  for a in  data] 
 	
-	async def get_list(self,selectColumnOrPo:Tuple[InstrumentedAttribute]|TypeVar,*filters:ColumnElement[bool]): 
+	async def get_list(self,selectColumnOrPo:Tuple[InstrumentedAttribute]|TypeVar,remove_instance_state:bool=True, *filters:ColumnElement[bool]): 
 		isTule,sml=self.create_select(selectColumnOrPo,*filters)
 		if isTule:return await self._get_tuple(sml)
-		return await self._get_list(sml)
+		return await self._get_list(sml,remove_instance_state)
 	
 	async def count(self,*filters:ColumnElement[bool],column:InstrumentedAttribute="*" )->int:
 		return await self._get_scalar(select(func.count(column)).filter(and_(*filters))) 
 	
 	async def exist(self,*filters:ColumnElement[bool],column:InstrumentedAttribute="*" )->bool:
 		return await self.count(*filters,column=column)>0
+	
+	def add(self,instance: object, _warn: bool = True):
+		self.db_session.add(instance,_warn)
+	def add_all(self,instances: Iterator[object]):
+		self.db_session.add_all(instances)
+
+	async def delete(self,instance: object):
+		await self.db_session.delete(instance)
+
+	async def commit(self):
+		await self.db_session.commit()
+	async def rollback(self):
+		await self.db_session.rollback()
 	
 class DbPagedOperations(DbOperations): 
 	def __init__(self, db_session:AsyncSession,filter_items:absFilterItems):
@@ -198,11 +215,11 @@ class DbPagedOperations(DbOperations):
 		print(one) ''' 
 		return total
 	
-	async def get_paged (self ,selectColumnOrPo:Tuple[InstrumentedAttribute]|TypeVar=None)-> List[dict]:
+	async def get_paged (self ,selectColumnOrPo:Tuple[InstrumentedAttribute]|TypeVar=None,remove_instance_state:bool=True,)-> List[dict]:
 		"""
 		selectColumn:  实体对象或者 filed
 		返回列表
 		"""
 		isTule,sml=await self._create_paged_select(self.filter_items,selectColumnOrPo)
 		if isTule:return await  self._get_tuple(sml)
-		return await self._get_list(sml)
+		return await self._get_list(sml,remove_instance_state)
