@@ -70,7 +70,7 @@ def _parseNodeText(text:str| bytes): # 解析 从 base64 解析出来的文本
     '''
     text_list = text.splitlines()
     
-    #if type(text) == str: text_list=[itm.encode("utf-8") for itm  in text_list]
+    #if type(text) == str: text_list=[itm.encode("utf-8") for itm  in text_list] 
     return parser(text_list)
 
 def parser(nodeUrls: List[str] | List[bytes])->List[dict]|None: 
@@ -78,6 +78,7 @@ def parser(nodeUrls: List[str] | List[bytes])->List[dict]|None:
     for node in nodeUrls: 
         if type(node) == str: node =node.encode("utf-8") 
         try:
+            print(node)
             denode=None
             toClashNode=None
             if is_vmess_node(node): 
@@ -115,10 +116,10 @@ def __check(nodesContent:str)->list|dict|str:
 def parser_content(nodesContent:str)->List[dict]:
     """
     解析文本为 clash节点s
-    """
+    """ 
     nodes_list = [] 
     try: 
-        #
+        # 
         yamlData =__check(nodesContent) 
         if type (yamlData) == dict: #yaml 格式
             #log.succ(f"{type(yamlData)}’yaml dict‘<--{addr}")
@@ -127,9 +128,9 @@ def parser_content(nodesContent:str)->List[dict]:
             #log.succ(f"{type(yamlData)} ’yaml list dict‘<--{addr}")
             nodes_list=_parseYamlNode(yamlData)
         else: # base64加密 or node list
-            # log.succ(f"{type(yamlData)} ’TEXT‘<--{addr}")
+            #og.succ(f"{type(yamlData)} ’TEXT‘<--{addr}")
             # base64 需要解密后内容 
-            rawTxt = base64.b64decode(nodesContent) if utils.isBase64(nodesContent)else nodesContent 
+            rawTxt = base64.b64decode(nodesContent) if utils.isBase64(nodesContent) else nodesContent  
             #log.err(f"{type(rawTxt)},\n{rawTxt}") 
             nodes_list=_parseNodeText(rawTxt)
     except Exception as e: 
