@@ -1,5 +1,8 @@
 from setuptools import setup, find_packages
 
+'''
+作为发布包， 主目录下[co6co_sanic_ext],不能依赖其他第三方包，否则安装时会找不到依赖第三方包
+'''
 import co6co_sanic_ext
 VERSION = co6co_sanic_ext.__version__
 
