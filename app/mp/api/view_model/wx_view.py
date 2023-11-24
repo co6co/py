@@ -14,7 +14,7 @@ from utils import wx_message
 from model import WechatConfig
 
 class WxView(BaseMethodView):
-    def _get_config(self,request:Request,appid:str)->Optional[ WechatConfig]:
+    def _get_config(self,request:Request,appid:str)->Optional[ WechatConfig]: 
         configs:List[dict]=request.app.config.wx_config  
         filtered:filter= filter(lambda c:c.get("appid")==appid,configs)
         
@@ -24,8 +24,7 @@ class WxView(BaseMethodView):
         return config
     def get(self,request:Request,appid:str):
         try:
-            signature = request.args.get("signature")
-            log.warn(f"signature:{signature}")
+            signature = request.args.get("signature") 
             config=self._get_config(request,appid) 
             if config and signature: 
                 timestamp = request.args.get("timestamp")
@@ -62,9 +61,14 @@ class WxView(BaseMethodView):
                 reply = create_reply("出错", e)
                 return raw(crypto.encrypt_message(reply.render(), nonce, timestamp),403,headers=header)
             msg = parse_message(msg) 
+           
             reply=WxView.message(request,msg,config) 
+            if reply ==None: # 来不及处理回复空串
+                 reply = create_reply(None)
+                 return raw(crypto.encrypt_message(reply.render(), nonce, timestamp),headers=header) 
             return raw(crypto.encrypt_message(reply.render(), nonce, timestamp),headers=header)
         except Exception as e:
             log.warn(e)
+            raise
 
         

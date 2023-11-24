@@ -38,13 +38,45 @@ def get_wx_user_info(request:Request):
     user_info = request.session.get('user_info')
     return raw(str(user_info))
 
+
+def remove_repetition_message(func):
+    message_ids=[]
+    remove_message_ids=[]
+    @wraps(func)
+    def remove(*args,**kwargs): 
+        log.start_mark("-----------")
+        msgId=None
+        try:
+            for i  in args: 
+                if isinstance(i,messages.BaseMessage): 
+                    msg:messages.BaseMessage=i
+                    if msg.id in message_ids: 
+                        #log.warn("过滤掉重复消息！")
+                        return
+                    message_ids.append(msg.id)
+                    msgId=msg.id  
+            return func(*args, **kwargs)
+        finally:
+            #log.log("123456")
+            #log.end_mark("------end-----")
+            if msgId!=None: remove_message_ids.append(msgId)
+            #else:log.warn("has : ‘过滤掉重复消息！’ message")
+    return remove
+
+'''
+群发消息, 被动消息，客服消息，模板消息
+公众号内网页：复杂的业务场景，需要通过网页形式来提供服务
+    网页授权获取用户基本信息：通过该接口，可以获取用户的基本信息（获取用户的OpenID是无需用户同意的，获取用户的基本信息则需用户同意）
+    微信JS-SDK，JavaScript代码使用微信原生功能的工具包，录制和播放微信语音、监听微信分享、上传手机本地图片、拍照等许多能力
+'''     
 def wx_message(func):
     """
-    对微信信息进行处理
-    """
+    对被动回复消息进行处理
+    """ 
     @wraps(func)
-    def check_message(request:Request,msg:messages.BaseMessage|events.BaseEvent,config:WechatConfig, *args, **kwargs):
-        # 消息收到最多三次 注意去重
+    @remove_repetition_message
+    def check_message(request:Request,msg:messages.BaseMessage ,config:WechatConfig, *args, **kwargs):
+        # 消息收到最多三次 注意去重 
         log.info(f"消息类型：{type(msg)}{msg.type},{msg}")
         if wx_message_type.text.getName()==msg.type:
             return _wx_text(request,msg,config) 
@@ -59,13 +91,14 @@ def wx_message(func):
         if wx_message_type.location.getName()==msg.type:
             return _wx_location(request,msg,config)
         if wx_message_type.event.getName()==msg.type:
-            _wx_event(request,msg,config)
-       
+            _wx_event(request,msg,config) 
+        
         return func(request,msg,config,*args, **kwargs)
     return check_message 
 def _wx_text(request:Request,msg:messages.TextMessage,config:WechatConfig): 
      #TextMessage({'ToUserName': 'gh_c8b421a2ed81', 'FromUserName': 'otcIn632hnZYU9v1FcO26trhghW4', 'CreateTime': '1700727977', 'MsgType': 'text', 'Content': '文本', 'MsgId': '24348569934556997'})
-     log.warn(f"文本消息：{msg.type},{msg}")
+     log.warn(f"文本消息：{msg.type},{msg}") 
+     getUser(config,msg)
 def _wx_image(request:Request,msg:messages.ImageMessage,config:WechatConfig):
      #ImageMessage({'ToUserName': 'gh_c8b421a2ed81', 'FromUserName': 'otcIn632hnZYU9v1FcO26trhghW4', 'CreateTime': '1700728033', 'MsgType': 'image', 'PicUrl': 'http://mmbiz.qpic.cn/sz_mmbiz_jpg/icrw9KdJuAHNbBoDicMHqcG8ftkh0S6yeqxPg9UML9ZAq34hnPWqWRqicWxVGXrhq4zlF7haXD4cYTt0o5IyEGKeQ/0', 'MsgId': '24348570211378290', 'MediaId': 'LYgeZgfZ7t_t6N7idjUEz3-9VElNVeyvhOkAacIJe71hcImo2j12teMt3KyP8buO'})
      log.warn(f"image消息：{msg.type},{msg}")
@@ -80,19 +113,25 @@ def _wx_location(request:Request,msg:messages.LocationMessage,config:WechatConfi
      #location,LocationMessage({'ToUserName': 'gh_c8b421a2ed81', 'FromUserName': 'otcIn632hnZYU9v1FcO26trhghW4', 'CreateTime': '1700728162', 'MsgType': 'location', 'Location_X': '25.657160', 'Location_Y': '103.558861', 'Scale': '0', 'Label': '大坡乡', 'MsgId': '24348572679095274'})
      log.warn(f"location消息：{msg.type},{msg}")
 def _wx_event(request:Request,msg:events.BaseEvent,config:WechatConfig):
-     tt=events.SubscribeEvent()
+     tt=events.SubscribeEvent(msg)
      getUser(config, tt)
      #SubscribeEvent({'ToUserName': 'gh_c8b421a2ed81', 'FromUserName': 'otcIn61ohODXRgz4Z-u4GIYVBez0', 'CreateTime': '1700728265', 'MsgType': 'event', 'Event': 'subscribe', 'EventKey': None})
      #UnsubscribeEvent({'ToUserName': 'gh_c8b421a2ed81', 'FromUserName': 'otcIn61ohODXRgz4Z-u4GIYVBez0', 'CreateTime': '1700728306', 'MsgType': 'event', 'Event': 'unsubscribe', 'EventKey': None})
      log.warn(f"事件消息：{msg.type},{msg}")
 
 
-def getUser(config:WechatConfig,msg):
+def getUser(config:WechatConfig,msg:messages.BaseMessage):
+    log.succ(f"config:{config.appid}{ config.appSecret}")
     wxClient =WeChatClient(config.appid, config.appSecret) 
+    log.succ(f"{wxClient.access_token_key}:{wxClient.access_token},{wxClient.expires_at}")  
+    print( wxClient.menu.get())
+    user = wxClient.user.get(msg.source)
+    print(user)
+    print( wxClient.menu.get())
+    
+    log.err(f"用户ID：{msg.source}")
     wxUserInfo = wxClient.user.get(msg.source)
     log.err(f"用户信息：{wxUserInfo}")
-
- 
     
 def getWeChatOAuth(redirect_url,config:WechatConfig):
     return WeChatOAuth(config.appid, config.appSecret, redirect_url)

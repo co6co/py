@@ -7,10 +7,16 @@
         "access_log":"True",
         "dev":"False" 
     },
+    "db_settings" : {
+        "DB_HOST": "localhost",
+        "DB_NAME": "wx_db",
+        "DB_USER": "root", 
+        "DB_PASSWORD":"mysql123456"
+    },
     "wx_config":[
         {
             "appid":"wxa96e7921ab04afab", 
-            "appSecret":"",
+            "appSecret":"0e2fe5bded860a9d8466fab5d1680ef1",
             "token":"abc_cy",  
             "encodingAESKey":"Rxsoy3HI275p1AcyHuw1VZXfAqy9meJ23kKNofF1xLI",	 
             "encrypt_mode":"normal"

@@ -7,7 +7,10 @@ client = WeChatClient('appid', 'secret')
 res = client.message.send_image('openid', 'media_id')
 # 查询自定义菜单
 menu = client.menu.get()
-
+  
+user = client.user.get('user id')
+menu = client.menu.get()
+menu = client.menu.create()
 
 def _is_api_endpoint(obj):
     return isinstance(obj, BaseWeChatAPI)
@@ -28,5 +31,6 @@ class WeChatMenu(BaseWeChatAPI):
 class WeChatClient三(BaseWeChatClient):
     API_BASE_URL = "https://api.weixin.qq.com/cgi-bin/" 
     menu = WeChatMenu()
+    
 
 

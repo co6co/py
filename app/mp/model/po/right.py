@@ -1,0 +1,116 @@
+#from co6co_db_ext.po import BasePO ,metadata
+from sqlalchemy import func,INTEGER, Integer,UUID,  INTEGER,BigInteger, Column, ForeignKey, String,DateTime
+from sqlalchemy.orm import  relationship,declarative_base
+import co6co.utils as tool
+from co6co.utils import hash
+import sqlalchemy
+from sqlalchemy.schema import DDL 
+from sqlalchemy import MetaData  
+
+metadata = MetaData() 
+BasePO = declarative_base(metadata=metadata)
+class UserPO(BasePO):
+    __tablename__ = "sys_user" 
+    id = Column("id",BigInteger,comment="主键",autoincrement=True, primary_key=True)
+    userName = Column("user_name",String(64), unique=True,  comment="userName")
+    category= Column("category",Integer,)
+    password = Column("user_pwd",String(256),comment="密码")
+    salt=Column("user_salt",String(64),comment="pwd=盐")
+    userGroup=Column("user_group_id",ForeignKey(f"sys_user_group.id"))
+    state=Column("state",INTEGER, comment="用户状态:0启用,1锁定,2禁用",server_default='0', default=0)  
+    avatar=Column("avatar",String(256),comment="图像URL")
+    remark=Column("remark",String(1500),comment="备注")
+    createTime=Column("create_time",DateTime , server_default=func.now() )
+    create_user=Column("create_user",BigInteger)
+    @staticmethod
+    def generateSalt( )->str:
+        """
+        生成salt
+        """
+        return tool.getRandomStr(6)
+    def encrypt(self,password:str=None)->str:
+        """
+        加密密码
+        不保存到属性
+        """
+        if password!=None: return hash.md5(self.salt+password) 
+        return hash.md5(self.salt+self.password) 
+    def verifyPwd(self,plainText:str)->bool:
+        """
+        验证输入的密码是否正确
+        """
+        return hash.md5(self.salt+plainText)==self.password
+class AccountPO(BasePO):
+    """
+    账号：以各种方式登录系统 用户名  EMAIL openID
+    """
+    __tablename__ = "sys_account" 
+    uid = Column("uuid",UUID,comment="主键",  primary_key=True)
+    user=Column("user_id",ForeignKey(f"{UserPO.__tablename__}.{UserPO.id.key}"))
+    accountName = Column("account_name",String(64), unique=True)
+    category = Column("category",INTEGER)
+    createTime= Column("create_time",DateTime,server_default=func.now(),comment="创建时间")
+    createUser= Column("create_user", BigInteger,comment="创建人")                   
+    updateTime= Column("update_time", DateTime,comment="修改时间") 
+    updateUser= Column("update_user", BigInteger,comment="修改人") 
+
+class UserGroupPO(BasePO):
+    """
+    用户组现在还不知道用来做什么
+    """
+    __tablename__ = "sys_user_group"
+
+    id = Column("id",Integer,autoincrement=True, primary_key=True)
+    name = Column("group_name",String(64), unique=True)
+    
+    createUser= Column("create_user", BigInteger,comment="创建人")  
+    createTime= Column("create_time",DateTime,server_default=func.now(),comment="创建时间")                 
+    updateTime= Column("update_time", DateTime,comment="修改时间") 
+    updateUser= Column("update_user", BigInteger,comment="修改人") 
+    
+
+class RolePO(BasePO):
+    """
+    给用户赋予权限需要通过角色
+    """
+    __tablename__ = "sys_role"
+
+    id = Column("id",BigInteger,comment="主键",autoincrement=True, primary_key=True)
+    name = Column("role_name",String(64), unique=True,  comment="角色名")
+
+class permissionPO(BasePO):
+    __tablename__ = "sys_permission"
+
+    id = Column("id",Integer,comment="主键",autoincrement=True, primary_key=True) 
+    parentId= Column("parent_id",Integer )
+    category= Column("category",Integer )
+    name = Column("name",String(64),   comment="名称")
+    code = Column("code",String(64), unique=True,  comment="权限为code")
+    url = Column("url",String(255)) 
+    remark = Column("remark",String(255),   comment="备注")
+    
+    createUser= Column("create_user", BigInteger,comment="创建人")                   
+    createTime= Column("create_time",DateTime,server_default=func.now(),comment="创建时间")
+    updateTime= Column("update_time", DateTime,comment="修改时间") 
+    updateUser= Column("update_user", BigInteger,comment="修改人")  
+
+class UserRolePO(BasePO):
+    """
+    用户_角色表
+    """
+    __tablename__ = "sys_user_role"
+
+    user= Column("user_id",ForeignKey(f"{UserPO.__tablename__}.{UserPO.id.key}"),   comment="主键id",primary_key=True)
+    role = Column("role_id",ForeignKey(f"{RolePO.__tablename__}.{RolePO.id.key}"),   comment="主键id",primary_key=True)
+    createUser= Column("create_user", BigInteger,comment="创建人")  
+    createTime= Column("create_time",DateTime,server_default=func.now(),comment="创建时间")   
+class permissionRolePO(BasePO):
+    """
+    权限_角色表
+    """
+    __tablename__ = "sys_permission_role"
+
+    user= Column("user_id",ForeignKey(f"{UserPO.__tablename__}.{UserPO.id.key}"),   comment="主键id",primary_key=True)
+    role = Column("role_id",ForeignKey(f"{RolePO.__tablename__}.{RolePO.id.key}"),   comment="主键id",primary_key=True)
+    createUser= Column("create_user", BigInteger,comment="创建人")  
+    createTime= Column("create_time",DateTime,server_default=func.now(),comment="创建时间") 

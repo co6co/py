@@ -16,12 +16,11 @@ def _create_App(name:str="__mp_main__",config:str=None,apiMount: Optional[Callab
             if '.json'  in config: customConfig= File.File.readJsonFile(config)
             else: customConfig=utils.load_module_from_file_location(Path(config) ).configs  
             if customConfig!=None:app.config.update(customConfig)
-            log.succ(f"app 配置信息：\n{app.config}")
+            #log.succ(f"app 配置信息：\n{app.config}")
             if apiMount!=None: apiMount(app,customConfig) 
         return app
-    except Exception as e:
-        
-        log.err(f"创建应用失败：\n{e}{ repr(e)}")
+    except Exception as e: 
+        log.err(f"创建应用失败：\n{e}{ repr(e)}\n 配置信息：{app.config}")
         exit 
 
 def startApp(configFile:str,apiInit:Optional[Callable[[Sanic,Any], None]] ): 
