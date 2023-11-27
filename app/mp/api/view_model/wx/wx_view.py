@@ -1,6 +1,7 @@
-from co6co_sanic_ext.view_model import BaseMethodView,Request 
+from api.view_model.base_view import BaseMethodView, AuthMethodView
 from sanic.response import text,raw
 from typing import List,Optional
+from sanic import  Request
 
 # wechatpy 依赖 cryptography
 # http://docs.wechatpy.org/zh-cn/stable/quickstart.html
@@ -39,14 +40,14 @@ class WxView(BaseMethodView):
             return text(f"异常请求{e}",403)
     @staticmethod
     @wx_message
-    def message(request:Request,msg:any,config:WechatConfig):
+    async def message(request:Request,msg:any,config:WechatConfig):
         if msg.type == "text":
             reply = create_reply(f"回复消息，我收到你的信息了：{msg.content}",msg )
         else:
             reply = create_reply("Sorry, can not handle this for now", msg)
         return reply
 
-    def post(self,request:Request,appid:str): 
+    async def post(self,request:Request,appid:str): 
         try: 
             header=dict({"Content-Type":"text/xml"}) 
             config:WechatConfig=self._get_config(request,appid)
@@ -62,7 +63,7 @@ class WxView(BaseMethodView):
                 return raw(crypto.encrypt_message(reply.render(), nonce, timestamp),403,headers=header)
             msg = parse_message(msg) 
            
-            reply=WxView.message(request,msg,config) 
+            reply=await WxView.message(request,msg,config) 
             if reply ==None: # 来不及处理回复空串
                  reply = create_reply(None)
                  return raw(crypto.encrypt_message(reply.render(), nonce, timestamp),headers=header) 
@@ -71,4 +72,4 @@ class WxView(BaseMethodView):
             log.warn(e)
             raise
 
-        
+

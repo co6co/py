@@ -1,4 +1,4 @@
-#from co6co_db_ext.po import BasePO ,metadata
+from co6co_db_ext.po import BasePO ,metadata
 from sqlalchemy import func,INTEGER, Integer,UUID,  INTEGER,BigInteger, Column, ForeignKey, String,DateTime
 from sqlalchemy.orm import  relationship,declarative_base
 import co6co.utils as tool
@@ -6,9 +6,10 @@ from co6co.utils import hash
 import sqlalchemy
 from sqlalchemy.schema import DDL 
 from sqlalchemy import MetaData  
+import uuid
 
-metadata = MetaData() 
-BasePO = declarative_base(metadata=metadata)
+#metadata = MetaData() 
+#BasePO = declarative_base(metadata=metadata)
 class UserPO(BasePO):
     __tablename__ = "sys_user" 
     id = Column("id",BigInteger,comment="主键",autoincrement=True, primary_key=True)
@@ -45,10 +46,13 @@ class AccountPO(BasePO):
     账号：以各种方式登录系统 用户名  EMAIL openID
     """
     __tablename__ = "sys_account" 
-    uid = Column("uuid",UUID,comment="主键",  primary_key=True)
+    uid = Column("uuid",String(36),  primary_key=True,default=uuid.uuid1())
+    #id = Column("id",BigInteger,comment="主键",autoincrement=True, primary_key=True)
     user=Column("user_id",ForeignKey(f"{UserPO.__tablename__}.{UserPO.id.key}"))
     accountName = Column("account_name",String(64), unique=True)
+    attachInfo= Column("attach_info",String(255),comment="有些信息需要存下来，才能配合账号使用")
     category = Column("category",INTEGER)
+    status = Column("status",String(16),comment="状态,根据账号类型，有不同得解释")
     createTime= Column("create_time",DateTime,server_default=func.now(),comment="创建时间")
     createUser= Column("create_user", BigInteger,comment="创建人")                   
     updateTime= Column("update_time", DateTime,comment="修改时间") 

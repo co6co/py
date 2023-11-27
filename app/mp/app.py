@@ -8,7 +8,7 @@ from co6co_web_db.services.db_service import injectDbSessionFactory,db_service
 from sanic.request import Request
 from sanic.response import text,json 
 import argparse
-from model.po.right import BasePO
+from co6co_db_ext.po import BasePO
 
 from pathlib import Path  
 

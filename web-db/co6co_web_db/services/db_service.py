@@ -68,8 +68,6 @@ def injectDbSessionFactory(app:Sanic,settings:dict,basePoType:TypeVar):
         app.shared_ctx.cache["db_session_factory"]=_async_session_factory 
 
     ''' 
-    service=db_service(app,app.config.db_settings)
-    service.sync_init_tables() 
     @app.middleware("request")
     async def inject_session(request:Request): 
         if "/api" in request.path:
