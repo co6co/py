@@ -1,4 +1,4 @@
-import { get_status_svc } from '../api/group';
+import { get_status_svc } from '../api/wx';
 const res =await get_status_svc()
 const data:{group:Array<optionItem>,postion:Array<optionItem>,allowSetNumberGroup:Array<string>}=res.data;
 

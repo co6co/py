@@ -33,7 +33,7 @@ class UserPO(BasePO):
         """
         加密密码
         不保存到属性
-        """
+        """ 
         if password!=None: return hash.md5(self.salt+password) 
         return hash.md5(self.salt+self.password) 
     def verifyPwd(self,plainText:str)->bool:
@@ -41,6 +41,12 @@ class UserPO(BasePO):
         验证输入的密码是否正确
         """
         return hash.md5(self.salt+plainText)==self.password
+    def to_dict(self):
+        """
+        jwt 保存内容
+        """
+        return {"id":self.id,"userName":self.userName, "group_id":self.userGroup}
+
 class AccountPO(BasePO):
     """
     账号：以各种方式登录系统 用户名  EMAIL openID
@@ -118,3 +124,16 @@ class permissionRolePO(BasePO):
     role = Column("role_id",ForeignKey(f"{RolePO.__tablename__}.{RolePO.id.key}"),   comment="主键id",primary_key=True)
     createUser= Column("create_user", BigInteger,comment="创建人")  
     createTime= Column("create_time",DateTime,server_default=func.now(),comment="创建时间") 
+
+
+class WxMenuPO(BasePO):
+    __tablename__ = "wx_menu" 
+    id = Column("id",Integer,comment="主键",autoincrement=True, primary_key=True)
+    openId = Column("open_id",String(64),  comment="公众号ID")
+    name=Column("name",String(64),  comment="菜名称")
+    content= Column("content",String(2048),comment="菜单内容") 
+    state=Column("state",Integer,comment="菜单状态") 
+    createTime=Column("create_time",DateTime , server_default=func.now() )
+    createUser=Column("create_user",BigInteger)
+    updateTime= Column("update_time", DateTime,comment="修改时间") 
+    updateUser= Column("update_user", BigInteger,comment="修改人") 

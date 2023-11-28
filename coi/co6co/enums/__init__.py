@@ -11,7 +11,7 @@ class Base_Enum  (Enum):
     """
     key:T
     val:T 
-    def __new__(cls, key:str, value:T):
+    def __new__(cls, key:T, value:T):
         obj = object.__new__(cls)
         obj.key = key 
         obj.val = value # value 为元组 (en_name,cn_name,val)
@@ -21,32 +21,36 @@ class Base_Enum  (Enum):
     def to_dict_list(cls)->List[Dict]: 
         status=[{ 'key':i.key,'value':i.val} for i in cls]
         return status 
-    def getValue(self)->int:
+    
+    def getValue(self)->T:
         return self.val
-    def getName(self)->int:
+    def getKey(self)->T:
         return self.key 
 
 @unique
 class Base_EC_Enum(Enum):
     """
-    枚举[英文 中文 数字] 
-    """
-    def __new__(cls, english:str, chinese:str, value:int):
+    枚举[key:英文 ,name:中文 ,val:数字] 
+    """ 
+    key:T
+    label:T
+    val:T 
+    def __new__(cls, key:T, label:T, value:T):
         obj = object.__new__(cls)
-        obj.en_name = english
-        obj.cn_name = chinese
+        obj.key = key
+        obj.label = label
         obj.val = value # value 为元组 (en_name,cn_name,val)
         return obj 
     
     @classmethod
     def to_dict_list(cls)->List[Dict]: 
-        status=[{"key":i.en_name,'label':i.cn_name,'value':i.val} for i in cls]
+        status=[{"key":i.key,'label':i.label,'value':i.val} for i in cls]
         return status 
-    def getValue(self)->int:
+    def getValue(self)->T:
         return self.val
-    def getName(self)->int:
-        return self.en_name
-    def getCnName(self)->int:
-        return self.cn_name
+    def getKey(self)->T:
+        return self.key
+    def getLabel(self)->T:
+        return self.label
  
     

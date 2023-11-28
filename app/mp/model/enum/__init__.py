@@ -1,4 +1,12 @@
-from co6co.enums import Base_Enum
+from co6co.enums import Base_Enum,Base_EC_Enum
 
 class Account_category(Base_Enum):
+    """
+    账号类别
+    """
     wx="wx",1 # 微信账号
+
+class wx_menu_state(Base_EC_Enum):
+    unpushed="unpushed","未推送",0
+    pushed="pushed","已推送",1
+    failed="failed","推送失败",9

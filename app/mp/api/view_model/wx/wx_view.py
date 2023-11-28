@@ -1,4 +1,5 @@
-from api.view_model.base_view import BaseMethodView, AuthMethodView
+from api.view_model.base_view import  AuthMethodView
+from api.view_model.wx import wx_base_view
 from sanic.response import text,raw
 from typing import List,Optional
 from sanic import  Request
@@ -12,21 +13,18 @@ from wechatpy.exceptions import InvalidSignatureException
 from wechatpy.exceptions import InvalidAppIdException
 from co6co.utils import log
 from utils import wx_message
+from model.enum.wx import wx_encrypt_mode
 from model import WechatConfig
 
-class WxView(BaseMethodView):
-    def _get_config(self,request:Request,appid:str)->Optional[ WechatConfig]: 
-        configs:List[dict]=request.app.config.wx_config  
-        filtered:filter= filter(lambda c:c.get("appid")==appid,configs)
-        
-        config=WechatConfig()
-        for f in filtered:
-            config.__dict__.update(f)  
-        return config
+class WxView(wx_base_view):
+    """
+    微信服务器 入口
+    """
+
     def get(self,request:Request,appid:str):
         try:
             signature = request.args.get("signature") 
-            config=self._get_config(request,appid) 
+            config=self.get_wx_config(request,appid) 
             if config and signature: 
                 timestamp = request.args.get("timestamp")
                 nonce = request.args.get("nonce")
@@ -46,30 +44,42 @@ class WxView(BaseMethodView):
         else:
             reply = create_reply("Sorry, can not handle this for now", msg)
         return reply
+    @staticmethod
+    def create_WeChatCrypto(config:WechatConfig)->WeChatCrypto|None:
+         if config.encrypt_mode==wx_encrypt_mode.safe.name:
+            return WeChatCrypto(config.token,config.encodingAESKey, config.appid) 
+         
+    @staticmethod
+    def getMessage(body:str,crypto:WeChatCrypto,msg_signature:str,timestamp:str,nonce:str):
+        if crypto==None:return body
+        return crypto.decrypt_message(body, msg_signature, timestamp, nonce)
+    @staticmethod
+    def reply_message(reply,crypto:WeChatCrypto,timestamp:str,nonce:str,status:int=200): 
+        header=dict({"Content-Type":"text/xml"}) 
+        if crypto!=None:
+            return raw(crypto.encrypt_message(reply.render(), nonce, timestamp),status,headers=header)
+        else: return raw(reply.render() ,status,headers=header)
+        
 
     async def post(self,request:Request,appid:str): 
-        try: 
-            header=dict({"Content-Type":"text/xml"}) 
-            config:WechatConfig=self._get_config(request,appid)
+        try:  
+            config:WechatConfig=self.get_wx_config(request,appid)
             timestamp = request.args.get("timestamp")
             nonce = request.args.get("nonce")
             msg_signature = request.args.get("msg_signature", "")
-            crypto = WeChatCrypto(config.token,config.encodingAESKey, appid)
-            try:
-                msg = crypto.decrypt_message(request.body, msg_signature, timestamp, nonce)
+            crypto=WxView.create_WeChatCrypto(config)
+            try: 
+                msg=WxView.getMessage(request.body,crypto,msg_signature,timestamp, nonce) 
                 print(f"from:{appid} Decrypted message: \n{msg}")
             except (InvalidSignatureException, InvalidAppIdException) as e: 
-                reply = create_reply("出错", e)
-                return raw(crypto.encrypt_message(reply.render(), nonce, timestamp),403,headers=header)
-            msg = parse_message(msg) 
-           
+                reply = create_reply("出错", e) 
+                return WxView.reply_message(reply,crypto, nonce, timestamp,403) 
+            msg = parse_message(msg)  
             reply=await WxView.message(request,msg,config) 
             if reply ==None: # 来不及处理回复空串
-                 reply = create_reply(None)
-                 return raw(crypto.encrypt_message(reply.render(), nonce, timestamp),headers=header) 
-            return raw(crypto.encrypt_message(reply.render(), nonce, timestamp),headers=header)
+                reply = create_reply(None)
+                return WxView.reply_message(reply,crypto, nonce, timestamp) 
+            return WxView.reply_message(reply,crypto, nonce, timestamp) 
         except Exception as e:
             log.warn(e)
             raise
-
-

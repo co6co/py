@@ -1,5 +1,6 @@
 
 { 
+    "SECRET":"81aa5d9ce2",
     "web_setting":{
         "port":8084,
         "host":"0.0.0.0",
@@ -15,11 +16,20 @@
     },
     "wx_config":[
         {
-            "appid":"wxa96e7921ab04afab", 
+            "name":"公众1", 
+            "appid":"wxa96e7921ab04afab",
             "appSecret":"0e2fe5bded860a9d8466fab5d1680ef1",
             "token":"abc_cy",  
             "encodingAESKey":"Rxsoy3HI275p1AcyHuw1VZXfAqy9meJ23kKNofF1xLI",	 
             "encrypt_mode":"normal"
-        } 
+        },
+        {
+            "name":"测试公众号", 
+            "appid":"wx181aa5d9ce286cf0", 
+            "appSecret":"0b19ad3a1be39f71028409c05351a43a",
+            "token":"token123456",  
+            "encodingAESKey":"",	 
+            "encrypt_mode":"normal"
+        }
     ]
 }

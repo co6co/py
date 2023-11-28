@@ -25,10 +25,11 @@ def init (app:Sanic,customConfig):
     #service=db_service(app,app.config.db_settings,BasePO)
    # service.sync_init_tables() 
     injectDbSessionFactory(app,app.config.db_settings,BasePO) 
-    app.blueprint(api)  
+    app.blueprint(api) 
+
     
 
-if __name__ == "__main__": 
+if __name__ == "__main__":
     parser=argparse.ArgumentParser(description="audit service.")
     parser.add_argument("-c","--config",default="app_config.json")
     args=parser.parse_args() 

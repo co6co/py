@@ -3,12 +3,12 @@ from co6co.utils import log
 from wechatpy import WeChatClient
 from sanic.request import Request
 from sanic.response import redirect,raw
-from model import WechatConfig, wx_message_type
+from model import WechatConfig 
 from wechatpy import messages ,events
 from co6co_db_ext.db_operations import DbOperations
 from model.pos.right import AccountPO
 from model.enum import Account_category
-from model import wx_event_type
+from model.enum.wx import wx_event_type
 import asyncio,datetime
 
 def wx_open_id_into_db(func):

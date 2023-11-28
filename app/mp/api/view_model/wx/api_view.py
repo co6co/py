@@ -1,19 +1,22 @@
 from api.view_model.wx import wx_base_view
+from sqlalchemy.ext.asyncio import AsyncSession
 from sanic.response import text,raw
-from typing import List,Optional
-from sanic import  Request
+from typing import List,Optional,Tuple
+from sanic import  Request 
+from co6co.utils import log 
+from model.pos.wx_where import WxMenuFilterItems,WxMenuPO
+from co6co_db_ext .db_operations import DbOperations
+from co6co_sanic_ext.model.res.result import Result
+from co6co_sanic_ext.utils import JSON_util
+from datetime import datetime
+from model.enum import wx_menu_state
 
-# wechatpy 依赖 cryptography
-# http://docs.wechatpy.org/zh-cn/stable/quickstart.html
-from wechatpy.crypto import WeChatCrypto
-from wechatpy import parse_message, create_reply
-from wechatpy.utils import check_signature
-from wechatpy.exceptions import InvalidSignatureException
-from wechatpy.exceptions import InvalidAppIdException
-from co6co.utils import log
-from utils import wx_message
-from model import WechatConfig
-
+class config_View(wx_base_view):
+    async def get(self, request:Request): 
+       """
+       获取微信公众号配置的 [{openId,name}]
+       """ 
+       return JSON_util.response(Result.success(self.get_wx_configs(request)))
 
 class Wx_message_View(wx_base_view):
     """
@@ -36,11 +39,126 @@ class WxView_Api(wx_base_view):
 
     is_to_all=true--->使其进入公众号在微信客户端的历史消息列表【media_id 会失效，后台草稿也会被自动删除。】
     """
+    async def get(self, request:Request):
+       """
+       未使用
+       """ 
+       return text("no use")
     async def post(self, request:Request):
         """
-
+        未使用 获取列表
         """ 
-        self.client.message.send_mass_article()
-        return text("")
+        return text("no use")
+    async def put(self, request:Request):
+        """
+        获取列表
+        """ 
+        return text("no use") 
+    
+class menus_Api(wx_base_view):
+    """
+    要求: 一级菜单:max->3  字数：max 4个汉字 “...”代替
+          二级菜单:max->5 字数：max 4个汉字
+
+          刷新策略 进入公众号会话页或公众号profile页时，上一次拉取菜单的请求在5分钟以前，
+    """ 
+    async def post(self, request:Request):
+        """
+        获取列表
+        """ 
+        param=WxMenuFilterItems() 
+        return await self._get_list(request,param,WxMenuPO.id)
+    
+    async def put(self, request:Request):
+        """
+        增加菜单
+        """
+        po =WxMenuPO()
+        po.__dict__.update(request.json)   
+        current_user_id=request.ctx.current_user["id"] 
+        async with request.ctx.session as session:  
+            session:AsyncSession=session
+            operation=DbOperations(session)
+            po.id=None  
+            po.createUser=current_user_id 
+            operation.add_all([po])
+            await session.commit()
+            return JSON_util.response(Result.success()) 
+    async def patch(self, request:Request):
+        """
+        修改菜单
+        """
+        return text("”") 
+    
+class menu_Api(wx_base_view): 
+    async def get(self, request:Request,pk:int):
+        return text("123")
+    
+    async def delete(self, request:Request,pk:int):
+        """
+        删除数据库存储得微信菜单
+        """
+        return self._del_po(request,WxMenuPO,pk) 
+    async def put(self, request:Request,pk:int):
+        """
+        更新菜单
+        """
+        po =WxMenuPO()
+        po.__dict__.update(request.json)   
+        current_user_id=request.ctx.current_user["id"] 
+        async with request.ctx.session as session:   
+            operation=DbOperations(session)
+            old_po:WxMenuPO= await operation.get_one_by_pk(WxMenuPO,pk)
+            if old_po==None: return JSON_util.response(Result.fail(message=f"未找{pk},对应的对象!"))  
+            old_po.name=po.name
+            old_po.openId=po.openId
+            old_po.content=po.content
+            old_po.updateUser=current_user_id
+            old_po.updateTime=datetime.now()
+            await session.commit()
+            return JSON_util.response(Result.success()) 
+    def push_menu(self, request:Request,openId:str,content:str)->Tuple[bool,str]:
+        try:
+            client=self.cteate_wx_client(request,openId)
+            client.menu.update(content)
+            return True,""
+        except Exception as e:
+            return False,e
+
+
+    async def patch(self, request:Request,pk:int):
+        """
+        推送菜单到微信公众号
+        1. 更改其他菜单状态
+        2. 更改当前菜单状态为已推送
+        """
+        po =WxMenuPO()
+        po.__dict__.update(request.json)   
+        current_user_id=request.ctx.current_user["id"] 
+        async with request.ctx.session as session:   
+            operation=DbOperations(session)
+            old_po:WxMenuPO= await operation.get_one_by_pk(WxMenuPO,pk)
+            if old_po==None: return JSON_util.response(Result.fail(message=f"未找{pk},对应的对象!"))   
+            old_po.openId
+            menuList:List[WxMenuPO]=operation.get_list(WxMenuPO,WxMenuPO.openId==old_po.openId ,WxMenuPO.id !=old_po.id)
+            for m in menuList:
+                m.state=wx_menu_state.unpushed.val
+                m.updateUser=current_user_id
+                m.updateTime=datetime.now()
+                
+            old_po.updateUser=current_user_id
+            old_po.updateTime=datetime.now()
+            f,msg=self.push_menu(request,old_po.openId,old_po.content)
+            if f: 
+                old_po.state=wx_menu_state.pushed.val
+                result=Result.success()
+            else :
+                old_po.state=wx_menu_state.failed.val 
+                result=Result.fail(message=msg)
+            await session.commit()
+            return JSON_util.response(result) 
+    
+
+
 
 

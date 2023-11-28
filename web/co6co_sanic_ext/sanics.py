@@ -21,7 +21,7 @@ def _create_App(name:str="__mp_main__",config:str=None,apiMount: Optional[Callab
         return app
     except Exception as e: 
         log.err(f"创建应用失败：\n{e}{ repr(e)}\n 配置信息：{app.config}")
-        exit 
+        raise 
 
 def startApp(configFile:str,apiInit:Optional[Callable[[Sanic,Any], None]] ): 
     loader = AppLoader(factory=partial(_create_App,config=configFile,apiMount=apiInit)) 

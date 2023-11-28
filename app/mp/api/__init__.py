@@ -2,7 +2,9 @@ from sanic import Blueprint
  
 from sanic.response import  text
 from sanic.exceptions import NotFound
+from api.user import user_api
 from api.wx import wx_api
 from api.test import test_api 
 
-api = Blueprint.group(wx_api ,test_api, url_prefix="/api",version=1)
+
+api = Blueprint.group(user_api,wx_api ,test_api, url_prefix="/api",version=1)

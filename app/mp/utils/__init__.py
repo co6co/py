@@ -4,7 +4,8 @@ from co6co.utils import log
 from wechatpy import WeChatClient
 from sanic.request import Request
 from sanic.response import redirect,raw
-from model import WechatConfig, wx_message_type
+from model import WechatConfig
+from model.enum.wx import wx_message_type
 from wechatpy import messages ,events
 
 from wechatpy.oauth import WeChatOAuth
@@ -99,7 +100,7 @@ def wx_message(func):
 async def _wx_text(request:Request,msg:messages.TextMessage,config:WechatConfig): 
     #TextMessage({'ToUserName': 'gh_c8b421a2ed81', 'FromUserName': 'otcIn632hnZYU9v1FcO26trhghW4', 'CreateTime': '1700727977', 'MsgType': 'text', 'Content': '文本', 'MsgId': '24348569934556997'})
     log.warn(f"文本消息：{msg.type},{msg}") 
-    #getUser(config,msg) #Error code: 48001, message: api unauthorized rid: 65640ec8-74a2c5fc-55771ced
+    getUser(config,msg) #Error code: 48001, message: api unauthorized rid: 65640ec8-74a2c5fc-55771ced
 async def _wx_image(request:Request,msg:messages.ImageMessage,config:WechatConfig):
      #ImageMessage({'ToUserName': 'gh_c8b421a2ed81', 'FromUserName': 'otcIn632hnZYU9v1FcO26trhghW4', 'CreateTime': '1700728033', 'MsgType': 'image', 'PicUrl': 'http://mmbiz.qpic.cn/sz_mmbiz_jpg/icrw9KdJuAHNbBoDicMHqcG8ftkh0S6yeqxPg9UML9ZAq34hnPWqWRqicWxVGXrhq4zlF7haXD4cYTt0o5IyEGKeQ/0', 'MsgId': '24348570211378290', 'MediaId': 'LYgeZgfZ7t_t6N7idjUEz3-9VElNVeyvhOkAacIJe71hcImo2j12teMt3KyP8buO'})
      log.warn(f"image消息：{msg.type},{msg}")
@@ -117,7 +118,7 @@ async def _wx_location(request:Request,msg:messages.LocationMessage,config:Wecha
 @wx_open_id_into_db
 async def _wx_event(request:Request,msg:events.BaseEvent,config:WechatConfig):
     tt=events.SubscribeEvent(msg) 
-    #getUser(config, tt)
+    getUser(config, tt)
      #SubscribeEvent({'ToUserName': 'gh_c8b421a2ed81', 'FromUserName': 'otcIn61ohODXRgz4Z-u4GIYVBez0', 'CreateTime': '1700728265', 'MsgType': 'event', 'Event': 'subscribe', 'EventKey': None})
      #UnsubscribeEvent({'ToUserName': 'gh_c8b421a2ed81', 'FromUserName': 'otcIn61ohODXRgz4Z-u4GIYVBez0', 'CreateTime': '1700728306', 'MsgType': 'event', 'Event': 'unsubscribe', 'EventKey': None})
     log.warn(f"事件消息：{msg.type},{msg}")
@@ -127,15 +128,10 @@ def getUser(config:WechatConfig,msg:messages.BaseMessage):
     log.succ(f"config:{config.appid}{ config.appSecret}")
     wxClient =WeChatClient(config.appid, config.appSecret) 
     log.succ(f"{wxClient.access_token_key}:{wxClient.access_token},{wxClient.expires_at}")  
-    print( wxClient.menu.get()) #Error code: 48001, message: api unauthorized rid: 65640fba-6ecf8a1b-6d07c5d8 //未认证的订阅号
-    user = wxClient.user.get(msg.source)
-    print(user)
-    print( wxClient.menu.get())
-    
+    print( "菜单：",wxClient.menu.get())
     log.err(f"用户ID：{msg.source}")
     wxUserInfo = wxClient.user.get(msg.source)
     log.err(f"用户信息：{wxUserInfo}")
     
 def getWeChatOAuth(redirect_url,config:WechatConfig):
     return WeChatOAuth(config.appid, config.appSecret, redirect_url)
- 

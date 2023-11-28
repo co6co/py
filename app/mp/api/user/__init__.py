@@ -32,8 +32,8 @@ async def login(request:Request):
         user:UserPO=await operation.get_one(UserPO,UserPO.userName.__eq__(where.userName) )  
         log.err(dir(user))
         if user !=None:
-            if user.password==user.encrypt(where.password):
-                token=await createToken(request,user)
+            if user.password==user.encrypt(where.password): 
+                token=await createToken(request,user.to_dict())
                 return  JSON_util.response(Result.success(data=token, message="登录成功"))
             else :return JSON_util.response(Result.fail(message="密码不正确!"))
         return  JSON_util.response(Result.fail(message="登录用户名不存在!"))
@@ -50,7 +50,7 @@ async def list(request:Request):
     async with request.ctx.session as session:   
         operation=DbPagedOperations(session,param)
         total = await operation.get_count(UserPO.id)  
-        list_paged = await operation.get_paged((UserPO.id,UserPO.roleId,UserPO.state,UserPO.createTime, UserPO.userName))
+        list_paged = await operation.get_paged((UserPO.id, UserPO.userGroup, UserPO.state,UserPO.createTime, UserPO.userName))
         pageList=Page_Result.success(list_paged) 
         pageList.total=total
         await session.commit()
@@ -77,15 +77,14 @@ async def add(request:Request):
     """ 
     user =UserPO()
     user.__dict__.update(request.json)   
-    current_user_id=request.ctx.current_user["id"]
-    if user.roleId not in [1,2]: JSON_util.response(Result.fail(message="选择的用户角色未知"))
+    current_user_id=request.ctx.current_user["id"] 
     async with request.ctx.session as session:  
         session:AsyncSession=session
         operation=DbOperations(session)
         isExist=await operation.exist(UserPO.userName==user.userName,column=UserPO.id)
         if isExist:return JSON_util.response(Result.fail(message=f"增加用户'{user.userName}'已存在"))
         user.id=None 
-        user.salt=user.generateSalt() 
+        user.salt=user.generateSalt()  
         user.password=user.encrypt()
         user.create_user=current_user_id
         user.createTime=datetime.datetime.now()

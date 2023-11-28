@@ -1,5 +1,5 @@
 import request  from '../../utils/request';
-const BASE_URL="/api/biz/group"
+const BASE_URL="/api/wx/menu"
 
  
 export const queryList_svc = (data:any): Promise<IPageResponse> => {

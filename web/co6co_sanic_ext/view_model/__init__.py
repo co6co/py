@@ -6,7 +6,9 @@ from co6co_db_ext.db_operations import DbPagedOperations,DbOperations,Instrument
 from co6co_sanic_ext.model.res.result import Page_Result
 from co6co_sanic_ext.utils import  JSON_util
 #from api.auth import authorized
-
+# 模块 移至 co6co_web_db 模块 
+# 若不继承 参考该类 书写
+'''
 class BaseMethodView(HTTPMethodView):  
     async def _get_list(self,request:Request,filterItems:absFilterItems,field:InstrumentedAttribute="*" ):
         """
@@ -21,6 +23,7 @@ class BaseMethodView(HTTPMethodView):
             pageList.total=total 
             await session.commit()
             return JSON_util.response(pageList)
+'''
 """
 class AuthMethodView(BaseMethodView): 
    decorators=[authorized] 
