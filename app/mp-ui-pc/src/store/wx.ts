@@ -26,7 +26,7 @@ export const wx_config_store = defineStore('wx_config',{
 			if(res.code==0) this.list = await res.data 
 		} ,
 		getItem(v:string){ 
-			if (v==null)return {key:"",value:undefined,label:""}
+			if (v==null)return {name:"未设置",openId:""}
 			return this.list.find(m=>m.openId=== v ) 
 		}
 	}

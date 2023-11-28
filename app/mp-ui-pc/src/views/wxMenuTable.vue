@@ -14,8 +14,10 @@
 					<template #default="scope"> {{scope.$index}} </template>
 				</el-table-column>
 				<el-table-column prop="id" label="ID" width="55" align="center"></el-table-column>
-				<el-table-column prop="name" label="菜单名称" sortable  :show-overflow-tooltip="true"></el-table-column>
-				<el-table-column prop="openId" label="OpenId" sortable  :show-overflow-tooltip="true"></el-table-column>
+				<el-table-column prop="name" label="菜单名称" sortable  :show-overflow-tooltip="true"></el-table-column> 
+				<el-table-column label="公众号" width="110"  sortable prop="flowStatus">
+								<template #default="scope"> <el-tag  >{{ config.getItem (scope.row.openId)?.name }} </el-tag></template>
+				</el-table-column> 
 				<el-table-column prop="state" label="状态" sortable  :show-overflow-tooltip="true"></el-table-column>
 				 
 
@@ -48,10 +50,9 @@
 		</div> 
 
 		<!-- 弹出框 -->
-		<el-dialog :title="form.title" v-model="form.dialogVisible" width="30%">
-			<el-form label-width="70px" ref="dialogForm" :rules="rules" :model="form.fromData"> 
-				<el-form-item label="所属公众号"  prop="openId"> 
-					{{ form.fromData.openId }}
+		<el-dialog :title="form.title" v-model="form.dialogVisible" width="80%">
+			<el-form label-width="90px" ref="dialogForm" :rules="rules" :model="form.fromData"> 
+				<el-form-item label="所属公众号"  prop="openId">  
 					<el-select style="width:160px"  class="mr10"  v-model="form.fromData.openId" placeholder="请选择">
 					<el-option 
 						v-for="item in config.list" 
@@ -62,8 +63,8 @@
 				<el-form-item label="名称" prop="name" >
 					<el-input v-model="form.fromData.name" placeholder="菜单名称"></el-input>
 				</el-form-item> 
-				<el-form-item label="内容" prop="content" >
-					<el-input v-model="form.fromData.content" placeholder="中文字符"></el-input>
+				<el-form-item label="内容" prop="content" > 
+					<md-editor class="mgb20" v-model="form.fromData.content" />
 				</el-form-item>  
 			</el-form>
 			<template #footer>
@@ -82,6 +83,9 @@ import { ElMessage, ElMessageBox,FormRules,FormInstance } from 'element-plus';
 import { Delete, Edit, Search, Compass ,Plus,Download} from '@element-plus/icons-vue'; 
 import {get_config_svc, list_menu_svc,add_menu_svc,edit_menu_svc, del_menu_svc,push_menu_svc} from '../api/wx'; 
 import { wx_config_store } from '../store/wx';
+import MdEditor from 'md-editor-v3';
+import 'md-editor-v3/lib/style.css';
+
 interface TableItem {
 	id: number;
     name: string; 
