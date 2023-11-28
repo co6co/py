@@ -9,6 +9,7 @@ wx_api = Blueprint("wx_API")
 # 微信服务器请求URL
 wx_api.add_route(WxView.as_view(),"/wx/<appid:str>",name="wx")
 wx_api.add_route(config_View.as_view(),"/wx/config",name="配置")
+
 wx_api.add_route(menus_Api.as_view(),"/wx/menu",name="公众号菜单s")
 wx_api.add_route(menu_Api.as_view(),"/wx/menu/<pk:int>",name="公众号菜单")
 
