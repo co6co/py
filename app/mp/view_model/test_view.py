@@ -1,4 +1,4 @@
-from api.view_model.base_view import BaseMethodView,Request 
+from view_model.base_view import BaseMethodView,Request 
 from sanic.response import text,raw
 from co6co .utils import log
 class TestView(BaseMethodView):

@@ -1,9 +1,9 @@
 from sanic import Sanic, Blueprint,Request
 from sanic.response import json,file_stream,file
  
-from api.view_model.wx.wx_view  import WxView
-from api.view_model.wx.media_view  import Media_View
-from api.view_model.wx.api_view  import config_View, menus_Api,menu_Api
+from view_model.wx.wx_view  import WxView
+from view_model.wx.media_view  import Media_View
+from view_model.wx.api_view  import config_View, menus_Api,menu_Api
 
 wx_api = Blueprint("wx_API")
 # 微信服务器请求URL

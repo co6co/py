@@ -64,7 +64,7 @@
 					<el-input v-model="form.fromData.name" placeholder="菜单名称"></el-input>
 				</el-form-item> 
 				<el-form-item label="内容" prop="content" > 
-					<md-editor class="mgb20" v-model="form.fromData.content" />
+					<md-editor :preview="false" class="mgb20" v-model="form.fromData.content" />
 				</el-form-item>  
 			</el-form>
 			<template #footer>

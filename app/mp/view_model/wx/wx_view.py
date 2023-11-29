@@ -1,5 +1,5 @@
-from api.view_model.base_view import  AuthMethodView
-from api.view_model.wx import wx_base_view
+from view_model.base_view import  AuthMethodView
+from view_model.wx import wx_base_view
 from sanic.response import text,raw
 from typing import List,Optional
 from sanic import  Request

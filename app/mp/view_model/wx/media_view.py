@@ -1,4 +1,4 @@
-from api.view_model.base_view import BaseMethodView, AuthMethodView
+from view_model.base_view import BaseMethodView, AuthMethodView
 from sanic.response import text,raw
 from typing import List,Optional
 from sanic import  Request

@@ -137,3 +137,25 @@ class WxMenuPO(BasePO):
     createUser=Column("create_user",BigInteger)
     updateTime= Column("update_time", DateTime,comment="修改时间") 
     updateUser= Column("update_user", BigInteger,comment="修改人") 
+
+
+class bizDevicePo(BasePO):
+    """
+    盒子
+    """
+    __tablename__ = "biz_device" 
+    id = Column("id",Integer,comment="主键",autoincrement=True, primary_key=True)
+    boardId = Column("board_id",String(64),comment="盒子唯一标识")
+    innerIp=Column("inner_ip",String(64),comment="内部IP")
+    ip=Column("ip",String(64),comment="外网IP")
+    name=Column("name",String(64),comment="盒子名称")
+
+class bizResourcePO(BasePO):
+    __tablename__ = "biz_resource"
+    id = Column("id",BigInteger,comment="主键",autoincrement=True, primary_key=True)
+    category = Column("category",Integer,comment="资源类型:0:图片资源,1:视频资源") 
+    deviceId = Column("device_id",ForeignKey(f"{bizDevicePo.__tablename__}.{bizDevicePo.id.key}")) 
+    url = Column("url_path",String(255),comment="资源路径,针对根路径下的绝对路径")
+
+    
+    

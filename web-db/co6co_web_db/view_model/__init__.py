@@ -7,10 +7,36 @@ from co6co_sanic_ext.model.res.result import Page_Result
 from co6co_sanic_ext.utils import  JSON_util
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import TypeVar
-from co6co_sanic_ext.model.res.result import Result
+from co6co_sanic_ext.model.res.result import Result 
+import aiofiles
 #from api.auth import authorized
 
-class BaseMethodView(HTTPMethodView):  
+class BaseMethodView(HTTPMethodView): 
+
+    async def save_file(file,path:str):
+        """
+        保存上传的文件
+        file.name
+        """
+        async with aiofiles.open(path, 'wb') as f:
+            await f.write(file.body) 
+
+    async def _save_file(self,request:Request, *savePath:str,fileFieldName:str=None):
+        """
+        保存上传的文件
+        """ 
+        p_len=len(savePath)
+        if fileFieldName!=None and p_len==1: 
+            file = request.files.get(fileFieldName)
+            await self.save_file(file,*savePath)
+        elif p_len==len(request.files):
+            i:int=0 
+            for file in request.files: 
+                file = request.files.get('file')
+                await self.save_file(file,savePath[i])
+                i+=1
+                
+
     async def _get_list(self,request:Request,filterItems:absFilterItems,field:InstrumentedAttribute="*" ):
         """
         列表

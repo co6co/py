@@ -1,6 +1,9 @@
 
 { 
     "SECRET":"81aa5d9ce2",
+    "biz_config":{
+        "upload_path":"d:/temp/upload"
+    },
     "web_setting":{
         "port":8084,
         "host":"0.0.0.0",
