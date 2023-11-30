@@ -18,7 +18,9 @@
 				<el-table-column label="公众号" width="110"  sortable prop="flowStatus">
 								<template #default="scope"> <el-tag  >{{ config.getItem (scope.row.openId)?.name }} </el-tag></template>
 				</el-table-column> 
-				<el-table-column prop="state" label="状态" sortable  :show-overflow-tooltip="true"></el-table-column>
+				<el-table-column prop="state" label="状态" sortable  :show-overflow-tooltip="true">
+					<template #default="scope"> <el-tag  >{{ config.getMenuStateItem(scope.row.state)?.label }} </el-tag></template>
+				</el-table-column>
 				 
 
 				<el-table-column prop="createTime" label="创建时间" sortable  :show-overflow-tooltip="true"></el-table-column> 

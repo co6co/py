@@ -4,8 +4,10 @@ from typing import List,Optional
 from sanic import  Request
 from utils import WechatConfig
 from wechatpy import WeChatClient
+from co6co.utils import log
 
-class wx_base_view(AuthMethodView): 
+
+class wx_base_view(BaseMethodView): 
     """
     公众号视图基类
     需要通过权限验证
@@ -15,7 +17,8 @@ class wx_base_view(AuthMethodView):
         创建微信客户端 
         WeChatClient与 微信服务器交换
         """ 
-        config=self.get_wx_config(request,appid)
+        config:WechatConfig=self.get_wx_config(request,appid)
+        log.warn(config.name)
         return WeChatClient(config.appid, config.appSecret) 
      
     def get_wx_config(self,request:Request,appid:str)->Optional[ WechatConfig]: 
@@ -33,5 +36,10 @@ class wx_base_view(AuthMethodView):
         """
         configs:List[dict]=request.app.config.wx_config   
         return [ {"openId":c.get("appid"),"name":c.get("name")} for c in configs]
+
+class wx_authon_views(wx_base_view,AuthMethodView):
+    def test():
+        print()
+
 
 

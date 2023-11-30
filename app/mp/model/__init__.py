@@ -5,6 +5,7 @@ class WechatConfig:
     服务器配置:url, token,encodingAESKey,encrypt_mode
     
     """
+    name:str=None, #仅为方便查看
     appid:str=None,		                #    公众号的appid
     appSecret:str=None,
     

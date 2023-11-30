@@ -154,8 +154,40 @@ class bizResourcePO(BasePO):
     __tablename__ = "biz_resource"
     id = Column("id",BigInteger,comment="主键",autoincrement=True, primary_key=True)
     category = Column("category",Integer,comment="资源类型:0:图片资源,1:视频资源") 
+    subCategory = Column("sub_category",Integer,comment="子资源类型")
     deviceId = Column("device_id",ForeignKey(f"{bizDevicePo.__tablename__}.{bizDevicePo.id.key}")) 
     url = Column("url_path",String(255),comment="资源路径,针对根路径下的绝对路径")
+
+ 
+class bizAlarmPO(BasePO):
+    __tablename__ = "biz_alarm"
+    id = Column("id",BigInteger,comment="主键",autoincrement=True, primary_key=True)
+    uuid = Column("uuid",String(64),unique=True,comment= "全局ID盒子上传")
+    alarmType= Column("alarm_type",String(64),unique=True,comment= "告警类型")
+    videoId= Column("video_resource_id",BigInteger,comment= "视频资源")
+    rawImageId= Column("image_raw_resource_id",BigInteger,comment= "原始图片资源")
+    markedImageId= Column("image_marked_resource_id",BigInteger,comment= "标注图片资源")
+    attachResource1= Column("attach_resource1_id",BigInteger,comment= "附加资源1")
+    attachResource2= Column("attach_resource2_id",BigInteger,comment= "附加资源2")
+    attachResource3= Column("attach_resource3_id",BigInteger,comment= "附加资源3")
+    taskSession= Column("task_session_id",String(64),comment= "任务属性")
+    taskDesc= Column("task_desc",String(64),comment= "任务描述") 
+    alarmTime=Column("alarm_time",DateTime ,comment= "告警事件" )  
+    createTime=Column("create_time",DateTime , server_default=func.now() ) 
+class bizAlarmAttachPO(BasePO):
+    __tablename__ = "biz_alarm_attach" 
+    id= Column("alarm_id",ForeignKey(f"{bizAlarmPO.__tablename__}.{bizAlarmPO.id.key}"),comment="主键id",primary_key=True)
+    result= Column("result",String(2048),comment="告警Result结果")
+    media= Column("media",String(2048),comment="告警media结果")
+    gps= Column("gps",String(2048),comment="告警gps结果")
+
+
+
+
+
+
+
+
 
     
     

@@ -3,9 +3,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from co6co_db_ext .db_operations import DbOperations
 from sanic import  Request 
 from sanic.response import text,raw
-from co6co_sanic_ext.utils import JSON_util
+from co6co_sanic_ext.utils import JSON_util,json
 
-from view_model.wx import wx_base_view
+from view_model.wx import wx_authon_views
 from model.pos.wx_where import WxMenuFilterItems,WxMenuPO
 from co6co_sanic_ext.model.res.result import Result
 
@@ -14,14 +14,14 @@ from co6co.utils import log
 from datetime import datetime
 from model.enum import wx_menu_state
 
-class config_View(wx_base_view):
+class config_View(wx_authon_views):
     async def get(self, request:Request): 
        """
        获取微信公众号配置的 [{openId,name}]
        """ 
        return JSON_util.response(Result.success(self.get_wx_configs(request)))
 
-class Wx_message_View(wx_base_view):
+class Wx_message_View(wx_authon_views):
     """
     与页面相关，页面中不能出现 与微信 openid 相关的东西
     """
@@ -29,7 +29,7 @@ class Wx_message_View(wx_base_view):
         self.client.media.upload()
 
 
-class WxView_Api(wx_base_view):
+class WxView_Api(wx_authon_views):
     """
     群发消息
     主动设置 clientmsgid 来避免重复推送
@@ -58,13 +58,15 @@ class WxView_Api(wx_base_view):
         """ 
         return text("no use") 
     
-class menus_Api(wx_base_view):
+class menus_Api(wx_authon_views):
     """
     要求: 一级菜单:max->3  字数：max 4个汉字 “...”代替
           二级菜单:max->5 字数：max 4个汉字
 
           刷新策略 进入公众号会话页或公众号profile页时，上一次拉取菜单的请求在5分钟以前，
     """ 
+    async def get(self,request:Request): 
+        return JSON_util.response(Result.success(data={"menuStates": wx_menu_state.to_dict_list()}))
     async def post(self, request:Request):
         """
         获取列表
@@ -93,8 +95,8 @@ class menus_Api(wx_base_view):
         """
         return text("”") 
     
-class menu_Api(wx_base_view): 
-    async def get(self, request:Request,pk:int):
+class menu_Api(wx_authon_views): 
+    async def get(self, request:Request,pk:int): 
         return text("123")
     
     async def delete(self, request:Request,pk:int):
@@ -120,14 +122,14 @@ class menu_Api(wx_base_view):
             old_po.updateTime=datetime.now()
             await session.commit()
             return JSON_util.response(Result.success()) 
+        
     def push_menu(self, request:Request,openId:str,content:str)->Tuple[bool,str]:
         try:
-            client=self.cteate_wx_client(request,openId)
-            log.warn(content)
-            client.menu.update(content)
+            client=self.cteate_wx_client(request,openId) 
+            client.menu.update(json.loads(content))
             return True,""
-        except Exception as e:
-            return False,e
+        except Exception as e: 
+            return False, str(e)
 
 
     async def patch(self, request:Request,pk:int):
@@ -141,7 +143,7 @@ class menu_Api(wx_base_view):
             operation=DbOperations(session)
             old_po:WxMenuPO= await operation.get_one_by_pk(WxMenuPO,pk)
             if old_po==None: return JSON_util.response(Result.fail(message=f"未找{pk},对应的对象!"))   
-            menuList:List[WxMenuPO]=operation.get_list(WxMenuPO,WxMenuPO.openId==old_po.openId ,WxMenuPO.id !=old_po.id)
+            menuList:List[WxMenuPO]=await operation.get_list(WxMenuPO,WxMenuPO.openId==old_po.openId ,WxMenuPO.id !=old_po.id,remove_instance_state=False)
             for m in menuList:
                 m.state=wx_menu_state.unpushed.val
                 m.updateUser=current_user_id
@@ -150,6 +152,8 @@ class menu_Api(wx_base_view):
             old_po.updateUser=current_user_id
             old_po.updateTime=datetime.now()
             f,msg=self.push_menu(request,old_po.openId,old_po.content)
+            log.warn(f)
+            log.warn(msg)
             if f: 
                 old_po.state=wx_menu_state.pushed.val
                 result=Result.success()
@@ -157,6 +161,7 @@ class menu_Api(wx_base_view):
                 old_po.state=wx_menu_state.failed.val 
                 result=Result.fail(message=msg)
             await session.commit()
+            log.err(result.__dict__)
             return JSON_util.response(result) 
     
 

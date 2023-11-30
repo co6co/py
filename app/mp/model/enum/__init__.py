@@ -11,6 +11,12 @@ class resource_category(Base_Enum):
     """
     video="video",0
     image="image",0
+class resource_image_sub_category(Base_Enum):
+    """
+    图片子资源类型
+    """
+    raw="raw",0
+    marked="marked",1
 
 class wx_menu_state(Base_EC_Enum):
     unpushed="unpushed","未推送",0

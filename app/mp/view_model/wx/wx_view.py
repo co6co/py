@@ -33,7 +33,7 @@ class WxView(wx_base_view):
                 msg_signature = request.args.get("msg_signature", "")
                 check_signature(config.token, signature, timestamp, nonce)
                 return text(echostr)
-            return text(u"微信验证失败",403) 
+            return text(u"验证失败",403) 
         except Exception as e: 
             return text(f"异常请求{e}",403)
     @staticmethod

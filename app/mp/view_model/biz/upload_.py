@@ -1,5 +1,7 @@
 
 from decimal import Decimal
+from model.pos.right import bizAlarmPO
+from datetime import datetime
 
 
 class Response:
@@ -25,44 +27,42 @@ class Response:
 class Video_Response(Response):
     VideoId:str
 
-class Video_Param:
-    """
-    盒子上传视频参数
-    """
-    BoardIp:str 
+class Box_base_Param:
     BoardId:str
-    ip:str
-    TaskSession:str
+    BoardIp:str   
     GBDeviceId:str
     GBTaskChnId:str
+    ip:str
+
+
+class Video_Param(Box_base_Param):
+    """
+    盒子上传视频参数
+    """  
     Video:str
     
-class Alert_Param:
+class Alert_Param(Box_base_Param):
     """
     盒子上传视频参数
     """
-    BoardIp:str
-    BoardId:str
+    UniqueId:str
+    Summary:str # 告警类型 
+    VideoFile:str
+    Result:str
+    TimeStamp:int 
     Addition:str
     AlarmId:str
-    ImageData:str
+    #原始图片
+    ImageData:str 
+    #标注过图片
     ImageDataLabeled:str
     Media:str
     LocalRawPath:str
-    LocalLabeledPath:str
+    LocalLabeledPath:str 
     TaskSession:str
-    GBDeviceId:str
-    GBTaskChnId:str
     TaskDesc:str
-    Time:str
-    VideoFile:str
-    GPS:str
-    available:bool
-    kSpeed:Decimal
-    nSpeed:Decimal
-    latitude:Decimal
-    longitude:Decimal
-    Result:str
+    Time:str 
+    GPS:str  
     Type:str
     RelativeBox:str
     RelativeRegion:str
@@ -71,3 +71,14 @@ class Alert_Param:
     desc:str
     value:str
     display:str
+
+    def to_po(self):
+        po= bizAlarmPO()
+        po.uuid=self.UniqueId
+        po.alarmType=self.Summary 
+        po.taskSession=self.TaskSession
+        po.taskDesc=self.TaskDesc 
+        po.alarmTime=datetime.fromisoformat(self.Time)
+        return po
+    def date(self):
+        return ""
