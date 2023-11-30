@@ -6,14 +6,48 @@ from co6co_db_ext.db_operations import DbPagedOperations,DbOperations,Instrument
 from co6co_sanic_ext.model.res.result import Page_Result
 from co6co_sanic_ext.utils import  JSON_util
 from sqlalchemy.ext.asyncio import AsyncSession
-from typing import TypeVar
+from typing import TypeVar,Dict,List,Any
 from co6co_sanic_ext.model.res.result import Result 
-import aiofiles
+import aiofiles,os,multipart
+from io import BytesIO
+
+
+
+from co6co.utils import log,getDateFolder
 #from api.auth import authorized
 
 class BaseMethodView(HTTPMethodView): 
+    async def save_body(self,request:Request,root:str):
+        ## 保存上传的内容 
+        filePath=os.path.join(root,getDateFolder(),f"{getDateFolder(format="%Y-%m-%d-%H-%M-%S") }.data")
+        filePath=os.path.abspath(filePath) # 转换为 os 所在系统路径 
+        folder=os.path.dirname(filePath) 
+        if not os.path.exists(folder):os.makedirs(folder)
+        async with aiofiles.open(filePath, 'wb') as f:
+            await f.write( request.body) 
+        ## end 保存上传的内容
+    async def parser_multipart_body(self,request:Request)->(Dict[str,tuple|Any],Dict[str,multipart.MultipartPart]):
+        """
+        解析内容: multipart/form-data; boundary=------------------------XXXXX,
+        的内容
+        """ 
+        env={
+            "REQUEST_METHOD":"POST",
+            "CONTENT_LENGTH":request.headers.get("content-length"),
+            "CONTENT_TYPE":request.headers.get("content-type"),
+            "wsgi.input":BytesIO(request.body)
+        }
+        data,file=multipart.parse_form_data(env)  
+        data_result={} 
+        #log.info(data.__dict__)
+        for key in data.__dict__.get("dict"):
+            value=data.__dict__.get("dict").get(key)
+            if len(value)==1: data_result.update({key:value[0]})
+            else : data_result.update({key:value})
+        #log.info(data_result) 
+        return data_result,file
 
-    async def save_file(file,path:str):
+    async def save_file(self,file,path:str):
         """
         保存上传的文件
         file.name
@@ -62,6 +96,13 @@ class BaseMethodView(HTTPMethodView):
             await operation.delete(po) 
             await operation.commit()    
             return JSON_util.response(Result.success())
+    def getFullPath(self,root, fileName:str)->(str,str):
+        """
+        获取去路径和相对路径
+        """
+        filePath="/".join(["",getDateFolder(),fileName] ) 
+        fullPath=os.path.join(root,filePath[1:])
+        return fullPath,filePath
 """
 class AuthMethodView(BaseMethodView): 
    decorators=[authorized] 

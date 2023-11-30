@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-
 
-import json
+import json,base64
 
 class File:
 
@@ -35,4 +35,21 @@ class File:
         with open(filePath,"r",encoding=encoding) as file: 
             content=file.read() #.splitlines()# readlines() 会存在\n 
             return content
+        
+    @staticmethod
+    def writeFile(filePath,data:bytes):
+        """
+        filePath: 文件路径
+        obj : 待写入的对象
+        """ 
+        with open(filePath,"wb") as file: #二进制模式打开文件
+            file.write(data)
+    @staticmethod
+    def writeBase64ToFile(filePath,base64Content:str):
+        """
+        filePath: 文件路径
+        obj : 待写入的对象
+        """
+        data=base64.b64decode(base64Content)
+        File.writeFile(filePath,data)
             
