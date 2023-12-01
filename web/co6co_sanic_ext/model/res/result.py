@@ -1,44 +1,35 @@
 # -*- encoding:utf-8 -*-
 from __future__ import annotations 
 class Result:
-    def __init__(self) -> None:
-        self.code=0
-        self.message=""
-        self.data={} 
-        pass
-    
-    @staticmethod
-    def create(code:int=0,data:any=None,message:str="操作成功")-> Result:
-        result=Result()
-        result.code=code
-        result.data=data
-        result.message=message
-        return result 
+    code:int
+    message:str
+    data:any
+    @classmethod
+    def __new__(cls,**kvargs) -> Result:
+        self=object.__new__(cls)
+        self.__dict__.update(kvargs)  
+        return self  
     @staticmethod
     def success(data:any=None,message:str="操作成功")-> Result:
-        return Result.create(data=data,code=0, message=message)
+        return Result.__new__(data=data,code=0, message=message)
     @staticmethod
     def fail(data:any=None,message:str="处理失败")-> Result:
-        return Result.create(data=data,code=500, message=message)
- 
-
+        return Result.__new__(data=data,code=500, message=message) 
+    
 class Page_Result(Result):
-    def __init__(self) -> None:
-        super().__init__() 
-        self.total=-1
-
+    total:int=-1  
+    @classmethod
+    def __new__(cls,**kvargs) -> Page_Result: 
+        self=object.__new__(cls)
+        self.__dict__.update(kvargs)  
+        self.total=-1 if self.total==None else self.total
+        return self   
     @staticmethod
-    def create(code:int=0,data:any=None,message:str="操作成功")-> Page_Result:
-        result=Page_Result()
-        result.code=code
-        result.data=data
-        return result 
+    def success(data:any=None,message:str="操作成功",**kvargs)-> Page_Result:
+        return Page_Result.__new__(data=data,message =message,total=kvargs.get("total"))
     @staticmethod
-    def success(data:any=None,message:str="操作成功")-> Page_Result:
-         return Result.create(data=data,code=0, message=message)
-    @staticmethod
-    def fail(data:any=None,message:str="处理失败")-> Page_Result:
-        return Result.create(data=data,code=500, message=message)
+    def fail(data:any=None,message:str="处理失败",**kvargs)-> Page_Result: 
+        return Page_Result.__new__(data=data,message =message,total=kvargs.get("total"))
 
         
 

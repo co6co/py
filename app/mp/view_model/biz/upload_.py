@@ -48,7 +48,9 @@ class Alert_Param(Box_base_Param):
     UniqueId:str
     Summary:str # 告警类型 
     VideoFile:str
-    Result:str
+    Result:dict
+    Media:dict
+    GPS:dict  
     TimeStamp:int 
     Addition:str
     AlarmId:str
@@ -56,13 +58,13 @@ class Alert_Param(Box_base_Param):
     ImageData:str 
     #标注过图片
     ImageDataLabeled:str
-    Media:str
+   
     LocalRawPath:str
     LocalLabeledPath:str 
     TaskSession:str
     TaskDesc:str
     Time:str 
-    GPS:str  
+   
     Type:str
     RelativeBox:str
     RelativeRegion:str

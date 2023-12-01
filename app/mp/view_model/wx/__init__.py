@@ -39,7 +39,7 @@ class wx_base_view(BaseMethodView):
 
 class wx_authon_views(wx_base_view,AuthMethodView):
     def test():
-        print()
+        print("")
 
 
 

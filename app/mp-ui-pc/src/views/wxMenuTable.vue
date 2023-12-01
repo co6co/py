@@ -25,13 +25,16 @@
 
 				<el-table-column prop="createTime" label="创建时间" sortable  :show-overflow-tooltip="true"></el-table-column> 
 				<el-table-column prop="updateTime" label="更新时间" sortable  :show-overflow-tooltip="true"></el-table-column> 
-				<el-table-column label="操作" width="316" align="center">
+				<el-table-column label="操作" width="388" align="left">
 					<template #default="scope">  
-						<el-button text :icon="Edit" @click="onOpenDialog(1, scope.row)" v-permiss="15">
+						<el-button text :icon="Edit" @click="onOpenDialog(1, scope.row)" >
 							编辑
 						</el-button>
-						<el-button text :icon="Edit" @click="onPush(1, scope.row)" v-permiss="15">
+						<el-button text :icon="Compass" v-if="scope.row.openId" @click="onPush(scope.$index, scope.row)"  >
 							推送
+						</el-button>
+						<el-button text :icon="Plus" title="获取当前公众号配置的菜单" v-if="scope.row.openId" @click="onPull(scope.$index, scope.row)">
+							获取
 						</el-button>
 						<el-button text :icon="Delete" class="red" @click="onDelete(scope.$index,scope.row)" >
 							删除
@@ -82,8 +85,8 @@
 <script setup lang="ts" name="basetable">
 import { ref, reactive } from 'vue';
 import { ElMessage, ElMessageBox,FormRules,FormInstance } from 'element-plus';
-import { Delete, Edit, Search, Compass ,Plus,Download} from '@element-plus/icons-vue'; 
-import {get_config_svc, list_menu_svc,add_menu_svc,edit_menu_svc, del_menu_svc,push_menu_svc} from '../api/wx'; 
+import { Delete, Edit, Search, Compass ,Plus,Download } from '@element-plus/icons-vue'; 
+import {get_config_svc, list_menu_svc,add_menu_svc,edit_menu_svc, del_menu_svc,push_menu_svc,pull_menu_svc} from '../api/wx'; 
 import { wx_config_store } from '../store/wx';
 import MdEditor from 'md-editor-v3';
 import 'md-editor-v3/lib/style.css';
@@ -107,10 +110,12 @@ const query = reactive<QueryType>({
 	pageSize: 10,
 	order:''
 });
+const config=wx_config_store() 
 const tableData = ref<TableItem[]>([]);
 const pageTotal = ref(0);
 // 获取表格数据
-const getData = () => {
+ const getData =async () => {
+	await config.refesh()
 	list_menu_svc(query).then(res => {
         if (res.code==0){
             tableData.value = res.data;
@@ -121,8 +126,7 @@ const getData = () => {
 	});
 };
 getData();
-const config=wx_config_store()
-config.refesh()
+
 
 // 查询操作
 const onSearch = () => {
@@ -167,6 +171,20 @@ const onPush=(index: number, row: any) => {
         push_menu_svc(row.id).then(res=>{
             if (res.code==0)  ElMessage.success('推送成功'),getData(); 
             else  ElMessage.error(`推送失败:${res.message}`); 
+        }) .finally(()=>{ 
+		})
+    })
+    .catch(() => {});
+}; 
+const onPull=(index: number, row: any) => {
+	// 
+	ElMessageBox.confirm(`确定要获取微信公众号菜单？`, '提示', {
+		type: 'warning'
+	})
+    .then(() => {
+        pull_menu_svc(row.id).then(res=>{
+            if (res.code==0)  ElMessage.success('获取成功'),getData(); 
+            else  ElMessage.error(`获取失败:${res.message}`); 
         }) .finally(()=>{ 
 		})
     })

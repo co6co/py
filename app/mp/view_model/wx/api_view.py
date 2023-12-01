@@ -95,9 +95,43 @@ class menus_Api(wx_authon_views):
         """
         return text("”") 
     
-class menu_Api(wx_authon_views): 
-    async def get(self, request:Request,pk:int): 
-        return text("123")
+class menu_Api(wx_authon_views):
+    def push_menu(self, request:Request,openId:str,content:str)->Tuple[bool,str]:
+        try:
+            client=self.cteate_wx_client(request,openId) 
+            client.menu.update(json.loads(content))
+            return True,""
+        except Exception as e: 
+            return False, str(e)
+    def pull_menu(self, request:Request,openId:str)->Tuple[bool,str]:
+        try:
+            client=self.cteate_wx_client(request,openId) 
+            result=client.menu.get ()
+            return True,result
+        except Exception as e: 
+            return False, str(e)
+         
+    async def get(self, request:Request,pk:int):
+        """
+        从微信服务器获取菜单，并保存到数据库中
+        """
+        current_user_id=request.ctx.current_user["id"] 
+        async with request.ctx.session as session:   
+            operation=DbOperations(session)
+            old_po:WxMenuPO= await operation.get_one_by_pk(WxMenuPO,pk)
+            if old_po==None: return JSON_util.response(Result.fail(message=f"未找{pk},对应的对象!"))  
+            
+            f,content=self.pull_menu(request,old_po.openId) 
+            if f:
+                old_po.updateUser=current_user_id
+                old_po.updateTime=datetime.now()
+                old_po.content=json.dumps( content)
+                result=Result.success()
+                await operation.commit() 
+            else : 
+                result=Result.fail(message=content)
+                await  operation.rollback() 
+            return JSON_util.response(result) 
     
     async def delete(self, request:Request,pk:int):
         """
@@ -123,15 +157,7 @@ class menu_Api(wx_authon_views):
             await session.commit()
             return JSON_util.response(Result.success()) 
         
-    def push_menu(self, request:Request,openId:str,content:str)->Tuple[bool,str]:
-        try:
-            client=self.cteate_wx_client(request,openId) 
-            client.menu.update(json.loads(content))
-            return True,""
-        except Exception as e: 
-            return False, str(e)
-
-
+     
     async def patch(self, request:Request,pk:int):
         """
         推送菜单到微信公众号
@@ -151,17 +177,14 @@ class menu_Api(wx_authon_views):
                 
             old_po.updateUser=current_user_id
             old_po.updateTime=datetime.now()
-            f,msg=self.push_menu(request,old_po.openId,old_po.content)
-            log.warn(f)
-            log.warn(msg)
+            f,msg=self.push_menu(request,old_po.openId,old_po.content) 
             if f: 
                 old_po.state=wx_menu_state.pushed.val
                 result=Result.success()
             else :
                 old_po.state=wx_menu_state.failed.val 
                 result=Result.fail(message=msg)
-            await session.commit()
-            log.err(result.__dict__)
+            await session.commit() 
             return JSON_util.response(result) 
     
 

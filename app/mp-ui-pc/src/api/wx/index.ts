@@ -22,6 +22,9 @@ export const del_menu_svc = (id:number): Promise<IPageResponse> => {
 export const push_menu_svc = (id:number): Promise<IPageResponse> => { 
     return request.patch(`${BASE_MENU_URL}/${id}`);
 }; 
+export const pull_menu_svc = (id:number): Promise<IPageResponse> => { 
+    return request.get(`${BASE_MENU_URL}/${id}`);
+}; 
 
 export const get_config_svc = (): Promise<IPageResponse> => { 
     return request.get(`${BASE_CONFIG_URL}`);

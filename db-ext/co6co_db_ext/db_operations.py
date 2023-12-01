@@ -179,6 +179,8 @@ class DbOperations:
 		await self.db_session.commit()
 	async def rollback(self):
 		await self.db_session.rollback()
+	async def close(self):
+		await self.db_session.close()
 	
 class DbPagedOperations(DbOperations): 
 	def __init__(self, db_session:AsyncSession,filter_items:absFilterItems):

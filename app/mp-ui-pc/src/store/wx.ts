@@ -9,15 +9,14 @@ interface ListItem {
 interface memu_state{
 	key:string,label:string,value:number
 }
-interface memu {
-	menuStates:Array<memu_state>
-} 
-
+interface memuConfig {
+	menuStates:memu_state[] //Array<memu_state>
+}  
 export const wx_config_store = defineStore('wx_config',{
 	state: () => {
 		return {
 			list: <ListItem[]>[],
-			memu:<memu>{},
+			memuConfig:<memuConfig>{},
 		};
 	},
 	getters: {
@@ -33,16 +32,18 @@ export const wx_config_store = defineStore('wx_config',{
 			const res =await get_config_svc() 
 			if(res.code==0) this.list = await res.data 
 			const res2 =await get_menu_svc() 
-			if(res2.code==0) this.memu .menuStates= await res2.data 
-			
+			if(res2.code==0) {
+				const data=await res2.data
+				this.memuConfig=data
+			}
 		} ,
 		getItem(v:string){ 
 			if (v==null)return {name:"未设置",openId:""}
 			return this.list.find(m=>m.openId=== v ) 
 		},
 		getMenuStateItem(v:number){  
-			if (v==null)return {key:"未设置",label:"未设置",value:-1}
-			return this.memu.menuStates.find(m=>m.value=== v )  
+			if (v==null)return {key:"未设置",label:"未设置",value:-1} 
+			return this.memuConfig.menuStates.find(m=>m.value=== v )  
 			
 		}
 	}

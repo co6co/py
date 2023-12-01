@@ -22,6 +22,9 @@ class WxView(wx_base_view):
     """
 
     def get(self,request:Request,appid:str):
+        """
+        入口1,get请求
+        """
         try:
             signature = request.args.get("signature") 
             config=self.get_wx_config(request,appid) 
@@ -62,6 +65,9 @@ class WxView(wx_base_view):
         
 
     async def post(self,request:Request,appid:str): 
+        """
+         入口2,POST请求
+        """
         try:  
             config:WechatConfig=self.get_wx_config(request,appid)
             timestamp = request.args.get("timestamp")

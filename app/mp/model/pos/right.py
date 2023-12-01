@@ -68,11 +68,9 @@ class UserGroupPO(BasePO):
     """
     用户组现在还不知道用来做什么
     """
-    __tablename__ = "sys_user_group"
-
+    __tablename__ = "sys_user_group" 
     id = Column("id",Integer,autoincrement=True, primary_key=True)
-    name = Column("group_name",String(64), unique=True)
-    
+    name = Column("group_name",String(64), unique=True) 
     createUser= Column("create_user", BigInteger,comment="创建人")  
     createTime= Column("create_time",DateTime,server_default=func.now(),comment="创建时间")                 
     updateTime= Column("update_time", DateTime,comment="修改时间") 
@@ -153,23 +151,37 @@ class bizDevicePo(BasePO):
 class bizResourcePO(BasePO):
     __tablename__ = "biz_resource"
     id = Column("id",BigInteger,comment="主键",autoincrement=True, primary_key=True)
+    uid = Column("uuid",String(36),  unique=True,default=uuid.uuid1())
     category = Column("category",Integer,comment="资源类型:0:图片资源,1:视频资源") 
     subCategory = Column("sub_category",Integer,comment="子资源类型")
     deviceId = Column("device_id",ForeignKey(f"{bizDevicePo.__tablename__}.{bizDevicePo.id.key}")) 
     url = Column("url_path",String(255),comment="资源路径,针对根路径下的绝对路径")
+    createTime=Column("create_time",DateTime , server_default=func.now() ) 
+
 
  
+class bizAlarmType(BasePO):
+    __tablename__ = "biz_alarm_type"
+    id = Column("id",Integer,comment="主键",autoincrement=True, primary_key=True)
+    type = Column("type",String(64),unique=True,comment= "告警类型")
+    desc= Column("desc",String(128), comment= "告警描述")
+    createTime=Column("create_time",DateTime , server_default=func.now() ) 
+    updateTime= Column("update_time", DateTime,comment="修改时间") 
+
+
 class bizAlarmPO(BasePO):
     __tablename__ = "biz_alarm"
     id = Column("id",BigInteger,comment="主键",autoincrement=True, primary_key=True)
     uuid = Column("uuid",String(64),unique=True,comment= "全局ID盒子上传")
-    alarmType= Column("alarm_type",String(64),unique=True,comment= "告警类型")
-    videoId= Column("video_resource_id",BigInteger,comment= "视频资源")
-    rawImageId= Column("image_raw_resource_id",BigInteger,comment= "原始图片资源")
-    markedImageId= Column("image_marked_resource_id",BigInteger,comment= "标注图片资源")
-    attachResource1= Column("attach_resource1_id",BigInteger,comment= "附加资源1")
-    attachResource2= Column("attach_resource2_id",BigInteger,comment= "附加资源2")
-    attachResource3= Column("attach_resource3_id",BigInteger,comment= "附加资源3")
+    alarmType= Column("alarm_type",String(64), comment= "告警类型")
+   
+    videoUid= Column("video_resource_uid",String(36),comment= "视频资源")
+    rawImageUid= Column("image_raw_resource_uid",String(36),comment= "原始图片资源")
+    markedImageUid= Column("image_marked_resource_uid",String(36),comment= "标注图片资源")
+    attachResource1= Column("attach_resource1_uid",String(36),comment= "附加资源1")
+    attachResource2= Column("attach_resource2_uid",String(36),comment= "附加资源2")
+    attachResource3= Column("attach_resource3_uid",String(36),comment= "附加资源3")
+    
     taskSession= Column("task_session_id",String(64),comment= "任务属性")
     taskDesc= Column("task_desc",String(64),comment= "任务描述") 
     alarmTime=Column("alarm_time",DateTime ,comment= "告警事件" )  

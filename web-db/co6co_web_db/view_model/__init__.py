@@ -16,7 +16,15 @@ from io import BytesIO
 from co6co.utils import log,getDateFolder
 #from api.auth import authorized
 
-class BaseMethodView(HTTPMethodView): 
+class BaseMethodView(HTTPMethodView):
+    """
+    视图基类： 约定 增删改查，其他未约定方法可根据实际情况具体使用
+    views.POST  : --> query list
+    views.PUT   :---> Add 
+    view.PUT    :---> Edit
+    view.DELETE :---> del
+
+    """ 
     async def save_body(self,request:Request,root:str):
         ## 保存上传的内容 
         filePath=os.path.join(root,getDateFolder(),f"{getDateFolder(format="%Y-%m-%d-%H-%M-%S") }.data")
@@ -102,6 +110,7 @@ class BaseMethodView(HTTPMethodView):
         """
         filePath="/".join(["",getDateFolder(),fileName] ) 
         fullPath=os.path.join(root,filePath[1:])
+
         return fullPath,filePath
 """
 class AuthMethodView(BaseMethodView): 
