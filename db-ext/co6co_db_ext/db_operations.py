@@ -4,24 +4,36 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import func,text
 from sqlalchemy.future import select
 from typing import TypeVar,Tuple,List,Dict,Any,Union,Iterator
-from sqlalchemy .orm.attributes import InstrumentedAttribute
+
+from sqlalchemy.orm import QueryPropertyDescriptor,joinedload,subqueryload,contains_eager
+from sqlalchemy.orm.query import Query
+from sqlalchemy.orm.attributes import InstrumentedAttribute
 from sqlalchemy.engine.row import  Row
+
 from  sqlalchemy.engine.result import ScalarResult,ChunkedIteratorResult
 from sqlalchemy.sql.elements import ColumnElement
 from sqlalchemy.sql import Select
-from .db_filter import absFilterItems
+from .db_filter import absFilterItems,Page_param
 
 
 #from sqlalchemy.orm import selectinload # 紧急装载器 在该表主键又外键的基础上使用 select(UserTable).options(selectinload(UserTable.LoginLog))
  
-from co6co.utils import log
+from co6co.utils import log 
 
 class DbOperations:
 	# 实体类存在字段
-	__po_has_field__:str="_sa_instance_state"
+	__po_has_field__:str="_sa_instance_state" 
 	def __init__(self,db_session:AsyncSession) -> None:
-		self.db_session = db_session
+		self.db_session = db_session 
 		pass
+	def _createQuery(self,poType:TypeVar):
+		"""
+		对没有 query 的 PO 增加 query 对象
+		"""
+		if not  hasattr(poType,"query") or isinstance(poType.query,Query): 
+			query=self.db_session.query_property()  
+			poType.query:Query=query  
+		
 	@staticmethod
 	def remove_db_instance_state( poInstance_or_poList:Iterator| Any )->List[Dict]|Dict:
 		if  hasattr (poInstance_or_poList,"__iter__") : return [dict(filter(lambda k: k[0] !=DbOperations.__po_has_field__, a1.__dict__.items())) for a1 in poInstance_or_poList]  
@@ -123,7 +135,7 @@ class DbOperations:
 	
 	def join(self,select:Select[Any], tarGet:TypeVar ,*filters:ColumnElement[bool] ) ->   Select[Any]:
 		"""
-		join
+		join , 没进行充分测试 谨慎使用
 		"""
 		sml=select.join(tarGet,and_(*filters)) 
 		return sml
@@ -181,6 +193,72 @@ class DbOperations:
 		await self.db_session.rollback()
 	async def close(self):
 		await self.db_session.close()
+
+	
+	 
+
+
+	async def query_joined(self,poType:TypeVar, joinArr:Tuple[InstrumentedAttribute], *filters:ColumnElement[bool],param:Page_param=None,orderby: List[InstrumentedAttribute]=None):
+		"""
+		joinedload ==查询==> LEFT OUTER JOIN
+		"""  
+		self._createQuery(poType) 
+		query=poType.query
+		if len (joinArr)>0:
+			query.options(joinedload(*joinArr)) 
+		if  len (filters)>0:			
+			query.filter(and_(*filters))
+		if param !=None: 
+			limit=param.limit
+			offset=param.offset
+			query.limit(limit).offset(offset)
+		return (query.all()) 
+	async def query_subquery(self,poType:TypeVar, joinArr:Tuple[InstrumentedAttribute], *filters:ColumnElement[bool],param:Page_param=None,orderby: List[InstrumentedAttribute]=None):
+		"""
+		先查询 users, 在 select * from (user) u join address on u.u_id == address.user_id
+		"""  
+		self._createQuery(poType) 
+		query=poType.query
+		if len (joinArr)>0:
+			query.options(subqueryload(*joinArr)) 
+		if  len (filters)>0:			
+			query.filter(and_(*filters))
+		if param !=None: 
+			limit=param.limit
+			offset=param.offset
+			query.limit(limit).offset(offset)
+		return (query.all()) 
+	async def query_eager(self,poType:TypeVar, joinArr:Tuple[InstrumentedAttribute], *filters:ColumnElement[bool],param:Page_param=None,orderby: List[InstrumentedAttribute]=None):
+		"""
+		数据做笛卡儿积 ，程序为每个元素间应用连接条件进行解析
+		"""  
+		self._createQuery(poType) 
+		query=poType.query
+		if len (joinArr)>0:
+			query.options(contains_eager(*joinArr)) 
+		if  len (filters)>0:			
+			query.filter(and_(*filters))
+		if param !=None: 
+			limit=param.limit
+			offset=param.offset
+			query.limit(limit).offset(offset)
+		return (query.all()) 
+	async def query_join_eager(self,poType:TypeVar, joinArr:Tuple[InstrumentedAttribute], *filters:ColumnElement[bool],param:Page_param=None,orderby: List[InstrumentedAttribute]=None):
+		"""
+		内连接，删除空
+		"""  
+		self._createQuery(poType) 
+		query=poType.query
+		if len (joinArr)>0:
+			query.join(*joinArr)
+			query.options(contains_eager(*joinArr)) 
+		if  len (filters)>0:			
+			query.filter(and_(*filters))
+		if param !=None: 
+			limit=param.limit
+			offset=param.offset
+			query.limit(limit).offset(offset)
+		return (query.all()) 
 	
 class DbPagedOperations(DbOperations): 
 	def __init__(self, db_session:AsyncSession,filter_items:absFilterItems):

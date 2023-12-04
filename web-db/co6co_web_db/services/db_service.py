@@ -17,8 +17,9 @@ import asyncio,time ,typing
 from sanic.log import logger  
 from sanic import Blueprint,Request
 from typing import TypeVar
+from co6co_db_ext.db_session import db_service
 
-class db_service: 
+'''class db_service: 
     def __init__(self,app:Sanic,settings:dict,basePoType:TypeVar) -> None:
         self.app=app
         self.basePO=basePoType
@@ -52,13 +53,13 @@ class db_service:
             except Exception as e:
                 logger.error(e)
                 logger.info(f"{retryTime*5}s后重试...")
-                time.sleep(retryTime*5) 
+                time.sleep(retryTime*5) '''
                 
-def injectDbSessionFactory(app:Sanic,settings:dict,basePoType:TypeVar):
+def injectDbSessionFactory(app:Sanic,settings:dict ):
     """
     挂在 DBSession_factory
     """
-    service=db_service(app,settings,basePoType)
+    service=db_service(settings)
     service.sync_init_tables() 
     '''
     @app.main_process_start
@@ -74,6 +75,7 @@ def injectDbSessionFactory(app:Sanic,settings:dict,basePoType:TypeVar):
             #logger.info("mount DbSession 。。。")
             request.app.ctx.session_fatcory=service.async_session_factory
             request.ctx.session=service.async_session_factory() 
+            request.ctx.scoped_session=service.session
             request.ctx.session_ctx_token = service.base_model_session_ctx.set(request.ctx.session) 
         
     @app.middleware("response")
