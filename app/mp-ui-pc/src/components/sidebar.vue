@@ -65,8 +65,8 @@ const items:Array<sideBarItem>= [
         },
         {
             icon: 'Calendar',
-            index: '/processAudit',
-            title: '数据审核',
+            index: '/alarmTable',
+            title: '告警管理',
             permiss: '2',   
          },
          {

@@ -37,19 +37,12 @@
 						<el-table highlight-current-row @sort-change="onColChange"  
 						:row-class-name="tableRowProp"
 						:data="table_module.data" border class="table" ref="tableInstance" @row-click="onTableSelect" header-cell-class-name="table-header">  
-							<el-table-column prop="id"  label="ID" width="65" align="center" sortable ></el-table-column>
-							<el-table-column prop="boatName" label="船名"  width="90" sortable  :show-overflow-tooltip="true"></el-table-column>
-							<el-table-column prop="vioName" label="违规名称" width="110"  sortable :show-overflow-tooltip="true"></el-table-column>
-							<el-table-column label="处理状态" width="110"  sortable prop="flowStatus">
-								<template #default="scope"> <el-tag  >{{ form_attach_data.getFlowStateName(scope.row.flowStatus)?.label }} </el-tag></template>
-							</el-table-column> 
-							<el-table-column label="人工审核" width="120" sortable :show-overflow-tooltip="true"  prop="manualAuditResult"> 
-								<template #default="scope"> <el-tag :type="form_attach_data.statue2TagType(scope.row.manualAuditResult)">{{ form_attach_data.getManualStateName(scope.row.manualAuditResult)?.label }} </el-tag></template>
-							</el-table-column>
-							<el-table-column label="程序审核"  width="120" sortable prop="programAuditResult" :show-overflow-tooltip="true">
-								<template #default="scope"><el-tag :type="form_attach_data.statue2TagType(scope.row.programAuditResult)"> {{  form_attach_data.getAutoStateName( scope.row.programAuditResult)?.label }} </el-tag></template>
-							</el-table-column> 
-							<el-table-column width="160" prop="devRecordTime" label="设备时间" sortable  :show-overflow-tooltip="true"></el-table-column> 
+							<el-table-column prop="uuid"  label="ID" width="65" align="center" sortable ></el-table-column>
+							<el-table-column prop="alarmType" label="告警类"  width="90" sortable  :show-overflow-tooltip="true"></el-table-column>
+							
+							 
+							<el-table-column width="160" prop="alarmTime" label="告警时间" sortable  :show-overflow-tooltip="true"></el-table-column> 
+							<el-table-column width="160" prop="createTime" label="入口事件" sortable  :show-overflow-tooltip="true"></el-table-column> 
 							<el-table-column label="操作" width="316" align="center">
 							<template #default="scope">  
 								<el-button text :icon="Edit" @click="onOpenDialog(scope.row)">
@@ -75,7 +68,7 @@
 
 		<!-- 弹出框 -->
 		<el-dialog title="标注" v-model="form.dialogVisible"   style="width:98%; height: 90%;" @keydown.ctrl="keyDown">
-			 <label-process ref="label_view" :options="table_module.currentRow" :meta-data="form_attach_data" @refesh="onRefesh" ></label-process>
+			
 			<template #footer>
 				<span class="dialog-footer">
 					<el-button @click="form.dialogVisible = false">取 消</el-button> 
@@ -178,7 +171,7 @@ const getQuery=()=>{
 }
 // 获取表格数据
 const getData = ( ) => {   
-	getQuery(),api.list_menu_svc(table_module.query).then(res => {
+	getQuery(),api.list_svc(table_module.query).then(res => {
         if (res.code==0){
             table_module.data = res.data; 
 		    table_module.pageTotal = res.total || -1; 

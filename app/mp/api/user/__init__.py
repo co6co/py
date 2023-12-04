@@ -32,7 +32,9 @@ async def login(request:Request):
         user:UserPO=await operation.get_one(UserPO,UserPO.userName.__eq__(where.userName) )  
         log.err(dir(user))
         if user !=None:
+            log.err(f"encode:{user.encrypt(where.password)}")
             if user.password==user.encrypt(where.password): 
+               
                 token=await createToken(request,user.to_dict())
                 return  JSON_util.response(Result.success(data=token, message="登录成功"))
             else :return JSON_util.response(Result.fail(message="密码不正确!"))
@@ -49,8 +51,8 @@ async def list(request:Request):
     param.__dict__.update(request.json) 
     async with request.ctx.session as session:   
         operation=DbPagedOperations(session,param)
-        total = await operation.get_count(UserPO.id)  
-        list_paged = await operation.get_paged((UserPO.id, UserPO.userGroup, UserPO.state,UserPO.createTime, UserPO.userName))
+        total = await operation.get_count(UserPO.id)   
+        list_paged = await operation.get_paged((UserPO.id, UserPO.userGroupPO, UserPO.state,UserPO.createTime, UserPO.userName))
         pageList=Page_Result.success(list_paged) 
         pageList.total=total
         await session.commit()

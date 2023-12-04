@@ -193,13 +193,13 @@ const routes: RouteRecordRaw[] = [
                 component: () => import(/* webpackChunkName: "process" */ '../views/wxMenuTable.vue'),
             },
             {
-                path: '/processLable',
-                name: 'processLable',
+                path: '/alarmTable',
+                name: 'alarmTable',
                 meta: {
                     title: '数据管理',
                     permiss: '2',
                 },
-                component: () => import(/* webpackChunkName: "process" */ '../views/processLable.vue'),
+                component: () => import(/* webpackChunkName: "process" */ '../views/alarmTable.vue'),
             }, 
         ],
     },

@@ -1,6 +1,6 @@
 
 from decimal import Decimal
-from model.pos.right import bizAlarmPO
+from model.pos.biz import bizAlarmPO
 from datetime import datetime
 
 

@@ -5,31 +5,19 @@ from co6co.utils import log ,File
 from sanic import utils
 from co6co_sanic_ext.utils.cors_utils import attach_cors
 from co6co_sanic_ext import sanics
-from co6co_web_db.services.db_service import injectDbSessionFactory,db_service
+from co6co_web_db.services.db_service import injectDbSessionFactory 
 
 from sanic.request import Request
 from sanic.response import text,json 
-import argparse
-from co6co_db_ext.po import BasePO
+import argparse 
 from co6co_sanic_ext .model.res .result import Result
-from pathlib import Path 
+from pathlib import Path
 
-class Page_Result(Result):
-    total:int
-    def __new__(cls, key:T, label:T, value:T):
-        obj :Page_Result= object.__new__(cls)
-        obj.code = key
-        obj.label = label
-        obj.total = value # value 为元组 (en_name,cn_name,val)
-        return obj 
-    @staticmethod
-    def create(code:int=0,data:any=None,message:str="操作成功")-> Page_Result:
-        result=Page_Result.__new__()
-        result.code=code
-        result.data=data 
-        return result 
-    
-     
+'''from model.pos.right import *  
+from model.pos.biz import *
+from model.pos.wx import * '''
+
+from model.pos.biz import BasePO, bizResourcePO  ,bizAlarmAttachPO,bizAlarmTypePO ,bizAlarmPO
 
 def init (app:Sanic,customConfig):
     """
@@ -43,12 +31,14 @@ def init (app:Sanic,customConfig):
     #app.blueprint(res) 
     #service=db_service(app,app.config.db_settings,BasePO)
    # service.sync_init_tables() 
-    injectDbSessionFactory(app,app.config.db_settings,BasePO) 
-    app.blueprint(api) 
+    injectDbSessionFactory(app,app.config.db_settings) 
+    app.blueprint(api)
 
+ 
+         
+ 
+if __name__ == "__main__":    
     
-
-if __name__ == "__main__":
     parser=argparse.ArgumentParser(description="audit service.")
     parser.add_argument("-c","--config",default="app_config.json")
     args=parser.parse_args() 

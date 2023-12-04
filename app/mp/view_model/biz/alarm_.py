@@ -1,4 +1,4 @@
-from model.pos.right import bizAlarmPO
+from model.pos.biz import bizAlarmPO
 from sqlalchemy .orm.attributes import InstrumentedAttribute 
 from typing import Tuple,List
 from co6co_db_ext.db_filter import absFilterItems

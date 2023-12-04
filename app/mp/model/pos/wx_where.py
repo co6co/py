@@ -1,4 +1,4 @@
-from model.pos.right import WxMenuPO
+from model.pos.wx import WxMenuPO
 from sqlalchemy .orm.attributes import InstrumentedAttribute 
 from typing import Tuple
 from co6co_db_ext.db_filter import absFilterItems
