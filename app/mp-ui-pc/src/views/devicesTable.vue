@@ -1,18 +1,20 @@
 <template>
-	<div>
+	<div> 
 		<div class="container"> 
-				<el-row :gutter="24"> 
-						<div class="handle-box"> 
-							<el-select style="width:160px"  class="mr10"  v-model="table_module.query.alarmType" placeholder="请选择">
-								<el-option 
-									v-for="item  in form_attach_data.flow_status" 
-									:key="item.key" :label="item.label" :value="item.value"
-								/> 
-							</el-select> 
-							<el-link type="primary" title="更多" @click="table_module.moreOption=!table_module.moreOption"><ElIcon :size="20"><MoreFilled /></ElIcon></el-link>
-							<el-button type="primary" :icon="Search" @click="onSearch">搜索</el-button>  
-						</div> 
-				</el-row>
+			<el-row :gutter="24"> 
+				<div class="handle-box"> 
+					<el-select style="width:160px"  class="mr10"  v-model="table_module.query.type" placeholder="请选择">
+						<el-option key="1" label="1" value="1"></el-option>
+					<!--<el-option 
+							v-for="item  in form_attach_data.flow_status" 
+							:key="item.key" :label="item.label" :value="item.value"
+						/> 
+						-->	
+					</el-select> 
+					<el-link type="primary" title="更多" @click="table_module.moreOption=!table_module.moreOption"><ElIcon :size="20"><MoreFilled /></ElIcon></el-link>
+					<el-button type="primary" :icon="Search" @click="onSearch">搜索</el-button>  
+				</div> 
+			</el-row>
 				<el-row :gutter="24" v-if="table_module.moreOption"> 
 					<div class="handle-box">  
 						<div class="el-select mr10">
@@ -70,8 +72,8 @@
 		</div>
 		<!-- 弹出框 -->
 		<el-dialog title="详细信息" v-model="form.dialogVisible"   style="width:98%; height: 90%;" @keydown.ctrl="keyDown">
-			<details-info :data="[]"  ></details-info>
-			<template #footer>
+			<stream></stream>
+			 <template #footer> 
 				<span class="dialog-footer">
 					<el-button @click="form.dialogVisible = false">取 消</el-button> 
 				</span>
@@ -87,7 +89,7 @@ import { TreeNode } from 'element-plus/es/components/tree-v2/src/types'
 import { TreeNodeData } from 'element-plus/es/components/tree/src/tree.type'
 import { Delete, Edit, Search, Compass,MoreFilled,Download } from '@element-plus/icons-vue'; 
 import  * as api from '../api/alarm'; 
-import  { detailsInfo} from '../components/details';    
+import  { stream} from '../components/stream';    
 interface TableRow {
     id: number,
     uuid:string
@@ -100,7 +102,7 @@ interface TableRow {
 }
 interface Query extends IpageParam{
   datetimes:Array<string>,
-  alarmType:String,  
+  type:String,  //设备类型
 }
 interface table_module  {
     query:Query, 
@@ -117,7 +119,7 @@ const tableInstance=ref<any>(null);
 const currentTableItemIndex = ref<number>();  
 const table_module = reactive<table_module>({ 
 	query:{
-		alarmType: '', 
+		type: '', 
 		datetimes:[], 
 		pageIndex: 1,
 		pageSize: 15,
@@ -233,74 +235,74 @@ const onOpenDialog=( row?:any)=>{
 }
 //**end 打标签 */
 </script> 
-<style  scoped lang="less"> 
+<style  lang="less"> 
 .el-link {
-  margin-right: 8px;
-}
-.el-link .el-icon--right.el-icon {
-  vertical-align: text-bottom;
-}
-.handle-box {
-	margin: 3px 0;
-} 
-.handle-select {
-	width: 120px;
-}
-
-.handle-input {
-	width: 300px;
-}
-.table {
-	width: 100%;
-	font-size: 14px;
-}
-.red {
-	color: #F56C6C;
-}
-.mr10 {
-	margin-right: 10px;
-}
-.table-td-thumb {
-	display: block;
-	margin: auto;
-	width: 40px;
-	height: 40px;
-} 
-.view .title {
-  color: var(--el-text-color-regular);
-  font-size: 18px;
-  margin: 10px 0;
-}
-.view .value {
-  color: var(--el-text-color-primary);
-  font-size: 16px;
-  margin: 10px 0;
-}
-
-::v-deep .view .radius {
-  height: 40px;
-  width: 70%;
-  border: 1px solid var(--el-border-color);
-  border-radius: 0;
-  margin-top: 20px;
-}  
-::v-deep  .el-table tr,.el-table__row {cursor: pointer;  } 
-
-.formItem {
-  display: flex;
-  align-items: center;
-  display: inline-block;
-  .label{display: inline-block; color: #aaa; padding: 0 5px;}
-}
-   
-::v-deep .el-dialog__body{height:70%; overflow: auto;}
-.menuInfo{.el-menu{width: auto; .el-menu-item{padding: 10px; height: 40px;}}}
-
-/**
-
-::v-deep .el-dialog{
-	.el-dialog__header{padding: 5px;}
-	.el-dialog__body{padding: 15px 5px;}
-	.el-dialog__footer{padding: 5px;}
-} */
+    margin-right: 8px;
+  }
+  .el-link .el-icon--right.el-icon {
+    vertical-align: text-bottom;
+  }
+  .handle-box {
+      margin: 3px 0;
+  } 
+  .handle-select {
+      width: 120px;
+  }
+  
+  .handle-input {
+      width: 300px;
+  }
+  .table {
+      width: 100%;
+      font-size: 14px;
+  }
+  .red {
+      color: #F56C6C;
+  }
+  .mr10 {
+      margin-right: 10px;
+  }
+  .table-td-thumb {
+      display: block;
+      margin: auto;
+      width: 40px;
+      height: 40px;
+  } 
+  .view .title {
+    color: var(--el-text-color-regular);
+    font-size: 18px;
+    margin: 10px 0;
+  }
+  .view .value {
+    color: var(--el-text-color-primary);
+    font-size: 16px;
+    margin: 10px 0;
+  }
+  
+  ::v-deep .view .radius {
+    height: 40px;
+    width: 70%;
+    border: 1px solid var(--el-border-color);
+    border-radius: 0;
+    margin-top: 20px;
+  }  
+  ::v-deep  .el-table tr,.el-table__row {cursor: pointer;  } 
+  
+  .formItem {
+    display: flex;
+    align-items: center;
+    display: inline-block;
+    .label{display: inline-block; color: #aaa; padding: 0 5px;}
+  }
+     
+  ::v-deep .el-dialog__body{height:70%; overflow: auto;}
+  .menuInfo{.el-menu{width: auto; .el-menu-item{padding: 10px; height: 40px;}}}
+  
+  /**
+  
+  ::v-deep .el-dialog{
+      .el-dialog__header{padding: 5px;}
+      .el-dialog__body{padding: 15px 5px;}
+      .el-dialog__footer{padding: 5px;}
+  } */
 </style>

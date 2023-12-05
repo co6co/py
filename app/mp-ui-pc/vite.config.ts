@@ -11,6 +11,7 @@ import topLevelAwait from 'vite-plugin-top-level-await'
 
 export default  defineConfig({
 	base: './',
+	//server:{hmr:{overlay:false} },
 	plugins: [
 		vue(),
 		VueSetupExtend(),
@@ -44,7 +45,6 @@ export const useConfig= ({ command, mode }: ConfigEnv): UserConfig => {
 	  env = loadEnv(mode, root)
 	}
 	return {
-		base: env.API_URL_BASE, 
-
+		base: env.API_URL_BASE,  
 	}
 }

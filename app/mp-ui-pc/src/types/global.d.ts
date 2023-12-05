@@ -102,3 +102,5 @@ interface download_config{
 declare module 'vue3-video-play'
 declare module 'wangeditor'
 declare module  "json-bigint"
+declare module  'JessibucaPro'
+

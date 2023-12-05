@@ -7,6 +7,7 @@ export {}
 
 declare module '@vue/runtime-core' {
   export interface GlobalComponents {
+    DetailsInfo: typeof import('./src/components/details/src/detailsInfo.vue')['default']
     Download: typeof import('./src/components/download/src/download.vue')['default']
     ElAvatar: typeof import('element-plus/es')['ElAvatar']
     ElButton: typeof import('element-plus/es')['ElButton']
@@ -15,6 +16,8 @@ declare module '@vue/runtime-core' {
     ElCheckbox: typeof import('element-plus/es')['ElCheckbox']
     ElCheckboxGroup: typeof import('element-plus/es')['ElCheckboxGroup']
     ElCol: typeof import('element-plus/es')['ElCol']
+    ElCollapse: typeof import('element-plus/es')['ElCollapse']
+    ElCollapseItem: typeof import('element-plus/es')['ElCollapseItem']
     ElDatePicker: typeof import('element-plus/es')['ElDatePicker']
     ElDialog: typeof import('element-plus/es')['ElDialog']
     ElDropdown: typeof import('element-plus/es')['ElDropdown']
@@ -52,6 +55,7 @@ declare module '@vue/runtime-core' {
     RouterView: typeof import('vue-router')['RouterView']
     SelectTree: typeof import('./src/components/process/src/selectTree.vue')['default']
     Sidebar: typeof import('./src/components/sidebar.vue')['default']
+    Stream: typeof import('./src/components/stream/src/stream.vue')['default']
     Tags: typeof import('./src/components/tags.vue')['default']
     Tree: typeof import('./src/components/process/src/tree.vue')['default']
   }

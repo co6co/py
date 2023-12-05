@@ -15,7 +15,8 @@ class bizDevicePo(BasePO):
     """
     __tablename__ = "biz_device" 
     id = Column("id",Integer,comment="主键",autoincrement=True, primary_key=True)
-    boardId = Column("board_id",String(64),comment="盒子唯一标识")
+    boardId = Column("device_uuid",String(64),comment="设备唯一标识")
+    deviceType= Column("device_type",Integer,comment="设备类型")
     innerIp=Column("inner_ip",String(64),comment="内部IP")
     ip=Column("ip",String(64),comment="外网IP")
     name=Column("name",String(64),comment="盒子名称")

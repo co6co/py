@@ -13,7 +13,7 @@ from typing import List,Optional ,Dict,Any
 import view_model.biz.upload_ as m
 from co6co.utils import log,getDateFolder
 import os,io
-from model.pos.biz import bizResourcePO  ,bizAlarmAttachPO,bizAlarmTypePO
+from model.pos.biz import bizResourcePO  ,bizAlarmAttachPO,bizAlarmTypePO,bizAlarmPO
 
 import multipart,uuid,datetime
 from view_model import get_upload_path
@@ -52,8 +52,8 @@ class Upload_view(BaseMethodView):
             if "_" in name: 
                 index=name.index("_")+1
                 result=name[index:].lower()
-                if result==36:return result
-        return str(uuid.uuid1())   
+                if len(result)==36:return result
+        return str(uuid.uuid4())   
     async def saveResourceToDb(self,opt:DbOperations,device_id,category:resource_category,path:str,sub_category:int=None,uid:str=None)->bizResourcePO:
         """
         资源保存
@@ -128,16 +128,16 @@ class Alarm_Upload_View(Upload_view):
             session:AsyncSession=app.ctx.session_fatcory()
             opt=DbOperations(session)
             try: 
-                one:bizAlarmType=await opt.get_one(bizAlarmType,bizAlarmType.type==param.Result.get("Type")) 
+                one:bizAlarmTypePO=await opt.get_one(bizAlarmTypePO,bizAlarmTypePO.alarmType==param.Result.get("Type")) 
                 if one==None:
-                    one=bizAlarmType()
-                    one.type=param.Result.get("Type")
+                    one=bizAlarmTypePO()
+                    one.alarmType=param.Result.get("Type")
                     one.desc=param.Result.get("Description")
                     opt.add(one)
                 else:
                     one.desc=param.Result.get("Description")
                     one.updateTime=datetime.datetime.now()
-                opt.commit()
+                await opt.commit()
             except Exception as e:
                 log.err(f"执行同步syncCheckEntity，失败{e}")
             finally:
@@ -165,17 +165,23 @@ class Alarm_Upload_View(Upload_view):
             #2. 保存到数据库
             async with request.ctx.session as session:  
                 session:AsyncSession=session
-                operation=DbOperations(session)
-                device_id=await get_Device_id(operation,p)
+                opt=DbOperations(session)
+                device_id=await get_Device_id(opt,p)
                 ## 2.1 保存图片 
                 u1=self.createResourceUUID()
                 u2=self.createResourceUUID()
                 p1=await self._saveImage(request,f"SRC_{u1}.jpeg",p.ImageData ) 
                 p2=await self._saveImage(request,f"Labeled_{u2}.jpeg",p.ImageDataLabeled ) 
-                await self.saveResourceToDb(operation,device_id,resource_category.image,p1,sub_category=resource_image_sub_category.raw.val,uid= u1)
-                await self. saveResourceToDb(operation,device_id,resource_category.image,p2,sub_category=resource_image_sub_category.marked.val,uid=u2)
-                await operation.commit()
+                await self.saveResourceToDb(opt,device_id,resource_category.image,p1,sub_category=resource_image_sub_category.raw.val,uid= u1)
+                await self. saveResourceToDb(opt,device_id,resource_category.image,p2,sub_category=resource_image_sub_category.marked.val,uid=u2)
+                await opt.commit()
                 po=p.to_po()  
+                result= await opt.exist(bizAlarmPO.uuid==po.uuid)
+                log.warn(result)
+                if result: 
+                    res:m.Response=m.Response.success(message=f"数据“{po.uuid}”重复上传")
+                    return JSON_util.response(res)
+                
                 po.videoUid=self.createResourceUUID(p.VideoFile)
                 po.rawImageUid=u1
                 po.markedImageUid=u2
@@ -185,11 +191,11 @@ class Alarm_Upload_View(Upload_view):
                 poa.media=json.dumps(p.Media )
                 session.add(po)
                 log.warn(f"提交前：{po.id}")
-                await operation.commit()
+                await opt.commit()
                 log.warn(f"提交后：{po.id}")
                 poa.id=po.id
-                operation.add_all([poa]) 
-                await operation.commit()
+                opt.add_all([poa]) 
+                await opt.commit()
                 res:m.Response=m.Response.success()
                 return JSON_util.response(res)
 

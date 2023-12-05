@@ -201,6 +201,15 @@ const routes: RouteRecordRaw[] = [
                 },
                 component: () => import(/* webpackChunkName: "process" */ '../views/alarmTable.vue'),
             }, 
+            {
+                path: '/devicesTable',
+                name: 'devicesTable',
+                meta: {
+                    title: '设备管理',
+                    permiss: '2',
+                },
+                component: () => import(/* webpackChunkName: "process" */ '../views/devicesTable.vue'),
+            }, 
         ],
     },
     {

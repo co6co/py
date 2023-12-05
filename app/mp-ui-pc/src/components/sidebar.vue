@@ -65,6 +65,12 @@ const items:Array<sideBarItem>= [
         },
         {
             icon: 'Calendar',
+            index: '/devicesTable',
+            title: '设备管理',
+            permiss: '2',   
+         },
+         {
+            icon: 'Calendar',
             index: '/alarmTable',
             title: '告警管理',
             permiss: '2',   

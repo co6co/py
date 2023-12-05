@@ -49,7 +49,7 @@ class UserPO(UserTimeStampedModelPO):
         """
         jwt 保存内容
         """
-        return {"id":self.id,"userName":self.userName, "group_id":self.userGroupPO}
+        return {"id":self.id,"userName":self.userName, "group_id":self.userGroupId}
  
     
 class AccountPO(BasePO):
