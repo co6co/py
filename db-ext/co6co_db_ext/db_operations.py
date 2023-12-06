@@ -14,6 +14,8 @@ from  sqlalchemy.engine.result import ScalarResult,ChunkedIteratorResult
 from sqlalchemy.sql.elements import ColumnElement
 from sqlalchemy.sql import Select
 from .db_filter import absFilterItems,Page_param
+from .po import BasePO
+
 
 
 #from sqlalchemy.orm import selectinload # 紧急装载器 在该表主键又外键的基础上使用 select(UserTable).options(selectinload(UserTable.LoginLog))
@@ -36,10 +38,19 @@ class DbOperations:
 		
 	@staticmethod
 	def remove_db_instance_state( poInstance_or_poList:Iterator| Any )->List[Dict]|Dict:
-		if  hasattr (poInstance_or_poList,"__iter__") : return [dict(filter(lambda k: k[0] !=DbOperations.__po_has_field__, a1.__dict__.items())) for a1 in poInstance_or_poList]  
+		if  hasattr (poInstance_or_poList,"__iter__") :
+			result= [dict(filter(lambda k: k[0] !=DbOperations.__po_has_field__, a1.__dict__.items())) for a1 in poInstance_or_poList]  
+			for r in result:
+				for r1 in r:
+					value=r.get(r1)
+					if (isinstance(value,BasePO)):
+						dic=DbOperations.remove_db_instance_state(value)
+						r.update({r1:dic}) 
+			return result
 		#and hasattr (poInstance_or_poList,"__dict__")
 		elif hasattr (poInstance_or_poList,"__dict__"): return dict(filter(lambda k: k[0] !=DbOperations.__po_has_field__, poInstance_or_poList.__dict__.items()))
 		else: return poInstance_or_poList
+	
 	@staticmethod
 	def row2dict(row:Row)->Dict:
 		"""

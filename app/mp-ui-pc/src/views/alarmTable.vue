@@ -4,10 +4,11 @@
 				<el-row :gutter="24"> 
 						<div class="handle-box"> 
 							<el-select style="width:160px"  class="mr10"  v-model="table_module.query.alarmType" placeholder="请选择">
-								<el-option 
+							<!--	<el-option 
 									v-for="item  in form_attach_data.flow_status" 
 									:key="item.key" :label="item.label" :value="item.value"
-								/> 
+								/> -->
+								<el-option label="123456"></el-option>
 							</el-select> 
 							<el-link type="primary" title="更多" @click="table_module.moreOption=!table_module.moreOption"><ElIcon :size="20"><MoreFilled /></ElIcon></el-link>
 							<el-button type="primary" :icon="Search" @click="onSearch">搜索</el-button>  
@@ -49,7 +50,10 @@
 							<el-table-column label="操作" width="316" align="center">
 							<template #default="scope">  
 								<el-button text :icon="Edit" @click="onOpenDialog(scope.row)">
-									打标签
+									详细信息
+								</el-button> 
+								<el-button text :icon="Edit" @click="onOpen2Dialog(scope.row)">
+									告警视频
 								</el-button> 
 							</template>
 						</el-table-column>
@@ -69,11 +73,29 @@
 				</el-row> 
 		</div>
 		<!-- 弹出框 -->
-		<el-dialog title="详细信息" v-model="form.dialogVisible"   style="width:98%; height: 90%;" @keydown.ctrl="keyDown">
-			<details-info :data="[]"  ></details-info>
+		<el-dialog title="详细信息" v-model="form.dialogVisible"   style="width:98%; height: 98%;" @keydown.ctrl="keyDown">
+			<details-info :data="form.data"  ></details-info>
 			<template #footer>
 				<span class="dialog-footer">
 					<el-button @click="form.dialogVisible = false">取 消</el-button> 
+				</span>
+			</template>
+		</el-dialog>
+
+		<!-- 弹出框 -->
+		<el-dialog title="详细信息" v-model="form2.dialogVisible"   style="width:98%; height: 90%;" @keydown.ctrl="keyDown">
+			<el-row> 
+				<el-col :span="12">
+					<img-video :viewOption="form2.data"  ></img-video>
+				</el-col>
+				<el-col :span="12">
+					 123
+				</el-col>
+			</el-row>
+			
+			<template #footer>
+				<span class="dialog-footer">
+					<el-button @click="form2.dialogVisible = false">取 消</el-button> 
 				</span>
 			</template>
 		</el-dialog>
@@ -88,6 +110,8 @@ import { TreeNodeData } from 'element-plus/es/components/tree/src/tree.type'
 import { Delete, Edit, Search, Compass,MoreFilled,Download } from '@element-plus/icons-vue'; 
 import  * as api from '../api/alarm'; 
 import  { detailsInfo} from '../components/details';    
+import  { imgVideo,types} from '../components/player';    
+import {str2Obj} from '../utils'
 interface TableRow {
     id: number,
     uuid:string
@@ -222,14 +246,44 @@ const keyDown=(e:KeyboardEvent)=>{
 	//process_view.value.keyDown(e) 
     e.stopPropagation() 
 } 
-//**打标签 */
+//**详细信息 */
+interface dialogDataType{
+	dialogVisible:boolean, 
+	data:Array<any>
+}
 let dialogData={
 	dialogVisible:false, 
+	data:[]
 }
-let form = reactive(dialogData); 
+let form = reactive<dialogDataType>(dialogData); 
 const onOpenDialog=( row?:any)=>{
 	form.dialogVisible = true  
-	table_module.currentRow=row 
+	table_module.currentRow=row   
+	form.data=[
+		{name:"检测结果信息",data:str2Obj( row.alarmAttachPO.result)},
+		{name:"视频流信息",data:str2Obj(row.alarmAttachPO.media)},
+		{name:"GPS信息",data:str2Obj(row.alarmAttachPO.gps)}]
+}
+
+
+//**视频下信息 */
+interface dialog2DataType{
+	dialogVisible:boolean, 
+	data:Array<types.imageOption|types.videoOption>
+}
+let dialog2Data={
+	dialogVisible:false, 
+	data:[]
+}
+let form2 = reactive<dialog2DataType>(dialog2Data); 
+const onOpen2Dialog=( row:TableRow)=>{
+	form2.dialogVisible = true  
+	table_module.currentRow=row   
+	form2.data=[
+		{ url:row.rawImageUid,name:"原始图片" ,type:1},
+		{ url:row.markedImageUid,name:"标注图片",type:1}, 
+		{ url:row.videoUid,poster:row.videoUid,type:0}, 
+	]
 }
 //**end 打标签 */
 </script> 

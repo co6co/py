@@ -18,14 +18,13 @@ from model.pos.biz import bizResourcePO  ,bizAlarmAttachPO,bizAlarmTypePO,bizAla
 import multipart,uuid,datetime
 from view_model import get_upload_path
 
-
-
+ 
 #@lru_cache(maxsize=20)
 async def get_Device_id( db:DbOperations,param:m.Box_base_Param,upgrade=False): 
-    one=await db.get_one(bizDevicePo.id,bizDevicePo.boardId==param.BoardId) 
+    one=await db.get_one(bizDevicePo.id,bizDevicePo.uuid==param.BoardId) 
     if one==None: 
         po=bizDevicePo()
-        po.boardId=param.BoardId
+        po.uuid=param.BoardId
         po.innerIp=param.BoardIp
         po.ip=param.ip
         db.add(po)

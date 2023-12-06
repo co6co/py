@@ -1,3 +1,4 @@
 
 import stream from './src/stream.vue' 
-export {stream}  
+import ptz from './src/ptz.vue' 
+export {stream,ptz}  

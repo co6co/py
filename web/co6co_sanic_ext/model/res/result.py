@@ -26,10 +26,10 @@ class Page_Result(Result):
         return self   
     @staticmethod
     def success(data:any=None,message:str="操作成功",**kvargs)-> Page_Result:
-        return Page_Result.__new__(data=data,message =message,total=kvargs.get("total"))
+        return Page_Result.__new__(data=data,code=0,message =message,total=kvargs.get("total"))
     @staticmethod
     def fail(data:any=None,message:str="处理失败",**kvargs)-> Page_Result: 
-        return Page_Result.__new__(data=data,message =message,total=kvargs.get("total"))
+        return Page_Result.__new__(data=data,code=500,message =message,total=kvargs.get("total"))
 
         
 

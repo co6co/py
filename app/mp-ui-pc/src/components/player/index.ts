@@ -1,3 +1,4 @@
 import Player from './src/Player.vue'
 import * as types from './src/types'
-export {Player, types}  
+import imgVideo from './src/imgVideo.vue'
+export {Player,imgVideo, types}  

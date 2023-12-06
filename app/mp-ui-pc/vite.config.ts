@@ -1,4 +1,4 @@
-import { resolve } from 'path'
+import path, { resolve } from 'path'
 import { loadEnv } from 'vite'
 import { defineConfig, UserConfig, ConfigEnv  } from 'vite';
 import vue from '@vitejs/plugin-vue';
@@ -11,7 +11,7 @@ import topLevelAwait from 'vite-plugin-top-level-await'
 
 export default  defineConfig({
 	base: './',
-	//server:{hmr:{overlay:false} },
+	//server:{hmr:{overlay:false} }, 
 	plugins: [
 		vue(),
 		VueSetupExtend(),
@@ -24,11 +24,12 @@ export default  defineConfig({
 		topLevelAwait({
 			promiseExportName: '__tla',
 			promiseImportName: i => `__tla_${i}`
-		}), 
+		}),  
 	],
 	optimizeDeps: {
 		include: ['schart.js']
 	}
+	
 });
 
 const root = process.cwd()

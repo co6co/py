@@ -1,53 +1,21 @@
 <template>
-    <div class="container"> 
-        <div container="jess_player" ref="jess_player_container">
+    <div class="box">  
+        <div class="jess_player" ref="jess_player_container">  </div>  
+        <el-radio-group v-model="player_option.type" @change="onReplay">
+            <el-radio label="MediaSource" />
+            <el-radio label="Webcodec" />
+            <el-radio label="SIMD" />
+        </el-radio-group>
 
-        </div> 
-        {{player_option.type}}
-        <el-checkbox-group v-model="player_option.type">
-            <el-checkbox label="MediaSource" name="type"  >MediaSource</el-checkbox>
-            <el-checkbox label="Webcodec " name="type" >Webcodec</el-checkbox>
-            <el-checkbox label="SIMD" name="type" >SIMD </el-checkbox>
-        </el-checkbox-group>
-        <div class="input">
-            <span>渲染标签：</span>
-            <select id="renderDom" onchange="replay()">
-                <option value="video" selected>video</option>
-                <option value="canvas" >canvas</option>
-            </select>
-
-            <span>canvas渲染技术：</span>
-            <select id="isUseWebGPU" onchange="replay()">
-                <option value="webgl" >webgl</option>
-                <option value="webgpu" selected>webgpu</option>
-            </select>
-            <span id="supportWebgpu"></span>
-        </div>
-        <!--
-        <div class="input">
-            <div>
-                <span>缓存时长：</span>
-                <input placeholder="单位：秒" type="text" id="videoBuffer" style="width: 50px" value="0.2">秒
-                <span>缓存延迟(延迟超过会触发丢帧)：</span>
-                <input placeholder="单位：秒" type="text" id="videoBufferDelay" style="width: 50px" value="1">秒
-                <button id="replay">重播</button>
-            </div>
-        </div>
-        -->
-        <div class="input">
-            <div>输入URL：</div>
-            <input
-                autocomplete="on"
-                id="playUrl"
-                value=""
-            />
-            <button id="play">播放</button>
-            <button id="pause" style="display: none">停止</button>
-        </div>
-        <div class="input" style="line-height: 30px">
-            <button id="destroy">销毁</button>
-            <span class="fps-inner"></span>
-        </div>
+        <el-radio-group v-model="player_option.renderDom" @change="onReplay">
+            <el-radio label="video" />
+            <el-radio label="canvas" /> 
+        </el-radio-group>
+        <el-radio-group v-model="player_option.useWebGPU" @change="onReplay">  
+            <el-radio :label="true"  >使用webGPU</el-radio>
+            <el-radio :label="false" >不使用webGPU</el-radio>
+        </el-radio-group>  
+        {{  `FPS: ${fps.fps} DFPS: ${fps.dfps}` }}  {{ player_option.useWebGPU }}  
     </div>
 </template>
  
@@ -55,108 +23,88 @@
 import { watch, PropType,reactive, ref , computed ,onMounted, onBeforeUnmount,nextTick} from 'vue';  
 import "../../../assets/jessi/jessibuca-pro-demo.js";
 import "../../../assets/jessi/jessibuca-pro-talk-demo.js";
-import "../../../assets/jessi/demo.js";
-import { PiniaVuePlugin } from 'pinia';
-
-
-var $player = document.getElementById('play');
-var $pause = document.getElementById('pause');
-//var $playHref = document.getElementById('playUrl');
-//var $container = document.getElementById('container');
-var $destroy = document.getElementById('destroy');
-/* var $useMSE = document.getElementById('useMSE');
-var $useSIMD = document.getElementById('useSIMD');
-var $useWCS = document.getElementById('useWCS');
-*/
-//var $videoBuffer = document.getElementById('videoBuffer');
-//var $videoBufferDelay = document.getElementById('videoBufferDelay');
-/*
-var $replay = document.getElementById('replay');
-var $fps = document.querySelector('.fps-inner');
-var $renderDom = document.getElementById('renderDom');
-var $isUseWebGPU = document.getElementById('isUseWebGPU');
-*/
-var showOperateBtns = true; // 是否显示按钮
-var forceNoOffscreen = true; //
-var jessibuca = null;
-
-interface PlayerOption{
-    type:Array<Boolean> 
-    ,videoBuffer:number// 缓存时长 s
-    ,videoBufferDelay:number// 缓存延迟 s
-    ,useCanvasRender:boolean
-    ,useWebGPU:boolean
-} 
-interface stream_data{
-    url:string,
-    quality:Array<String>,// ['普清', '高清', '超清', '4K', '8K']
-}
+import "../../../assets/jessi/demo.js";  
+  
+var showOperateBtns = true; // 是否显示按钮 
 const props = defineProps({
-  data: {
-    type:Array ,
+  sources: {
+    type: Array<stream_source> ,
+    required: true
+  } ,
+  option: {
+    type:Object as  PropType<player_option> ,
     required: false
   } 
 })
+const fps=ref({fps:0,dfps:0}) 
 const player_option=ref<PlayerOption>({
-    type:[true,true,true],
+    type:"MediaSource",
+    renderDom:"video",
+    useWebGPU:false,
     videoBuffer:0.2,
     videoBufferDelay:2,
-    useCanvasRender:false,
-    useWebGPU:false 
+    useCanvasRender:false, 
+    currentSource:-1, 
 })
 const jess_player_container=ref<HTMLElement>( )
-const jess_player=ref( )
-const play=(url:string)=>{
-    function play() { 
-        if (url) {
-            jess_player.value.play(url);
-            if($player&&$pause&&$destroy){
-                $player.style.display = 'none';
-                $pause.style.display = 'inline-block';
-                $destroy.style.display = 'inline-block';
-            } 
-        }
-    } 
+const jess_player=ref() 
+const emits=defineEmits(["created","destroyed"])
+const onPlay=( )=>{ 
+    let index=player_option.value.currentSource
+    let url=undefined;
+    if (index>-1 && index < props.sources.length ) url=props.sources.at(index)?.url 
+    if (url) jess_player.value.play(url);  
+} 
+const destroying=()=>{
+    emits("destroyed")
 }
-const create=()=>  { 
-        console.log(jess_player_container.value)
+const replay=()=> {
+    alert("配置改变重新播放")
+    if (jess_player.value) {
+        jess_player.value.destroy().then(() =>destroying(),create(),onPlay());
+    } else {
+        create(),onPlay();
+    }
+}
+const create=()=>  {  
        const jessibuca = new JessibucaPro({
             container:jess_player_container.value,
             videoBuffer: player_option.value.videoBuffer, // 缓存时长
             videoBufferDelay: player_option.value.videoBufferDelay, // 1000s
             isResize: false,
-            text: "",
+            text: "text",
             loadingText: "加载中",
-            debug: true,
+            debug: false,
             debugLevel: "debug",
-            useMSE:player_option.value.type[0],// $useMSE.checked === true,
-            useSIMD:player_option.value.type[1],// $useSIMD.checked === true,
-            useWCS: player_option.value.type[2],//$useWCS.checked === true,
-            /*
+            useMSE:player_option.value.type=="MediaSource",// $useMSE.checked === true,
+            useSIMD:player_option.value.type=="Webcodec",// $useSIMD.checked === true,
+            useWCS: player_option.value.type=="SIMD",//$useWCS.checked === true,
+            
             showBandwidth: showOperateBtns, // 显示网速
-            showPerformance: showOperateBtns, // 显示性能
+            //showPerformance: showOperateBtns, // 显示性能
             operateBtns: {
                 fullscreen: showOperateBtns,
                 screenshot: showOperateBtns,
                 play: showOperateBtns,
                 audio: showOperateBtns,
-                ptz: showOperateBtns,
+                //ptz: showOperateBtns,
                 quality: showOperateBtns,
                 performance: showOperateBtns,
             },
+            
             timeout: 10000,
             heartTimeoutReplayUseLastFrameShow: true,
             audioEngine: "worklet",
-            qualityConfig: ['普清', '高清', '超清', '4K', '8K'],
-            forceNoOffscreen: forceNoOffscreen,
+          
+            forceNoOffscreen: true, 
             isNotMute: false,
             heartTimeout: 10,
             ptzZoomShow:true,
-            useCanvasRender: player_option.value.useCanvasRender,
+            useCanvasRender: player_option.value.renderDom=="canvas",
             useWebGPU: player_option.value.useWebGPU,
-            controlHtml:'<div>我是 <span style="color: red">test</span>文案</div>',
+            //controlHtml:'<div>我是 <span style="color: red">test</span>文案</div>',
             supportHls265: true,
-            */
+            qualityConfig:props.sources.map(m=>m.name),
         },);
 
 
@@ -165,76 +113,39 @@ const create=()=>  {
         })
 
         jessibuca.on('streamQualityChange', (value:string) => {
-            console.log('streamQualityChange', value);
+            player_option.value.currentSource=props.sources.findIndex(m=>m.name==value)
+            console.log('streamQualityChange', value,player_option.value.currentSource);
         })
 
         jessibuca.on('timeUpdate', (value:string) => {
-            console.log('timeUpdate', value);
+           // console.log('timeUpdate', value);
         }) 
-        if ($player&&$pause&&$destroy){ 
-            $player.style.display = 'inline-block';
-            $pause.style.display = 'none';
-            $destroy.style.display = 'none'; 
-        }
+        jessibuca.on('stats', (stats:{fps:number,dfps:number}) => {
+            // console.log('stats', stats);
+            fps.value=stats 
+        })
+        
         jess_player.value=jessibuca
+        emits("created",jessibuca)
     } 
-    onMounted(()=>{
+      onMounted(()=>{
         create()
-    })
-   
+        onPlay()
+    }) 
+    const onReplay=()=>{
+        replay()
+    }
+    const onPause=()=>{
+        jess_player.value.pause();
+    }
 </script>
 <style lang="less" scoped>
 //@import "@/assets/jessi/demo.css";
-
-.root {
-    display: flex;
-    place-content: center;
-    margin-top: 3rem;
-}
-
-.container-shell {
+.jess_player{
+    width:100%;
+    height:400px;
     backdrop-filter: blur(5px);
     background: hsla(0, 0%, 50%, 0.5);
     padding: 30px 4px 10px 4px;
-    /* border: 2px solid black; */
-    width: auto;
-    position: relative;
-    border-radius: 5px;
-    box-shadow: 0 10px 20px;
-    &::before{
-        content: "jessibuca demo player";
-        position: absolute;
-        color: darkgray;
-        top: 4px;
-        left: 10px;
-        text-shadow: 1px 1px black;
-    }
-}
-
-.container-shell:before {
-    content: "jessibuca demo player";
-    position: absolute;
-    color: darkgray;
-    top: 4px;
-    left: 10px;
-    text-shadow: 1px 1px black;
-} 
- 
-.container {
-    background: rgba(13, 14, 27, 0.7);
-    width: 320px;
-    height: 199px;
-    display: inline-block;
-    margin-right: 10px;
-    margin-bottom: 10px;
-} 
-@media (max-width: 720px) { 
-    .container {
-        width: 95vw;
-        height: 52.7vw;
-        margin: 0 auto;
-        margin-bottom: 10px;
-        display: block;
-    }
 } 
 </style>

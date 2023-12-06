@@ -71,11 +71,14 @@
 				</el-row> 
 		</div>
 		<!-- 弹出框 -->
-		<el-dialog title="详细信息" v-model="form.dialogVisible"   style="width:98%; height: 90%;" @keydown.ctrl="keyDown">
-			<stream></stream>
+		<el-dialog title="详细信息" v-model="dialogData.dialogVisible"   style="width:98%; height: 90%;" @keydown.ctrl="keyDown"> 
+				<el-row :gutter="24">  
+					<el-col :span="15"><stream :sources="dialogData.sources"></stream> </el-col>
+					<el-col :span="9"><ptz @ptz="OnPtz"></ptz></el-col> 
+				</el-row>  
 			 <template #footer> 
 				<span class="dialog-footer">
-					<el-button @click="form.dialogVisible = false">取 消</el-button> 
+					<el-button @click="dialogData.dialogVisible = false">取 消</el-button> 
 				</span>
 			</template>
 		</el-dialog>
@@ -89,7 +92,9 @@ import { TreeNode } from 'element-plus/es/components/tree-v2/src/types'
 import { TreeNodeData } from 'element-plus/es/components/tree/src/tree.type'
 import { Delete, Edit, Search, Compass,MoreFilled,Download } from '@element-plus/icons-vue'; 
 import  * as api from '../api/alarm'; 
-import  { stream} from '../components/stream';    
+import  { stream ,ptz} from '../components/stream';   
+
+
 interface TableRow {
     id: number,
     uuid:string
@@ -224,14 +229,26 @@ const keyDown=(e:KeyboardEvent)=>{
 	//process_view.value.keyDown(e) 
     e.stopPropagation() 
 } 
-//**打标签 */
-let dialogData={
+//**打窗口 */
+interface dialogData{
+	dialogVisible:boolean,
+	sources:Array< stream_source>
+} 
+let dialogData = reactive<dialogData>({
 	dialogVisible:false, 
-}
-let form = reactive(dialogData); 
+	sources:[
+		 {url:"http://127.0.0.1/res/viedo/2.mp4",name:"主码流"}, 
+		 {url:"http://127.0.0.1/res/viedo/2.mp4",name:"子码流"}, 
+	]
+		
+
+}); 
 const onOpenDialog=( row?:any)=>{
-	form.dialogVisible = true  
+	dialogData.dialogVisible = true  
 	table_module.currentRow=row 
+}
+const OnPtz=(name:string,type:string)=>{
+	console.warn(name,type)
 }
 //**end 打标签 */
 </script> 

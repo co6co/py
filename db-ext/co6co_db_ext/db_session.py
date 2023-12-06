@@ -29,7 +29,7 @@ class db_service:
         self.engine = create_async_engine(f"mysql+aiomysql://{defaultSetting['DB_USER']}:{defaultSetting['DB_PASSWORD']}@{defaultSetting['DB_HOST']}/{defaultSetting['DB_NAME']}", echo=True) 
         self.async_session_factory  = sessionmaker(self.engine, expire_on_commit=False,class_=AsyncSession)# AsyncSession,
         self.session=scoped_session( sessionmaker(autoflush=False, autocommit=False,bind=self.engine) ) 
-        BasePO.query=self.self.async_session_factory().query_property()
+        BasePO.query=self.session.query_property()
         self.base_model_session_ctx = ContextVar("session") 
         pass
     async def init_tables(self):

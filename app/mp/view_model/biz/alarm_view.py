@@ -33,6 +33,7 @@ class Alarms_View(AuthMethodView):
                 .filter(and_(*filterItems.filter()))
                 .limit(filterItems.limit).offset(filterItems.offset)
             ) 
+            session.get()
             result= await opt._get_list(select,True) 
             select=(
                 Select( func.count( )).select_from(

@@ -21,7 +21,9 @@ def main():
         exit()
     if args.isFile:
         print(args.source,args.target)
-        if args.decode: base64.decode(open(args.source), open(args.target, "w"))
+        data=open(args.source,"rb",encoding='utf-8').read()
+        print(data)
+        if args.decode: base64.decode(open(args.source,"rb").raw, open(args.target, "wb"))
         else:base64.encode(open(args.source), open(args.target, "w"))
     else:
         data_bytes = args.source.encode('utf-8')  
