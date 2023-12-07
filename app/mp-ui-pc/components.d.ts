@@ -49,6 +49,7 @@ declare module '@vue/runtime-core' {
     ElTreeSelect: typeof import('element-plus/es')['ElTreeSelect']
     ElTreeV2: typeof import('element-plus/es')['ElTreeV2']
     Header: typeof import('./src/components/header.vue')['default']
+    Image: typeof import('./src/components/player/src/Image.vue')['default']
     ImgVideo: typeof import('./src/components/player/src/imgVideo.vue')['default']
     LabelProcess: typeof import('./src/components/labelprocess/src/labelProcess.vue')['default']
     Log: typeof import('./src/components/log/src/log.vue')['default']

@@ -10,7 +10,7 @@ class resource_category(Base_Enum):
     资源类型
     """
     video="video",0
-    image="image",0
+    image="image",1
 class resource_image_sub_category(Base_Enum):
     """
     图片子资源类型

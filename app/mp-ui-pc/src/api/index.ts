@@ -21,6 +21,7 @@ export const download_blob_resource=(resource:{data:Blob,fileName:string})=>{
   link.click()
   window.URL.revokeObjectURL(link.href) 
 }
+// 请求文件资源
 export const request_resource_svc=async (url:string, axios_config:AxiosRequestConfig={method:"get", responseType :"blob"}) =>{ 
     let default_config:{method:Method, url:string,  timeout:number,params:any}={
         method:'get',//请求方式
@@ -32,6 +33,7 @@ export const request_resource_svc=async (url:string, axios_config:AxiosRequestCo
     //const blob = new Blob([res.data]);//处理文档流  
     const result=create_URL_resource({data:res.data}) 
     return result
+    //request_resource_svc("/api/xxxx/poster?path="+address).then(res=>{ option.value.poster=res}).catch(e=>option.value.poster="" );   
 } 
 
 //下载文件

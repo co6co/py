@@ -1,12 +1,12 @@
 <template>
-    <videoPlay  v-bind="playerOption" :poster='option.poster'></videoPlay>
+    <videoPlay  v-bind="playerOption" :poster='option.poster'></videoPlay> 
 </template>
 
 <script lang="ts" setup  >
 import { watch, PropType,reactive, ref , computed ,onMounted, onBeforeUnmount,nextTick} from 'vue';  
 import 'vue3-video-play/dist/style.css'
 import { videoPlay} from 'vue3-video-play'
-import { videoOption } from './types'
+import {videoOption } from './types'
 const props = defineProps({
  option: {
    type:  Object as PropType<videoOption>,

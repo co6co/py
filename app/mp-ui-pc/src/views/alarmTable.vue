@@ -109,6 +109,7 @@ import { TreeNode } from 'element-plus/es/components/tree-v2/src/types'
 import { TreeNodeData } from 'element-plus/es/components/tree/src/tree.type'
 import { Delete, Edit, Search, Compass,MoreFilled,Download } from '@element-plus/icons-vue'; 
 import  * as api from '../api/alarm'; 
+import  * as res_api from '../api'; 
 import  { detailsInfo} from '../components/details';    
 import  { imgVideo,types} from '../components/player';    
 import {str2Obj} from '../utils'
@@ -269,22 +270,40 @@ const onOpenDialog=( row?:any)=>{
 //**视频下信息 */
 interface dialog2DataType{
 	dialogVisible:boolean, 
-	data:Array<types.imageOption|types.videoOption>
+	data:Array<types.resourceOption>
 }
 let dialog2Data={
 	dialogVisible:false, 
 	data:[]
 }
-let form2 = reactive<dialog2DataType>(dialog2Data); 
-const onOpen2Dialog=( row:TableRow)=>{
-	form2.dialogVisible = true  
-	table_module.currentRow=row   
-	form2.data=[
-		{ url:row.rawImageUid,name:"原始图片" ,type:1},
-		{ url:row.markedImageUid,name:"标注图片",type:1}, 
-		{ url:row.videoUid,poster:row.videoUid,type:0}, 
-	]
+let form2 = ref<dialog2DataType>(dialog2Data); 
+const setVideoResource=(uuid:string,option:types.videoOption)=>{
+	res_api.request_resource_svc(import.meta.env.VITE_BASE_URL+`/api/resource/poster/${uuid}`).then(res=>{option.poster=res}).catch(e=>option.poster="" );  
+	res_api.request_resource_svc(import.meta.env.VITE_BASE_URL+`/api/resource/${uuid}`).then(res=>{ option.url=res}).catch(e=>option.url="" );   
 }
+const setImageResource=(uuid:string,option:types.imageOption)=>{
+	res_api.request_resource_svc(import.meta.env.VITE_BASE_URL+`/api/resource/${uuid}`).then(res=>{ option.url=res}).catch(e=>option.url="" );  
+}
+const getResultUrl=(uuid:string,isposter:boolean=false)=>{
+	if (isposter) return import.meta.env.VITE_BASE_URL+`/api/resource/poster/${uuid}/700/600`;
+	return import.meta.env.VITE_BASE_URL+`/api/resource/${uuid}`
+}
+const onOpen2Dialog=( row:TableRow)=>{
+	form2.value.dialogVisible = true  
+	table_module.currentRow=row  
+	form2.value.data=[  
+		{ url: getResultUrl(row.rawImageUid), name:"原始图片" ,poster:getResultUrl(row.rawImageUid,true),type:1},
+		{ url:getResultUrl(row.markedImageUid),  name:"标注图片",poster:getResultUrl(row.markedImageUid,true), type:1} ,
+	 	{ url:getResultUrl(row.videoUid),  name:"原始视频", poster:getResultUrl(row.videoUid,true),type:0},
+	]
+	/**
+	setImageResource(row.rawImageUid,opt1)
+	setImageResource(row.markedImageUid,opt2)
+	setVideoResource(row.videoUid,opt3)
+	form2.value.data=[opt1,opt2,opt3] 
+	*/ 
+}
+
 //**end 打标签 */
 </script> 
 <style  scoped lang="less"> 

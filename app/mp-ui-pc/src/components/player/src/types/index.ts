@@ -1,11 +1,17 @@
-export interface videoOption{
-    url:string,
-    poster:string
-    type:0
-} 
-export interface imageOption{
-    url:string,
+export interface resourceOption{
+    url:string, 
+    poster:string,
+    type: 0|1 ,//0 视频 1： 图片
     name:string,
-    type:1
+} 
+ 
+export interface imageOption{
+    url:string,  
+    name:string,
+} 
+ 
+export interface videoOption{
+    url:string, 
+    poster:string,  
 } 
  

@@ -53,6 +53,7 @@ class Upload_view(BaseMethodView):
                 result=name[index:].lower()
                 if len(result)==36:return result
         return str(uuid.uuid4())   
+    
     async def saveResourceToDb(self,opt:DbOperations,device_id,category:resource_category,path:str,sub_category:int=None,uid:str=None)->bizResourcePO:
         """
         资源保存
@@ -142,7 +143,7 @@ class Alarm_Upload_View(Upload_view):
             finally:
                 await opt.db_session.close() 
 
-    async def _saveImage(self, request:Request,fileName:str, base64:str):
+    async def _saveImage(self,request:Request,fileName:str, base64:str):
         config=request.app.config
         root=get_upload_path(config)
         if root==None:return  JSON_util.response(m.Video_Response.fail("未配置上传目录"))

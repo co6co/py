@@ -33,3 +33,8 @@ import("../assets/iconfont/iconfont")                  相对路径可以
 }
 </style> 
 ```
+
+
+# 对象
+https://ts.xcatliu.com/basics/type-of-object-interfaces.html
+https://blog.csdn.net/wenxingchen/article/details/125341773 动态组件
