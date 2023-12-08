@@ -155,16 +155,8 @@ const routes: RouteRecordRaw[] = [
                     title: '个人中心',
                 },
                 component: () => import(  '../views/user.vue'),
-            },
-            {
-                path: '/processAudit',
-                name: 'processAudit',
-                meta: {
-                    title: '数据审核',
-                    permiss: '2',
-                },
-                component: () => import(/* webpackChunkName: "process" */ '../views/processTable.vue'),
-            },
+            }, 
+             
             {
                 path: '/taskTable',
                 name: 'taskTable',

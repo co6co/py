@@ -64,7 +64,7 @@ const items:Array<sideBarItem>= [
             permiss: '2',
         },
         {
-            icon: 'Calendar',
+            icon: 'PieChart',
             index: '/devicesTable',
             title: '设备管理',
             permiss: '2',   
@@ -86,18 +86,7 @@ const items:Array<sideBarItem>= [
             index: '/groupTable',
             title: '分组信息',
             permiss: '2',   
-         },
-         
-         {
-            icon: 'Calendar',
-            index: '1',
-            title: '标签管理',
-            permiss: '2',
-            subs: [
-                { icon: 'DocumentCopy', index: '/labelTable',   title: '标签管理',  permiss: '2',   },
-                { icon: 'PieChart', index: '/processLable',   title: '数据标签',  permiss: '2',   },
-            ]
-         },
+         }, 
          {
             icon: 'Calendar',
             index: '1',

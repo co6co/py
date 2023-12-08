@@ -1,5 +1,5 @@
-<template>
-    <videoPlay  v-bind="playerOption" :poster='option.poster'></videoPlay> 
+<template> 
+  <videoPlay  v-bind="playerOption" :poster='option.poster'></videoPlay>  
 </template>
 
 <script lang="ts" setup  >
@@ -11,13 +11,15 @@ const props = defineProps({
  option: {
    type:  Object as PropType<videoOption>,
    required: true
-}}) 
+}
+}) 
+const data=ref("")
 const playerOption=reactive({
  width: '100%', //播放器高度O
  height: '100%', //播放器高度
  color: "#409eff", //主题色
  title: '', //视频名称
- src: props.option.url, //视频源
+ src: data.value, //视频源
  muted: false, //静音
  webFullScreen: false,
  speedRate: ["0.75", "1.0", "1.25", "1.5", "2.0"], //播放倍速
@@ -28,4 +30,7 @@ const playerOption=reactive({
  volume: 0.3,    //默认音量大小
  control: true,  //是否显示控制器
 })  
+onMounted(()=>{
+  playerOption.src=props.option.url 
+})
 </script> 

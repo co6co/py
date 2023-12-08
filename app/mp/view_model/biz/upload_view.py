@@ -8,7 +8,7 @@ from co6co_sanic_ext.utils import JSON_util,json
 from view_model.base_view import  BaseMethodView
 from model.pos.biz import bizDevicePo,bizResourcePO
 
-from model.enum import resource_category,resource_image_sub_category
+from model.enum import resource_category,resource_image_sub_category,device_type
 from typing import List,Optional ,Dict,Any
 import view_model.biz.upload_ as m
 from co6co.utils import log,getDateFolder
@@ -27,6 +27,8 @@ async def get_Device_id( db:DbOperations,param:m.Box_base_Param,upgrade=False):
         po.uuid=param.BoardId
         po.innerIp=param.BoardIp
         po.ip=param.ip
+        po.deviceType=device_type.box.val
+
         db.add(po)
         await db.commit()  
         return po.id
@@ -34,6 +36,7 @@ async def get_Device_id( db:DbOperations,param:m.Box_base_Param,upgrade=False):
         po=await db.get_one_by_pk(bizDevicePo,one)  
         po.innerIp=param.BoardIp
         po.ip=param.ip
+        po.deviceType=device_type.box.val
         await db.commit() 
     return one  
 

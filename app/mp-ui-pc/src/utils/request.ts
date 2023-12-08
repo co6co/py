@@ -15,8 +15,7 @@ const service:AxiosInstance = axios.create({
 let elLoading:ReturnType<typeof ElLoading.service >;
 //增加请求拦截器
 service.interceptors.request.use(
-    (config: AxiosRequestConfig ) => { //发送请求之前 
-        //console.warn( localStorage.getItem("token" ))
+    (config: AxiosRequestConfig ) => { //发送请求之前  
         if(!config.headers)config.headers={}; 
         config.headers.Authorization="Bearer "+  localStorage.getItem("token" );  
         const noLogin= config.params&&config.params.noLogin

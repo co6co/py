@@ -1,12 +1,12 @@
 <template>
     <div class="box">  
         <div class="jess_player" ref="jess_player_container">  </div>  
+        <!--
         <el-radio-group v-model="player_option.type" @change="onReplay">
             <el-radio label="MediaSource" />
             <el-radio label="Webcodec" />
             <el-radio label="SIMD" />
-        </el-radio-group>
-
+        </el-radio-group> 
         <el-radio-group v-model="player_option.renderDom" @change="onReplay">
             <el-radio label="video" />
             <el-radio label="canvas" /> 
@@ -14,17 +14,18 @@
         <el-radio-group v-model="player_option.useWebGPU" @change="onReplay">  
             <el-radio :label="true"  >使用webGPU</el-radio>
             <el-radio :label="false" >不使用webGPU</el-radio>
-        </el-radio-group>  
-        {{  `FPS: ${fps.fps} DFPS: ${fps.dfps}` }}  {{ player_option.useWebGPU }}  
+        </el-radio-group>   
+        {{  `FPS: ${fps.fps} DFPS: ${fps.dfps}` }}  {{ player_option.useWebGPU }}  {{ currentUrl }}
+        -->
     </div>
 </template>
  
 <script setup lang="ts">
-import { watch, PropType,reactive, ref , computed ,onMounted, onBeforeUnmount,nextTick} from 'vue';  
+import { watch, PropType,reactive, ref , computed ,onMounted, onUnmounted, onBeforeUnmount,nextTick} from 'vue';  
 import "../../../assets/jessi/jessibuca-pro-demo.js";
 import "../../../assets/jessi/jessibuca-pro-talk-demo.js";
 import "../../../assets/jessi/demo.js";  
-  
+ 
 var showOperateBtns = true; // 是否显示按钮 
 const props = defineProps({
   sources: {
@@ -36,7 +37,8 @@ const props = defineProps({
     required: false
   } 
 })
-const fps=ref({fps:0,dfps:0}) 
+ 
+const fps=reactive({fps:0,dfps:0}) 
 const player_option=ref<PlayerOption>({
     type:"MediaSource",
     renderDom:"video",
@@ -44,26 +46,31 @@ const player_option=ref<PlayerOption>({
     videoBuffer:0.2,
     videoBufferDelay:2,
     useCanvasRender:false, 
-    currentSource:-1, 
+    currentSource:0, 
+})
+watch(()=>props.sources,(n,o)=>{
+    onPlay()
 })
 const jess_player_container=ref<HTMLElement>( )
 const jess_player=ref() 
+const currentUrl=ref() 
 const emits=defineEmits(["created","destroyed"])
-const onPlay=( )=>{ 
-    let index=player_option.value.currentSource
+const onPlay=( )=>{    
+    let index=player_option.value.currentSource 
     let url=undefined;
     if (index>-1 && index < props.sources.length ) url=props.sources.at(index)?.url 
-    if (url) jess_player.value.play(url);  
+    if (url) jess_player.value.play(url),currentUrl.value=url;   
+    else console.info("url无效")
 } 
 const destroying=()=>{
     emits("destroyed")
 }
-const replay=()=> {
-    alert("配置改变重新播放")
+const replay=()=> { 
+    return
     if (jess_player.value) {
-        jess_player.value.destroy().then(() =>destroying(),create(),onPlay());
+        jess_player.value.destroy().then(() =>destroying(),create(),  onPlay());
     } else {
-        create(),onPlay();
+        create(), onPlay();
     }
 }
 const create=()=>  {  
@@ -105,33 +112,32 @@ const create=()=>  {
             //controlHtml:'<div>我是 <span style="color: red">test</span>文案</div>',
             supportHls265: true,
             qualityConfig:props.sources.map(m=>m.name),
-        },);
-
-
+        },); 
         jessibuca.on('ptz', (arrow:number) => {
             console.log('ptz', arrow);
         })
-
+ 
         jessibuca.on('streamQualityChange', (value:string) => {
             player_option.value.currentSource=props.sources.findIndex(m=>m.name==value)
             console.log('streamQualityChange', value,player_option.value.currentSource);
+            onReplay()
         })
 
-        jessibuca.on('timeUpdate', (value:string) => {
-           // console.log('timeUpdate', value);
+        jessibuca.on('timeUpdate', (value:string) => { 
         }) 
-        jessibuca.on('stats', (stats:{fps:number,dfps:number}) => {
-            // console.log('stats', stats);
-            fps.value=stats 
-        })
-        
+        jessibuca.on('stats', (stats:{fps:number,dfps:number}) => { 
+            fps.dfps=stats .dfps
+            fps.fps=stats.fps 
+        }) 
         jess_player.value=jessibuca
         emits("created",jessibuca)
     } 
-      onMounted(()=>{
-        create()
-        onPlay()
+    onMounted(()=>{  
+        create(),onPlay()
     }) 
+    onUnmounted(()=>{
+        if (jess_player.value)   jess_player.value.destroy().then(() =>destroying()); 
+    })
     const onReplay=()=>{
         replay()
     }
@@ -139,8 +145,7 @@ const create=()=>  {
         jess_player.value.pause();
     }
 </script>
-<style lang="less" scoped>
-//@import "@/assets/jessi/demo.css";
+<style lang="less" scoped> 
 .jess_player{
     width:100%;
     height:400px;

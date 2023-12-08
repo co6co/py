@@ -1,27 +1,23 @@
 
-from co6co_db_ext.po import BasePO ,metadata,UserTimeStampedModelPO
+from co6co_db_ext.po import BasePO ,metadata,UserTimeStampedModelPO,TimeStampedModelPO
 from sqlalchemy import func,INTEGER, Integer,UUID,  INTEGER,BigInteger, Column, ForeignKey, String,DateTime
-from sqlalchemy.orm import  relationship,declarative_base,Relationship
-import co6co.utils as tool
-from co6co.utils import hash
-import sqlalchemy
-from sqlalchemy.schema import DDL
-from sqlalchemy import MetaData  
+from sqlalchemy.orm import Relationship 
+from sqlalchemy.schema import DDL 
 import uuid
 
-class bizDevicePo(BasePO):
+
+class bizDevicePo(TimeStampedModelPO):
     """
     盒子设备
     """
     __tablename__ = "biz_device" 
     id = Column("id",Integer,comment="主键",autoincrement=True, primary_key=True)
-    uuid = Column("device_uuid",String(64),comment="设备唯一标识")
+    uuid = Column("device_uuid",String(64),comment="设备唯一标识，主要与设备通行使用")
     deviceType= Column("device_type",Integer,comment="设备类型")
     innerIp=Column("inner_ip",String(64),comment="内部IP")
     ip=Column("ip",String(64),comment="外网IP")
-    name=Column("name",String(64),comment="盒子名称")
-
-    resourcePO=Relationship("bizResourcePO",back_populates="devicePO",uselist=True,passive_deletes=True)
+    name=Column("name",String(64),comment="设备名称") 
+    resourcesPO=Relationship("bizResourcePO",back_populates="devicePO",uselist=True,passive_deletes=True)
 
 class bizResourcePO(BasePO):
     """
@@ -35,10 +31,8 @@ class bizResourcePO(BasePO):
     url = Column("url_path",String(255),comment="资源路径,针对根路径下的绝对路径")
     createTime=Column("create_time",DateTime , server_default=func.now())  
     deviceId = Column("device_id",ForeignKey(f"{bizDevicePo.__tablename__}.{bizDevicePo.id.name}",ondelete="CASCADE"),nullable=False,index=True)
-    devicePO=Relationship("bizDevicePo",back_populates="resourcePO")
+    devicePO=Relationship("bizDevicePo",back_populates="resourcesPO")
 
-
- 
 class bizAlarmTypePO(BasePO): 
     __tablename__ = "biz_alarm_type"
     alarmType = Column("alarm_type", String(64),comment= "告警类型", primary_key=True)

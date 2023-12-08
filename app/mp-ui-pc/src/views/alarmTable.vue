@@ -88,13 +88,12 @@
 				<el-col :span="12">
 					<img-video :viewOption="form2.data"  ></img-video>
 				</el-col>
-				<el-col :span="12">
-					 123
+				<el-col :span="12"> 
 				</el-col>
 			</el-row>
 			
 			<template #footer>
-				<span class="dialog-footer">
+				<span class="dialog-footer"> 
 					<el-button @click="form2.dialogVisible = false">取 消</el-button> 
 				</span>
 			</template>
@@ -113,6 +112,8 @@ import  * as res_api from '../api';
 import  { detailsInfo} from '../components/details';    
 import  { imgVideo,types} from '../components/player';    
 import {str2Obj} from '../utils'
+
+ 
 interface TableRow {
     id: number,
     uuid:string
@@ -294,7 +295,7 @@ const onOpen2Dialog=( row:TableRow)=>{
 	form2.value.data=[  
 		{ url: getResultUrl(row.rawImageUid), name:"原始图片" ,poster:getResultUrl(row.rawImageUid,true),type:1},
 		{ url:getResultUrl(row.markedImageUid),  name:"标注图片",poster:getResultUrl(row.markedImageUid,true), type:1} ,
-	 	{ url:getResultUrl(row.videoUid),  name:"原始视频", poster:getResultUrl(row.videoUid,true),type:0},
+	 	{ url:"http://127.0.0.1:18000/flv/vlive/3.flv",  name:"原始视频", poster:getResultUrl(row.videoUid,true),type:0},
 	]
 	/**
 	setImageResource(row.rawImageUid,opt1)

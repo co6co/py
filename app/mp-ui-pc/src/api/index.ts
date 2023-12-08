@@ -1,14 +1,7 @@
 import axios  from '../utils/request';
 import  {ResponseType,Method} from 'axios';
 import  {AxiosInstance, AxiosError, AxiosResponse, AxiosRequestConfig} from 'axios';
-
-
-export const fetchData = () => {
-    return axios ({
-        url: './table.json',
-        method: 'get'
-    });
-};  
+ 
 //创建 Blob 资源
 export const create_URL_resource=(resource:{data:Blob }):string=>{
     return URL.createObjectURL(resource.data) 
