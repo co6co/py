@@ -18,7 +18,17 @@ from co6co_db_ext.po import BasePO
 class db_service:
     session:scoped_session  # 同步连接
     async_session_factory:sessionmaker #异步连接
-    def __init__(self,settings:dict ) -> None:  
+    def _createEngine(self, url:str ):
+        if "sqlite" not in  url:
+            self.engine = create_async_engine(url, echo=True )  
+            self.async_session_factory  = sessionmaker(self.engine, expire_on_commit=False,class_=AsyncSession)# AsyncSession,
+        else:
+            self.session=scoped_session( sessionmaker(autoflush=False, autocommit=False,bind=self.engine) ) 
+        BasePO.query=self.session.query_property()
+        self.base_model_session_ctx = ContextVar("session") 
+        pass
+        
+    def __init__(self,settings:dict,engineUrl:str=None  ) -> None:  
         defaultSetting={
             'DB_HOST': 'localhost',
             'DB_NAME': '',
@@ -26,11 +36,10 @@ class db_service:
             'DB_PASSWORD':''
         }
         self.settings=defaultSetting.update(settings)
-        self.engine = create_async_engine(f"mysql+aiomysql://{defaultSetting['DB_USER']}:{defaultSetting['DB_PASSWORD']}@{defaultSetting['DB_HOST']}/{defaultSetting['DB_NAME']}", echo=True) 
-        self.async_session_factory  = sessionmaker(self.engine, expire_on_commit=False,class_=AsyncSession)# AsyncSession,
-        self.session=scoped_session( sessionmaker(autoflush=False, autocommit=False,bind=self.engine) ) 
-        BasePO.query=self.session.query_property()
-        self.base_model_session_ctx = ContextVar("session") 
+        if  engineUrl!=None:self._createEngine(engineUrl)
+        else :
+            engineUrl=f"mysql+aiomysql://{defaultSetting['DB_USER']}:{defaultSetting['DB_PASSWORD']}@{defaultSetting['DB_HOST']}/{defaultSetting['DB_NAME']}"
+            self._createEngine(engineUrl ); 
         pass
     async def init_tables(self):
         async with self.engine.begin() as conn: 

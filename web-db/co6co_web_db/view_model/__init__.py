@@ -27,7 +27,7 @@ class BaseMethodView(HTTPMethodView):
     """ 
     async def save_body(self,request:Request,root:str):
         ## 保存上传的内容 
-        filePath=os.path.join(root,getDateFolder(),f"{getDateFolder(format="%Y-%m-%d-%H-%M-%S") }.data")
+        filePath=os.path.join(root,getDateFolder(),f"{getDateFolder(format='%Y-%m-%d-%H-%M-%S')}.data")
         filePath=os.path.abspath(filePath) # 转换为 os 所在系统路径 
         folder=os.path.dirname(filePath) 
         if not os.path.exists(folder):os.makedirs(folder)

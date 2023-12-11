@@ -5,7 +5,8 @@ from sqlalchemy.orm import  DeclarativeBase, declarative_base, relationship,Quer
 # 与属性库实体相关，所有实体集成 BasePO类
 
 metadata = MetaData()  
-class BasePO(declarative_base(metadata=metadata)):  
+#class BasePO(declarative_base(metadata=metadata)):  
+class BasePO(DeclarativeBase):
     __abstract__=True
     @property
     def query()->Query:
