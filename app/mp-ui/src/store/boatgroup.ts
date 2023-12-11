@@ -1,5 +1,5 @@
-import { get_status_svc } from '../api/wx';
-const res =await get_status_svc()
+import { get_config_svc } from '../api/wx';
+const res =await get_config_svc()
 const data:{group:Array<optionItem>,postion:Array<optionItem>,allowSetNumberGroup:Array<string>}=res.data;
 
 let group:Array<any>=[];

@@ -99,6 +99,7 @@ class menu_Api(wx_authon_views):
     def push_menu(self, request:Request,openId:str,content:str)->Tuple[bool,str]:
         try:
             client=self.cteate_wx_client(request,openId) 
+           
             client.menu.update(json.loads(content))
             return True,""
         except Exception as e: 
@@ -107,7 +108,11 @@ class menu_Api(wx_authon_views):
         try:
             client=self.cteate_wx_client(request,openId) 
             result=client.menu.get ()
-            return True,result
+            log.err(type(result))
+            log.err(result)
+            #obj=json.dumps( content) 
+            data=result.get("menu")
+            return True,data
         except Exception as e: 
             return False, str(e)
          
@@ -124,8 +129,8 @@ class menu_Api(wx_authon_views):
             f,content=self.pull_menu(request,old_po.openId) 
             if f:
                 old_po.updateUser=current_user_id
-                old_po.updateTime=datetime.now()
-                old_po.content=json.dumps( content)
+                old_po.updateTime=datetime.now() 
+                old_po.content=json.dumps( content) 
                 result=Result.success()
                 await operation.commit() 
             else : 

@@ -12,6 +12,10 @@ import topLevelAwait from 'vite-plugin-top-level-await'
 export default  defineConfig({
 	base: './',
 	//server:{hmr:{overlay:false} }, 
+	server: {
+		host: '0.0.0.0',
+		port: 5173
+	},
 	plugins: [
 		vue(),
 		VueSetupExtend(),
@@ -28,7 +32,13 @@ export default  defineConfig({
 	],
 	optimizeDeps: {
 		include: ['schart.js']
-	}
+	}	 //这里进行配置别名
+	,resolve: {
+	   alias: {
+		 "@": path.resolve("./src"), // @代替src
+		 "#": path.resolve("./types"), // #代替types
+	   },
+	 }, 
 	
 });
 

@@ -1,9 +1,10 @@
 {
   "compilerOptions": {
     "baseUrl": "./",
+    "module": "ESNext", //commonjs|ES6|ESNext|ES2022
     "target": "ESNext",
     "useDefineForClassFields": true,
-    "module": "ESNext",
+   
     "moduleResolution": "Node",
     "strict": true,
     "jsx": "preserve",

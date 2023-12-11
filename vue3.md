@@ -1,3 +1,11 @@
+# 使用淘宝镜像
+```
+ npm install -g cnpm --registry https://registry.npm.taobao.org
+ npm install cnpm -g --registry=https://registry.npmmirror.com
+ 
+ npm config set registry https://registry.npmjs.org
+```
+
 # 导入资源
 @ 把它当做src文件夹的别名
 ~@ 可以加载静态资源(图片与css),也可以加载node-modules中的资源,不可以加载JavaScript与typescript
@@ -38,3 +46,4 @@ import("../assets/iconfont/iconfont")                  相对路径可以
 # 对象
 https://ts.xcatliu.com/basics/type-of-object-interfaces.html
 https://blog.csdn.net/wenxingchen/article/details/125341773 动态组件
+

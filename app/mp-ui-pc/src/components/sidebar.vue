@@ -20,7 +20,7 @@
                             <span>{{ item.title }}</span>
                         </template>
                        
-                        <template v-for="subItem in item.subs">
+                        <template v-for="(subItem,index) in item.subs">
                             <el-sub-menu
                                 v-if="subItem.subs"
                                 :index="subItem.index"
@@ -32,7 +32,7 @@
                                     {{ threeItem.title }}
                                 </el-menu-item>
                             </el-sub-menu>
-                            <el-menu-item v-else :index="subItem.index" v-permiss="item.permiss">
+                            <el-menu-item :key="subItem.index" v-else :index="subItem.index" v-permiss="item.permiss">
                                 {{ subItem.title }}
                             </el-menu-item>
                         </template> 

@@ -23,6 +23,5 @@ app.directive('permiss', {
             el['hidden'] = true;
         }
     },
-});
-
+}); 
 app.mount('#app');

@@ -41,7 +41,7 @@ const onDownload = async () => {
   const res_head = download_fragment_svc(props.url) ;
   const header=(await res_head).headers
   obj.totalSize=Number(header["content-length"])
-  const contentType=header["Content-Type"]
+  let contentType=header["Content-Type"]?.toString()
   /**
   //获取文件名称
   let fileName = ''
@@ -51,6 +51,7 @@ const onDownload = async () => {
     fileName = decodeURI(cd.substring(index + 1, cd.length))
   }
    */
+  if (!contentType) contentType="text/plain"
   await startDownload(contentType,props. fileName, props. chunkSize)
 }
 const download_fragment= async (start:number,end:number)=>{

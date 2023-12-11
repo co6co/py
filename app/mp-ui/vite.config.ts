@@ -1,4 +1,5 @@
-import { resolve } from 'path'
+import path,{ resolve } from 'path' //todo 
+//import path from "path"; //这个path用到了上面安装的@types/node
 import { loadEnv } from 'vite'
 import { defineConfig, UserConfig, ConfigEnv  } from 'vite';
 import vue from '@vitejs/plugin-vue';
@@ -11,6 +12,10 @@ import topLevelAwait from 'vite-plugin-top-level-await'
 
 export default  defineConfig({
 	base: './',
+	server: {
+		host: '0.0.0.0',
+		port: 5174
+	},
 	plugins: [
 		vue(),
 		VueSetupExtend(),
@@ -27,7 +32,14 @@ export default  defineConfig({
 	],
 	optimizeDeps: {
 		include: ['schart.js']
-	}
+	},
+	 //这里进行配置别名
+	 resolve: {
+		alias: {
+		  "@": path.resolve("./src"), // @代替src
+		  "#": path.resolve("./types"), // #代替types
+		},
+	  }, 
 });
 
 const root = process.cwd()

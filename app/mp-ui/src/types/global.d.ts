@@ -1,17 +1,16 @@
-
 declare interface IResponse<T = any> { 
-    code: int
+    code: number
     message:string 
     data: T extends any ? T : T & any 
 }
 declare interface IPageResponse <T=any> extends IResponse<T>{
-  total:int
+  total:number //number 与 Number 区别
 }
 declare interface IpageParam<T=any>{
-  pageIndex:int
-  pageSize:int
-  orderBy?:string
-  order?:string //[desc|asc]
+  pageIndex:number
+  pageSize:number
+  orderBy?:String
+  order?:String //[desc|asc]
   data?:T extends any?T:T&any
 } 
 
@@ -49,7 +48,7 @@ interface table_module{
   currentItem:any,
   tableData:any,
   pageTotal:number,
-  treeData:ref<types.TreeItem[]>,
+  treeData:Array<any>,
 	treeCacheData:any,  
 	treeDataMap:any
 }
@@ -77,21 +76,21 @@ interface KeyValue{
   key?:string,value?:string 
 }
 interface ItemAattachData2{
-  flow_status:[ ...optionItem] 
+  flow_status:Array<optionItem> //[ ...optionItem] 
 }
 //Process 附加属性
 interface ItemAattachData{
-  allowAuditStatus:[...number],
-  flow_status:[ ...optionItem], 
+  allowAuditStatus:Array<number>,
+  flow_status:Array<optionItem>, 
   getFlowStateName:(v:number)=>optionItem  ,
-  manual_audit_state:[ ...optionItem],
+  manual_audit_state:Array<optionItem>, 
   getManualStateName:(v:number)=>optionItem,
-  program_audit_state:[...optionItem ],
+  program_audit_state:Array<optionItem>, 
   getAutoStateName:(v:number)=>optionItem,
   statue2TagType:(v?:number)=>"" | "success" | "warning" | "info" | "danger",
 
-  rule:[...KeyValue],
-  user_name_list:[ ...optionItem], 
+  rule:Array<KeyValue>,  
+  user_name_list:Array<optionItem>, 
 }
  
 
@@ -102,3 +101,9 @@ interface download_config{
 declare module 'vue3-video-play'
 declare module 'wangeditor'
 declare module  "json-bigint"
+ 
+
+
+
+
+

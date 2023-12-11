@@ -87,7 +87,7 @@
 import { ref, reactive } from 'vue';
 import { ElMessage, ElMessageBox } from 'element-plus';
 import { Delete, Edit, Search, Plus } from '@element-plus/icons-vue';
-import { fetchData } from '../api/index';
+import { fetchData } from '../api/demo';
 
 interface TableItem {
 	id: number;

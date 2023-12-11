@@ -1,4 +1,4 @@
-import axios, {AxiosInstance, AxiosError, AxiosResponse, AxiosRequestConfig} from 'axios';
+import axios, {AxiosInstance, AxiosError, AxiosResponse, AxiosRequestConfig,InternalAxiosRequestConfig} from 'axios';
 import {getToken,setToken,removeToken} from "./auth"
 import { ElLoading,ElMessage } from 'element-plus' 
 import { useRouter } from 'vue-router';
@@ -15,9 +15,7 @@ const service:AxiosInstance = axios.create({
 let elLoading:ReturnType<typeof ElLoading.service >;
 //增加请求拦截器
 service.interceptors.request.use(
-    (config: AxiosRequestConfig ) => { //发送请求之前 
-        //console.warn( localStorage.getItem("token" ))
-        if(!config.headers)config.headers={}; 
+    (config: InternalAxiosRequestConfig) => {//发送请求之前   
         config.headers.Authorization="Bearer "+  localStorage.getItem("token" );  
         const noLogin= config.params&&config.params.noLogin
         if(!noLogin) elLoading = ElLoading.service({ fullscreen: true }) 
@@ -47,8 +45,8 @@ service.interceptors.response.use(
         if(elLoading) elLoading.close(); 
         if(error.response?.status===403){ 
             localStorage.removeItem('ms_username'); 
-		    router.push('/login'); 
-        }else if ( error.config.responseType =="json") {
+            ElMessage.error(`未认证:${error.message}`)
+        }else if ( error.config&& error.config.responseType =="json") {
             ElMessage.error(`请求出现错误:${error.message}`)
         } 
         return Promise.reject(error);
