@@ -25,3 +25,12 @@ export const createStateEndDatetime=(type:number, beforeHour:number)=>{
 	}  
 	return [dayjs(startDate) .format('YYYY-MM-DD HH:mm:ss'),dayjs(endDate) .format('YYYY-MM-DD HH:mm:ss')]
 }
+
+
+//生成随机字符串
+export const randomString=(len:number, chars:string='0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ') =>{
+    var result = '';
+    for (var i = len; i > 0; --i) result += chars[Math.floor(Math.random() * chars.length)];
+    return result;
+} 
+ 

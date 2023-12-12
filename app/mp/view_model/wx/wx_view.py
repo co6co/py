@@ -19,8 +19,7 @@ from model import WechatConfig
 class WxView(wx_base_view):
     """
     微信服务器 入口
-    """
-
+    """ 
     def get(self,request:Request,appid:str):
         """
         入口1,get请求

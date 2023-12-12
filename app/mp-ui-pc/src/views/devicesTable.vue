@@ -92,18 +92,27 @@ const getData = ( ) => {
 getData();   
 /** 播放器 */
 interface player_sources{  
-	sources:Array< stream_source>
+	sources: Array< stream_source >
 } 
-const player=reactive<player_sources>({sources:[]})
+const player=reactive<player_sources>( {sources:[]})
  
 const onNodeCheck=( item?:any)=>{ 
 	tree_module.currentItem=item 
-	player.sources= [ 
-	  {url:`http://127.0.0.1:18000/flv/vlive/${item.ip}.flv`,name:"HTTP-FLV"}, 
-		{url:`ws://127.0.0.1:18000/ws-flv/vlive/${item.ip}.flv`,name:"WS-FLV"}, 
-		{url:`webrtc://127.0.0.1:18000/rtc/vlive/${item.ip}`,name:"webrtc"}, 
-		{url:`http://127.0.0.1:18000/vhls/${item.ip}/${item.ip}_live.m3u8`,name:"HLS(m3u8)"}
-	]   
+	player.sources= 
+  [
+   /*
+	  {url:`http://wx.co6co.top:452/flv/vlive/${item.ip}.flv`,name:"HTTP-FLV"}, 
+		{url:`ws://wx.co6co.top:452/ws-flv/vlive/${item.ip}.flv`,name:"WS-FLV"}, 
+		{url:`webrtc://wx.co6co.top:452/rtc/vlive/${item.ip}`,name:"webrtc"}, 
+		{url:`http://wx.co6co.top:452/vhls/${item.ip}/${item.ip}_live.m3u8`,name:"HLS(m3u8)"}
+   */ 
+   {url:`http://192.168.1.99:4452/vhls/${item.ip}/${item.ip}_live.m3u8`,name:"HLS(m3u8)"},
+   {url:`webrtc://192.168.1.99:4452/rtc/vlive/${item.ip}`,name:"webrtc"}, //不行
+    {url:`ws://192.168.1.99:4452/ws-flv/vlive/${item.ip}.flv`,name:"WSFLV"}, 
+    {url:`http://192.168.1.99:4452/flv/vlive/${item.ip}.flv`,name:"HTTPFLV"}, 
+		 
+		
+	]  
 }
 /** ptz */
 const {startMqtt,Ref_Mqtt}=useMqtt()
@@ -111,11 +120,13 @@ interface mqttMessage{
   UUID?:string
 }
 let arr:Array<mqttMessage> = [];
-startMqtt("WS://192.168.1.99:4451/mqtt",
+startMqtt("WS://wx.co6co.top:451/mqtt",
   "/edge_app_controller_reply",
   (topic: any, message: any) => {
     const msg:mqttMessage= JSON.parse(message.toString());
     arr.unshift(msg); //新增到数组起始位置
+    let data=unique(arr);
+    alert(JSON.stringify(data))
     console.warn(unique(arr))
   }
 );

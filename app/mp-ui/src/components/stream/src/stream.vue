@@ -1,5 +1,6 @@
 <template>
-    <div class="box">  
+    <div class="box"> 
+      
         <div class="jess_player" ref="jess_player_container">  </div>  
         <!--
         <el-radio-group v-model="player_option.type" @change="onReplay">
@@ -51,6 +52,7 @@ const player_option=ref<PlayerOption>({
 watch(()=>props.sources,(n,o)=>{
     onPlay()
 })
+
 const jess_player_container=ref<HTMLElement>( )
 const jess_player=ref() 
 const currentUrl=ref() 

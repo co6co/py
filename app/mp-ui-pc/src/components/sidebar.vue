@@ -75,6 +75,7 @@ const items:Array<sideBarItem>= [
             title: '告警管理',
             permiss: '2',   
          },
+         /*
          {
             icon: 'DocumentCopy',
             index: '/taskTable',
@@ -86,7 +87,7 @@ const items:Array<sideBarItem>= [
             index: '/groupTable',
             title: '分组信息',
             permiss: '2',   
-         }, 
+         }, */
          {
             icon: 'Calendar',
             index: '1',
@@ -94,7 +95,7 @@ const items:Array<sideBarItem>= [
             permiss: '2',
             subs: [
                 { icon: 'DocumentCopy', index: '/wxMenuTable',   title: '菜单',  permiss: '2',   },
-                { icon: 'PieChart', index: '/processLable',   title: '数据标签',  permiss: '2',   },
+               /* { icon: 'PieChart', index: '/processLable',   title: '数据标签',  permiss: '2',   },*/
             ]
          }
          

@@ -13,7 +13,7 @@ from utils.db import wx_open_id_into_db
 
 
 def oauth(func):
-    def warpper(request):
+    def warpper(request:Request):
         if request.session.get('user_info', None) is None:
             code = request.GET.get('code', None)
             wechat_oauth = getWeChatOAuth(request.get_raw_uri())

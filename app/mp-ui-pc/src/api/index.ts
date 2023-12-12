@@ -15,11 +15,12 @@ export const download_blob_resource=(resource:{data:Blob,fileName:string})=>{
   window.URL.revokeObjectURL(link.href) 
 }
 // 请求文件资源
-export const request_resource_svc=async (url:string, axios_config:AxiosRequestConfig={method:"get", responseType :"blob"}) =>{ 
-    let default_config:{method:Method, url:string,  timeout:number,params:any}={
+export const request_resource_svc=async (url:string,axios_config:AxiosRequestConfig={method:"get", responseType :"blob"}) =>{ 
+    let default_config:{method:Method, url:string,  baseURL:"",   timeout:number,params:any}={
         method:'get',//请求方式
         url:url,//请求地址  会加上 baseURL  
         timeout:30000,
+        baseURL:"",
         params:{noLogin: true}
     } 
     const res = await axios({... default_config, ...axios_config})   

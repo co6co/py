@@ -156,25 +156,7 @@ const routes: RouteRecordRaw[] = [
                 },
                 component: () => import(  '../views/user.vue'),
             }, 
-             
-            {
-                path: '/taskTable',
-                name: 'taskTable',
-                meta: {
-                    title: '任务列表',
-                    permiss: '2',
-                },
-                component: () => import(/* webpackChunkName: "process" */ '../views/taskTable.vue'),
-            },
-            {
-                path: '/groupTable',
-                name: 'groupTable',
-                meta: {
-                    title: '分组信息',
-                    permiss: '2',
-                },
-                component: () => import(/* webpackChunkName: "process" */ '../views/groupTable.vue'),
-            },
+              
             {
                 path: '/wxMenuTable',
                 name: 'wxMenuTable',

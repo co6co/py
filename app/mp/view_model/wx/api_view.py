@@ -107,9 +107,7 @@ class menu_Api(wx_authon_views):
     def pull_menu(self, request:Request,openId:str)->Tuple[bool,str]:
         try:
             client=self.cteate_wx_client(request,openId) 
-            result=client.menu.get ()
-            log.err(type(result))
-            log.err(result)
+            result:dict=client.menu.get () 
             #obj=json.dumps( content) 
             data=result.get("menu")
             return True,data

@@ -14,7 +14,7 @@ interface PlayerOption{
   ,videoBufferDelay:number// 缓存延迟 s
   ,useCanvasRender:boolean
   ,useWebGPU?:boolean
-  currentSource:number 
+  currentSource?: stream_source
 
 } 
 interface stream_source{

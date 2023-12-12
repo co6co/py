@@ -295,7 +295,7 @@ const onOpen2Dialog=( row:TableRow)=>{
 	form2.value.data=[  
 		{ url: getResultUrl(row.rawImageUid), name:"原始图片" ,poster:getResultUrl(row.rawImageUid,true),type:1},
 		{ url:getResultUrl(row.markedImageUid),  name:"标注图片",poster:getResultUrl(row.markedImageUid,true), type:1} ,
-	 	{ url:"http://127.0.0.1:18000/flv/vlive/3.flv",  name:"原始视频", poster:getResultUrl(row.videoUid,true),type:0},
+	 	{ url:getResultUrl(row.videoUid),  name:"原始视频", poster:getResultUrl(row.videoUid,true),type:0},
 	]
 	/**
 	setImageResource(row.rawImageUid,opt1)
