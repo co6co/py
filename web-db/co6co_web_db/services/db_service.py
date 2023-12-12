@@ -73,17 +73,20 @@ def injectDbSessionFactory(app:Sanic,settings:dict,engineUrl:str=None,**kvags ):
     async def inject_session(request:Request): 
         if "/api" in request.path:
             #logger.info("mount DbSession 。。。")
-            request.app.ctx.session_fatcory=service.async_session_factory
-            request.ctx.session=service.async_session_factory() 
-            request.ctx.scoped_session=service.session
-            request.ctx.session_ctx_token = service.base_model_session_ctx.set(request.ctx.session) 
+            if service.useAsync:
+                request.app.ctx.session_fatcory=service.async_session_factory
+                request.ctx.session=service.async_session_factory() 
+                request.ctx.session_ctx_token = service.base_model_session_ctx.set(request.ctx.session) 
+            else:
+                request.ctx.session=service.session 
         
     @app.middleware("response")
     async def close_session(request:Request, response):
         if hasattr(request.ctx, "session_ctx_token"):
             try:
-                service.base_model_session_ctx.reset(request.ctx.session_ctx_token) 
-                await request.ctx.session.close()
+                if service.useAsync:
+                    service.base_model_session_ctx.reset(request.ctx.session_ctx_token) 
+                    await request.ctx.session.close()
                 #logger.info("close DbSession。")
                 #await request.ctx.session.dispose() 
             except Exception as e:

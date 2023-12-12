@@ -31,3 +31,4 @@ def startApp(configFile:str,apiInit:Optional[Callable[[Sanic,Any], None]] ):
         app.prepare( host=setting.get("host"), port=setting.get("port"),debug=setting.get("debug"), access_log=setting.get("access_log") ,dev=setting.get("dev")) 
         Sanic.serve(primary=app, app_loader=loader)
         #app.run(host=setting.get("host"), port=setting.get("port"),debug=True, access_log=True) 
+    return app
