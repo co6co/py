@@ -26,6 +26,8 @@ class UserPO(UserTimeStampedModelPO):
     userGroupPO=Relationship("UserGroupPO",back_populates="userPOs") 
     rolePOs=Relationship("RolePO",secondary="sys_user_role",back_populates="userPOs",passive_deletes=True)
 
+    wxUserPO=Relationship("WxUserPO",back_populates="wxUserPO",uselist=False,passive_deletes=True)
+
 
     @staticmethod
     def generateSalt( )->str:

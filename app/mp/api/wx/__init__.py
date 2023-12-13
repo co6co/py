@@ -14,7 +14,7 @@ wx_api.add_route(config_View.as_view(),"/wx/config",name="配置")
 wx_api.add_route(menus_Api.as_view(),"/wx/menu",name="公众号菜单s")
 wx_api.add_route(menu_Api.as_view(),"/wx/menu/<pk:int>",name="公众号菜单")
 
-wx_api.add_route(Authon_View.as_view(),"/wx/oauth2",name="微信snsapi ") #snsapi_base/snsapi_userinfo 
+wx_api.add_route(Authon_View.as_view(),"/wx/<appid:str>/oauth2",name="微信snsapi ") #snsapi_base/snsapi_userinfo 
 
 
 

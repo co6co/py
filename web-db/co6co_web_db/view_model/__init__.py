@@ -25,6 +25,19 @@ class BaseMethodView(HTTPMethodView):
     view.DELETE :---> del
 
     """ 
+    def usable_args(self,request:Request)->dict:
+        """
+        去除列表
+        request.args={name:['123'],groups:["a","b"]}
+        return {name:'123',groups:["a","b"]}
+        """
+        args:dict=request.args
+        data_result={}
+        for key in  args:
+            value=args.get(key)
+            if len(value)==1: data_result.update({key:value[0]})
+            else : data_result.update({key:value})
+        return data_result
     async def save_body(self,request:Request,root:str):
         ## 保存上传的内容 
         filePath=os.path.join(root,getDateFolder(),f"{getDateFolder(format='%Y-%m-%d-%H-%M-%S')}.data")

@@ -47,6 +47,16 @@ const routes: RouteRecordRaw[] = [
                 },
                 component: () => import( '../views/devicesTable.vue'),
             }, 
+
+            {
+                path: '/index.html',
+                name: 'wxHome',
+                meta: {
+                    title: '获取用户信息',
+                    permiss: '2',
+                },
+                component: () => import(  '../views/wxHome.vue'),
+            },
         ],
     }, 
     {

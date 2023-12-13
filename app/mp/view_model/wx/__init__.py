@@ -35,7 +35,7 @@ class wx_base_view(BaseMethodView):
         创建微信客户端 
         WeChatClient与 微信服务器交换
         """ 
-        return get_wx_config(request,appid)
+        return crate_wx_cliet(request,appid)
      
     def get_wx_config(self,request:Request,appid:str)->Optional[ WechatConfig]: 
         """

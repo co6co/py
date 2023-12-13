@@ -79,19 +79,19 @@ def wx_message(func):
     async def check_message(request:Request,msg:messages.BaseMessage ,config:WechatConfig, *args, **kwargs):
         # 消息收到最多三次 注意去重 
         log.info(f"消息类型：{type(msg)}{msg.type},{msg}")
-        if wx_message_type.text.getName()==msg.type:
+        if wx_message_type.text.val==msg.type:
             return await _wx_text(request,msg,config) 
-        if wx_message_type.image.getName()==msg.type:
+        if wx_message_type.image.val==msg.type:
             return await _wx_image(request,msg,config)
-        if wx_message_type.voice.getName()==msg.type:
+        if wx_message_type.voice.val==msg.type:
             return await _wx_voice(request,msg,config)
-        if wx_message_type.video.getName()==msg.type:
+        if wx_message_type.video.val==msg.type:
             return await _wx_video(request,msg,config)
-        if wx_message_type.link.getName()==msg.type:
+        if wx_message_type.link.val==msg.type:
             return await _wx_link(request,msg,config)
-        if wx_message_type.location.getName()==msg.type:
+        if wx_message_type.location.val==msg.type:
             return await _wx_location(request,msg,config)
-        if wx_message_type.event.getName()==msg.type:
+        if wx_message_type.event.val==msg.type:
             return await _wx_event(request,msg,config) 
         
         return await func(request,msg,config,*args, **kwargs)

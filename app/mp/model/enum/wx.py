@@ -6,6 +6,11 @@ class wx_encrypt_mode(Base_Enum):
     compatible="compatible",1
     safe="safed",2 
 
+class wx_authon_scope(Base_Enum):
+    snsapi_userinfo="snsapi_userinfo",1
+    snsapi_base="snsapi_base",0
+
+
 
 class wx_message_type(Base_Enum):
     """

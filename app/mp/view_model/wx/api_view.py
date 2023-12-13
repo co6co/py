@@ -110,6 +110,7 @@ class menu_Api(wx_authon_views):
             result:dict=client.menu.get () 
             #obj=json.dumps( content) 
             data=result.get("menu")
+            log.warn(data)
             return True,data
         except Exception as e: 
             return False, str(e)
@@ -128,7 +129,7 @@ class menu_Api(wx_authon_views):
             if f:
                 old_po.updateUser=current_user_id
                 old_po.updateTime=datetime.now() 
-                old_po.content=json.dumps( content) 
+                old_po.content=json.dumps( content,ensure_ascii=False) 
                 result=Result.success()
                 await operation.commit() 
             else : 
