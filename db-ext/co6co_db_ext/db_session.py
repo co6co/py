@@ -18,13 +18,16 @@ from co6co_db_ext.po import BasePO
 class db_service:
     session:scoped_session  # 同步连接
     async_session_factory:sessionmaker #异步连接
+    useAsync:bool
     def _createEngine(self, url:str ):
-        if "sqlite" not in  url:
+        self.useAsync=True
+        if "sqlite" not in  url: 
             self.engine = create_async_engine(url, echo=True )  
             self.async_session_factory  = sessionmaker(self.engine, expire_on_commit=False,class_=AsyncSession)# AsyncSession,
         else:
+            self.useAsync=False
             self.session=scoped_session( sessionmaker(autoflush=False, autocommit=False,bind=self.engine) ) 
-        BasePO.query=self.session.query_property()
+            BasePO.query=self.session.query_property()
         self.base_model_session_ctx = ContextVar("session") 
         pass
         

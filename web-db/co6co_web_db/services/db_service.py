@@ -55,11 +55,11 @@ from co6co_db_ext.db_session import db_service
                 logger.info(f"{retryTime*5}s后重试...")
                 time.sleep(retryTime*5) '''
                 
-def injectDbSessionFactory(app:Sanic,settings:dict,engineUrl:str=None,**kvags ):
+def injectDbSessionFactory(app:Sanic,settings:dict,engineUrl:str=None ):
     """
     挂在 DBSession_factory
     """
-    service=db_service(settings,engineUrl,*kvags)
+    service=db_service(settings,engineUrl )
     service.sync_init_tables() 
     '''
     @app.main_process_start

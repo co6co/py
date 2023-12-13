@@ -19,24 +19,29 @@ class Authon_View(wx_base_view):
     @oauth
     @staticmethod
     def getAuthonInfo(request:Request,param,Authon_param):
-        return  text(  "/mh5/index.html")
-    def get(self,request:Request):
+        """
+        为了 为了参数同一
+        """
+        return text("")
+    
+    def get(self,request:Request,appid:str):
         """
         微信服务器 redirect_uri  调用入口获取微信用户信息
         需要在公众号接口处配置回调地址：接口权限>网页服务>网页帐号>修改
             域名不能加http://
-        """ 
-        '''
-        code=request.args.get("code")
-        state=request.args.get("state") 
-        '''
+            测试公众号可以使用端口
+        """  
         try:
-            log.warn(request.args)
-            param=Authon_param()
-            param.__dict__.update(request.json)
+            args=self.usable_args (request)
+            code=args.get("code")
+            state=args.get("state")  
+            param=Authon_param(appid)
+            param.__dict__.update(args)
+            param.setState(state) 
             return Authon_View.getAuthonInfo(request,param)
-        except:
-            return redirect("/audit/wx/mp/ui/")
+        except Exception as e: 
+            log.err(f"oauth2:异常:{e}")
+            return redirect("/")
 
     def post(self,request:Request):
         """
