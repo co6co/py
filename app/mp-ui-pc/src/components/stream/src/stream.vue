@@ -21,7 +21,7 @@
 </template>
  
 <script setup lang="ts">
-import { watch, PropType,reactive, ref , computed ,onMounted, onUnmounted, onBeforeUnmount,nextTick} from 'vue';  
+import { watch, PropType,reactive, ref , computed ,onMounted, onUnmounted, onBeforeUnmount,nextTick, watchEffect} from 'vue';  
 import "../../../assets/jessi/jessibuca-pro-demo.js";
 import "../../../assets/jessi/jessibuca-pro-talk-demo.js";
 import "../../../assets/jessi/demo.js";   
@@ -47,17 +47,27 @@ const player_option=reactive<PlayerOption>({
     videoBufferDelay:2,
     useCanvasRender:false,  
 })
-watch(()=>props.sources,(n,o)=>{ 
-    replay()
+let currentSource:stream_source|undefined=undefined
+watchEffect(() => {
+    try {
+        console.info("12323",props.sources,props.sources.length)
+        if (props.sources.length>0 && props.sources[0].url) {
+            currentSource=props.sources.at(0)
+            nextTick(()=>{ replay()})   // 可能会死
+        }
+    } catch (e) {
+        console.error(e)
+    }
 })
+ 
 const jess_player_container=ref<HTMLElement>( )
 const jess_player=ref()  
 const emits=defineEmits(["created","destroyed"])
  
 const onPlay=( )=>{   
     try{ 
-        if (player_option&&player_option.currentSource)
-            jess_player.value.play(player_option.currentSource.url)  
+        if (currentSource )
+            jess_player.value.play(currentSource.url)  
         
     }catch(e){
         console.error(e)
@@ -68,14 +78,15 @@ const destroying=()=>{
 }
 const replay=()=> {   
     try{ 
-        if (jess_player.value) {
-            jess_player.value.destroy().then(() =>{
-                console.info("销毁 创建播放");
-                destroying(), create(),  onPlay()  
-            });
-        } else {
+        if (jess_player.value) { 
+            jess_player.value.destroy().then(() =>{ 
+                destroying(),create(),  onPlay()  
+            });  
+        } 
+        else {
             create(), onPlay();
-        }
+        } 
+        
     }catch(e){
         console.error(e)
     } 
@@ -142,9 +153,9 @@ const create=()=>  {
 
     jessibuca.on('streamQualityChange', (value:string) => {
         //todo 需要调试功能 
-        player_option.currentSource=props.sources.find(m=>m.name==value)
-        console.log('streamQualityChange', value,player_option.currentSource,"all=>",props.sources);
-        onPlay(  )  
+        currentSource=props.sources.find(m=>m.name==value)
+        //console.log('streamQualityChange', value,player_option.currentSource,"all=>",props.sources);
+        onPlay()  
     })
 
     jessibuca.on('timeUpdate', (value:string) => { 
@@ -157,7 +168,7 @@ const create=()=>  {
     emits("created",jessibuca)
 } 
 onMounted(()=>{ 
-    create(),onPlay()
+    //create(),onPlay()
 }) 
 onUnmounted(()=>{
     if (jess_player.value) jess_player.value.destroy().then(() =>destroying()); 

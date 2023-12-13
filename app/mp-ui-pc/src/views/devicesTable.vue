@@ -107,11 +107,9 @@ const onNodeCheck=( item?:any)=>{
 		{url:`http://wx.co6co.top:452/vhls/${item.ip}/${item.ip}_live.m3u8`,name:"HLS(m3u8)"}
    */ 
    {url:`http://192.168.1.99:4452/vhls/${item.ip}/${item.ip}_live.m3u8`,name:"HLS(m3u8)"},
-   {url:`webrtc://192.168.1.99:4452/rtc/vlive/${item.ip}`,name:"webrtc"}, //不行
-    {url:`ws://192.168.1.99:4452/ws-flv/vlive/${item.ip}.flv`,name:"WSFLV"}, 
-    {url:`http://192.168.1.99:4452/flv/vlive/${item.ip}.flv`,name:"HTTPFLV"}, 
-		 
-		
+   {url:`webrtc://192.168.1.99:4452/rtc/vlive/${item.ip}`,name:"webrtc不支持"}, //不行
+   {url:`ws://192.168.1.99:4452/ws-flv/vlive/${item.ip}.flv`,name:"WSFLV"}, 
+   {url:`http://192.168.1.99:4452/flv/vlive/${item.ip}.flv`,name:"HTTPFLV"},  
 	]  
 }
 /** ptz */
