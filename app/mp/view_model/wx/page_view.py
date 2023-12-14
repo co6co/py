@@ -13,10 +13,10 @@ from typing import List,Optional,Tuple
 from co6co.utils import log  
 from datetime import datetime
 from model.enum import wx_menu_state
-from view_model.wx.fn_oauth import Authon_param,oauth
+from view_model.wx.fn_oauth import Authon_param,oauth,oauth_debug
 
 class Authon_View(wx_base_view): 
-    @oauth
+    @oauth_debug
     @staticmethod
     def getAuthonInfo(request:Request,param,Authon_param):
         """
@@ -32,12 +32,14 @@ class Authon_View(wx_base_view):
             测试公众号可以使用端口
         """  
         try:
-            args=self.usable_args (request)
+            args=self.usable_args (request) 
+            log.warn(request.args)
             code=args.get("code")
             state=args.get("state")  
             param=Authon_param(appid)
             param.__dict__.update(args)
             param.setState(state) 
+            log.warn(param)
             return Authon_View.getAuthonInfo(request,param)
         except Exception as e: 
             log.err(f"oauth2:异常:{e}")

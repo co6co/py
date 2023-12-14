@@ -51,4 +51,7 @@ declare module '@vue/runtime-core' {
     Stream: typeof import('./src/components/stream/src/stream.vue')['default']
     Tags: typeof import('./src/components/tags.vue')['default']
   }
+  export interface ComponentCustomProperties {
+    vLoading: typeof import('element-plus/es')['ElLoadingDirective']
+  }
 }

@@ -30,16 +30,25 @@ const routes: RouteRecordRaw[] = [
                 component: () => import(  '../views/user.vue'),
             },  
             {
-                path: '/alarmTable',
+                path: '/alarminfo.html',
                 name: 'alarmTable',
                 meta: {
-                    title: '数据管理',
+                    title: '告警信息',
                     permiss: '2',
                 },
                 component: () => import( '../views/alarmTable.vue'),
             }, 
             {
-                path: '/devicesTable',
+                path: '/preview.html',
+                name: 'devicesTable',
+                meta: {
+                    title: '实时视频',
+                    permiss: '2',
+                },
+                component: () => import( '../views/devicesTable.vue'),
+            }, 
+            {
+                path: '/devicesManage.html',
                 name: 'devicesTable',
                 meta: {
                     title: '设备管理',

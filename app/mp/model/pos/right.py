@@ -26,8 +26,7 @@ class UserPO(UserTimeStampedModelPO):
     userGroupPO=Relationship("UserGroupPO",back_populates="userPOs") 
     rolePOs=Relationship("RolePO",secondary="sys_user_role",back_populates="userPOs",passive_deletes=True)
 
-    wxUserPO=Relationship("WxUserPO",back_populates="wxUserPO",uselist=False,passive_deletes=True)
-
+   
 
     @staticmethod
     def generateSalt( )->str:
@@ -71,6 +70,8 @@ class AccountPO(BasePO):
     updateUser= Column("update_user", BigInteger,comment="修改人") 
 
     userPO=Relationship(UserPO,back_populates="accountPOs")
+    wxUserPO=Relationship("WxUserPO",back_populates="accountPO",uselist=False,passive_deletes=True)
+
 
     
 
@@ -80,7 +81,8 @@ class UserGroupPO(BasePO):
     """
     __tablename__ = "sys_user_group" 
     id = Column("id",Integer,autoincrement=True, primary_key=True)
-    name = Column("group_name",String(64), unique=True) 
+    name = Column("group_name",String(64) ) 
+    code = Column("group_code",String(64), unique=True) 
     createUser= Column("create_user", BigInteger,comment="创建人")  
     createTime= Column("create_time",DateTime,server_default=func.now(),comment="创建时间")                 
     updateTime= Column("update_time", DateTime,comment="修改时间") 
@@ -95,7 +97,8 @@ class RolePO(TimeStampedModelPO):
     __tablename__ = "sys_role"
 
     id = Column("id",BigInteger,comment="主键",autoincrement=True, primary_key=True)
-    name = Column("role_name",String(64), unique=True,  comment="角色名") 
+    name = Column("role_name",String(64) ,comment="角色名") 
+    code = Column("role_code",String(64), unique=True) 
     userPOs=Relationship("UserPO",secondary="sys_user_role",back_populates="rolePOs",passive_deletes=True)
     permissionPOs=Relationship("permissionPO",secondary="sys_permission_role",back_populates="rolePOs",passive_deletes=True)
 

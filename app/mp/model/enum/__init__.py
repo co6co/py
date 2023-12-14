@@ -1,5 +1,25 @@
 from co6co.enums import Base_Enum,Base_EC_Enum
 
+class User_Group(Base_Enum):
+    """
+    用户组代码
+    """
+    wx_user="wx_user",0
+    wx_admin="wx_admin",1
+
+class User_Role(Base_Enum):
+    """
+    角色代码
+    """
+    wx_user="wx_user_role",0
+    wx_admin="wx_admin_role",1
+
+class User_category(Base_Enum):
+    """
+    用户类别
+    """
+    sys="sys",0 # 系统，需要用户名和密码
+    unbind="unbind",1 # 未绑定用户信息，即没有用户和密码等信息
 class Account_category(Base_Enum):
     """
     账号类别

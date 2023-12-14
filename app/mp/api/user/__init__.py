@@ -3,17 +3,18 @@ import datetime
 from sanic.response import  json
 from sanic import Blueprint,Request
 from sanic import exceptions
-from model.pos.right import UserPO  
+from model.pos.right import UserPO  ,UserGroupPO
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from co6co_sanic_ext.utils import JSON_util
 from model.pos.where import UserFilterItems 
-from co6co_db_ext.res.result import Result,Page_Result
-from co6co_web_db.services.jwt_service import createToken
+from co6co_db_ext.res.result import Result,Page_Result 
 
-from services import authorized
+from services import authorized,generateUserToken
 from co6co.utils import log
-from co6co_db_ext.db_operations import DbOperations,DbPagedOperations
+from co6co_db_ext .db_operations import DbOperations,DbPagedOperations,and_,joinedload
+from sqlalchemy import func,text
+from sqlalchemy.sql import Select
 
 user_api = Blueprint("user_API", url_prefix="/user")  
 
@@ -34,7 +35,7 @@ async def login(request:Request):
         if user !=None:
             log.err(f"encode:{user.encrypt(where.password)}")
             if user.password==user.encrypt(where.password):  
-                token=await createToken(request,user.to_dict())
+                token=await generateUserToken(request,user.to_dict())
                 return  JSON_util.response(Result.success(data=token, message="登录成功"))
             else :return JSON_util.response(Result.fail(message="密码不正确!"))
         return  JSON_util.response(Result.fail(message="登录用户名不存在!"))
@@ -48,14 +49,30 @@ async def list(request:Request):
     """  
     param=UserFilterItems()
     param.__dict__.update(request.json) 
-    async with request.ctx.session as session:   
-        operation=DbPagedOperations(session,param)
-        total = await operation.get_count(UserPO.id)   
-        list_paged = await operation.get_paged((UserPO.id, UserPO.userGroupPO, UserPO.state,UserPO.createTime, UserPO.userName))
-        pageList=Page_Result.success(list_paged) 
-        pageList.total=total
-        await session.commit()
-        return JSON_util.response(pageList)
+    async with request.ctx.session as session:  
+        session:AsyncSession=session 
+        opt=DbOperations(session)  
+        select=(
+            Select( UserPO.id,  UserPO.state,UserPO.createTime, UserPO.userName ,UserPO.userGroupId,UserGroupPO.name,UserGroupPO.code ).join(UserGroupPO,isouter=True)
+            .filter(and_(*param.filter()))
+            .limit(param.limit).offset(param.offset) 
+        )
+        sql=text("SELECT sys_user.id, sys_user.state, sys_user.create_time, sys_user.user_name, sys_user.user_group_id, sys_user_group.group_name, sys_user_group.group_code FROM sys_user LEFT OUTER JOIN sys_user_group ON sys_user_group.id = sys_user.user_group_id")
+        result=await session.execute(sql)
+        result=result.fetchall()
+        #result=await opt._get_list(select,False)
+        select=(
+            Select( func.count( )).select_from(
+                Select(UserPO.id) 
+                .options(joinedload(UserPO.userGroupPO))
+                .filter(and_(*param.filter()))
+            )
+        ) 
+        total= await opt._get_scalar(select)  
+        pageResult=Page_Result.success(result ) 
+        pageResult.total=total
+        await opt.commit()
+        return JSON_util.response(pageResult)
 
 @user_api.route("/exist/<userName:str>",methods=["GET", "POST",])
 @authorized
@@ -87,7 +104,7 @@ async def add(request:Request):
         user.id=None 
         user.salt=user.generateSalt()  
         user.password=user.encrypt()
-        user.create_user=current_user_id
+        user.createUser=current_user_id
         user.createTime=datetime.datetime.now()
         session.add_all([user])
         await session.commit()

@@ -28,19 +28,20 @@ class JWT_service :
             log.err(e)
             return None
 
-async def createToken(request:Request,data:dict):
+async def createToken(SECRET:str,data:dict):
     """
     登录时生成tooken
     """
-    svc=JWT_service(request.app.config.SECRET)
+    svc=JWT_service(SECRET)
     result=svc.encode(data )   
     return result
 
-async def validToken(request:Request):
+async def validToken(request:Request,SECRET:str):
     """
     验证token 是否有效
+    request.app.config.SECRET
     """
-    svc=JWT_service(request.app.config.SECRET)
+    svc=JWT_service(SECRET)
     log.succ(f"token:{request.token}")
     result=svc.decode(request.token) 
 

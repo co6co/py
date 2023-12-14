@@ -1,9 +1,9 @@
 import axios, {AxiosInstance, AxiosError, AxiosResponse, AxiosRequestConfig,InternalAxiosRequestConfig} from 'axios';
-import {getToken,setToken,removeToken} from "./auth"
+import {getToken,setToken,removeToken,getCookie} from "./auth"
 import { ElLoading,ElMessage } from 'element-plus' 
 import { useRouter } from 'vue-router';
 import router from '../router/index';
-import JSONbig  from 'json-bigint' 
+import JSONbig  from 'json-bigint'  
 
 //console.log(import.meta.env)
 //console.info(import.meta.env.BASE_URL)
@@ -15,8 +15,10 @@ const service:AxiosInstance = axios.create({
 let elLoading:ReturnType<typeof ElLoading.service >;
 //增加请求拦截器
 service.interceptors.request.use(
-    (config: InternalAxiosRequestConfig) => {//发送请求之前   
-        config.headers.Authorization="Bearer "+  localStorage.getItem("token" );  
+    (config: InternalAxiosRequestConfig) => {//发送请求之前 
+        let token =  localStorage.getItem("token" )
+        if (!token) token=getCookie("Authorization") 
+        config.headers.Authorization="Bearer "+  token;  
         const noLogin= config.params&&config.params.noLogin
         if(!noLogin) elLoading = ElLoading.service({ fullscreen: true }) 
         else delete config.params.noLogin 
