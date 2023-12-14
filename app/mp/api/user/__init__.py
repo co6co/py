@@ -3,7 +3,7 @@ import datetime
 from sanic.response import  json
 from sanic import Blueprint,Request
 from sanic import exceptions
-from model.pos.right import UserPO  ,UserGroupPO
+from model.pos.right import UserPO  ,UserGroupPO,RolePO,UserRolePO
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from co6co_sanic_ext.utils import JSON_util
@@ -53,14 +53,17 @@ async def list(request:Request):
         session:AsyncSession=session 
         opt=DbOperations(session)  
         select=(
-            Select( UserPO.id,  UserPO.state,UserPO.createTime, UserPO.userName ,UserPO.userGroupId,UserGroupPO.name,UserGroupPO.code ).join(UserGroupPO,isouter=True)
+            Select( UserPO.id,  UserPO.state,UserPO.createTime, UserPO.userName ,UserPO.userGroupId,UserGroupPO.name.label("groupName"),UserGroupPO.code.label("groupCode")  )
+            .join(UserGroupPO,isouter=True)
+            
             .filter(and_(*param.filter()))
             .limit(param.limit).offset(param.offset) 
         )
-        sql=text("SELECT sys_user.id, sys_user.state, sys_user.create_time, sys_user.user_name, sys_user.user_group_id, sys_user_group.group_name, sys_user_group.group_code FROM sys_user LEFT OUTER JOIN sys_user_group ON sys_user_group.id = sys_user.user_group_id")
-        result=await session.execute(sql)
+       
+        result=await session.execute(select)
         result=result.fetchall()
-        #result=await opt._get_list(select,False)
+        log.warn(result)
+        result =[dict(zip(a._fields,a))  for a in  result]
         select=(
             Select( func.count( )).select_from(
                 Select(UserPO.id) 

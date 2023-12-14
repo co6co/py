@@ -12,12 +12,7 @@
 				</el-table-column>
 				<el-table-column prop="id" label="ID" width="55" align="center"></el-table-column>
 				<el-table-column prop="userName" label="用户名"></el-table-column>
-				<el-table-column label="用户组">
-					<template #default="scope"> {{ form_attach_data.getRoleName(scope.row.roleId)?.label }} </template>
-				</el-table-column> 
-				<el-table-column label="用户角色">
-					<template #default="scope"> {{ form_attach_data.getRoleName(scope.row.roleId)?.label }} </template>
-				</el-table-column> 
+				<el-table-column label="用户组" prop="groupName"> </el-table-column>  
 				<el-table-column label="状态" align="center">
 					<template #default="scope">
 						<el-tag >

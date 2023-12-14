@@ -7,6 +7,7 @@ import sqlalchemy
 from sqlalchemy.schema import DDL 
 from sqlalchemy import MetaData  
 import uuid
+from model.pos.wx import WxUserPO  #AccountPO 引用到
 
 #metadata = MetaData() 
 #BasePO = declarative_base(metadata=metadata)
@@ -137,8 +138,4 @@ class permissionRolePO(UserTimeStampedModelPO):
     role = Column("role_id",ForeignKey(f"{RolePO.__tablename__}.{RolePO.id.name}",ondelete="CASCADE"),   comment="主键id",primary_key=True)
     createUser= Column("create_user", BigInteger,comment="创建人")  
     createTime= Column("create_time",DateTime,server_default=func.now(),comment="创建时间") 
-
-
-
-    
     

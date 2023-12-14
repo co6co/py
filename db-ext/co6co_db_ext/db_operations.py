@@ -208,10 +208,11 @@ class DbOperations:
 	
 	 
 
-
+    
 	async def query_joined(self,poType:TypeVar, joinArr:Tuple[InstrumentedAttribute], *filters:ColumnElement[bool],param:Page_param=None,orderby: List[InstrumentedAttribute]=None):
 		"""
-		joinedload ==查询==> LEFT OUTER JOIN
+		joinedload ==查询==> LEFT OUTER JOIN 
+		不应该使用
 		"""  
 		self._createQuery(poType) 
 		query=poType.query
@@ -227,6 +228,7 @@ class DbOperations:
 	async def query_subquery(self,poType:TypeVar, joinArr:Tuple[InstrumentedAttribute], *filters:ColumnElement[bool],param:Page_param=None,orderby: List[InstrumentedAttribute]=None):
 		"""
 		先查询 users, 在 select * from (user) u join address on u.u_id == address.user_id
+  		不应该使用
 		"""  
 		self._createQuery(poType) 
 		query=poType.query
@@ -242,6 +244,7 @@ class DbOperations:
 	async def query_eager(self,poType:TypeVar, joinArr:Tuple[InstrumentedAttribute], *filters:ColumnElement[bool],param:Page_param=None,orderby: List[InstrumentedAttribute]=None):
 		"""
 		数据做笛卡儿积 ，程序为每个元素间应用连接条件进行解析
+  		不应该使用
 		"""  
 		self._createQuery(poType) 
 		query=poType.query
@@ -257,6 +260,7 @@ class DbOperations:
 	async def query_join_eager(self,poType:TypeVar, joinArr:Tuple[InstrumentedAttribute], *filters:ColumnElement[bool],param:Page_param=None,orderby: List[InstrumentedAttribute]=None):
 		"""
 		内连接，删除空
+  		不应该使用
 		"""  
 		self._createQuery(poType) 
 		query=poType.query
