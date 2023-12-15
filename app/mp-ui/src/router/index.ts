@@ -1,6 +1,7 @@
 import { createRouter, createWebHashHistory, RouteRecordRaw } from 'vue-router';
 import { usePermissStore } from '../store/permiss';
-import Home from '../views/home.vue';
+//import Home from '../views/home.vue';
+import wxHome from '../views/wxHome.vue';
 
 const routes: RouteRecordRaw[] = [
     {
@@ -10,7 +11,7 @@ const routes: RouteRecordRaw[] = [
     {
         path: '/',
         name: 'Home',
-        component: Home,
+        component: wxHome,
         children: [ 
             {
                 path: '/usermgr',
@@ -39,14 +40,34 @@ const routes: RouteRecordRaw[] = [
                 component: () => import( '../views/alarmTable.vue'),
             }, 
             {
+                path: '/alarmdetail.html',
+                name: 'alarmdetail',
+                meta: {
+                    title: '告警详情',
+                    permiss: '2',
+                },
+                
+                component: () => import( '../views/alarmDetail.vue'),
+            }, 
+            {
+                path: '/alarmpreview.html',
+                name: 'alarmPreview',
+                meta: {
+                    title: '告警预览',
+                    permiss: '2',
+                },
+                component: () => import( '../views/alarmPreview.vue'),
+            }, 
+            {
                 path: '/preview.html',
-                name: 'devicesTable',
+                name: 'preview',
                 meta: {
                     title: '实时视频',
                     permiss: '2',
                 },
-                component: () => import( '../views/devicesTable.vue'),
+                component: () => import( '../views/devicesPreview.vue'),
             }, 
+            
             {
                 path: '/devicesManage.html',
                 name: 'devicesTable',
@@ -55,8 +76,7 @@ const routes: RouteRecordRaw[] = [
                     permiss: '2',
                 },
                 component: () => import( '../views/devicesTable.vue'),
-            }, 
-
+            },  
             {
                 path: '/index.html',
                 name: 'wxHome',

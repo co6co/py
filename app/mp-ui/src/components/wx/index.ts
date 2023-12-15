@@ -11,9 +11,8 @@ const appid = import.meta.env.VITE_WX_appid;
 const getScope=(scope:number)=>{ 
  return scope==0?"snsapi_base":"snsapi_userinfo"
 }
-const getRedirectUrl = (redirect_uri: string,scope:number, stateCode: string) => {  
-    alert(stateCode)
-    return redirect_uri +`?code=123456&scope=${getScope(scope)}&state=` +encodeURI( stateCode )+ "#wechat_redirect"
+const getRedirectUrl = (redirect_uri: string,scope:number, stateCode: string) => {   
+     return redirect_uri +`?code=123456&scope=${getScope(scope)}&state=` +encodeURI( stateCode )+ "#wechat_redirect"
     let redirectUrl =
         "https://open.weixin.qq.com/connect/oauth2/authorize?appid=" + appid;
     redirectUrl += "&redirect_uri=" + encodeURI(redirect_uri);

@@ -3,10 +3,10 @@ import datetime
 from sanic.response import  json
 from sanic import Blueprint,Request
 from sanic import exceptions
-from model.pos.right import UserPO  ,UserGroupPO,RolePO,UserRolePO
+from model.pos.right import UserPO ,AccountPO ,UserGroupPO,RolePO,UserRolePO
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from co6co_sanic_ext.utils import JSON_util
+from co6co_web_db.utils import DbJSONEncoder as JSON_util
 from model.pos.where import UserFilterItems 
 from co6co_db_ext.res.result import Result,Page_Result 
 
@@ -19,6 +19,23 @@ from sqlalchemy.sql import Select
 user_api = Blueprint("user_API", url_prefix="/user")  
 
 
+
+@user_api.route("/ticket/<uuid:str>",methods=["POST",])
+async def ticket(request:Request,uuid:str):  
+    async with request.ctx.session as session:  
+        session:AsyncSession=session
+        select=(
+            Select(UserPO   )
+            .join(AccountPO,isouter=True) 
+            .filter( AccountPO.uid==uuid)
+        ) 
+        result= await session.execute(select)
+        user:UserPO=result.scalar()
+        log.warn(user)
+        token=await generateUserToken(request,user.to_dict())
+        await session.commit()
+        return  JSON_util.response(Result.success(data=token, message="登录成功")) 
+    
 @user_api.route("/login",methods=["POST",])
 async def login(request:Request):  
     """
@@ -52,30 +69,37 @@ async def list(request:Request):
     async with request.ctx.session as session:  
         session:AsyncSession=session 
         opt=DbOperations(session)  
+        log.start_mark("un errr")
         select=(
-            Select( UserPO.id,  UserPO.state,UserPO.createTime, UserPO.userName ,UserPO.userGroupId,UserGroupPO.name.label("groupName"),UserGroupPO.code.label("groupCode")  )
-            .join(UserGroupPO,isouter=True)
-            
+            Select(UserPO.id,  UserPO.state,UserPO.createTime, UserPO.userName ,UserPO.userGroupId,UserGroupPO.name.label("groupName"),UserGroupPO.code.label("groupCode")  )
+            .join(UserGroupPO,isouter=True) 
             .filter(and_(*param.filter()))
-            .limit(param.limit).offset(param.offset) 
-        )
-       
+            .limit(param.limit).offset(param.offset)  
+        ) 
+        '''
+        //todo  sqlalchemy.engine.row import RowMapping   to JSON 
+          '''
         result=await session.execute(select)
-        result=result.fetchall()
-        log.warn(result)
-        result =[dict(zip(a._fields,a))  for a in  result]
+        result=result.mappings().all()
+        result=[dict(a)  for a in  result]    
+        ''' result=await session.execute(select)
+        result =[dict(zip(a._fields,a))  for a in  result] 
+        '''
+        
         select=(
             Select( func.count( )).select_from(
-                Select(UserPO.id) 
-                .options(joinedload(UserPO.userGroupPO))
+                 Select(UserPO.id)
+                .join(UserGroupPO,isouter=True) 
                 .filter(and_(*param.filter()))
             )
         ) 
-        total= await opt._get_scalar(select)  
-        pageResult=Page_Result.success(result ) 
-        pageResult.total=total
+        totalResult= await session.execute(select)  
+        total=totalResult.scalar_one()
+        log.warn(type(result))
+        
+        pageResult=Page_Result.success(result ,total=total)  
         await opt.commit()
-        return JSON_util.response(pageResult)
+        return JSON_util.response(pageResult )
 
 @user_api.route("/exist/<userName:str>",methods=["GET", "POST",])
 @authorized

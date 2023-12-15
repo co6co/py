@@ -3,7 +3,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from co6co_db_ext .db_operations import DbOperations
 from sanic import  Request 
 from sanic.response import text,raw
-from co6co_sanic_ext.utils import JSON_util,json
+from co6co_sanic_ext.utils import JSON_util
+import json
 
 from view_model.wx import wx_authon_views
 from model.pos.wx_where import WxMenuFilterItems,WxMenuPO

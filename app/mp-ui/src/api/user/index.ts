@@ -29,3 +29,7 @@ export const currentUser_svc = ( ): Promise<IResponse> => {
 export const get_user_name_List_svc =( ): Promise<IResponse> => {
     return request.get(`${BASE_URL}/userList`);
 };
+
+export const ticket_svc =(ticket:string ): Promise<IResponse> => {
+    return request.post(`${BASE_URL}/ticket/${ticket}`);
+};

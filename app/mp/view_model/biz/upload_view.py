@@ -3,7 +3,8 @@ from co6co_db_ext .db_operations import DbOperations
 from sanic import  Request ,Sanic
 from sanic_ext import Extend
 from sanic.response import text,raw
-from co6co_sanic_ext.utils import JSON_util,json
+from co6co_sanic_ext.utils import JSON_util
+import json
 
 from view_model.base_view import  BaseMethodView
 from model.pos.biz import bizDevicePo,bizResourcePO

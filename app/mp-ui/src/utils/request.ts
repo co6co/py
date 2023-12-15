@@ -1,10 +1,14 @@
 import axios, {AxiosInstance, AxiosError, AxiosResponse, AxiosRequestConfig,InternalAxiosRequestConfig} from 'axios';
-import {getToken,setToken,removeToken,getCookie} from "./auth"
+import {getTokes} from "./auth"
 import { ElLoading,ElMessage } from 'element-plus' 
 import { useRouter } from 'vue-router';
 import router from '../router/index';
 import JSONbig  from 'json-bigint'  
 
+
+export const axiosInst:AxiosInstance = axios.create({ 
+    timeout: 5000, 
+});
 //console.log(import.meta.env)
 //console.info(import.meta.env.BASE_URL)
 const service:AxiosInstance = axios.create({
@@ -16,8 +20,7 @@ let elLoading:ReturnType<typeof ElLoading.service >;
 //增加请求拦截器
 service.interceptors.request.use(
     (config: InternalAxiosRequestConfig) => {//发送请求之前 
-        let token =  localStorage.getItem("token" )
-        if (!token) token=getCookie("Authorization") 
+        let token=getTokes() 
         config.headers.Authorization="Bearer "+  token;  
         const noLogin= config.params&&config.params.noLogin
         if(!noLogin) elLoading = ElLoading.service({ fullscreen: true }) 
@@ -39,7 +42,7 @@ service.interceptors.response.use(
             else return response;
         } 
         if (response.status === 206 )  return response;
-        else {
+        else { 
             Promise.reject();
         }
     },
@@ -50,7 +53,10 @@ service.interceptors.response.use(
             ElMessage.error(`未认证:${error.message}`)
         }else if ( error.config&& error.config.responseType =="json") {
             ElMessage.error(`请求出现错误:${error.message}`)
+        }  else if ( error.config&& error.config.headers["Content-Type"] =="application/json") {
+            ElMessage.error(`请求出现错误:${error.message}`)
         } 
+        
         return Promise.reject(error);
     }
 );

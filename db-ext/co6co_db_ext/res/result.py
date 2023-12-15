@@ -1,6 +1,8 @@
 # -*- encoding:utf-8 -*-
 from __future__ import annotations 
 from co6co.enums import Base_Enum
+from sqlalchemy.engine.row import RowMapping
+from sqlalchemy.engine.result import ChunkedIteratorResult
 class Result: 
     def __new__(cls,code:int,data:any,message:str) -> Result:
         """
@@ -15,7 +17,9 @@ class Result:
         """
         obj = object.__new__(cls)
         obj.code = code 
-        obj.message = message 
+        obj.message = message  
+        #if isinstance(obj,RowMapping):obj.data=[dict(a)  for a in  data]  
+        #elif isinstance(obj,ChunkedIteratorResult): obj.data=[dict(zip(a._fields,a))  for a in  data]  
         obj.data=data 
         return obj  
     

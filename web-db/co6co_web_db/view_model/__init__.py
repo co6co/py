@@ -7,9 +7,10 @@ from co6co_sanic_ext.model.res.result import Page_Result
 from co6co_sanic_ext.utils import  JSON_util
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import TypeVar,Dict,List,Any
-from co6co_sanic_ext.model.res.result import Result 
+from co6co_sanic_ext.model.res.result import Result,Page_Result
 import aiofiles,os,multipart
 from io import BytesIO
+from co6co_web_db.utils import DbJSONEncoder
 
 
 
@@ -25,6 +26,10 @@ class BaseMethodView(HTTPMethodView):
     view.DELETE :---> del
 
     """ 
+    def response_json(self,data:Result|Page_Result):
+        return DbJSONEncoder.json(data)  
+
+
     def usable_args(self,request:Request)->dict:
         """
         去除列表

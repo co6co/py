@@ -16,9 +16,29 @@ from model.pos.right import UserPO,AccountPO
 from sqlalchemy.orm import joinedload
 from sqlalchemy.sql import Select
 
+async def getAccountuuid(request:Result ,userOpenId:str=None):  
+    accountuuid=None 
+    async with request.ctx.session as session:
+        session:AsyncSession=session
+        operation=DbOperations(session)  
+        try:   
+            select=(
+                Select(AccountPO) 
+                .options(joinedload(AccountPO.userPO))  
+                .filter(AccountPO.accountName==userOpenId,AccountPO.category==Account_category.wx.val ) 
+            )  
+            a:AccountPO=await operation._get_one(select,False)   
+            accountuuid=a.uid
+        except Exception as e:
+            log.err(f"创建Token失败:{e}")
+        finally:
+            await operation.commit() 
+
+    return accountuuid
+
 async def generateUserToken(request:Result,data=None,userId:int=None,userOpenId:str=None): 
     token="" 
-   
+    
     SECRET=request.app.config.SECRET 
     if data!=None:
         token=await createToken(SECRET,data)
@@ -38,10 +58,12 @@ async def generateUserToken(request:Result,data=None,userId:int=None,userOpenId:
                     )  
                     a:AccountPO=await operation._get_one(select,False)  
                     token=await createToken(SECRET,  a.userPO.to_dict()) 
+                   
             except Exception as e:
                 log.err(f"创建Token失败:{e}")
             finally:
                 await operation.commit() 
+
     return token
 
 

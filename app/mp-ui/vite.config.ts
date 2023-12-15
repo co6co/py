@@ -14,8 +14,12 @@ export default  defineConfig({
 	base: './',
 	server: {
 		host: '0.0.0.0',
-		port: 5174
+		port: 5174,
+		cors:true
 	},
+	build: {
+        target: ['esnext']
+    },
 	plugins: [
 		vue(),
 		VueSetupExtend(),

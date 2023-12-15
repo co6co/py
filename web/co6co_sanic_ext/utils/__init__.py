@@ -1,8 +1,14 @@
-import json,datetime
-from typing import Any
+import datetime
+from typing import Any,Dict
 from sanic.response import json as res_json
+import  json as sys_json
 
-class JSON_util(json.JSONEncoder):
+class JSON_util(sys_json.JSONEncoder):
+    @classmethod
+    def json(cls,data:Any, status: int = 200, headers: Dict[str, str] | None = None ):
+        jsonEncoder=object.__new__(cls)
+        return res_json(jsonEncoder.encode(data),status,headers) 
+
     def default(self, obj: Any) -> Any: 
         #print("JSON_Util:",obj,"-->",type(obj))
         if isinstance(obj, datetime.datetime):  return obj.strftime("%Y-%m-%d %H:%M:%S")
@@ -13,5 +19,7 @@ class JSON_util(json.JSONEncoder):
         elif hasattr(obj,"__dict__"):  return obj.__dict__ 
         return None
     
-    def response(res:any):
-        return res_json(JSON_util().encode(res))
+    def response(res:any,jsonEncoder:sys_json.JSONEncoder=None):
+        if jsonEncoder==None: return res_json(JSON_util().encode(res))
+        else: return res_json(jsonEncoder.encode(res))
+    

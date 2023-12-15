@@ -22,6 +22,7 @@ from .po import BasePO
  
 from co6co.utils import log 
 
+
 class DbOperations:
 	# 实体类存在字段
 	__po_has_field__:str="_sa_instance_state" 

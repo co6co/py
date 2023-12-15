@@ -102,8 +102,7 @@ const items:Array<sideBarItem>= [
 const route = useRoute();
 const onRoutes = computed(() => {
     return route.path;
-});
-
+}); 
 const sidebar = useSidebarStore();
 </script>
 

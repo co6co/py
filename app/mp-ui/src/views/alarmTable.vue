@@ -49,10 +49,10 @@
 							<el-table-column width="160" prop="createTime" label="入库时间" sortable  :show-overflow-tooltip="true"></el-table-column> 
 							<el-table-column label="操作" width="316" align="center">
 							<template #default="scope">  
-								<el-button text :icon="Edit" @click="onOpenDialog(scope.row)">
+								<el-button text :icon="Edit" @click="onOpenPage('/alarmdetail.html', scope.row)">
 									详细信息
 								</el-button> 
-								<el-button text :icon="Edit" @click="onOpen2Dialog(scope.row)">
+								<el-button text :icon="Edit" @click="onOpenPage('/alarmpreview.html', scope.row)">
 									告警视频
 								</el-button> 
 							</template>
@@ -72,32 +72,7 @@
 					 
 				</el-row> 
 		</div>
-		<!-- 弹出框 -->
-		<el-dialog title="详细信息" v-model="form.dialogVisible"   style="width:98%; height: 98%;" @keydown.ctrl="keyDown">
-			<details-info :data="form.data"  ></details-info>
-			<template #footer>
-				<span class="dialog-footer">
-					<el-button @click="form.dialogVisible = false">取 消</el-button> 
-				</span>
-			</template>
-		</el-dialog>
-
-		<!-- 弹出框 -->
-		<el-dialog title="详细信息" v-model="form2.dialogVisible"   style="width:98%; height: 90%;" @keydown.ctrl="keyDown">
-			<el-row> 
-				<el-col :span="12">
-					<img-video :viewOption="form2.data"  ></img-video>
-				</el-col>
-				<el-col :span="12"> 
-				</el-col>
-			</el-row>
-			
-			<template #footer>
-				<span class="dialog-footer"> 
-					<el-button @click="form2.dialogVisible = false">取 消</el-button> 
-				</span>
-			</template>
-		</el-dialog>
+		  
 	</div>
 </template>
 
@@ -108,12 +83,28 @@ import { TreeNode } from 'element-plus/es/components/tree-v2/src/types'
 import { TreeNodeData } from 'element-plus/es/components/tree/src/tree.type'
 import { Delete, Edit, Search, Compass,MoreFilled,Download } from '@element-plus/icons-vue'; 
 import  * as api from '../api/alarm'; 
-import  * as res_api from '../api'; 
-import  { detailsInfo} from '../components/details';    
-import  { imgVideo,types} from '../components/player';    
-import {str2Obj} from '../utils'
 
- 
+import  { imgVideo,types} from '../components/player';    
+import {useAppDataStore} from '../store/appStore'
+
+//页面跳转相关 1.
+import { useRouter } from "vue-router";
+const router = useRouter()
+
+const dataStore=useAppDataStore() 
+const onOpenPage=(path:string,row:any)=>{
+	console.info("-=setState=>",row)
+	dataStore.setState(row) 
+	router.push({
+		path: path,
+		//后面两个参数没用到
+		query: {
+			mode: "edit",
+		},
+		params:{data:"123456"}, 
+	});
+}
+
 interface TableRow {
     id: number,
     uuid:string
@@ -248,64 +239,7 @@ const keyDown=(e:KeyboardEvent)=>{
 	//process_view.value.keyDown(e) 
     e.stopPropagation() 
 } 
-//**详细信息 */
-interface dialogDataType{
-	dialogVisible:boolean, 
-	data:Array<any>
-}
-let dialogData={
-	dialogVisible:false, 
-	data:[]
-}
-let form = reactive<dialogDataType>(dialogData); 
-const onOpenDialog=( row?:any)=>{
-	form.dialogVisible = true  
-	table_module.currentRow=row   
-	form.data=[
-		{name:"检测结果信息",data:str2Obj( row.alarmAttachPO.result)},
-		{name:"视频流信息",data:str2Obj(row.alarmAttachPO.media)},
-		{name:"GPS信息",data:str2Obj(row.alarmAttachPO.gps)}]
-}
-
-
-//**视频下信息 */
-interface dialog2DataType{
-	dialogVisible:boolean, 
-	data:Array<types.resourceOption>
-}
-let dialog2Data={
-	dialogVisible:false, 
-	data:[]
-}
-let form2 = ref<dialog2DataType>(dialog2Data); 
-const setVideoResource=(uuid:string,option:types.videoOption)=>{
-	res_api.request_resource_svc(import.meta.env.VITE_BASE_URL+`/api/resource/poster/${uuid}`).then(res=>{option.poster=res}).catch(e=>option.poster="" );  
-	res_api.request_resource_svc(import.meta.env.VITE_BASE_URL+`/api/resource/${uuid}`).then(res=>{ option.url=res}).catch(e=>option.url="" );   
-}
-const setImageResource=(uuid:string,option:types.imageOption)=>{
-	res_api.request_resource_svc(import.meta.env.VITE_BASE_URL+`/api/resource/${uuid}`).then(res=>{ option.url=res}).catch(e=>option.url="" );  
-}
-const getResultUrl=(uuid:string,isposter:boolean=false)=>{
-	if (isposter) return import.meta.env.VITE_BASE_URL+`/api/resource/poster/${uuid}/700/600`;
-	return import.meta.env.VITE_BASE_URL+`/api/resource/${uuid}`
-}
-const onOpen2Dialog=( row:TableRow)=>{
-	form2.value.dialogVisible = true  
-	table_module.currentRow=row  
-	form2.value.data=[  
-		{ url: getResultUrl(row.rawImageUid), name:"原始图片" ,poster:getResultUrl(row.rawImageUid,true),type:1},
-		{ url:getResultUrl(row.markedImageUid),  name:"标注图片",poster:getResultUrl(row.markedImageUid,true), type:1} ,
-	 	{ url:"http://127.0.0.1:18000/flv/vlive/3.flv",  name:"原始视频", poster:getResultUrl(row.videoUid,true),type:0},
-	]
-	/**
-	setImageResource(row.rawImageUid,opt1)
-	setImageResource(row.markedImageUid,opt2)
-	setVideoResource(row.videoUid,opt3)
-	form2.value.data=[opt1,opt2,opt3] 
-	*/ 
-}
-
-//**end 打标签 */
+ 
 </script> 
 <style  scoped lang="less"> 
 .el-link {

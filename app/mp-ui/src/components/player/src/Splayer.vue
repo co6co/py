@@ -50,10 +50,7 @@ const initApp = () => {
   } else { 
     console.error("Browser not supported!");
   } 
-};
-
-
-
+}; 
 const initPlayer = () => {  
   player.value=new shaka.Player(playerEle.value); 
   

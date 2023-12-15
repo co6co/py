@@ -3,7 +3,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from co6co_db_ext .db_operations import DbOperations
 from sanic import  Request 
 from sanic.response import text,raw,redirect
-from co6co_sanic_ext.utils import JSON_util,json
+from co6co_sanic_ext.utils import JSON_util
+import json
 
 from view_model.wx import wx_base_view
 from model.pos.wx_where import WxMenuFilterItems,WxMenuPO
@@ -16,7 +17,7 @@ from model.enum import wx_menu_state
 from view_model.wx.fn_oauth import Authon_param,oauth,oauth_debug
 
 class Authon_View(wx_base_view): 
-    @oauth_debug
+    @oauth
     @staticmethod
     def getAuthonInfo(request:Request,param,Authon_param):
         """

@@ -6,7 +6,8 @@ from sanic.response import text,raw
 from sqlalchemy import func
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from co6co_sanic_ext.utils import JSON_util,json
+from co6co_sanic_ext.utils import JSON_util
+import json
 from co6co.utils import log
 
 from view_model.base_view import  AuthMethodView

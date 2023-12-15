@@ -6,7 +6,8 @@ from sqlalchemy.sql import Select
 from sanic import  Request 
 from sanic.response import text,raw
 
-from co6co_sanic_ext.utils import JSON_util,json
+from co6co_sanic_ext.utils import JSON_util
+import json
 from co6co.utils import log
 
 from view_model.base_view import  AuthMethodView
