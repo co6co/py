@@ -7,11 +7,19 @@ class File:
     @staticmethod
     def readFile2Base64(filePath:str):
         """
-        文件内容转  base64
+        文件内容  -->  base64
         """
         with open(filePath, 'rb') as file:
             file_content = file.read()
             return hash.enbase64(file_content)
+    @staticmethod
+    def readFileBase642Str(filePath:str):
+        """
+        文件内容base64 --> content  
+        """
+        with open(filePath, 'rb') as file:
+            file_content = file.read()
+            return hash.debase64(file_content)
         
     @staticmethod
     def readJsonFile(filePath:str, encoding:str="utf-8"):

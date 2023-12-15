@@ -1,10 +1,5 @@
-import hashlib,os,base64
-import string
-
-
-
-
-
+# -*- coding: utf-8 -*-
+import hashlib,os ,string 
 
 def enbase642(content:str):
     """
@@ -33,15 +28,15 @@ def enbase642(content:str):
     return encoded_string
 
 base64_charset = string.ascii_uppercase + string.ascii_lowercase + string.digits + '+/'
-def enbase64(origin_bytes):
+def enbase64(data:str|bytes):
     """
     将bytes类型编码为base64
     :param origin_bytes:需要编码的bytes
     :return:base64字符串
     """
-    origin_bytes=origin_bytes.encode()
+    if type(data)==str: data=data.encode()
     # 将每一位bytes转换为二进制字符串
-    base64_bytes = ['{:0>8}'.format(str(bin(b)).replace('0b', '')) for b in origin_bytes]
+    base64_bytes = ['{:0>8}'.format(str(bin(b)).replace('0b', '')) for b in data]
 
     resp = ''
     nums = len(base64_bytes) // 3
@@ -65,14 +60,14 @@ def enbase64(origin_bytes):
         resp += ''.join([base64_charset[i] for i in tmp_unit]) + (3 - remain) * '='
 
     return resp
+
 def valid_base64_str(b_str):
     """
     = 存在的意义是为了补位 要是4个字符的倍数，如果不是4的倍数需要在结尾加上=
     验证是否为合法base64字符串
     :param b_str: 待验证的base64字符串
     :return:是否合法
-    """
-    print(b_str)
+    """ 
     if len(b_str) % 4: 
         return False
 
@@ -81,7 +76,7 @@ def valid_base64_str(b_str):
             return False
     return True
 
-def debase64(base64_str):
+def debase64(data:str|bytes,encodeing:str|None="utf-8") ->str|bytes:
     """
     解码base64字符串
     :param base64_str:base64字符串
@@ -89,9 +84,11 @@ def debase64(base64_str):
     """
     #if not valid_base64_str(base64_str):
     #    return bytearray()
+    content=data
+    if type(data)==bytes:content=data.decode(encodeing)
 
     # 对每一个base64字符取下标索引，并转换为6为二进制字符串
-    base64_bytes = ['{:0>6}'.format(str(bin(base64_charset.index(s))).replace('0b', '')) for s in base64_str if s != '=']
+    base64_bytes = ['{:0>6}'.format(str(bin(base64_charset.index(s))).replace('0b', '')) for s in content if s != '=']
     resp = bytearray()
     nums = len(base64_bytes) // 4
     remain = len(base64_bytes) % 4
@@ -109,12 +106,9 @@ def debase64(base64_str):
         remain_part = ''.join(base64_bytes[nums * 4:])
         tmp_unit = [int(remain_part[i * 8:(i + 1) * 8], 2) for i in range(remain - 1)]
         for i in tmp_unit:
-            resp.append(i)
-
-     
-    return resp.decode("utf-8")
-
- 
+            resp.append(i) 
+    if encodeing==None:return resp
+    else:  return resp.decode(encodeing) 
 
 def md5(plain_text:str)->str:
     """
