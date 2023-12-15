@@ -1,9 +1,18 @@
 # -*- coding:utf-8 -*-
 
 import json,base64,os
+from  co6co.utils import hash
 
 class File:
-
+    @staticmethod
+    def readFile2Base64(filePath:str):
+        """
+        文件内容转  base64
+        """
+        with open(filePath, 'rb') as file:
+            file_content = file.read()
+            return hash.enbase64(file_content)
+        
     @staticmethod
     def readJsonFile(filePath:str, encoding:str="utf-8"):
         """
