@@ -68,35 +68,7 @@ const items:Array<sideBarItem>= [
             index: '/devicesTable',
             title: '设备管理',
             permiss: '2',   
-         },
-         {
-            icon: 'Calendar',
-            index: '/alarmTable',
-            title: '告警管理',
-            permiss: '2',   
-         },
-         {
-            icon: 'DocumentCopy',
-            index: '/taskTable',
-            title: '任务列表',
-            permiss: '2',   
-         },
-         {
-            icon: 'Edit',
-            index: '/groupTable',
-            title: '分组信息',
-            permiss: '2',   
-         }, 
-         {
-            icon: 'Calendar',
-            index: '1',
-            title: '微信公众管理',
-            permiss: '2',
-            subs: [
-                { icon: 'DocumentCopy', index: '/wxMenuTable',   title: '菜单',  permiss: '2',   },
-                { icon: 'PieChart', index: '/processLable',   title: '数据标签',  permiss: '2',   },
-            ]
-         }  
+         } 
 ];
 
 const route = useRoute();

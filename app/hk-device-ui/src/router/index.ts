@@ -29,15 +29,7 @@ const routes: RouteRecordRaw[] = [
                 },
                 component: () => import(  '../views/user.vue'),
             },  
-            {
-                path: '/alarmTable',
-                name: 'alarmTable',
-                meta: {
-                    title: '数据管理',
-                    permiss: '2',
-                },
-                component: () => import( '../views/alarmTable.vue'),
-            }, 
+            
             {
                 path: '/devicesTable',
                 name: 'devicesTable',
@@ -49,6 +41,14 @@ const routes: RouteRecordRaw[] = [
             }, 
         ],
     }, 
+    {
+        path: '/login',
+        name: 'Login',
+        meta: {
+            title: '登录',
+        },
+        component: () => import(/* webpackChunkName: "login" */ '../views/login.vue'),
+    },
     {
         path: '/403',
         name: '403',

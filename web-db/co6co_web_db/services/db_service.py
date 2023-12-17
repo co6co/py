@@ -17,49 +17,13 @@ import asyncio,time ,typing
 from sanic.log import logger  
 from sanic import Blueprint,Request
 from typing import TypeVar
-from co6co_db_ext.db_session import db_service
+from co6co_db_ext.db_session import db_service 
 
-'''class db_service: 
-    def __init__(self,app:Sanic,settings:dict,basePoType:TypeVar) -> None:
-        self.app=app
-        self.basePO=basePoType
-
-        defaultSetting={
-            'DB_HOST': 'localhost',
-            'DB_NAME': '',
-            'DB_USER': 'root',
-            'DB_PASSWORD':''
-        }
-        self.settings=defaultSetting.update(settings)
-        self.engine = create_async_engine(f"mysql+aiomysql://{defaultSetting['DB_USER']}:{defaultSetting['DB_PASSWORD']}@{defaultSetting['DB_HOST']}/{defaultSetting['DB_NAME']}", echo=True) 
-        self.async_session_factory  = sessionmaker(self.engine, expire_on_commit=False,class_=AsyncSession)# AsyncSession,
-        self.base_model_session_ctx = ContextVar("session") 
-        pass
-    async def init_tables(self):
-        async with self.engine.begin() as conn: 
-            #await conn.run_sync(BasePO.metadata.drop_all)
-            await conn.run_sync(self.basePO.metadata.create_all) 
-            await conn.commit() 
-        await self.engine.dispose() 
-  
-
-    def sync_init_tables(self): 
-         retryTime=0
-         while(True):
-            try:
-                if retryTime<8:retryTime+=1
-                asyncio.run(self.init_tables())
-                break
-            except Exception as e:
-                logger.error(e)
-                logger.info(f"{retryTime*5}s后重试...")
-                time.sleep(retryTime*5) '''
-                
-def injectDbSessionFactory(app:Sanic,settings:dict,engineUrl:str=None ):
+def injectDbSessionFactory(app:Sanic,settings:dict={},engineUrl:str=None ):
     """
     挂在 DBSession_factory
     """
-    service=db_service(settings,engineUrl )
+    service=db_service(settings,engineUrl)
     service.sync_init_tables() 
     '''
     @app.main_process_start

@@ -20,3 +20,10 @@ Top-level await is not available in the configured target environment ("chrome87
  
  # 调试
   vue-devtools 5.3.4 及以下为 vue2
+# 模块分类
+ESM 和 CJS 模块
+CommonJS 模块确实没有 “默认导出” 这种说法
+typescript 只能理解 .ts 文件，无法理解 .vue文件。
+
+https://sisi001.gitee.io/posts/61cb.html
+eslint 只有开发阶段需要，因此添加到开发阶段的依赖中即可;根目录创建 .eslintrc.js 文件

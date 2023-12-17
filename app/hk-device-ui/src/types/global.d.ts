@@ -6,6 +6,7 @@ declare interface IResponse<T = any> {
 declare interface IPageResponse <T=any> extends IResponse<T>{
   total:number //number 与 Number 区别
 }
+//query pageList 参数
 declare interface IpageParam<T=any>{
   pageIndex:number
   pageSize:number

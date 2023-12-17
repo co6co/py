@@ -1,0 +1,12 @@
+
+{ 
+    "SECRET":"81aa5d9ce2", 
+    "web_setting":{
+        "port":8084,
+        "host":"0.0.0.0",
+        "debug": "False",
+        "access_log":"True",
+        "dev":"False" 
+    },
+    "engineUrl" :"sqlite:///_database/devices.db3"    
+}

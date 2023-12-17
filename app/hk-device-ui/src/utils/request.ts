@@ -45,7 +45,7 @@ service.interceptors.response.use(
         if(elLoading) elLoading.close(); 
         if(error.response?.status===403){ 
             localStorage.removeItem('ms_username'); 
-            ElMessage.error(`未认证:${error.message}`)
+	        router.push('/login'); 
         }else if ( error.config&& error.config.responseType =="json") {
             ElMessage.error(`请求出现错误:${error.message}`)
         } 
