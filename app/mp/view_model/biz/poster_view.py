@@ -46,16 +46,22 @@ class Image_View(BaseMethodView):
         constant = cv2.copyMakeBorder(imreadImage, top, bottom, left, right, cv2.BORDER_CONSTANT, value = BLACK)
         # 调整图像大小并返回图像，目的是减少计算量和内存占用，提升训练速度
         return cv2.resize(constant, (height, width))
-
-    async def screenshot(self,fullPath:str,w:int=208,h:int=117):
+     
+    async def screenshot(self,fullPath:str,w:int=208,h:int=117,isFile:bool=True):
         """
         视频截图
         视频第一帧作为 poster
         """
         log.warn(fullPath)
-        if os.path.exists(fullPath):
+        if (isFile and os.path.exists(fullPath)) or fullPath:
             try:
+                
+               
                 cap =cv2.VideoCapture(fullPath) # 打开视频
+                cap.set(cv2.CAP_PROP_FPS, 30)
+                cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1920)
+                cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 1080)
+                #cap.set(cv2.CAP_PROP_READ_TIMEOUT_MSEC , 5)
                 ret,fram=cap.read()
                 s=None
                 if ret: 
@@ -63,10 +69,10 @@ class Image_View(BaseMethodView):
                     s='tmp/frame_%s.jpg' %datetime.datetime.now().strftime('%H%M%S%f')
                     fram=self.resize_image(fram,w,h)
                     cv2.imwrite(s, fram) 
-                    res= await file(s,mime_type="image/jpeg")  
+                    res= await file(fram,mime_type="image/jpeg")  
                     return res  
             finally:
-                if s !=None:os.remove(s)
+                #if s !=None:os.remove(s)
                 cap.release()
         return empty(status=404) 
     

@@ -103,20 +103,21 @@ class Video_Upload_View(Upload_view):
             session:AsyncSession=session
             operation=DbOperations(session)
             uid=self.createResourceUUID(file.filename)
+             
             isExist=await operation.exist(bizResourcePO.uid==uid,bizAlarmAttachPO.id)
             if not isExist: 
                 fullPath,filePath=self.getFullPath(root,file.filename)
                 file.save_as(fullPath) 
                 device_id=await get_Device_id(operation,p,True) 
-                await self.saveResourceToDb(operation,device_id,resource_category.video, filePath,uid= uid) 
+                po:bizResourcePO =await self.saveResourceToDb(operation,device_id,resource_category.video, filePath,uid= uid) 
                 await session.commit() 
             else:
                 session.close
-        # 返回响应 
-        res:m.Video_Response=m.Video_Response.success() 
-        log.err(f"返回的VideoID：{uid}")
-        res.VideoId=uid 
-        return JSON_util.response(res)
+            # 返回响应 
+            res:m.Video_Response=m.Video_Response.success() 
+            log.err(f"返回的VideoID：uid:{uid},id:{po.id}")
+            res.VideoId=uid 
+            return JSON_util.response(res)
 
 
 class Alarm_Upload_View(Upload_view):

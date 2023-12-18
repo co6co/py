@@ -1,7 +1,7 @@
 <template>
     <div v-loading="loading">
         <div>
-            <v-tags></v-tags>
+            <!--<v-tags></v-tags>-->
             <div class="content">
                 <router-view v-slot="{ Component }">
                     <transition name="move" mode="out-in">
@@ -15,7 +15,7 @@
     </div>
 </template>
 <script setup lang="ts">
-import { ref, reactive, onMounted } from "vue";
+import { ref, reactive, onMounted, WatchEffect, watchEffect } from "vue";
 import { randomString } from "../utils";
 import { getRedirectUrl } from "../components/wx";
 
@@ -23,8 +23,12 @@ import { useTagsStore } from "../store/tags";
 import vTags from "../components/tags.vue";
 import { getTokes, setTokes } from "../utils/auth";
 import { ticket_svc } from "../api/user";
-import { nextTick } from "process";
+import { showNotify } from 'vant';
+ 
+ 
+
 const tags = useTagsStore();
+const debug = import.meta.env.VITE_IS_DEBUG;
 
 const getUrl = () => {
     let url = document.location.toString();
@@ -54,38 +58,50 @@ function getQueryVariable(key: string) {
     } catch (e) {}
     return null;
 }
+
 let token = getTokes();
+const tokenRef = ref(token);
 const ticket = getQueryVariable("ticket");
+if (ticket)  showNotify({type:"success" ,  message: ticket }); 
+const tokenChange = () => {
+    if (debug)console.info(tokenRef.value, ticket);
+    else if (!tokenRef.value || !ticket) {
+        const backUrk = ref();
+        const redirect_uri = import.meta.env.VITE_WX_redirect_uri;
+        const scope = 1;
+        let redirectUrl = "";
+        if (debug) {
+            redirectUrl = getRedirectUrl(
+                redirect_uri,
+                scope,
+                `${randomString(10)}-${scope}-${getUrl()}-${randomString(10)}`
+            );
+        } else {
+            redirectUrl = getRedirectUrl(
+                redirect_uri,
+                scope,
+                `${randomString(10)}-${scope}-${getUrl()}-${randomString(10)}`
+            );
+        }
+        window.location.href = redirectUrl;
+    }
+};
 
-
-if (!token && ticket) {
-     ticket_svc(ticket).then((res)=>{
-        if (res.code == 0) setTokes(res.data), token = getTokes();
-    }) 
-}  
-if (!token) {
-    const backUrk = ref();
-    const redirect_uri = import.meta.env.VITE_WX_redirect_uri;
-    const scope = 1;
-    let redirectUrl = getRedirectUrl(
-        redirect_uri,
-        scope,
-        `${randomString(10)}-${scope}-${getUrl()}-${randomString(10)}`
-    );
-     /*
-        redirectUrl = getRedirectUrl(
-            redirect_uri,
-            scope,
-            `${randomString(10)}-${scope}-${getUrl()}-${randomString(10)}`
-        );
-        */
- 
-    window.location.href = redirectUrl;
+watchEffect(() => {
+    tokenChange();
+});
+if (ticket) {
+    ticket_svc(ticket).then((res) => {
+        if (res.code == 0)
+            setTokes(res.data),
+                (tokenRef.value = getTokes()),
+                (loading.value = false);
+        else showNotify({ type: 'danger', message: res.message });  
+    });
 }
-
 const loading = ref(true);
 onMounted(() => {
-    loading.value = false;
+    loading.value=false
 });
 </script>
 <style lang="less">

@@ -50,6 +50,15 @@ const routes: RouteRecordRaw[] = [
                 component: () => import( '../views/alarmDetail.vue'),
             }, 
             {
+                path: '/devicelist.html',
+                name: 'devicelist',
+                meta: {
+                    title: '视频列表',
+                    permiss: '2',
+                },
+                component: () => import( '../views/deviceList.vue'),
+            }, 
+            {
                 path: '/alarmpreview.html',
                 name: 'alarmPreview',
                 meta: {
@@ -58,6 +67,9 @@ const routes: RouteRecordRaw[] = [
                 },
                 component: () => import( '../views/alarmPreview.vue'),
             }, 
+           
+            
+            
             {
                 path: '/preview.html',
                 name: 'preview',

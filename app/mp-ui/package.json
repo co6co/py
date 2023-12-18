@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "vite --mode dev",
     "build": "vue-tsc --noEmit && vite build --mode pro",
-    "clean": "rm -rf node_modules", 
+    "clean": "rm -rf node_modules",
     "serve": "vite preview"
   },
   "dependencies": {
@@ -19,6 +19,7 @@
     "mqtt": "^5.3.3",
     "pinia": "^2.0.20",
     "shaka-player": "^4.7.1",
+    "vant": "^4.8.1",
     "vue": "^3.3.4",
     "vue-cropperjs": "^5.0.0",
     "vue-router": "^4.1.3",

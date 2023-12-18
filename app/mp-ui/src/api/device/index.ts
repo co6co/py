@@ -6,3 +6,6 @@ const BASE_URL="/api/biz/device/camera"
 export const list_svc = (data:any): Promise<IPageResponse> => {   
     return request.post(`${BASE_URL}`,data);
 };  
+export const get_poster_svc = (id:number): Promise<IPageResponse> => {   
+    return request.get(`${BASE_URL}/${id}`);
+};   

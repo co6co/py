@@ -92,8 +92,7 @@ import { useRouter } from "vue-router";
 const router = useRouter()
 
 const dataStore=useAppDataStore() 
-const onOpenPage=(path:string,row:any)=>{
-	console.info("-=setState=>",row)
+const onOpenPage=(path:string,row:any)=>{ 
 	dataStore.setState(row) 
 	router.push({
 		path: path,

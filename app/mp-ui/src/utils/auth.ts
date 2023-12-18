@@ -9,7 +9,7 @@ export function setTokes(token:any){
 export function getTokes(){
     let token =localStorage.getItem("token" )
     if (!token) token=getCookie("Authorization")
-    if (!token)  token="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MDI3MTQ0MDksImlhdCI6MTcwMjYyODAwOSwiaXNzIjoiSldUK1NFUlZJQ0UiLCJkYXRhIjp7ImlkIjoyLCJ1c2VyTmFtZSI6Im9Qd3ZMNkoyWDlZbnl0dW81YWdNTGdLR1ZKUUkiLCJncm91cF9pZCI6Mn19.fztD24fVV5cYtXj1Ev5uoU5bHOGZx01vTkIm-yXdpEM"
+    //if (!token)  token="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MDI3MTQ0MDksImlhdCI6MTcwMjYyODAwOSwiaXNzIjoiSldUK1NFUlZJQ0UiLCJkYXRhIjp7ImlkIjoyLCJ1c2VyTmFtZSI6Im9Qd3ZMNkoyWDlZbnl0dW81YWdNTGdLR1ZKUUkiLCJncm91cF9pZCI6Mn19.fztD24fVV5cYtXj1Ev5uoU5bHOGZx01vTkIm-yXdpEM"
     return token
 }
 export function getCookie(key: string) {

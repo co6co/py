@@ -7,7 +7,7 @@ from model.pos.right import UserPO ,AccountPO ,UserGroupPO,RolePO,UserRolePO
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from co6co_web_db.utils import DbJSONEncoder as JSON_util
-from model.pos.where import UserFilterItems 
+from model.filters.UserFilterItems import UserFilterItems 
 from co6co_db_ext.res.result import Result,Page_Result 
 
 from services import authorized,generateUserToken

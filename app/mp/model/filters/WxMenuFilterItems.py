@@ -25,6 +25,8 @@ class WxMenuFilterItems(absFilterItems):
 		if  self.checkFieldValue(self.name):
 			filters_arr.append(WxMenuPO.name.like(f"%{self.name}%")) 
 		return filters_arr
+	def create_List_select():
+		raise Exception("为实现")
 	
 	def getDefaultOrderBy(self)->Tuple[InstrumentedAttribute]:
 		"""

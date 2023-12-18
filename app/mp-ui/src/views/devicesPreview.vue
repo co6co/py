@@ -1,30 +1,14 @@
 <template>
     <div>
         <div class="container">
-            <div class="header">
-                <div class="collapse-btn" @click="onSideBarBut">
-                    <el-icon v-if="sidebar.collapse"><Expand /></el-icon>
-                    <el-icon v-else><Fold /></el-icon>
-                </div>
-            </div>
-            <el-row :gutter="24">
-                <el-col :span="colsWidth.l">
-                    <el-input v-model="deviceName" placeholder="设备名称" />
-                    <el-tree
-                        @node-click="onNodeCheck"
-                        ref="tree"
-                        class="filter-tree"
-                        :data="tree_module.data"
-                        :props="tree_module.defaultProps"
-                        default-expand-all
-                        :filter-node-method="tree_module.filterNode"
-                    />
-                </el-col>
-                <el-col :span="colsWidth.c">
-                    <stream :sources="player.sources"></stream>
-                </el-col>
-                <el-col :span="colsWidth.r"><ptz @ptz="OnPtz"></ptz></el-col>
-            </el-row>
+            <van-button size="mini" @click="onToList()"
+                ><icon name="arrow-left"
+            /></van-button>
+            <van-skeleton title avatar :row="3" :loading="loading">
+                <stream :sources="player.sources"></stream>
+            </van-skeleton> 
+            <notice-bar left-icon="volume-o" :text="noticeMessage" />
+            <ptz @ptz="OnPtz"></ptz>
         </div>
     </div>
 </template>
@@ -40,118 +24,67 @@ import {
     onBeforeUnmount,
     computed
 } from "vue";
+
 import {
-    ElMessage,
-    ElMessageBox,
-    FormRules,
-    FormInstance,
-    ElTreeSelect
-} from "element-plus";
-import { TreeNode } from "element-plus/es/components/tree-v2/src/types";
-import { TreeNodeData } from "element-plus/es/components/tree/src/tree.type";
-import {
-    Delete,
-    Edit,
+    Image as VanImage,
+    Divider,
+    List,
     Search,
-    Compass,
-    MoreFilled,
-    Download
-} from "@element-plus/icons-vue";
+    Icon,
+    Grid,
+    GridItem,
+    Card,
+    NoticeBar,
+    Skeleton
+} from "vant";
 import * as api from "../api/device";
 import { stream, ptz } from "../components/stream";
 import { useMqtt } from "../utils/mqtting";
 
-import { useSidebarStore } from "../store/sidebar";
-const sidebar = useSidebarStore();
+import * as d from "../store/types/devices";
 
-interface ColsWidth {
-    l: 3 | 1 | 0;
-    c: 15 | 22 | 24;
-    r: 6 | 1 | 0;
-}
-const colsWidth = reactive<ColsWidth>({
-    l: 3,
-    c: 15,
-    r: 6
+import { useRouter } from "vue-router";
+import { useAppDataStore } from "../store/appStore";
+const loading = ref(true);
+const dataStore = useAppDataStore();
+const router = useRouter();
+const onToList = () => {
+    router.back();
+};
+onMounted(() => {
+    const rowData = <d.dataItem>dataStore.getState();
+    loadData(rowData);
+    loading.value = false;
 });
-const onSideBarBut = () => {
-    if (sidebar.collapse) {
-        colsWidth.l = 0;
-        colsWidth.c = 24;
-        colsWidth.r = 0;
-    } else {
-        colsWidth.l = 3;
-        colsWidth.c = 15;
-        colsWidth.r = 6;
-    }
-    sidebar.handleCollapse();
-};
-const deviceName = ref("");
-const tree = ref(null);
-
-interface Tree {
-    [key: string]: any;
+interface preview_module {
+    currentItem?: d.dataItem;
 }
-interface Query {
-    name: string;
-}
-interface dataItem {}
-interface tree_module {
-    query: Query;
-    data: Array<dataItem>;
-    currentItem?: dataItem;
-    total: number;
-    defaultProps: { children: String; label: String };
-    filterNode: (value: string, data: Tree) => boolean;
-}
-const tree_module = reactive<tree_module>({
-    query: {
-        name: ""
-    },
-    data: [],
-    total: -1,
-    filterNode: (value: string, data: Tree) => {
-        if (!value) return true;
-        return data.label.includes(value);
-    },
-    defaultProps: {
-        children: "children",
-        label: "name"
-    }
-});
-// 查询操作
-const onSearch = () => {
-    getData();
-};
-const getQuery = () => {};
-// 获取表格数据
-const getData = () => {
-    getQuery(),
-        api.list_svc(tree_module.query).then((res) => {
-            if (res.code == 0) {
-                tree_module.data = res.data;
-                tree_module.total = res.total || -1;
-            } else {
-                ElMessage.error(res.message);
-            }
-        });
-};
-getData();
+const preview_module = reactive<preview_module>({});
 /** 播放器 */
 interface player_sources {
     sources: Array<stream_source>;
 }
 const player = reactive<player_sources>({ sources: [] });
 
-const onNodeCheck = (item?: any) => {
-    tree_module.currentItem = item;
+const loadData = (item: d.dataItem) => {
+    preview_module.currentItem = item;
     player.sources = [
-           
-	  {url:`http://wx.co6co.top:452/flv/vlive/${item.ip}.flv`,name:"HTTP-FLV"}, 
-		{url:`ws://wx.co6co.top:452/ws-flv/vlive/${item.ip}.flv`,name:"WS-FLV"}, 
-		{url:`webrtc://wx.co6co.top:452/rtc/vlive/${item.ip}`,name:"webrtc"}, 
-		{url:`http://wx.co6co.top:452/vhls/${item.ip}/${item.ip}_live.m3u8`,name:"HLS(m3u8)"}
-    
+        {
+            url: `http://wx.co6co.top:452/flv/vlive/${item.ip}.flv`,
+            name: "HTTP-FLV"
+        },
+        {
+            url: `ws://wx.co6co.top:452/ws-flv/vlive/${item.ip}.flv`,
+            name: "WS-FLV"
+        },
+        {
+            url: `webrtc://wx.co6co.top:452/rtc/vlive/${item.ip}`,
+            name: "webrtc"
+        },
+        {
+            url: `http://wx.co6co.top:452/vhls/${item.ip}/${item.ip}_live.m3u8`,
+            name: "HLS(m3u8)"
+        }
     ];
 };
 /** ptz */
@@ -159,13 +92,16 @@ const { startMqtt, Ref_Mqtt } = useMqtt();
 interface mqttMessage {
     UUID?: string;
 }
+const noticeMessage = ref("");
 let arr: Array<mqttMessage> = [];
 startMqtt(
-    "WS://192.168.1.99:4451/mqtt",
+    "WS://wx.co6co.top:451/mqtt",
     "/edge_app_controller_reply",
     (topic: any, message: any) => {
         const msg: mqttMessage = JSON.parse(message.toString());
+        console.warn("收到信息", msg, typeof msg);
         arr.unshift(msg); //新增到数组起始位置
+        noticeMessage.value = JSON.stringify(msg);
         console.warn(unique(arr));
     }
 );
@@ -175,6 +111,7 @@ function unique(arr: Array<mqttMessage>) {
     return arr.filter((a) => !res.has(a.UUID) && res.set(a.UUID, 1));
 }
 const OnPtz = (name: string, type: string) => {
+    noticeMessage.value = "";
     let param = {
         payload: {
             BoardId: "RJ-BOX3-733E5155B1FBB3C3BB9EFC86EDDACA60",

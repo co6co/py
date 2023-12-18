@@ -7,7 +7,8 @@ from co6co_sanic_ext.utils import JSON_util
 import json
 
 from view_model.wx import wx_base_view
-from model.pos.wx_where import WxMenuFilterItems,WxMenuPO
+from model.filters.WxMenuFilterItems import WxMenuFilterItems
+from model.pos.wx import WxMenuPO
 from co6co_sanic_ext.model.res.result import Result
 from sanic.response import redirect
 from typing import List,Optional,Tuple
