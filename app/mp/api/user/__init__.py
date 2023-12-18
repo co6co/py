@@ -24,7 +24,7 @@ user_api = Blueprint("user_API", url_prefix="/user")
 async def ticket(request:Request,uuid:str):  
     async with request.ctx.session as session:  
         session:AsyncSession=session
-        select=(
+        select=( 
             Select(UserPO   )
             .join(AccountPO,isouter=True) 
             .filter( AccountPO.uid==uuid)

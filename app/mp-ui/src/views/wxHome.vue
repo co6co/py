@@ -111,4 +111,5 @@ body {
 .example-showcase .el-loading-mask {
     z-index: 9;
 }
+.content{overflow: auto;}
 </style>

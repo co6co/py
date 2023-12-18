@@ -29,8 +29,7 @@ class CameraFilterItems(absFilterItems):
 	def create_List_select(self):
 		select=(
 				Select(*self.listSelectFields)#.join(device.deviceCategoryPO,isouter=True)
-				.filter(and_(*self.filter())) 
-				.limit(self.limit).offset(self.offset)
+				.filter(and_(*self.filter()))  
 		) 
 		return select
 	
