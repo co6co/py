@@ -32,12 +32,13 @@ class IP_Cameras_View(AuthMethodView):
 
         async with request.ctx.session as session:
             session: AsyncSession = session
+            executer=  await session.execute(param.count_select)
+            total=executer.scalar()
+            
             result = await session.execute(param.list_select)
             result = result.mappings().all()
-            result = [dict(a) for a in result]
-
-            executer = await session.execute(param.count_select)
-            pageList = Page_Result.success(result, total=executer.scalar())
+            result = [dict(a) for a in result] 
+            pageList = Page_Result.success(result, total=total)
 
             await session.commit()
         return JSON_util.response(pageList)
