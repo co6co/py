@@ -5,11 +5,7 @@
         <div class="handle-box">
           <el-input v-model="table_module.query.name" placeholder="设备名称" class="handle-input mr10"></el-input>
           <el-select style="width:160px" class="mr10" v-model="table_module.query.category" placeholder="设备类别">
-             <!-- <el-option 
-  										v-for="item  in form_attach_data.flow_status" 
-  										:key="item.key" :label="item.label" :value="item.value"
-  					  /> -->
-            <el-option label="123456"></el-option>
+            <el-option v-for="item  in category_list" :key="item.id" :label="item.name" :value="item.id" />
           </el-select>
           <el-link type="primary" title="更多" @click="table_module.moreOption=!table_module.moreOption">
             <ElIcon :size="20">
@@ -17,6 +13,7 @@
             </ElIcon>
           </el-link>
           <el-button type="primary" :icon="Search" @click="onSearch">搜索</el-button>
+          <el-button type="primary" :icon="Search" @click="onSetting">补光灯设置</el-button>
         </div>
       </el-row>
       <el-row :gutter="24" v-if="table_module.moreOption">
@@ -44,12 +41,11 @@
           <el-table-column prop="categoryName" label="类别名称" width="119" sortable
             :show-overflow-tooltip="true"></el-table-column>
           <el-table-column prop="categoryCode" label="类别代码" width="119" sortable
-            :show-overflow-tooltip="true"></el-table-column> 
+            :show-overflow-tooltip="true"></el-table-column>
           <el-table-column width="160" prop="createTime" label="入库时间" sortable
             :show-overflow-tooltip="true"></el-table-column>
           <el-table-column label="操作" width="316" align="center">
             <template #default="scope">
-             
               <el-button text :icon="Edit" @click="onOpen2Dialog(scope.row)">
                 查看日志
               </el-button>
@@ -66,11 +62,23 @@
       </el-row>
     </div>
     <!-- 弹出框 -->
-    <el-dialog title="详细信息" v-model="form.dialogVisible" style="width:98%; height: 98%;" @keydown.ctrl="keyDown">
-      <details-info :data="form.data"></details-info>
+    <el-dialog title="设置补光灯" v-model="form.dialogVisible" style="width:98%; height: 98%;" @keydown.ctrl="keyDown">
+      <el-form label-width="70px">
+        <el-form-item label="开/关">
+          <el-switch v-model="form.allows" class="ml-2"
+            style="--el-switch-on-color: #13ce66; --el-switch-off-color: #ff4949" />
+        </el-form-item>
+        <el-form-item label="开始时间">
+          <el-time-select v-model="form.startTime" start="18:00" step="00:05" end="21:30" placeholder="选择时间" />
+        </el-form-item>
+        <el-form-item label="结束时间">
+          <el-time-select v-model="form.endTime" start="05:30" step="00:05" end="08:30" placeholder="选择时间" />
+        </el-form-item>
+      </el-form>
       <template #footer>
         <span class="dialog-footer">
           <el-button @click="form.dialogVisible = false">取 消</el-button>
+          <el-button type="primary" @click="onSave">确 定</el-button>
         </span>
       </template>
     </el-dialog>
@@ -121,7 +129,7 @@ interface TableRow {
 interface Query extends IpageParam {
   datetimes: Array<string>,
   name: String,
-  category: String,
+  category?: number,
 }
 interface table_module {
   query: Query,
@@ -130,14 +138,24 @@ interface table_module {
   currentRow?: TableRow,
   pageTotal: number,
 }
-
+interface Category {
+  id: number;
+  name: string;
+  code: string;
+}
+const category_list = ref<Array<Category>>(<Category[]>[])
+onMounted(async () => {
+  const res = await api.category_list_svc()
+  if (res.code == 0) {
+    category_list.value = res.data
+  }
+})
 
 const tableInstance = ref<any>(null);
 const currentTableItemIndex = ref<number>();
 const table_module = reactive<table_module>({
   query: {
     name: '',
-    category: '',
     datetimes: [],
     pageIndex: 1,
     pageSize: 15,
@@ -146,7 +164,7 @@ const table_module = reactive<table_module>({
   },
   moreOption: false,
   data: [],
-  pageTotal: -1,
+  pageTotal: 0,
 });
 const setDatetime = (t: number, i: number) => {
   let endDate = null
@@ -194,7 +212,7 @@ const getData = () => {
   api.list_svc(table_module.query).then(res => {
     if (res.code == 0) {
       table_module.data = res.data;
-      table_module.pageTotal = res.total || -1;
+      table_module.pageTotal = res.total || 0;
     } else {
       ElMessage.error(res.message);
     }
@@ -241,27 +259,39 @@ const keyDown = (e: KeyboardEvent) => {
   //process_view.value.keyDown(e) 
   e.stopPropagation()
 }
-//**详细信息 */
+//**补光灯设置 */
 interface dialogDataType {
-  dialogVisible: boolean,
-  data: Array<any>
+  dialogVisible: boolean;
+  allows?: boolean;
+  startTime: string;
+  endTime: string;
+  query?: Query;
 }
 let dialogData = {
   dialogVisible: false,
-  data: []
+  allows: true,
+  startTime: "20:00",
+  endTime: "07:00"
+
 }
 let form = reactive<dialogDataType>(dialogData);
-const onOpenDialog = (row?: any) => {
+
+const onSetting = () => {
   form.dialogVisible = true
-  table_module.currentRow = row
-  form.data = [
-    { name: "检测结果信息", data: str2Obj(row.alarmAttachPO.result) },
-    { name: "视频流信息", data: str2Obj(row.alarmAttachPO.media) },
-    { name: "GPS信息", data: str2Obj(row.alarmAttachPO.gps) }]
 }
-
-
-//**视频下信息 */
+const onSave = () => {
+  ElMessageBox.confirm(`确定要设置吗？`, '提示', {
+    type: 'warning'
+  })
+    .then(() => {
+      form.query = table_module.query
+      api.set_ligth_svc(form).then((res) => {
+        if (res.code == 0) ElMessage.success(res.message);
+        else ElMessage.error(res.message);
+      })
+    });
+}
+//**日志查看 */
 interface dialog2DataType {
   dialogVisible: boolean,
   data: Array<types.resourceOption>
@@ -271,25 +301,10 @@ let dialog2Data = {
   data: []
 }
 let form2 = ref<dialog2DataType>(dialog2Data);
-const setVideoResource = (uuid: string, option: types.videoOption) => {
-  res_api.request_resource_svc(import.meta.env.VITE_BASE_URL + `/api/resource/poster/${uuid}`).then(res => { option.poster = res }).catch(e => option.poster = "");
-  res_api.request_resource_svc(import.meta.env.VITE_BASE_URL + `/api/resource/${uuid}`).then(res => { option.url = res }).catch(e => option.url = "");
-}
-const setImageResource = (uuid: string, option: types.imageOption) => {
-  res_api.request_resource_svc(import.meta.env.VITE_BASE_URL + `/api/resource/${uuid}`).then(res => { option.url = res }).catch(e => option.url = "");
-}
-const getResultUrl = (uuid: string, isposter: boolean = false) => {
-  if (isposter) return import.meta.env.VITE_BASE_URL + `/api/resource/poster/${uuid}/700/600`;
-  return import.meta.env.VITE_BASE_URL + `/api/resource/${uuid}`
-}
 const onOpen2Dialog = (row: TableRow) => {
   form2.value.dialogVisible = true
   table_module.currentRow = row
-  form2.value.data = [
-    { url: getResultUrl(row.rawImageUid), name: "原始图片", poster: getResultUrl(row.rawImageUid, true), type: 1 },
-    { url: getResultUrl(row.markedImageUid), name: "标注图片", poster: getResultUrl(row.markedImageUid, true), type: 1 },
-    { url: "http://127.0.0.1:18000/flv/vlive/3.flv", name: "原始视频", poster: getResultUrl(row.videoUid, true), type: 0 },
-  ]
+  form2.value.data = []
 }
 
 //**end 打标签 */

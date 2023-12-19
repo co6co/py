@@ -42,6 +42,8 @@ import { Lock, User } from '@element-plus/icons-vue';
 import { login_svc } from '../api/login';
 import { json } from 'stream/consumers';
 
+import {setToken} from '../utils/auth'
+
 interface LoginInfo {
 	username: string;
 	password: string; 
@@ -66,8 +68,8 @@ const submitForm = (formEl: FormInstance | undefined) => {
 			login_svc({userName:param.username,password:param.password}).then(res=>{ 
 				message.value=res.message
 				if(res.code==0){ 
-					ElMessage.success(message.value);
-					localStorage.setItem("token",res.data)
+					ElMessage.success(message.value); 
+					setToken(res.data)
 					localStorage.setItem('ms_username', param.username);
 					const keys = permiss.defaultList[param.username == 'admin' ? 'admin' : 'user'];
 					permiss.handleSet(keys);

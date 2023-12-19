@@ -1,5 +1,5 @@
 import axios, {AxiosInstance, AxiosError, AxiosResponse, AxiosRequestConfig,InternalAxiosRequestConfig} from 'axios';
-import {getToken,setToken,removeToken} from "./auth"
+import {getToken,removeToken} from "./auth"
 import { ElLoading,ElMessage } from 'element-plus' 
 import { useRouter } from 'vue-router';
 import router from '../router/index';
@@ -15,8 +15,9 @@ const service:AxiosInstance = axios.create({
 let elLoading:ReturnType<typeof ElLoading.service >;
 //增加请求拦截器
 service.interceptors.request.use(
-    (config: InternalAxiosRequestConfig) => {//发送请求之前   
-        config.headers.Authorization="Bearer "+  localStorage.getItem("token" );  
+    (config: InternalAxiosRequestConfig) => {//发送请求之前 
+        let token=getToken() 
+        config.headers.Authorization="Bearer "+  token;  
         const noLogin= config.params&&config.params.noLogin
         if(!noLogin) elLoading = ElLoading.service({ fullscreen: true }) 
         else delete config.params.noLogin 
@@ -44,9 +45,12 @@ service.interceptors.response.use(
     (error: AxiosError) => {//不是 2xx 的触发 
         if(elLoading) elLoading.close(); 
         if(error.response?.status===403){ 
-            localStorage.removeItem('ms_username'); 
-	        router.push('/login'); 
-        }else if ( error.config&& error.config.responseType =="json") {
+            removeToken()  
+            ElMessage.error(`未认证、无权限或者认证信息已过期:${error.message}`)
+           router.push('/login'); 
+        }else if ( error.config && error.config.responseType =="json") {
+            ElMessage.error(`请求出现错误:${error.message}`)
+        }  else if ( error.config&& error.config.headers["Content-Type"] =="application/json") {
             ElMessage.error(`请求出现错误:${error.message}`)
         } 
         return Promise.reject(error);

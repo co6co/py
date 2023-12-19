@@ -16,8 +16,7 @@ from pathlib import Path
 def init (app:Sanic,customConfig):
     """ 
     初始化
-    """
-    log.warn(customConfig)
+    """ 
     attach_cors(app) 
     from api import api
     #from static import res 

@@ -8,7 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import scoped_session
 
 from co6co_web_db.utils import DbJSONEncoder as JSON_util
-from model.filters.userFilter  import UserFilterItems 
+from model.filters.UserFilterItems  import UserFilterItems 
 from co6co_db_ext.res.result import Result,Page_Result 
 
 from services import authorized,generateUserToken
@@ -19,23 +19,7 @@ from sqlalchemy.sql import Select
 
 user_api = Blueprint("user_API", url_prefix="/user")  
 
-
-
-@user_api.route("/ticket/<uuid:str>",methods=["POST",])
-async def ticket(request:Request,uuid:str):  
-    async with request.ctx.session as session:  
-        session:AsyncSession=session
-        select=(
-            Select(UserPO   )
-            .join(AccountPO,isouter=True) 
-            .filter( AccountPO.uid==uuid)
-        ) 
-        result= await session.execute(select)
-        user:UserPO=result.scalar()
-        log.warn(user)
-        token=await generateUserToken(request,user.to_dict())
-        await session.commit()
-        return  JSON_util.response(Result.success(data=token, message="登录成功")) 
+ 
     
 @user_api.route("/login",methods=["POST",])
 async def login(request:Request):  
@@ -43,17 +27,18 @@ async def login(request:Request):
     登录
     """
     try:
+        userName=request.json.get("userName")
+        password=request.json.get("password")
         where =UserFilterItems()
         where.__dict__.update(request.json)  
-        session:scoped_session=request.ctx.session 
-        operation=DbOperations(session) 
+        session:scoped_session=request.ctx.session  
         sql=(
-            Select(UserPO).where(UserPO.userName.__eq__(where.userName) )
+            Select(UserPO).where(UserPO.userName.__eq__(userName) )
         )
-        user:UserPO= session.execute(sql) .scalar()
+        user:UserPO= session.execute(sql).scalar()
         if user !=None:
-            log.err(f"encode:{user.encrypt(where.password)}")
-            if user.password==user.encrypt(where.password):  
+            log.err(f"encode:{user.encrypt(password)}")
+            if user.password==user.encrypt(password):  
                 token= await generateUserToken(request,user.to_dict())
                 return  JSON_util.response(Result.success(data=token, message="登录成功"))
             else :return JSON_util.response(Result.fail(message="密码不正确!"))
@@ -69,41 +54,21 @@ async def list(request:Request):
     列表
     """  
     param=UserFilterItems()
-    param.__dict__.update(request.json) 
-    async with request.ctx.session as session:  
-        session:AsyncSession=session 
-        opt=DbOperations(session)  
-        log.start_mark("un errr")
-        select=(
-            Select(UserPO.id,  UserPO.state,UserPO.createTime, UserPO.userName ,UserPO.userGroupId,UserGroupPO.name.label("groupName"),UserGroupPO.code.label("groupCode")  )
-            .join(UserGroupPO,isouter=True) 
-            .filter(and_(*param.filter()))
-            .limit(param.limit).offset(param.offset)  
-        ) 
-        '''
-        //todo  sqlalchemy.engine.row import RowMapping   to JSON 
-          '''
-        result=await session.execute(select)
-        result=result.mappings().all()
-        result=[dict(a)  for a in  result]    
-        ''' result=await session.execute(select)
-        result =[dict(zip(a._fields,a))  for a in  result] 
-        '''
-        
-        select=(
-            Select( func.count( )).select_from(
-                 Select(UserPO.id)
-                .join(UserGroupPO,isouter=True) 
-                .filter(and_(*param.filter()))
-            )
-        ) 
-        totalResult= await session.execute(select)  
-        total=totalResult.scalar_one()
-        log.warn(type(result))
-        
-        pageResult=Page_Result.success(result ,total=total)  
-        await opt.commit()
-        return JSON_util.response(pageResult )
+    param.__dict__.update(request.json)  
+    session:scoped_session= request.ctx.session 
+    
+    result=  session.execute(param.list_select)
+    result=result.mappings().all()
+    result=[dict(a)  for a in  result]    
+    ''' result=await session.execute(select)
+    result =[dict(zip(a._fields,a))  for a in  result] 
+    ''' 
+    totalResult=   session.execute(param.count_select)  
+    total=totalResult.scalar_one()
+    
+    pageResult=Page_Result.success(result ,total=total)  
+     
+    return JSON_util.response(pageResult )
 
 @user_api.route("/exist/<userName:str>",methods=["GET", "POST",])
 @authorized

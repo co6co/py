@@ -16,11 +16,12 @@ class devicePo(TimeStampedModelPO):
     __tablename__="device_table"
     id:Mapped[int] =mapped_column( BigInteger, primary_key=True,autoincrement=True)
     ip:Mapped[str]=mapped_column(String(16)  ,nullable=False,unique=True)
-    category:Mapped[int]=mapped_column(INTEGER ,nullable=False ,comment="设备类型")
+    #category:Mapped[int]=mapped_column(INTEGER ,nullable=False ,comment="设备类型")
     category=Column("category_id",ForeignKey(f"device_category.id",ondelete="CASCADE"))
     vendor:Mapped[int]=mapped_column(INTEGER ,nullable=False ,server_default="1", comment="设备产生:1:海康,2:宇视,3:大华")
     name:Mapped[str]=mapped_column(String(64)  )
     code:Mapped[str]=mapped_column(String(32)  )
+    taskState=Column("task_state",INTEGER)
     categoryPO:Mapped["deviceCategoryPO"]=relationship(back_populates="devicePOs")
     deviceLogPOs:Mapped[List["deviceLogPo"]]=relationship(back_populates="devicePO")
      
