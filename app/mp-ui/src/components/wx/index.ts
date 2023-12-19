@@ -1,9 +1,7 @@
-import { ref, reactive } from "vue";
-import { randomString } from "../../utils";
-import alarmTableVue from "../../views/alarmTable.vue";
+import { ref, reactive } from "vue"; 
 
-const appid = import.meta.env.VITE_WX_appid;
-const debug = import.meta.env.VITE_IS_DEBUG;
+const appid = import.meta.env.VITE_WX_appid; 
+const debug = Boolean( Number(import.meta.env.VITE_IS_DEBUG)); 
 //const redirect_uri = import.meta.env.VITE_WX_redirect_uri;
 //let stateCode = randomString(18);
 

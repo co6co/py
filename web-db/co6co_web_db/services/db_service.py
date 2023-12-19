@@ -24,6 +24,7 @@ def injectDbSessionFactory(app:Sanic,settings:dict={},engineUrl:str=None ):
     挂在 DBSession_factory
     """
     service=db_service(settings,engineUrl)
+    app.ctx.service=service
     service.sync_init_tables() 
     '''
     @app.main_process_start

@@ -13,6 +13,8 @@ import argparse
 from co6co_sanic_ext .model.res .result import Result
 from pathlib import Path
 
+from view_model.tasks.devices_tasks import update_device_poster_task
+
 '''from model.pos.right import *  
 from model.pos.biz import *
 from model.pos.wx import * '''
@@ -33,12 +35,12 @@ def init (app:Sanic,customConfig):
    # service.sync_init_tables() 
     injectDbSessionFactory(app,app.config.db_settings) 
     app.blueprint(api)
+    app.add_task(update_device_poster_task(app))
 
  
          
  
-if __name__ == "__main__":    
-    
+if __name__ == "__main__":     
     parser=argparse.ArgumentParser(description="audit service.")
     parser.add_argument("-c","--config",default="app_config.json")
     args=parser.parse_args() 

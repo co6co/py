@@ -93,14 +93,16 @@ const router = useRouter()
 
 const dataStore=useAppDataStore() 
 const onOpenPage=(path:string,row:any)=>{ 
-	dataStore.setState(row) 
+	dataStore.setState(row)  
 	router.push({
 		path: path,
 		//后面两个参数没用到
+		/**
 		query: {
 			mode: "edit",
 		},
 		params:{data:"123456"}, 
+		 */
 	});
 }
 

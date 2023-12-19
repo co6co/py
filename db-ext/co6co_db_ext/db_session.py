@@ -14,6 +14,7 @@ import asyncio,time ,typing
 from typing import TypeVar
 from co6co.utils import log
 from co6co_db_ext.po import BasePO
+from sqlalchemy.pool import NullPool
 
 class db_service:
     session:scoped_session  # 同步连接
@@ -22,11 +23,11 @@ class db_service:
     def _createEngine(self, url:str ):
         self.useAsync=True
         if "sqlite" not in  url: 
-            self.engine = create_async_engine(url, echo=True )  
+            self.engine = create_async_engine(url, echo=True,poolclass=NullPool)  
             self.async_session_factory  = sessionmaker(self.engine, expire_on_commit=False,class_=AsyncSession)# AsyncSession,
         else:
             self.useAsync=False
-            self.engine =create_engine(url,echo= True)
+            self.engine =create_engine(url,echo= True,poolclass=NullPool)  
             self.session=scoped_session( sessionmaker(autoflush=False, autocommit=False,bind=self.engine) ) 
             BasePO.query=self.session.query_property()
         self.base_model_session_ctx = ContextVar("session") 

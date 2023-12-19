@@ -44,5 +44,8 @@ class wx_menu_state(Base_EC_Enum):
     failed="failed","推送失败",9
 
 class device_type(Base_Enum):
+     """
+     设备类型
+     """
      box="盒子",1
      ip_camera="网络摄像机",2

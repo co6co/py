@@ -14,4 +14,4 @@ biz_api.add_route(Alarms_View.as_view(),"/biz/alarm",name="alarms")
 biz_api.add_route(Alarm_View.as_view(),"/biz/alarm/<pk:int>",name="alarm") 
 
 biz_api.add_route(IP_Cameras_View.as_view(),"/biz/device/camera",name=IP_Cameras_View.__name__) 
-biz_api.add_route(IP_Camera_View.as_view(),"/biz/device/camera/<pk:int>",name=IP_Camera_View.__name__) 
+biz_api.add_route(IP_Camera_View.as_view(),"/biz/device/poster/<pk:int>",name=IP_Camera_View.__name__) 

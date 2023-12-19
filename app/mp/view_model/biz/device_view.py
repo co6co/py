@@ -12,7 +12,7 @@ from co6co.utils import log
 from model.filters.DeviceFilterItems import CameraFilterItems
 
 from view_model.base_view import AuthMethodView
-from model.pos.biz import bizDevicePo
+from model.pos.biz import bizDevicePo,bizCameraPO
 from co6co_sanic_ext.model.res.result import Page_Result
 from sqlalchemy.sql import Select
 
@@ -26,20 +26,19 @@ class IP_Cameras_View(AuthMethodView):
     async def post(self, request: Request):
         """
         获取相机设备 list
+        
+         未知原因 dbsession 会卡住
         """
         param = CameraFilterItems()
-        param.__dict__.update(request.json)
-
+        param.__dict__.update(request.json) 
         async with request.ctx.session as session:
             session: AsyncSession = session
             executer=  await session.execute(param.count_select)
-            total=executer.scalar()
-            
+            total=executer.scalar() 
             result = await session.execute(param.list_select)
             result = result.mappings().all()
             result = [dict(a) for a in result] 
-            pageList = Page_Result.success(result, total=total)
-
+            pageList = Page_Result.success(result, total=total) 
             await session.commit()
         return JSON_util.response(pageList)
 
@@ -51,10 +50,8 @@ class IP_Camera_View(Image_View):
         """   
         async with request.ctx.session as session:
             session: AsyncSession = session
-            one: bizDevicePo= await session.get_one(bizDevicePo,pk)
-            if one!=None:
-                url=f"http://wx.co6co.top:452/flv/vlive/{one.ip}.flv"
-                return await self.screenshot(url)
-            await session.commit()
-            
+            one: bizCameraPO= await session.get_one(bizCameraPO,pk)
+            if one!=None and one.poster !=None and os.path.exists(one.poster) :
+                return await file(one.poster,mime_type="image/jpeg")  
+            await session.commit() 
         return empty(status=404)

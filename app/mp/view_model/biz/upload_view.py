@@ -97,27 +97,36 @@ class Video_Upload_View(Upload_view):
         file:multipart.MultipartPart=files.get("Video") 
         if file==None:return  JSON_util.response(m.Video_Response.fail("上传[file['Video']]未找到视频文件"))
         
-        #2. 保存到数据库
-        async with request.ctx.session as session:
-            ## 1.1 查询以前是否上传过
-            session:AsyncSession=session
-            operation=DbOperations(session)
-            uid=self.createResourceUUID(file.filename)
-             
-            isExist=await operation.exist(bizResourcePO.uid==uid,bizAlarmAttachPO.id)
-            if not isExist: 
-                fullPath,filePath=self.getFullPath(root,file.filename)
-                file.save_as(fullPath) 
-                device_id=await get_Device_id(operation,p,True) 
-                po:bizResourcePO =await self.saveResourceToDb(operation,device_id,resource_category.video, filePath,uid= uid) 
-                await session.commit() 
-            else:
-                session.close
-            # 返回响应 
-            res:m.Video_Response=m.Video_Response.success() 
-            log.err(f"返回的VideoID：uid:{uid},id:{po.id}")
-            res.VideoId=uid 
+        try:
+            #2. 保存到数据库
+            async with request.ctx.session as session:
+                ## 1.1 查询以前是否上传过
+                session:AsyncSession=session
+                operation=DbOperations(session)
+                uid=self.createResourceUUID(file.filename)
+                
+                isExist=await operation.exist(bizResourcePO.uid==uid,column=bizResourcePO.id)
+                log.warn(f"isExist:{isExist}")
+                if not isExist: 
+                    fullPath,filePath=self.getFullPath(root,file.filename)
+                    file.save_as(fullPath) 
+                    device_id=await get_Device_id(operation,p,True) 
+                    po:bizResourcePO =await self.saveResourceToDb(operation,device_id,resource_category.video, filePath,uid= uid) 
+                    await session.commit() 
+                    log.err(f"返回的VideoID：uid:{uid},id:{po.id}") 
+                else:
+                    log.err(f"返回的VideoID：uid:{uid} 已存在！") 
+                # 返回响应 
+                res:m.Video_Response=m.Video_Response.success()  
+                res.VideoId="0" 
+                return JSON_util.response(res)
+        except Exception as e:
+            log.err(f"上传视频失败：{e}")
+            # 为了继续上传影响业务 ，返回成功
+            res:m.Video_Response=m.Video_Response.success()  
+            res.VideoId="0" 
             return JSON_util.response(res)
+              
 
 
 class Alarm_Upload_View(Upload_view):
@@ -205,5 +214,6 @@ class Alarm_Upload_View(Upload_view):
                 return JSON_util.response(res)
 
         except Exception as e:
-            res:m.Response=m.Response.fail(message=str(e))
+            log.err(f"上告警失败：{e}")
+            res:m.Response=m.Response.success( )
             return JSON_util.response(res) 

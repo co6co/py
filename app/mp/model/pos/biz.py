@@ -8,7 +8,7 @@ import uuid
 
 class bizDevicePo(TimeStampedModelPO):
     """
-    盒子设备
+    设备
     """
     __tablename__ = "biz_device" 
     id = Column("id",Integer,comment="主键",autoincrement=True, primary_key=True)
@@ -18,6 +18,20 @@ class bizDevicePo(TimeStampedModelPO):
     ip=Column("ip",String(64),comment="外网IP")
     name=Column("name",String(64),comment="设备名称") 
     resourcesPO=Relationship("bizResourcePO",back_populates="devicePO",uselist=True,passive_deletes=True)
+    cameraPO=Relationship("bizCameraPO",back_populates="devicePo")
+
+class bizCameraPO(UserTimeStampedModelPO):
+    """
+    摄像头设备
+    """
+    __tablename__ = "biz_camera" 
+    id = Column("id",ForeignKey(f"biz_device.id",ondelete="CASCADE"), primary_key=True)
+    poster = Column("poster",String(255)) 
+    streams = Column("stream_urls",String(2048),comment="json 对象[{url:xx,name:xx}]") 
+    devicePo=Relationship("bizDevicePo",back_populates="cameraPO")
+
+
+
 
 class bizResourcePO(BasePO):
     """

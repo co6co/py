@@ -45,8 +45,7 @@ const routes: RouteRecordRaw[] = [
                 meta: {
                     title: '告警详情',
                     permiss: '2',
-                },
-                
+                }, 
                 component: () => import( '../views/alarmDetail.vue'),
             }, 
             {
@@ -66,10 +65,8 @@ const routes: RouteRecordRaw[] = [
                     permiss: '2',
                 },
                 component: () => import( '../views/alarmPreview.vue'),
-            }, 
-           
-            
-            
+            },  
+
             {
                 path: '/preview.html',
                 name: 'preview',

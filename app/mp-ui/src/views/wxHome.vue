@@ -21,14 +21,12 @@ import { getRedirectUrl } from "../components/wx";
 
 import { useTagsStore } from "../store/tags";
 import vTags from "../components/tags.vue";
-import { getTokes, setTokes } from "../utils/auth";
+import { getToken, setToken } from "../utils/auth";
 import { ticket_svc } from "../api/user";
-import { showNotify } from 'vant';
- 
- 
+import { showNotify } from "vant";
 
 const tags = useTagsStore();
-const debug = import.meta.env.VITE_IS_DEBUG;
+const debug = Boolean( Number(import.meta.env.VITE_IS_DEBUG)); 
 
 const getUrl = () => {
     let url = document.location.toString();
@@ -59,14 +57,15 @@ function getQueryVariable(key: string) {
     return null;
 }
 
-let token = getTokes();
+let token = getToken();
 const tokenRef = ref(token);
 const ticket = getQueryVariable("ticket");
-if (ticket)  showNotify({type:"success" ,  message: ticket }); 
-const tokenChange = () => {
-    if (debug)console.info(tokenRef.value, ticket);
-    else if (!tokenRef.value || !ticket) {
+//if (ticket) showNotify({ type: "success", message: ticket });
+const tokenChange = () => { 
+    if (debug) console.info(ticket);
+    else if (tokenRef.value == null || ticket == null) {
         const backUrk = ref();
+        showNotify({ type: "warning", message: `跳转` });
         const redirect_uri = import.meta.env.VITE_WX_redirect_uri;
         const scope = 1;
         let redirectUrl = "";
@@ -93,15 +92,15 @@ watchEffect(() => {
 if (ticket) {
     ticket_svc(ticket).then((res) => {
         if (res.code == 0)
-            setTokes(res.data),
-                (tokenRef.value = getTokes()),
+            setToken(res.data),
+                (tokenRef.value = getToken()),
                 (loading.value = false);
-        else showNotify({ type: 'danger', message: res.message });  
+        else showNotify({ type: "danger", message: res.message });
     });
 }
 const loading = ref(true);
 onMounted(() => {
-    loading.value=false
+    loading.value = false;
 });
 </script>
 <style lang="less">
@@ -111,5 +110,7 @@ body {
 .example-showcase .el-loading-mask {
     z-index: 9;
 }
-.content{overflow: auto;}
+.content {
+    overflow: auto;
+}
 </style>

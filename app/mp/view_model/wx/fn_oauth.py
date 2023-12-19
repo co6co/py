@@ -56,25 +56,12 @@ def oauth_debug(method):
         #res.add_cookie("Authorization",token) 
         return res 
     return warpper
-def oauth(method):
-    """
-    微信页面 认证
-    """
-    @wraps(method)
-    async def  warpper(request:Request,param:Authon_param ):  
-        config=get_wx_config(request,param.appid) 
-        # 这样需要优化 ，仅第一次需要调用其他需要调用刷新
-        oauth=WeChatOAuth(param.appid, config.appSecret, param.url, scope=param.scope.key, state=param.state) 
-        #oauth .check_access_token()
-        # 第二步 通过code换取网页授权access_token
-        data=oauth.fetch_access_token(param.code) 
-        log.warn(data)
 
-        # 第三步 刷新 access_token
-        #access_token拥有较短的有效期，当access_token超时后，
-        # 可以使用refresh_token进行刷新，refresh_token有效期为30天，当refresh_token失效之后，需要用户重新授权。
-        #oauth.refresh_access_token(data.refresh_token)
-
+async def get_snsapi_userinfo(oauth:WeChatOAuth,request:Request,param:Authon_param):
+    """
+    获取用户信息入库
+    """
+    try:
         if param.scope==wx_authon_scope.snsapi_userinfo: 
             # 第四步 获取用户信息
             user=oauth.get_user_info()  
@@ -97,6 +84,33 @@ def oauth(method):
             #return res
         else:
             log.warn(param.appid) 
+    except Exception as e:
+        log.warn(f"获取微信用户失败：{e}")
+        return redirect(f"{param.url}",status=403) 
+
+def oauth(method):
+    """
+    微信页面 认证
+    """
+    @wraps(method)
+    async def  warpper(request:Request,param:Authon_param ):  
+        try: 
+            config=get_wx_config(request,param.appid) 
+            # 这样需要优化 ，仅第一次需要调用其他需要调用刷新
+            oauth=WeChatOAuth(param.appid, config.appSecret, param.url, scope=param.scope.key, state=param.state) 
+            #oauth .check_access_token()
+            # 第二步 通过code换取网页授权access_token
+            data=oauth.fetch_access_token(param.code)  
+            log.info(f"access_token:{data}")
+
+            # 第三步 刷新 access_token
+            #access_token拥有较短的有效期，当access_token超时后，
+            # 可以使用refresh_token进行刷新，refresh_token有效期为30天，当refresh_token失效之后，需要用户重新授权。
+            #oauth.refresh_access_token(data.refresh_token)
+            return await get_snsapi_userinfo(oauth,request,param)
+        except Exception as e:
+            log.warn(f"通过code 换取 access失败：{e}")
+            return redirect(f"{param.url}",status=403)   
        
         return redirect(param.url )
         return method(*args, **kwargs)

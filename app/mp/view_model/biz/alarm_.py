@@ -3,7 +3,9 @@ from sqlalchemy .orm.attributes import InstrumentedAttribute
 from typing import Tuple,List
 from co6co_db_ext.db_filter import absFilterItems
 from co6co.utils import log
-from sqlalchemy import or_,and_
+from sqlalchemy import or_,and_,Select
+from co6co_db_ext .db_operations import joinedload
+
 
 class AlarmFilterItems(absFilterItems):
     """
@@ -25,7 +27,14 @@ class AlarmFilterItems(absFilterItems):
         if self.datetimes and len( self.datetimes)==2:
             filters_arr.append(bizAlarmPO.alarmTime.between(self.datetimes[0],self.datetimes[1]))  
         return filters_arr
-
+    
+    def create_List_select(self):
+        select=(
+                 Select(bizAlarmPO) 
+                .options(joinedload(bizAlarmPO.alarmTypePO)) 
+                .options(joinedload(bizAlarmPO.alarmAttachPO)) 
+        ) 
+        return select
     def getDefaultOrderBy(self)->Tuple[InstrumentedAttribute]:
         """
         默认排序

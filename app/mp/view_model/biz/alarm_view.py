@@ -26,25 +26,15 @@ class Alarms_View(AuthMethodView):
         """ 
         filterItems=AlarmFilterItems()
         filterItems.__dict__.update(request.json)
+        #return JSON_util.response(Page_Result.fail())
         async with request.ctx.session as session:  
-            session:AsyncSession=session 
+            session:AsyncSession=session  
+            total=await session.execute(filterItems.count_select)
+            total=total.scalar()
+            #result=await session.execute(filterItems.list_select)
+            # total= result.scalars().fetchall()  
             opt=DbOperations(session)  
-            select=(
-                 Select(bizAlarmPO) 
-                .options(joinedload(bizAlarmPO.alarmTypePO)) 
-                .options(joinedload(bizAlarmPO.alarmAttachPO)) 
-                .filter(and_(*filterItems.filter()))
-                .limit(filterItems.limit).offset(filterItems.offset)
-            )  
-            result= await opt._get_list(select,True) 
-            select=(
-                Select( func.count( )).select_from(
-                    Select(bizAlarmPO.id) 
-                    .options(joinedload(bizAlarmPO.alarmTypePO))
-                    .filter(and_(*filterItems.filter()))
-                )
-            ) 
-            total= await opt._get_scalar(select)  
+            result=await opt._get_list(filterItems.list_select,True)  
             pageList=Page_Result.success(result,total=total)  
             await session.commit() 
         return JSON_util.response(pageList)

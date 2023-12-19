@@ -1,15 +1,16 @@
 <template>
     <div>
-        <div class="container">
-            <van-button size="mini" @click="onToList()"
-                ><icon name="arrow-left"
-            /></van-button>
-            <van-skeleton title avatar :row="3" :loading="loading">
-                <stream :sources="player.sources"></stream>
-            </van-skeleton> 
-            <notice-bar left-icon="volume-o" :text="noticeMessage" />
+        <van-button size="mini" @click="onToList()"
+            ><icon name="arrow-left"
+        /></van-button>
+        <van-skeleton title avatar :row="3" :loading="loading">
+            <stream :sources="player.sources"></stream>
+        </van-skeleton>
+        <notice-bar left-icon="volume-o" :text="noticeMessage" />
+        <div style="text-align: center;">
             <ptz @ptz="OnPtz"></ptz>
         </div>
+      
     </div>
 </template>
 <script setup lang="ts" name="basetable">
@@ -65,10 +66,11 @@ interface player_sources {
     sources: Array<stream_source>;
 }
 const player = reactive<player_sources>({ sources: [] });
-
+const tet = ref();
 const loadData = (item: d.dataItem) => {
     preview_module.currentItem = item;
-    player.sources = [
+    if (item.streams) player.sources = item.streams;
+    /** [
         {
             url: `http://wx.co6co.top:452/flv/vlive/${item.ip}.flv`,
             name: "HTTP-FLV"
@@ -85,7 +87,7 @@ const loadData = (item: d.dataItem) => {
             url: `http://wx.co6co.top:452/vhls/${item.ip}/${item.ip}_live.m3u8`,
             name: "HLS(m3u8)"
         }
-    ];
+    ]; */
 };
 /** ptz */
 const { startMqtt, Ref_Mqtt } = useMqtt();

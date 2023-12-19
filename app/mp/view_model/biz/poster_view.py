@@ -54,9 +54,7 @@ class Image_View(BaseMethodView):
         """
         log.warn(fullPath)
         if (isFile and os.path.exists(fullPath)) or fullPath:
-            try:
-                
-               
+            try: 
                 cap =cv2.VideoCapture(fullPath) # 打开视频
                 cap.set(cv2.CAP_PROP_FPS, 30)
                 cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1920)

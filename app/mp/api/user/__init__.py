@@ -21,11 +21,11 @@ user_api = Blueprint("user_API", url_prefix="/user")
 
 
 @user_api.route("/ticket/<uuid:str>",methods=["POST",])
-async def ticket(request:Request,uuid:str):  
+async def ticket(request:Request,uuid:str): 
     async with request.ctx.session as session:  
         session:AsyncSession=session
         select=( 
-            Select(UserPO   )
+            Select(UserPO)
             .join(AccountPO,isouter=True) 
             .filter( AccountPO.uid==uuid)
         ) 
