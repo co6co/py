@@ -20,6 +20,6 @@ class JSON_util(sys_json.JSONEncoder):
         return None
     
     def response(res:any,jsonEncoder:sys_json.JSONEncoder=None):
-        if jsonEncoder==None: return res_json(JSON_util().encode(res))
-        else: return res_json(jsonEncoder.encode(res))
+        if jsonEncoder==None: return res_json(sys_json.loads(JSON_util().encode(res)))
+        else: return res_json(sys_json.loads(jsonEncoder.encode(res)))
     

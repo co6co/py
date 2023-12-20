@@ -2,6 +2,10 @@ import { createRouter, createWebHashHistory, RouteRecordRaw } from 'vue-router';
 import { usePermissStore } from '../store/permiss';
 import Home from '../views/home.vue';
 
+import { getToken, removeToken } from '../utils/auth';
+import { Storage } from '../store/Storage';
+
+const storeage=new Storage()
 const routes: RouteRecordRaw[] = [
     {
         path: '/',
@@ -211,9 +215,10 @@ const router = createRouter({
 
 router.beforeEach((to, from, next) => {
     document.title = `${to.meta.title} `;
-    const role = localStorage.getItem('ms_username');
-    const permiss = usePermissStore();
-    if (!role && to.path !== '/login') {
+    const role =storeage.get("username") 
+    const permiss = usePermissStore();  
+    let token = getToken();
+    if (!token && to.path !== '/login') {
         next('/login');
     } else if (to.meta.permiss && !permiss.key.includes(to.meta.permiss)) {
         // 如果没有权限，则进入403

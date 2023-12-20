@@ -15,6 +15,7 @@ export const download_blob_resource=(resource:{data:Blob,fileName:string})=>{
   window.URL.revokeObjectURL(link.href) 
 }
 // 请求文件资源
+//todo mp 端 没有 baseURL:""
 export const request_resource_svc=async (url:string,axios_config:AxiosRequestConfig={method:"get", responseType :"blob"}) =>{ 
     let default_config:{method:Method, url:string,  baseURL:"",   timeout:number,params:any}={
         method:'get',//请求方式

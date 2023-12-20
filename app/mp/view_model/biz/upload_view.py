@@ -56,6 +56,7 @@ class Upload_view(BaseMethodView):
                 index=name.index("_")+1
                 result=name[index:].lower()
                 if len(result)==36:return result
+            elif len(name)==36:return fileName
         return str(uuid.uuid4())   
     
     async def saveResourceToDb(self,opt:DbOperations,device_id,category:resource_category,path:str,sub_category:int=None,uid:str=None)->bizResourcePO:
@@ -106,26 +107,26 @@ class Video_Upload_View(Upload_view):
                 uid=self.createResourceUUID(file.filename)
                 
                 isExist=await operation.exist(bizResourcePO.uid==uid,column=bizResourcePO.id)
-                log.warn(f"isExist:{isExist}")
+                
                 if not isExist: 
                     fullPath,filePath=self.getFullPath(root,file.filename)
                     file.save_as(fullPath) 
                     device_id=await get_Device_id(operation,p,True) 
                     po:bizResourcePO =await self.saveResourceToDb(operation,device_id,resource_category.video, filePath,uid= uid) 
                     await session.commit() 
-                    log.err(f"返回的VideoID：uid:{uid},id:{po.id}") 
+                    log.succ(f"返回的VideoID：uid:{uid},id:{po.id}") 
                 else:
-                    log.err(f"返回的VideoID：uid:{uid} 已存在！") 
+                    log.warn(f"返回的VideoID：uid:{uid} 已存在！") 
                 # 返回响应 
                 res:m.Video_Response=m.Video_Response.success()  
-                res.VideoId="0" 
+                res.VideoId=uid 
                 return JSON_util.response(res)
         except Exception as e:
             log.err(f"上传视频失败：{e}")
             # 为了继续上传影响业务 ，返回成功
-            res:m.Video_Response=m.Video_Response.success()  
-            res.VideoId="0" 
-            return JSON_util.response(res)
+            res:m.Video_Response=m.Video_Response.fail()  
+            res.VideoId="-1" 
+            return  JSON_util.response(res)
               
 
 
@@ -172,6 +173,7 @@ class Alarm_Upload_View(Upload_view):
         p=m.Alert_Param() 
         p.__dict__.update(request.json )
         p.ip=request.client_ip
+        log.warn(p.VideoFile)
         request.app.add_task(self. syncCheckEntity( request.app,p),name="同步检测类型")
         ## debug
         await self.save_body(request,get_upload_path(request.app.config))
@@ -190,10 +192,10 @@ class Alarm_Upload_View(Upload_view):
                 await self. saveResourceToDb(opt,device_id,resource_category.image,p2,sub_category=resource_image_sub_category.marked.val,uid=u2)
                 await opt.commit()
                 po=p.to_po()  
-                result= await opt.exist(bizAlarmPO.uuid==po.uuid)
-                log.warn(result)
+                result= await opt.exist(bizAlarmPO.uuid==po.uuid) 
                 if result: 
                     res:m.Response=m.Response.success(message=f"数据“{po.uuid}”重复上传")
+                    log.warn(f"告警信息删除重复{po.uuid}")
                     return JSON_util.response(res)
                 
                 po.videoUid=self.createResourceUUID(p.VideoFile)
@@ -204,9 +206,9 @@ class Alarm_Upload_View(Upload_view):
                 poa.gps=json.dumps(p.GPS)
                 poa.media=json.dumps(p.Media )
                 session.add(po)
-                log.warn(f"提交前：{po.id}")
+                #log.warn(f"提交前：{po.id}")
                 await opt.commit()
-                log.warn(f"提交后：{po.id}")
+                #log.warn(f"提交后：{po.id}")
                 poa.id=po.id
                 opt.add_all([poa]) 
                 await opt.commit()
@@ -215,5 +217,5 @@ class Alarm_Upload_View(Upload_view):
 
         except Exception as e:
             log.err(f"上告警失败：{e}")
-            res:m.Response=m.Response.success( )
+            res:m.Response=m.Response.fail( message=e)
             return JSON_util.response(res) 

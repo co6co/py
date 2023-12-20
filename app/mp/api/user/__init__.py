@@ -51,8 +51,8 @@ async def login(request:Request):
         log.err(dir(user))
         if user !=None:
             log.err(f"encode:{user.encrypt(where.password)}")
-            if user.password==user.encrypt(where.password):  
-                token=await generateUserToken(request,user.to_dict())
+            if user.password==user.encrypt(where.password):   
+                token=await generateUserToken(request,user.to_dict(),7200)
                 return  JSON_util.response(Result.success(data=token, message="登录成功"))
             else :return JSON_util.response(Result.fail(message="密码不正确!"))
         return  JSON_util.response(Result.fail(message="登录用户名不存在!"))

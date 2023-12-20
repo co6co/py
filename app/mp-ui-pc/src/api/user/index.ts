@@ -29,3 +29,4 @@ export const currentUser_svc = ( ): Promise<IResponse> => {
 export const get_user_name_List_svc =( ): Promise<IResponse> => {
     return request.get(`${BASE_URL}/userList`);
 };
+

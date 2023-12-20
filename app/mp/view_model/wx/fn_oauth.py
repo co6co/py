@@ -1,6 +1,6 @@
 from functools import wraps
 from sanic.request import Request
-from services import generateUserToken,getAccountuuid
+from services import  getAccountuuid
 from view_model.wx import crate_wx_cliet,get_wx_config
 from wechatpy.oauth import WeChatOAuth
 from sanic.response import text,raw,redirect
@@ -47,8 +47,7 @@ class Authon_param:
 
 def oauth_debug(method):
     @wraps(method)
-    async def  warpper(request:Request,param:Authon_param ):  
-        #token=await generateUserToken(request,userOpenId="oPwvL6J2X9Ynytuo5agMLgKGVJQI")
+    async def  warpper(request:Request,param:Authon_param ):   
 
         uuid=await getAccountuuid(request,userOpenId="oPwvL6J2X9Ynytuo5agMLgKGVJQI") 
         res=redirect(f"{param.url}?ticket={uuid}") 
@@ -74,8 +73,7 @@ async def get_snsapi_userinfo(oauth:WeChatOAuth,request:Request,param:Authon_par
             #asyncio.run(oauth_wx_user_to_db(request,wxUser)) #已经启动的事件循环中调用 asyncio.run()，就会出现事件循环冲突的问题
             #loop = asyncio.get_event_loop()
             #loop.run_until_complete(oauth_wx_user_to_db(request,wxUser)) 
-            await oauth_wx_user_to_db(request,wx_user)
-            #token=await generateUserToken(request,userOpenId=wx_user.openid)
+            await oauth_wx_user_to_db(request,wx_user) 
             uuid=await getAccountuuid(request,userOpenId=wx_user.openid) 
             log.err(f"{param.url}?ticket={uuid}")
             return redirect(f"{param.url}?ticket={uuid}") 

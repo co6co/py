@@ -67,7 +67,7 @@ class Image_View(BaseMethodView):
                     s='tmp/frame_%s.jpg' %datetime.datetime.now().strftime('%H%M%S%f')
                     fram=self.resize_image(fram,w,h)
                     cv2.imwrite(s, fram) 
-                    res= await file(fram,mime_type="image/jpeg")  
+                    res= await file(s,mime_type="image/jpeg")  
                     return res  
             finally:
                 #if s !=None:os.remove(s)

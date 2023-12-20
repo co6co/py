@@ -18,16 +18,15 @@ from sqlalchemy.sql import Select
 
 from model.enum import device_type
 import os,cv2,datetime
-from sanic.response import file,empty
+from sanic.response import file,empty,json
+from sqlalchemy.engine.row import RowMapping
 
 from view_model.biz.poster_view import Image_View
 class IP_Cameras_View(AuthMethodView):
 
     async def post(self, request: Request):
         """
-        获取相机设备 list
-        
-         未知原因 dbsession 会卡住
+        获取相机设备 list 
         """
         param = CameraFilterItems()
         param.__dict__.update(request.json) 
@@ -37,10 +36,14 @@ class IP_Cameras_View(AuthMethodView):
             total=executer.scalar() 
             result = await session.execute(param.list_select)
             result = result.mappings().all()
+            for a in result: 
+                log.succ(type(a.get("streams"))) #sqlalchemy.engine.row.RowMapping
+                log.succ(a.get("streams"))
+                log.succ(a.get("name"))
             result = [dict(a) for a in result] 
             pageList = Page_Result.success(result, total=total) 
             await session.commit()
-        return JSON_util.response(pageList)
+        return  JSON_util.response(pageList)
 
 
 class IP_Camera_View(Image_View):

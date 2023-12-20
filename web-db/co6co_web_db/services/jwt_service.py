@@ -9,12 +9,12 @@ class JWT_service :
         self._issuer=issuer
         pass
 
-    def encode(self,data,expiration_date:int=1)->str:
+    def encode(self,data,expire_seconds:int=86400)->str:
         """
         加密数据： 
         """
         dic={
-            'exp':datetime.datetime.utcnow()+datetime.timedelta(days=expiration_date), # 过期时间
+            'exp':datetime.datetime.utcnow()+datetime.timedelta( seconds=expire_seconds), # 过期时间
             'iat':datetime.datetime.utcnow(), # 开始时间
             'iss':self._issuer,# 签名
             'data':data # 内容一般放用户ID 和开始时间 
@@ -28,12 +28,12 @@ class JWT_service :
             log.err(e)
             return None
 
-async def createToken(SECRET:str,data:dict):
+async def createToken(SECRET:str,data:dict,expire_seconds:int=86400):
     """
     登录时生成tooken
     """
     svc=JWT_service(SECRET)
-    result=svc.encode(data )   
+    result=svc.encode(data,expire_seconds )   
     return result
 
 async def validToken(request:Request,SECRET:str):
