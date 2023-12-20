@@ -5,3 +5,4 @@ class device_category(Base_Enum):
     """
     wx_user="wx_user",0
     wx_admin="wx_admin",1
+

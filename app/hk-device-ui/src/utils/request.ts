@@ -31,30 +31,39 @@ service.interceptors.request.use(
 
 //增加响应拦截器
 service.interceptors.response.use(
-    (response: AxiosResponse) => { //2xx 范围的都会触发该方法
-        if(elLoading)elLoading.close();  
-        if (response.status === 200 ) { 
-            if(response.headers["content-type"]=="application/json")return JSONbig.parse(response.data) ;
-            else return response;
-        } 
-        if (response.status === 206 )  return response;
-        else {
-            Promise.reject();
-        }
-    },
-    (error: AxiosError) => {//不是 2xx 的触发 
-        if(elLoading) elLoading.close(); 
-        if(error.response?.status===403){ 
-            removeToken()  
-            ElMessage.error(`未认证、无权限或者认证信息已过期:${error.message}`)
-           router.push('/login'); 
-        }else if ( error.config && error.config.responseType =="json") {
-            ElMessage.error(`请求出现错误:${error.message}`)
-        }  else if ( error.config&& error.config.headers["Content-Type"] =="application/json") {
-            ElMessage.error(`请求出现错误:${error.message}`)
-        } 
-        return Promise.reject(error);
-    }
+	(response: AxiosResponse) => {
+		//2xx 范围的都会触发该方法
+		if (elLoading) elLoading.close();
+		if (response.status === 200) {
+			if (response.headers['content-type'] == 'application/json') {
+				if (typeof response.data == 'string')
+                    return console.info("response is string"), JSONbig.parse(response.data);
+				return response.data;
+			} else return response;
+		}
+		if (response.status === 206) return response;
+		else {
+			Promise.reject();
+		}
+	},
+	(error: AxiosError) => {
+		//不是 2xx 的触发
+		if (elLoading) elLoading.close();
+		if (error.response?.status === 403) {
+			removeToken();
+			ElMessage.error(`未认证、无权限或者认证信息已过期:${error.message}`);
+			//需要验证是否是微信端
+			///router.push('/login');
+		} else if (error.config && error.config.responseType == 'json') {
+			ElMessage.error(`请求出现错误:${error.message}`);
+		} else if (
+			error.config &&
+			error.config.headers['Content-Type'] == 'application/json'
+		) {
+			ElMessage.error(`请求出现错误:${error.message}`);
+		}
+		return Promise.reject(error);
+	}
 );
 
 export default service;

@@ -7,7 +7,8 @@ import time
 import tkinter
 import json
 from ctypes import *
-from HCNetSDK import *
+
+from services.hik_service.HCNetSDK import *
 
 # 系统环境标识
 WINDOWS_FLAG = True

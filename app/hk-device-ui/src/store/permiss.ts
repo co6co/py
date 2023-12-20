@@ -1,12 +1,15 @@
 import { defineStore } from 'pinia';
+import { Storage } from '../store/Storage';
 
+const storage=new Storage()
 interface ObjectList {
 	[key: string]: string[];
 }
 
 export const usePermissStore = defineStore('permiss', {
 	state: () => {
-		const keys = localStorage.getItem('ms_keys');
+		const keys = storage.get('ms_keys');
+		//console.info("permiss:",keys)
 		return {
 			key: keys ? JSON.parse(keys) : <string[]>[],
 			defaultList: <ObjectList>{

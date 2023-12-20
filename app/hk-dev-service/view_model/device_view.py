@@ -22,6 +22,7 @@ from model.enum import device_type
 from model.pos.device import devicePo,TasksPO
 import datetime
 from co6co_db_ext.db_session import db_service
+from services.hik_service import DemoTest
 
 class Device_Category_View(AuthMethodView):  
     async def get(self,request:Request):
@@ -62,14 +63,19 @@ class Device_View(AuthMethodView):
         session:scoped_session=service.session
         try:
             tpo= TasksPO ()
-            exec=session.execute(Select(func.max( TasksPO.id)))
-            log.warn(type(exec))
-            log(exec)
-            maxId=exec.fetchone()
-            log(type(maxId))
+            
+            
+            '''
+            scalar()  == value
+            first()   = (v,)
+            scalars().all() == list
+            .mappings().all() == list[{key:value}]
+            mappings().fetchone()={}
+            '''
+            
            
-           
-            tpo.id=maxId+1
+            log.succ(DemoTest.GetPlatform())
+            #tpo.id=maxId+1
             tpo.createUser=userId
             tpo.name=taskName
             tpo.type=Task_Type.down_task.val
@@ -85,6 +91,7 @@ class Device_View(AuthMethodView):
                         po:devicePo=po
                         log.info(po.name)
                         po.taskState=1
+                        
             
             tpo.status=Task_Statue.finshed.val
         except Exception as e: 

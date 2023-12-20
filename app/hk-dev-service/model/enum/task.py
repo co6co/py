@@ -6,7 +6,7 @@ class Task_Type (Base_EC_Enum):
     任务类型
     """
     down_task= 'down_task','下载任务',0 
-    setting_linght= 'setting_linght','设置灯光参数',1 
+    setting_light= 'settting_light','设置灯光参数',1 
     
 
 class Task_Statue (Base_EC_Enum):

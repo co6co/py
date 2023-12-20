@@ -1,8 +1,14 @@
 <template>
 	<div class="login-wrap">
 		<div class="ms-login">
-			<div class="ms-title">AI 数据审核系统</div>
-			<el-form :model="param" :rules="rules" ref="login" label-width="0px" class="ms-content">
+			<div class="ms-title">{{sysInfo.name}}  <el-text class="mx-1" size="small" tag="sub">{{ sysInfo.verson }}</el-text> </div>
+			<el-form
+				:model="param"
+				:rules="rules"
+				ref="login"
+				label-width="0px"
+				class="ms-content"
+			>
 				<el-form-item prop="username">
 					<el-input v-model="param.username" placeholder="用户名"  >
 						<template #prepend> 
@@ -32,64 +38,83 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive } from 'vue';
-import { useTagsStore } from '../store/tags';
-import { usePermissStore } from '../store/permiss';
-import { useRouter } from 'vue-router';
-import { ElMessage } from 'element-plus';
-import type { FormInstance, FormRules } from 'element-plus';
-import { Lock, User } from '@element-plus/icons-vue';
-import { login_svc } from '../api/login';
-import { json } from 'stream/consumers';
+	import { ref, reactive } from 'vue';
+	import { useTagsStore } from '../store/tags';
+	import { usePermissStore } from '../store/permiss';
+	import { useRouter } from 'vue-router';
+	import { ElMessage } from 'element-plus';
+	import type { FormInstance, FormRules } from 'element-plus';
+	import { Lock, User } from '@element-plus/icons-vue';
+	import { login_svc } from '../api/authen';
+	import { json } from 'stream/consumers';
+	import { setToken } from '../utils/auth';
+	import { Storage } from '../store/Storage';
+	import config from '../../package.json';
 
-import {setToken} from '../utils/auth'
-
-interface LoginInfo {
-	username: string;
-	password: string; 
-}
-let message=ref("");
-const router = useRouter();
-const param = reactive<LoginInfo>({
-	username:  "",// "admin",
-	password:    "",//"admin12345"
-});
-
-const rules: FormRules = {
-	username: [{ required: true, message: '请输入用户名', trigger: 'blur' } ],
-	password: [{ required: true, message: '请输入密码', trigger: 'blur' }]
-};
-const permiss = usePermissStore();
-const login = ref<FormInstance>();
-const submitForm = (formEl: FormInstance | undefined) => {
-	if (!formEl) return;
-	formEl.validate((valid: boolean) => {
-		if (valid) {
-			login_svc({userName:param.username,password:param.password}).then(res=>{ 
-				message.value=res.message
-				if(res.code==0){ 
-					ElMessage.success(message.value); 
-					setToken(res.data)
-					localStorage.setItem('ms_username', param.username);
-					const keys = permiss.defaultList[param.username == 'admin' ? 'admin' : 'user'];
-					permiss.handleSet(keys);
-					localStorage.setItem('ms_keys', JSON.stringify(keys));
-					router.push('/');
-				}
-				else{
-					ElMessage.error(message.value); 
-				}
-			}).catch(err=>{   
-				//todo debug  login.vue?t=1697628463669:82 Uncaught (in promise) TypeError: Cannot read properties of undefined (reading 'message')
-				message.value=err.message||"请求出错"
-				ElMessage.error(err.message) 
-			}) 
-		} else {
-			message.value="数据验证失败"
-			return false;
-		}
+	interface LoginInfo {
+		username: string;
+		password: string;
+	}
+	interface SystemInfo {
+		name: string;
+		verson: string;
+	}
+	let message = ref('');
+	const router = useRouter();
+	const param = reactive<LoginInfo>({
+		username: '', // "admin",
+		password: '', //"admin12345"
 	});
-};
+
+	const sysInfo = reactive<SystemInfo>({ name: '', verson: '' });
+	sysInfo.name = config.name;
+	sysInfo.verson = config.version;
+	const rules: FormRules = {
+		username: [{ required: true, message: '请输入用户名', trigger: 'blur' }],
+		password: [{ required: true, message: '请输入密码', trigger: 'blur' }],
+	};
+
+	let storeage = new Storage();
+	const permiss = usePermissStore();
+	const login = ref<FormInstance>();
+	const submitForm = (formEl: FormInstance | undefined) => {
+		if (!formEl) return;
+		formEl.validate((valid: boolean) => {
+			if (valid) {
+				login_svc({ userName: param.username, password: param.password })
+					.then((res) => {
+						message.value = res.message;
+						if (res.code == 0) {
+							ElMessage.success(message.value);
+							console.info(res)
+							setToken(res.data.token, res.data.expireSeconds);
+							storeage.set('username', param.username, res.data.expireSeconds); 
+							const keys =
+								permiss.defaultList[
+									param.username == 'admin' ? 'admin' : 'user'
+								];
+							permiss.handleSet(keys);
+							storeage.set(
+								'ms_keys',
+								JSON.stringify(keys),
+								res.data.expireSeconds
+							);
+							router.push('/');
+						} else {
+							ElMessage.error(message.value);
+						}
+					})
+					.catch((err) => {
+						//todo debug  login.vue?t=1697628463669:82 Uncaught (in promise) TypeError: Cannot read properties of undefined (reading 'message')
+						message.value = err.message || '请求出错';
+						ElMessage.error(err.message);
+					});
+			} else {
+				message.value = '数据验证失败';
+				return false;
+			}
+		});
+	};
 
 const tags = useTagsStore();
 tags.clearTags();

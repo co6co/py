@@ -7,17 +7,17 @@ from sqlalchemy.schema import DDL
 from sqlalchemy.orm import DeclarativeBase,Mapped,mapped_column,relationship
 from sqlalchemy import ForeignKey,String,BigInteger
 from typing import List
-
+import datetime
 
 class devicePo(TimeStampedModelPO):
     """
     设备表
     """
     __tablename__="device_table"
-    id:Mapped[int] =mapped_column( BigInteger, primary_key=True,autoincrement=True)
+    id:Mapped[int] =mapped_column(  BigInteger().with_variant(Integer,"sqlite"), primary_key=True,autoincrement=True)
     ip:Mapped[str]=mapped_column(String(16)  ,nullable=False,unique=True)
-    #category:Mapped[int]=mapped_column(INTEGER ,nullable=False ,comment="设备类型")
-    category=Column("category_id",ForeignKey(f"device_category.id",ondelete="CASCADE"))
+    category:Mapped[int]=mapped_column("category_id" ,ForeignKey(f"device_category.id",ondelete="CASCADE") ,comment="设备类型")
+    #category=Column("category_id",ForeignKey(f"device_category.id",ondelete="CASCADE")) 
     vendor:Mapped[int]=mapped_column(INTEGER ,nullable=False ,server_default="1", comment="设备产生:1:海康,2:宇视,3:大华")
     name:Mapped[str]=mapped_column(String(64)  )
     code:Mapped[str]=mapped_column(String(32)  )
@@ -34,7 +34,7 @@ class deviceCategoryPO(TimeStampedModelPO):
     设备类别 
     """
     __tablename__="device_category"
-    id:Mapped[int] =mapped_column( BigInteger, primary_key=True )  
+    id:Mapped[int] =mapped_column(  BigInteger().with_variant(Integer,"sqlite"), primary_key=True )  
     name:Mapped[str]=mapped_column(String(64)  )
     code:Mapped[str]=mapped_column(String(32)  )
     devicePOs:Mapped[List["devicePo"]]=relationship(back_populates="categoryPO")
@@ -47,7 +47,7 @@ class deviceLogPo(BasePO):
     设备操作日志
     """
     __tablename__="device_operate_log"
-    id:Mapped[int] =mapped_column(BigInteger,primary_key=True,autoincrement=True)
+    id:Mapped[int] =mapped_column( BigInteger().with_variant(Integer,"sqlite"),primary_key=True,autoincrement=True)
     category:Mapped[str]=mapped_column(String(16),nullable=False,comment="操作类型")
     deviceId:Mapped[int]=mapped_column("device_id",ForeignKey("device_table.id"),nullable=True)
     result:Mapped[str]=mapped_column("result",String(16),nullable=False,comment="操作结果")
@@ -59,24 +59,24 @@ class deviceLogPo(BasePO):
         return f"{self.__class__} md5:{self.category},  {self.result}>"
 
 
-class sysConfigPO:
+class sysConfigPO(UserTimeStampedModelPO):
     """
     配置相关
     """
     __tablename__="sys_config"
-    id:Mapped[int] =mapped_column( BigInteger, primary_key=True )   
+    id:Mapped[int] =mapped_column(  BigInteger().with_variant(Integer,"sqlite"), primary_key=True )   
     code:Mapped[str]=mapped_column(String(32),nullable=False  )
     name:Mapped[str]=mapped_column(String(64))
     value:Mapped[str]=mapped_column(String(255),nullable=False)
    
     def __repr__(self) -> str:
-        return f"{self.__class__} {self.__name__}->{self.ip},{self.name}>"
+        return f"{self.__class__} {self.__name__}->{self.id},{self.name}>"
 
     
 
 class TasksPO(BasePO):
     __tablename__="user_tasks"
-    id= Column("id", BigInteger,comment="主键id",primary_key=True,autoincrement=True)                       #bigint(20) NOT NULL COMMENT '主键id',
+    id= Column("id", BigInteger().with_variant(Integer,"sqlite"),comment="主键id",primary_key=True)                       #bigint(20) NOT NULL COMMENT '主键id',
     name= Column("name", String(64),comment="名称")                     #varchar(64) DEFAULT NULL COMMENT '名称',
     type= Column("type",Integer,comment="任务类型:0:批量下载任务")                     
     status= Column("status",Integer,comment="状态:0:创建,1:开始ing,2:完成,3:异常结束, 9:取消")     
