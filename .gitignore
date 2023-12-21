@@ -6,4 +6,4 @@
 /**/*.pyc 
 /**/tmp/
 /**/tmp/
-/**/hik_service/lib
+/**/hk-dev-service/lib/
