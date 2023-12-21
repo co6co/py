@@ -91,6 +91,7 @@
 	} from '@element-plus/icons-vue';
 	import * as api from '../api/device';
 	import { stream, ptz } from '../components/stream';
+	import * as p from '../components/stream/src/types/ptz';
 
 	import { useMqtt } from '../utils/mqtting';
 	import * as d from '../store/types/devices';
@@ -166,13 +167,13 @@
 		if (row.streams && typeof row.streams == 'string')
 			player.sources = JSON.parse(row.streams);
 		/**
-  [
-  
-	  {url:`http://wx.co6co.top:452/flv/vlive/${item.ip}.flv`,name:"HTTP-FLV"}, 
-		{url:`ws://wx.co6co.top:452/ws-flv/vlive/${item.ip}.flv`,name:"WS-FLV"}, 
-		{url:`webrtc://wx.co6co.top:452/rtc/vlive/${item.ip}`,name:"webrtc"}, 
-		{url:`http://wx.co6co.top:452/vhls/${item.ip}/${item.ip}_live.m3u8`,name:"HLS(m3u8)"} 
-	]   */
+	  [
+
+		  {url:`http://wx.co6co.top:452/flv/vlive/${item.ip}.flv`,name:"HTTP-FLV"},
+			{url:`ws://wx.co6co.top:452/ws-flv/vlive/${item.ip}.flv`,name:"WS-FLV"},
+			{url:`webrtc://wx.co6co.top:452/rtc/vlive/${item.ip}`,name:"webrtc"},
+			{url:`http://wx.co6co.top:452/vhls/${item.ip}/${item.ip}_live.m3u8`,name:"HLS(m3u8)"}
+		]   */
 	};
 	/** ptz */
 	const { startMqtt, Ref_Mqtt } = useMqtt();
@@ -196,20 +197,39 @@
 		const res = new Map();
 		return arr.filter((a) => !res.has(a.UUID) && res.set(a.UUID, 1));
 	}
-	const OnPtz = (name: string, type: string) => {
-		let param = {
-			payload: {
-				BoardId: 'RJ-BOX3-733E5155B1FBB3C3BB9EFC86EDDACA60',
-				Event: '/app_network_query_v2',
-			},
-			qos: 0,
-			retain: false,
-		};
-		Ref_Mqtt.value?.publish(
-			'/edge_app_controller',
-			JSON.stringify(param.payload)
-		);
-		console.warn(name, type);
+
+	const mediaStreamStarting = ref(false);
+	const OnPtz = (name: p.ptz_name, type: p.ptz_type) => {
+		// 对接
+		if (type == 'starting' && name == 'center') {
+			mediaStreamStarting.value = true;
+			navigator.mediaDevices
+				.getUserMedia({
+					audio: true /*, video:{width:1280, height:720,facingMode: "user" }*/,
+				})
+				.then(function (mediaStream) {
+					if (!mediaStreamStarting.value) {
+						mediaStream.getTracks()[0].stop();
+					}
+				})
+				.catch(function (error) {});
+		} else if (type == 'stop' && name == 'center') {
+			mediaStreamStarting.value = false;
+		} else {
+			console.warn(name, type); 
+			let param = {
+				payload: {
+					BoardId: 'RJ-BOX3-733E5155B1FBB3C3BB9EFC86EDDACA60',
+					Event: '/app_network_query_v2',
+				},
+				qos: 0,
+				retain: false,
+			};
+			Ref_Mqtt.value?.publish(
+				'/edge_app_controller',
+				JSON.stringify(param.payload)
+			);
+		}
 	};
 	//**end 打标签 */
 </script>

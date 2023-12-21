@@ -32,5 +32,9 @@ interface player_option{
 declare module  'JessibucaPro'
 declare  class JessibucaPro { 
   constructor(opt:any)
-  on(eventName:string, x:function)
+  on(eventName:string, x:Function)
 } 
+
+
+
+ 

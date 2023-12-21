@@ -2,9 +2,8 @@
 /**/*.egg-info/
 /**/dist
 /coi/XXXX
-/**/.fleet/
-<<<<<<< HEAD
-/**/*.pyc
-=======
+/**/.fleet/ 
+/**/*.pyc 
 /**/tmp/
->>>>>>> 026c50d5ed14603efcc8ed960dcb8101d70607ef
+/**/tmp/
+/**/hik_service/lib

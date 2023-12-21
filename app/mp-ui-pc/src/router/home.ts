@@ -1,9 +1,8 @@
 import { createRouter, createWebHashHistory, RouteRecordRaw } from 'vue-router';
-import { usePermissStore } from '../store/permiss';
-//import Home from '../views/home.vue';
+import { usePermissStore } from '../store/permiss'; 
 import wxHome from '../views2/wxHome.vue';
-import { getToken, removeToken, setToken } from '../utils/auth';
-import { Storage } from '../store/Storage';
+import { getToken, removeToken, setToken } from '../utils/auth'; 
+import { nextTick } from 'vue'; 
 
 const routes: RouteRecordRaw[] = [
 	{
@@ -113,79 +112,34 @@ const router = createRouter({
 	history: createWebHashHistory(),
 	routes,
 });
-import { randomString } from '../utils';
-import { getRedirectUrl } from '../components/wx';
+ 
+import { getQueryVariable } from '../utils';
+import { redirectUrl } from '../components/wx';
+import { ticket_svc } from '../api/authen';
 import { showNotify } from 'vant';
-import { ticket_svc } from '../api/authen'; 
-
+ 
 const debug = Boolean(Number(import.meta.env.VITE_IS_DEBUG));
-
-const getUrl = () => {
-	let url = document.location.toString();
-	let arrUrl = url.split('//');
-	let start = arrUrl[1].indexOf('/');
-	let relUrl = arrUrl[1].substring(start); //stop省略，截取从start开始到结尾的所有字符
-	if (relUrl.indexOf('?') != -1) {
-		relUrl = relUrl.split('?')[0];
-	}
-	return relUrl.replace('#', '**');
-};
-
-function getQueryVariable(key: string) {
-	try {
-		//var query = window.location.search.substring(1);
-		var query = window.location.href.substring(
-			window.location.href.indexOf('?') + 1
-		);
-		var vars = query.split('&');
-		for (var i = 0; i < vars.length; i++) {
-			var pair = vars[i].split('=');
-			if (pair[0] == key) {
-				return pair[1];
-			}
-		}
-		return null;
-	} catch (e) {}
-	return null;
-}
-
-const redirectUrl = () => {
-	showNotify({ type: 'warning', message: `跳转...` });
-	const redirect_uri = import.meta.env.VITE_WX_redirect_uri;
-	const scope = 1;
-	let redirectUrl = '';
-	if (debug) {
-		redirectUrl = getRedirectUrl(
-			redirect_uri,
-			scope,
-			`${randomString(10)}-${scope}-${getUrl()}-${randomString(10)}`
-		);
-	} else {
-		redirectUrl = getRedirectUrl(
-			redirect_uri,
-			scope,
-			`${randomString(10)}-${scope}-${getUrl()}-${randomString(10)}`
-		);
-	}
-	window.location.href = redirectUrl;
-};
 const ticket = getQueryVariable('ticket');
 router.beforeEach((to, from, next) => {
 	document.title = `${to.meta.title} `;
 	const permiss = usePermissStore();
 	let token = getToken();
-    console.info(token)
-	if (!token) {
-		//next('/login');
+	({ type: 'warning', message: token });
+	if (!token) { 
 		if (ticket) {
 			ticket_svc(ticket).then((res) => {
-				if (res.code == 0) setToken(res.data.token, res.data.expireSeconds);
+				if (res.code == 0) {
+					setToken(res.data.token, res.data.expireSeconds);
+					nextTick(()=>next())
+					
+				}
 				else showNotify({ type: 'danger', message: res.message });
 			});
 		} else {
 			redirectUrl();
-		}
-	}  else {
+		} 
+		//next('/403');
+	} else {
 		next();
 	}
 });

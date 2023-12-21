@@ -1,6 +1,6 @@
 import Cookie from "js-cookie";
 import { Storage } from '../store/Storage'
-const authonKey = "Authorization"; 
+const authonKey = "Authorization3"; 
 
 const storage = new Storage()
 export function setToken(token: any,secounds:number=7200) {
@@ -12,7 +12,6 @@ export function getToken() {
     
     let token =storage.get(authonKey );
     if (!token) token = getCookie(authonKey);
-    //if (!token)  token="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MDI3MTQ0MDksImlhdCI6MTcwMjYyODAwOSwiaXNzIjoiSldUK1NFUlZJQ0UiLCJkYXRhIjp7ImlkIjoyLCJ1c2VyTmFtZSI6Im9Qd3ZMNkoyWDlZbnl0dW81YWdNTGdLR1ZKUUkiLCJncm91cF9pZCI6Mn19.fztD24fVV5cYtXj1Ev5uoU5bHOGZx01vTkIm-yXdpEM"
     return token;
 }
 export function removeToken() {

@@ -47,8 +47,7 @@ class Authon_param:
 
 def oauth_debug(method):
     @wraps(method)
-    async def  warpper(request:Request,param:Authon_param ):   
-
+    async def  warpper(request:Request,param:Authon_param ):    
         uuid=await getAccountuuid(request,userOpenId="oPwvL6J2X9Ynytuo5agMLgKGVJQI") 
         res=redirect(f"{param.url}?ticket={uuid}") 
         #res=redirect(param.url,headers={"Authorization":token}) 

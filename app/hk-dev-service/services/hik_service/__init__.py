@@ -6,23 +6,61 @@ import platform
 import time
 import tkinter
 import json
+from co6co.utils import log
 from ctypes import *
-
+import requests
+import xmltodict 
+from xml.dom.minidom import parseString
+ 
 from services.hik_service.HCNetSDK import *
+
+
+class HkServiceWeb:
+    ip: str = None
+    userName: str = None
+    password: str = None
+
+    def __init__(self, ip, userName, password) -> None:
+        self.ip = ip
+        self.userName = userName
+        self.password = password
+        pass
+
+    def putDevice(self,dataxml:str): 
+        url = f"http://{self.ip}//ISAPI/System/deviceInfo"
+        response = requests.put(url, auth=(self.userName, self.password),data=dataxml)
+        if response.status_code == 200:
+            d=xmltodict.parse(response.content) 
+            log.succ(f"更新设备信息：{d}") 
+        else:
+            print("Failed to start recording.")
+    def getDeviceInfo(self):
+        url = f"http://{self.ip}//ISAPI/System/deviceInfo"
+        response = requests.get(url, auth=(self.userName, self.password))
+        #response = requests.put(url, auth=(self.userName, self.password))
+        if response.status_code == 200:
+            d=xmltodict.parse(response.content)
+            log.warn(d)
+            d.update({"DeviceInfo":{"deviceName":"IP CAMERA"}})
+            data =xmltodict.unparse(d)  
+            log.warn(d)
+            log.warn(data)
+            self.putDevice(data)
+        else:
+            print("Failed to start recording.")
 
 
 class HkService:
     # 系统环境标识
-    WINDOWS_FLAG: bool = True
-    lUserID: int = None
+    windiws_flage: bool = True
+    userId: int = None
     sdk: object = None
 
     def __init__(self) -> None:
         # 获取系统平台
         self.__getPlatform()
-
         # 加载库,先加载依赖库
-        if self.WINDOWS_FLAG:
+        if self.windiws_flage:
             os.chdir(r'./lib/win')
             self.sdk = ctypes.CDLL(r'./HCNetSDK.dll')
         else:
@@ -34,16 +72,19 @@ class HkService:
         # 初始化
         self.sdk.NET_DVR_Init()
         # 启用SDK写日志
+        # self.sdk.NET_DVR_SetLogToFile( 3, bytes('./SdkLog_Python/', encoding="utf-8"), True)
         self.sdk.NET_DVR_SetLogToFile(
-            3, bytes('./SdkLog_Python/', encoding="utf-8"), False)
+            3, bytes('C:\\SdkLog\\', encoding="utf-8"), True)
 
+        '''
         # 注册登录设备
-        iUserID = self.LoginDev()
-        if iUserID < 0:
+        userId = self.Login()
+        if userId < 0:
             print('登录失败，退出')
         else:
-            self.setShowString(iUserID)  # 透传方式设置通道字符叠加参数
-            self.getShowString(iUserID)  # 透传方式获取通道字符叠加参数
+            self.setShowString(userId)  # 透传方式设置通道字符叠加参数
+            self.getShowString(userId)  # 透传方式获取通道字符叠加参数
+        '''
 
     def __getPlatform(self):
         """
@@ -53,15 +94,15 @@ class HkService:
         print('' + sysstr)
         if sysstr != "Windows":
             # global WINDOWS_FLAG
-            self.WINDOWS_FLAG = False
+            self.windiws_flage = False
         else:
-            self.WINDOWS_FLAG = True
+            self.windiws_flage = True
 
     def SetSDKInitCfg(self):
         # 设置SDK初始化依赖库路径
         # 设置HCNetSDKCom组件库和SSL库加载路径
         # print(os.getcwd())
-        if self.WINDOWS_FLAG:
+        if self.windiws_flage:
             strPath = os.getcwd().encode('gbk')
             sdk_ComPath = NET_DVR_LOCAL_SDK_PATH()
             sdk_ComPath.sPath = strPath
@@ -80,7 +121,7 @@ class HkService:
             self.sdk.NET_DVR_SetSDKInitCfg(
                 4, create_string_buffer(strPath + b'/libssl.so.1.1'))
 
-    def LoginDev(self,ip:str,user:str,password:str):
+    def Login(self, ip: str, user: str, password: str):
         # 设备登录信息
         struLoginInfo = NET_DVR_USER_LOGIN_INFO()
         struLoginInfo.bUseAsynLogin = 0  # 同步登录方式
@@ -93,85 +134,39 @@ class HkService:
         struDeviceInfoV40 = NET_DVR_DEVICEINFO_V40()
 
         # 登录设备
-        self.iUserID = self.sdk.NET_DVR_Login_V40(
+        self.userId = self.sdk.NET_DVR_Login_V40(
             byref(struLoginInfo), byref(struDeviceInfoV40))
-        if self.iUserID < 0:
+        if self.userId < 0:
             print('登录失败, 错误码: %d' % self.sdk.NET_DVR_GetLastError())
         else:
             print('登录成功，设备序列号：%s' % str(
                 struDeviceInfoV40.struDeviceV30.sSerialNumber, encoding="utf8"))
 
     def Close(self):
-        if self.iUserID >= 0:
+        if self.userId!=None and self.userId >= 0:
             # 注销用户
-            self.sdk.NET_DVR_Logout(self.iUserID)
+            self.sdk.NET_DVR_Logout(self.userId)
             # 释放SDK资源
-            self.sdk.NET_DVE_Cleanup()
+            # log.warn(dir(self.sdk))
+            # self.sdk.NET_DVE_Cleanup() # 没有该方法
 
-    def getShowString(self):
+    def create_input(self, url: str, queryData: str = None) -> NET_DVR_XML_CONFIG_INPUT:
         xmlInput = NET_DVR_XML_CONFIG_INPUT()
         xmlInput.dwSize = sizeof(xmlInput)
-        url = create_string_buffer(b'GET /ISAPI/System/Video/inputs/channels/1/overlays/text/1')
+        url = create_string_buffer(bytes(url, encoding="ascii"))
         xmlInput.lpRequestUrl = addressof(url)
-        # print(xmlInput.lpRequestUrl)
         xmlInput.dwRequestUrlLen = len(url)
-        # print(len(url))
-        xmlInput.lpInBuffer = None  # 获取参数时输入为空
+        xmlInput.lpInBuffer = None
         xmlInput.dwInBufferSize = 0
-        xmlInput.dwRecvTimeOut = 5000  # 超时时间
-        xmlInput.byForceEncrpt = 0
-
-        xmlOutput = NET_DVR_XML_CONFIG_OUTPUT()  # 输出参数
-        xmlOutput.dwSize = sizeof(xmlOutput)
-        xmlOutput.dwOutBufferSize = 8 * 1024
-        xmlOutput.dwStatusSize = 1024
-        M1 = 8 * 1024
-        buff1 = (c_ubyte * M1)()
-        M2 = 1024
-        buff2 = (c_ubyte * M2)()
-
-        xmlOutput.lpOutBuffer = addressof(buff1)
-        xmlOutput.lpStatusBuffer = addressof(buff2)
-
-        if self.sdk.NET_DVR_STDXMLConfig(self.lUserID, byref(xmlInput), byref(xmlOutput)) == 1:
-            print('---获取成功---')
-            # 获取成功，输出结果
-            Bbytes_Out = string_at(xmlOutput.lpOutBuffer,
-                                   xmlOutput.dwOutBufferSize)
-            strOutput = str(Bbytes_Out, 'UTF-8')
-            print(strOutput + '\n')
-            # 状态信息
-            '''Bbytes_Status = string_at(xmlOutput.lpStatusBuffer, xmlOutput.dwStatusSize)
-            strStatus = str(Bbytes_Status)
-            print(strStatus + '\n')'''
-        else:
-            # 接口返回失败，错误号错误号判断原因
-            print('NET_DVR_STDXMLConfig接口调用失败，错误码：%d，登录句柄：%d' %
-                  (self.sdk.NET_DVR_GetLastError(), self. lUserID))
-
-    def setShowString(self):
-        xmlInput = NET_DVR_XML_CONFIG_INPUT()
-
-        xmlInput.dwSize = sizeof(xmlInput)
-        url = create_string_buffer(
-            b'PUT /ISAPI/System/Video/inputs/channels/1/overlays/text/1')
-
-        xmlInput.lpRequestUrl = addressof(url)
-        xmlInput.dwRequestUrlLen = len(url)
-        # 输入参数
-        str_bytes = bytes('<TextOverlay xmlns=\"http://www.hikvision.com/ver20/XMLSchema\" version=\"2.0\">'
-                          '<id>1</id>'
-                          '<enabled>true</enabled>'
-                          '<positionX>100</positionX>'
-                          '<positionY>200</positionY>'
-                          '<displayText>1234567测试abc</displayText></TextOverlay>', encoding="utf-8")
-
-        iLen = len(str_bytes)
-        xmlInput.lpInBuffer = cast(str_bytes, c_void_p)
-        xmlInput.dwInBufferSize = iLen
+        if queryData != None:
+            str_bytes = bytes(queryData, encoding="ascii")
+            xmlInput.lpInBuffer = cast(str_bytes, c_void_p)
+            xmlInput.dwInBufferSize = len(str_bytes)
         xmlInput.dwRecvTimeOut = 5000
         xmlInput.byForceEncrpt = 0
+        return xmlInput
 
+    def create_output(self) -> NET_DVR_XML_CONFIG_OUTPUT:
         xmlOutput = NET_DVR_XML_CONFIG_OUTPUT()
         xmlOutput.dwSize = sizeof(xmlOutput)
         xmlOutput.dwOutBufferSize = 8 * 1024
@@ -183,21 +178,102 @@ class HkService:
 
         xmlOutput.lpOutBuffer = addressof(buff1)
         xmlOutput.lpStatusBuffer = addressof(buff2)
+        return xmlOutput
 
+    def request2(self, xmlInput: str, xmlOutput: str = None):
         reValue = self.sdk.NET_DVR_STDXMLConfig(
-            self.lUserID, byref(xmlInput), byref(xmlOutput))
+            self.userId, byref(xmlInput), byref(xmlOutput))
+        result: str = None
         if reValue == 1:
-            print('---设置成功---')
-            # 设置成功，输出结果
-            '''Bbytes_Out = string_at(xmlOutput.lpOutBuffer, xmlOutput.dwOutBufferSize)
-            strOutput = str(Bbytes_Out)
-            print(strOutput + '\n')'''
-            # 状态信息
             Bbytes_Status = string_at(
                 xmlOutput.lpStatusBuffer, xmlOutput.dwStatusSize)
-            strStatus = str(Bbytes_Status, 'UTF-8')
-            print(strStatus + '\n')
+            result = str(Bbytes_Status, 'UTF-8')
         else:
-            # 接口返回失败，错误号错误号判断原因
-            print('NET_DVR_STDXMLConfig接口调用失败，错误码：%d，登录句柄：%d' %
-                  (self.sdk.NET_DVR_GetLastError(), self.lUserID))
+            # https://open.hikvision.com/hardware/definitions/NET_DVR_GetLastError.html
+            log.err(f" NET_DVR_GetLastError:{ self.sdk.NET_DVR_GetLastError()},登录句柄:{self.userId}")
+
+        return result
+
+    def request(self, url: str, inputData: str = None):
+        xmlInput = self.create_input(url, inputData)
+        xmlOutput = self. create_output()
+        reValue = self.sdk.NET_DVR_STDXMLConfig(
+            self.userId, byref(xmlInput), byref(xmlOutput))
+        result: str = None
+        if reValue == 1:
+            Bbytes_Status = string_at(
+                xmlOutput.lpStatusBuffer, xmlOutput.dwStatusSize)
+            result = str(Bbytes_Status, 'UTF-8')
+        else:
+            # https://open.hikvision.com/hardware/definitions/NET_DVR_GetLastError.html
+            print(f"{url},NET_DVR_GetLastError:{ self.sdk.NET_DVR_GetLastError()},登录句柄:{self.userId}")
+
+        return result
+
+    def setShowString(self):
+        url = "PUT /ISAPI/System/Video/inputs/channels/1/overlays/text/1"
+        querydata = ('<TextOverlay xmlns=\"http://www.hikvision.com/ver20/XMLSchema\" version=\"2.0\">'
+                     '<id>1</id>'
+                     '<enabled>true</enabled>'
+                     '<positionX>100</positionX>'
+                     '<positionY>200</positionY>'
+                     '<displayText>1234567测试abc</displayText></TextOverlay>')
+
+        self .request(url, querydata)
+
+    def getShowString(self):
+        url = 'GET /ISAPI/System/Video/inputs/channels/1/overlays/text/1'
+        data = self .request(url)
+        print(f"请求{url},结果：{data}")
+
+    def getDeviceInfo(self):
+        url = 'GET /ISAPI/System/deviceInfo'
+        data = self.request(url)
+        print(f"请求{url},结果：{data}")
+
+    # 区域局部聚焦和局部曝光功能：矩形区域座标左上角和右下角（startX,startY,endX,endY）
+    # flag=1局部聚焦功能，flag!=1局部曝光功能
+    def RegionalCorrection(self, startX, startY, endX, endY, flag=1):
+        # #定义传输内容
+        if (flag == 1):
+            choise = "regionalFocus"
+        else:
+            choise = "regionalExposure"
+        inUrl = "PUT /ISAPI/Image/channels/1/" + choise
+        inPutBuffer = "<" + choise + "><StartPoint><positionX>" + str(startX) + "</positionX><positionY>" + str(
+            startY) + "</positionY></StartPoint><EndPoint><positionX>" + str(endX) + "</positionX><positionY>" + str(endY) + "</positionY></EndPoint></" + choise + ">"
+        self.request(inUrl, inPutBuffer)
+
+        input = self.create_input(inUrl, inPutBuffer)
+
+        szUrl = (ctypes.c_char * 256)()
+        struInput = NET_DVR_XML_CONFIG_INPUT()
+        struOuput = NET_DVR_XML_CONFIG_OUTPUT()
+        struInput.dwSize = ctypes.sizeof(struInput)
+        struOuput.dwSize = ctypes.sizeof(struOuput)
+        dwBufferLen = 1024 * 1024
+        pBuffer = (ctypes.c_char * dwBufferLen)()
+
+    # _____________________________________________put________________________________________________________
+        csCommand = bytes(inUrl, "ascii")
+        ctypes.memmove(szUrl, csCommand, len(csCommand))
+        struInput.lpRequestUrl = ctypes.cast(szUrl, ctypes.c_void_p)
+        struInput.dwRequestUrlLen = len(szUrl)
+
+        m_csInputParam = bytes(inPutBuffer, "ascii")
+        dwInBufferLen = 1024 * 1024
+        pInBuffer = (ctypes.c_byte * dwInBufferLen)()
+        ctypes.memmove(pInBuffer, m_csInputParam, len(m_csInputParam))
+        struInput.lpInBuffer = ctypes.cast(pInBuffer, ctypes.c_void_p)
+        struInput.dwInBufferSize = len(m_csInputParam)
+
+        struOuput.lpStatusBuffer = ctypes.cast(pBuffer, ctypes.c_void_p)
+        struOuput.dwStatusSize = dwBufferLen
+
+        self.request2(input, struOuput)
+        if (self.sdk.NET_DVR_STDXMLConfig(self.userId, ctypes.byref(struInput), ctypes.byref(struOuput))):
+            error_info = self.sdk.NET_DVR_GetLastError()
+            print("上传成功：" + str(error_info))
+        else:
+            error_info = self.sdk.NET_DVR_GetLastError()
+            print("上传失败：错误号为" + str(error_info))

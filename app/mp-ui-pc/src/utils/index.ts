@@ -33,4 +33,21 @@ export const randomString=(len:number, chars:string='0123456789abcdefghijklmnopq
     for (var i = len; i > 0; --i) result += chars[Math.floor(Math.random() * chars.length)];
     return result;
 } 
- 
+ //获取URL 参数
+ export const getQueryVariable= (key: string) =>{
+    try {
+        //var query = window.location.search.substring(1);
+        var query = window.location.href.substring(
+            window.location.href.indexOf("?") + 1
+        );
+        var vars = query.split("&");
+        for (var i = 0; i < vars.length; i++) {
+            var pair = vars[i].split("=");
+            if (pair[0] == key) {
+                return pair[1];
+            }
+        }
+        return null;
+    } catch (e) {}
+    return null;
+}
