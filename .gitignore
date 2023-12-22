@@ -1,6 +1,7 @@
 /**/__pycache__/
 /**/*.egg-info/
-/**/dist
+/**/dist/
+/**/build/
 /coi/XXXX
 /**/.fleet/ 
 /**/*.pyc 

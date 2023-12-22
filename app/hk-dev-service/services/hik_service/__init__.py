@@ -19,6 +19,341 @@ class HkServiceWeb:
     ip: str = None
     userName: str = None
     password: str = None
+    '''
+    GET /ISAPI/ITC/syncSignalOutput/capabilities
+    <?xml version="1.0" encoding="UTF-8"?>
+<SyncSignalOutputList version="2.0" xmlns="http://www.isapi.org/ver20/XMLSchema">
+<IOOutNum min="1" max="8">7</IOOutNum>
+<SyncSignalOutput>
+<id min="1" max="8">1</id>
+<IOWorkMode opt="flashLight,polarizer">flashLight</IOWorkMode>
+<defaultStatus opt="high,low">low</defaultStatus>
+<outputStatus opt="high,low,pulse">high</outputStatus>
+<aheadTime min="0" max="1000">0</aheadTime>
+<timeDelay min="0" max="10000">1600</timeDelay>
+<freqMultiply min="1" max="15">2</freqMultiply>
+<dutyRate min="0" max="40">18</dutyRate>
+<isSupportDetectBrightness >true</isSupportDetectBrightness >
+<detectBrightness min="0" max="100">0</detectBrightness>
+<isSupportTimeBrightness>true</isSupportTimeBrightness>
+<isSupportPlateBrightness>true</isSupportPlateBrightness>
+<isSupportIncrBright>false</isSupportIncrBright>
+<postFlashEnable>true</postFlashEnable>
+<illegalFlashEnable>true</illegalFlashEnable>
+<videoFlashEnable>false</videoFlashEnable>
+</SyncSignalOutput>
+<SyncSignalOutput>
+<id min="1" max="8">2</id>
+<IOWorkMode opt="flashLight,polarizer">flashLight</IOWorkMode>
+<defaultStatus opt="high,low">low</defaultStatus>
+<outputStatus opt="high,low,pulse">high</outputStatus>
+<aheadTime min="0" max="1000">0</aheadTime>
+<timeDelay min="0" max="10000">1600</timeDelay>
+<freqMultiply min="1" max="15">2</freqMultiply>
+<dutyRate min="0" max="40">18</dutyRate>
+<isSupportDetectBrightness >true</isSupportDetectBrightness >
+<detectBrightness min="0" max="100">0</detectBrightness>
+<isSupportTimeBrightness>true</isSupportTimeBrightness>
+<isSupportPlateBrightness>true</isSupportPlateBrightness>
+<isSupportIncrBright>false</isSupportIncrBright>
+<postFlashEnable>true</postFlashEnable>
+<illegalFlashEnable>true</illegalFlashEnable>
+<videoFlashEnable>false</videoFlashEnable>
+</SyncSignalOutput>
+<SyncSignalOutput>
+<id min="1" max="8">3</id>
+<IOWorkMode opt="flashLight,polarizer">flashLight</IOWorkMode>
+<defaultStatus opt="high,low">low</defaultStatus>
+<outputStatus opt="high,low,pulse">high</outputStatus>
+<aheadTime min="0" max="1000">0</aheadTime>
+<timeDelay min="0" max="10000">1600</timeDelay>
+<freqMultiply min="1" max="15">2</freqMultiply>
+<dutyRate min="0" max="40">18</dutyRate>
+<isSupportDetectBrightness >true</isSupportDetectBrightness >
+<detectBrightness min="0" max="100">0</detectBrightness>
+<isSupportTimeBrightness>true</isSupportTimeBrightness>
+<isSupportPlateBrightness>true</isSupportPlateBrightness>
+<isSupportIncrBright>false</isSupportIncrBright>
+<postFlashEnable>true</postFlashEnable>
+<illegalFlashEnable>true</illegalFlashEnable>
+<videoFlashEnable>false</videoFlashEnable>
+</SyncSignalOutput>
+<SyncSignalOutput>
+<id min="1" max="8">4</id>
+<IOWorkMode opt="flashLight,polarizer">flashLight</IOWorkMode>
+<defaultStatus opt="high,low">low</defaultStatus>
+<outputStatus opt="high,low,pulse">high</outputStatus>
+<aheadTime min="0" max="1000">0</aheadTime>
+<timeDelay min="0" max="10000">1600</timeDelay>
+<freqMultiply min="1" max="15">2</freqMultiply>
+<dutyRate min="0" max="40">18</dutyRate>
+<isSupportDetectBrightness >true</isSupportDetectBrightness >
+<detectBrightness min="0" max="100">0</detectBrightness>
+<isSupportTimeBrightness>true</isSupportTimeBrightness>
+<isSupportPlateBrightness>true</isSupportPlateBrightness>
+<isSupportIncrBright>false</isSupportIncrBright>
+<postFlashEnable>true</postFlashEnable>
+<illegalFlashEnable>true</illegalFlashEnable>
+<videoFlashEnable>false</videoFlashEnable>
+</SyncSignalOutput>
+<SyncSignalOutput>
+<id min="1" max="8">5</id>
+<IOWorkMode opt="flashLight,polarizer">flashLight</IOWorkMode>
+<defaultStatus opt="high,low">low</defaultStatus>
+<outputStatus opt="high,low,pulse">high</outputStatus>
+<aheadTime min="0" max="1000">0</aheadTime>
+<timeDelay min="0" max="10000">1600</timeDelay>
+<freqMultiply min="1" max="15">2</freqMultiply>
+<dutyRate min="0" max="40">18</dutyRate>
+<isSupportDetectBrightness >true</isSupportDetectBrightness >
+<detectBrightness min="0" max="100">0</detectBrightness>
+<isSupportTimeBrightness>true</isSupportTimeBrightness>
+<isSupportPlateBrightness>true</isSupportPlateBrightness>
+<isSupportIncrBright>false</isSupportIncrBright>
+<postFlashEnable>true</postFlashEnable>
+<illegalFlashEnable>true</illegalFlashEnable>
+<videoFlashEnable>false</videoFlashEnable>
+</SyncSignalOutput>
+<SyncSignalOutput>
+<id min="1" max="8">6</id>
+<IOWorkMode opt="flashLight,polarizer">flashLight</IOWorkMode>
+<defaultStatus opt="high,low">low</defaultStatus>
+<outputStatus opt="high,low,pulse">high</outputStatus>
+<aheadTime min="0" max="1000">0</aheadTime>
+<timeDelay min="0" max="10000">1600</timeDelay>
+<freqMultiply min="1" max="15">2</freqMultiply>
+<dutyRate min="0" max="40">18</dutyRate>
+<isSupportDetectBrightness >true</isSupportDetectBrightness >
+<detectBrightness min="0" max="100">0</detectBrightness>
+<isSupportTimeBrightness>true</isSupportTimeBrightness>
+<isSupportPlateBrightness>true</isSupportPlateBrightness>
+<isSupportIncrBright>false</isSupportIncrBright>
+<postFlashEnable>true</postFlashEnable>
+<illegalFlashEnable>true</illegalFlashEnable>
+<videoFlashEnable>false</videoFlashEnable>
+</SyncSignalOutput>
+<SyncSignalOutput>
+<id min="1" max="8">7</id>
+<IOWorkMode opt="flashLight,polarizer">flashLight</IOWorkMode>
+<defaultStatus opt="high,low">low</defaultStatus>
+<outputStatus opt="high,low,pulse">high</outputStatus>
+<aheadTime min="0" max="1000">0</aheadTime>
+<timeDelay min="0" max="10000">1600</timeDelay>
+<freqMultiply min="1" max="15">2</freqMultiply>
+<dutyRate min="0" max="40">18</dutyRate>
+<isSupportDetectBrightness >true</isSupportDetectBrightness >
+<detectBrightness min="0" max="100">0</detectBrightness>
+<isSupportTimeBrightness>true</isSupportTimeBrightness>
+<isSupportPlateBrightness>true</isSupportPlateBrightness>
+<isSupportIncrBright>false</isSupportIncrBright>
+<postFlashEnable>true</postFlashEnable>
+<illegalFlashEnable>true</illegalFlashEnable>
+<videoFlashEnable>false</videoFlashEnable>
+</SyncSignalOutput>
+</SyncSignalOutputList>
+
+
+    
+    
+    PUT /ISAPI/ITC/syncSignalOutput
+    <?xml version="1.0" encoding="utf-8"?>
+<SyncSignalOutputList xmlns="http://www.isapi.org/ver20/XMLSchema" version="2.0">
+	<SyncSignalOutput>
+		<id>1</id>
+		<IOWorkMode>flashLight</IOWorkMode>
+		<defaultStatus>low</defaultStatus>
+		<outputStatus>high</outputStatus>
+		<aheadTime max="1000" min="0">0</aheadTime>
+		<timeDelay>1600</timeDelay>
+		<freqMultiply>2</freqMultiply>
+		<dutyRate>18</dutyRate>
+		<postFlashEnable>true</postFlashEnable>
+		<illegalFlashEnable>true</illegalFlashEnable>
+		<videoFlashEnable>false</videoFlashEnable>
+		<detectBrightnessEnable>false</detectBrightnessEnable>
+		<brightnessThreshold>0</brightnessThreshold>
+		<flashEnabled>true</flashEnabled>
+		<startHour>12</startHour>
+		<startMinute>00</startMinute>
+		<endHour>12</endHour>
+		<endMinute>01</endMinute>
+		<plateBrightness>false</plateBrightness>
+		<incrBrightEnable>false</incrBrightEnable>
+		<incrBrightTime>80</incrBrightTime>
+		<incrBrightPercent>50</incrBrightPercent>
+		<brightness>0</brightness>
+		<delayCaptureTime>0</delayCaptureTime>
+	</SyncSignalOutput>
+	<SyncSignalOutput>
+		<id>2</id>
+		<IOWorkMode>flashLight</IOWorkMode>
+		<defaultStatus>low</defaultStatus>
+		<outputStatus>high</outputStatus>
+		<aheadTime max="1000" min="0">0</aheadTime>
+		<timeDelay>1600</timeDelay>
+		<freqMultiply>2</freqMultiply>
+		<dutyRate>18</dutyRate>
+		<postFlashEnable>true</postFlashEnable>
+		<illegalFlashEnable>true</illegalFlashEnable>
+		<videoFlashEnable>false</videoFlashEnable>
+		<detectBrightnessEnable>false</detectBrightnessEnable>
+		<brightnessThreshold>0</brightnessThreshold>
+		<flashEnabled>false</flashEnabled>
+		<startHour>12</startHour>
+		<startMinute>00</startMinute>
+		<endHour>12</endHour>
+		<endMinute>01</endMinute>
+		<plateBrightness>false</plateBrightness>
+		<incrBrightEnable>false</incrBrightEnable>
+		<incrBrightTime>80</incrBrightTime>
+		<incrBrightPercent>50</incrBrightPercent>
+		<brightness>0</brightness>
+		<delayCaptureTime>0</delayCaptureTime>
+	</SyncSignalOutput>
+	<SyncSignalOutput>
+		<id>3</id>
+		<IOWorkMode>flashLight</IOWorkMode>
+		<defaultStatus>low</defaultStatus>
+		<outputStatus>high</outputStatus>
+		<aheadTime max="1000" min="0">0</aheadTime>
+		<timeDelay>1600</timeDelay>
+		<freqMultiply>2</freqMultiply>
+		<dutyRate>18</dutyRate>
+		<postFlashEnable>true</postFlashEnable>
+		<illegalFlashEnable>true</illegalFlashEnable>
+		<videoFlashEnable>false</videoFlashEnable>
+		<detectBrightnessEnable>false</detectBrightnessEnable>
+		<brightnessThreshold>0</brightnessThreshold>
+		<flashEnabled>true</flashEnabled>
+		<startHour>12</startHour>
+		<startMinute>00</startMinute>
+		<endHour>12</endHour>
+		<endMinute>01</endMinute>
+		<plateBrightness>false</plateBrightness>
+		<incrBrightEnable>false</incrBrightEnable>
+		<incrBrightTime>80</incrBrightTime>
+		<incrBrightPercent>50</incrBrightPercent>
+		<brightness>0</brightness>
+		<delayCaptureTime>0</delayCaptureTime>
+	</SyncSignalOutput>
+	<SyncSignalOutput>
+		<id>4</id>
+		<IOWorkMode>flashLight</IOWorkMode>
+		<defaultStatus>low</defaultStatus>
+		<outputStatus>pulse</outputStatus>
+		<aheadTime max="1000" min="0">0</aheadTime>
+		<timeDelay>1600</timeDelay>
+		<freqMultiply>2</freqMultiply>
+		<dutyRate>18</dutyRate>
+		<postFlashEnable>true</postFlashEnable>
+		<illegalFlashEnable>true</illegalFlashEnable>
+		<videoFlashEnable>true</videoFlashEnable>
+		<detectBrightnessEnable>false</detectBrightnessEnable>
+		<brightnessThreshold>0</brightnessThreshold>
+		<flashEnabled>true</flashEnabled>
+		<startHour>12</startHour>
+		<startMinute>00</startMinute>
+		<endHour>12</endHour>
+		<endMinute>01</endMinute>
+		<plateBrightness>false</plateBrightness>
+		<incrBrightEnable>false</incrBrightEnable>
+		<incrBrightTime>50</incrBrightTime>
+		<incrBrightPercent>50</incrBrightPercent>
+		<brightness>0</brightness>
+		<delayCaptureTime>0</delayCaptureTime>
+	</SyncSignalOutput>
+	<SyncSignalOutput>
+		<id>5</id>
+		<IOWorkMode>flashLight</IOWorkMode>
+		<defaultStatus>low</defaultStatus>
+		<outputStatus>pulse</outputStatus>
+		<aheadTime max="1000" min="0">0</aheadTime>
+		<timeDelay>1600</timeDelay>
+		<freqMultiply>2</freqMultiply>
+		<dutyRate>18</dutyRate>
+		<postFlashEnable>true</postFlashEnable>
+		<illegalFlashEnable>true</illegalFlashEnable>
+		<videoFlashEnable>true</videoFlashEnable>
+		<detectBrightnessEnable>false</detectBrightnessEnable>
+		<brightnessThreshold>0</brightnessThreshold>
+		<flashEnabled>true</flashEnabled>
+		<startHour>12</startHour>
+		<startMinute>00</startMinute>
+		<endHour>12</endHour>
+		<endMinute>01</endMinute>
+		<plateBrightness>false</plateBrightness>
+		<incrBrightEnable>false</incrBrightEnable>
+		<incrBrightTime>50</incrBrightTime>
+		<incrBrightPercent>50</incrBrightPercent>
+		<brightness>0</brightness>
+		<delayCaptureTime>0</delayCaptureTime>
+	</SyncSignalOutput>
+	<SyncSignalOutput>
+		<id>6</id>
+		<IOWorkMode>flashLight</IOWorkMode>
+		<defaultStatus>low</defaultStatus>
+		<outputStatus>pulse</outputStatus>
+		<aheadTime max="1000" min="0">0</aheadTime>
+		<timeDelay>1600</timeDelay>
+		<freqMultiply>2</freqMultiply>
+		<dutyRate>18</dutyRate>
+		<postFlashEnable>true</postFlashEnable>
+		<illegalFlashEnable>true</illegalFlashEnable>
+		<videoFlashEnable>true</videoFlashEnable>
+		<detectBrightnessEnable>false</detectBrightnessEnable>
+		<brightnessThreshold>0</brightnessThreshold>
+		<flashEnabled>true</flashEnabled>
+		<startHour>12</startHour>
+		<startMinute>00</startMinute>
+		<endHour>12</endHour>
+		<endMinute>01</endMinute>
+		<plateBrightness>false</plateBrightness>
+		<incrBrightEnable>false</incrBrightEnable>
+		<incrBrightTime>50</incrBrightTime>
+		<incrBrightPercent>50</incrBrightPercent>
+		<brightness>0</brightness>
+		<delayCaptureTime>0</delayCaptureTime>
+	</SyncSignalOutput>
+	<SyncSignalOutput>
+		<id>7</id>
+		<IOWorkMode>flashLight</IOWorkMode>
+		<defaultStatus>low</defaultStatus>
+		<outputStatus>high</outputStatus>
+		<aheadTime max="1000" min="0">0</aheadTime>
+		<timeDelay>1600</timeDelay>
+		<freqMultiply>2</freqMultiply>
+		<dutyRate>18</dutyRate>
+		<postFlashEnable>true</postFlashEnable>
+		<illegalFlashEnable>true</illegalFlashEnable>
+		<videoFlashEnable>false</videoFlashEnable>
+		<detectBrightnessEnable>false</detectBrightnessEnable>
+		<brightnessThreshold>0</brightnessThreshold>
+		<flashEnabled>false</flashEnabled>
+		<startHour>00</startHour>
+		<startMinute>00</startMinute>
+		<endHour>00</endHour>
+		<endMinute>00</endMinute>
+		<plateBrightness>false</plateBrightness>
+		<incrBrightEnable>false</incrBrightEnable>
+		<incrBrightTime>50</incrBrightTime>
+		<incrBrightPercent>50</incrBrightPercent>
+		<brightness>0</brightness>
+		<delayCaptureTime>0</delayCaptureTime>
+	</SyncSignalOutput>
+</SyncSignalOutputList>
+
+
+<?xml version="1.0" encoding="UTF-8"?>
+<ResponseStatus version="2.0" xmlns="http://www.isapi.org/ver20/XMLSchema">
+<requestURL>/ISAPI/ITC/syncSignalOutput</requestURL>
+<statusCode>1</statusCode>
+<statusString>OK</statusString>
+<subStatusCode>ok</subStatusCode>
+</ResponseStatus>
+
+
+
+    '''
 
     def __init__(self, ip, userName, password) -> None:
         self.ip = ip
