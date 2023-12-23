@@ -36,6 +36,10 @@ conda activate env_name
 conda deactivate
 
 conda list # 包管理
+### 2.1 查看Python 所在路径
+where python #windows
+which python # linux or macOS
+
 
 
 # 包管理

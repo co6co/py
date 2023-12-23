@@ -18,7 +18,7 @@ class bizDevicePo(TimeStampedModelPO):
     ip=Column("ip",String(64),comment="外网IP")
     name=Column("name",String(64),comment="设备名称") 
     resourcesPO=Relationship("bizResourcePO",back_populates="devicePO",uselist=True,passive_deletes=True)
-    cameraPO=Relationship("bizCameraPO",back_populates="devicePo")
+    cameraPO=Relationship("bizCameraPO",back_populates="devicePo",uselist=False,)
 
 class bizCameraPO(UserTimeStampedModelPO):
     """
@@ -29,6 +29,9 @@ class bizCameraPO(UserTimeStampedModelPO):
     poster = Column("poster",String(255)) 
     streams = Column("stream_urls",String(2048),comment="json 对象[{url:xx,name:xx}]") 
     devicePo=Relationship("bizDevicePo",back_populates="cameraPO")
+
+    def __repr__(self) -> str:
+        return f"{self.__class__} id:{self.id},streams:{self.streams},createTime:{self.createTime}"
 
 
 
