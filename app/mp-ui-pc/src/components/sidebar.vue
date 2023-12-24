@@ -67,7 +67,7 @@ const items: Array<sideBarItem> = [
       {
         icon: 'DocumentCopy',
         index: '/devicesPreview',
-        title: '设备预览',
+        title: '视频监控',
         permiss: '2',
       }
     ]
@@ -76,7 +76,7 @@ const items: Array<sideBarItem> = [
   {
     icon: 'Calendar',
     index: '/alarmTable',
-    title: '告警管理',
+    title: '告警事件',
     permiss: '2',
   },
   /*

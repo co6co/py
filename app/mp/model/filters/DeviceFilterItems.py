@@ -3,10 +3,13 @@ from model.pos.biz import bizDevicePo, bizCameraPO
 from sqlalchemy .orm.attributes import InstrumentedAttribute
 from typing import Tuple
 from co6co_db_ext.db_filter import absFilterItems
+from co6co_db_ext.db_operations import DbOperations
 from co6co.utils import log
 from sqlalchemy import or_, and_, Select
+from sqlalchemy.orm import joinedload, contains_eager
+import json
 
-
+ 
 class DeviceFilterItems(absFilterItems):
     """
     设备管理
@@ -18,14 +21,14 @@ class DeviceFilterItems(absFilterItems):
     def __init__(self):
         super().__init__(bizDevicePo)
         self.listSelectFields = [
-            bizDevicePo.id,bizDevicePo.uuid, bizDevicePo.name, bizDevicePo.deviceType, bizDevicePo.createTime, bizDevicePo.ip, bizDevicePo.innerIp,
-            bizDevicePo.cameraPO
+            bizDevicePo.id, bizDevicePo.uuid, bizDevicePo.name, bizDevicePo.deviceType, bizDevicePo.createTime, bizDevicePo.ip, bizDevicePo.innerIp,
+            bizCameraPO.streams,bizCameraPO.poster
         ]
 
     def filter(self) -> list:
         """
         过滤条件 
-        """
+        """ 
         filters_arr = []
         if self.checkFieldValue(self.name):
             filters_arr.append(bizDevicePo.name.like(f"%{self.name}%"))
@@ -38,7 +41,8 @@ class DeviceFilterItems(absFilterItems):
 
     def create_List_select(self):
         select = (
-            Select(*self.listSelectFields).join(bizCameraPO, isouter=True)
+            Select(*self.listSelectFields)
+            .outerjoin(bizCameraPO)
             .filter(and_(*self.filter()))
         )
         return select
@@ -89,7 +93,7 @@ class CameraFilterItems(absFilterItems):
 
 class posterTaskFilterItems(absFilterItems):
     """
-    定时问题过滤条件
+    定时任务过滤条件
     """
 
     def __init__(self, userName=None, role_id: int = None):

@@ -1,5 +1,6 @@
 {
-  "name": "告警系统",
+  "name": "数字安全管理系统",
+  "company":"江苏国信协联能源有限公司",
   "version": "0.0.1",
   "private": true,
   "scripts": {

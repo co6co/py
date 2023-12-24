@@ -3,6 +3,9 @@
 import type { MqttClient, OnMessageCallback } from 'mqtt'; 
 import { ref, onUnmounted } from 'vue';
  
+
+
+const mqqt_server=import.meta.env.VITE_mqtt_server
 class MQTTing {
     url: string; // mqtt地址
     topics: string[]
@@ -19,8 +22,8 @@ class MQTTing {
             clean: true,// 保留会话
             // 认证信息
             clientId: "clientId",
-            username: "admin", //用户名 不用的话什么也不用填
-            password: "admin", //密码 不用的话什么也不用填
+            username: "mqttroot", //用户名 不用的话什么也不用填
+            password: "hQEMA4fLSGZcsDhlAQf", //密码 不用的话什么也不用填
             connectTimeout: 4000, // 超时时间
             reconnectPeriod: 4000, // 重连时间间隔
         };
@@ -32,8 +35,7 @@ class MQTTing {
         this.client.on('reconnect', ( ) => {
             
         });
-    } 
-
+    }
     subscribe(topic?:string) {
         if (topic!=null) this.topics.push(topic)
         this.topics.forEach((item) => {
@@ -139,7 +141,7 @@ function useMqtting() {
 }
 
 
-export {useMqtt,useMqtting,MQTTing}
+export {useMqtt,useMqtting,MQTTing,mqqt_server}
 /**
  * 
  * 

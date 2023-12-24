@@ -7,7 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from co6co_sanic_ext.utils import JSON_util, sys_json
 from co6co.utils import log
 from model.filters.DeviceFilterItems import DeviceFilterItems, CameraFilterItems
-from co6co_db_ext.db_operations import DbOperations,joinedload
+from sqlalchemy.orm import joinedload
 from view_model.base_view import AuthMethodView
 from model.pos.biz import bizDevicePo, bizCameraPO
 from model.enum import device_type
@@ -34,11 +34,11 @@ class Devices_View(AuthMethodView):
         获取设备类型
         """
         dictList = device_type.to_dict_list()
-        return JSON_util.response(Result.success({"deviceType": dictList}))
+        return JSON_util.response(Result.success({"categoryList": dictList,"cameraCategory":device_type.ip_camera.val,"boxCategory":device_type.box.val}))
 
     async def post(self, request: Request):
         """
-        获取相机设备 list 
+        获取设备 list 
         """
         param = DeviceFilterItems()
         param.__dict__.update(request.json)

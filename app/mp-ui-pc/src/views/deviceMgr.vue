@@ -5,7 +5,7 @@
         <div class="handle-box">
           <el-input v-model="table_module.query.name" placeholder="用户名" class="handle-input mr10"></el-input>
           <el-select style="width: 160px" class="mr10" clearable v-model="table_module.query.category" placeholder="设备类型">
-            <el-option v-for="item  in category_list" :key="item.uid" :label="item.key" :value="item.value" />
+            <el-option v-for="item  in DeviceCategoryRef?.categoryList" :key="item.uid" :label="item.key" :value="item.value" />
           </el-select>
           <el-link type="primary" title="更多" @click="table_module.moreOption=!table_module.moreOption">
             <ElIcon :size="20">
@@ -73,7 +73,7 @@
       <el-form label-width="90px" ref="dialogForm" :rules="rules" :model="form.fromData" style="max-width: 460px">
         <el-form-item label="设备类型" prop="deviceType">
           <el-select style="width:160px" class="mr10" clearable v-model="form.fromData.deviceType" placeholder="请选择">
-            <el-option v-for="item in category_list" :disabled="item.uid=='box'" :key="item.uid" :label="item.key"
+            <el-option v-for="item in DeviceCategoryRef?.categoryList" :disabled="item.value==DeviceCategoryRef?.boxCategory" :key="item.uid" :label="item.key"
               :value="item.value" />
           </el-select>
         </el-form-item>
@@ -144,22 +144,21 @@ import * as res_api from '../api';
 import * as t from '../store/types/devices'
 import { detailsInfo } from '../components/details';
 import { imgVideo, types } from '../components/player';
-import { str2Obj } from '../utils'
+import { str2Obj,createStateEndDatetime } from '../utils'
 
 
-interface cameraPO {
-  poster: string;
-  streams: t.streamItem
-}
+
+ 
 interface TableRow {
   id: number;
   uuid: string;
   deviceType: number;
   innerIp: string;
   ip: string;
-  name: string;
-  cameraPO?: string;
+  name: string; 
   createTime: string;
+  poster?: string; 
+  streams?: string;
 }
 interface Query extends IpageParam {
   name: string;
@@ -190,45 +189,29 @@ const table_module = reactive<table_module>({
   data: [],
   pageTotal: -1,
   getDeviceName: (value?: number) => {
-    if (category_list.value && category_list.value.length > 0) {
-      let result = value == null ? "" : category_list.value.find(m => m.value == value)?.key
-      if (result == null) {
-        return ""
-      }
+    if (DeviceCategoryRef.value && DeviceCategoryRef.value.categoryList.length > 0) {
+      let result = value == null ? "" : DeviceCategoryRef.value.categoryList.find(m => m.value == value)?.key
+      if (result == null) return "" 
       return result
-    }
-    console.info("is NULL")
+    } 
     return ""
   }
-});
-const setDatetime = (t: number, i: number) => {
-  let endDate = null
-  let startDate = null
-  switch (t) {
-    case 0:
-      endDate = new Date();
-      const times = endDate.getTime() - i * 3600 * 1000
-      startDate = new Date(times)
-      break
-    case 1:
-      startDate = new Date(dayjs(new Date()).format('YYYY/MM/DD'))
-      endDate = startDate.getTime() + 24 * 3600 * 1000 - 1000
-      break
-    default:
-      startDate = new Date(dayjs(new Date()).format('YYYY/MM/DD'))
-      endDate = startDate.getTime() + 24 * 3600 * 1000 - 1000
-      break
-  }
-  table_module.query.datetimes = [dayjs(startDate).format('YYYY-MM-DD HH:mm:ss'), dayjs(endDate).format('YYYY-MM-DD HH:mm:ss')]
+}); 
+const setDatetime = (t: number, i: number) => { 
+  table_module.query.datetimes =createStateEndDatetime(t,i)
 }
 
+interface DeviceCategory{
+  categoryList:Array<EnumType>
+  cameraCategory:number
+  boxCategory:number
+}
 
-const category_list = ref<Array<EnumType>>(<EnumType[]>[])
+const DeviceCategoryRef = ref<DeviceCategory>( )
 const getDeviceType = async () => {
   const res = await api.dev_type_svc()
-  if (res.code == 0) {
-    console.info(res)
-    category_list.value = res.data.deviceType
+  if (res.code == 0) { 
+    DeviceCategoryRef.value = res.data
   }
 }
 getDeviceType()
@@ -348,8 +331,7 @@ const onOpenDialog = (operation: 0 | 1, row?: any) => {
   form.id = -1;
   switch (operation) {
     case 0:
-      form.title = "增加";
-
+      form.title = "增加"; 
       form.fromData.innerIp = ""
       form.fromData.name = ""
       break;
@@ -359,6 +341,7 @@ const onOpenDialog = (operation: 0 | 1, row?: any) => {
       form.fromData.deviceType = row.deviceType
       form.fromData.innerIp = row.innerIp
       form.fromData.name = row.name
+      if (row.streams && typeof row.streams == 'string')form.fromData.streamUrls=JSON.parse(row.streams); 
       break;
   }
 }
