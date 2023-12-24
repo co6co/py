@@ -52,6 +52,15 @@ const routes: RouteRecordRaw[] = [
                 },
                 component: () => import( '../views/devicesTable.vue'),
             }, 
+            {
+                path: '/config',
+                name: 'config',
+                meta: {
+                    title: '配置管理',
+                    permiss: '2',
+                },
+                component: () => import( '../views/config.vue'),
+            }, 
         ],
     }, 
     {

@@ -33,15 +33,20 @@ class HkServiceWeb:
 <timeDelay min="0" max="10000">1600</timeDelay>
 <freqMultiply min="1" max="15">2</freqMultiply>
 <dutyRate min="0" max="40">18</dutyRate>
+
 <isSupportDetectBrightness >true</isSupportDetectBrightness >
 <detectBrightness min="0" max="100">0</detectBrightness>
-<isSupportTimeBrightness>true</isSupportTimeBrightness>
-<isSupportPlateBrightness>true</isSupportPlateBrightness>
-<isSupportIncrBright>false</isSupportIncrBright>
+
 <postFlashEnable>true</postFlashEnable>
 <illegalFlashEnable>true</illegalFlashEnable>
+
+<isSupportTimeBrightness>true</isSupportTimeBrightness>
+
+<isSupportPlateBrightness>true</isSupportPlateBrightness>
+<isSupportIncrBright>false</isSupportIncrBright>
 <videoFlashEnable>false</videoFlashEnable>
 </SyncSignalOutput>
+
 <SyncSignalOutput>
 <id min="1" max="8">2</id>
 <IOWorkMode opt="flashLight,polarizer">flashLight</IOWorkMode>
@@ -167,22 +172,28 @@ class HkServiceWeb:
 		<timeDelay>1600</timeDelay>
 		<freqMultiply>2</freqMultiply>
 		<dutyRate>18</dutyRate>
-		<postFlashEnable>true</postFlashEnable>
+
+        <detectBrightnessEnable>false</detectBrightnessEnable>
+		
+        <postFlashEnable>true</postFlashEnable>
 		<illegalFlashEnable>true</illegalFlashEnable>
-		<videoFlashEnable>false</videoFlashEnable>
-		<detectBrightnessEnable>false</detectBrightnessEnable>
+		
 		<brightnessThreshold>0</brightnessThreshold>
 		<flashEnabled>true</flashEnabled>
-		<startHour>12</startHour>
-		<startMinute>00</startMinute>
-		<endHour>12</endHour>
-		<endMinute>01</endMinute>
-		<plateBrightness>false</plateBrightness>
-		<incrBrightEnable>false</incrBrightEnable>
+		
 		<incrBrightTime>80</incrBrightTime>
 		<incrBrightPercent>50</incrBrightPercent>
 		<brightness>0</brightness>
 		<delayCaptureTime>0</delayCaptureTime>
+
+        <plateBrightness>false</plateBrightness>
+        <incrBrightEnable>false</incrBrightEnable>
+        <videoFlashEnable>false</videoFlashEnable>
+
+        <startHour>12</startHour>
+		<startMinute>00</startMinute>
+		<endHour>12</endHour>
+		<endMinute>01</endMinute>
 	</SyncSignalOutput>
 	<SyncSignalOutput>
 		<id>2</id>
