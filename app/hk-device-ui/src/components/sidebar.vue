@@ -62,7 +62,21 @@ const items: Array<sideBarItem> = [
     index: '/taskTable',
     title: '任务管理',
     permiss: '2',
-  }
+  },
+  {
+    icon: 'Calendar',
+    index: '0',
+    title: '系统管理',
+    permiss: '2',
+    subs: [
+      {
+        icon: 'DocumentCopy',
+        index: '/config',
+        title: '配置管理',
+        permiss: '2',
+      },
+    ]
+  },
 ];
 
 const route = useRoute();

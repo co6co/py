@@ -19,7 +19,7 @@ class Base_Enum  (Enum):
     
     @classmethod
     def to_dict_list(cls)->List[Dict]: 
-        status=[{ 'key':i.key,'value':i.val} for i in cls]
+        status=[{'uid':i.name, 'key':i.key,'value':i.val} for i in cls]
         return status 
     
     def getValue(self)->T:
@@ -44,7 +44,7 @@ class Base_EC_Enum(Enum):
     
     @classmethod
     def to_dict_list(cls)->List[Dict]: 
-        status=[{"key":i.key,'label':i.label,'value':i.val} for i in cls]
+        status=[{'uid':i.name,"key":i.key,'label':i.label,'value':i.val} for i in cls]
         return status 
     def getValue(self)->T:
         return self.val

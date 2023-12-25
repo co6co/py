@@ -34,7 +34,7 @@ async def update_device_poster_task(app):
             session:AsyncSession=service.async_session_factory()
             sanrc=await session.execute(filter.count_select)
             count=sanrc.scalar()
-            log.succ(f"记录数：{count}")
+            log.succ(f"获取设备视频poster：{count}")
             if count>0 and filter.pageIndex<=filter.getMaxPageIndex(count): 
                 await queryData(session,filter)
                 filter.pageIndex+=1

@@ -3,17 +3,16 @@
     <div class="container">
       <el-row :gutter="24">
         <div class="handle-box">
-          <el-input v-model="table_module.query.name" placeholder="设备名称" class="handle-input mr10"></el-input>
-          <el-select style="width:160px" class="mr10" v-model="table_module.query.category" placeholder="设备类别">
-            <el-option v-for="item  in category_list" :key="item.id" :label="item.name" :value="item.id" />
-          </el-select>
+          <el-input v-model="table_module.query.name" placeholder="配置名" class="handle-input mr10"></el-input>
+          <el-input v-model="table_module.query.code" placeholder="配置code" class="handle-input mr10"></el-input>
+  
           <el-link type="primary" title="更多" @click="table_module.moreOption=!table_module.moreOption">
             <ElIcon :size="20">
               <MoreFilled />
             </ElIcon>
           </el-link>
           <el-button type="primary" :icon="Search" @click="onSearch">搜索</el-button>
-          <el-button type="primary" :icon="Search" @click="onSetting">补光灯设置</el-button>
+          <el-button type="primary" :icon="Plus" @click="onOpenDialog(0)">新增</el-button>
         </div>
       </el-row>
       <el-row :gutter="24" v-if="table_module.moreOption">
@@ -24,30 +23,33 @@
             <el-link type="info" @click="setDatetime(1,24)">今天</el-link>
             <el-date-picker style="margin-top: 3px;" v-model="table_module.query.datetimes" format="YYYY-MM-DD HH:mm:ss"
               value-format="YYYY-MM-DD HH:mm:ss" type="datetimerange" range-separator="至" start-placeholder="开始时间"
-              end-placeholder="结束时间" title="告警事件" />
+              end-placeholder="结束时间" title="创建时间" />
           </div>
         </div>
       </el-row>
-  
       <el-row :gutter="24">
         <el-table highlight-current-row @sort-change="onColChange" :row-class-name="tableRowProp"
           :data="table_module.data" border class="table" ref="tableInstance" @row-click="onTableSelect"
           header-cell-class-name="table-header">
           <el-table-column prop="id" label="ID" width="80" align="center" sortable
             :show-overflow-tooltip="true"></el-table-column>
-          <el-table-column prop="ip" label="IP地址" width="119" sortable :show-overflow-tooltip="true"></el-table-column>
-          <el-table-column prop="name" label="名称" width="119" sortable :show-overflow-tooltip="true"></el-table-column>
-          <el-table-column prop="code" label="代码" width="119" sortable :show-overflow-tooltip="true"></el-table-column>
-          <el-table-column prop="categoryName" label="类别名称" width="119" sortable
+  
+          <el-table-column prop="name" label="名称" width="120" align="center" sortable
             :show-overflow-tooltip="true"></el-table-column>
-          <el-table-column prop="categoryCode" label="类别代码" width="119" sortable
+          <el-table-column prop="code" label="名称" width="130" align="center" sortable
             :show-overflow-tooltip="true"></el-table-column>
-          <el-table-column width="160" prop="createTime" label="入库时间" sortable
+          <el-table-column width="160" prop="createTime" label="创建时间" sortable
+            :show-overflow-tooltip="true"></el-table-column>
+  
+          <el-table-column width="160" prop="updateTime" label="更新时间" sortable
             :show-overflow-tooltip="true"></el-table-column>
           <el-table-column label="操作" width="316" align="center">
             <template #default="scope">
-              <el-button text :icon="Edit" @click="onOpen2Dialog(scope.row)">
-                查看日志
+              <el-button text :icon="Edit" @click="onOpenDialog(1,scope.row)" v-if="scope.row.deviceType!='1'">
+                修改
+              </el-button>
+              <el-button text :icon="Delete" @click="onDelete(scope.row)" v-if="scope.row.deviceType!='1'">
+                删除
               </el-button>
             </template>
           </el-table-column>
@@ -62,40 +64,24 @@
       </el-row>
     </div>
     <!-- 弹出框 -->
-    <el-dialog title="设置补光灯" v-model="form.dialogVisible" style="width:30%;" @keydown.ctrl="keyDown">
-      <el-form label-width="70px">
-        <el-form-item label="开/关">
-          <el-switch v-model="form.allows" class="ml-2"
-            style="--el-switch-on-color: #13ce66; --el-switch-off-color: #ff4949" />
+    <el-dialog :title="form.title" v-model="form.dialogVisible" style="width:40%; height:50%;" @keydown.ctrl="keyDown">
+      <el-form label-width="90px" ref="dialogForm" :rules="rules" :model="form.fromData" style="max-width: 360px">
+  
+        <el-form-item label="名称" prop="name">
+          <el-input v-model="form.fromData.name" placeholder="配置名称"></el-input>
         </el-form-item>
-        <el-form-item label="开始时间">
-          <el-time-select v-model="form.startTime" start="18:00" step="00:05" end="21:30" placeholder="选择时间" />
+        <el-form-item label="代码" prop="code">
+          <el-input v-model="form.fromData.code" placeholder="配置代码"></el-input>
         </el-form-item>
-        <el-form-item label="结束时间">
-          <el-time-select v-model="form.endTime" start="05:30" step="00:05" end="08:30" placeholder="选择时间" />
+        <el-form-item label="配置值" prop="value">
+          <el-input v-model="form.fromData.value" placeholder="配置值"></el-input>
         </el-form-item>
+  
       </el-form>
       <template #footer>
         <span class="dialog-footer">
-          <el-button @click="form.dialogVisible = false">取 消</el-button>
-          <el-button type="primary" @click="onSave">确 定</el-button>
-        </span>
-      </template>
-    </el-dialog>
-  
-    <!-- 弹出框 -->
-    <el-dialog title="详细信息" v-model="form2.dialogVisible" style="width:50%; height: 40%;" @keydown.ctrl="keyDown">
-      <el-row>
-        <el-col :span="12">
-          <img-video :viewOption="form2.data"></img-video>
-        </el-col>
-        <el-col :span="12">
-        </el-col>
-      </el-row>
-  
-      <template #footer>
-        <span class="dialog-footer">
-          <el-button @click="form2.dialogVisible = false">取 消</el-button>
+          <el-button @click="form.dialogVisible = false">关闭</el-button>
+          <el-button @click="onDialogSave(dialogForm)">保存</el-button>
         </span>
       </template>
     </el-dialog>
@@ -107,84 +93,52 @@ import { ref, watch, reactive, nextTick, PropType, onMounted, onBeforeUnmount, c
 import { ElMessage, ElMessageBox, FormRules, FormInstance, ElTreeSelect, dayjs } from 'element-plus';
 import { TreeNode } from 'element-plus/es/components/tree-v2/src/types'
 import { TreeNodeData } from 'element-plus/es/components/tree/src/tree.type'
-import { Delete, Edit, Search, Compass, MoreFilled, Download } from '@element-plus/icons-vue';
-import * as api from '../api/device';
+import { Delete, Edit, Search, Compass, MoreFilled, Download, Plus, Minus } from '@element-plus/icons-vue';
+import * as api from '../api/config';
 import * as res_api from '../api';
 import { detailsInfo } from '../components/details';
 import { imgVideo, types } from '../components/player';
-import { str2Obj } from '../utils'
+import { str2Obj, createStateEndDatetime } from '../utils'
 
-//table Row
 interface TableRow {
-  id: number,
-  ip: string
-  categoryName: string
-  vendor: number,
-  name: string,
-  code: string,
-  createTime: string,
-  updateTime: string,
-}
-//
-interface Query extends IpageParam {
-  datetimes: Array<string>,
-  name: String,
-  category?: number,
-}
-interface table_module {
-  query: Query,
-  moreOption: boolean,
-  data: TableRow[],
-  currentRow?: TableRow,
-  pageTotal: number,
-}
-interface Category {
   id: number;
+  code: string;
+  name: string;
+  createTime: string;
+  updateTime: string;
+  value: string;
+}
+interface Query extends IpageParam {
   name: string;
   code: string;
+  datetimes: Array<string>,
 }
-const category_list = ref<Array<Category>>(<Category[]>[])
-onMounted(async () => {
-  const res = await api.category_list_svc()
-  if (res.code == 0) {
-    category_list.value = res.data
-  }
-})
+interface table_module {
+  query: Query;
+  moreOption: boolean;
+  data: TableRow[];
+  currentRow?: TableRow;
+  pageTotal: number;
+}
 
 const tableInstance = ref<any>(null);
 const currentTableItemIndex = ref<number>();
 const table_module = reactive<table_module>({
   query: {
-    name: '',
+    name: "",
+    code: "",
     datetimes: [],
     pageIndex: 1,
-    pageSize: 15,
-    order: 'asc',
-    orderBy: '',
+    pageSize: 10,
+    order: "asc",
+    orderBy: ""
   },
   moreOption: false,
   data: [],
-  pageTotal: 0,
+  pageTotal: 0
 });
 const setDatetime = (t: number, i: number) => {
-  let endDate = null
-  let startDate = null
-  switch (t) {
-    case 0:
-      endDate = new Date();
-      const times = endDate.getTime() - i * 3600 * 1000
-      startDate = new Date(times)
-      break
-    case 1:
-      startDate = new Date(dayjs(new Date()).format('YYYY/MM/DD'))
-      endDate = startDate.getTime() + 24 * 3600 * 1000 - 1000
-      break
-    default:
-      startDate = new Date(dayjs(new Date()).format('YYYY/MM/DD'))
-      endDate = startDate.getTime() + 24 * 3600 * 1000 - 1000
-      break
-  }
-  table_module.query.datetimes = [dayjs(startDate).format('YYYY-MM-DD HH:mm:ss'), dayjs(endDate).format('YYYY-MM-DD HH:mm:ss')]
+  table_module.query.datetimes = createStateEndDatetime(t, i)
 }
 
 // 排序
@@ -193,8 +147,6 @@ const onColChange = (column: any) => {
   table_module.query.orderBy = column.prop
   if (column) getData() // 获取数据的方法
 }
-
-
 const tableRowProp = (data: { row: any, rowIndex: number }) => {
   data.row.index = data.rowIndex;
 }
@@ -205,11 +157,12 @@ const onRefesh = () => {
 const onSearch = () => {
   getData();
 };
-
+const getQuery = () => {
+  table_module.query.pageIndex = table_module.query.pageIndex || 1;
+}
 // 获取表格数据
 const getData = () => {
-  table_module.query.pageIndex = table_module.query.pageIndex || 1;
-  api.list_svc(table_module.query).then(res => {
+  getQuery(), api.list_svc(table_module.query).then(res => {
     if (res.code == 0) {
       table_module.data = res.data;
       table_module.pageTotal = res.total || 0;
@@ -259,54 +212,105 @@ const keyDown = (e: KeyboardEvent) => {
   //process_view.value.keyDown(e) 
   e.stopPropagation()
 }
-//**补光灯设置 */
+//**详细信息 */
+interface FromData {
+  deviceType?: number;
+  name: string;
+  code: string;
+  value: string;
+}
 interface dialogDataType {
-  dialogVisible: boolean;
-  allows?: boolean;
-  startTime: string;
-  endTime: string;
-  query?: Query;
+  dialogVisible: boolean,
+  operation: 0 | 1 | number,
+  title?: string;
+  id: number
+  fromData: FromData
 }
 let dialogData = {
   dialogVisible: false,
-  allows: true,
-  startTime: "20:00",
-  endTime: "07:00"
-
+  operation: 0,
+  id: 0,
+  fromData: {
+    code: "",
+    name: "",
+    value: ""
+  }
 }
+const dialogForm = ref<FormInstance>();
+const rules: FormRules = {
+  code: [{ required: true, message: '配置code', trigger: ['blur'] }],
+  name: [{ required: true, message: '请输入设备名称', trigger: 'blur' }],
+  value: [{ required: true, message: '请输入配置值', trigger: ['blur'] }]
+};
 let form = reactive<dialogDataType>(dialogData);
-
-const onSetting = () => {
+const onOpenDialog = (operation: 0 | 1, row?: any) => {
   form.dialogVisible = true
+  table_module.currentRow = row
+
+  form.dialogVisible = true
+  form.operation = operation
+  form.id = -1;
+  switch (operation) {
+    case 0:
+      form.title = "增加";
+      form.fromData.code = ""
+      form.fromData.name = ""
+      form.fromData.value = ""
+      break;
+    case 1:
+      form.id = row.id
+      form.title = "编辑";
+      form.fromData.value = row.value
+      form.fromData.code = row.code
+      form.fromData.name = row.name
+      break;
+  }
 }
-const onSave = () => {
-  ElMessageBox.confirm(`确定要设置吗？`, '提示', {
+const onDialogSave = (formEl: FormInstance | undefined) => {
+  if (!formEl) return;
+  formEl.validate(value => {
+    if (value) {
+      if (form.operation == 0) {
+        api.add_config_svc(form.fromData).then(res => {
+          if (res.code == 0) {
+            form.dialogVisible = false;
+            ElMessage.success(`增加成功`);
+            getData()
+          }
+          else { ElMessage.error(`增加失败:${res.message}`); }
+        })
+      } else {
+        api.edit_config_svc(form.id, form.fromData).then(res => {
+          if (res.code == 0) {
+            form.dialogVisible = false;
+            ElMessage.success(`编辑成功`);
+            getData()
+          }
+          else { ElMessage.error(`编辑失败:${res.message}`); }
+        })
+      }
+    } else {
+      ElMessage.error("请检查输入的数据！")
+      return false;
+    }
+  })
+}
+
+// 删除操作
+const onDelete = (row: TableRow) => {
+  // 二次确认删除
+  ElMessageBox.confirm(`确定要删除"${row.name}\t${row.code}"配置吗？`, '提示', {
     type: 'warning'
   })
     .then(() => {
-      form.query = table_module.query
-      api.set_ligth_svc(form).then((res) => {
-        if (res.code == 0) ElMessage.success(res.message);
-        else ElMessage.error(res.message);
+      api.del_config_svc(row.id).then(res => {
+        if (res.code == 0) ElMessage.success('删除成功'), getData();
+        else ElMessage.error(`删除失败:${res.message}`);
+      }).finally(() => {
       })
-    });
-}
-//**日志查看 */
-interface dialog2DataType {
-  dialogVisible: boolean,
-  data: Array<types.resourceOption>
-}
-let dialog2Data = {
-  dialogVisible: false,
-  data: []
-}
-let form2 = ref<dialog2DataType>(dialog2Data);
-const onOpen2Dialog = (row: TableRow) => {
-  form2.value.dialogVisible = true
-  table_module.currentRow = row
-  form2.value.data = []
-}
-
+    })
+    .catch(() => { });
+};
 //**end 打标签 */
 </script> 
 <style  scoped lang="less">
@@ -401,5 +405,30 @@ const onOpen2Dialog = (row: TableRow) => {
       height: 40px;
     }
   }
+}
+
+::v-deep .streamInfo {
+  max-width: 560px;
+
+  .el-card {
+    margin: 2px 0;
+  }
+
+  .el-form-item {
+    padding: 8px 0;
+  }
+
+  .el-form-item__content {
+    width: 470px;
+  }
+
+  .el-card__body {
+    padding: 2px 5px;
+  }
+
+  .el-form-item__label {
+    width: 70px;
+  }
+
 }
 </style>

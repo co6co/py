@@ -109,7 +109,7 @@ import  * as api from '../api/alarm';
 import  * as res_api from '../api'; 
 import  { detailsInfo} from '../components/details';    
 import  { imgVideo,types} from '../components/player';    
-import {str2Obj} from '../utils'
+import {str2Obj,createStateEndDatetime} from '../utils'
 
  
 interface TableRow {
@@ -152,27 +152,9 @@ const table_module = reactive<table_module>({
     data:[],
 	pageTotal:-1,  
 }); 
-const setDatetime=(t:number, i:number)=>{ 
-	let endDate=null
-	let startDate=null
-	switch (t){
-		case 0:
-			endDate=new Date();
-			const times=endDate.getTime()-i*3600*1000
-			startDate=new Date(times)
-			break
-		case 1:
-			startDate=new Date( dayjs(new Date()) .format('YYYY/MM/DD'))
-			endDate=startDate.getTime()+24*3600*1000-1000
-			break
-		default:
-			startDate=new Date( dayjs(new Date()) .format('YYYY/MM/DD'))
-			endDate=startDate.getTime()+24*3600*1000 -1000
-			break
-	}  
-	table_module.query.datetimes=[dayjs(startDate) .format('YYYY-MM-DD HH:mm:ss'),dayjs(endDate) .format('YYYY-MM-DD HH:mm:ss')]
-}
- 
+const setDatetime=(t:number, i:number)=>{  
+	table_module.query.datetimes=createStateEndDatetime(t,i)
+} 
    // 排序
 const onColChange = (column:any) =>  {  
 	table_module.query.order = column.order  === 'descending' ? 'desc' : 'asc'

@@ -14,6 +14,17 @@ declare interface IpageParam<T=any>{
   data?:T extends any?T:T&any
 } 
 
+// 枚举类型
+interface EnumType {
+  uid:string;
+  key: string;
+  value: number|string; 
+}
+
+interface EnumsType extends EnumType { 
+  label:string
+}
+
 interface sideBarItem{
   icon:string ,
   index:string,

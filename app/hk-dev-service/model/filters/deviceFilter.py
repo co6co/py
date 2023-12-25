@@ -86,9 +86,9 @@ class LightFilterItems(DeviceFilterItems):
     """
     补光灯设置
     """
-    allows: bool = True
+    allows:    bool = True
     startTime: str = None
-    endTime: str = None 
+    endTime:   str = None 
     def __init__(self):
         super().__init__()
         self.listSelectFields=[device.devicePo]

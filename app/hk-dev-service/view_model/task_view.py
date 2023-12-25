@@ -58,12 +58,7 @@ class user_task_View(AuthMethodView):
             session: scoped_session = request.ctx.session 
             po: TasksPO = session.get_one(TasksPO,pk)
             if po == None: JSON_util.response(Result.fail(message="任务不存在，请刷新重试！"))
-            if po.createUser == userId:
-                if po.type==Task_Type.down_task.val:
-                    taskFolder = request.app.config.taskFolder
-                    filePath = os.path.join(taskFolder, po.data[1:])
-                    if os.path.exists(filePath):
-                        os.remove(filePath)
+            if po.createUser == userId: 
                 '''
                 其他需要处理的任务
                 '''
@@ -72,5 +67,5 @@ class user_task_View(AuthMethodView):
                 return JSON_util.response(Result.success())
             else:
                 return JSON_util.response(Result.fail(message="该任务不属于当前用户创建"))
-        except Exception as e:
+        except Exception as e: 
             return JSON_util.response(Result.fail(message=f"删除任务失败：{e}"))

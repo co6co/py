@@ -40,7 +40,7 @@ import {
 } from "vant";
 import * as api from "../api/device";
 import { stream, ptz } from "../components/stream";
-import { useMqtt } from "../utils/mqtting";
+import { useMqtt ,mqqt_server} from "../utils/mqtting";
 
 import * as d from "../store/types/devices";
 
@@ -97,7 +97,8 @@ interface mqttMessage {
 const noticeMessage = ref("");
 let arr: Array<mqttMessage> = [];
 startMqtt(
-    "WS://wx.co6co.top:451/mqtt",
+    //"WS://wx.co6co.top:451/mqtt",
+    mqqt_server,
     "/edge_app_controller_reply",
     (topic: any, message: any) => {
         const msg: mqttMessage = JSON.parse(message.toString());

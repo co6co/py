@@ -68,8 +68,7 @@ async def list(request:Request):
     param.__dict__.update(request.json) 
     async with request.ctx.session as session:  
         session:AsyncSession=session 
-        opt=DbOperations(session)  
-        log.start_mark("un errr")
+        opt=DbOperations(session)   
         select=(
             Select(UserPO.id,  UserPO.state,UserPO.createTime, UserPO.userName ,UserPO.userGroupId,UserGroupPO.name.label("groupName"),UserGroupPO.code.label("groupCode")  )
             .join(UserGroupPO,isouter=True) 

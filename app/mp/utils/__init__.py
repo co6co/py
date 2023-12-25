@@ -11,8 +11,10 @@ from wechatpy import messages ,events
 from wechatpy.oauth import WeChatOAuth
 
 from services.wx_services import wx_open_id_into_db 
+import uuid
 
-
+def createUuid():
+    return uuid.uuid4()
 def oauth(func):
     def warpper(request:Request):
         if request.session.get('user_info', None) is None:

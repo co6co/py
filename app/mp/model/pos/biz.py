@@ -18,6 +18,7 @@ class bizDevicePo(TimeStampedModelPO):
     ip=Column("ip",String(64),comment="外网IP")
     name=Column("name",String(64),comment="设备名称") 
     resourcesPO=Relationship("bizResourcePO",back_populates="devicePO",uselist=True,passive_deletes=True)
+<<<<<<< HEAD
     boxPO=Relationship("bizBoxPO",uselist=False, back_populates="devicePo")
     cameraPO=Relationship("bizCameraPO",uselist=False, back_populates="devicePo")
     mqttPo=Relationship("bizMqttPO",uselist=False,  back_populates="devicePo")
@@ -45,6 +46,9 @@ class bizBoxPO(UserTimeStampedModelPO):
     devicePo=Relationship("bizDevicePo",back_populates="BoxPO") 
 
 
+=======
+    cameraPO=Relationship("bizCameraPO",back_populates="devicePo",uselist=False,)
+>>>>>>> 9291bbecdb59696ddf401e6f09bbd67c6b614179
 
 class bizCameraPO(UserTimeStampedModelPO):
     """
@@ -55,12 +59,20 @@ class bizCameraPO(UserTimeStampedModelPO):
     CameraType= Column("type",String(16))
     poster = Column("poster",String(255)) 
     streams = Column("stream_urls",String(2048),comment="json 对象[{url:xx,name:xx}]") 
+<<<<<<< HEAD
     sip= Column("sip_address",String(64),comment="盒子SIP地址") 
     talkbackNo = Column("talkbackNo",Integer,comment="对讲号")  
     channel1_sip= Column("channel1_sip",String(64),comment="通道1 sip 地址") 
     channel2_sip= Column("channel2_sip",String(64),comment="通道2 sip 地址") 
     channel3_sip= Column("channel3_sip",String(64),comment="通道3 sip 地址") 
     devicePo=Relationship("bizDevicePo",back_populates="cameraPO") 
+=======
+    devicePo=Relationship("bizDevicePo",back_populates="cameraPO")
+
+    def __repr__(self) -> str:
+        return f"{self.__class__} id:{self.id},streams:{self.streams},createTime:{self.createTime}"
+
+>>>>>>> 9291bbecdb59696ddf401e6f09bbd67c6b614179
 
 class bizMqttPO(UserTimeStampedModelPO):
     """

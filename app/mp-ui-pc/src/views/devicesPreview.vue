@@ -38,7 +38,7 @@
 								<el-pagination
 									v-if="hasData"
 									background
-									layout="prev,   next"
+									layout="prev,next"
 									:total="tree_module.total"
 									:current-page="tree_module.query.pageIndex"
 									:page-size="tree_module.query.pageSize"
@@ -93,12 +93,11 @@
 	import { stream, ptz } from '../components/stream';
 	import * as p from '../components/stream/src/types/ptz';
 
-	import { useMqtt } from '../utils/mqtting';
+	import { useMqtt ,mqqt_server} from '../utils/mqtting';
 	import * as d from '../store/types/devices';
 
 	const deviceName = ref('');
-	const tree = ref(null);
-
+	const tree = ref(null); 
 	interface Tree {
 		[key: string]: any;
 	}
@@ -182,7 +181,9 @@
 	}
 	let arr: Array<mqttMessage> = [];
 	startMqtt(
-		'WS://wx.co6co.top:451/mqtt',
+		//'WS://wx.co6co.top:451/mqtt',
+		mqqt_server,
+		//'WS://yx.co6co.top/mqtt',
 		'/edge_app_controller_reply',
 		(topic: any, message: any) => {
 			const msg: mqttMessage = JSON.parse(message.toString());
