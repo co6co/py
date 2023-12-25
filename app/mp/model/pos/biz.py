@@ -1,6 +1,6 @@
 
 from co6co_db_ext.po import BasePO ,metadata,UserTimeStampedModelPO,TimeStampedModelPO
-from sqlalchemy import func,INTEGER, Integer,UUID,  INTEGER,BigInteger, Column, ForeignKey, String,DateTime
+from sqlalchemy import func,INTEGER, Integer,UUID,  INTEGER,BigInteger, Column, ForeignKey, Text, String,DateTime
 from sqlalchemy.orm import Relationship 
 from sqlalchemy.schema import DDL 
 import uuid
@@ -18,11 +18,10 @@ class bizDevicePo(TimeStampedModelPO):
     ip=Column("ip",String(64),comment="外网IP")
     name=Column("name",String(64),comment="设备名称") 
     resourcesPO=Relationship("bizResourcePO",back_populates="devicePO",uselist=True,passive_deletes=True)
-<<<<<<< HEAD
     boxPO=Relationship("bizBoxPO",uselist=False, back_populates="devicePo")
     cameraPO=Relationship("bizCameraPO",uselist=False, back_populates="devicePo")
-    mqttPo=Relationship("bizMqttPO",uselist=False,  back_populates="devicePo")
-    xttPo=Relationship("bizXssPO",uselist=False,  back_populates="devicePo")
+    mqttPO=Relationship("bizMqttPO",uselist=False,  back_populates="devicePo")
+    xttPO=Relationship("bizXssPO",uselist=False,  back_populates="devicePo")
     routerPO=Relationship("bizRouterPO",uselist=False,  back_populates="devicePo")
 
 class bizBoxPO(UserTimeStampedModelPO):
@@ -43,13 +42,7 @@ class bizBoxPO(UserTimeStampedModelPO):
     channel1_sip= Column("channel1_sip",String(64),comment="通道1 sip 地址") 
     channel2_sip= Column("channel2_sip",String(64),comment="通道2 sip 地址") 
     channel3_sip= Column("channel3_sip",String(64),comment="通道3 sip 地址") 
-    devicePo=Relationship("bizDevicePo",back_populates="BoxPO") 
-
-
-=======
-    cameraPO=Relationship("bizCameraPO",back_populates="devicePo",uselist=False,)
->>>>>>> 9291bbecdb59696ddf401e6f09bbd67c6b614179
-
+    devicePo=Relationship("bizDevicePo",back_populates="boxPO")  
 class bizCameraPO(UserTimeStampedModelPO):
     """
     摄像头设备
@@ -58,21 +51,16 @@ class bizCameraPO(UserTimeStampedModelPO):
     id = Column("id",ForeignKey(f"biz_device.id",ondelete="CASCADE"), primary_key=True)
     CameraType= Column("type",String(16))
     poster = Column("poster",String(255)) 
-    streams = Column("stream_urls",String(2048),comment="json 对象[{url:xx,name:xx}]") 
-<<<<<<< HEAD
-    sip= Column("sip_address",String(64),comment="盒子SIP地址") 
+    streams = Column("stream_urls",String(2048),comment="json 对象[{url:xx,name:xx}]")  
+    sip= Column("sip_address",String(64),comment="SIP地址") 
     talkbackNo = Column("talkbackNo",Integer,comment="对讲号")  
     channel1_sip= Column("channel1_sip",String(64),comment="通道1 sip 地址") 
     channel2_sip= Column("channel2_sip",String(64),comment="通道2 sip 地址") 
     channel3_sip= Column("channel3_sip",String(64),comment="通道3 sip 地址") 
-    devicePo=Relationship("bizDevicePo",back_populates="cameraPO") 
-=======
-    devicePo=Relationship("bizDevicePo",back_populates="cameraPO")
-
+    devicePo=Relationship("bizDevicePo",back_populates="cameraPO")  
     def __repr__(self) -> str:
         return f"{self.__class__} id:{self.id},streams:{self.streams},createTime:{self.createTime}"
-
->>>>>>> 9291bbecdb59696ddf401e6f09bbd67c6b614179
+ 
 
 class bizMqttPO(UserTimeStampedModelPO):
     """
@@ -83,7 +71,7 @@ class bizMqttPO(UserTimeStampedModelPO):
     tcpPort = Column("tcpPort",Integer) 
     wsPort = Column("wsPort",Integer)
     wssPort = Column("wssPort",Integer) 
-    devicePo=Relationship("bizDevicePo",back_populates="mqttPo") 
+    devicePo=Relationship("bizDevicePo",back_populates="mqttPO") 
  
 
 class bizXssPO(UserTimeStampedModelPO):
@@ -96,7 +84,7 @@ class bizXssPO(UserTimeStampedModelPO):
     sip = Column("sip",String(20))
     domain= Column("domain",String(10))
     password= Column("password",String(32)) 
-    devicePo=Relationship("bizDevicePo",back_populates="xttPo") 
+    devicePo=Relationship("bizDevicePo",back_populates="xttPO") 
 
 class bizRouterPO(UserTimeStampedModelPO):
     """
@@ -156,7 +144,7 @@ class bizAlarmPO(BasePO):
 class bizAlarmAttachPO(BasePO):
     __tablename__ = "biz_alarm_attach" 
     id= Column("alarm_id",ForeignKey(f"{bizAlarmPO.__tablename__}.{bizAlarmPO.id.name}",ondelete="CASCADE"),comment="主键id",primary_key=True)
-    result= Column("result",String(2048),comment="告警Result结果")
+    result= Column("result",Text,comment="告警Result结果")
     media= Column("media",String(2048),comment="告警media结果")
     gps= Column("gps",String(2048),comment="告警gps结果")
 

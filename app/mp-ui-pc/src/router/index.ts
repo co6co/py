@@ -9,7 +9,7 @@ const storeage=new Storage()
 const routes: RouteRecordRaw[] = [
     {
         path: '/',
-        redirect: '/usermgr',
+        redirect: '/devicesPreview',
     },
     {
         path: '/',
@@ -20,7 +20,7 @@ const routes: RouteRecordRaw[] = [
                 path: '/usermgr',
                 name: 'usermgr',
                 meta: {
-                    title: '用户名管理',
+                    title: '用户管理',
                     permiss: '2',
                 },
                 component: () => import(  '../views/userTable.vue'),
@@ -38,7 +38,7 @@ const routes: RouteRecordRaw[] = [
                 path: '/wxMenuTable',
                 name: 'wxMenuTable',
                 meta: {
-                    title: '公告号菜单管理',
+                    title: '菜单管理',
                     permiss: '2',
                 },
                 component: () => import(/* webpackChunkName: "process" */ '../views/wxMenuTable.vue'),
@@ -47,7 +47,7 @@ const routes: RouteRecordRaw[] = [
                 path: '/alarmTable',
                 name: 'alarmTable',
                 meta: {
-                    title: '数据管理',
+                    title: '告警事件',
                     permiss: '2',
                 },
                 component: () => import(/* webpackChunkName: "process" */ '../views/alarmTable.vue'),
@@ -56,7 +56,7 @@ const routes: RouteRecordRaw[] = [
                 path: '/devicesPreview',
                 name: 'devicesPreview',
                 meta: {
-                    title: '设备预览',
+                    title: '视频监控',
                     permiss: '2',
                 },
                 component: () => import(/* webpackChunkName: "process" */ '../views/devicesPreview.vue'),

@@ -2,7 +2,7 @@
     <div>
         <search
             v-model="vue_module.query.name"
-            placeholder="设备名"
+            placeholder="定位名称"
             @search="onQuery"
         />
         <van-pull-refresh

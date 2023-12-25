@@ -10,7 +10,7 @@
 							<div class="card-header">
 								<el-input
 									v-model="tree_module.query.name"
-									placeholder="设备名称"
+									placeholder="点位名称"
 								>
 									<template #append>
 										<el-button :icon="Search" @click="tree_module.onSearch" />

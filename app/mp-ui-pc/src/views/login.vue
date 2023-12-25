@@ -47,8 +47,8 @@ import { Lock, User } from '@element-plus/icons-vue';
 import { login_svc } from '../api/authen';
 import { json } from 'stream/consumers';
 import { setToken } from '../utils/auth';
-import { Storage } from '../store/Storage';
-import config from '../../package.json';
+import { Storage } from '../store/Storage'; 
+import {pkg} from '../utils'
 
 interface LoginInfo {
   username: string;
@@ -67,10 +67,9 @@ const param = reactive<LoginInfo>({
 });
 
 const sysInfo = reactive<SystemInfo>({ name: '', verson: '', company: "" });
-sysInfo.name = config.name;
-sysInfo.verson = config.version;
-sysInfo.company = config.company;
-console.info(config)
+sysInfo.name = pkg.name;
+sysInfo.verson = pkg.version;
+sysInfo.company = pkg.company; 
 const rules: FormRules = {
   username: [{ required: true, message: '请输入用户名', trigger: 'blur' }],
   password: [{ required: true, message: '请输入密码', trigger: 'blur' }],
@@ -172,7 +171,7 @@ tags.clearTags();
 }
 
 .company {
-	 color: #eee;
+	 color: #ddd;
 	 padding: 5px;text-align:  center;
 	 
 }

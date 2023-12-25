@@ -49,3 +49,6 @@ class device_type(Base_Enum):
      """
      box="盒子",1
      ip_camera="网络摄像机",2
+     router="路由器",3
+     mqqt_server="mqtt服务器",4
+     xss_server="语音对讲服务器",4

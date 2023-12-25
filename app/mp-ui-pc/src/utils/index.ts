@@ -1,5 +1,9 @@
 import JSONbig  from 'json-bigint' 
 import {  dayjs } from 'element-plus';
+
+import config from '../../package.json';
+export const pkg=config
+
 export const str2Obj=(str:string)=>{
     return JSONbig.parse( str)
 }

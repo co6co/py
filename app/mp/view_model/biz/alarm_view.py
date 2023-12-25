@@ -1,6 +1,6 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from co6co_db_ext .db_operations import DbOperations,DbPagedOperations,and_,joinedload
-from sqlalchemy import func
+from sqlalchemy import  func
 from sqlalchemy.sql import Select
 
 from sanic import  Request 
@@ -12,13 +12,30 @@ from co6co.utils import log
 
 from view_model.base_view import  AuthMethodView
 from model.pos.biz import bizAlarmPO,bizAlarmAttachPO,bizResourcePO,BasePO
-from view_model.biz.alarm_ import AlarmFilterItems
-from co6co_sanic_ext.model.res.result import Page_Result 
+from view_model.biz.alarm_ import AlarmFilterItems,AlarmCategoryFilterItems
+from co6co_sanic_ext.model.res.result import Result, Page_Result 
 
+class Alarm_category_View(AuthMethodView): 
+    """
+    告警类型
+    """
+    async def get(self,request:Request): 
+        """
+        告警类型
+        """ 
+        param = AlarmCategoryFilterItems() 
+        async with request.ctx.session as session:
+            session: AsyncSession = session
+            executer = await session.execute(param.create_List_select()) 
+            result = executer.mappings().all()
+            result = [dict(a) for a in result]
+            pageList = Result.success(result )
+            await session.commit()
+        return JSON_util.response(pageList)  
 
 class Alarms_View(AuthMethodView):
     """
-    告警列表
+    告警
     """
     async def post(self,request:Request):
         """

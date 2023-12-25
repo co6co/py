@@ -18,7 +18,7 @@ const routes: RouteRecordRaw[] = [
 				path: '/usermgr',
 				name: 'usermgr',
 				meta: {
-					title: '用户名管理',
+					title: '用户管理',
 					permiss: '2',
 				},
 				component: () => import('../views2/userTable.vue'),
@@ -35,7 +35,7 @@ const routes: RouteRecordRaw[] = [
 				path: '/alarminfo.html',
 				name: 'alarmTable',
 				meta: {
-					title: '告警信息',
+					title: '告警事件',
 					permiss: '2',
 				},
 				component: () => import('../views2/alarmTable.vue'),
@@ -53,7 +53,7 @@ const routes: RouteRecordRaw[] = [
 				path: '/devicelist.html',
 				name: 'devicelist',
 				meta: {
-					title: '视频列表',
+					title: '设备管理',
 					permiss: '2',
 				},
 				component: () => import('../views2/deviceList.vue'),
@@ -72,7 +72,7 @@ const routes: RouteRecordRaw[] = [
 				path: '/preview.html',
 				name: 'preview',
 				meta: {
-					title: '实时视频',
+					title: '视频监控',
 					permiss: '2',
 				},
 				component: () => import('../views2/devicesPreview.vue'),
@@ -86,16 +86,7 @@ const routes: RouteRecordRaw[] = [
 					permiss: '2',
 				},
 				component: () => import('../views2/devicesTable.vue'),
-			},
-			{
-				path: '/index.html',
-				name: 'wxHome',
-				meta: {
-					title: '获取用户信息',
-					permiss: '2',
-				},
-				component: () => import('../views2/wxHome.vue'),
-			},
+			} 
 		],
 	},
 	{
