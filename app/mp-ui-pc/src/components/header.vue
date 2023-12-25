@@ -9,6 +9,7 @@
 		<div class="header-right">
 			<div class="header-user-con">
 				<!-- 消息中心 -->
+				<!--
 				<div class="btn-bell" @click="router.push('/tabs')">
 					<el-tooltip
 						effect="dark"
@@ -19,6 +20,7 @@
 					</el-tooltip>
 					<span class="btn-bell-badge" v-if="message"></span>
 				</div>
+				-->
 				<!-- 用户头像 -->
 				<el-avatar class="user-avator" :size="30" :src="imgurl" />
 				<!-- 用户名下拉菜单 -->

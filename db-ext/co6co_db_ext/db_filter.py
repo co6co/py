@@ -29,7 +29,12 @@ class absFilterItems(ABC, Page_param):
 	@abstractclassmethod
 	def filter(self)->List[ColumnElement[bool]]:
 		raise NotADirectoryError("Can't instantiate abstract clas") 
-	def _getOrderby(self)->List[Dict[str,str]]: 
+	def _getOrderby(self)->List[Dict[str,str]]:
+		"""
+		orderBy:id,name
+		order: asc,desc
+		从字符串转 [{"id":"asc"},{"name","desc"}]
+		"""
 		if self.orderBy and  self.order:
 			by=self.orderBy.split(",")
 			order=self.order.split(",")
