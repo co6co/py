@@ -18,7 +18,33 @@ class bizDevicePo(TimeStampedModelPO):
     ip=Column("ip",String(64),comment="外网IP")
     name=Column("name",String(64),comment="设备名称") 
     resourcesPO=Relationship("bizResourcePO",back_populates="devicePO",uselist=True,passive_deletes=True)
-    cameraPO=Relationship("bizCameraPO",back_populates="devicePo")
+    boxPO=Relationship("bizBoxPO",uselist=False, back_populates="devicePo")
+    cameraPO=Relationship("bizCameraPO",uselist=False, back_populates="devicePo")
+    mqttPo=Relationship("bizMqttPO",uselist=False,  back_populates="devicePo")
+    xttPo=Relationship("bizXssPO",uselist=False,  back_populates="devicePo")
+    routerPO=Relationship("bizRouterPO",uselist=False,  back_populates="devicePo")
+
+class bizBoxPO(UserTimeStampedModelPO):
+    """
+    盒子设备
+    //UUID 根据实际需求需要更正
+    //上传设备获得:RJ-BOX3-733E5155B1FBB3C3BB9EFC86EDDACA60
+    //配置BOX3-733E5155B1FBB3C3BB9EFC86EDDACA60
+    """
+    __tablename__ = "biz_dev_box" 
+    id = Column("id",ForeignKey(f"biz_device.id",ondelete="CASCADE"), primary_key=True)
+    cpuNo = Column("cpu_serial_number",String(255)) 
+    mac = Column("mac",String(128)) 
+    license= Column("license",String(255)) 
+    sip= Column("sip_address",String(64),comment="盒子SIP地址") 
+    talkbackNo = Column("talkbackNo",Integer,comment="对讲号") 
+   
+    channel1_sip= Column("channel1_sip",String(64),comment="通道1 sip 地址") 
+    channel2_sip= Column("channel2_sip",String(64),comment="通道2 sip 地址") 
+    channel3_sip= Column("channel3_sip",String(64),comment="通道3 sip 地址") 
+    devicePo=Relationship("bizDevicePo",back_populates="BoxPO") 
+
+
 
 class bizCameraPO(UserTimeStampedModelPO):
     """
@@ -26,13 +52,51 @@ class bizCameraPO(UserTimeStampedModelPO):
     """
     __tablename__ = "biz_camera" 
     id = Column("id",ForeignKey(f"biz_device.id",ondelete="CASCADE"), primary_key=True)
+    CameraType= Column("type",String(16))
     poster = Column("poster",String(255)) 
     streams = Column("stream_urls",String(2048),comment="json 对象[{url:xx,name:xx}]") 
-    devicePo=Relationship("bizDevicePo",back_populates="cameraPO")
+    sip= Column("sip_address",String(64),comment="盒子SIP地址") 
+    talkbackNo = Column("talkbackNo",Integer,comment="对讲号")  
+    channel1_sip= Column("channel1_sip",String(64),comment="通道1 sip 地址") 
+    channel2_sip= Column("channel2_sip",String(64),comment="通道2 sip 地址") 
+    channel3_sip= Column("channel3_sip",String(64),comment="通道3 sip 地址") 
+    devicePo=Relationship("bizDevicePo",back_populates="cameraPO") 
 
+class bizMqttPO(UserTimeStampedModelPO):
+    """
+    Mqtt 服务器
+    """
+    __tablename__ = "biz_dev_mqttPO" 
+    id = Column("id",ForeignKey(f"biz_device.id",ondelete="CASCADE"), primary_key=True)
+    tcpPort = Column("tcpPort",Integer) 
+    wsPort = Column("wsPort",Integer)
+    wssPort = Column("wssPort",Integer) 
+    devicePo=Relationship("bizDevicePo",back_populates="mqttPo") 
+ 
 
+class bizXssPO(UserTimeStampedModelPO):
+    """
+    Xss 服务器
+    """
+    __tablename__ = "biz_dev_xssPO" 
+    id = Column("id",ForeignKey(f"biz_device.id",ondelete="CASCADE"), primary_key=True)
+    port = Column("port",Integer) 
+    sip = Column("sip",String(20))
+    domain= Column("domain",String(10))
+    password= Column("password",String(32)) 
+    devicePo=Relationship("bizDevicePo",back_populates="xttPo") 
 
-
+class bizRouterPO(UserTimeStampedModelPO):
+    """
+    4G路由器
+    """
+    __tablename__ = "biz_dev_router" 
+    id = Column("id",ForeignKey(f"biz_device.id",ondelete="CASCADE"), primary_key=True)
+    sim = Column("sim",String(20)) 
+    ssd= Column("wifi_ssd",String(32))
+    password= Column("wifi_password",String(32))   
+    devicePo=Relationship("bizDevicePo",back_populates="routerPO") 
+    
 class bizResourcePO(BasePO):
     """
     资源
