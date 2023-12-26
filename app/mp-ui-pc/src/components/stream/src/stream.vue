@@ -15,8 +15,8 @@
             <el-radio :label="true"  >使用webGPU</el-radio>
             <el-radio :label="false" >不使用webGPU</el-radio>
         </el-radio-group>   
-        {{  `FPS: ${fps.fps} DFPS: ${fps.dfps}` }}  {{ player_option.useWebGPU }}  {{ player_option.currentSource?.name }}
-        -->
+         {{  `FPS: ${fps.fps} DFPS: ${fps.dfps}` }}  {{ player_option.useWebGPU }}  {{ player_option.currentSource?.name }}
+        --> 
     </div>
 </template>
  
@@ -50,11 +50,14 @@ const player_option=reactive<PlayerOption>({
 let currentSource:stream_source|undefined=undefined
 watchEffect(() => {
     try {
-        console.info("12323",props.sources,props.sources.length)
+      
         if (props.sources.length>0 && props.sources[0].url) {
             currentSource=props.sources.at(0)
             nextTick(()=>{ replay()})   // 可能会死
+        }else{
+
         }
+
     } catch (e) {
         console.error(e)
     }
@@ -85,8 +88,7 @@ const replay=()=> {
         } 
         else {
             create(), onPlay();
-        } 
-        
+        }  
     }catch(e){
         console.error(e)
     } 
@@ -183,9 +185,9 @@ const onPause=()=>{
 <style lang="less" scoped> 
 .jess_player{
     width:100%;
-    height:400px;
+    height:500px;
     backdrop-filter: blur(5px);
     background: hsla(0, 0%, 50%, 0.5);
-    padding: 30px 4px 10px 4px;
+    padding: 0px 4px 0px 4px;
 } 
 </style>

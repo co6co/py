@@ -53,7 +53,7 @@ const routes: RouteRecordRaw[] = [
 				path: '/devicelist.html',
 				name: 'devicelist',
 				meta: {
-					title: '设备管理',
+					title: '视频监控',
 					permiss: '2',
 				},
 				component: () => import('../views2/deviceList.vue'),

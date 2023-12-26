@@ -189,7 +189,7 @@ class Alarm_Upload_View(Upload_view):
                 p1=await self._saveImage(request,f"SRC_{u1}.jpeg",p.ImageData ) 
                 p2=await self._saveImage(request,f"Labeled_{u2}.jpeg",p.ImageDataLabeled ) 
                 await self.saveResourceToDb(opt,device_id,resource_category.image,p1,sub_category=resource_image_sub_category.raw.val,uid= u1)
-                await self. saveResourceToDb(opt,device_id,resource_category.image,p2,sub_category=resource_image_sub_category.marked.val,uid=u2)
+                await self.saveResourceToDb(opt,device_id,resource_category.image,p2,sub_category=resource_image_sub_category.marked.val,uid=u2)
                 await opt.commit()
                 po=p.to_po()  
                 result= await opt.exist(bizAlarmPO.uuid==po.uuid) 
@@ -197,21 +197,17 @@ class Alarm_Upload_View(Upload_view):
                     res:m.Response=m.Response.success(message=f"数据“{po.uuid}”重复上传")
                     log.warn(f"告警信息删除重复{po.uuid}")
                     return JSON_util.response(res)
-                
+                #视频资源
                 po.videoUid=self.createResourceUUID(p.VideoFile)
                 po.rawImageUid=u1
                 po.markedImageUid=u2
-                poa=bizAlarmAttachPO()  
+                poa=bizAlarmAttachPO()  # 附加信息
                 poa.result=json.dumps(p.Result) 
                 poa.gps=json.dumps(p.GPS)
                 poa.media=json.dumps(p.Media )
-                session.add(po)
-                #log.warn(f"提交前：{po.id}")
-                await opt.commit()
-                #log.warn(f"提交后：{po.id}")
-                poa.id=po.id
-                opt.add_all([poa]) 
-                await opt.commit()
+                po.alarmAttachPO=poa 
+                session.add(po) 
+                await opt.commit()  
                 res:m.Response=m.Response.success()
                 return JSON_util.response(res)
 

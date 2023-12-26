@@ -1,62 +1,61 @@
 <template>
-	<div>
-		<div class="container">
-			<el-row :gutter="24">
-				<!--LEFT-->
-				<el-col :span="4">
-					<el-card class="box-card">
-						<!--header-->
-						<template #header>
-							<div class="card-header">
-								<el-input
-									v-model="tree_module.query.name"
-									placeholder="点位名称"
-								>
-									<template #append>
-										<el-button :icon="Search" @click="tree_module.onSearch" />
-									</template>
-								</el-input>
-							</div>
-						</template>
-						<!--content-->
-						<div>
-							<el-tree
-								v-if="hasData"
-								@node-click="onNodeCheck"
-								ref="tree"
-								class="filter-tree"
-								:data="tree_module.data"
-								:props="tree_module.defaultProps"
-								default-expand-all
-								:filter-node-method="tree_module.filterNode"
-							/>
-							<el-empty v-else></el-empty>
+	<div class="container-layout">
+		<el-container>
+			<el-aside width="200px">
+				<el-card class="box-card">
+					<!--header-->
+					<template #header>
+						<div class="card-header">
+							<el-input v-model="tree_module.query.name" placeholder="点位名称">
+								<template #append>
+									<el-button :icon="Search" @click="tree_module.onSearch" />
+								</template>
+							</el-input>
 						</div>
-						<!--footer-->
-						<template #footer>
-							<div class="context">
-								<el-pagination
-									v-if="hasData"
-									background
-									layout="prev,next"
-									:total="tree_module.total"
-									:current-page="tree_module.query.pageIndex"
-									:page-size="tree_module.query.pageSize"
-									@current-change="tree_module.pageChange"
-								/></div
-						></template>
-					</el-card>
-				</el-col>
-				<!--center-->
-				<el-col :span="15">
-					<stream :sources="player.sources"></stream>
-				</el-col>
-				<!--right-->
-				<el-col :span="5">
-					<ptz @ptz="OnPtz"></ptz>
-				</el-col>
-			</el-row>
-		</div>
+					</template>
+					<!--content-->
+					<div>
+						<el-tree
+							v-if="hasData"
+							highlight-current
+							@node-click="onNodeCheck"
+							ref="tree"
+							class="filter-tree"
+							:data="tree_module.data"
+							:props="tree_module.defaultProps"
+							default-expand-all
+							:filter-node-method="tree_module.filterNode"
+						/>
+						<el-empty v-else></el-empty>
+					</div>
+					<!--footer-->
+					<template #footer>
+						<div class="context">
+							<el-pagination
+								v-if="hasData"
+								background
+								layout="prev,next"
+								:total="tree_module.total"
+								:current-page="tree_module.query.pageIndex"
+								:page-size="tree_module.query.pageSize"
+								@current-change="tree_module.pageChange"
+							/></div
+					></template>
+				</el-card>
+			</el-aside>
+			<el-main>
+				<el-scrollbar>
+					<div style="padding: 5px">
+						<el-row :gutter="24">
+							<el-col :span="20"
+								><stream :sources="player.sources"></stream
+							></el-col>
+							<el-col :span="4"><ptz @ptz="OnPtz"></ptz></el-col>
+						</el-row>
+					</div>
+				</el-scrollbar>
+			</el-main>
+		</el-container>
 	</div>
 </template>
 
@@ -93,11 +92,11 @@
 	import { stream, ptz } from '../components/stream';
 	import * as p from '../components/stream/src/types/ptz';
 
-	import { useMqtt ,mqqt_server} from '../utils/mqtting';
+	import { useMqtt, mqqt_server } from '../utils/mqtting';
 	import * as d from '../store/types/devices';
 
 	const deviceName = ref('');
-	const tree = ref(null); 
+	const tree = ref(null);
 	interface Tree {
 		[key: string]: any;
 	}
@@ -163,8 +162,9 @@
 
 	const onNodeCheck = (row?: any) => {
 		tree_module.currentItem = row;
-		if (row.streams && typeof row.streams == 'string')
-			player.sources = JSON.parse(row.streams);
+		console.info(row)
+		if (row.streams && typeof row.streams == 'string') player.sources = JSON.parse(row.streams);
+		else player.sources = [],ElMessage.warning("未配置设备流地址");
 		/**
 	  [
 
@@ -217,7 +217,7 @@
 		} else if (type == 'stop' && name == 'center') {
 			mediaStreamStarting.value = false;
 		} else {
-			console.warn(name, type); 
+			console.warn(name, type);
 			let param = {
 				payload: {
 					BoardId: 'RJ-BOX3-733E5155B1FBB3C3BB9EFC86EDDACA60',
@@ -235,38 +235,7 @@
 	//**end 打标签 */
 </script>
 <style lang="less">
-	.el-link {
-		margin-right: 8px;
-	}
-	.el-link .el-icon--right.el-icon {
-		vertical-align: text-bottom;
-	}
-	.handle-box {
-		margin: 3px 0;
-	}
-	.handle-select {
-		width: 120px;
-	}
-
-	.handle-input {
-		width: 300px;
-	}
-	.table {
-		width: 100%;
-		font-size: 14px;
-	}
-	.red {
-		color: #f56c6c;
-	}
-	.mr10 {
-		margin-right: 10px;
-	}
-	.table-td-thumb {
-		display: block;
-		margin: auto;
-		width: 40px;
-		height: 40px;
-	}
+	@import '../assets/css/tables.css';
 	.view .title {
 		color: var(--el-text-color-regular);
 		font-size: 18px;
@@ -326,5 +295,12 @@
 			text-align: center;
 		}
 		padding: 5px;
+	}
+
+	.el-tree--highlight-current
+		.el-tree-node.is-current
+		> .el-tree-node__content {
+		background: #bdbdc5;
+		color: #f56c6c;
 	}
 </style>

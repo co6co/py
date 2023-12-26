@@ -61,93 +61,93 @@
 				</el-row>
 			</el-header>
 			<el-main>
-        <el-scrollbar>
-				<el-table
-					highlight-current-row
-					@sort-change="onColChange"
-					:row-class-name="tableRowProp"
-					:data="table_module.data"
-					border
-					class="table"
-					ref="tableInstance"
-					@row-click="onTableSelect"
-					header-cell-class-name="table-header"
-				>
-					<el-table-column
-						prop="id"
-						label="ID"
-						width="80"
-						align="center"
-						sortable
-						:show-overflow-tooltip="true"
-					></el-table-column>
-					<el-table-column
-						prop="uuid"
-						label="UUID"
-						width="120"
-						align="center"
-						sortable
-						:show-overflow-tooltip="true"
-					></el-table-column>
-					<el-table-column
-						prop="name"
-						label="名称"
-						width="80"
-						align="center"
-						sortable
-						:show-overflow-tooltip="true"
-					></el-table-column>
-					<el-table-column
-						prop="innerIp"
-						label="内部地址"
-						width="120"
-						align="center"
-						sortable
-						:show-overflow-tooltip="true"
-					></el-table-column>
-					<el-table-column
-						prop="ip"
-						label="网络地址"
-						width="120"
-						align="center"
-						sortable
-						:show-overflow-tooltip="true"
-					></el-table-column>
-					<el-table-column
-						prop="deviceType"
-						label="设备类型"
-						width="120"
-						sortable
-						:show-overflow-tooltip="true"
+				<el-scrollbar>
+					<el-table
+						highlight-current-row
+						@sort-change="onColChange"
+						:row-class-name="tableRowProp"
+						:data="table_module.data"
+						border
+						class="table"
+						ref="tableInstance"
+						@row-click="onTableSelect"
+						header-cell-class-name="table-header"
 					>
-						<template #default="scope">
-							<el-tag>
-								{{ table_module.getDeviceName(scope.row.deviceType) }}
-							</el-tag>
-						</template>
-					</el-table-column>
+						<el-table-column
+							prop="id"
+							label="ID"
+							width="80"
+							align="center"
+							sortable
+							:show-overflow-tooltip="true"
+						></el-table-column>
+						<el-table-column
+							prop="uuid"
+							label="UUID"
+							width="120"
+							align="center"
+							sortable
+							:show-overflow-tooltip="true"
+						></el-table-column>
+						<el-table-column
+							prop="name"
+							label="名称"
+							width="80"
+							align="center"
+							sortable
+							:show-overflow-tooltip="true"
+						></el-table-column>
+						<el-table-column
+							prop="innerIp"
+							label="内部地址"
+							width="120"
+							align="center"
+							sortable
+							:show-overflow-tooltip="true"
+						></el-table-column>
+						<el-table-column
+							prop="ip"
+							label="网络地址"
+							width="120"
+							align="center"
+							sortable
+							:show-overflow-tooltip="true"
+						></el-table-column>
+						<el-table-column
+							prop="deviceType"
+							label="设备类型"
+							width="120"
+							sortable
+							:show-overflow-tooltip="true"
+						>
+							<template #default="scope">
+								<el-tag>
+									{{ table_module.getDeviceName(scope.row.deviceType) }}
+								</el-tag>
+							</template>
+						</el-table-column>
 
-					<el-table-column
-						width="160"
-						prop="createTime"
-						label="创建时间"
-						sortable
-						:show-overflow-tooltip="true"
-					></el-table-column>
-					<el-table-column label="操作" width="316" align="center">
-						<template #default="scope">
-							<el-button
-								text
-								:icon="Edit"
-								@click="onOpenDialog(1, scope.row)"
-								v-if="scope.row.deviceType != '1'"
-							>
-								修改
-							</el-button>
-						</template>
-					</el-table-column>
-				</el-table>
-      </el-scrollbar>
+						<el-table-column
+							width="160"
+							prop="createTime"
+							label="创建时间"
+							sortable
+							:show-overflow-tooltip="true"
+						></el-table-column>
+						<el-table-column label="操作" width="316" align="center">
+							<template #default="scope">
+								<el-button
+									text
+									:icon="Edit"
+									@click="onOpenDialog(1, scope.row)"
+									v-if="scope.row.deviceType != '1'"
+								>
+									修改
+								</el-button>
+							</template>
+						</el-table-column>
+					</el-table>
+				</el-scrollbar>
 			</el-main>
 			<el-footer>
 				<div class="pagination">
@@ -210,7 +210,7 @@
 				</el-form-item>
 
 				<el-form-item label="流信息" class="streamInfo">
-					<el-card
+					<el-card style="height: 136px;"
 						v-for="(steam, index) in form.fromData.streamUrls"
 						:key="index"
 					>
@@ -531,6 +531,7 @@
 				form.fromData.name = row.name;
 				if (row.streams && typeof row.streams == 'string')
 					form.fromData.streamUrls = JSON.parse(row.streams);
+				else form.fromData.streamUrls = [];
 				break;
 		}
 	};

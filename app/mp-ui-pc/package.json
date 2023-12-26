@@ -1,6 +1,12 @@
 {
   "name": "数字安全员管理系统",
   "company":"江苏国信协联能源有限公司",
+  "en_company":"JIANGSU GUOXIN UNION ENERGY CO.,LTD.",
+  "beian":{
+    "name":"苏ICP备050xxxxx号",
+    "serialNumberName":"苏公网安备3202820xxxxxx号", 
+    "serialNumber":"3202820xxxxxx"
+  },
   "version": "0.0.1", 
   "private": true,
   "scripts": {

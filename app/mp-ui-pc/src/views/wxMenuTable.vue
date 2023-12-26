@@ -396,32 +396,5 @@ const valid_name=(rule:any,value:string,back:Function)=>{
 </script>
 
 <style scoped lang="less">
-	@import '../assets/css/tables.css';
-	.handle-box {
-		margin-bottom: 20px;
-	}
-
-	.handle-select {
-		width: 120px;
-	}
-
-	.handle-input {
-		width: 300px;
-	}
-	.table {
-		width: 100%;
-		font-size: 14px;
-	}
-	.red {
-		color: #f56c6c;
-	}
-	.mr10 {
-		margin-right: 10px;
-	}
-	.table-td-thumb {
-		display: block;
-		margin: auto;
-		width: 40px;
-		height: 40px;
-	}
+	@import '../assets/css/tables.css'; 
 </style>

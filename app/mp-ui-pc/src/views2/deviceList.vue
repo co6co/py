@@ -1,5 +1,6 @@
 <template>
     <div>
+        <nav-bar title="router.currentRoute.value.meta.title" />
         <search
             v-model="vue_module.query.name"
             placeholder="定位名称"
@@ -18,25 +19,26 @@
                 :finished="vue_module.statue.finished"
                 finished-text="没有更多了"
             >
-                <card
+                <card 
                     v-for="item in vue_module.data"
                     :key="item.id"
                     :title="item.name"
                     :thumb="getPoster(item.id)"
+                    @click="onPreview(item)"
                 >
-                {{  getPoster(item.id)}}
+                {{ item }}  
+                    {{getPoster(item.id)}}
                     <template #tags>
-                        <van-tag plain type="danger">{{ item.ip }}</van-tag>
-                        <van-tag plain type="danger">{{
-                            item.innerIp
-                        }}</van-tag>
-                        <van-tag plain type="danger">{{ item.id }}</van-tag>
+                        <van-tag plain type="danger">设备地址{{ item.innerIp }}</van-tag>
+                        <van-tag  type="primary">{{ item.name}}</van-tag> 
                     </template>
+                    <!--
                     <template #footer>
                         <van-button size="mini" @click="onPreview(item)"
                             >预览</van-button
                         > 
                     </template>
+                    -->
                 </card>
                 <empty v-if="vue_module.statue.empty" description="无数据" />
             </van-list>
@@ -56,7 +58,8 @@ import {
     Grid,
     GridItem,
     Card,
-    Tag as vanTag
+    Tag as vanTag,
+    NavBar
 } from "vant";
 
 import * as api from "../api/device";
