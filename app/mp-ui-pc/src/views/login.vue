@@ -67,7 +67,7 @@
 									>登录</el-button
 								>
 							</div>
-							<p class="login-tips">Tips : {{ message }}</p>
+							<p class="login-tips" v-show="message"> {{ message }}</p>
 						</el-form>
 					</div>
 				</div>
@@ -76,7 +76,7 @@
 				<div class="content">
 					<em class="left">
 						<h1><img :src="logo" /></h1>
-						<h2 class="f35 hei bol">国信协联</h2>
+						<h2>国信协联</h2>
 					</em>
 					<em class="ritht">
 						<span>
@@ -228,12 +228,13 @@
 
 <style scoped>
 	.el-header {
-		height: 19vh;
+		height: 15vh;
 	} 
 	.el-header .content {
 		overflow: hidden;
 		text-align: center;
-		padding: 0;
+		padding: 4vh;
+		line-height: 34px;
 	}
 	.el-header .content .left,
 	.el-header .content .right {
@@ -264,24 +265,26 @@
 		position: relative;
 		background-image: url(../assets/img/c.jpg);
 		background-size: 100%;
-		height: 65vh;
+		height: 66vh;
 	}
 	.el-footer {
-		height: 19vh;
+		height: 20vh;
 		padding: 35px;
-		background-color: #191919;
+		/*background-color: #191919; */
+		background-color: #464444;
+		
 	} 	
 	.el-footer .content {
 		overflow: hidden;
 		text-align: center;
-		line-height: 45px;
+		line-height: 45px; 
 	}
 	.el-footer .content .left,
 	.el-footer .content .ritht {
 		display: inline-block;
 	}
 	.el-footer .content .left {
-		border-right: 2px solid #646464;
+		border-right: 2px solid #646464; 
 		padding-right: 50px;
 		margin-right: 50px;
 	}
@@ -292,18 +295,20 @@
 		font-style: normal;
 		font-weight: normal;
 		line-height: 1;
-		color: rgba(255, 255, 255, 0.55);
+		color: rgba(255, 255, 255, 0.55); 
+
 	}
 	.el-footer .content .ritht span {
 		display: block;
 		line-height: 30px;
 	}
 	.el-footer .content .ritht span a {
-		color: rgba(255, 255, 255, 0.55);
+		 color: rgba(255, 255, 255, 0.55);  
 	}
 	.el-footer .content .left h2 {
 		font-size: 32px;
-		color: rgba(255, 255, 255, 0.2);
+		color: rgba(255, 255, 255, 0.2); 
+	 
 	} 
 	.ms-title {
 		width: 100%;
@@ -349,3 +354,4 @@
 		text-align: center;
 	}
 </style>
+ 

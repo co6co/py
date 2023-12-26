@@ -128,7 +128,7 @@
 				<div class="pagination">
 					<el-pagination
 						background
-						layout="total, prev, pager, next"
+						layout="prev, pager, next,total,jumper"
 						:current-page="query.pageIndex"
 						:page-size="query.pageSize"
 						:total="pageTotal"
