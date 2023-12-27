@@ -5,7 +5,7 @@
 				<div class="handle-box">
 					<el-input
 						v-model="query.name"
-						placeholder="用户名"
+						placeholder="用户名称"
 						class="handle-input mr10"
 					></el-input>
 					<el-button type="primary" :icon="Search" @click="onSearch"

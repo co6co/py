@@ -45,6 +45,7 @@ declare module '@vue/runtime-core' {
     ElTableColumn: typeof import('element-plus/es')['ElTableColumn']
     ElTag: typeof import('element-plus/es')['ElTag']
     ElText: typeof import('element-plus/es')['ElText']
+    ElTooltip: typeof import('element-plus/es')['ElTooltip']
     ElTree: typeof import('element-plus/es')['ElTree']
     Header: typeof import('./src/components/header.vue')['default']
     Image: typeof import('./src/components/player/src/Image.vue')['default']
@@ -57,6 +58,7 @@ declare module '@vue/runtime-core' {
     Sidebar: typeof import('./src/components/sidebar.vue')['default']
     Splayer: typeof import('./src/components/player/src/Splayer.vue')['default']
     Stream: typeof import('./src/components/stream/src/stream.vue')['default']
+    StreamPlayer: typeof import('./src/components/stream/src/streamPlayer.vue')['default']
     Tags: typeof import('./src/components/tags.vue')['default']
   }
   export interface ComponentCustomProperties {

@@ -4,8 +4,7 @@
 			<el-header>
 				<div class="content">
 					<span class="left">
-						<em>
-						<i class="logo"></i></em>
+						<em> <i class="logo"></i></em>
 						<em>
 							<h3 class="company">{{ sysInfo.company }}</h3>
 							<h3 class="en_company">{{ sysInfo.en_company }}</h3>
@@ -67,7 +66,7 @@
 									>登录</el-button
 								>
 							</div>
-							<p class="login-tips" v-show="message"> {{ message }}</p>
+							<p class="login-tips" v-show="message">{{ message }}</p>
 						</el-form>
 					</div>
 				</div>
@@ -98,12 +97,10 @@
 								{{ sysInfo.beian?.serialNumberName }}</a
 							>
 						</span>
-						<span>
-							技术支持： &nbsp;<a href="#" target="_blank"
-								>江苏惠纬讯信息科技有限公司</a
-							>
-						</span>
+						
 						<span>版权所有(C)2023&nbsp;{{ sysInfo.company }} </span>
+						<span> 技术支持： &nbsp;<a href="#" target="_blank" >江苏惠纬讯信息科技有限公司</a>
+						</span>
 					</em>
 				</div>
 			</el-footer>
@@ -124,15 +121,19 @@
 	import { setToken } from '../utils/auth';
 	import { Storage } from '../store/Storage';
 	import { pkg } from '../utils';
-	import logo from '../assets/img/logo2.png';
+	import logo from '../assets/img/logo3.png';
+	//import logo from '../assets/img/logo.jpg';
 
 	import ba from '../assets/img/ba.png';
 	import gz from '../assets/img/gz.jpg';
-	import { computed } from 'vue'; 
+	import { computed } from 'vue';
 
-	const imageList=reactive<{current:string,urls:Array<string>}>({current:"",urls:[]})
-	imageList.current=gz
-	imageList.urls=[gz]
+	const imageList = reactive<{ current: string; urls: Array<string> }>({
+		current: '',
+		urls: [],
+	});
+	imageList.current = gz;
+	imageList.urls = [gz];
 
 	interface LoginInfo {
 		username: string;
@@ -191,10 +192,9 @@
 					.then((res) => {
 						message.value = res.message;
 						if (res.code == 0) {
-							ElMessage.success(message.value);
+							
 							setToken(res.data.token, res.data.expireSeconds);
-							storeage.set('username', param.username, res.data.expireSeconds);
-
+							storeage.set('username', param.username, res.data.expireSeconds); 
 							const keys =
 								permiss.defaultList[
 									param.username == 'admin' ? 'admin' : 'user'
@@ -206,17 +206,17 @@
 								res.data.expireSeconds
 							);
 							router.push('/');
+							ElMessage.success(message.value);
 						} else {
 							ElMessage.error(message.value);
 						}
 					})
 					.catch((err) => {
-						//todo debug  login.vue?t=1697628463669:82 Uncaught (in promise) TypeError: Cannot read properties of undefined (reading 'message')
 						message.value = err.message || '请求出错';
 						ElMessage.error(err.message);
 					});
 			} else {
-				message.value = '数据验证失败';
+				message.value = '请输入你的用户名和密码！';
 				return false;
 			}
 		});
@@ -226,89 +226,97 @@
 	tags.clearTags();
 </script>
 
-<style scoped>
+<style scoped lang="less">
+	@footer-color:#000;// rgba(255, 255, 255, 0.2); 
+	@footer-bgcolor:#fff; // #464444; 
+	.el-container{height: 100vh}
 	.el-header {
 		height: 15vh;
-	} 
-	.el-header .content {
-		overflow: hidden;
-		text-align: center;
-		padding: 4vh;
-		line-height: 34px;
-	}
-	.el-header .content .left,
-	.el-header .content .right {
-		display: block;
-	}
-	.el-header .content .left{float: left;}
-	.el-header .content .right{float: right;}
-	.el-header .logo {
-		width: 133px;
-		height: 39px;
-		background-image: url(../assets/img/logo.jpg);
-		display: inline-block;
-	} 
-	.el-header em {
-		display: inline-block; margin-right: 15px;
-	}
-	.el-header em h3{text-align: left;}
-	.el-header .company {
-		font-size: 26px;
-		color: #333;
-	}
-	.el-header .en_company {
-		font-size: 12px;
-		text-transform: uppercase;
-		color: #000;
+		.content {
+			overflow: hidden;
+			text-align: center;
+			padding: 4vh;
+			line-height: 34px;
+			.left,
+			.right {
+				display: block;
+			}
+			.left {
+				float: left;
+			}
+			.right {
+				float: right;
+			}
+			.logo {
+				width: 133px;
+				height: 39px;
+				background-image: url(../assets/img/logo.jpg);
+				display: inline-block;
+			}
+			em {
+				display: inline-block;
+				margin-right: 15px;
+				h3 {
+					text-align: left;
+				}
+			}
+			.company {
+				font-size: 26px;
+				color: #333;
+			}
+			.en_company {
+				font-size: 12px;
+				text-transform: uppercase;
+				color: #000;
+			}
+		}
 	}
 	.el-main {
 		position: relative;
 		background-image: url(../assets/img/c.jpg);
 		background-size: 100%;
-		height: 66vh;
+		height: 65vh;
 	}
 	.el-footer {
 		height: 20vh;
-		padding: 35px;
+		padding: 30px;
 		/*background-color: #191919; */
-		background-color: #464444;
-		
-	} 	
-	.el-footer .content {
-		overflow: hidden;
-		text-align: center;
-		line-height: 45px; 
-	}
-	.el-footer .content .left,
-	.el-footer .content .ritht {
-		display: inline-block;
-	}
-	.el-footer .content .left {
-		border-right: 2px solid #646464; 
-		padding-right: 50px;
-		margin-right: 50px;
-	}
-	.el-footer .content .ritht {
-		text-align: left;
-		font-family: Arial, '微软雅黑', Helvetica, sans-serif;
-		font-size: 14px;
-		font-style: normal;
-		font-weight: normal;
-		line-height: 1;
-		color: rgba(255, 255, 255, 0.55); 
+		background-color: @footer-bgcolor;
+		.content {
+			overflow: hidden;
+			text-align: center;
+			//line-height: 45px;
+			.left,
+			.ritht {
+				display: inline-block;
+			}
+			.left {
+				border-right: 2px solid #646464;
+				padding-right: 50px;
+				margin-right: 50px;
+				h2 {
+					font-size: 32px;
+					color:lighten( @footer-color,20%);
+				}
+			}
 
-	}
-	.el-footer .content .ritht span {
-		display: block;
-		line-height: 30px;
-	}
-	.el-footer .content .ritht span a {
-		 color: rgba(255, 255, 255, 0.55);  
-	}
-	.el-footer .content .left h2 {
-		font-size: 32px;
-		color: rgba(255, 255, 255, 0.2); 
-	 
+			.ritht {
+				text-align: left;
+				font-family: Arial, '微软雅黑', Helvetica, sans-serif;
+				font-size: 14px;
+				font-style: normal;
+				font-weight: normal;
+				line-height: 1;
+				color: @footer-color;;
+				span {
+					display: block;
+					line-height: 30px;
+					a {
+						color: @footer-color;;
+					}
+				}
+			}
+		}
 	} 
 	.ms-title {
 		width: 100%;
@@ -354,4 +362,3 @@
 		text-align: center;
 	}
 </style>
- 

@@ -5,7 +5,7 @@
 				<div class="handle-box">
 					<el-input
 						v-model="table_module.query.name"
-						placeholder="用户名"
+						placeholder="设备名称"
 						class="handle-input mr10"
 					></el-input>
 					<el-select

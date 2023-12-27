@@ -1,4 +1,4 @@
-from model.pos.biz import bizAlarmPO, bizAlarmTypePO
+from model.pos.biz import bizAlarmPO, bizAlarmTypePO,bizAlarmAttachPO
 from sqlalchemy .orm.attributes import InstrumentedAttribute
 from typing import Tuple, List
 from co6co_db_ext.db_filter import absFilterItems
@@ -44,6 +44,7 @@ class AlarmFilterItems(absFilterItems):
     def __init__(self):
         self.datetimes = []
         super().__init__(bizAlarmPO)
+        self.listSelectFields = [bizAlarmPO ]
 
     def filter(self) -> list:
         """
@@ -60,6 +61,12 @@ class AlarmFilterItems(absFilterItems):
     def create_List_select(self):
         select = (
             Select(bizAlarmPO)
+            .options(joinedload(bizAlarmPO.alarmTypePO))
+            .options(joinedload(bizAlarmPO.alarmAttachPO))
+            .filter(*self.filter())
+        )
+        select = (
+            Select( bizAlarmPO)#.join(bizAlarmPO.alarmTypePO).join(bizAlarmPO.alarmAttachPO)
             .options(joinedload(bizAlarmPO.alarmTypePO))
             .options(joinedload(bizAlarmPO.alarmAttachPO))
             .filter(*self.filter())

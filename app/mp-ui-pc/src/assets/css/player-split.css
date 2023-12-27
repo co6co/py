@@ -1,0 +1,201 @@
+.playerList {
+	display: grid;
+	grid-template-columns: 100%;
+	grid-template-rows: calc(100% - 48px) 48px;
+	height: 100%;
+}
+
+.playerList .hide {
+	display: none;
+}
+
+.playerList .video-list {
+	flex: 1 1 auto;
+	background: #98a5a5;
+	display: grid;
+}
+.playerList .video-list .video-item {
+	background: #95a0a0;
+	cursor: pointer;
+	position: relative; 
+	width: 100%;
+	height: 100%;
+}
+.playerList .video-list .video-item.hide {
+	display: none;
+}
+
+.playerList .video-list .video-item.active {
+	background: #ffba00;
+}
+.playerList .video-list.video-split-6 {
+	grid-template-columns: 33.33% 33.33% 33.33%;
+	grid-template-rows: 33.33% 33.33% 33.33%;
+}
+.playerList .video-list.video-split-6 .video-item.video-item-1 {
+	grid-column-start: 1;
+	grid-column-end: 3;
+	grid-row-start: 1;
+	grid-row-end: 3;
+}
+
+.playerList .video-list.video-split-8 {
+	grid-template-columns: 25% 25% 25% 25%;
+	grid-template-rows: 25% 25% 25% 25%;
+}
+.playerList .video-list.video-split-8 .video-item.video-item-1 {
+	grid-column-start: 1;
+	grid-column-end: 4;
+	grid-row-start: 1;
+	grid-row-end: 4;
+}
+
+.playerList .video-list.video-split-9 {
+	grid-template-columns: 33.33% 33.33% 33.33%;
+	grid-template-rows: 33.33% 33.33% 33.33%;
+}
+
+.playerList .video-list.video-split-10 {
+	grid-template-columns: 20% 20% 20% 20% 20%;
+	grid-template-rows: 20% 20% 20% 20% 20%;
+}
+.playerList .video-list.video-split-10 .video-item.video-item-1 {
+	grid-column-start: 1;
+	grid-column-end: 5;
+	grid-row-start: 1;
+	grid-row-end: 5;
+}
+
+.playerList .video-list.video-split-16 {
+	grid-template-columns: 25% 25% 25% 25%;
+	grid-template-rows: 25% 25% 25% 25%;
+}
+
+.playerList .video-list.video-split-25 {
+	grid-template-columns: 20% 20% 20% 20% 20%;
+	grid-template-rows: 20% 20% 20% 20% 20%;
+}
+
+.playerList .video-list.video-split-64 {
+	grid-template-columns: 12.5% 12.5% 12.5% 12.5% 12.5% 12.5% 12.5% 12.5%;
+	grid-template-rows: 12.5% 12.5% 12.5% 12.5% 12.5% 12.5% 12.5% 12.5%;
+}
+
+.playerList .video-list.video-split-1 {
+	grid-template-columns: 100%;
+	grid-template-rows: 100%;
+}
+.playerList .video-list.video-split-2 {
+	grid-template-columns: 50% 50%;
+	grid-template-rows: 100%;
+}
+
+.playerList .video-list.video-split-4 {
+	grid-template-columns: 50% 50%;
+	grid-template-rows: 50% 50%;
+}
+
+.playerList .video-tools {
+	background: #ccc;
+}
+.playerList .video-tools ul {
+	display: flex;
+	list-style: none;
+	padding: 0 10px;
+	margin: 0;
+	line-height: 48px;
+}
+.playerList .video-tools ul .icon {
+	cursor: pointer;
+}
+.playerList .video-tools ul li {
+	margin: 0 8px;
+	position: relative;
+}
+.playerList .video-tools ul li svg {
+	margin-top: 8px;
+	width: 32px;
+	height: 32px;
+}
+.playerList .video-tools ul .iconfont {
+	font-size: 24px;
+}
+.playerList .video-tools .unrecording .recording-icon {
+	display: none;
+}
+.playerList .video-tools .unrecording .unrecording-icon {
+	display: block;
+}
+.playerList .video-tools .recording .unrecording-icon {
+	display: none;
+}
+.playerList .video-tools .recording .recording-icon {
+	display: block;
+}
+
+.player_container {
+	background: #090909;
+	width: calc(100% - 2px);
+	height: calc(100% - 2px);
+	margin: 1px;
+	text-align: center;
+	color: #ffba00;
+
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+
+@media screen and (max-width: 720px) {
+	/*竖屏*/
+	.container-shell {
+		width: 100vw;
+		height: 100vh;
+		padding: 0;
+	}
+	.playerList {
+		position: absolute;
+		height: 50vh;
+		width: calc(100% - 6px);
+	}
+	.streams-list-box {
+		position: absolute;
+		top: 55vh;
+		height: 45vh;
+		width: 100%;
+	}
+	.pc-only {
+		display: none;
+	}
+
+	.playerList .video-tools ul li svg {
+		width: 20px;
+		height: 20px;
+	}
+}
+/*横屏*/
+@media (max-width: 720px) and (orientation: landscape) {
+	.playerList {
+		position: relative;
+		top: 0;
+		width: 70vw;
+		height: 100%;
+	}
+	.streams-list-box {
+		position: relative;
+		top: 0;
+		left: 0;
+		width: 30vw;
+		height: 100%;
+		background-color: #ffba00;
+	}
+	.pc-only {
+		display: none;
+	}
+
+	.playerList .video-tools ul li svg {
+		margin-top: 8px;
+		width: 24px;
+		height: 24px;
+	}
+}

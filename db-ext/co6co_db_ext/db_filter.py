@@ -59,8 +59,8 @@ class absFilterItems(ABC, Page_param):
 		orderList= self._getOrderby()
 		if len(orderList)==0: return self.getDefaultOrderBy()
 		# () 获取的结果不能重复 取*
-        # []  获取的结果能重复 取*
-		else: return [ self. po_type.__dict__[key].desc() if it[key] and it[key].lower()=="desc" else  self. po_type.__dict__[key].asc()  for it in orderList for key in it.keys()]
+        # []  获取的结果能重复 取* 
+		else: return [ self. po_type.__dict__[key].desc() if it[key] and it[key].lower()=="desc" else  self. po_type.__dict__[key].asc() for it in orderList for key in it.keys() if key in self.po_type.__dict__]
 	
 	def checkFieldValue(self,fielValue:Any)->bool:
 		if type(fielValue) == str and fielValue:return True
@@ -78,7 +78,7 @@ class absFilterItems(ABC, Page_param):
 	
 	@property
 	def list_select(self):
-		return self.create_List_select().limit(self.limit).offset(self.offset) 
+		return self.create_List_select().limit(self.limit).offset(self.offset).order_by(*self.getOrderBy())
 	@property
 	def count_select(self): 
 		return Select( func.count( )).select_from(self.create_List_select())

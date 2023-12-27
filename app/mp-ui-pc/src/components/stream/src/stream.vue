@@ -1,4 +1,6 @@
+
 <template>
+    <!--一开始测试使用-->
     <div class="box">   
         <div class="jess_player" ref="jess_player_container">  </div>   
         <!--

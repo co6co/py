@@ -5,15 +5,9 @@
 				<div class="handle-box">
 					<el-input
 						v-model="query.name"
-						placeholder="名称"
+						placeholder="菜单名称"
 						class="handle-input mr10"
-					></el-input>
-					<el-input
-						v-model="query.alias"
-						placeholder="别名"
-						class="handle-input mr10"
-					></el-input>
-
+					></el-input> 
 					<el-button type="primary" :icon="Search" @click="onSearch"
 						>搜索</el-button
 					>
