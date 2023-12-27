@@ -398,10 +398,7 @@
 		.el-aside {
 			::v-deep .el-card__body {
 				height: 59vh;
-			}
-			.el-scrollbar {
-				background: #f56c6c;
-			}
+			} 
 		}
 		.el-main {
 			padding: 0;

@@ -62,7 +62,7 @@ export const getQueryVariable = (key: string) => {
 	return null;
 };
 
-export const toggleFullScreen = (elem: HTMLElement) => {
+export const toggleFullScreen = (elem: HTMLElement|any) => {
 	if (!elem) elem = document.documentElement;
 	if (elem.requestFullscreen) {
 		elem.requestFullscreen();
