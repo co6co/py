@@ -67,8 +67,7 @@
 	const destroying = () => {
 		emits('destroyed');
 	};
-	const stop = (bck?: Function) => {
-		console.warn(jess_player.value);
+	const stop = (bck?: Function) => { 
 		if (jess_player.value) {
 			jess_player.value.destroy().then(() => {
 				destroying();
@@ -158,4 +157,8 @@
 	const onPause = () => {
 		jess_player.value.pause();
 	};
+
+	defineExpose({
+		stop,
+	});
 </script>

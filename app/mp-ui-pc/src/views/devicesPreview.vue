@@ -63,18 +63,18 @@
 													{{ i }}
 												</div>
 												<div class="js">
-													<stream-player 
-													:stream="
-														playerList.players[i - 1].url
-													"></stream-player>
+													<stream-player
+														:ref="(el) => setPlayerDom(i, el)"
+														:stream="
+															playerList.players[i - 1].url
+														"></stream-player>
 												</div>
-												
 											</div>
 										</template>
 									</div>
 									<div class="video-tools">
 										<ul>
-											<li>
+											<li @click="onCloseAll()">
 												<el-tooltip content="关闭所有">
 													<el-icon>
 														<CloseBold />
@@ -82,7 +82,7 @@
 												</el-tooltip>
 											</li>
 
-											<li>
+											<li @click="onClose()">
 												<el-tooltip content="关闭当前">
 													<el-icon>
 														<CircleClose />
@@ -128,34 +128,31 @@
 												</div>
 											</li>
 
-											<li style="margin-left: auto" @click="onFullScreens">
+											<li
+												style="margin-left: auto"
+												@click="onToggleFullScreens()">
 												<el-tooltip content="全屏">
 													<el-icon>
-														<FullScreen />
+														<CanelFullScreen v-if="playerList.isFullScreen" />
+														<FullScreen v-else />
 													</el-icon>
 												</el-tooltip>
 											</li>
 											<li @click="onSwitchSplitNum(4)">
-												<el-tooltip content="4">
-													<el-icon>
-														<FullScreen />
-													</el-icon>
+												<el-tooltip content="4分屏">
+													<el-icon> <FourScreen /> </el-icon>
 												</el-tooltip>
 											</li>
 
 											<li @click="onSwitchSplitNum(2)">
-												<el-tooltip content="2">
-													<el-icon>
-														<FullScreen />
-													</el-icon>
+												<el-tooltip content="2分屏">
+													<el-icon> <TwoScreen /> </el-icon>
 												</el-tooltip>
 											</li>
 
 											<li @click="onSwitchSplitNum(1)">
-												<el-tooltip content="1">
-													<el-icon>
-														<FullScreen>1</FullScreen>
-													</el-icon>
+												<el-tooltip content="1分屏">
+													<el-icon> <OneScreen /> </el-icon>
 												</el-tooltip>
 											</li>
 										</ul>
@@ -205,12 +202,20 @@
 		Download,
 		CloseBold,
 	} from '@element-plus/icons-vue';
+	import {
+		OneScreen,
+		TwoScreen,
+		FourScreen,
+		FullScreen,
+		CanelFullScreen,
+	} from '../components/icons/screenIcon';
 	import * as api from '../api/device';
 	import { stream, ptz, streamPlayer } from '../components/stream';
 	import * as p from '../components/stream/src/types/ptz';
 	import { toggleFullScreen } from '../utils';
 	import { useMqtt, mqqt_server } from '../utils/mqtting';
 	import * as d from '../store/types/devices';
+	import { showLoading, closeLoading } from '../components/Logining';
 
 	const deviceName = ref('');
 	const tree = ref(null);
@@ -260,6 +265,7 @@
 	});
 	// 获取表格数据
 	const getData = () => {
+		showLoading()
 		api.list_svc(tree_module.query).then((res) => {
 			if (res.code == 0) {
 				tree_module.data = res.data;
@@ -267,32 +273,39 @@
 			} else {
 				ElMessage.error(res.message);
 			}
+			closeLoading()
 		});
 	};
 	const hasData = computed(() => tree_module.data.length > 0);
 	getData();
 	/** 播放器 */
 	interface player {
+		dom: any;
 		url: string;
 		streamList: Array<stream_source>;
 	}
 	interface PlayerList {
 		splitNum: number;
+		isFullScreen: boolean;
 		currentWin: number;
 		currentStreams: Array<stream_source>;
 		players: Array<player>;
 	}
 	const playerList = reactive<PlayerList>({
 		splitNum: 4,
+		isFullScreen: false,
 		currentWin: 1,
 		currentStreams: [],
 		players: [
-			{ url: '', streamList: [{ name: '', url: '' }] },
-			{ url: '', streamList: [{ name: '', url: '' }] },
-			{ url: '', streamList: [{ name: '', url: '' }] },
-			{ url: '', streamList: [{ name: '', url: '' }] },
+			{ dom: {}, url: '', streamList: [{ name: '', url: '' }] },
+			{ dom: {}, url: '', streamList: [{ name: '', url: '' }] },
+			{ dom: {}, url: '', streamList: [{ name: '', url: '' }] },
+			{ dom: {}, url: '', streamList: [{ name: '', url: '' }] },
 		],
 	});
+	const setPlayerDom = (index: number, ele: any) => {
+		playerList.players[index - 1].dom = ele;
+	};
 
 	const onPlayerClick = (winIndex: number) => {
 		playerList.currentWin = winIndex;
@@ -300,16 +313,26 @@
 			playerList.players[playerList.currentWin - 1].streamList;
 	};
 
-	const onFullScreens = () => {
-		//全屏
+	const onToggleFullScreens = () => {
+		//全屏/退出全屏
 		var ele = document.getElementById('playerList');
-		if (ele) {
-			toggleFullScreen(ele);
-		}
+		if (ele) toggleFullScreen(ele, !playerList.isFullScreen);
+		playerList.isFullScreen = !playerList.isFullScreen;
 	};
 
 	const onSwitchSplitNum = (n: number) => {
 		playerList.splitNum = n;
+	};
+
+	const onCloseAll = () => {
+		for (let i = 0; i < playerList.players.length; i++) {
+			const dom = playerList.players[i].dom;
+			dom.stop();
+		}
+	};
+	const onClose = () => {
+		const dom = playerList.players[playerList.currentWin - 1].dom;
+		dom.stop();
 	};
 
 	const onNodeCheck = (row?: any) => {
@@ -398,7 +421,7 @@
 		.el-aside {
 			::v-deep .el-card__body {
 				height: 59vh;
-			} 
+			}
 		}
 		.el-main {
 			padding: 0;
@@ -425,7 +448,7 @@
 						.js {
 							position: absolute;
 							width: calc(100% - 4px);
-							height: calc(100% - 4px); 
+							height: calc(100% - 4px);
 							left: 2px;
 							top: 2px;
 						}

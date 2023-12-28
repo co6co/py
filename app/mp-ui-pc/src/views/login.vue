@@ -127,6 +127,7 @@
 	import ba from '../assets/img/ba.png';
 	import gz from '../assets/img/gz.jpg';
 	import { computed } from 'vue';
+	import { showLoading, closeLoading } from '../components/Logining';
 
 	const imageList = reactive<{ current: string; urls: Array<string> }>({
 		current: '',
@@ -188,11 +189,11 @@
 		if (!formEl) return;
 		formEl.validate((valid: boolean) => {
 			if (valid) {
+				showLoading()
 				login_svc({ userName: param.username, password: param.password })
 					.then((res) => {
 						message.value = res.message;
-						if (res.code == 0) {
-							
+						if (res.code == 0) { 
 							setToken(res.data.token, res.data.expireSeconds);
 							storeage.set('username', param.username, res.data.expireSeconds); 
 							const keys =
@@ -214,7 +215,9 @@
 					.catch((err) => {
 						message.value = err.message || '请求出错';
 						ElMessage.error(err.message);
-					});
+					}).finally(()=>{
+						closeLoading()
+					})
 			} else {
 				message.value = '请输入你的用户名和密码！';
 				return false;

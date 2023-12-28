@@ -1,70 +1,171 @@
-<template >
-    <el-row>
-      <el-col :span="24" style="height:25rem;">   
-        <component :key="currentName" :is="compoents[currentName]" :option="current_options"></component> 
-       </el-col>
-      <el-col :span="24">
-        <div style="overflow: auto;">
-          <ul  style="height:5rem;" >
-            <!--{position:(item.type==1?'inherit':'relative')}--> 
-            <li @click="onShow(item,index)" :key="index" v-for="(item,index) in imageOptions"   >  
-             <a><el-image :key="index" :src="item.poster" :title="item.name"/> </a>   
-            </li>
-            <li @click="onShow(item,index)" :key="index" v-for="(item,index) in videoOptions"  style="position:relative" >  
-              <a> <el-image :src="item.poster" :title="item.name"/><CaretRight /> </a>  
-            </li> 
-          </ul>  
-        </div>
-      </el-col> 
-    </el-row>
+<template>
+	<el-row>
+		<!--显示大图-->
+		<el-col :span="24" style="height: 25rem">
+			<component
+				:key="currentName"
+				:is="compoents[currentName]"
+				:option="current_options"></component>
+		</el-col>
+		<!--导航图-->
+		<el-col :span="24">
+      <ul>
+        
+      </ul>
+			<el-carousel   trigger="click" :autoplay="false" direction="vertical" style="padding: 5px 0;">
+				<el-carousel-item
+					@click="onShow(item, index)"
+					:key="index"
+					v-for="(item, index) in imageOptions">
+					<a
+						><el-image :key="index" :src="item.poster" :title="item.name" />
+					</a>
+				</el-carousel-item>
+				<el-carousel-item class="item"
+					@click="onShow(item, index)"
+					:key="index"
+					v-for="(item, index) in videoOptions"
+					style="position: relative">
+					<a>
+						<el-image :src="item.poster" :title="item.name" /><CaretRight />
+					</a>
+				</el-carousel-item>
+			</el-carousel>
+			<!--
+			<div style="overflow: auto">
+				<ul style="height: 5rem">
+					<li
+						@click="onShow(item, index)"
+						:key="index"
+						v-for="(item, index) in imageOptions">
+						<a
+							><el-image :key="index" :src="item.poster" :title="item.name" />
+						</a>
+					</li>
+					<li
+						@click="onShow(item, index)"
+						:key="index"
+						v-for="(item, index) in videoOptions"
+						style="position: relative">
+						<a>
+							<el-image :src="item.poster" :title="item.name" /><CaretRight />
+						</a>
+					</li>
+				</ul>
+			</div>
+      -->
+		</el-col>
+	</el-row>
 </template>
 <script setup lang="ts">
-import { watch, PropType,reactive, ref , markRaw,defineAsyncComponent,computed ,onMounted, onBeforeUnmount,nextTick} from 'vue';  
-import 'vue3-video-play/dist/style.css'
-import { resourceOption } from './types'
-import { ElImage } from 'element-plus';
-const props = defineProps({ 
-  viewOption:{
-    type:Array<resourceOption>,
-    required:true 
-  } 
-}) 
-const compoents = reactive({
-  Image: markRaw(defineAsyncComponent(() => import('../../../components/player/src/Image.vue'))),
-  Video: markRaw(defineAsyncComponent(() => import('../../../components/player/src/Player.vue'))),
-  Splayer: markRaw(defineAsyncComponent(() => import('../../../components/player/src/Splayer.vue'))) 
-}) 
-const imageOptions= computed  (()=>{
-    return props.viewOption.filter(m=>m.type==1)
-})
- 
-const videoOptions= computed  (()=>{
-    return props.viewOption.filter(m=>m.type==0)
-})
-const currentName = ref<"Image"|"Video"|"Splayer">('Image')  
-const current_options = ref<resourceOption>({ url:"", name:"string", type:1,poster:""} ) 
+	import {
+		watch,
+		PropType,
+		reactive,
+		ref,
+		markRaw,
+		defineAsyncComponent,
+		computed,
+		onMounted,
+		onBeforeUnmount,
+		nextTick,
+	} from 'vue';
+	import 'vue3-video-play/dist/style.css';
+	import { resourceOption } from './types';
+	import { ElImage } from 'element-plus';
+	const props = defineProps({
+		viewOption: {
+			type: Array<resourceOption>,
+			required: true,
+		},
+	});
+	const compoents = reactive({
+		Image: markRaw(
+			defineAsyncComponent(
+				() => import('../../../components/player/src/Image.vue')
+			)
+		),
+		Video: markRaw(
+			defineAsyncComponent(
+				() => import('../../../components/player/src/Player.vue')
+			)
+		),
+		Splayer: markRaw(
+			defineAsyncComponent(
+				() => import('../../../components/player/src/Splayer.vue')
+			)
+		),
+	});
+	const imageOptions = computed(() => {
+		return props.viewOption.filter((m) => m.type == 1);
+	});
 
-const onShow=(option:resourceOption, key:number)=>{ 
-  if (option.type==0){
-    currentName.value="Video" 
-  }
-  else currentName.value="Image"
-  current_options.value=option
-}
-onMounted(()=>{
-  if (props.viewOption.length>0)current_options.value=props.viewOption[0]
-})
-</script> 
+	const videoOptions = computed(() => {
+		return props.viewOption.filter((m) => m.type == 0);
+	});
+	const currentName = ref<'Image' | 'Video' | 'Splayer'>('Image');
+	const current_options = ref<resourceOption>({
+		url: '',
+		name: 'string',
+		type: 1,
+		poster: '',
+	});
+
+	const onShow = (option: resourceOption, key: number) => {
+		if (option.type == 0) {
+			currentName.value = 'Video';
+		} else currentName.value = 'Image';
+		current_options.value = option;
+	};
+	onMounted(() => {
+		if (props.viewOption.length > 0)
+			current_options.value = props.viewOption[0];
+	});
+</script>
 <style scoped lang="less">
-ul{
-  width: 833px;
-  li {  
-        cursor:pointer; border: 1px #ccc ;overflow: hidden;list-style: none;  
-        float: left; min-width: 100px; text-align: center; margin: 4px; 
-       a {
-        .el-image{width: 200px;height: 106px;}
-        svg{position: absolute; left: 40%; top: 38%; width: 20%;}
-      } 
-   } 
-}
+	::v-deep .el-carousel__container {
+    padding: 5px; height: 110px;
+		.el-carousel__item.item {
+			//width: 140px; min-height: 100px;
+			position: relative; float: left;	width: 200px;transform: none; border: 1px solid #ccc; 
+			a {
+				.el-image {
+					width: 200px;
+					height: 106px;
+				}
+				svg {
+					position: absolute;
+					left: 40%;
+					top: 38%;
+					width: 20%;
+				}
+			}
+		}
+	}
+
+	ul {
+		width: 833px;
+		li {
+			cursor: pointer;
+			border: 1px #ccc;
+			overflow: hidden;
+			list-style: none;
+			float: left;
+			min-width: 100px;
+			text-align: center;
+			margin: 4px;
+			a {
+				.el-image {
+					width: 200px;
+					height: 106px;
+				}
+				svg {
+					position: absolute;
+					left: 40%;
+					top: 38%;
+					width: 20%;
+				}
+			}
+		}
+	}
 </style>

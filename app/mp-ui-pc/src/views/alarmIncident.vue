@@ -1,5 +1,4 @@
 <template>
-	<!--该视图暂时不用，替换未 alarm-->
 	<div class="container-layout">
 		<el-container>
 			<el-header>
@@ -9,14 +8,12 @@
 						class="mr10"
 						clearable
 						v-model="table_module.query.alarmType"
-						placeholder="告警类型"
-					>
+						placeholder="告警类型">
 						<el-option
 							v-for="(item, index) in table_module.categoryList"
 							:key="index"
 							:label="item.desc"
-							:value="item.alarmType"
-						/>
+							:value="item.alarmType" />
 					</el-select>
 					<div class="el-select mr10">
 						<el-date-picker
@@ -28,8 +25,7 @@
 							range-separator="至"
 							start-placeholder="开始时间"
 							end-placeholder="结束时间"
-							title="告警时间"
-						/>
+							title="告警时间" />
 						<el-link type="info" @click="setDatetime(0, 0.5)">30分钟内</el-link>
 						<el-link type="info" @click="setDatetime(0, 1)">1小时内</el-link>
 						<el-link type="info" @click="setDatetime(1, 24)">今天</el-link>
@@ -52,81 +48,62 @@
 				</el-row>
 			</el-header>
 
-			<el-main >
+			<el-main>
 				<el-scrollbar>
 					<!--主内容-->
+					<el-row>
+						<el-col :span="12">
+							<div style="height: 100%; overflow: auto">
+								<el-table
+									highlight-current-row
+									@sort-change="onColChange"
+									:row-class-name="tableRowProp"
+									:data="table_module.data"
+									border
+									class="table"
+									ref="tableInstance"
+									@row-click="onTableSelect"
+									header-cell-class-name="table-header">
+									<el-table-column
+										label="序号"
+										width="119"
+										align="center"
+										:show-overflow-tooltip="true">
+										<template #default="scope">
+											<span>{{
+												getTableIndex(table_module.query, scope.$index)
+											}}</span>
+										</template>
+									</el-table-column>
+									<el-table-column
+										prop="alarmTypePO.desc"
+										label="安全员"
+										width="119"
+										sortable
+										:show-overflow-tooltip="true"></el-table-column>
 
-					<el-table
-						highlight-current-row
-						@sort-change="onColChange"
-						:row-class-name="tableRowProp"
-						:data="table_module.data"
-						border
-						class="table"
-						ref="tableInstance"
-						@row-click="onTableSelect"
-						header-cell-class-name="table-header"
-					>
-						<el-table-column
-							prop="uuid"
-							label="ID"
-							width="130"
-							align="center"
-							sortable
-							:show-overflow-tooltip="true"
-						></el-table-column>
-						<el-table-column
-							prop="alarmType"
-							label="告警类型"
-							width="119"
-							sortable
-							:show-overflow-tooltip="true"
-						></el-table-column>
-						<el-table-column
-							prop="alarmTypePO.desc"
-							label="告警描述"
-							width="119"
-							sortable
-							:show-overflow-tooltip="true"
-						></el-table-column>
-						<el-table-column
-							label="任务类型"
-							width="110"
-							sortable
-							prop="flowStatus"
-						>
-							<template #default="scope">
-								<el-tag
-									>{{ scope.row.taskSession }}--{{ scope.row.taskDesc }}
-								</el-tag></template
-							>
-						</el-table-column>
+									<el-table-column
+										prop="alarmTypePO.desc"
+										label="告警类型"
+										width="119"
+										sortable
+										:show-overflow-tooltip="true"></el-table-column>
 
-						<el-table-column
-							width="160"
-							prop="alarmTime"
-							label="告警时间"
-							sortable
-							:show-overflow-tooltip="true"
-						></el-table-column>
-						<el-table-column
-							width="160"
-							prop="createTime"
-							label="入库时间"
-							sortable
-							:show-overflow-tooltip="true"
-						></el-table-column>
-						<el-table-column label="操作" width="316" align="center">
-							<template #default="scope">
-								<el-button text :icon="Edit" @click="onOpenDialog(scope.row)">
-									详细信息
-								</el-button>
-								<el-button text :icon="Edit" @click="onOpen2Dialog(scope.row)">
-									告警视频
-								</el-button>
-							</template>
-						</el-table-column>
-					</el-table>
+									<el-table-column
+										width="160"
+										prop="alarmTime"
+										label="告警时间"
+										sortable
+										:show-overflow-tooltip="true"></el-table-column>
+								</el-table>
+							</div>
+						</el-col>
+						<el-col :span="12" style="position: relative;">
+							<div style="padding: 5px; overflow: hidden; ">
+								<img-video    :viewOption="form2.data"></img-video>
+							</div>
+						</el-col>
+					</el-row>
 				</el-scrollbar>
 			</el-main>
 
@@ -135,13 +112,12 @@
 				<div class="pagination">
 					<el-pagination
 						background
-						layout="prev, pager, next,total,jumper"
+						layout="prev, pager,next,total,jumper"
 						:current-page="table_module.query.pageIndex"
 						:page-sizes="[100, 200, 300, 400]"
 						:page-size="table_module.query.pageSize"
 						:total="table_module.pageTotal"
-						@current-change="onPageChange"
-					>
+						@current-change="onPageChange">
 					</el-pagination>
 				</div>
 			</el-footer>
@@ -152,8 +128,7 @@
 			title="详细信息"
 			v-model="form.dialogVisible"
 			style="width: 80%; height: 76%"
-			@keydown.ctrl="keyDown"
-		>
+			@keydown.ctrl="keyDown">
 			<details-info :data="form.data"></details-info>
 			<template #footer>
 				<span class="dialog-footer">
@@ -167,8 +142,7 @@
 			title="详细信息"
 			v-model="form2.dialogVisible"
 			style="width: 98%; height: 90%"
-			@keydown.ctrl="keyDown"
-		>
+			@keydown.ctrl="keyDown">
 			<el-row>
 				<el-col :span="12">
 					<img-video :viewOption="form2.data"></img-video>
@@ -220,7 +194,9 @@
 	import { detailsInfo } from '../components/details';
 	import { imgVideo, types } from '../components/player';
 	import { str2Obj, createStateEndDatetime } from '../utils';
+
 	import { showLoading, closeLoading } from '../components/Logining';
+	import { getTableIndex } from '../utils/tables';
 
 	interface TableRow {
 		id: number;
@@ -297,7 +273,7 @@
 	};
 	// 获取表格数据
 	const getData = () => {
-		showLoading()
+		showLoading();
 		getQuery();
 		api.list_svc(table_module.query).then((res) => {
 			if (res.code == 0) {
@@ -306,7 +282,7 @@
 			} else {
 				ElMessage.error(res.message);
 			}
-			closeLoading()
+			closeLoading();
 		});
 	};
 
@@ -342,6 +318,7 @@
 	const onTableSelect = (row: any) => {
 		currentTableItemIndex.value = row.index;
 		table_module.currentRow = row;
+		onOpen2Dialog(row);
 	};
 	const keyDown = (e: KeyboardEvent) => {
 		if (e.ctrlKey) {
@@ -433,8 +410,8 @@
 		return import.meta.env.VITE_BASE_URL + `/api/resource/${uuid}`;
 	};
 	const onOpen2Dialog = (row: TableRow) => {
-		form2.value.dialogVisible = true;
-		table_module.currentRow = row;
+		//form2.value.dialogVisible = true;
+		//table_module.currentRow = row;
 		form2.value.data = [
 			{
 				url: getResultUrl(row.rawImageUid),
@@ -459,7 +436,7 @@
 </script>
 <style scoped lang="less">
 	@import '../assets/css/tables.css';
-	
+
 	.view .title {
 		color: var(--el-text-color-regular);
 		font-size: 18px;

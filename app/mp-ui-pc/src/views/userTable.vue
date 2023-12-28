@@ -212,6 +212,8 @@
 		retsetPwd_svc,
 	} from '../api/user';
 
+	import { showLoading, closeLoading } from '../components/Logining';
+
 	interface TableItem {
 		id: number;
 		userName: string;
@@ -228,6 +230,7 @@
 	const pageTotal = ref(0);
 	// 获取表格数据
 	const getData = () => {
+		showLoading()
 		queryList_svc(query).then((res) => {
 			if (res.code == 0) {
 				tableData.value = res.data;
@@ -236,6 +239,7 @@
 				ElMessage.error(res.message);
 			}
 		});
+		closeLoading()
 	};
 	getData();
 

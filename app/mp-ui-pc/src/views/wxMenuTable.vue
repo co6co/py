@@ -1,13 +1,12 @@
 <template>
 	<div class="container-layout">
-		<el-container >
+		<el-container>
 			<el-header>
-				<div class="handle-box">
+				<div class="handle-box"> 
 					<el-input
 						v-model="query.name"
 						placeholder="菜单名称"
-						class="handle-input mr10"
-					></el-input> 
+						class="handle-input mr10"></el-input>
 					<el-button type="primary" :icon="Search" @click="onSearch"
 						>搜索</el-button
 					>
@@ -18,15 +17,14 @@
 			</el-header>
 			<el-main>
 				<el-scrollbar>
-					<el-table
+					<el-table 
 						highlight-current-row
 						@sort-change="onColChange"
-						:data="tableData"
+						:data="table_module.data"
 						border
 						class="table"
 						ref="multipleTable"
-						header-cell-class-name="table-header"
-					>
+						header-cell-class-name="table-header">
 						<el-table-column label="序号" width="55" align="center">
 							<template #default="scope"> {{ scope.$index }} </template>
 						</el-table-column>
@@ -34,20 +32,17 @@
 							prop="id"
 							label="ID"
 							width="55"
-							align="center"
-						></el-table-column>
+							align="center"></el-table-column>
 						<el-table-column
 							prop="name"
 							label="菜单名称"
 							sortable
-							:show-overflow-tooltip="true"
-						></el-table-column>
+							:show-overflow-tooltip="true"></el-table-column>
 						<el-table-column
 							label="公众号"
 							width="110"
 							sortable
-							prop="flowStatus"
-						>
+							prop="flowStatus">
 							<template #default="scope">
 								<el-tag
 									>{{ config.getItem(scope.row.openId)?.name }}
@@ -58,8 +53,7 @@
 							prop="state"
 							label="状态"
 							sortable
-							:show-overflow-tooltip="true"
-						>
+							:show-overflow-tooltip="true">
 							<template #default="scope">
 								<el-tag
 									>{{ config.getMenuStateItem(scope.row.state)?.label }}
@@ -71,29 +65,25 @@
 							prop="createTime"
 							label="创建时间"
 							sortable
-							:show-overflow-tooltip="true"
-						></el-table-column>
+							:show-overflow-tooltip="true"></el-table-column>
 						<el-table-column
 							prop="updateTime"
 							label="更新时间"
 							sortable
-							:show-overflow-tooltip="true"
-						></el-table-column>
+							:show-overflow-tooltip="true"></el-table-column>
 						<el-table-column label="操作" width="388" align="left">
 							<template #default="scope">
 								<el-button
 									text
 									:icon="Edit"
-									@click="onOpenDialog(1, scope.row)"
-								>
+									@click="onOpenDialog(1, scope.row)">
 									编辑
 								</el-button>
 								<el-button
 									text
 									:icon="Compass"
 									v-if="scope.row.openId"
-									@click="onPush(scope.$index, scope.row)"
-								>
+									@click="onPush(scope.$index, scope.row)">
 									推送
 								</el-button>
 								<el-button
@@ -101,16 +91,14 @@
 									:icon="Plus"
 									title="获取当前公众号配置的菜单"
 									v-if="scope.row.openId"
-									@click="onPull(scope.$index, scope.row)"
-								>
+									@click="onPull(scope.$index, scope.row)">
 									获取
 								</el-button>
 								<el-button
 									text
 									:icon="Delete"
 									class="red"
-									@click="onDelete(scope.$index, scope.row)"
-								>
+									@click="onDelete(scope.$index, scope.row)">
 									删除
 								</el-button>
 							</template>
@@ -126,8 +114,7 @@
 						:current-page="query.pageIndex"
 						:page-size="query.pageSize"
 						:total="pageTotal"
-						@current-change="onCurrentPageChange"
-					></el-pagination>
+						@current-change="onCurrentPageChange"></el-pagination>
 				</div>
 			</el-footer>
 		</el-container>
@@ -137,35 +124,30 @@
 				label-width="90px"
 				ref="dialogForm"
 				:rules="rules"
-				:model="form.fromData"
-			>
+				:model="form.fromData">
 				<el-form-item label="所属公众号" prop="openId">
 					<el-select
 						style="width: 160px"
 						class="mr10"
 						v-model="form.fromData.openId"
-						placeholder="请选择"
-					>
+						placeholder="请选择">
 						<el-option
 							v-for="item in config.list"
 							:key="item.openId"
 							:label="item.name"
-							:value="item.openId"
-						/>
+							:value="item.openId" />
 					</el-select>
 				</el-form-item>
 				<el-form-item label="名称" prop="name">
 					<el-input
 						v-model="form.fromData.name"
-						placeholder="菜单名称"
-					></el-input>
+						placeholder="菜单名称"></el-input>
 				</el-form-item>
 				<el-form-item label="内容" prop="content">
 					<md-editor
 						:preview="false"
 						class="mgb20"
-						v-model="form.fromData.content"
-					/>
+						v-model="form.fromData.content" />
 				</el-form-item>
 			</el-form>
 			<template #footer>
@@ -179,12 +161,13 @@
 </template>
 
 <script setup lang="ts" name="basetable">
-	import { ref, reactive } from 'vue';
+	import { ref, reactive, watchEffect } from 'vue';
 	import {
 		ElMessage,
 		ElMessageBox,
 		FormRules,
 		FormInstance,
+		ElLoading,
 	} from 'element-plus';
 	import {
 		Delete,
@@ -206,39 +189,56 @@
 	import { wx_config_store } from '../store/wx';
 	import MdEditor from 'md-editor-v3';
 	import 'md-editor-v3/lib/style.css';
-
-	interface TableItem {
+	import { showLoading, closeLoading } from '../components/Logining';
+	interface TableRow {
 		id: number;
 		name: string;
 		openId: string;
 	}
-	interface QueryType {
-		name?: string;
-		alias?: string;
-		pageIndex: number;
-		pageSize: number;
-		order?: string;
-		orderBy?: string;
+
+	interface Query extends IpageParam {
+		name: '';
 	}
-	const query = reactive<QueryType>({
+	const query = reactive<Query>({
 		name: '',
 		pageIndex: 1,
 		pageSize: 10,
 		order: '',
 	});
+
 	const config = wx_config_store();
-	const tableData = ref<TableItem[]>([]);
 	const pageTotal = ref(0);
+
+	interface table_module { 
+		query: Query;
+		data: TableRow[];
+		currentRow?: TableRow;
+		pageTotal: number;
+	}
+
+	const table_module = reactive<table_module>({ 
+		query: {
+			name: '',
+			pageIndex: 1,
+			pageSize: 15,
+			order: 'asc',
+			orderBy: '',
+		},
+		data: [],
+		pageTotal: 0,
+	});
 	// 获取表格数据
 	const getData = async () => {
+		showLoading();
 		await config.refesh();
 		list_menu_svc(query).then((res) => {
 			if (res.code == 0) {
-				tableData.value = res.data;
-				pageTotal.value = res.total || -1;
+				table_module.data = res.data;
+				table_module.pageTotal = res.total || -1;
 			} else {
 				ElMessage.error(res.message);
 			}
+			closeLoading();
 		});
 	};
 	getData();
@@ -308,16 +308,6 @@
 			})
 			.catch(() => {});
 	};
-	/**
-const valid_name=(rule:any,value:string,back:Function)=>{
-	console.info(rule)
-	if(value.length<2) return rule.message="长度应该大于2", back(new Error(rule.message))
-	get_exist_svc (dialogData.id,value).then(res=>{
-		if(res.code==0) return rule.message=res.message, back(new Error(rule.message))
-		else  return  back( );
-	}) 
-}
- */
 	//弹出框 add and edit
 	const dialogForm = ref<FormInstance>();
 	const rules: FormRules = {
@@ -390,5 +380,5 @@ const valid_name=(rule:any,value:string,back:Function)=>{
 </script>
 
 <style scoped lang="less">
-	@import '../assets/css/tables.css'; 
+	@import '../assets/css/tables.css';
 </style>

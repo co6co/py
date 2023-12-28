@@ -62,15 +62,37 @@ export const getQueryVariable = (key: string) => {
 	return null;
 };
 
-export const toggleFullScreen = (elem: HTMLElement|any) => {
+export const toggleFullScreen = (
+	elem: HTMLElement | any,
+	fullScreen: boolean = true
+) => {
 	if (!elem) elem = document.documentElement;
-	if (elem.requestFullscreen) {
-		elem.requestFullscreen();
-	} else if (elem.mozRequestFullScreen) {
-		elem.mozRequestFullScreen();
-	} else if (elem.webkitRequestFullscreen) {
-		elem.webkitRequestFullscreen();
-	} else if (elem.msRequestFullscreen) {
-		elem.msRequestFullscreen();
+	if (fullScreen) {
+		if (elem.requestFullscreen) {
+			console.info("1")
+			elem.requestFullscreen();
+		} else if (elem.mozRequestFullScreen) {
+			console.info("2")
+			elem.mozRequestFullScreen();
+		} else if (elem.webkitRequestFullscreen) {
+			console.info("3")
+			elem.webkitRequestFullscreen();
+		} else if (elem.msRequestFullscreen) {
+			console.info("4")
+			elem.msRequestFullscreen();
+		}
+	}else{
+		elem = document; 
+		if (elem.exitFullscreen) {
+			elem.exitFullscreen(); 
+		  } else if (elem.mozCancelFullScreen) { // Firefox 
+			elem.mozCancelFullScreen();
+		  } else if (elem.webkitExitFullscreen) { // Chrome, Safari and Opera
+			elem.webkitExitFullscreen(); 
+		  } else if (elem.msExitFullscreen) { // Internet Explorer and Edge 
+			elem.msExitFullscreen();
+		  }
 	}
 };
+
+

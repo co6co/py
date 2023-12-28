@@ -6,24 +6,16 @@
 		<div>
 			<div class="playerList">
 				<div class="video-list video-split-4">
-					<div
-						class="video-item splitNum video-item-1"
-						>
+					<div class="video-item splitNum video-item-1">
 						<div class="player_container" id="player_container1">1</div>
 					</div>
-					<div
-						class="video-item splitNum video-item-2 active"
-						>
+					<div class="video-item splitNum video-item-2 active">
 						<div class="player_container" id="player_container2">2</div>
 					</div>
-					<div
-						class="video-item splitNum video-item-3"
-						>
+					<div class="video-item splitNum video-item-3">
 						<div class="player_container" id="player_container3">3</div>
 					</div>
-					<div
-						class="video-item splitNum video-item-4"
-						>
+					<div class="video-item splitNum video-item-4">
 						<div class="player_container" id="container4">4</div>
 					</div>
 				</div>
@@ -36,7 +28,6 @@
 								onclick="closeAll()"
 								onmousemove="showtip('<b>关闭所有</b>')"
 								onmouseout="hidetip()">
-								 
 							</a>
 						</li>
 
@@ -46,7 +37,6 @@
 								onclick="closeCurCell()"
 								onmousemove="showtip('<b>关闭选中单元格</b>')"
 								onmouseout="hidetip()">
-								 
 							</a>
 						</li>
 
@@ -58,7 +48,6 @@
 								onmousemove="showtip('<b>录像</b>')"
 								onmouseout="hidetip()"
 								class="unrecording">
-								 
 							</a>
 						</li>
 
@@ -68,7 +57,6 @@
 								onclick="screenshot()"
 								onmousemove="showtip('<b>截图</b>')"
 								onmouseout="hidetip()">
-								 
 							</a>
 						</li>
 
@@ -77,28 +65,18 @@
 						</li>
 
 						<li>
-							<div class="select-form-item hide" id="chStreamSelectForm">
-								<label class="select-form-label">切换码流</label>
-								<div class="layui-input-block">
-									<select
-										id="chStreamSelectId"
-										name="type"
-										lay-filter="typeFilter">
-										<option></option>
-									</select>
-								</div>
-							</div>
+							<select style="background: #cccddd;" id="chStreamSelectId" name="type" lay-filter="typeFilter">
+								<option></option>
+							</select>
 						</li>
 
-						<slot name="extend-tools"></slot>
-
+						<slot name="extend-tools"></slot> 
 						<li style="margin-left: auto">
 							<a
 								href="javascript:;"
 								onmousemove="showtip('<b>多屏全屏</b>')"
 								onmouseout="hidetip()"
 								onclick="fullscreens()">
-								 
 							</a>
 						</li>
 
@@ -108,7 +86,6 @@
 								onmousemove="showtip('<b>全屏</b>')"
 								onmouseout="hidetip()"
 								onclick="fullscreen()">
-								 
 							</a>
 						</li>
 
@@ -118,7 +95,6 @@
 								onmousemove="showtip('<b>缩放模式</b>')"
 								onmouseout="hidetip()"
 								onclick="scaleMode()">
-								 
 							</a>
 						</li>
 
@@ -128,7 +104,6 @@
 								onmousemove="showtip('<b>4分屏</b>')"
 								onmouseout="hidetip()"
 								onclick="splitScreen(4)">
-								 
 							</a>
 						</li>
 
@@ -138,7 +113,6 @@
 								onmousemove="showtip('<b>2分屏</b>')"
 								onmouseout="hidetip()"
 								onclick="splitScreen(2)">
-								 
 							</a>
 						</li>
 
@@ -148,7 +122,6 @@
 								onmousemove="showtip('<b>1分屏</b>')"
 								onmouseout="hidetip()"
 								onclick="splitScreen(1)">
-								 
 							</a>
 						</li>
 					</ul>

@@ -317,6 +317,7 @@
 	import { detailsInfo } from '../components/details';
 	import { imgVideo, types } from '../components/player';
 	import { str2Obj, createStateEndDatetime } from '../utils';
+	import { showLoading, closeLoading } from '../components/Logining';
 
 	interface TableRow {
 		id: number;
@@ -413,6 +414,7 @@
 	};
 	// 获取表格数据
 	const getData = () => {
+		showLoading()
 		getQuery(),
 			api.dev_list_svc(table_module.query).then((res) => {
 				if (res.code == 0) {
@@ -421,6 +423,7 @@
 				} else {
 					ElMessage.error(res.message);
 				}
+				closeLoading()
 			});
 	};
 	getData();

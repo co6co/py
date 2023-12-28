@@ -1,5 +1,6 @@
 <template> 
-  <videoPlay  v-bind="playerOption" :poster='option.poster'></videoPlay>  
+  <videoPlay v-if="option.url"  v-bind="playerOption" :poster='option.poster'></videoPlay>  
+  <el-empty v-else description="未加载数据" />
 </template>
 
 <script lang="ts" setup  >

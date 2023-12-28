@@ -25,9 +25,11 @@ service.interceptors.request.use(
 		//发送请求之前
 		let token = getToken();
 		config.headers.Authorization = 'Bearer ' + token;
+		/*
 		const noLogin = config.params && config.params.noLogin;
 		if (!noLogin) elLoading = ElLoading.service({ fullscreen: true });
 		else delete config.params.noLogin;
+		*/
 		return config;
 	},
 	(error: AxiosError) => {
@@ -41,7 +43,7 @@ service.interceptors.request.use(
 service.interceptors.response.use(
 	(response: AxiosResponse) => {
 		//2xx 范围的都会触发该方法
-		if (elLoading) elLoading.close();
+		//if (elLoading) elLoading.close();
 		if (response.status === 200) {
 			if (response.headers['content-type'] == 'application/json') {
 				if (typeof response.data == 'string')
@@ -56,7 +58,7 @@ service.interceptors.response.use(
 	},
 	(error: AxiosError) => {
 		//不是 2xx 的触发
-		if (elLoading) elLoading.close();
+		//if (elLoading) elLoading.close();
 		if (error.response?.status === 403) {
 			removeToken();
 			ElMessage.error(`未认证、无权限或者认证信息已过期:${error.message}`);

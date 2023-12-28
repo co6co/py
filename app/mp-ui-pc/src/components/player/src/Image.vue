@@ -1,5 +1,5 @@
-<template>
-	<el-image
+<template>  
+	<el-image v-if="option.url"
 		:src="result"
 		style="width: 100%; height: 100%"
 		:title="option.name"
@@ -9,6 +9,7 @@
 		fit="cover"
 		:preview-src-list="srcList"
 	></el-image>
+	<el-empty v-else description="未加载数据" />
 </template>
 
 <script lang="ts" setup>
