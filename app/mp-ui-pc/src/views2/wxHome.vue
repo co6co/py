@@ -1,22 +1,18 @@
 <template>
-	<div v-loading="loading">
-		<div>
-			<!--<v-tags></v-tags>-->
-			<div class="content">
-				<router-view v-slot="{ Component }">
-					<transition name="move" mode="out-in">
-						<!--<keep-alive :include="tags.nameList">-->
-							<component :is="Component"></component>
-						<!--</keep-alive>-->
-					</transition>
-				</router-view>
-			</div>
-		</div>
+	<!--<v-tags></v-tags>-->
+	<div class="content" v-loading="loading">
+		<router-view v-slot="{ Component }">
+			<transition name="move" mode="out-in">
+				<!--<keep-alive :include="tags.nameList">-->
+				<component :is="Component"></component>
+				<!--</keep-alive>-->
+			</transition>
+		</router-view>
 	</div>
 </template>
 <script setup lang="ts">
-	import { ref, reactive, onMounted, WatchEffect, watchEffect } from 'vue'; 
-    /*
+	import { ref, reactive, onMounted, WatchEffect, watchEffect } from 'vue';
+	/*
     import { useTagsStore } from '../store/tags';
 	import vTags from '../components/tags.vue';
 	import { getToken, setToken } from '../utils/auth';
@@ -61,10 +57,15 @@
 	.example-showcase .el-loading-mask {
 		z-index: 9;
 	}
-	.content {
-		overflow: auto;
-	}
+
 	#app {
 		overflow: auto;
+		.content {
+			overflow: auto; 
+			.el-container {
+				height: 97vh;
+				overflow: hidden;
+			}
+		}
 	}
 </style>

@@ -20,6 +20,7 @@
 							:key="item.uid"
 							:label="item.key"
 							:value="item.value"
+							
 						/>
 					</el-select>
 					<el-link
@@ -422,8 +423,9 @@
 					table_module.pageTotal = res.total || -1;
 				} else {
 					ElMessage.error(res.message);
-				}
-				closeLoading()
+				} 
+			}).finally(() => {
+				closeLoading();
 			});
 	};
 	getData();

@@ -11,7 +11,7 @@ class absFilterItems(ABC, Page_param):
 	抽象过滤器
 	配合 DbOperations 使用
 	"""
-	listSelectFields: List[InstrumentedAttribute]
+	listSelectFields: List[InstrumentedAttribute] # 使用该数据 dictor
 	def __init__(self,po:TypeVar) -> None:
 		super().__init__() 
 
@@ -61,6 +61,14 @@ class absFilterItems(ABC, Page_param):
 		# () 获取的结果不能重复 取*
         # []  获取的结果能重复 取* 
 		else: return [ self. po_type.__dict__[key].desc() if it[key] and it[key].lower()=="desc" else  self. po_type.__dict__[key].asc() for it in orderList for key in it.keys() if key in self.po_type.__dict__]
+	def getOrderBy_Fields(self)->List[InstrumentedAttribute]:
+		""" 
+		获取排序规则 2 由 select 字段 排序
+		//todo 功能未实现
+		"""
+		orderList= self._getOrderby()
+		if len(orderList)==0: return self.getDefaultOrderBy() 
+		else: return [ self. po_type.__dict__[key].desc() if it[key] and it[key].lower()=="desc" else  self. po_type.__dict__[key].asc() for it in orderList for key in it.keys() if key in self.po_type.__dict__]
 	
 	def checkFieldValue(self,fielValue:Any)->bool:
 		if type(fielValue) == str and fielValue:return True
@@ -77,7 +85,9 @@ class absFilterItems(ABC, Page_param):
 		return select
 	
 	@property
-	def list_select(self):
+	def list_select(self,useListFiled=False):
+		if useListFiled:
+			return self.create_List_select().limit(self.limit).offset(self.offset).order_by(*self.getOrderBy_Fields())
 		return self.create_List_select().limit(self.limit).offset(self.offset).order_by(*self.getOrderBy())
 	@property
 	def count_select(self): 

@@ -1,6 +1,6 @@
 /*table 页面*/
 .el-container{height: 82vh; overflow: hidden;}
-.el-main{padding-top: 0;padding-bottom: 0; height: 90%;}
+.el-main{padding-top: 0;padding-bottom: 0; height: 90%; overflow: hidden;}
 .el-header .container{ border: 1px solid #ddd;    border-radius: 5px;}
 .el-scrollbar{background: #fff;}
 .handle-box {

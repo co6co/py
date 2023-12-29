@@ -31,6 +31,8 @@ def resize_image( imreadImage, height = 208, width = 117):
     constant = cv2.copyMakeBorder(imreadImage, top, bottom, left, right, cv2.BORDER_CONSTANT, value = BLACK)
     # 调整图像大小并返回图像，目的是减少计算量和内存占用，提升训练速度
     return cv2.resize(constant, (height, width))
+
+
 async def screenshot( videoPathOrStreamUrl: str, w: int = 208, h: int = 117, isFile: bool = True) -> str:
     """
     视频截图
@@ -38,10 +40,10 @@ async def screenshot( videoPathOrStreamUrl: str, w: int = 208, h: int = 117, isF
     """
     if (isFile and os.path.exists(videoPathOrStreamUrl)) or videoPathOrStreamUrl:
         try:
-            cap = cv2.VideoCapture(videoPathOrStreamUrl)  # 打开视频
+            cap = cv2.VideoCapture(videoPathOrStreamUrl,cv2.CAP_FFMPEG)  # 打开视频
             cap.set(cv2.CAP_PROP_FPS, 30)
             cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1920)
-            cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 1080)
+            cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 1080) 
             # cap.set(cv2.CAP_PROP_READ_TIMEOUT_MSEC , 5)
             ret, fram = cap.read()
             s = None

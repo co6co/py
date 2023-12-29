@@ -9,14 +9,12 @@
 						class="mr10"
 						clearable
 						v-model="table_module.query.alarmType"
-						placeholder="告警类型"
-					>
+						placeholder="告警类型">
 						<el-option
 							v-for="(item, index) in table_module.categoryList"
 							:key="index"
 							:label="item.desc"
-							:value="item.alarmType"
-						/>
+							:value="item.alarmType" />
 					</el-select>
 					<div class="el-select mr10">
 						<el-date-picker
@@ -28,8 +26,7 @@
 							range-separator="至"
 							start-placeholder="开始时间"
 							end-placeholder="结束时间"
-							title="告警时间"
-						/>
+							title="告警时间" />
 						<el-link type="info" @click="setDatetime(0, 0.5)">30分钟内</el-link>
 						<el-link type="info" @click="setDatetime(0, 1)">1小时内</el-link>
 						<el-link type="info" @click="setDatetime(1, 24)">今天</el-link>
@@ -52,7 +49,7 @@
 				</el-row>
 			</el-header>
 
-			<el-main >
+			<el-main>
 				<el-scrollbar>
 					<!--主内容-->
 
@@ -65,36 +62,31 @@
 						class="table"
 						ref="tableInstance"
 						@row-click="onTableSelect"
-						header-cell-class-name="table-header"
-					>
+						header-cell-class-name="table-header">
 						<el-table-column
 							prop="uuid"
 							label="ID"
 							width="130"
 							align="center"
 							sortable
-							:show-overflow-tooltip="true"
-						></el-table-column>
+							:show-overflow-tooltip="true"></el-table-column>
 						<el-table-column
 							prop="alarmType"
 							label="告警类型"
 							width="119"
 							sortable
-							:show-overflow-tooltip="true"
-						></el-table-column>
+							:show-overflow-tooltip="true"></el-table-column>
 						<el-table-column
 							prop="alarmTypePO.desc"
 							label="告警描述"
 							width="119"
 							sortable
-							:show-overflow-tooltip="true"
-						></el-table-column>
+							:show-overflow-tooltip="true"></el-table-column>
 						<el-table-column
 							label="任务类型"
 							width="110"
 							sortable
-							prop="flowStatus"
-						>
+							prop="flowStatus">
 							<template #default="scope">
 								<el-tag
 									>{{ scope.row.taskSession }}--{{ scope.row.taskDesc }}
@@ -107,15 +99,13 @@
 							prop="alarmTime"
 							label="告警时间"
 							sortable
-							:show-overflow-tooltip="true"
-						></el-table-column>
+							:show-overflow-tooltip="true"></el-table-column>
 						<el-table-column
 							width="160"
 							prop="createTime"
 							label="入库时间"
 							sortable
-							:show-overflow-tooltip="true"
-						></el-table-column>
+							:show-overflow-tooltip="true"></el-table-column>
 						<el-table-column label="操作" width="316" align="center">
 							<template #default="scope">
 								<el-button text :icon="Edit" @click="onOpenDialog(scope.row)">
@@ -140,8 +130,7 @@
 						:page-sizes="[100, 200, 300, 400]"
 						:page-size="table_module.query.pageSize"
 						:total="table_module.pageTotal"
-						@current-change="onPageChange"
-					>
+						@current-change="onPageChange">
 					</el-pagination>
 				</div>
 			</el-footer>
@@ -152,8 +141,7 @@
 			title="详细信息"
 			v-model="form.dialogVisible"
 			style="width: 80%; height: 76%"
-			@keydown.ctrl="keyDown"
-		>
+			@keydown.ctrl="keyDown">
 			<details-info :data="form.data"></details-info>
 			<template #footer>
 				<span class="dialog-footer">
@@ -167,8 +155,7 @@
 			title="详细信息"
 			v-model="form2.dialogVisible"
 			style="width: 98%; height: 90%"
-			@keydown.ctrl="keyDown"
-		>
+			@keydown.ctrl="keyDown">
 			<el-row>
 				<el-col :span="12">
 					<img-video :viewOption="form2.data"></img-video>
@@ -297,17 +284,21 @@
 	};
 	// 获取表格数据
 	const getData = () => {
-		showLoading()
+		showLoading();
 		getQuery();
-		api.list_svc(table_module.query).then((res) => {
-			if (res.code == 0) {
-				table_module.data = res.data;
-				table_module.pageTotal = res.total || -1;
-			} else {
-				ElMessage.error(res.message);
-			}
-			closeLoading()
-		});
+		api
+			.list_svc(table_module.query)
+			.then((res) => {
+				if (res.code == 0) {
+					table_module.data = res.data;
+					table_module.pageTotal = res.total || -1;
+				} else {
+					ElMessage.error(res.message);
+				}
+			})
+			.finally(() => {
+				closeLoading();
+			});
 	};
 
 	const getAlarmCategory = async () => {
@@ -459,7 +450,7 @@
 </script>
 <style scoped lang="less">
 	@import '../assets/css/tables.css';
-	
+
 	.view .title {
 		color: var(--el-text-color-regular);
 		font-size: 18px;

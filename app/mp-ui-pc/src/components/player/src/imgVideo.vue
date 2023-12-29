@@ -1,59 +1,40 @@
 <template>
-	<el-row>
+	<el-row class="Image">
 		<!--显示大图-->
-		<el-col :span="24" style="height: 25rem">
+		<el-col :span="24" >
 			<component
 				:key="currentName"
 				:is="compoents[currentName]"
 				:option="current_options"></component>
 		</el-col>
+	</el-row>
+	<el-row class="NavImage">
 		<!--导航图-->
 		<el-col :span="24">
-      <ul>
-        
-      </ul>
-			<el-carousel   trigger="click" :autoplay="false" direction="vertical" style="padding: 5px 0;">
-				<el-carousel-item
-					@click="onShow(item, index)"
-					:key="index"
-					v-for="(item, index) in imageOptions">
-					<a
-						><el-image :key="index" :src="item.poster" :title="item.name" />
-					</a>
-				</el-carousel-item>
-				<el-carousel-item class="item"
-					@click="onShow(item, index)"
-					:key="index"
-					v-for="(item, index) in videoOptions"
-					style="position: relative">
-					<a>
-						<el-image :src="item.poster" :title="item.name" /><CaretRight />
-					</a>
-				</el-carousel-item>
-			</el-carousel>
-			<!--
-			<div style="overflow: auto">
-				<ul style="height: 5rem">
-					<li
-						@click="onShow(item, index)"
-						:key="index"
-						v-for="(item, index) in imageOptions">
-						<a
-							><el-image :key="index" :src="item.poster" :title="item.name" />
-						</a>
-					</li>
-					<li
-						@click="onShow(item, index)"
-						:key="index"
-						v-for="(item, index) in videoOptions"
-						style="position: relative">
-						<a>
-							<el-image :src="item.poster" :title="item.name" /><CaretRight />
-						</a>
-					</li>
-				</ul>
+			<div class="imag_nav_container">
+				<el-scrollbar>
+					<ul>
+						<li
+							@click="onShow(item, index)"
+							:key="index"
+							v-for="(item, index) in imageOptions">
+							<a
+								><el-image :key="index" :src="item.poster" :title="item.name" />
+							</a>
+						</li>
+
+						<li
+							@click="onShow(item, index)"
+							:key="index"
+							v-for="(item, index) in videoOptions"
+							style="position: relative">
+							<a>
+								<el-image :src="item.poster" :title="item.name" /><CaretRight />
+							</a>
+						</li>
+					</ul>
+				</el-scrollbar>
 			</div>
-      -->
 		</el-col>
 	</el-row>
 </template>
@@ -123,48 +104,39 @@
 	});
 </script>
 <style scoped lang="less">
-	::v-deep .el-carousel__container {
-    padding: 5px; height: 110px;
-		.el-carousel__item.item {
-			//width: 140px; min-height: 100px;
-			position: relative; float: left;	width: 200px;transform: none; border: 1px solid #ccc; 
-			a {
-				.el-image {
-					width: 200px;
-					height: 106px;
-				}
-				svg {
-					position: absolute;
-					left: 40%;
-					top: 38%;
-					width: 20%;
-				}
-			}
+	.Image {
+		.el-col {
+			height: 25rem; //rem 相对与 html 的 font-size计算
+						   //em 相对与 父元素的  font-size计算
+							//1vh=  1/100浏览器高度
+							//1vw
 		}
 	}
+	.imag_nav_container {
+		overflow: auto;
+		white-space: nowrap;
+	}
+	ul li {
+		width: 100%;
 
-	ul {
-		width: 833px;
-		li {
-			cursor: pointer;
-			border: 1px #ccc;
-			overflow: hidden;
-			list-style: none;
-			float: left;
-			min-width: 100px;
-			text-align: center;
-			margin: 4px;
-			a {
-				.el-image {
-					width: 200px;
-					height: 106px;
-				}
-				svg {
-					position: absolute;
-					left: 40%;
-					top: 38%;
-					width: 20%;
-				}
+		cursor: pointer;
+		overflow: hidden;
+		z-index: calc(var(--el-index-normal) - 1);
+		display: inline-block; //块级元素 超出盒子会换行
+		width: 200px;
+		transform: none;
+		border: 1px solid #ccc;
+		padding: 1px;
+		a {
+			.el-image {
+				width: 100%;
+				height: 106px;
+			}
+			svg {
+				position: absolute;
+				left: 40%;
+				top: 35%;
+				width: 20%;
 			}
 		}
 	}

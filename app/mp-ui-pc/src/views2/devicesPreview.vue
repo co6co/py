@@ -1,14 +1,20 @@
 <template>
-	<div>
-		<nav-bar left-text="返回" left-arrow :title="title" @click="onToList()" />
-		<van-skeleton title avatar :row="3" :loading="loading">
+	<el-container>
+		<el-header>
+			<nav-bar left-text="返回" left-arrow :title="title" @click="onToList()"
+		/></el-header>
+
+		<el-main class="ui">
 			<stream :sources="player.sources"></stream>
-		</van-skeleton>
-		<notice-bar left-icon="volume-o" :text="noticeMessage" />
-		<div style="text-align: center">
-			<ptz @ptz="OnPtz"></ptz>
-		</div>
-	</div>
+		</el-main>
+		<el-footer>
+			<notice-bar left-icon="volume-o" :text="noticeMessage" />
+			<div class="ptzContent">
+				<ptz @ptz="OnPtz"></ptz>
+			</div>
+		</el-footer>
+	</el-container>
+	<div></div>
 </template>
 <script setup lang="ts" name="basetable">
 	import {
@@ -52,9 +58,9 @@
 	};
 	const title = ref();
 	onMounted(() => {
-		const rowData = <d.dataItem>dataStore.getState();  
-		console.info("123",rowData);
-        if (!rowData.id) console.warn("数据为加载"),router.back();
+		const rowData = <d.dataItem>dataStore.getState();
+		console.info('123', rowData);
+		if (!rowData.id) console.warn('数据为加载'), router.back();
 		loadData(rowData);
 		loading.value = false;
 	});
@@ -66,11 +72,11 @@
 	interface player_sources {
 		sources: Array<stream_source>;
 	}
-	const player = reactive<player_sources>({ sources: [] }); 
-	const loadData = (item: d.dataItem) => { 
+	const player = reactive<player_sources>({ sources: [] });
+	const loadData = (item: d.dataItem) => {
 		title.value = item.name + '预览';
 		preview_module.currentItem = item;
-		if (item.streams) player.sources = item.streams; 
+		if (item.streams) player.sources = item.streams;
 	};
 	/** ptz */
 	const { startMqtt, Ref_Mqtt } = useMqtt();
@@ -115,6 +121,49 @@
 	//**end 打标签 */
 </script>
 <style lang="less">
+	@import '../assets/css/tables.css';
+	.el-header {
+		height: 5vh;
+	}
+	#app .content .ui .el-container {
+		height: 100%;
+	}
+	.el-main.ui {
+		overflow: auto;
+		height: 60vh;
+		.el-header,
+		.el-main {
+			padding: 0;
+			margin: 0;
+			height: 27vh;
+		}
+		.el-header {
+			height: 65vh;
+		}
+		::v-deep .Image {
+			.el-col {
+				height: 20rem;
+			}
+		}
+		::v-deep .NavImage {
+			height: 10rem;
+		}
+	}
+	.el-footer {
+		height: 30vh;
+		position: relative;
+		.ptzContent {
+			width: 156px;
+			height: 156px;
+			position: absolute;
+			top: 0;
+			left: 0;
+			right: 0;
+			bottom: 0;
+			margin: auto;
+		}
+	}
+
 	.el-link {
 		margin-right: 8px;
 	}

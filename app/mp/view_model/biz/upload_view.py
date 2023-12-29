@@ -191,7 +191,8 @@ class Alarm_Upload_View(Upload_view):
                 await self.saveResourceToDb(opt,device_id,resource_category.image,p1,sub_category=resource_image_sub_category.raw.val,uid= u1)
                 await self.saveResourceToDb(opt,device_id,resource_category.image,p2,sub_category=resource_image_sub_category.marked.val,uid=u2)
                 await opt.commit()
-                po=p.to_po()  
+                po=p.to_po() 
+                po.deviceId=device_id
                 result= await opt.exist(bizAlarmPO.uuid==po.uuid) 
                 if result: 
                     res:m.Response=m.Response.success(message=f"数据“{po.uuid}”重复上传")

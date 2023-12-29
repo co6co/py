@@ -3,9 +3,27 @@ from co6co_db_ext.po import BasePO ,metadata,UserTimeStampedModelPO,TimeStampedM
 from sqlalchemy import func,INTEGER, Integer,UUID,  INTEGER,BigInteger, Column, ForeignKey, Text, String,DateTime
 from sqlalchemy.orm import Relationship 
 from sqlalchemy.schema import DDL 
-import uuid
+import uuid 
 
 
+class bizSitePo(TimeStampedModelPO):
+    """
+    站点信息
+    一个站点由一个box 和若干个相机组成，一个 4G 路由器，组成 
+    """
+    __tablename__ = "biz_site" 
+    id = Column("id",Integer,comment="主键",autoincrement=True, primary_key=True)
+    name= Column("name",String(64),nullable=False, comment="站点名称")
+    bozId = Column("box_id",ForeignKey(f"biz_dev_box.id" ),unique=True, comment="盒子ID")
+    routerId = Column("router_id",Integer,comment="路由器ID")
+    camera1Id = Column("camera1_Id",Integer,comment="眼睛1")
+    camera2Id = Column("camera2_Id",Integer,comment="眼睛2")
+    camera3Id = Column("camera3_Id",Integer,comment="眼睛3")
+    camera4Id = Column("camera4_Id",Integer,comment="眼睛4")
+    camera5Id = Column("camera5_Id",Integer,comment="眼睛5")
+    boxPO =Relationship("bizBoxPO",   back_populates="sitePO")
+
+    
 class bizDevicePo(TimeStampedModelPO):
     """
     设备
@@ -17,6 +35,7 @@ class bizDevicePo(TimeStampedModelPO):
     innerIp=Column("inner_ip",String(64),comment="内部IP")
     ip=Column("ip",String(64),comment="外网IP")
     name=Column("name",String(64),comment="设备名称") 
+    
     resourcesPO=Relationship("bizResourcePO",back_populates="devicePO",uselist=True,passive_deletes=True)
     boxPO=Relationship("bizBoxPO",uselist=False, back_populates="devicePo")
     cameraPO=Relationship("bizCameraPO",uselist=False, back_populates="devicePo")
@@ -43,6 +62,10 @@ class bizBoxPO(UserTimeStampedModelPO):
     channel2_sip= Column("channel2_sip",String(64),comment="通道2 sip 地址") 
     channel3_sip= Column("channel3_sip",String(64),comment="通道3 sip 地址") 
     devicePo=Relationship("bizDevicePo",back_populates="boxPO")  
+
+    sitePO =Relationship("bizSitePo",uselist=False,  back_populates="boxPO")
+    alarmPO=Relationship("bizAlarmPO",back_populates="boxPO" )
+    
 class bizCameraPO(UserTimeStampedModelPO):
     """
     摄像头设备
@@ -57,6 +80,13 @@ class bizCameraPO(UserTimeStampedModelPO):
     channel1_sip= Column("channel1_sip",String(64),comment="通道1 sip 地址") 
     channel2_sip= Column("channel2_sip",String(64),comment="通道2 sip 地址") 
     channel3_sip= Column("channel3_sip",String(64),comment="通道3 sip 地址") 
+    channel4_sip= Column("channel4_sip",String(64),comment="通道4 sip 地址") 
+    channel5_sip= Column("channel5_sip",String(64),comment="通道5 sip 地址") 
+    channel6_sip= Column("channel6_sip",String(64),comment="通道6 sip 地址") 
+    channel7_sip= Column("channel7_sip",String(64),comment="通道7 sip 地址") 
+    channel8_sip= Column("channel8_sip",String(64),comment="通道8 sip 地址") 
+    channel9_sip= Column("channel9_sip",String(64),comment="通道9 sip 地址") 
+    channel10_sip= Column("channel10_sip",String(64),comment="通道10 sip 地址") 
     devicePo=Relationship("bizDevicePo",back_populates="cameraPO")  
     def __repr__(self) -> str:
         return f"{self.__class__} id:{self.id},streams:{self.streams},createTime:{self.createTime}"
@@ -123,6 +153,7 @@ class bizAlarmTypePO(BasePO):
 class bizAlarmPO(BasePO):
     __tablename__ = "biz_alarm"
     id = Column("id",BigInteger,comment="主键",autoincrement=True, primary_key=True)
+    deviceId = Column("device_id",ForeignKey(f"{bizBoxPO.__tablename__}.{bizBoxPO.id.name}"),comment="产生记录的设备" )
     uuid = Column("uuid",String(64),unique=True,comment= "全局ID盒子上传")
     alarmType= Column("alarm_type",ForeignKey(f"{bizAlarmTypePO.__tablename__}.{bizAlarmTypePO.alarmType.name}",ondelete="CASCADE"))
    
@@ -139,7 +170,8 @@ class bizAlarmPO(BasePO):
     createTime=Column("create_time",DateTime , server_default=func.now() ) 
 
     alarmTypePO=Relationship(bizAlarmTypePO,back_populates="alarmPOs") 
-    alarmAttachPO=Relationship("bizAlarmAttachPO",back_populates="alarmPO",uselist=False,passive_deletes=True)
+    alarmAttachPO=Relationship("bizAlarmAttachPO",back_populates="alarmPO",uselist=False,passive_deletes=True) 
+    boxPO=Relationship("bizBoxPO",back_populates="alarmPO",uselist=False )
 
 class bizAlarmAttachPO(BasePO):
     __tablename__ = "biz_alarm_attach" 

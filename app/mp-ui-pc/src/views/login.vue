@@ -19,8 +19,7 @@
 							:min-scale="0.2"
 							:preview-src-list="imageList.urls"
 							:initial-index="4"
-							fit="cover"
-						/>
+							fit="cover" />
 					</span>
 				</div>
 			</el-header>
@@ -38,8 +37,7 @@
 							:rules="rules"
 							ref="login"
 							label-width="0px"
-							class="ms-content"
-						>
+							class="ms-content">
 							<el-form-item prop="username">
 								<el-input v-model="param.username" placeholder="用户名">
 									<template #prepend>
@@ -54,8 +52,7 @@
 									type="password"
 									placeholder="密 码"
 									v-model="param.password"
-									@keyup.enter="submitForm(login)"
-								>
+									@keyup.enter="submitForm(login)">
 									<template #prepend>
 										<el-icon> <Lock /> </el-icon>
 									</template>
@@ -97,9 +94,12 @@
 								{{ sysInfo.beian?.serialNumberName }}</a
 							>
 						</span>
-						
+
 						<span>版权所有(C)2023&nbsp;{{ sysInfo.company }} </span>
-						<span> 技术支持： &nbsp;<a href="#" target="_blank" >江苏惠纬讯信息科技有限公司</a>
+						<span>
+							技术支持： &nbsp;<a href="#" target="_blank"
+								>江苏惠纬讯信息科技有限公司</a
+							>
 						</span>
 					</em>
 				</div>
@@ -189,13 +189,13 @@
 		if (!formEl) return;
 		formEl.validate((valid: boolean) => {
 			if (valid) {
-				showLoading()
+				showLoading();
 				login_svc({ userName: param.username, password: param.password })
 					.then((res) => {
 						message.value = res.message;
-						if (res.code == 0) { 
+						if (res.code == 0) {
 							setToken(res.data.token, res.data.expireSeconds);
-							storeage.set('username', param.username, res.data.expireSeconds); 
+							storeage.set('username', param.username, res.data.expireSeconds);
 							const keys =
 								permiss.defaultList[
 									param.username == 'admin' ? 'admin' : 'user'
@@ -215,9 +215,10 @@
 					.catch((err) => {
 						message.value = err.message || '请求出错';
 						ElMessage.error(err.message);
-					}).finally(()=>{
-						closeLoading()
 					})
+					.finally(() => {
+						closeLoading();
+					});
 			} else {
 				message.value = '请输入你的用户名和密码！';
 				return false;
@@ -230,9 +231,11 @@
 </script>
 
 <style scoped lang="less">
-	@footer-color:#000;// rgba(255, 255, 255, 0.2); 
-	@footer-bgcolor:#fff; // #464444; 
-	.el-container{height: 100vh}
+	@footer-color: #000; // rgba(255, 255, 255, 0.2);
+	@footer-bgcolor: #fff; // #464444;
+	.el-container {
+		height: 100vh;
+	}
 	.el-header {
 		height: 15vh;
 		.content {
@@ -299,7 +302,7 @@
 				margin-right: 50px;
 				h2 {
 					font-size: 32px;
-					color:lighten( @footer-color,20%);
+					color: lighten(@footer-color, 20%);
 				}
 			}
 
@@ -310,17 +313,17 @@
 				font-style: normal;
 				font-weight: normal;
 				line-height: 1;
-				color: @footer-color;;
+				color: @footer-color;
 				span {
 					display: block;
 					line-height: 30px;
 					a {
-						color: @footer-color;;
+						color: @footer-color;
 					}
 				}
 			}
 		}
-	} 
+	}
 	.ms-title {
 		width: 100%;
 		line-height: 50px;

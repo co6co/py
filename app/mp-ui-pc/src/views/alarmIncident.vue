@@ -48,12 +48,11 @@
 				</el-row>
 			</el-header>
 
-			<el-main>
-				<el-scrollbar>
+			<el-main> 
 					<!--主内容-->
 					<el-row>
-						<el-col :span="12">
-							<div style="height: 100%; overflow: auto">
+						<el-col :span="12" style="height:100%; overflow: auto">
+							<el-scrollbar>
 								<el-table
 									highlight-current-row
 									@sort-change="onColChange"
@@ -76,14 +75,14 @@
 										</template>
 									</el-table-column>
 									<el-table-column
-										prop="alarmTypePO.desc"
+										prop="siteName"
 										label="安全员"
 										width="119"
 										sortable
 										:show-overflow-tooltip="true"></el-table-column>
 
 									<el-table-column
-										prop="alarmTypePO.desc"
+										prop="alarmTypeDesc"
 										label="告警类型"
 										width="119"
 										sortable
@@ -96,15 +95,21 @@
 										sortable
 										:show-overflow-tooltip="true"></el-table-column>
 								</el-table>
-							</div>
+							</el-scrollbar>
 						</el-col>
-						<el-col :span="12" style="position: relative;">
-							<div style="padding: 5px; overflow: hidden; ">
-								<img-video    :viewOption="form2.data"></img-video>
+						<el-col :span="12" style="position: relative">
+							<div
+								style="
+									width: 100%;
+									overflow: hidden;
+									position: absolute;
+									left: 0; 
+								">
+								<img-video :viewOption="form2.data"></img-video>
 							</div>
 						</el-col>
 					</el-row>
-				</el-scrollbar>
+				 
 			</el-main>
 
 			<el-footer>
@@ -275,15 +280,19 @@
 	const getData = () => {
 		showLoading();
 		getQuery();
-		api.list_svc(table_module.query).then((res) => {
-			if (res.code == 0) {
-				table_module.data = res.data;
-				table_module.pageTotal = res.total || -1;
-			} else {
-				ElMessage.error(res.message);
-			}
-			closeLoading();
-		});
+		api
+			.list_svc(table_module.query)
+			.then((res) => {
+				if (res.code == 0) {
+					table_module.data = res.data;
+					table_module.pageTotal = res.total || -1;
+				} else {
+					ElMessage.error(res.message);
+				}
+			})
+			.finally(() => {
+				closeLoading();
+			});
 	};
 
 	const getAlarmCategory = async () => {
@@ -436,7 +445,9 @@
 </script>
 <style scoped lang="less">
 	@import '../assets/css/tables.css';
-
+	.el-row {
+		height: 100%;
+	}
 	.view .title {
 		color: var(--el-text-color-regular);
 		font-size: 18px;

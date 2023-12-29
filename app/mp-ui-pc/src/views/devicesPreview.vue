@@ -23,11 +23,35 @@
 								highlight-current
 								@node-click="onNodeCheck"
 								ref="tree"
+								:icon="VideoCamera"
 								class="filter-tree"
 								:data="tree_module.data"
 								:props="tree_module.defaultProps"
 								default-expand-all
-								:filter-node-method="tree_module.filterNode" />
+								:filter-node-method="tree_module.filterNode">
+								<template #default="scope">
+									<div class="custom-node">
+										<el-icon style="padding-right: 5px;"><VideoCamera /></el-icon>
+										<!--
+										<i
+											class="tree-icon"
+											:class="{
+												'el-icon-caret-right': !scope.node.expanded,
+												'el-icon-caret-bottom': scope.node.expanded,
+												'el-icon-wlj-yuandian': scope.data.is_leaf === 1,
+											}"
+											:style="{
+												color:
+													scope.data.is_leaf === 1
+														? 'rgb(54,229,150)'
+														: '#409eff',
+											}" />
+											-->
+										<span>{{ scope.node.label }}</span>
+									</div>
+								</template>
+							</el-tree>
+
 							<el-empty v-else></el-empty>
 						</div>
 						<!--footer-->
@@ -201,6 +225,7 @@
 		MoreFilled,
 		Download,
 		CloseBold,
+		VideoCamera,
 	} from '@element-plus/icons-vue';
 	import {
 		OneScreen,
@@ -240,7 +265,7 @@
 		query: {
 			name: '',
 			pageIndex: 1,
-			pageSize: 10,
+			pageSize: 20,
 			order: 'asc',
 			orderBy: '',
 		},
@@ -265,16 +290,20 @@
 	});
 	// 获取表格数据
 	const getData = () => {
-		showLoading()
-		api.list_svc(tree_module.query).then((res) => {
-			if (res.code == 0) {
-				tree_module.data = res.data;
-				tree_module.total = res.total || -1;
-			} else {
-				ElMessage.error(res.message);
-			}
-			closeLoading()
-		});
+		showLoading();
+		api
+			.list_svc(tree_module.query)
+			.then((res) => {
+				if (res.code == 0) {
+					tree_module.data = res.data;
+					tree_module.total = res.total || -1;
+				} else {
+					ElMessage.error(res.message);
+				}
+			})
+			.finally(() => {
+				closeLoading();
+			});
 	};
 	const hasData = computed(() => tree_module.data.length > 0);
 	getData();

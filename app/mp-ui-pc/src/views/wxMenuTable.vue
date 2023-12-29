@@ -2,7 +2,7 @@
 	<div class="container-layout">
 		<el-container>
 			<el-header>
-				<div class="handle-box"> 
+				<div class="handle-box">
 					<el-input
 						v-model="query.name"
 						placeholder="菜单名称"
@@ -17,7 +17,7 @@
 			</el-header>
 			<el-main>
 				<el-scrollbar>
-					<el-table 
+					<el-table
 						highlight-current-row
 						@sort-change="onColChange"
 						:data="table_module.data"
@@ -209,14 +209,14 @@
 	const config = wx_config_store();
 	const pageTotal = ref(0);
 
-	interface table_module { 
+	interface table_module {
 		query: Query;
 		data: TableRow[];
 		currentRow?: TableRow;
 		pageTotal: number;
 	}
 
-	const table_module = reactive<table_module>({ 
+	const table_module = reactive<table_module>({
 		query: {
 			name: '',
 			pageIndex: 1,
@@ -231,15 +231,18 @@
 	const getData = async () => {
 		showLoading();
 		await config.refesh();
-		list_menu_svc(query).then((res) => {
-			if (res.code == 0) {
-				table_module.data = res.data;
-				table_module.pageTotal = res.total || -1;
-			} else {
-				ElMessage.error(res.message);
-			}
-			closeLoading();
-		});
+		list_menu_svc(query)
+			.then((res) => {
+				if (res.code == 0) {
+					table_module.data = res.data;
+					table_module.pageTotal = res.total || -1;
+				} else {
+					ElMessage.error(res.message);
+				}
+			})
+			.finally(() => {
+				closeLoading();
+			});
 	};
 	getData();
 

@@ -53,8 +53,9 @@ class Alarms_View(AuthMethodView):
             opt=DbOperations(session)  
             #result=await opt._get_list(filterItems.list_select,True)  
             execute= await session.execute(filterItems.list_select)
-            result=execute.scalars().all()
-            result=opt.remove_db_instance_state(result)
+            result=execute.scalars().all() 
+            #result=opt.remove_db_instance_state(result)
+            result= await opt._get_tuple(filterItems.list_select)
             #result=[dict(a)  for a in  result]    
             pageList=Page_Result.success(result,total=total)  
             await session.commit() 

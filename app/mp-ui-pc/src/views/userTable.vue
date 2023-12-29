@@ -6,8 +6,7 @@
 					<el-input
 						v-model="query.name"
 						placeholder="用户名称"
-						class="handle-input mr10"
-					></el-input>
+						class="handle-input mr10"></el-input>
 					<el-button type="primary" :icon="Search" @click="onSearch"
 						>搜索</el-button
 					>
@@ -23,8 +22,7 @@
 						border
 						class="table"
 						ref="multipleTable"
-						header-cell-class-name="table-header"
-					>
+						header-cell-class-name="table-header">
 						<el-table-column label="序号" width="55" align="center">
 							<template #default="scope"> {{ scope.$index }} </template>
 						</el-table-column>
@@ -32,8 +30,7 @@
 							prop="id"
 							label="ID"
 							width="55"
-							align="center"
-						></el-table-column>
+							align="center"></el-table-column>
 						<el-table-column prop="userName" label="用户名"></el-table-column>
 						<el-table-column label="用户组" prop="groupName"> </el-table-column>
 						<el-table-column label="状态" align="center">
@@ -46,16 +43,14 @@
 
 						<el-table-column
 							prop="createTime"
-							label="注册时间"
-						></el-table-column>
+							label="注册时间"></el-table-column>
 						<el-table-column label="操作" width="316" align="center">
 							<template #default="scope">
 								<el-button
 									text
 									:icon="Edit"
 									@click="onOpenEditDialog(scope.$index, scope.row)"
-									v-permiss="15"
-								>
+									v-permiss="15">
 									编辑
 								</el-button>
 								<el-button
@@ -63,16 +58,14 @@
 									:icon="Delete"
 									class="red"
 									@click="onDelete(scope.$index, scope.row)"
-									v-permiss="16"
-								>
+									v-permiss="16">
 									删除
 								</el-button>
 								<el-button
 									text
 									:icon="Compass"
 									@click="onOpenResetDialog(scope.$index, scope.row)"
-									v-permiss="15"
-								>
+									v-permiss="15">
 									重置密码
 								</el-button>
 							</template>
@@ -88,8 +81,7 @@
 						:current-page="query.pageIndex"
 						:page-size="query.pageSize"
 						:total="pageTotal"
-						@current-change="handlePageChange"
-					></el-pagination>
+						@current-change="handlePageChange"></el-pagination>
 				</div>
 			</el-footer>
 		</el-container>
@@ -110,8 +102,7 @@
 							v-for="item in form_attach_data.roleList"
 							:key="item.key"
 							:label="item.label"
-							:value="item.value"
-						/>
+							:value="item.value" />
 					</el-select>
 				</el-form-item>
 				<el-form-item label="用户状态" prop="state">
@@ -120,8 +111,7 @@
 							v-for="item in form_attach_data.stateList"
 							:key="item.key"
 							:label="item.label"
-							:value="item.value"
-						/>
+							:value="item.value" />
 					</el-select>
 				</el-form-item>
 			</el-form>
@@ -147,8 +137,7 @@
 							v-for="item in form_attach_data.roleList"
 							:key="item.key"
 							:label="item.label"
-							:value="item.value"
-						/>
+							:value="item.value" />
 					</el-select>
 				</el-form-item>
 				<el-form-item label="用户状态">
@@ -157,8 +146,7 @@
 							v-for="item in form_attach_data.stateList"
 							:key="item.key"
 							:label="item.label"
-							:value="item.value"
-						/>
+							:value="item.value" />
 					</el-select>
 				</el-form-item>
 			</el-form>
@@ -179,8 +167,7 @@
 					<el-input
 						v-model="resetPwdFrom.password"
 						type="password"
-						show-password
-					>
+						show-password>
 					</el-input>
 				</el-form-item>
 			</el-form>
@@ -230,16 +217,19 @@
 	const pageTotal = ref(0);
 	// 获取表格数据
 	const getData = () => {
-		showLoading()
-		queryList_svc(query).then((res) => {
-			if (res.code == 0) {
-				tableData.value = res.data;
-				pageTotal.value = res.total || -1;
-			} else {
-				ElMessage.error(res.message);
-			}
-		});
-		closeLoading()
+		showLoading();
+		queryList_svc(query)
+			.then((res) => {
+				if (res.code == 0) {
+					tableData.value = res.data;
+					pageTotal.value = res.total || -1;
+				} else {
+					ElMessage.error(res.message);
+				}
+			})
+			.finally(() => {
+				closeLoading();
+			});
 	};
 	getData();
 
