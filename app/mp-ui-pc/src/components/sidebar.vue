@@ -104,7 +104,7 @@
 		{
 			icon: 'CameraFilled',
 			index: '/deviceMgr',
-			title: '设备管理',
+			title: '站点管理',
 			permiss: '2',
 		},
 

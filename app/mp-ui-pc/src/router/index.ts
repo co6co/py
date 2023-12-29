@@ -65,7 +65,7 @@ const routes: RouteRecordRaw[] = [
 				path: '/deviceMgr',
 				name: 'deviceMgr',
 				meta: {
-					title: '设备管理',
+					title: '站点管理',
 					permiss: '2',
 				},
 				component: () => import('../views/deviceMgr.vue'),

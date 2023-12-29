@@ -78,8 +78,8 @@
 									<div
 										class="video-list"
 										:class="'video-split-' + playerList.splitNum">
-										<template v-for="i in playerList.splitNum">
-											<div
+										<template v-for="i  in playerList.splitNum"  :key="`video-item-${i}`">
+											<div 
 												class="video-item splitNum"
 												@click="onPlayerClick(i)"
 												:class="{ active: i == playerList.currentWin }">
@@ -321,7 +321,7 @@
 		players: Array<player>;
 	}
 	const playerList = reactive<PlayerList>({
-		splitNum: 4,
+		splitNum: 1,
 		isFullScreen: false,
 		currentWin: 1,
 		currentStreams: [],

@@ -76,7 +76,7 @@
 									</el-table-column>
 									<el-table-column
 										prop="siteName"
-										label="安全员"
+										label="站点名"
 										width="119"
 										sortable
 										:show-overflow-tooltip="true"></el-table-column>
