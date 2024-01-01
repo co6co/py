@@ -9,3 +9,7 @@ DbOperations和DbPagedOperations 以方便业务使用；
 0.0.1 初始版本
 0.0.2 修复了部分Bug
 0.0.3 封装JOIN 查询
+
+
+https://yifei.me/note/2652
+https://www.osgeo.cn/sqlalchemy/
