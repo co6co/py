@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>View Video</title>
+</head>
+<body>
+<div>
+    <img id="video" src="" style="background: red;width: 300px; height: 250px;" />
+</div> 
+<script src="https://code.jquery.com/jquery-3.3.1.js" ></script>
+<script>
+        let wss_url = "ws://127.0.0.1:8899/";
+        let ws = new WebSocket(wss_url);
+        ws.onopen = function(evt) {
+            console.log(">>> ws.onopen.");
+            //ws.send("Test");
+        };
+
+        ws.onmessage = function(evt) {  
+            //get PromiseResult from Promise
+			console.log( evt.data)
+            var base64 = evt.data.text().then(
+                res => { 
+					console.log(res); 
+					$("#video").attr("src",res);
+                }
+            )
+        };
+
+        ws.onclose = function(evt) {
+            console.log(">>> ws.onclose.");
+        };
+</script>
+</body>
+</html>

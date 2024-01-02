@@ -1,0 +1,25 @@
+<html>
+　　<head>
+　　　　<title>wss协议视频流展示</title>
+　　</head>
+　　<!-- 网页视频播放器 -->
+　　<script src="http://cdn.jsdelivr.net/npm/xgplayer/browser/index.js" charset="utf-8"></script>
+　　<!-- 网页视频播放器flv格式加载相关js（ios系统暂不支持该插件） -->
+　　<script src="http://cdn.jsdelivr.net/npm/xgplayer-flv.js/browser/index.js" charset="utf-8"></script>
+<body>
+　　<!-- 视频放置区域 -->
+　　<div id="wssFlvVideo"></div>
+</body>
+　　<script type="text/javascript">
+　　　　<!-- flv视频播放器插件加载，配置信息 -->
+　　　　new window.FlvJsPlayer({
+        　　id: 'wssFlvVideo',
+        　　isLive: false,
+        　　playsinline: true,
+        　　url: 'wss://stream.jshwx.com.cn:8441/flv_ws?device=gb34020000000010363001?type=rt.flv',
+        　　autoplay: true,
+        　　height: window.innerHeight,
+        　　width: window.innerWidth
+    　　});
+　　</script>
+</html>
