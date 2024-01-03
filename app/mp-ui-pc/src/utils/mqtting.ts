@@ -2,8 +2,6 @@
 //const mqtt = require('mqtt/dist/mqtt'); //#CommonJS 模块中  tsconfig.json 文件中可以设置 module 选项来
 import type { MqttClient, OnMessageCallback } from 'mqtt'; 
 import { ref, onUnmounted } from 'vue';
- 
-
 
 const mqqt_server=import.meta.env.VITE_mqtt_server
 class MQTTing {

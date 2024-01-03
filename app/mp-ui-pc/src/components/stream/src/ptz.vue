@@ -29,7 +29,8 @@
 			class="ptz-control"
 			@mousedown="onOperater('center', 0)"
 			@mouseup="onOperater('center', 1)"
-		></div>
+		><el-icon><Microphone /></el-icon>
+	</div>
 		<div class="ptz-btns">
 			<div class="ptz-btn">
 				<div
@@ -129,11 +130,7 @@
 		emits('ptz', name, type === 0 ? 'starting' : 'stop');
 	};
 </script>
-<style scoped lang="less">
-	.active {
-		background: #706161;
-	}
-
+<style scoped lang="less"> 
 	@normal-color: #fff;
 	@active-color: #706161;
 
@@ -200,8 +197,14 @@
 		background: @normal-color;
 		border-radius: 50%;
 		transition: left 0.3s, top 0.3s;
-		&:hover {
+		&:hover ,&.active{
 			background: @active-color;
+			.el-icon{color: darken( @normal-color,10%);  ;}
+		}
+		
+		.el-icon{
+			position: absolute;
+			left:18px;top:18px; 
 		}
 	}
 	.ptz-control.ptz-control-left {
@@ -352,7 +355,7 @@
 		top: 15px;
 		border: 7px solid transparent;
 		border-bottom: 10px solid @normal-color;
-		&:hover {
+		&:hover, &.active{
 			border-bottom: 10px solid @active-color;
 		}
 	}
@@ -362,7 +365,7 @@
 		right: 15px;
 		border: 7px solid transparent;
 		border-left: 10px solid @normal-color;
-		&:hover {
+		&:hover , &.active{
 			border-left: 10px solid @active-color;
 		}
 	}
@@ -371,7 +374,7 @@
 		top: 71px;
 		border: 7px solid transparent;
 		border-right: 10px solid @normal-color;
-		&:hover {
+		&:hover, &.active {
 			border-right: 10px solid @active-color;
 		}
 	}
@@ -380,7 +383,7 @@
 		bottom: 15px;
 		border: 7px solid transparent;
 		border-top: 10px solid @normal-color;
-		&:hover {
+		&:hover , &.active{
 			border-top: 10px solid @active-color;
 		}
 	}
@@ -390,7 +393,7 @@
 		top: 33px;
 		border: 7px solid transparent;
 		border-right: 10px solid @normal-color;
-		&:hover {
+		&:hover , &.active{
 			border-right: 10px solid @active-color;
 		}
 	}
@@ -400,7 +403,7 @@
 		top: 33px;
 		border: 7px solid transparent;
 		border-left: 10px solid @normal-color;
-		&:hover {
+		&:hover , &.active{
 			border-left: 10px solid @active-color;
 		}
 	}
@@ -410,7 +413,7 @@
 		bottom: 33px;
 		border: 7px solid transparent;
 		border-top: 10px solid @normal-color;
-		&:hover {
+		&:hover ,&.active{
 			border-top: 10px solid @active-color;
 		}
 	}
@@ -420,7 +423,7 @@
 		bottom: 33px;
 		border: 7px solid transparent;
 		border-top: 10px solid @normal-color;
-		&:hover {
+		&:hover , &.active{
 			border-top: 10px solid @active-color;
 		}
 	}

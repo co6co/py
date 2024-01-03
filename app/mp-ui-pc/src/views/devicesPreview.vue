@@ -31,7 +31,9 @@
 								:filter-node-method="tree_module.filterNode">
 								<template #default="scope">
 									<div class="custom-node">
-										<el-icon style="padding-right: 5px;"><VideoCamera /></el-icon>
+										<el-icon style="padding-right: 5px"
+											><VideoCamera
+										/></el-icon>
 										<!--
 										<i
 											class="tree-icon"
@@ -78,8 +80,10 @@
 									<div
 										class="video-list"
 										:class="'video-split-' + playerList.splitNum">
-										<template v-for="i  in playerList.splitNum"  :key="`video-item-${i}`">
-											<div 
+										<template
+											v-for="i in playerList.splitNum"
+											:key="`video-item-${i}`">
+											<div
 												class="video-item splitNum"
 												@click="onPlayerClick(i)"
 												:class="{ active: i == playerList.currentWin }">
@@ -185,6 +189,7 @@
 							</el-col>
 							<el-col :span="5">
 								<div class="content">
+									<talker ref="talkerRef" :talk-no="10"></talker>
 									<ptz @ptz="OnPtz"></ptz>
 								</div>
 							</el-col>
@@ -241,6 +246,7 @@
 	import { useMqtt, mqqt_server } from '../utils/mqtting';
 	import * as d from '../store/types/devices';
 	import { showLoading, closeLoading } from '../components/Logining';
+	import { talker } from '../utils/device';
 
 	const deviceName = ref('');
 	const tree = ref(null);
@@ -401,23 +407,13 @@
 		return arr.filter((a) => !res.has(a.UUID) && res.set(a.UUID, 1));
 	}
 
-	const mediaStreamStarting = ref(false);
+	const talkerRef = ref();
 	const OnPtz = (name: p.ptz_name, type: p.ptz_type) => {
 		// 对接
 		if (type == 'starting' && name == 'center') {
-			mediaStreamStarting.value = true;
-			navigator.mediaDevices
-				.getUserMedia({
-					audio: true /*, video:{width:1280, height:720,facingMode: "user" }*/,
-				})
-				.then(function (mediaStream) {
-					if (!mediaStreamStarting.value) {
-						mediaStream.getTracks()[0].stop();
-					}
-				})
-				.catch(function (error) {});
+			talkerRef.value.connect();
 		} else if (type == 'stop' && name == 'center') {
-			mediaStreamStarting.value = false;
+			talkerRef.value.disconnect();
 		} else {
 			console.warn(name, type);
 			let param = {
@@ -428,9 +424,45 @@
 				qos: 0,
 				retain: false,
 			};
+			let ptzcmd = 'A50F010800FA00B7';
+			if (type == 'starting') {
+				switch (name) {
+					case 'up':
+						ptzcmd = 'A50F010800FA00B7';
+						break;
+					case 'down':
+						ptzcmd = 'A50F010400FA00B3';
+						break;
+					case 'right':
+						ptzcmd = 'A50F0101FA0000B0';
+						break;
+					case 'left':
+						ptzcmd = 'A50F0102FA0000B1';
+						break;
+					case 'zoomin':
+						ptzcmd = 'A50F01200000A075';
+						break;
+					case 'zoomout':
+						ptzcmd = 'A50F01100000A065';
+						break;
+				}
+			} else {
+				ptzcmd = 'A50F0100000000B5';
+			}
+
+			let xml = `
+			<?xml version="1.0" encoding="UTF-8"?>
+			<Control>
+				<CmdType>DeviceControl</CmdType>
+				<SN>130</SN>
+				<DeviceID>34020000004009999936</DeviceID>
+				<PTZCmd>${ptzcmd}</PTZCmd>
+			</Control> 
+			`;
+			console.info("发送",xml)
 			Ref_Mqtt.value?.publish(
-				'/edge_app_controller',
-				JSON.stringify(param.payload)
+				'/MANSCDP_cmd',
+				xml
 			);
 		}
 	};

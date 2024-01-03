@@ -30,7 +30,7 @@ async def update_device_poster_task(app):
     while True:
         session:AsyncSession=None
         try: 
-            await asyncio.sleep(60)	# 设定任务休眠时间 
+            await asyncio.sleep(800)	# 设定任务休眠时间 
             session:AsyncSession=service.async_session_factory()
             sanrc=await session.execute(filter.count_select)
             count=sanrc.scalar()

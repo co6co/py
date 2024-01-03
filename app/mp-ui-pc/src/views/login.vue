@@ -216,7 +216,7 @@
 						message.value = err.message || '请求出错';
 						ElMessage.error(err.message);
 					})
-					.finally(() => {
+					.finally(() => { 
 						closeLoading();
 					});
 			} else {

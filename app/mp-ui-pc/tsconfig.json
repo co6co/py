@@ -38,7 +38,7 @@
     "src/**/*.d.ts",
     "src/**/*.vue",
     "src/utils/auth.js"
-  ],
+, "src/assets/js/xtalk-rtc.js"  ],
   "references": [
     {
       "path": "./tsconfig.node.json"

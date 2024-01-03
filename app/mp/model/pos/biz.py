@@ -30,7 +30,7 @@ class bizDevicePo(TimeStampedModelPO):
     """
     __tablename__ = "biz_device" 
     id = Column("id",Integer,comment="主键",autoincrement=True, primary_key=True)
-    uuid = Column("device_uuid",String(64),comment="设备唯一标识，主要与设备通行使用")
+    uuid = Column("device_uuid",String(64),comment="设备唯一标识，主要与设备通行使用") 
     deviceType= Column("device_type",Integer,comment="设备类型")
     innerIp=Column("inner_ip",String(64),comment="内部IP")
     ip=Column("ip",String(64),comment="外网IP")
@@ -40,6 +40,7 @@ class bizDevicePo(TimeStampedModelPO):
     boxPO=Relationship("bizBoxPO",uselist=False, back_populates="devicePo")
     cameraPO=Relationship("bizCameraPO",uselist=False, back_populates="devicePo")
     mqttPO=Relationship("bizMqttPO",uselist=False,  back_populates="devicePo")
+    sipPO=Relationship("bizSipPO",uselist=False,  back_populates="devicePo")
     xttPO=Relationship("bizXssPO",uselist=False,  back_populates="devicePo")
     routerPO=Relationship("bizRouterPO",uselist=False,  back_populates="devicePo")
 
@@ -72,6 +73,7 @@ class bizCameraPO(UserTimeStampedModelPO):
     """
     __tablename__ = "biz_camera" 
     id = Column("id",ForeignKey(f"biz_device.id",ondelete="CASCADE"), primary_key=True)
+    no = Column("no",Integer,comment="球机编号")
     CameraType= Column("type",String(16))
     poster = Column("poster",String(255)) 
     streams = Column("stream_urls",String(2048),comment="json 对象[{url:xx,name:xx}]")  
@@ -96,23 +98,34 @@ class bizMqttPO(UserTimeStampedModelPO):
     """
     Mqtt 服务器
     """
-    __tablename__ = "biz_dev_mqttPO" 
+    __tablename__ = "biz_svr_mqtt" 
     id = Column("id",ForeignKey(f"biz_device.id",ondelete="CASCADE"), primary_key=True)
     tcpPort = Column("tcpPort",Integer) 
     wsPort = Column("wsPort",Integer)
     wssPort = Column("wssPort",Integer) 
     devicePo=Relationship("bizDevicePo",back_populates="mqttPO") 
+
+class bizSipPO(UserTimeStampedModelPO):
+    """
+    sip 服务器
+    """
+    __tablename__ = "biz_svr_sip" 
+    id = Column("id",ForeignKey(f"biz_device.id",ondelete="CASCADE"), primary_key=True)
+    port = Column("port",Integer) 
+    sip = Column("sip",String(20))
+    domain= Column("domain",String(10))
+    password= Column("password",String(32)) 
+    devicePo=Relationship("bizDevicePo",back_populates="sipPO") 
  
 
 class bizXssPO(UserTimeStampedModelPO):
     """
     Xss 服务器
     """
-    __tablename__ = "biz_dev_xssPO" 
+    __tablename__ = "biz_svr_xss" 
     id = Column("id",ForeignKey(f"biz_device.id",ondelete="CASCADE"), primary_key=True)
-    port = Column("port",Integer) 
-    sip = Column("sip",String(20))
-    domain= Column("domain",String(10))
+    port = Column("port",Integer)  
+    userName= Column("user_name",String(10))
     password= Column("password",String(32)) 
     devicePo=Relationship("bizDevicePo",back_populates="xttPO") 
 
