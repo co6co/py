@@ -38,25 +38,15 @@
 		videoBufferDelay: 2,
 		useCanvasRender: false,
 	});
-	watchEffect(() => {
-		try {
-			if (props.stream) {
-				console.error('开始播放:', props.stream);
-				nextTick(() => {
-					replay();
-				}); // 可能会死
-			} else {
-				stop();
-			}
-		} catch (e) {
-			console.error(e);
-		}
-	});
-
+	const _loaded=ref(false)
 	const jess_player_container = ref<HTMLElement>();
 	const jess_player = ref();
-	const emits = defineEmits(['created', 'destroyed']);
-
+	
+	const emits = defineEmits(['created', 'destroyed']); 
+	
+	const destroying = () => {
+		emits('destroyed');
+	};
 	const onPlay = () => {
 		try {
 			if (props.stream) jess_player.value.play(props.stream);
@@ -64,10 +54,7 @@
 			console.error(e);
 		}
 	};
-	const destroying = () => {
-		emits('destroyed');
-	};
-	const stop = (bck?: Function) => { 
+	const stop = (bck?: Function) => {  
 		if (jess_player.value) {
 			jess_player.value.destroy().then(() => {
 				destroying();
@@ -77,17 +64,8 @@
 			if (bck) bck();
 		}
 	};
-
-	const replay = () => {
-		try {
-			stop(() => {
-				create(), onPlay();
-			});
-		} catch (e) {
-			console.error(e);
-		}
-	};
-
+	
+	
 	const create = () => {
 		console.info('create...');
 		const jessibuca = new JessibucaPro({
@@ -145,8 +123,30 @@
 		jess_player.value = jessibuca;
 		emits('created', jessibuca);
 	};
-	onMounted(() => {
-		//create(),onPlay()
+	const replay = () => {
+		try {
+			stop(() => {
+				create(), onPlay();
+			});
+		} catch (e) {
+			console.error(e);
+		}
+	}; 
+	watchEffect(() => {
+		try {  
+			if (props.stream) {
+				console.error('开始播放:', props.stream);
+				nextTick(() => {
+					replay();
+				}); // 可能会死
+			} else { 
+				stop();
+			}
+		} catch (e) {
+			console.error(e);
+		}
+	});
+	onMounted(() => { 
 	});
 	onUnmounted(() => {
 		if (jess_player.value) jess_player.value.destroy().then(() => destroying());

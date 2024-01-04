@@ -16,6 +16,7 @@ export default defineConfig({
 		host: '0.0.0.0',
 		port: 5173,
 	},
+	esbuild:{jsx: "preserve"},
 	plugins: [
 		vue(),
 		VueSetupExtend(),
@@ -34,6 +35,7 @@ export default defineConfig({
 		include: ['schart.js'],
 	}, //这里进行配置别名
 	resolve: {
+		//extensions: ['.mjs', '.js', '.ts', '.jsx', '.tsx', '.json', '.less', '.css'],
 		alias: {
 			'@': path.resolve('./src'), // @代替src
 			'#': path.resolve('./types'), // #代替types

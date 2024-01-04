@@ -12,7 +12,7 @@ import json,os
 from typing import List
 from co6co.utils.File import File 
  
-
+import time
 
 class stream:
     name:str
@@ -31,6 +31,10 @@ async def update_device_poster_task(app):
         session:AsyncSession=None
         try: 
             await asyncio.sleep(800)	# 设定任务休眠时间 
+            #log.warn("tasking")
+            #time.sleep(60)
+            #log.warn("tasked")
+            #continue
             session:AsyncSession=service.async_session_factory()
             sanrc=await session.execute(filter.count_select)
             count=sanrc.scalar()

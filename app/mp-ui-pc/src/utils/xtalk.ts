@@ -37,12 +37,15 @@ class xTalker {
 	}
 
 	xTalkHandleIncomingError(error: any) {
-		xTalkSetError('ERROR: ' + error);
+		this.xTalkSetError('ERROR: ' + error);
 		this.xTalkResetState();
 	}
 
-	xTalkGetAudioElement() {
-		return document.getElementById(this.xtalk_audio_element_id);
+	xTalkGetAudioElement(): HTMLMediaElement {
+		let ele = document.getElementById(this.xtalk_audio_element_id);
+		if (ele && 'srcObject' in ele) return ele as HTMLMediaElement;
+		this.xTalkSetError('ERROR: ' + HTMLMediaElement);
+		throw new Error(`id:${this.xtalk_audio_element_id} ,没有 srcObject 属性`);
 	}
 
 	xTalkSetStatus(text: string) {
@@ -63,6 +66,7 @@ class xTalker {
 
 	// SDP offer received from peer, set remote description and create an answer
 	xTalkoOnIncomingSDP(sdp: any) {
+		let that = this;
 		this.xTalkWebrtcPeerConnection
 			.setRemoteDescription(sdp)
 			.then(() => {
@@ -74,12 +78,12 @@ class xTalker {
 						this.xTalkSetStatus('Got local stream, creating answer');
 						this.xTalkWebrtcPeerConnection
 							.createAnswer()
-							.then(xTalkOnLocalDescription)
-							.catch(xTalkSetError);
+							.then(that.xTalkOnLocalDescription)
+							.catch(that.xTalkSetError);
 					})
-					.catch(xTalkSetError);
+					.catch(that.xTalkSetError);
 			})
-			.catch(xTalkSetError);
+			.catch(that.xTalkSetError);
 	}
 
 	// Local description was set, send it to peer
@@ -224,7 +228,7 @@ class xTalker {
 			}
 
 			// Incoming JSON signals the beginning of a call
-			if (!this.xTalkWebrtcPeerConnection) xTalkCreateCall(msg);
+			if (!this.xTalkWebrtcPeerConnection) this.xTalkCreateCall(msg);
 
 			if (msg.sdp != null) {
 				this.xTalkoOnIncomingSDP(msg.sdp);
@@ -263,7 +267,7 @@ class xTalker {
 		}
 
 		// Incoming JSON signals the beginning of a call
-		if (!this.xTalkWebrtcPeerConnection) xTalkCreateCall(msg);
+		if (!this.xTalkWebrtcPeerConnection) this.xTalkCreateCall(msg);
 
 		if (msg.sdp != null) {
 			this.xTalkoOnIncomingSDP(msg.sdp);
@@ -290,9 +294,8 @@ class xTalker {
 	}
 
 	xTalkOnServerError(event: any) {
-		this.xTalkSetError(
-			'Unable to connect to server, did you add an exception for the certificate?'
-		);
+		console.error('Unable to connect to server, did you add an exception for the certificate?')
+		  
 		// Retry after 3 seconds
 		//window.setTimeout(xtalk_websocket_server_connect, 3000);
 	}
@@ -303,8 +306,8 @@ class xTalker {
 		if (navigator.mediaDevices.getUserMedia) {
 			return navigator.mediaDevices.getUserMedia(this.xtalk_constraints);
 		} else {
+			this.xTalkErrorUserMediaHandler();
 			throw new Error('not implemented');
-			xTalkErrorUserMediaHandler();
 		}
 	}
 
@@ -370,22 +373,22 @@ class xTalker {
 		if (this.xtalk_xss_mode) {
 			this.xTalkWebsocketConnection.addEventListener(
 				'message',
-				this.xTalkOnServerMessageXss
+				this.xTalkOnServerMessageXss.bind(this)
 			);
 		} else {
 			this.xTalkWebsocketConnection.addEventListener(
 				'message',
-				this.xTalkOnServerMessage
+				this.xTalkOnServerMessage.bind(this)
 			);
 		}
 
 		this.xTalkWebsocketConnection.addEventListener(
 			'error',
-			this.xTalkOnServerError
+			this.xTalkOnServerError.bind(this)
 		);
 		this.xTalkWebsocketConnection.addEventListener(
 			'close',
-			this.xTalkOnServerClose
+			this.xTalkOnServerClose.bind(this)
 		);
 	}
 
@@ -420,7 +423,7 @@ class xTalker {
 				this.xTalkWebrtcPeerConnection.addStream(stream);
 				return stream;
 			})
-			.catch(xTalkSetError);
+			.catch(this.xTalkSetError);
 
 		if (msg != null && !msg.sdp) {
 			console.log("WARNING: First message wasn't an SDP message!?");
@@ -456,6 +459,4 @@ class xTalker {
 	}
 }
 
-export {
-	xTalker
-};
+export { xTalker };

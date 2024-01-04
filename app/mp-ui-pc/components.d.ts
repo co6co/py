@@ -9,6 +9,7 @@ declare module '@vue/runtime-core' {
   export interface GlobalComponents {
     CaptureFace: typeof import('./src/components/details/src/CaptureFace.vue')['default']
     DetailsInfo: typeof import('./src/components/details/src/detailsInfo.vue')['default']
+    Device: typeof import('./src/components/devices/src/device.vue')['default']
     Download: typeof import('./src/components/download/src/download.vue')['default']
     ElAside: typeof import('element-plus/es')['ElAside']
     ElAvatar: typeof import('element-plus/es')['ElAvatar']
@@ -60,6 +61,7 @@ declare module '@vue/runtime-core' {
     Stream: typeof import('./src/components/stream/src/stream.vue')['default']
     StreamPlayer: typeof import('./src/components/stream/src/streamPlayer.vue')['default']
     Tags: typeof import('./src/components/tags.vue')['default']
+    Talker: typeof import('./src/components/devices/src/talker.vue')['default']
   }
   export interface ComponentCustomProperties {
     vLoading: typeof import('element-plus/es')['ElLoadingDirective']

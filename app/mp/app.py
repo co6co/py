@@ -26,6 +26,11 @@ def init (app:Sanic,customConfig):
     公众号12345
     初始化
     """
+
+    #@app.main_process_start 
+    #async def on_main_process_start(app: Sanic):
+    #    update_device_poster_task(app)
+
     log.warn(customConfig)
     attach_cors(app) 
     from api import api

@@ -1,27 +1,23 @@
 {
-  "compilerOptions": {
-    "baseUrl": "./",
-    "module": "ESNext", //commonjs|ES6|ESNext|ES2022
-    "target": "ESNext",
-    "useDefineForClassFields": true,
-    "moduleResolution": "Node",
-    "strict": true,
-    "jsx": "preserve",
-    "sourceMap": true,
-    "resolveJsonModule": true,
-    "isolatedModules": true,
-    "esModuleInterop": true,
-    "lib": [
-      "ESNext",
-      "DOM"
-    ],
-    "skipLibCheck": true,
-    "paths": {
-      "@/*": [
-        "src/*"
-      ]
-    }
-    /*
+	"compilerOptions": {
+		"baseUrl": "./",
+		"module": "ESNext", //commonjs|ES6|ESNext|ES2022
+		"target": "ESNext",
+		"useDefineForClassFields": true,
+		"moduleResolution": "Node",
+		"strict": true,
+		"jsx": "preserve", //react 
+		"sourceMap": true,
+		"resolveJsonModule": true,
+		"isolatedModules": true,
+		"esModuleInterop": true,
+		"lib": ["ESNext", "DOM"],
+		"skipLibCheck": true,
+		"paths": {
+			"@/*": ["src/*"]
+		},
+		//"types": []
+		/*
     ,
     // 是否自动生成声明文件
     "declaration": true,
@@ -32,16 +28,17 @@
     // 仅生成 .d.ts 文件，不生成 .js 文件
     "emitDeclarationOnly": true,
     */
-  },
-  "include": [
-    "src/**/*.ts",
-    "src/**/*.d.ts",
-    "src/**/*.vue",
-    "src/utils/auth.js"
-, "src/assets/js/xtalk-rtc.js"  ],
-  "references": [
-    {
-      "path": "./tsconfig.node.json"
-    }
-  ] 
+	},
+	"include": [
+		"src/**/*.ts",
+		"src/**/*.d.ts",
+		"src/**/*.vue",
+		"src/utils/auth.js",
+		"src/assets/js/xtalk-rtc.js"
+	],
+	"references": [
+		{
+			"path": "./tsconfig.node.json"
+		}
+	]
 }

@@ -1,30 +1,39 @@
 import { defineStore } from 'pinia';
-import * as d from './types/devices'
+import * as d from './types/devices';
+import * as s from '../api/server';
 
-interface Object  {
+interface Object {
 	[key: string]: any;
 }
-
+interface XssConfig {
+	ip: string;
+	port: number;
+}
 export const useAppDataStore = defineStore('app_Data', {
-	state: ( ) => {
+	state: () => {
 		/*
 		const keys = localStorage.getItem('app_Data');
 		return {
 			key: keys ? JSON.parse(keys) : <string[]>[],
 		};*/
 		return {
-			data:{
-				row:{}
-				 
-			}
-		 }
+			data: {
+				row: {},
+				xssConfig: <XssConfig>{},
+			},
+		};
 	},
 	actions: {
-		setState(val:any) {
-			this.data.row = val; 
+		setState(val: any) {
+			this.data.row = val;
 		},
-		getState(  ) {
-			return this.data.row  ;
-		}
-	}
+		getState() {
+			return this.data.row;
+		},
+		async setXssConfig() { 
+			const res = await s.get_xss_config_svc();
+			if (res.code == 0) this.data.xssConfig = res.data;
+			else console.warn('getXssConfig',res.message) 
+		},
+	},
 });

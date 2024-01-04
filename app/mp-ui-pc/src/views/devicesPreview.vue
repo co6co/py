@@ -239,14 +239,15 @@
 		FullScreen,
 		CanelFullScreen,
 	} from '../components/icons/screenIcon';
-	import * as api from '../api/device';
+	//import * as api from '../api/device';
+	import * as api from '../api/site';
 	import { stream, ptz, streamPlayer } from '../components/stream';
 	import * as p from '../components/stream/src/types/ptz';
 	import { toggleFullScreen } from '../utils';
 	import { useMqtt, mqqt_server } from '../utils/mqtting';
 	import * as d from '../store/types/devices';
 	import { showLoading, closeLoading } from '../components/Logining';
-	import { talker } from '../utils/device';
+	import { talker } from '../components/devices';
 
 	const deviceName = ref('');
 	const tree = ref(null);
@@ -307,7 +308,7 @@
 					ElMessage.error(res.message);
 				}
 			})
-			.finally(() => {
+			.finally(() => {	
 				closeLoading();
 			});
 	};
@@ -383,6 +384,7 @@
 		}
 	};
 	/** ptz */
+
 	const { startMqtt, Ref_Mqtt } = useMqtt();
 	interface mqttMessage {
 		UUID?: string;
@@ -408,6 +410,7 @@
 	}
 
 	const talkerRef = ref();
+	
 	const OnPtz = (name: p.ptz_name, type: p.ptz_type) => {
 		// 对接
 		if (type == 'starting' && name == 'center') {

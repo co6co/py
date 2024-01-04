@@ -14,15 +14,10 @@ class bizSitePo(TimeStampedModelPO):
     __tablename__ = "biz_site" 
     id = Column("id",Integer,comment="主键",autoincrement=True, primary_key=True)
     name= Column("name",String(64),nullable=False, comment="站点名称")
-    bozId = Column("box_id",ForeignKey(f"biz_dev_box.id" ),unique=True, comment="盒子ID")
-    routerId = Column("router_id",Integer,comment="路由器ID")
-    camera1Id = Column("camera1_Id",Integer,comment="眼睛1")
-    camera2Id = Column("camera2_Id",Integer,comment="眼睛2")
-    camera3Id = Column("camera3_Id",Integer,comment="眼睛3")
-    camera4Id = Column("camera4_Id",Integer,comment="眼睛4")
-    camera5Id = Column("camera5_Id",Integer,comment="眼睛5")
-    boxPO =Relationship("bizBoxPO",   back_populates="sitePO")
-
+   
+    boxPO =Relationship("bizBoxPO",uselist=False, back_populates="sitePO") 
+    routerPO=Relationship("bizRouterPO",uselist=False,back_populates="sitePO") 
+    camerasPO=Relationship("bizCameraPO",uselist=True, back_populates="sitePO")  
     
 class bizDevicePo(TimeStampedModelPO):
     """
@@ -53,6 +48,8 @@ class bizBoxPO(UserTimeStampedModelPO):
     """
     __tablename__ = "biz_dev_box" 
     id = Column("id",ForeignKey(f"biz_device.id",ondelete="CASCADE"), primary_key=True)
+    siteId=Column("site_id",ForeignKey(f"biz_site.id" ))
+
     cpuNo = Column("cpu_serial_number",String(255)) 
     mac = Column("mac",String(128)) 
     license= Column("license",String(255)) 
@@ -64,7 +61,7 @@ class bizBoxPO(UserTimeStampedModelPO):
     channel3_sip= Column("channel3_sip",String(64),comment="通道3 sip 地址") 
     devicePo=Relationship("bizDevicePo",back_populates="boxPO")  
 
-    sitePO =Relationship("bizSitePo",uselist=False,  back_populates="boxPO")
+    sitePO =Relationship("bizSitePo",  back_populates="boxPO")
     alarmPO=Relationship("bizAlarmPO",back_populates="boxPO" )
     
 class bizCameraPO(UserTimeStampedModelPO):
@@ -74,6 +71,7 @@ class bizCameraPO(UserTimeStampedModelPO):
     __tablename__ = "biz_camera" 
     id = Column("id",ForeignKey(f"biz_device.id",ondelete="CASCADE"), primary_key=True)
     no = Column("no",Integer,comment="球机编号")
+    siteId=Column("site_id",ForeignKey(f"biz_site.id" ) )
     CameraType= Column("type",String(16))
     poster = Column("poster",String(255)) 
     streams = Column("stream_urls",String(2048),comment="json 对象[{url:xx,name:xx}]")  
@@ -89,7 +87,10 @@ class bizCameraPO(UserTimeStampedModelPO):
     channel8_sip= Column("channel8_sip",String(64),comment="通道8 sip 地址") 
     channel9_sip= Column("channel9_sip",String(64),comment="通道9 sip 地址") 
     channel10_sip= Column("channel10_sip",String(64),comment="通道10 sip 地址") 
-    devicePo=Relationship("bizDevicePo",back_populates="cameraPO")  
+    
+    devicePo=Relationship("bizDevicePo",back_populates="cameraPO")   
+    sitePO=Relationship("bizSitePo",back_populates="camerasPO") 
+    
     def __repr__(self) -> str:
         return f"{self.__class__} id:{self.id},streams:{self.streams},createTime:{self.createTime}"
  
@@ -135,10 +136,14 @@ class bizRouterPO(UserTimeStampedModelPO):
     """
     __tablename__ = "biz_dev_router" 
     id = Column("id",ForeignKey(f"biz_device.id",ondelete="CASCADE"), primary_key=True)
+    siteId=Column("site_id",ForeignKey(f"biz_site.id" ))
+
     sim = Column("sim",String(20)) 
     ssd= Column("wifi_ssd",String(32))
     password= Column("wifi_password",String(32))   
     devicePo=Relationship("bizDevicePo",back_populates="routerPO") 
+
+    sitePO=Relationship("bizSitePo",back_populates="routerPO") 
     
 class bizResourcePO(BasePO):
     """
