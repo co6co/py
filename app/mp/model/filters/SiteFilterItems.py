@@ -5,7 +5,7 @@ from co6co_db_ext.db_filter import absFilterItems
 from co6co_db_ext.db_operations import absFilterItems
 from co6co.utils import log
 from sqlalchemy import Select, or_,and_
-from sqlalchemy.orm import joinedload, contains_eager
+from sqlalchemy.orm import joinedload, contains_eager,selectinload
 
 class SiteDiveceFilterItems(absFilterItems): 
 	"""
@@ -26,8 +26,8 @@ class SiteDiveceFilterItems(absFilterItems):
 		return filters_arr
 	def create_List_select(self):
 		select=(
-				Select(bizSitePo)
-				.options(joinedload(bizSitePo.boxPO))  
+				Select(bizSitePo).options(selectinload(bizSitePo.boxPO))
+				#.options(joinedload(bizSitePo.boxPO))  
 				.options(joinedload(bizSitePo.camerasPO)) 
 				.filter(and_(*self.filter()))  
 		) 

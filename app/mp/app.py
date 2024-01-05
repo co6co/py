@@ -41,10 +41,7 @@ def init (app:Sanic,customConfig):
     injectDbSessionFactory(app,app.config.db_settings) 
     app.blueprint(api)
     app.add_task(update_device_poster_task(app))
-
- 
-         
- 
+    
 if __name__ == "__main__":     
     parser=argparse.ArgumentParser(description="audit service.")
     parser.add_argument("-c","--config",default="app_config.json")

@@ -21,7 +21,7 @@ class stream:
         self.name=name
         self.url=url
         pass
-    
+ 
     
 async def update_device_poster_task(app): 
     filter=posterTaskFilterItems()

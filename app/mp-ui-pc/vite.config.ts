@@ -16,7 +16,7 @@ export default defineConfig({
 		host: '0.0.0.0',
 		port: 5173,
 	},
-	esbuild:{jsx: "preserve"},
+	//esbuild:{jsx: "preserve"},
 	plugins: [
 		vue(),
 		VueSetupExtend(),
@@ -30,6 +30,7 @@ export default defineConfig({
 			promiseExportName: '__tla',
 			promiseImportName: (i) => `__tla_${i}`,
 		}),
+		"@vue/babel-plugin-jsx"
 	],
 	optimizeDeps: {
 		include: ['schart.js'],

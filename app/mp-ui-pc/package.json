@@ -36,9 +36,11 @@
     "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.0/xlsx-0.20.0.tgz"
   },
   "devDependencies": {
+    "@babel/preset-react": "^7.23.3",
     "@types/js-cookie": "^3.0.4",
     "@types/node": "^20.8.5",
     "@vitejs/plugin-vue": "^3.0.0",
+    "@vue/babel-plugin-jsx": "^1.1.5",
     "@vue/compiler-sfc": "^3.1.2",
     "eslint": "^8.56.0",
     "eslint-plugin-vue": "^9.19.2",

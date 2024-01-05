@@ -36,7 +36,7 @@
 
 	onBeforeMount(async () => {
 		try { 
-			//await store.setXssConfig();
+			await store.setXssConfig();
 		} catch (e) {
 			console.error(e);
 		}
