@@ -5,7 +5,7 @@ import datetime
 from sanic.response import json
 from sanic import Blueprint, Request
 from sanic import exceptions
-from model.pos.biz import bizXssPO, bizDevicePo
+from model.pos.biz import bizXssPO
 from sqlalchemy.ext.asyncio import AsyncSession, AsyncSessionTransaction
 
 from co6co_web_db.utils import DbJSONEncoder as JSON_util
@@ -28,14 +28,11 @@ server_api = Blueprint("server_API")
 async def xss(request: Request):
     """
     获取对讲服务器
-    """
-    log.err(f"server ..1，{id( request.ctx.session)}")
-    async with request.ctx.session.begin() as txn:
-        txn: AsyncSessionTransaction = txn 
+    """ 
+    async with request.ctx.session  as session,session.begin():
+        session: AsyncSession = session 
         select = (
-            Select(bizXssPO.port, bizDevicePo.ip, bizDevicePo.name).join(
-                bizDevicePo, isouter=True, onclause=bizDevicePo.id == bizXssPO.id)
+            Select(bizXssPO.port, bizXssPO.ip, bizXssPO.name) 
         )
-        result = (await txn.session.execute(select)).fetchone()  
-        await txn.session.commit()
-        return JSON_util.response(Result.success(data=db_tools.row2dict(result), message="获取成功"))
+        result = (await session.execute(select)).fetchone()   
+    return JSON_util.response(Result.success(data=db_tools.row2dict(result), message="获取成功"))

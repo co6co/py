@@ -20,7 +20,7 @@ from sqlalchemy.pool import NullPool
 
 
 class db_service:
-    settings: dict = {
+    default_settings: dict = {
         'DB_HOST': 'localhost',
         'DB_NAME': '',
         'DB_USER': 'root',
@@ -29,6 +29,7 @@ class db_service:
         'pool_size': 20,
         'max_overflow': 10
     }
+    settings={}
     session: scoped_session  # 同步连接
     async_session_factory: sessionmaker  # 异步连接
     useAsync: bool
@@ -37,12 +38,12 @@ class db_service:
 
     def _createEngine(self, url: str):
         self.useAsync = True
-        echo = self.settings.get("echo")
+        echo =bool( self.settings.get("echo"))
         pool_size = self.settings.get("pool_size")
         max_overflow = self.settings.get("max_overflow")
         if "sqlite" not in url:
             self.engine = create_async_engine(
-                url, echo=echo, pool_size=pool_size, max_overflow=max_overflow)
+                url, echo= echo, pool_size=pool_size, max_overflow=max_overflow)
             self.async_session_factory = sessionmaker(
                 self.engine, expire_on_commit=False, class_=AsyncSession)  # AsyncSession,
         else:
@@ -54,8 +55,9 @@ class db_service:
         self.base_model_session_ctx = ContextVar("session")
         pass
 
-    def __init__(self, settings: dict, engineUrl: str = None) -> None:
-        self.settings .update(settings)
+    def __init__(self, config: dict, engineUrl: str = None) -> None:
+        self.settings =self.default_settings.copy()
+        self.settings .update(config)
         if engineUrl != None:
             self._createEngine(engineUrl)
         else:

@@ -17,27 +17,7 @@ class bizSitePo(TimeStampedModelPO):
    
     boxPO =Relationship("bizBoxPO",uselist=False, back_populates="sitePO") 
     routerPO=Relationship("bizRouterPO",uselist=False,back_populates="sitePO") 
-    camerasPO=Relationship("bizCameraPO",uselist=True, back_populates="sitePO")  
-    
-class bizDevicePo(TimeStampedModelPO):
-    """
-    设备
-    """
-    __tablename__ = "biz_device" 
-    id = Column("id",Integer,comment="主键",autoincrement=True, primary_key=True)
-    uuid = Column("device_uuid",String(64),comment="设备唯一标识，主要与设备通行使用") 
-    deviceType= Column("device_type",Integer,comment="设备类型")
-    innerIp=Column("inner_ip",String(64),comment="内部IP")
-    ip=Column("ip",String(64),comment="外网IP")
-    name=Column("name",String(64),comment="设备名称") 
-    
-    resourcesPO=Relationship("bizResourcePO",back_populates="devicePO",uselist=True,passive_deletes=True)
-    boxPO=Relationship("bizBoxPO",uselist=False, back_populates="devicePo")
-    cameraPO=Relationship("bizCameraPO",uselist=False, back_populates="devicePo")
-    mqttPO=Relationship("bizMqttPO",uselist=False,  back_populates="devicePo")
-    sipPO=Relationship("bizSipPO",uselist=False,  back_populates="devicePo")
-    xttPO=Relationship("bizXssPO",uselist=False,  back_populates="devicePo")
-    routerPO=Relationship("bizRouterPO",uselist=False,  back_populates="devicePo")
+    camerasPO=Relationship("bizCameraPO",uselist=True, back_populates="sitePO") 
 
 class bizBoxPO(UserTimeStampedModelPO):
     """
@@ -47,8 +27,13 @@ class bizBoxPO(UserTimeStampedModelPO):
     //配置BOX3-733E5155B1FBB3C3BB9EFC86EDDACA60
     """
     __tablename__ = "biz_dev_box" 
-    id = Column("id",ForeignKey(f"biz_device.id",ondelete="CASCADE"), primary_key=True)
+    id = Column("id",Integer, primary_key=True,autoincrement=True)
     siteId=Column("site_id",ForeignKey(f"biz_site.id" ))
+
+    uuid = Column("uuid",String(64),comment="设备唯一标识，主要与设备通行使用")  
+    innerIp=Column("inner_ip",String(64),comment="内部IP")
+    ip=Column("ip",String(64),comment="外网IP")
+    name=Column("name",String(64),comment="设备名称") 
 
     cpuNo = Column("cpu_serial_number",String(255)) 
     mac = Column("mac",String(128)) 
@@ -59,8 +44,8 @@ class bizBoxPO(UserTimeStampedModelPO):
     channel1_sip= Column("channel1_sip",String(64),comment="通道1 sip 地址") 
     channel2_sip= Column("channel2_sip",String(64),comment="通道2 sip 地址") 
     channel3_sip= Column("channel3_sip",String(64),comment="通道3 sip 地址") 
-    devicePo=Relationship("bizDevicePo",back_populates="boxPO")  
-
+    
+    resourcesPO=Relationship("bizResourcePO", uselist=True,  back_populates="boxPO")
     sitePO =Relationship("bizSitePo",  back_populates="boxPO")
     alarmPO=Relationship("bizAlarmPO",back_populates="boxPO" )
     
@@ -69,7 +54,11 @@ class bizCameraPO(UserTimeStampedModelPO):
     摄像头设备
     """
     __tablename__ = "biz_camera" 
-    id = Column("id",ForeignKey(f"biz_device.id",ondelete="CASCADE"), primary_key=True)
+    id = Column("id",Integer, primary_key=True,autoincrement=True)
+    uuid = Column("device_uuid",String(64),comment="设备唯一标识，主要与设备通行使用") 
+    innerIp=Column("inner_ip",String(64),comment="内部IP")
+    ip=Column("ip",String(64),comment="外网IP")
+    name=Column("name",String(64),comment="设备名称") 
     no = Column("no",Integer,comment="球机编号")
     siteId=Column("site_id",ForeignKey(f"biz_site.id" ) )
     CameraType= Column("type",String(16))
@@ -87,9 +76,8 @@ class bizCameraPO(UserTimeStampedModelPO):
     channel8_sip= Column("channel8_sip",String(64),comment="通道8 sip 地址") 
     channel9_sip= Column("channel9_sip",String(64),comment="通道9 sip 地址") 
     channel10_sip= Column("channel10_sip",String(64),comment="通道10 sip 地址") 
-    
-    devicePo=Relationship("bizDevicePo",back_populates="cameraPO")   
-    sitePO=Relationship("bizSitePo",back_populates="camerasPO") 
+       
+    sitePO=Relationship("bizSitePo",back_populates="camerasPO")
     
     def __repr__(self) -> str:
         return f"{self.__class__} id:{self.id},streams:{self.streams},createTime:{self.createTime}"
@@ -100,23 +88,30 @@ class bizMqttPO(UserTimeStampedModelPO):
     Mqtt 服务器
     """
     __tablename__ = "biz_svr_mqtt" 
-    id = Column("id",ForeignKey(f"biz_device.id",ondelete="CASCADE"), primary_key=True)
+    id = Column("id",Integer, primary_key=True,autoincrement=True)
+    uuid = Column("device_uuid",String(64),comment="设备唯一标识，主要与设备通行使用") 
+    innerIp=Column("inner_ip",String(64),comment="内部IP")
+    ip=Column("ip",String(64),comment="外网IP")
+    name=Column("name",String(64),comment="设备名称") 
+ 
     tcpPort = Column("tcpPort",Integer) 
     wsPort = Column("wsPort",Integer)
-    wssPort = Column("wssPort",Integer) 
-    devicePo=Relationship("bizDevicePo",back_populates="mqttPO") 
+    wssPort = Column("wssPort",Integer)  
 
 class bizSipPO(UserTimeStampedModelPO):
     """
     sip 服务器
     """
     __tablename__ = "biz_svr_sip" 
-    id = Column("id",ForeignKey(f"biz_device.id",ondelete="CASCADE"), primary_key=True)
+    id = Column("id",Integer, primary_key=True,autoincrement=True)
+    uuid = Column("device_uuid",String(64),comment="设备唯一标识，主要与设备通行使用") 
+    innerIp=Column("inner_ip",String(64),comment="内部IP")
+    ip=Column("ip",String(64),comment="外网IP")
+    name=Column("name",String(64),comment="设备名称") 
     port = Column("port",Integer) 
     sip = Column("sip",String(20))
     domain= Column("domain",String(10))
-    password= Column("password",String(32)) 
-    devicePo=Relationship("bizDevicePo",back_populates="sipPO") 
+    password= Column("password",String(32))  
  
 
 class bizXssPO(UserTimeStampedModelPO):
@@ -124,24 +119,30 @@ class bizXssPO(UserTimeStampedModelPO):
     Xss 服务器
     """
     __tablename__ = "biz_svr_xss" 
-    id = Column("id",ForeignKey(f"biz_device.id",ondelete="CASCADE"), primary_key=True)
+    id = Column("id",Integer, primary_key=True,autoincrement=True)
+    uuid = Column("device_uuid",String(64),comment="设备唯一标识，主要与设备通行使用") 
+    innerIp=Column("inner_ip",String(64),comment="内部IP")
+    ip=Column("ip",String(64),comment="外网IP")
+    name=Column("name",String(64),comment="设备名称") 
     port = Column("port",Integer)  
     userName= Column("user_name",String(10))
-    password= Column("password",String(32)) 
-    devicePo=Relationship("bizDevicePo",back_populates="xttPO") 
+    password= Column("password",String(32))  
 
 class bizRouterPO(UserTimeStampedModelPO):
     """
     4G路由器
     """
     __tablename__ = "biz_dev_router" 
-    id = Column("id",ForeignKey(f"biz_device.id",ondelete="CASCADE"), primary_key=True)
+    id = Column("id",Integer, primary_key=True,autoincrement=True)
+    uuid = Column("device_uuid",String(64),comment="设备唯一标识，主要与设备通行使用") 
+    innerIp=Column("inner_ip",String(64),comment="内部IP")
+    ip=Column("ip",String(64),comment="外网IP")
+    name=Column("name",String(64),comment="设备名称") 
     siteId=Column("site_id",ForeignKey(f"biz_site.id" ))
 
     sim = Column("sim",String(20)) 
     ssd= Column("wifi_ssd",String(32))
-    password= Column("wifi_password",String(32))   
-    devicePo=Relationship("bizDevicePo",back_populates="routerPO") 
+    password= Column("wifi_password",String(32))    
 
     sitePO=Relationship("bizSitePo",back_populates="routerPO") 
     
@@ -156,8 +157,9 @@ class bizResourcePO(BasePO):
     subCategory = Column("sub_category",Integer,comment="子资源类型")
     url = Column("url_path",String(255),comment="资源路径,针对根路径下的绝对路径")
     createTime=Column("create_time",DateTime , server_default=func.now())  
-    deviceId = Column("device_id",ForeignKey(f"{bizDevicePo.__tablename__}.{bizDevicePo.id.name}",ondelete="CASCADE"),nullable=False,index=True)
-    devicePO=Relationship("bizDevicePo",back_populates="resourcesPO")
+    boxId = Column("box_id",ForeignKey("biz_dev_box.id",ondelete="CASCADE"),nullable=False,index=True)
+
+    boxPO=Relationship("bizBoxPO",back_populates="resourcesPO")
 
 class bizAlarmTypePO(BasePO): 
     __tablename__ = "biz_alarm_type"
@@ -166,12 +168,11 @@ class bizAlarmTypePO(BasePO):
     createTime=Column("create_time",DateTime , server_default=func.now() ) 
     updateTime= Column("update_time", DateTime,comment="修改时间")  
     alarmPOs=Relationship("bizAlarmPO",back_populates="alarmTypePO",uselist=True,passive_deletes=True)
-
-
+    
 class bizAlarmPO(BasePO):
     __tablename__ = "biz_alarm"
     id = Column("id",BigInteger,comment="主键",autoincrement=True, primary_key=True)
-    deviceId = Column("device_id",ForeignKey(f"{bizBoxPO.__tablename__}.{bizBoxPO.id.name}"),comment="产生记录的设备" )
+    boxId = Column("device_id",ForeignKey(f"{bizBoxPO.__tablename__}.{bizBoxPO.id.name}"),comment="产生记录的设备" )
     uuid = Column("uuid",String(64),unique=True,comment= "全局ID盒子上传")
     alarmType= Column("alarm_type",ForeignKey(f"{bizAlarmTypePO.__tablename__}.{bizAlarmTypePO.alarmType.name}",ondelete="CASCADE"))
    

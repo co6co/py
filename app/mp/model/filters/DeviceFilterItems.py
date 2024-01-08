@@ -1,5 +1,5 @@
 from model.enum import device_type
-from model.pos.biz import bizDevicePo, bizCameraPO
+from model.pos.biz import  bizCameraPO
 from sqlalchemy .orm.attributes import InstrumentedAttribute
 from typing import Tuple
 from co6co_db_ext.db_filter import absFilterItems
@@ -19,9 +19,9 @@ class DeviceFilterItems(absFilterItems):
     datetimes: list = None
 
     def __init__(self):
-        super().__init__(bizDevicePo)
+        super().__init__(bizCameraPO)
         self.listSelectFields = [
-            bizDevicePo.id, bizDevicePo.uuid, bizDevicePo.name, bizDevicePo.deviceType, bizDevicePo.createTime, bizDevicePo.ip, bizDevicePo.innerIp,
+            bizCameraPO.id, bizCameraPO.uuid, bizCameraPO.name, bizCameraPO.deviceType, bizCameraPO.createTime, bizCameraPO.ip, bizCameraPO.innerIp,
             bizCameraPO.streams,bizCameraPO.poster
         ]
 
@@ -31,11 +31,11 @@ class DeviceFilterItems(absFilterItems):
         """ 
         filters_arr = []
         if self.checkFieldValue(self.name):
-            filters_arr.append(bizDevicePo.name.like(f"%{self.name}%"))
+            filters_arr.append(bizCameraPO.name.like(f"%{self.name}%"))
         if self.checkFieldValue(self.category):
-            filters_arr.append(bizDevicePo.deviceType.__eq__(self.category))
+            filters_arr.append(bizCameraPO.deviceType.__eq__(self.category))
         if self.datetimes and len(self.datetimes) == 2:
-            filters_arr.append(bizDevicePo.createTime.between(
+            filters_arr.append(bizCameraPO.createTime.between(
                 self.datetimes[0], self.datetimes[1]))
         return filters_arr
 
@@ -51,7 +51,7 @@ class DeviceFilterItems(absFilterItems):
         """
         默认排序
         """
-        return (bizDevicePo.id.asc(),)
+        return (bizCameraPO.id.asc(),)
 
 
 class CameraFilterItems(absFilterItems):
@@ -61,9 +61,9 @@ class CameraFilterItems(absFilterItems):
     name: str
 
     def __init__(self):
-        super().__init__(bizDevicePo)
+        super().__init__(bizCameraPO)
         self.listSelectFields = [
-            bizDevicePo.id, bizDevicePo.name, bizDevicePo.createTime, bizDevicePo.ip, bizDevicePo.innerIp,
+            bizCameraPO.id, bizCameraPO.name, bizCameraPO.createTime, bizCameraPO.ip, bizCameraPO.innerIp,
             bizCameraPO.poster, bizCameraPO.streams
         ]
 
@@ -72,9 +72,9 @@ class CameraFilterItems(absFilterItems):
         过滤条件
         """
         filters_arr = []
-        filters_arr.append(bizDevicePo.deviceType == device_type.ip_camera.val)
+        filters_arr.append(bizCameraPO.deviceType == device_type.ip_camera.val)
         if self.checkFieldValue(self.name):
-            filters_arr.append(bizDevicePo.name.like(f"%{self.name}%"))
+            filters_arr.append(bizCameraPO.name.like(f"%{self.name}%"))
         return filters_arr
 
     def create_List_select(self):
@@ -88,7 +88,7 @@ class CameraFilterItems(absFilterItems):
         """
         默认排序
         """
-        return (bizDevicePo.id.asc(),)
+        return (bizCameraPO.id.asc(),)
 
 
 class posterTaskFilterItems(absFilterItems):

@@ -291,7 +291,7 @@
 			getData();
 		},
 		defaultProps: {
-			children: 'children',
+			children: 'devices',
 			label: 'name',
 		},
 	});
@@ -302,13 +302,20 @@
 			.list_svc(tree_module.query)
 			.then((res) => {
 				if (res.code == 0) {
+					for (let i = 0; i < res.data.length; i++) {
+						//如果 devices 只有1条，移动值 为 res.data[i] 属性
+						if (res.data[i].devices && res.data[i].devices.length == 1) {
+							res.data[i].device = res.data[i].devices[0];
+							delete res.data[i].devices;
+						}
+					}
 					tree_module.data = res.data;
 					tree_module.total = res.total || -1;
 				} else {
 					ElMessage.error(res.message);
 				}
 			})
-			.finally(() => {	
+			.finally(() => {
 				closeLoading();
 			});
 	};
@@ -370,18 +377,35 @@
 		const dom = playerList.players[playerList.currentWin - 1].dom;
 		dom.stop();
 	};
-
-	const onNodeCheck = (row?: any) => {
-		tree_module.currentItem = row;
-		if (row.streams && typeof row.streams == 'string') {
-			let stream = JSON.parse(row.streams);
-			playerList.players[playerList.currentWin - 1].streamList = stream;
-			playerList.players[playerList.currentWin - 1].url = stream[0].url;
-		} else {
+	const   play=(streams:String|{url:string,name:string})=>{
+		let streamArr = null;
+		if (streams && typeof streams == 'string') 
+			  streamArr = JSON.parse(streams);
+		else streamArr = streams;
+		if (streamArr) {
+			playerList.players[playerList.currentWin - 1].streamList = streamArr;
+			playerList.players[playerList.currentWin - 1].url = streamArr[0].url;
+		}else {
 			playerList.players[playerList.currentWin - 1].url = '';
 			playerList.players[playerList.currentWin - 1].streamList = [];
 			ElMessage.warning('未配置设备流地址');
 		}
+	}
+	const onNodeCheck = (row?: any) => {
+		console.info(row)
+		tree_module.currentItem = row;
+		//只有一个设备的点
+		if (row.device) {
+			let device = row.device;
+			let stream = device.streams;
+			play(stream)
+		} 
+		//有多个设备的点 ，仅展开
+		else if(row.devices)console.info("展开") ;
+		else  //点位 
+			play(row.streams)
+			
+		 
 	};
 	/** ptz */
 
@@ -410,7 +434,7 @@
 	}
 
 	const talkerRef = ref();
-	
+
 	const OnPtz = (name: p.ptz_name, type: p.ptz_type) => {
 		// 对接
 		if (type == 'starting' && name == 'center') {
@@ -462,11 +486,8 @@
 				<PTZCmd>${ptzcmd}</PTZCmd>
 			</Control> 
 			`;
-			console.info("发送",xml)
-			Ref_Mqtt.value?.publish(
-				'/MANSCDP_cmd',
-				xml
-			);
+			console.info('发送', xml);
+			Ref_Mqtt.value?.publish('/MANSCDP_cmd', xml);
 		}
 	};
 	//**end 打标签 */

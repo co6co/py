@@ -9,7 +9,7 @@ from co6co.utils import log
 from model.filters.DeviceFilterItems import DeviceFilterItems, CameraFilterItems
 from sqlalchemy.orm import joinedload
 from view_model.base_view import AuthMethodView
-from model.pos.biz import bizDevicePo, bizCameraPO
+from model.pos.biz import  bizCameraPO
 from model.enum import device_type
 from model.params.devices import cameraParam, streamUrl
 from co6co_sanic_ext.model.res.result import Result, Page_Result
@@ -70,13 +70,11 @@ class IP_Cameras_View(AuthMethodView):
                 po.streams = sys_json.dumps(param.streamUrls)
                 po.createTime=datetime.datetime.now()
                 po.createUser=id
-                devicePo = bizDevicePo()
-                devicePo.uuid=createUuid()
-                devicePo.deviceType = param.deviceType
-                devicePo.name = param.name
-                devicePo.innerIp = param.innerIp
-                devicePo.cameraPO = po
-                devicePo.createTime=datetime.datetime.now()
+              
+                po.uuid=createUuid() 
+                po.name = param.name
+                po.innerIp = param.innerIp 
+                po.createTime=datetime.datetime.now()
                 session.add(po)
                 await session.commit()
             return JSON_util.response(Result.success())
@@ -131,25 +129,19 @@ class IP_Camera_View(AuthMethodView):
             param = cameraParam()
             param.__dict__.update(request.json)
             id=self.getUserId(request)
-            async with request.ctx.session as session:
+            async with request.ctx.session as session,session.begin():
                 session: AsyncSession = session
                 select = (
-                    Select(bizCameraPO) 
-                    .options(joinedload(bizCameraPO.devicePo)).filter(bizCameraPO.id==pk)
+                    Select(bizCameraPO).filter(bizCameraPO.id==pk)
                 )
                 execute=await session.execute(select) 
                 po:bizCameraPO=execute.scalar()
-                if po == None: return JSON_util.response(Result.fail(message="未找到设备!"))
-                log.warn(po)
-                po.streams = sys_json.dumps(param.streamUrls)
-                po.updateTime=datetime.datetime.now()
-                po.updateUser=id
-                devicePo: bizDevicePo = po.devicePo
-                devicePo.deviceType = param.deviceType
-                devicePo.name = param.name
-                devicePo.innerIp = param.innerIp
-                devicePo.updateTime=datetime.datetime.now() 
-                await session.commit()
+                if po == None: return JSON_util.response(Result.fail(message="未找到设备!")) 
+                po.streams = sys_json.dumps(param.streamUrls) 
+                po.updateUser=id 
+                po.name = param.name
+                po.innerIp = param.innerIp
+                po.updateTime=datetime.datetime.now()  
             return JSON_util.response(Result.success())
         except Exception as e: 
             return JSON_util.response(Result.fail(message=e))

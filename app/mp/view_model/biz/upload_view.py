@@ -7,7 +7,7 @@ from co6co_sanic_ext.utils import JSON_util
 import json
 
 from view_model.base_view import  BaseMethodView
-from model.pos.biz import bizDevicePo,bizResourcePO
+from model.pos.biz import bizBoxPO,bizResourcePO
 
 from model.enum import resource_category,resource_image_sub_category,device_type
 from typing import List,Optional ,Dict,Any
@@ -22,9 +22,9 @@ from view_model import get_upload_path
  
 #@lru_cache(maxsize=20)
 async def get_Device_id( db:DbOperations,param:m.Box_base_Param,upgrade=False): 
-    one=await db.get_one(bizDevicePo.id,bizDevicePo.uuid==param.BoardId) 
+    one=await db.get_one(bizBoxPO.id,bizBoxPO.uuid==param.BoardId) 
     if one==None: 
-        po=bizDevicePo()
+        po=bizBoxPO()
         po.uuid=param.BoardId
         po.innerIp=param.BoardIp
         po.ip=param.ip
@@ -34,10 +34,10 @@ async def get_Device_id( db:DbOperations,param:m.Box_base_Param,upgrade=False):
         await db.commit()  
         return po.id
     elif upgrade: 
-        po=await db.get_one_by_pk(bizDevicePo,one)  
+        po=await db.get_one_by_pk(bizBoxPO,one)  
+        po:bizBoxPO=po
         po.innerIp=param.BoardIp
-        po.ip=param.ip
-        po.deviceType=device_type.box.val
+        po.ip=param.ip 
         await db.commit() 
     return one  
 
@@ -192,7 +192,7 @@ class Alarm_Upload_View(Upload_view):
                 await self.saveResourceToDb(opt,device_id,resource_category.image,p2,sub_category=resource_image_sub_category.marked.val,uid=u2)
                 await opt.commit()
                 po=p.to_po() 
-                po.deviceId=device_id
+                po.boxId=device_id
                 result= await opt.exist(bizAlarmPO.uuid==po.uuid) 
                 if result: 
                     res:m.Response=m.Response.success(message=f"数据“{po.uuid}”重复上传")

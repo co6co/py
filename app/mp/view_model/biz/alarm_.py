@@ -1,4 +1,4 @@
-from model.pos.biz import bizSitePo, bizDevicePo, bizBoxPO,  bizAlarmPO, bizAlarmTypePO, bizAlarmAttachPO
+from model.pos.biz import bizSitePo,  bizBoxPO,  bizAlarmPO, bizAlarmTypePO, bizAlarmAttachPO
 from sqlalchemy .orm.attributes import InstrumentedAttribute
 from typing import Tuple, List
 from co6co_db_ext.db_filter import absFilterItems
@@ -52,6 +52,7 @@ class AlarmFilterItems(absFilterItems):
                                  bizAlarmPO.alarmTime, 
                                  bizAlarmPO.rawImageUid,  
                                  bizAlarmPO.createTime,
+                                 bizSitePo.name.label("boxName"),
                                  bizSitePo.name.label("siteName"),
                                  bizAlarmTypePO.desc.label("alarmTypeDesc")
                                 ] 
@@ -70,8 +71,10 @@ class AlarmFilterItems(absFilterItems):
     def create_List_select(self): 
         select = ( 
             Select(*self.listSelectFields)
-            .join(bizSitePo, isouter=True, onclause=bizAlarmPO.deviceId == bizSitePo.bozId)
             .join(bizAlarmTypePO, isouter=True, onclause=bizAlarmPO.alarmType == bizAlarmTypePO.alarmType)
+            .join(bizBoxPO, isouter=True, onclause=bizAlarmPO.boxId == bizBoxPO.id)
+            .join(bizSitePo, isouter=True, onclause=bizSitePo.id == bizBoxPO.siteId)
+            
             #.options(joinedload(bizAlarmPO.alarmTypePO))
             #.options(joinedload(bizAlarmPO.alarmAttachPO))
             # .options( contains_eager(bizBoxPO))

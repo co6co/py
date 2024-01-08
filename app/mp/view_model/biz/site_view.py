@@ -29,32 +29,38 @@ class Sites_View(AuthMethodView):
         #return JSON_util.response(Page_Result.fail())
 
         try: 
-            log.err(f"session ..1，{id( request.ctx.session)}")
-
-            async with request.ctx.session.begin() as txn:  
+            log.err(f"session ..1，{id( request.ctx.session)}") 
+            async with request.ctx.session as session,session.begin():  
                 log.err(f"session ..2")
-                txn:AsyncSessionTransaction=txn 
-                total=await txn.session.execute(filterItems.count_select)
+                session:AsyncSession=session  
+                total=await session.execute(filterItems.count_select)
                 log.err(f"session ..3")
                 total=total.scalar()  
-                execute= await txn.session.execute(filterItems.list_select)
-                result=execute.unique().scalars().all() 
-                await txn.session.commit() 
+                execute= await session.execute(filterItems.list_select)
+                result=execute.unique().scalars().all()  
+            data=[] 
             for a in result:
-                a:bizSitePo=a
-                 
-                print(a.__table__.get_children)
- 
-                log.err(type(a))  
-                log.warn(f"a:{a.to_dict()}")
-                for pa in a.camerasPO:
-                    log.warn(f"po属性:{pa.to_dict()}") 
-                #a.camerasPO= db_tools.remove_db_instance_state(a.camerasPO)
-                #a.boxPO= db_tools.remove_db_instance_state(a.boxPO)
-                
-            #result= await opt._get_tuple(filterItems.list_select)  
-            log.warn(type(result))   
-            pageList=Page_Result.success(result ,total=total)   
+                d={ }
+                a:bizSitePo=a 
+                for c in a.__table__.columns:
+                    print(type(c),c)
+                    
+                    print("label:", c.label.__name__,"\t_label:",c._label)
+                    print("key:", c.key,"\t_key_label:",c._key_label)
+                    print("anon_label:", c.anon_label,"\t_key_label:",c._anon_label)
+                    print("key:", c._key_label,"\t_anon_key_label:",c._anon_key_label)
+                    print("key:", c._anon_name_label,"\t_key_label:",c._anon_tq_label)
+                    log.warn(c.anon_key_label)
+
+                d.update(a.to_dict()) 
+                devices=[]
+                a.boxPO
+                if a.boxPO:d.update({"box":a.boxPO.to_dict()})
+                for pa in a.camerasPO: 
+                    devices.append(pa.to_dict())
+                d.update({"devices":devices})
+                data.append(d)  
+            pageList=Page_Result.success(data ,total=total)   
         except Exception as e:
             log.err(f"session ... e:{e}")
             pageList=Page_Result.fail(message=f"请求失败：{e}")

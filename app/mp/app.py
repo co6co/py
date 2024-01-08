@@ -6,6 +6,7 @@ from sanic import utils
 from co6co_sanic_ext.utils.cors_utils import attach_cors
 from co6co_sanic_ext import sanics
 from co6co_web_db.services.db_service import injectDbSessionFactory 
+from co6co_db_ext.db_session import db_service
 
 from sanic.request import Request
 from sanic.response import text,json 
@@ -38,6 +39,16 @@ def init (app:Sanic,customConfig):
     #app.blueprint(res) 
     #service=db_service(app,app.config.db_settings,BasePO)
    # service.sync_init_tables() 
+    settings: dict = {
+        'DB_HOST': 'localhost',
+        'DB_NAME': '',
+        'DB_USER': 'root',
+        'DB_PASSWORD': '',
+        'echo': True,
+        'pool_size': 20,
+        'max_overflow': 0
+    }
+ 
     injectDbSessionFactory(app,app.config.db_settings) 
     app.blueprint(api)
     app.add_task(update_device_poster_task(app))
