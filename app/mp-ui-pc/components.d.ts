@@ -10,6 +10,7 @@ declare module '@vue/runtime-core' {
     BizPlayer: typeof import('./src/components/biz/src/bizPlayer.vue')['default']
     CaptureFace: typeof import('./src/components/details/src/CaptureFace.vue')['default']
     DetailsInfo: typeof import('./src/components/details/src/detailsInfo.vue')['default']
+    DeviceNav: typeof import('./src/components/devices/src/deviceNav.vue')['default']
     Download: typeof import('./src/components/download/src/download.vue')['default']
     ElAside: typeof import('element-plus/es')['ElAside']
     ElAvatar: typeof import('element-plus/es')['ElAvatar']

@@ -24,6 +24,9 @@ class Base_Enum  (Enum):
     
     @classmethod
     def value_of(cls, value):
+        """
+        字符串转枚举
+        """
         for k, v in cls.__members__.items(): 
             if k == value: return v
         else:

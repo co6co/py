@@ -71,13 +71,13 @@
 						<el-table-column
 							prop="name"
 							label="名称"
-							width="80"
+							width="90"
 							align="center"
 							sortable
 							:show-overflow-tooltip="true"></el-table-column>
 
 						<el-table-column
-							prop="ip"
+							prop="innerIp"
 							label="网络地址"
 							width="120"
 							align="center"
@@ -87,7 +87,7 @@
 						<el-table-column
 							prop="sip"
 							label="sip地址"
-							width="120"
+							width="190"
 							align="center"
 							sortable
 							:show-overflow-tooltip="true"></el-table-column>

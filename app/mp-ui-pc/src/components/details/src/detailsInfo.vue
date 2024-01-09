@@ -31,7 +31,7 @@ const props = defineProps({
     required: true
   } 
 })
-const activeNames = ref(['1'])
+const activeNames = ref([0])
 const handleChange = (val: string[]) => {
   console.log(val)
 }

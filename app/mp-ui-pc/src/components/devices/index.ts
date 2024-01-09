@@ -1,3 +1,5 @@
 
 import talker from './src/talker.vue' 
-export {talker}  
+import deviceNav from './src/deviceNav.vue' 
+import * as types from "./src/types";
+export {talker,deviceNav,types}  

@@ -62,6 +62,7 @@
 		overflow: auto;
 		.content {
 			overflow: auto; 
+			padding: 0; margin: 0;
 			.el-container {
 				height: 97vh;
 				overflow: hidden;

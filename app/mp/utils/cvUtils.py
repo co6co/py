@@ -1,8 +1,7 @@
 from co6co.utils import log
 import os
 import cv2
-import datetime
-import websocket
+import datetime 
 from websockets.sync.client import connect
 
 import numpy as np

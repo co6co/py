@@ -11,76 +11,13 @@
 			<el-footer>
 				<el-row>
 					<el-col :span="12">
-						<el-card class="box-card">
-							<!--header-->
-							<template #header>
-								<div class="card-header">
-									<el-input
-										v-model="tree_module.query.name"
-										placeholder="点位名称">
-										<template #append>
-											<el-button :icon="Search" @click="tree_module.onSearch" />
-										</template>
-									</el-input>
-								</div>
-							</template>
-							<!--content-->
-							<div class="content">
-								<el-tree
-									v-if="hasData"
-									highlight-current
-									@node-click="onNodeCheck"
-									ref="tree"
-									class="filter-tree"
-									:data="tree_module.data"
-									:props="tree_module.defaultProps"
-									default-expand-all
-									:filter-node-method="tree_module.filterNode">
-									<template #default="{ node, data }">
-										<span>
-											<!--
-										<i v-if="node.expanded" > 
-											<el-icon><ArrowUp /></el-icon>
-										</i>
-										 
-										<i v-else>
-											<el-icon><ArrowDown /></el-icon>
-										</i>
-										-->
-											<!-- 没有子级所展示的图标 -->
-											<i v-if="!data.devices"
-												><el-icon><VideoCamera /></el-icon
-											></i>
-											<i v-else-if="data.devices"
-												><el-icon><Avatar /></el-icon
-											></i>
-
-											{{ node.label }}
-										</span>
-									</template>
-								</el-tree>
-
-								<el-empty v-else></el-empty>
-							</div>
-							<!--footer-->
-							<template #footer>
-								<div class="context">
-									<el-pagination
-										v-if="hasData"
-										background
-										layout="prev,next"
-										:total="tree_module.total"
-										:current-page="tree_module.query.pageIndex"
-										:page-size="tree_module.query.pageSize"
-										@current-change="tree_module.pageChange" /></div
-							></template>
-						</el-card>
+						<device-nav @node-click="play"></device-nav>
 					</el-col>
 					<el-col :span="12">
 						<div class="content">
 							<talker
 								ref="talkerRef"
-								:talk-no="tree_module.currentDevice?.talkbackNo"></talker>
+								:talk-no="currentDeviceData.data?.talkbackNo"></talker>
 							<ptz @ptz="OnPtz"></ptz>
 						</div>
 					</el-col>
@@ -133,91 +70,12 @@
 	import { useMqtt, mqqt_server } from '../utils/mqtting';
 	import * as d from '../store/types/devices';
 	import { showLoading, closeLoading } from '../components/Logining';
-	import { talker } from '../components/devices';
+	import { talker ,deviceNav,types as dType} from '../components/devices';
 	import { bizPlayer, types } from '../components/biz';
 
 	const deviceName = ref('');
-	const tree = ref(null);
-	interface Tree {
-		[key: string]: any;
-	}
-	interface Query extends IpageParam {
-		name: string;
-	}
-	interface dataItem {}
-	interface deviceItem {
-		streams: string;
-		sip: string;
-		talkbackNo: number;
-		channel1_sip: string;
-		channel2_sip: string;
-	}
-	interface tree_module {
-		query: Query;
-		data: Array<dataItem>;
-		currentItem?: dataItem;
-		currentDevice?: deviceItem;
-		total: number;
-		defaultProps: { children: String; label: String };
-		filterNode: (value: string, data: Tree) => boolean;
-		pageChange: (val: number) => void;
-		onSearch: () => void;
-	}
-	const tree_module = reactive<tree_module>({
-		query: {
-			name: '',
-			pageIndex: 1,
-			pageSize: 20,
-			order: 'asc',
-			orderBy: '',
-		},
-		data: [],
-		total: 0,
-		filterNode: (value: string, data: Tree) => {
-			if (!value) return true;
-			return data.label.includes(value);
-		},
-		// 分页导航
-		pageChange: (val: number) => {
-			tree_module.query.pageIndex = val;
-			getData();
-		},
-		onSearch: () => {
-			getData();
-		},
-		defaultProps: {
-			children: 'devices',
-			label: 'name',
-		},
-	});
-	// 获取表格数据
-	const getData = () => {
-		showLoading();
-		api
-			.list_svc(tree_module.query)
-			.then((res) => {
-				if (res.code == 0) {
-					for (let i = 0; i < res.data.length; i++) {
-						//如果 devices 只有1条，移动值 为 res.data[i] 属性
-						if (res.data[i].devices && res.data[i].devices.length == 1) {
-							res.data[i].device = res.data[i].devices[0];
-							delete res.data[i].devices;
-						}
-					}
-					tree_module.data = res.data;
-					tree_module.total = res.total || -1;
-				} else {
-					ElMessage.error(res.message);
-				}
-			})
-			.finally(() => {
-				closeLoading();
-			});
-	};
-	const hasData = computed(() => tree_module.data.length > 0);
-	getData();
-	/** 播放器 */
-
+	 
+	/** 播放器 */ 
 	const playerList = reactive<types.PlayerList>({
 		splitNum: 1,
 		isFullScreen: false,
@@ -230,7 +88,8 @@
 			{ url: '', streamList: [{ name: '', url: '' }] },
 		],
 	});
-	const play = (streams: String | { url: string; name: string }) => {
+	const currentDeviceData=reactive<{data?:dType.deviceItem}>({})
+	const play = (streams: String | { url: string; name: string },device:dType.deviceItem) => {
 		let streamArr = null;
 		if (streams && typeof streams == 'string') streamArr = JSON.parse(streams);
 		else streamArr = streams;
@@ -242,26 +101,10 @@
 			playerList.players[playerList.currentWin - 1].streamList = [];
 			ElMessage.warning('未配置设备流地址');
 		}
+		currentDeviceData.data=device
 	};
-	const onNodeCheck = (row?: any) => {
-		tree_module.currentItem = row;
-		//只有一个设备的点
-		if (row.device) {
-			let device = row.device;
-			tree_module.currentDevice = device;
-			let stream = device.streams;
-			play(stream);
-		}
-		//有多个设备的点 ，仅展开
-		else if (row.devices) console.info('展开');
-		else {
-			//点位
-			tree_module.currentDevice = row;
-			play(row.streams);
-		}
-	};
-	/** ptz */
-
+ 
+	/** ptz */ 
 	const { startMqtt, Ref_Mqtt } = useMqtt();
 	interface mqttMessage {
 		UUID?: string;
@@ -286,8 +129,7 @@
 		return arr.filter((a) => !res.has(a.UUID) && res.set(a.UUID, 1));
 	}
 
-	const talkerRef = ref();
-
+	const talkerRef = ref(); 
 	const OnPtz = (name: p.ptz_name, type: p.ptz_type) => {
 		// 对接
 		if (type == 'starting' && name == 'center') {
@@ -328,7 +170,7 @@
 			} else {
 				ptzcmd = 'A50F0100000000B5';
 			}
-			let sip = tree_module.currentDevice?.sip;
+			let sip = currentDeviceData.data?.sip;
 			let sn = new Date().getMilliseconds();
 			let xml = `
 			<?xml version="1.0" encoding="UTF-8"?>
@@ -348,7 +190,7 @@
 <style scoped lang="less">
 	@import '../assets/css/player-split.css';
 	@color: #000; // rgba(255, 255, 255, 0.2);
-	@bgcolor: #fff; // #464444;
+	@bgcolor: #fff; // #464444; 
 	#app .content .el-container {
 		height: 100vh;
 		.el-scrollbar {
@@ -356,17 +198,20 @@
 		}
 		.el-footer {
 			height: 40vh;
+			padding:0;
+			.content{ padding: 0 10px;}
+			::v-deep .el-card__body{height: 22vh;}
 		}
 		.el-main {
 			height: 60vh;
 			padding: 0;
-			margin: 0 15px;
+			margin: 0;
 			::v-deep .el-scrollbar__view {
 				height: 100%;
 			}
-			.el-scrollbar {
+			.el-scrollbar { 
 				.content {
-					padding: 10px;
+					padding: 0;
 					.box {
 						width: 50%;
 						display: inline-block;

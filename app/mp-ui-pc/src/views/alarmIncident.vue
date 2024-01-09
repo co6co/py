@@ -51,7 +51,7 @@
 			<el-main> 
 					<!--主内容-->
 					<el-row>
-						<el-col :span="12" style="height:100%; overflow: auto">
+						<el-col :span="11" style="height:100%; overflow: auto">
 							<el-scrollbar>
 								<el-table
 									highlight-current-row
@@ -96,7 +96,7 @@
 								</el-table>
 							</el-scrollbar>
 						</el-col>
-						<el-col :span="12" style="position: relative">
+						<el-col :span="13" style="position: relative">
 							<div
 								style="
 									width: 100%;
