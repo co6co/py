@@ -30,7 +30,7 @@ export default defineConfig({
 			promiseExportName: '__tla',
 			promiseImportName: (i) => `__tla_${i}`,
 		}),
-		"@vue/babel-plugin-jsx"
+		//"@vue/babel-plugin-jsx"
 	],
 	optimizeDeps: {
 		include: ['schart.js'],

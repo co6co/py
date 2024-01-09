@@ -6,91 +6,151 @@ from sanic import  Request
 from sanic.response import text,raw,empty,file_stream
 from co6co_sanic_ext.utils import JSON_util
 import json
-from model.filters.SiteFilterItems import SiteDiveceFilterItems
+from model.enum import device_type
+from typing import TypeVar
+from model.filters.SiteFilterItems import SiteFilterItems, SiteDiveceFilterItems
 from co6co_sanic_ext.model.res.result import Result, Page_Result
 
 from view_model import get_upload_path
 from view_model.base_view import BaseMethodView, AuthMethodView
-from model.pos.biz import bizResourcePO,bizSitePo
-import os 
+from model.pos.biz import bizCameraPO,bizRouterPO,bizBoxPO,  bizResourcePO,bizSitePo
+import os ,datetime
 from co6co.utils import log
 from sqlalchemy.engine.row import RowMapping
+from sqlalchemy import Select
+
 
 class Sites_View(AuthMethodView):
     """
     安全员站点
     """
+
+    async def get(self,request:Request):
+        """
+        获取站点列表 [{id:1,name:站点}]
+        """
+        try:  
+            async with request.ctx.session as session,session.begin():   
+                session:AsyncSession=session  
+                select=(
+                    Select(bizSitePo.id,bizSitePo.name)
+                )
+                executer=await session.execute(select)  
+                result = executer.mappings().all()
+                result = [dict(a) for a in result]
+            result=Result.success(result  )   
+        except Exception as e: 
+            result=Result.fail(message=f"请求失败：{e}")  
+        return JSON_util.response(result)
+
+    async def patch(self,request:Request):
+        filterItems=SiteFilterItems()
+        filterItems.__dict__.update(request.json) 
+        try:  
+            async with request.ctx.session as session,session.begin():   
+                session:AsyncSession=session  
+                total=await session.execute(filterItems.count_select) 
+                total=total.scalar()  
+                executer= await session.execute(filterItems.list_select)
+                result = executer.mappings().all()
+                result = [dict(a) for a in result]
+            pageList=Page_Result.success(result ,total=total)   
+        except Exception as e: 
+            pageList=Page_Result.fail(message=f"请求失败：{e}")  
+        return JSON_util.response(pageList)
+
+
     async def post(self,request:Request):
         """
-        列表 
+        列表 包括 相机列表，box信息
         """ 
         filterItems=SiteDiveceFilterItems()
         filterItems.__dict__.update(request.json)
-        #return JSON_util.response(Page_Result.fail())
-
-        try: 
-            log.err(f"session ..1，{id( request.ctx.session)}") 
-            async with request.ctx.session as session,session.begin():  
-                log.err(f"session ..2")
+        #return JSON_util.response(Page_Result.fail()) 
+        try:  
+            async with request.ctx.session as session,session.begin():   
                 session:AsyncSession=session  
-                total=await session.execute(filterItems.count_select)
-                log.err(f"session ..3")
+                total=await session.execute(filterItems.count_select) 
                 total=total.scalar()  
-                execute= await session.execute(filterItems.list_select)
-                result=execute.unique().scalars().all()  
-            data=[] 
+                executer= await session.execute(filterItems.list_select)
+                result=executer.unique().scalars().all()  
+            data=[]  
             for a in result:
                 d={ }
-                a:bizSitePo=a 
-                for c in a.__table__.columns:
-                    print(type(c),c)
-                    
-                    print("label:", c.label.__name__,"\t_label:",c._label)
-                    print("key:", c.key,"\t_key_label:",c._key_label)
-                    print("anon_label:", c.anon_label,"\t_key_label:",c._anon_label)
-                    print("key:", c._key_label,"\t_anon_key_label:",c._anon_key_label)
-                    print("key:", c._anon_name_label,"\t_key_label:",c._anon_tq_label)
-                    log.warn(c.anon_key_label)
-
-                d.update(a.to_dict()) 
-                devices=[]
-                a.boxPO
+                a:bizSitePo=a   
+                d.update(a.to_dict2()) 
+                devices=[] 
                 if a.boxPO:d.update({"box":a.boxPO.to_dict()})
                 for pa in a.camerasPO: 
-                    devices.append(pa.to_dict())
+                    pa:bizCameraPO=pa 
+                    devices.append(pa.to_dict())  
                 d.update({"devices":devices})
                 data.append(d)  
             pageList=Page_Result.success(data ,total=total)   
         except Exception as e:
             log.err(f"session ... e:{e}")
-            pageList=Page_Result.fail(message=f"请求失败：{e}")
-            raise
-        except asyncio.CancelledError:
-            # 处理任务被取消后的逻辑
-            print("Task was cancelled.")
+            pageList=Page_Result.fail(message=f"请求失败：{e}")  
         return JSON_util.response(pageList)
     
-    
+    async def put(self, request: Request):
+        """
+        增加站点
+        """
+        try:
+            po = bizSitePo()
+            po.__dict__.update(request.json) 
+            async with request.ctx.session as session,session.begin():
+                session: AsyncSession = session  
+                session.add(po) 
+            return JSON_util.response(Result.success())
+        except Exception as e:
+            return JSON_util.response(Result.fail(message=e))
+        
 class Site_View(BaseMethodView):
     """
     资源视图
     """
-    async def get(self,request:Request,uid:str):
+    async def get(self,request:Request,pk:int):
         """
-        获取资源内容
+        获取详细信息内容
         """ 
-        async with request.ctx.session as session: 
-            session:AsyncSession=session
-            operation=DbOperations(session) 
-            while(True):  
-                url= await operation.get_one(bizResourcePO.url,bizResourcePO.uid==uid) 
-                if url==None:break 
-                else:
-                    upload=get_upload_path(request.app.config)
-                    fullPath=os.path.join(upload,url[1:]) 
-                    if not os.path.exists(fullPath):break 
-                    await operation.commit()
-                    #file(s,mime_type="image/jpeg")  
-                    return await file_stream(fullPath ) 
-        return empty(status=404)
+        try: 
+            data=self.usable_args(request) 
+            log.warn(data)
+            data=data.get("category") 
+            type:device_type=device_type.value_of(data)
+            async with request.ctx.session as session,session.begin(): 
+                session:AsyncSession=session  
+                if type==device_type.router: 
+                    select=(Select(bizRouterPO).where(bizRouterPO.siteId==pk) )
+                if type==device_type.ip_camera: 
+                    select=(Select(bizCameraPO).where(bizCameraPO.siteId==pk) )
+                if type==device_type.box: 
+                    select=(Select(bizBoxPO).where(bizBoxPO.siteId==pk) )
+                executer= await session.execute(select)
+                poList=executer.scalars().all()
+                result=db_tools.remove_db_instance_state(poList)
+                return JSON_util.response(Result.success(result))
+        except Exception as e: 
+            log.err(e)
+            return JSON_util.response(Result.fail(message=e)) 
+         
+    async def put(self, request: Request,pk:int):
+        """
+        编辑站点
+        """ 
+        try: 
+            po=bizSitePo()
+            po.__dict__.update(request.json) 
+            async with request.ctx.session as session,session.begin():
+                log.warn("********************")
+                session: AsyncSession = session  
+                oldPo:bizSitePo=await session.get_one(bizSitePo,pk) 
+                if oldPo == None: return JSON_util.response(Result.fail(message="未找到设备!"))  
+                oldPo.name = po.name 
+                oldPo.updateTime=datetime.datetime.now()   
+            return JSON_util.response(Result.success())
+        except Exception as e: 
+            return JSON_util.response(Result.fail(message=e))
+
 

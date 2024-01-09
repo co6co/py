@@ -106,7 +106,7 @@
 							label="入库时间"
 							sortable
 							:show-overflow-tooltip="true"></el-table-column>
-						<el-table-column label="操作" width="316" align="center">
+						<el-table-column label="操作"  align="center">
 							<template #default="scope">
 								<el-button text :icon="Edit" @click="onOpenDialog(scope.row)">
 									详细信息

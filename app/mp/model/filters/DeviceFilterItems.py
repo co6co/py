@@ -21,7 +21,7 @@ class DeviceFilterItems(absFilterItems):
     def __init__(self):
         super().__init__(bizCameraPO)
         self.listSelectFields = [
-            bizCameraPO.id, bizCameraPO.uuid, bizCameraPO.name, bizCameraPO.deviceType, bizCameraPO.createTime, bizCameraPO.ip, bizCameraPO.innerIp,
+            bizCameraPO.id, bizCameraPO.uuid, bizCameraPO.name, bizCameraPO.CameraType, bizCameraPO.createTime, bizCameraPO.ip, bizCameraPO.innerIp,
             bizCameraPO.streams,bizCameraPO.poster
         ]
 
@@ -33,7 +33,7 @@ class DeviceFilterItems(absFilterItems):
         if self.checkFieldValue(self.name):
             filters_arr.append(bizCameraPO.name.like(f"%{self.name}%"))
         if self.checkFieldValue(self.category):
-            filters_arr.append(bizCameraPO.deviceType.__eq__(self.category))
+            filters_arr.append(bizCameraPO.CameraType.__eq__(self.category))
         if self.datetimes and len(self.datetimes) == 2:
             filters_arr.append(bizCameraPO.createTime.between(
                 self.datetimes[0], self.datetimes[1]))
@@ -61,25 +61,20 @@ class CameraFilterItems(absFilterItems):
     name: str
 
     def __init__(self):
-        super().__init__(bizCameraPO)
-        self.listSelectFields = [
-            bizCameraPO.id, bizCameraPO.name, bizCameraPO.createTime, bizCameraPO.ip, bizCameraPO.innerIp,
-            bizCameraPO.poster, bizCameraPO.streams
-        ]
+        super().__init__(bizCameraPO) 
 
     def filter(self) -> list:
         """
         过滤条件
         """
-        filters_arr = []
-        filters_arr.append(bizCameraPO.deviceType == device_type.ip_camera.val)
+        filters_arr = [] 
         if self.checkFieldValue(self.name):
             filters_arr.append(bizCameraPO.name.like(f"%{self.name}%"))
         return filters_arr
 
     def create_List_select(self):
         select = (
-            Select(*self.listSelectFields).join(bizCameraPO, isouter=True)
+            Select(bizCameraPO) 
             .filter(and_(*self.filter()))
         )
         return select

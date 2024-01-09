@@ -5,34 +5,8 @@
 				<div class="handle-box">
 					<el-input
 						v-model="table_module.query.name"
-						placeholder="设备名称"
-						class="handle-input mr10"
-					></el-input>
-					<el-select
-						style="width: 160px"
-						class="mr10"
-						clearable
-						v-model="table_module.query.category"
-						placeholder="设备类型"
-					>
-						<el-option
-							v-for="item in DeviceCategoryRef?.categoryList"
-							:key="item.uid"
-							:label="item.key"
-							:value="item.value"
-							
-						/>
-					</el-select>
-					<el-link
-						type="primary"
-						v-show="false"
-						title="更多"
-						@click="table_module.moreOption = !table_module.moreOption"
-					>
-						<ElIcon :size="20">
-							<MoreFilled />
-						</ElIcon>
-					</el-link>
+						placeholder="站点名称"
+						class="handle-input mr10"></el-input>
 					<el-button type="primary" :icon="Search" @click="onSearch"
 						>搜索</el-button
 					>
@@ -40,26 +14,6 @@
 						>新增</el-button
 					>
 				</div>
-				<el-row :gutter="24" v-if="table_module.moreOption">
-					<div class="handle-box">
-						<div class="el-select mr10">
-							<el-link type="info" @click="setDatetime(0, 0.5)">0.5h内</el-link>
-							<el-link type="info" @click="setDatetime(0, 1)">1h内</el-link>
-							<el-link type="info" @click="setDatetime(1, 24)">今天</el-link>
-							<el-date-picker
-								style="margin-top: 3px"
-								v-model="table_module.query.datetimes"
-								format="YYYY-MM-DD HH:mm:ss"
-								value-format="YYYY-MM-DD HH:mm:ss"
-								type="datetimerange"
-								range-separator="至"
-								start-placeholder="开始时间"
-								end-placeholder="结束时间"
-								title="告警事件"
-							/>
-						</div>
-					</div>
-				</el-row>
 			</el-header>
 			<el-main>
 				<el-scrollbar>
@@ -72,78 +26,59 @@
 						class="table"
 						ref="tableInstance"
 						@row-click="onTableSelect"
-						header-cell-class-name="table-header"
-					>
+						header-cell-class-name="table-header">
 						<el-table-column
 							prop="id"
 							label="ID"
 							width="80"
 							align="center"
 							sortable
-							:show-overflow-tooltip="true"
-						></el-table-column>
-						<el-table-column
-							prop="uuid"
-							label="UUID"
-							width="120"
-							align="center"
-							sortable
-							:show-overflow-tooltip="true"
-						></el-table-column>
+							:show-overflow-tooltip="true"></el-table-column>
 						<el-table-column
 							prop="name"
 							label="名称"
-							width="80"
-							align="center"
-							sortable
-							:show-overflow-tooltip="true"
-						></el-table-column>
-						<el-table-column
-							prop="innerIp"
-							label="内部地址"
 							width="120"
 							align="center"
 							sortable
-							:show-overflow-tooltip="true"
-						></el-table-column>
-						<el-table-column
-							prop="ip"
-							label="网络地址"
-							width="120"
-							align="center"
-							sortable
-							:show-overflow-tooltip="true"
-						></el-table-column>
-						<el-table-column
-							prop="deviceType"
-							label="设备类型"
-							width="120"
-							sortable
-							:show-overflow-tooltip="true"
-						>
-							<template #default="scope">
-								<el-tag>
-									{{ table_module.getDeviceName(scope.row.deviceType) }}
-								</el-tag>
-							</template>
-						</el-table-column>
+							:show-overflow-tooltip="true"></el-table-column>
 
 						<el-table-column
 							width="160"
 							prop="createTime"
 							label="创建时间"
 							sortable
-							:show-overflow-tooltip="true"
-						></el-table-column>
-						<el-table-column label="操作" width="316" align="center">
+							:show-overflow-tooltip="true"></el-table-column>
+						<el-table-column
+							width="160"
+							prop="updateTime"
+							label="更新时间"
+							sortable
+							:show-overflow-tooltip="true"></el-table-column>
+						<el-table-column label="操作" align="center">
 							<template #default="scope">
 								<el-button
 									text
 									:icon="Edit"
-									@click="onOpenDialog(1, scope.row)"
-									v-if="scope.row.deviceType != '1'"
-								>
+									@click="onOpenDialog(1, scope.row)">
 									修改
+								</el-button>
+								<el-button
+									text
+									:icon="Message"
+									@click="onOpen2Dialog('router', scope.row)">
+									路由器信息
+								</el-button>
+								<el-button
+									text
+									:icon="Cpu"
+									@click="onOpen2Dialog('box', scope.row)">
+									盒子信息
+								</el-button>
+								<el-button
+									text
+									:icon="VideoCamera"
+									@click="onOpen2Dialog('ip_camera', scope.row)">
+									违停球信息
 								</el-button>
 							</template>
 						</el-table-column>
@@ -159,8 +94,7 @@
 						:page-sizes="[100, 200, 300, 400]"
 						:page-size="table_module.query.pageSize"
 						:total="table_module.pageTotal"
-						@current-change="onPageChange"
-					>
+						@current-change="onPageChange">
 					</el-pagination>
 				</div>
 			</el-footer>
@@ -170,85 +104,16 @@
 		<el-dialog
 			:title="form.title"
 			v-model="form.dialogVisible"
-			style="width: 50%; height: 80%"
-			@keydown.ctrl="keyDown"
-		>
+			@keydown.ctrl="keyDown">
 			<el-form
 				label-width="90px"
 				ref="dialogForm"
 				:rules="rules"
-				:model="form.fromData"
-				style="max-width: 460px"
-			>
-				<el-form-item label="设备类型" prop="deviceType">
-					<el-select
-						style="width: 160px"
-						class="mr10"
-						clearable
-						v-model="form.fromData.deviceType"
-						placeholder="请选择"
-					>
-						<el-option
-							v-for="item in DeviceCategoryRef?.categoryList"
-							:disabled="item.value == DeviceCategoryRef?.boxCategory"
-							:key="item.uid"
-							:label="item.key"
-							:value="item.value"
-						/>
-					</el-select>
-				</el-form-item>
+				:model="form.fromData">
 				<el-form-item label="名称" prop="name">
 					<el-input
 						v-model="form.fromData.name"
-						placeholder="设备名称"
-					></el-input>
-				</el-form-item>
-				<el-form-item label="内网IP" prop="innerIp">
-					<el-input
-						v-model="form.fromData.innerIp"
-						placeholder="内外IP"
-					></el-input>
-				</el-form-item>
-
-				<el-form-item label="流信息" class="streamInfo">
-					<el-card style="height: 136px;"
-						v-for="(steam, index) in form.fromData.streamUrls"
-						:key="index"
-					>
-						<el-form-item
-							label="流名称"
-							:prop="'streamUrls.' + index + '.name'"
-							:rules="{
-								required: true,
-								message: '请输入流名称',
-								trigger: 'blur',
-							}"
-						>
-							<el-input
-								v-model="steam.name"
-								placeholder="视频流名称"
-								required
-							></el-input>
-						</el-form-item>
-
-						<el-form-item
-							label="流地址"
-							:prop="'streamUrls.' + index + '.url'"
-							:rules="{
-								required: true,
-								message: '请输入流地址',
-								trigger: 'blur',
-							}"
-						>
-							<el-input
-								v-model="steam.url"
-								placeholder="视频流地址"
-								required
-							></el-input>
-						</el-form-item>
-						<el-button @click="removeStream" :icon="Minus"> </el-button>
-					</el-card>
-					<el-button @click="addStream" :icon="Plus"></el-button>
+						placeholder="设备名称"></el-input>
 				</el-form-item>
 			</el-form>
 			<template #footer>
@@ -261,16 +126,15 @@
 
 		<!-- 弹出框 -->
 		<el-dialog
-			title="详细信息"
+			:title="form2.title"
 			v-model="form2.dialogVisible"
-			style="width: 98%; height: 90%"
-			@keydown.ctrl="keyDown"
-		>
+			style="width:70%;"
+			@keydown.ctrl="keyDown">
 			<el-row>
-				<el-col :span="12">
-					<img-video :viewOption="form2.data"></img-video>
+				<el-col>
+					<details-info :data="form2.data"></details-info>
 				</el-col>
-				<el-col :span="12"> </el-col>
+				 
 			</el-row>
 			<template #footer>
 				<span class="dialog-footer">
@@ -311,25 +175,23 @@
 		Download,
 		Plus,
 		Minus,
+		Message,Cpu,VideoCamera
 	} from '@element-plus/icons-vue';
-	import * as api from '../api/device';
+	import * as api from '../api/site';
+	import * as dev_api from '../api/device';
 	import * as res_api from '../api';
 	import * as t from '../store/types/devices';
 	import { detailsInfo } from '../components/details';
 	import { imgVideo, types } from '../components/player';
 	import { str2Obj, createStateEndDatetime } from '../utils';
 	import { showLoading, closeLoading } from '../components/Logining';
+	import { AnyAaaaRecord } from 'dns';
 
 	interface TableRow {
 		id: number;
-		uuid: string;
-		deviceType: number;
-		innerIp: string;
-		ip: string;
 		name: string;
 		createTime: string;
-		poster?: string;
-		streams?: string;
+		updateTime: string;
 	}
 	interface Query extends IpageParam {
 		name: string;
@@ -342,7 +204,6 @@
 		data: TableRow[];
 		currentRow?: TableRow;
 		pageTotal: number;
-		getDeviceName: (category?: number) => String;
 	}
 
 	const tableInstance = ref<any>(null);
@@ -359,21 +220,6 @@
 		moreOption: false,
 		data: [],
 		pageTotal: -1,
-		getDeviceName: (value?: number) => {
-			if (
-				DeviceCategoryRef.value &&
-				DeviceCategoryRef.value.categoryList.length > 0
-			) {
-				let result =
-					value == null
-						? ''
-						: DeviceCategoryRef.value.categoryList.find((m) => m.value == value)
-								?.key;
-				if (result == null) return '';
-				return result;
-			}
-			return '';
-		},
 	});
 	const setDatetime = (t: number, i: number) => {
 		table_module.query.datetimes = createStateEndDatetime(t, i);
@@ -385,14 +231,6 @@
 		boxCategory: number;
 	}
 
-	const DeviceCategoryRef = ref<DeviceCategory>();
-	const getDeviceType = async () => {
-		const res = await api.dev_type_svc();
-		if (res.code == 0) {
-			DeviceCategoryRef.value = res.data;
-		}
-	};
-	getDeviceType();
 	onMounted(() => {});
 	// 排序
 	const onColChange = (column: any) => {
@@ -415,18 +253,21 @@
 	};
 	// 获取表格数据
 	const getData = () => {
-		showLoading()
+		showLoading();
 		getQuery(),
-			api.dev_list_svc(table_module.query).then((res) => {
-				if (res.code == 0) {
-					table_module.data = res.data;
-					table_module.pageTotal = res.total || -1;
-				} else {
-					ElMessage.error(res.message);
-				} 
-			}).finally(() => {
-				closeLoading();
-			});
+			api
+				.list2_svc(table_module.query)
+				.then((res) => {
+					if (res.code == 0) {
+						table_module.data = res.data;
+						table_module.pageTotal = res.total || -1;
+					} else {
+						ElMessage.error(res.message);
+					}
+				})
+				.finally(() => {
+					closeLoading();
+				});
 	};
 	getData();
 	// 分页导航
@@ -480,10 +321,7 @@
 	};
 	//**详细信息 */
 	interface FromData {
-		deviceType?: number;
-		innerIp: string;
 		name: string;
-		streamUrls: Array<{ name: String; url: String }>;
 	}
 	interface dialogDataType {
 		dialogVisible: boolean;
@@ -497,22 +335,12 @@
 		operation: 0,
 		id: 0,
 		fromData: {
-			innerIp: '',
 			name: '',
-			streamUrls: [],
 		},
 	};
 	const dialogForm = ref<FormInstance>();
 	const rules: FormRules = {
-		deviceType: [
-			{ required: true, message: '请选择设备类型', trigger: ['blur'] },
-		],
 		name: [{ required: true, message: '请输入设备名称', trigger: 'blur' }],
-		innerIp: [{ required: true, message: '请输入设备IP', trigger: ['blur'] }],
-		streamName: [
-			{ required: true, message: '请视频地址名称', trigger: ['blur'] },
-		],
-		streamUrl: [{ required: true, message: '请视频地址', trigger: ['blur'] }],
 	};
 	let form = reactive<dialogDataType>(dialogData);
 	const onOpenDialog = (operation: 0 | 1, row?: any) => {
@@ -525,33 +353,22 @@
 		switch (operation) {
 			case 0:
 				form.title = '增加';
-				form.fromData.innerIp = '';
 				form.fromData.name = '';
 				break;
 			case 1:
 				form.id = row.id;
 				form.title = '编辑';
-				form.fromData.deviceType = row.deviceType;
-				form.fromData.innerIp = row.innerIp;
 				form.fromData.name = row.name;
-				if (row.streams && typeof row.streams == 'string')
-					form.fromData.streamUrls = JSON.parse(row.streams);
-				else form.fromData.streamUrls = [];
 				break;
 		}
 	};
-	const removeStream = (index: number) => {
-		form.fromData.streamUrls.splice(index, 1);
-	};
-	const addStream = () => {
-		form.fromData.streamUrls.push({ name: '', url: '' });
-	};
+
 	const onDialogSave = (formEl: FormInstance | undefined) => {
 		if (!formEl) return;
 		formEl.validate((value) => {
 			if (value) {
 				if (form.operation == 0) {
-					api.add_camera_svc(form.fromData).then((res) => {
+					api.add_site_svc(form.fromData).then((res) => {
 						if (res.code == 0) {
 							form.dialogVisible = false;
 							ElMessage.success(`增加成功`);
@@ -561,7 +378,7 @@
 						}
 					});
 				} else {
-					api.edit_camera_svc(form.id, form.fromData).then((res) => {
+					api.edit_site_svc(form.id, form.fromData).then((res) => {
 						if (res.code == 0) {
 							form.dialogVisible = false;
 							ElMessage.success(`编辑成功`);
@@ -577,22 +394,39 @@
 			}
 		});
 	};
-	//**视频下信息 */
-	interface dialog2DataType {
-		dialogVisible: boolean;
-		data: Array<types.resourceOption>;
+	interface dataContent {
+		name: string;
+		data: any;
 	}
-	let dialog2Data = {
+	//**视频下信息 */
+	interface DataType {
+		title:String,
+		dialogVisible: boolean;
+		data: dataContent[];
+	}
+
+	let form2 = ref<DataType>({
+		title:"",
 		dialogVisible: false,
 		data: [],
-	};
-	let form2 = ref<dialog2DataType>(dialog2Data);
-	const onOpen2Dialog = (row: TableRow) => {
+	});
+	const onOpen2Dialog = (category: string, row: TableRow) => {
 		form2.value.dialogVisible = true;
-		table_module.currentRow = row;
+		if (category=="box"){form2.value.title="盒子信息"}
+		else if (category=="router"){form2.value.title="路由器信息"}
+		else {form2.value.title="违停球信息"}
+		
+		api.getDetailInfo(row.id, category).then((res) => {
+			if (res.code == 0) {
+				let data = [];
+				for (let i = 0; i < res.data.length; i++) {
+					data.push({ name: res.data[i].name + '信息', data: res.data[i] });
+				}
+				if (res.data.length == 0) form2.value.dialogVisible =false,ElMessage.warning('未找到相关信息');
+				else form2.value.data = data;
+			}
+		});
 	};
-
-	//**end 打标签 */
 </script>
 <style scoped lang="less">
 	@import '../assets/css/tables.css';

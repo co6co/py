@@ -1,38 +1,44 @@
 <template>
 	<div class="container-layout">
 		<el-container>
-			<el-aside width="200px">
+			<el-main>
 				<el-scrollbar>
-					<el-card class="box-card">
-						<!--header-->
-						<template #header>
-							<div class="card-header">
-								<el-input
-									v-model="tree_module.query.name"
-									placeholder="点位名称">
-									<template #append>
-										<el-button :icon="Search" @click="tree_module.onSearch" />
-									</template>
-								</el-input>
-							</div>
-						</template>
-						<!--content-->
-						<div class="content">
-							<el-tree
-								v-if="hasData"
-								highlight-current
-								@node-click="onNodeCheck"
-								ref="tree"
-								
-								class="filter-tree"
-								:data="tree_module.data"
-								:props="tree_module.defaultProps"
-								default-expand-all
-								:filter-node-method="tree_module.filterNode">
-								<template #default="{ node, data }">
-									<span>
-
-										 <!--
+					<div class="content">
+						<biz-player :player-list="playerList"></biz-player>
+					</div>
+				</el-scrollbar>
+			</el-main>
+			<el-footer>
+				<el-row>
+					<el-col :span="12">
+						<el-card class="box-card">
+							<!--header-->
+							<template #header>
+								<div class="card-header">
+									<el-input
+										v-model="tree_module.query.name"
+										placeholder="点位名称">
+										<template #append>
+											<el-button :icon="Search" @click="tree_module.onSearch" />
+										</template>
+									</el-input>
+								</div>
+							</template>
+							<!--content-->
+							<div class="content">
+								<el-tree
+									v-if="hasData"
+									highlight-current
+									@node-click="onNodeCheck"
+									ref="tree"
+									class="filter-tree"
+									:data="tree_module.data"
+									:props="tree_module.defaultProps"
+									default-expand-all
+									:filter-node-method="tree_module.filterNode">
+									<template #default="{ node, data }">
+										<span>
+											<!--
 										<i v-if="node.expanded" > 
 											<el-icon><ArrowUp /></el-icon>
 										</i>
@@ -41,51 +47,45 @@
 											<el-icon><ArrowDown /></el-icon>
 										</i>
 										-->
-										<!-- 没有子级所展示的图标 -->
-										<i v-if="!data.devices" ><el-icon><VideoCamera /></el-icon></i>
-										<i v-else-if="data.devices" ><el-icon><Avatar /></el-icon></i>
-										
-										{{ node.label }}
-									</span> 
-								</template>
-							</el-tree>
+											<!-- 没有子级所展示的图标 -->
+											<i v-if="!data.devices"
+												><el-icon><VideoCamera /></el-icon
+											></i>
+											<i v-else-if="data.devices"
+												><el-icon><Avatar /></el-icon
+											></i>
 
-							<el-empty v-else></el-empty>
+											{{ node.label }}
+										</span>
+									</template>
+								</el-tree>
+
+								<el-empty v-else></el-empty>
+							</div>
+							<!--footer-->
+							<template #footer>
+								<div class="context">
+									<el-pagination
+										v-if="hasData"
+										background
+										layout="prev,next"
+										:total="tree_module.total"
+										:current-page="tree_module.query.pageIndex"
+										:page-size="tree_module.query.pageSize"
+										@current-change="tree_module.pageChange" /></div
+							></template>
+						</el-card>
+					</el-col>
+					<el-col :span="12">
+						<div class="content">
+							<talker
+								ref="talkerRef"
+								:talk-no="tree_module.currentDevice?.talkbackNo"></talker>
+							<ptz @ptz="OnPtz"></ptz>
 						</div>
-						<!--footer-->
-						<template #footer>
-							<div class="context">
-								<el-pagination
-									v-if="hasData"
-									background
-									layout="prev,next"
-									:total="tree_module.total"
-									:current-page="tree_module.query.pageIndex"
-									:page-size="tree_module.query.pageSize"
-									@current-change="tree_module.pageChange" /></div
-						></template>
-					</el-card>
-				</el-scrollbar>
-			</el-aside>
-			<el-main>
-				<el-scrollbar>
-					<div class="content">
-						<el-row>
-							<el-col :span="19" style="height: 100%">
-								<biz-player :player-list="playerList"></biz-player>
-							</el-col>
-							<el-col :span="5">
-								<div class="content">
-									<talker
-										ref="talkerRef"
-										:talk-no="tree_module.currentDevice?.talkbackNo"></talker>
-									<ptz @ptz="OnPtz"></ptz>
-								</div>
-							</el-col>
-						</el-row>
-					</div>
-				</el-scrollbar>
-			</el-main>
+					</el-col>
+				</el-row>
+			</el-footer>
 		</el-container>
 	</div>
 </template>
@@ -124,7 +124,7 @@
 		ArrowUp,
 		ArrowDown,
 	} from '@element-plus/icons-vue';
- 
+	
 	//import * as api from '../api/device';
 	import * as api from '../api/site';
 	import { stream, ptz, streamPlayer } from '../components/stream';
@@ -199,10 +199,7 @@
 				if (res.code == 0) {
 					for (let i = 0; i < res.data.length; i++) {
 						//如果 devices 只有1条，移动值 为 res.data[i] 属性
-						if  (res.data[i].devices && res.data[i].devices.length == 0){
-							delete res.data[i].devices;
-						}
-						else if (res.data[i].devices && res.data[i].devices.length == 1) {
+						if (res.data[i].devices && res.data[i].devices.length == 1) {
 							res.data[i].device = res.data[i].devices[0];
 							delete res.data[i].devices;
 						}
@@ -220,19 +217,19 @@
 	const hasData = computed(() => tree_module.data.length > 0);
 	getData();
 	/** 播放器 */
-	 
-	const playerList = reactive<types. PlayerList>({
+
+	const playerList = reactive<types.PlayerList>({
 		splitNum: 1,
 		isFullScreen: false,
-		currentWin: 1,
+		currentWin: 1, 
 		currentStreams: [],
 		players: [
-			{ dom: {}, url: '', streamList: [{ name: '', url: '' }] },
-			{ dom: {}, url: '', streamList: [{ name: '', url: '' }] },
-			{ dom: {}, url: '', streamList: [{ name: '', url: '' }] },
-			{ dom: {}, url: '', streamList: [{ name: '', url: '' }] },
+			{  url: '', streamList: [{ name: '', url: '' }] },
+			{ url: '', streamList: [{ name: '', url: '' }] },
+			{ url: '', streamList: [{ name: '', url: '' }] },
+			{ url: '', streamList: [{ name: '', url: '' }] },
 		],
-	}); 
+	});
 	const play = (streams: String | { url: string; name: string }) => {
 		let streamArr = null;
 		if (streams && typeof streams == 'string') streamArr = JSON.parse(streams);
@@ -352,49 +349,22 @@
 	@import '../assets/css/player-split.css';
 	@color: #000; // rgba(255, 255, 255, 0.2);
 	@bgcolor: #fff; // #464444;
-	.el-container {
-		height: 82vh;
-		overflow: hidden;
+	#app .content .el-container {
+		height: 100vh;
 		.el-scrollbar {
 			background: @bgcolor;
 		}
-
-		.el-aside {
-			::v-deep .el-card__body {
-				height: 59vh;
-			}
+		.el-footer {
+			height: 40vh;
 		}
 		.el-main {
+			height: 60vh;
 			padding: 0;
 			margin: 0 15px;
 			::v-deep .el-scrollbar__view {
 				height: 100%;
 			}
-			.el-row {
-				height: 100%;
-			}
 			.el-scrollbar {
-				.playerList {
-					.el-icon {
-						cursor: pointer;
-						font-size: 23px;
-						vertical-align: middle;
-						padding-bottom: 7px;
-						&:hover {
-							color: red;
-						}
-					}
-					.video-item {
-						position: relative;
-						.js {
-							position: absolute;
-							width: calc(100% - 4px);
-							height: calc(100% - 4px);
-							left: 2px;
-							top: 2px;
-						}
-					}
-				}
 				.content {
 					padding: 10px;
 					.box {
@@ -406,6 +376,7 @@
 			}
 		}
 	}
+
 	.view .title {
 		color: var(--el-text-color-regular);
 		font-size: 18px;

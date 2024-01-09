@@ -88,8 +88,7 @@
 										sortable
 										:show-overflow-tooltip="true"></el-table-column>
 
-									<el-table-column
-										width="160"
+									<el-table-column 
 										prop="alarmTime"
 										label="告警时间"
 										sortable
@@ -110,8 +109,7 @@
 						</el-col>
 					</el-row>
 				 
-			</el-main>
-
+			</el-main> 
 			<el-footer>
 				<!--分页组件-->
 				<div class="pagination">

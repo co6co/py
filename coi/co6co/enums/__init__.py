@@ -22,6 +22,13 @@ class Base_Enum  (Enum):
         status=[{'uid':i.name, 'key':i.key,'value':i.val} for i in cls]
         return status 
     
+    @classmethod
+    def value_of(cls, value):
+        for k, v in cls.__members__.items(): 
+            if k == value: return v
+        else:
+            raise ValueError(f"'{cls.__name__}' enum not found for '{value}'")
+    
     def getValue(self)->T:
         return self.val
     def getKey(self)->T:

@@ -102,9 +102,15 @@
 			permiss: '2',
 		},
 		{
+			icon: 'Promotion',
+			index: '/siteMgr',
+			title: '站点管理',
+			permiss: '2',
+		},
+		{
 			icon: 'CameraFilled',
 			index: '/deviceMgr',
-			title: '站点管理',
+			title: '设备管理',
 			permiss: '2',
 		},
 

@@ -13,6 +13,7 @@ from model.pos.biz import  bizCameraPO
 from model.enum import device_type
 from model.params.devices import cameraParam, streamUrl
 from co6co_sanic_ext.model.res.result import Result, Page_Result
+from co6co_db_ext .db_utils import db_tools
 from sqlalchemy.sql import Select
 
 
@@ -67,14 +68,10 @@ class IP_Cameras_View(AuthMethodView):
             async with request.ctx.session as session:
                 session: AsyncSession = session
                 po = bizCameraPO()
-                po.streams = sys_json.dumps(param.streamUrls)
+                param.set_po(po) 
                 po.createTime=datetime.datetime.now()
-                po.createUser=id
-              
                 po.uuid=createUuid() 
-                po.name = param.name
-                po.innerIp = param.innerIp 
-                po.createTime=datetime.datetime.now()
+                po.createUser=id 
                 session.add(po)
                 await session.commit()
             return JSON_util.response(Result.success())
@@ -93,13 +90,10 @@ class IP_Cameras_View(AuthMethodView):
             executer = await session.execute(param.count_select)
             total = executer.scalar()
             result = await session.execute(param.list_select)
-            result = result.mappings().all()
-            for a in result:
-                # sqlalchemy.engine.row.RowMapping
-                log.succ(type(a.get("streams")))
-                log.succ(a.get("streams"))
-                log.succ(a.get("name"))
-            result = [dict(a) for a in result]
+            #result = result.mappings().all() 
+            #result = [dict(a) for a in result]
+            result = result.scalars().all()
+            result=db_tools.remove_db_instance_state(result)
             pageList = Page_Result.success(result, total=total)
             await session.commit()
         return JSON_util.response(pageList)
@@ -126,7 +120,7 @@ class IP_Camera_View(AuthMethodView):
         编辑相机
         """
         try:
-            param = cameraParam()
+            param  = cameraParam()
             param.__dict__.update(request.json)
             id=self.getUserId(request)
             async with request.ctx.session as session,session.begin():
@@ -137,11 +131,27 @@ class IP_Camera_View(AuthMethodView):
                 execute=await session.execute(select) 
                 po:bizCameraPO=execute.scalar()
                 if po == None: return JSON_util.response(Result.fail(message="未找到设备!")) 
-                po.streams = sys_json.dumps(param.streamUrls) 
-                po.updateUser=id 
-                po.name = param.name
-                po.innerIp = param.innerIp
+                param.set_po(po)
                 po.updateTime=datetime.datetime.now()  
             return JSON_util.response(Result.success())
         except Exception as e: 
+            log.err(f"编辑相机失败：{e}")
             return JSON_util.response(Result.fail(message=e))
+    async def delete(self, request: Request, pk: int):
+        """
+        删除相机
+        """
+        log.succ(f"删除相机：{pk}")
+        try: 
+            async with request.ctx.session as session,session.begin():
+                session: AsyncSession = session
+                select = ( Select(bizCameraPO).filter(bizCameraPO.id==pk) )
+                execute=await session.execute(select) 
+                po:bizCameraPO=execute.scalar()
+                if po == None: return JSON_util.response(Result.fail(message="未找到设备!"))
+                await session.delete(po)  
+                return JSON_util.response(Result.success())
+        except Exception as e: 
+            log.err(f"删除相机{pk}失败：{e}")
+            return JSON_util.response(Result.fail(message=e))
+    

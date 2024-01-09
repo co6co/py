@@ -62,10 +62,19 @@ const routes: RouteRecordRaw[] = [
 				component: () => import('../views/devicesPreview.vue'),
 			},
 			{
+				path: '/siteMgr',
+				name: 'siteMgr',
+				meta: {
+					title: '站点管理',
+					permiss: '2',
+				},
+				component: () => import('../views/siteMgr.vue'),
+			},
+			{
 				path: '/deviceMgr',
 				name: 'deviceMgr',
 				meta: {
-					title: '站点管理',
+					title: '设备管理',
 					permiss: '2',
 				},
 				component: () => import('../views/deviceMgr.vue'),

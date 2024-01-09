@@ -55,7 +55,7 @@ def getVideoFragment(wsUrl: str):
 def getTempFileName(ext: str = "jpg"):
     if not os.path.exists("tmp"):
         os.makedirs("tmp")
-    s = f'tmp/frame_{datetime.datetime.now().strftime('%H%M%S%f')}.{ext}'
+    s = f"tmp/frame_{datetime.datetime.now().strftime('%H%M%S%f')}.{ext}"
     return s
 
 

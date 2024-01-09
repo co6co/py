@@ -7,9 +7,9 @@ export {}
 
 declare module '@vue/runtime-core' {
   export interface GlobalComponents {
+    BizPlayer: typeof import('./src/components/biz/src/bizPlayer.vue')['default']
     CaptureFace: typeof import('./src/components/details/src/CaptureFace.vue')['default']
     DetailsInfo: typeof import('./src/components/details/src/detailsInfo.vue')['default']
-    Device: typeof import('./src/components/devices/src/device.vue')['default']
     Download: typeof import('./src/components/download/src/download.vue')['default']
     ElAside: typeof import('element-plus/es')['ElAside']
     ElAvatar: typeof import('element-plus/es')['ElAvatar']
@@ -32,6 +32,7 @@ declare module '@vue/runtime-core' {
     ElIcon: typeof import('element-plus/es')['ElIcon']
     ElImage: typeof import('element-plus/es')['ElImage']
     ElInput: typeof import('element-plus/es')['ElInput']
+    ElInputNumber: typeof import('element-plus/es')['ElInputNumber']
     ElLink: typeof import('element-plus/es')['ElLink']
     ElMain: typeof import('element-plus/es')['ElMain']
     ElMenu: typeof import('element-plus/es')['ElMenu']
