@@ -55,7 +55,7 @@
 							0
 						">
 						<el-select
-							style="width: 160px"
+							style="width: 90px"
 							class="mr10"
 							clearable
 							v-model="playerList.players[playerList.currentWin - 1].url"

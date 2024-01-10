@@ -90,18 +90,6 @@
 			permiss: '2',
 		},
 		{
-			icon: 'Menu',
-			index: '/wxMenuTable',
-			title: '菜单管理',
-			permiss: '2',
-		},
-		{
-			icon: 'Avatar',
-			index: '/usermgr',
-			title: '用户管理',
-			permiss: '2',
-		},
-		{
 			icon: 'Promotion',
 			index: '/siteMgr',
 			title: '站点管理',
@@ -109,11 +97,30 @@
 		},
 		{
 			icon: 'CameraFilled',
-			index: '/deviceMgr',
+			index: '/siteAssociation',
 			title: '设备管理',
 			permiss: '2',
+		},  
+		{
+			icon: 'Avatar',
+			index: '/usermgr',
+			title: '用户管理',
+			permiss: '2',
+		}, 
+		{
+			icon: 'Menu',
+			index: '/wxMenuTable',
+			title: '菜单管理',
+			permiss: '2',
 		},
-
+		/**
+		{
+			icon: 'Menu',
+			index: '/deviceMgr',
+			title: '监控管理',
+			permiss: '2',
+		},
+		 */
 		/**
 		{
 			icon: 'Setting',
@@ -141,12 +148,10 @@
 		top: 70px;
 		bottom: 0;
 		overflow-y: scroll;
-	}
-
+	} 
 	.sidebar::-webkit-scrollbar {
 		width: 0;
-	}
-
+	} 
 	.sidebar-el-menu:not(.el-menu--collapse) {
 		width: 250px;
 	}

@@ -1,7 +1,7 @@
 <template>
 	<el-row class="Image">
 		<!--显示大图-->
-		<el-col :span="24" >
+		<el-col :span="24" > 
 			<component
 				:key="currentName"
 				:is="compoents[currentName]"
@@ -15,18 +15,19 @@
 				<el-scrollbar>
 					<ul>
 						<li
+							v-for="(item, index) in imageOptions"
 							@click="onShow(item, index)"
 							:key="index"
-							v-for="(item, index) in imageOptions">
+							>
 							<a
 								><el-image :key="index" :src="item.poster" :title="item.name" />
 							</a>
 						</li>
 
-						<li
+						<li 
+							v-for="(item, index) in videoOptions"
 							@click="onShow(item, index)"
 							:key="index"
-							v-for="(item, index) in videoOptions"
 							style="position: relative">
 							<a>
 								<el-image :src="item.poster" :title="item.name" /><CaretRight />
@@ -49,17 +50,12 @@
 		computed,
 		onMounted,
 		onBeforeUnmount,
+		watchEffect,
 		nextTick,
 	} from 'vue';
 	import 'vue3-video-play/dist/style.css';
 	import { resourceOption } from './types';
 	import { ElImage } from 'element-plus';
-	const props = defineProps({
-		viewOption: {
-			type: Array<resourceOption>,
-			required: true,
-		},
-	});
 	const compoents = reactive({
 		Image: markRaw(
 			defineAsyncComponent(
@@ -76,40 +72,61 @@
 				() => import('../../../components/player/src/Splayer.vue')
 			)
 		),
-	});
-	const imageOptions = computed(() => {
-		return props.viewOption.filter((m) => m.type == 1);
+		htmlPlayer: markRaw(
+			defineAsyncComponent(
+				() => import('../../../components/player/src/htmlPlayer.vue')
+			)
+		),
 	});
 
+	const props = defineProps({
+		viewOption: {
+			type: Array<resourceOption>,
+			required: true,
+		},
+	}); 
+	const imageOptions = computed(() => {
+		console.info("image computed.")
+		return props.viewOption.filter((m) => m.type == 1);
+	});
+	
+
 	const videoOptions = computed(() => {
+		console.info("video  computed.")
 		return props.viewOption.filter((m) => m.type == 0);
 	});
-	const currentName = ref<'Image' | 'Video' | 'Splayer'>('Image');
+
+	
+	const currentName = ref<'Image' | 'Video' | 'Splayer'|'htmlPlayer'>('Image');
+	let current_Index =0;
 	const current_options = ref<resourceOption>({
 		url: '',
 		name: 'string',
 		type: 1,
 		poster: '',
 	});
-
-	const onShow = (option: resourceOption, key: number) => {
-		if (option.type == 0) {
-			currentName.value = 'Video';
-		} else currentName.value = 'Image';
+	watch(()=>props.viewOption,(n,o)=>{
+		//watch 先于 计算属性
+		nextTick(()=>{
+			console.info("wztch  computed.") 
+			if (currentName.value=="Image")current_options.value = imageOptions.value[current_Index];
+			else current_options.value = videoOptions.value[current_Index]; 
+		}) 
+	})
+	const onShow = (option: resourceOption, index: number) => { 
+		if (option.type == 0) currentName.value = 'htmlPlayer';
+		else currentName.value = 'Image';
+		current_Index=index
 		current_options.value = option;
-	};
-	onMounted(() => {
-		if (props.viewOption.length > 0)
-			current_options.value = props.viewOption[0];
-	});
+	}; 
 </script>
 <style scoped lang="less">
 	.Image {
 		.el-col {
 			height: 25rem; //rem 相对与 html 的 font-size计算
 						   //em 相对与 父元素的  font-size计算
-							//1vh=  1/100浏览器高度
-							//1vw
+						   //1vh=  1/100浏览器高度
+						   //1vw
 		}
 	}
 	.imag_nav_container {
@@ -117,8 +134,7 @@
 		white-space: nowrap;
 	}
 	ul li {
-		width: 100%;
-
+		width: 100%; 
 		cursor: pointer;
 		overflow: hidden;
 		z-index: calc(var(--el-index-normal) - 1);

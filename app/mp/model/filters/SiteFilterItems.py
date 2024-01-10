@@ -17,7 +17,7 @@ class SiteFilterItems(absFilterItems):
     def __init__(self):
         super().__init__(bizSitePo)
         self.listSelectFields = [
-            bizSitePo.id, bizSitePo.name, bizSitePo.createTime, bizSitePo.updateTime]
+            bizSitePo.id, bizSitePo.name,bizSitePo.postionInfo ,bizSitePo.deviceCode,bizSitePo.deviceDesc,bizSitePo.createTime, bizSitePo.updateTime]
 
     def filter(self) -> list:
         """
@@ -50,7 +50,7 @@ class SiteDiveceFilterItems(absFilterItems):
 
     def __init__(self):
         super().__init__(bizSitePo)
-        self.listSelectFields = [bizSitePo.id, bizSitePo.name]
+        
 
     def filter(self) -> list:
         """

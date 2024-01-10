@@ -17,7 +17,7 @@ export const list2_svc = (data: any): Promise<IPageResponse> => {
 };
 
 export const getDetailInfo=(id:number ,category:string): Promise<IPageResponse> => { 
-    return request.get(`${BASE_URL}/${id}?category=${category}` );
+    return request.post(`${BASE_URL}/${id}`, {category:category} );
 }; 
 export const add_site_svc = (data:any): Promise<IPageResponse> => { 
     return request.put(`${BASE_URL}`,data);

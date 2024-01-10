@@ -412,7 +412,7 @@
 	const getResultUrl = (uuid: string, isposter: boolean = false) => {
 		if (isposter)
 			return (
-				import.meta.env.VITE_BASE_URL + `/api/resource/poster/${uuid}/700/600`
+				import.meta.env.VITE_BASE_URL + `/api/resource/poster/${uuid}/680/480`
 			);
 		return import.meta.env.VITE_BASE_URL + `/api/resource/${uuid}`;
 	};

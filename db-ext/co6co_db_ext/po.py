@@ -15,7 +15,7 @@ class BasePO(DeclarativeBase):
         return dict(filter(lambda k: k[0] !="_sa_instance_state", self.__dict__.items()))
         #return {to_camelcase(c.name): getattr(self, c.name, None) for c in self.__table__.columns}
     def to_dict2(self):
-        return {to_camelcase(c.name): getattr(self, c.name, None) for c in self.__table__.columns}
+        return {to_camelcase(c.name): getattr(self,to_camelcase(c.name), None) for c in self.__table__.columns}
     
 class TimeStampedModelPO(BasePO):
     __abstract__=True

@@ -16,8 +16,9 @@
                 <el-tree v-if="hasData" highlight-current @node-click="onNodeCheck" ref="tree" class="filter-tree"
                     :data="tree_module.data" :props="tree_module.defaultProps" default-expand-all
                     :filter-node-method="tree_module.filterNode">
-                    <template #default="{ node, data }">
-                        <span>
+                    <template #default="{ node, data  }">
+                        <span> 
+                          
                             <!-- 没有子级所展示的图标 -->
                             <i v-if="!data.devices"><el-icon>
                                     <VideoCamera />
@@ -26,7 +27,7 @@
                                     <Avatar />
                                 </el-icon></i>
                             <span class="label">
-                                <el-tooltip :content="node.label">
+                                <el-tooltip :content=" data.deviceDesc||node.label">
                                     {{ node.label }}
                                 </el-tooltip>
                             </span>
@@ -124,7 +125,7 @@ const tree_module = reactive<tree_module>({
   },
   defaultProps: {
     children: 'devices',
-    label: 'name',
+    label: 'name', 
   },
 });
 // 获取表格数据

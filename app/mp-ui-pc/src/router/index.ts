@@ -70,11 +70,21 @@ const routes: RouteRecordRaw[] = [
 				},
 				component: () => import('../views/siteMgr.vue'),
 			},
+			
+			{
+				path: '/siteAssociation',
+				name: 'siteAssociation',
+				meta: {
+					title: '设备管理',
+					permiss: '2',
+				},
+				component: () => import('../views/siteAssociation.vue'),
+			},
 			{
 				path: '/deviceMgr',
 				name: 'deviceMgr',
 				meta: {
-					title: '设备管理',
+					title: '监控设备',
 					permiss: '2',
 				},
 				component: () => import('../views/deviceMgr.vue'),

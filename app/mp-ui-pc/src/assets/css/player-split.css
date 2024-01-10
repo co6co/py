@@ -109,7 +109,7 @@
 	cursor: pointer;
 }
 .playerList .video-tools ul li {
-	margin: 0 8px;
+	margin: 0 5px;
 	position: relative;
 }
 .playerList .video-tools ul li svg {

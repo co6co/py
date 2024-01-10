@@ -14,6 +14,9 @@ class bizSitePo(TimeStampedModelPO):
     __tablename__ = "biz_site" 
     id = Column("id",Integer,comment="主键",autoincrement=True, primary_key=True)
     name= Column("name",String(64),nullable=False, comment="站点名称")
+    deviceCode= Column("device_code",String(64),nullable=False, comment="设备编号")
+    postionInfo= Column("postion_info",String(255),nullable=False, comment="设备安装位置")
+    deviceDesc= Column("device_desc",String(255),nullable=False, comment="设备使用描述")
    
     boxPO =Relationship("bizBoxPO",uselist=False, back_populates="sitePO") 
     routerPO=Relationship("bizRouterPO",uselist=False,back_populates="sitePO") 

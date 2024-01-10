@@ -110,23 +110,26 @@ class Site_View(BaseMethodView):
     """
     资源视图
     """
-    async def get(self,request:Request,pk:int):
+    async def post(self,request:Request,pk:int):
         """
         获取详细信息内容
         """ 
         try: 
+            '''
             data=self.usable_args(request) 
             log.warn(data)
             data=data.get("category") 
+            ''' 
+            data=request.json.get("category")
             type:device_type=device_type.value_of(data)
             async with request.ctx.session as session,session.begin(): 
                 session:AsyncSession=session  
                 if type==device_type.router: 
-                    select=(Select(bizRouterPO).where(bizRouterPO.siteId==pk) )
+                    select=(Select(bizRouterPO).where(bizRouterPO.siteId==pk).order_by(bizRouterPO.id.asc()) )
                 if type==device_type.ip_camera: 
-                    select=(Select(bizCameraPO).where(bizCameraPO.siteId==pk) )
+                    select=(Select(bizCameraPO).where(bizCameraPO.siteId==pk) .order_by(bizCameraPO.id.asc()) )
                 if type==device_type.box: 
-                    select=(Select(bizBoxPO).where(bizBoxPO.siteId==pk) )
+                    select=(Select(bizBoxPO).where(bizBoxPO.siteId==pk).order_by(bizBoxPO.id.asc())  )
                 executer= await session.execute(select)
                 poList=executer.scalars().all()
                 result=db_tools.remove_db_instance_state(poList)
@@ -142,12 +145,14 @@ class Site_View(BaseMethodView):
         try: 
             po=bizSitePo()
             po.__dict__.update(request.json) 
-            async with request.ctx.session as session,session.begin():
-                log.warn("********************")
+            async with request.ctx.session as session,session.begin(): 
                 session: AsyncSession = session  
                 oldPo:bizSitePo=await session.get_one(bizSitePo,pk) 
                 if oldPo == None: return JSON_util.response(Result.fail(message="未找到设备!"))  
                 oldPo.name = po.name 
+                oldPo.deviceCode = po.deviceCode 
+                oldPo.postionInfo = po.postionInfo 
+                oldPo.deviceDesc = po.deviceDesc 
                 oldPo.updateTime=datetime.datetime.now()   
             return JSON_util.response(Result.success())
         except Exception as e: 

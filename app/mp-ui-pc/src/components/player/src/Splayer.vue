@@ -1,4 +1,4 @@
-<template>
+ <template>
     <div ref="playerContainer" class="max-w-full">
       <video  
         ref="playerEle"
@@ -12,6 +12,9 @@
       <button @click="pause">暂停</button>
     </div>
 </template>
+ 
+ 
+
 <!--https://blog.csdn.net/xiao suom/article/details/1299 89073-->
 <script lang="ts" setup>
 
@@ -105,23 +108,4 @@ const pause = () => playerEle.value && playerEle.value.pause();
 defineExpose({ play, pause });
 </script>
 
-
-
-<style scoped>
-.max-w-full {
-  max-width: 100%;
-}
-
-.full {
-  width: 100%;
-  height: 100%;
-}
-</style> 
-<!--
-<shaka-player
-  class="video"
-  :src="src"
-  :poster="poster"
-  autoplay
-></shaka-player>
--->
+ 

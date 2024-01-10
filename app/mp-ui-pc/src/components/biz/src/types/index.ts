@@ -10,3 +10,4 @@ export interface PlayerList {
     currentStreams: Array<stream_source>;
     players: Array<player>;
 }
+

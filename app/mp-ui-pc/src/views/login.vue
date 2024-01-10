@@ -95,7 +95,7 @@
 							>
 						</span>
 
-						<span>版权所有(C)2023&nbsp;{{ sysInfo.company }} </span>
+						<span>版权所有(C)2024&nbsp;{{ sysInfo.company }} </span>
 						<span>
 							技术支持： &nbsp;<a href="#" target="_blank"
 								>江苏惠纬讯信息科技有限公司</a
