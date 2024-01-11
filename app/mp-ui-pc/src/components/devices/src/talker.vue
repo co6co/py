@@ -35,14 +35,24 @@
 	const store = useAppDataStore();
 
 	onBeforeMount(async () => {
-		try { 
+		try {
 			await store.setXssConfig();
 		} catch (e) {
 			console.error(e);
 		}
 	});
-	onMounted(() => {}); 
-	let talker = new xTalker(); 
+	onMounted(() => {});
+	let talker = new xTalker();  
+	const emit = defineEmits<{  (event: 'stateChange', connect: 0|1|number,connectDesc:string): void }>() 
+	talker.xTalkSetConnectState = (value: string) => {
+		talker.xtalk_conn_state = value;
+		let connect=0
+		console.info("talkerStateChange：",value)
+		if(value=="Connected") connect=1;
+		else connect=0
+		emit("stateChange",connect,value)
+	};
+
 	const connected = ref(false);
 	const connect = () => {
 		talker.xtalk_xss_mode = true;
@@ -54,13 +64,12 @@
 		let peer = props.talkNo;
 		if (typeof peer == 'number') talker.xtalk_xss_to_device_id = peer;
 		else if (typeof peer == 'string') talker.xtalk_xss_to_gb_url = peer;
-		talker.xtalk_websocket_server_connect();
-		console.info(talker.xtalk_conn_state);
+		talker.xtalk_websocket_server_connect(); 
 		connected.value = true;
 	};
 	const disconnect = () => {
 		talker.xtalk_websocket_server_disconn();
-		console.info(talker.xtalk_conn_state);
+		//console.info('call disconnect,state:', talker.xtalk_conn_state);
 		connected.value = false;
 	};
 	//示例方法 不在使用
@@ -82,6 +91,6 @@
 	defineExpose({
 		talker,
 		connect,
-		disconnect,
+		disconnect 
 	});
 </script>

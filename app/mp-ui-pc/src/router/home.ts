@@ -7,7 +7,7 @@ import { nextTick } from 'vue';
 const routes: RouteRecordRaw[] = [
 	{
 		path: '/',
-		redirect: '/usermgr',
+		redirect: '/devicesPreview.html',
 	},
 	{
 		path: '/',

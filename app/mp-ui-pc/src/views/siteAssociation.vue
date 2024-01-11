@@ -88,8 +88,7 @@
 				</el-scrollbar>
 			</el-main>
 			<el-footer>
-				<div class="pagination">
-					{{ pagedOption.pageSizes }}
+				<div class="pagination"> 
 					<el-pagination
 						background
 						:current-page="table_module.query.pageIndex"
@@ -106,7 +105,7 @@
 			</el-footer>
 		</el-container>
 		<!-- 编辑监控球机 -->
-		<edit-ip-camera ref="editIpCameraRef"   @saved="onIpcamerSave()"></edit-ip-camera>
+		<edit-ip-camera ref="editIpCameraRef" :allow-modify-site="false"   @saved="onIpcamerSave()"></edit-ip-camera>
 		<!-- 弹出框 -->
 		<el-dialog
 			:title="form2.title"
@@ -257,11 +256,11 @@
 	const onOpenIpCameraDialog = ( category:string, row: TableRow) => { 
     queryDeviceDetailInfo(row.id, category).then((res) => {
 			if (res.code == 0) { 
-        let data={}
-        if ( res.data.length>0)  data= res.data[0];
-        if ( res.data.length>1) console.warn("site对应了多个球机,现只能编辑一个！")
-        //有记录编辑无数据增加
-        editIpCameraRef.value.onOpenDialog(res.data.length>0?1:0,data);
+				let data={siteId:row.id}
+				if ( res.data.length>0)  data= res.data[0];
+				if ( res.data.length>1) console.warn("site对应了多个球机,现只能编辑一个！")
+				//有记录编辑无数据增加
+				editIpCameraRef.value.onOpenDialog(res.data.length>0?1:0,data);
 			}
 		}); 
 	};

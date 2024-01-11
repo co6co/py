@@ -56,8 +56,9 @@ const getUrl = () => {
 const redirectUrl = () => {
 	showNotify({ type: 'warning', message: `跳转...` });
 	const redirect_uri = import.meta.env.VITE_WX_redirect_uri; 
+	console.info(redirect_uri)
 	const scope = 1;
-	let redirectUrl = '';
+	let redirectUrl = ''; 
 	if (debug) {
 		redirectUrl = RedirectWxService(
 			redirect_uri,
@@ -65,8 +66,9 @@ const redirectUrl = () => {
 			`${randomString(10)}-${scope}-${getUrl()}-${randomString(10)}`
 		);
 	} else {
+		let url=`${window.location.protocol}//${window.location.host}${redirect_uri}`
 		redirectUrl = RedirectWxService(
-			redirect_uri,
+			url,
 			scope,
 			`${randomString(10)}-${scope}-${getUrl()}-${randomString(10)}`
 		);

@@ -134,8 +134,7 @@
 	}; 
 	watchEffect(() => {
 		try {  
-			if (props.stream) {
-				console.error('开始播放:', props.stream);
+			if (props.stream) { 
 				nextTick(() => {
 					replay();
 				}); // 可能会死

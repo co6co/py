@@ -1,10 +1,9 @@
 <template>
-	 
 	<!-- 弹出框 -->
 	<el-dialog
 		:title="form.title"
 		v-model="form.dialogVisible"
-		style="width: 50%; height: 80%" > 
+		style="width: 50%; height: 80%">
 		<el-form
 			label-width="90px"
 			ref="dialogForm"
@@ -16,9 +15,10 @@
 					v-model="form.fromData.name"
 					placeholder="设备名称"></el-input>
 			</el-form-item>
-			<el-form-item label="所属站点" prop="siteId">
-				<el-select
+			<el-form-item label="所属站点" prop="siteId"> 
+				<el-select 
 					style="width: 160px"
+					:disabled="!allowModifySite"
 					class="mr10"
 					clearable
 					v-model="form.fromData.siteId"
@@ -121,7 +121,7 @@
 </template>
 
 <script setup lang="ts">
-	import { ref, reactive,PropType } from 'vue';
+	import { ref, reactive, PropType } from 'vue';
 	import {
 		ElMessage,
 		ElMessageBox,
@@ -130,22 +130,28 @@
 	} from 'element-plus';
 	import { Plus, Minus } from '@element-plus/icons-vue';
 	import * as api from '../../../api/device';
-    import * as site_api from '../../../api/site'; 
- 
-interface CameraItem  {
-    id?:number;
-    innerIp: string;
-    name: string;
-    sip: string;
-    channel1_sip: string;
-    channel2_sip: string;
-    channel3_sip: string;
-    channel4_sip: string;
-    channel5_sip: string;
-    siteId?: number;
-    talkbackNo?: number; 
-    streams:String,
-}
+	import * as site_api from '../../../api/site';
+
+	const props = defineProps({
+		allowModifySite: {
+			type: Boolean, 
+			default: true,
+		},
+	});
+	interface CameraItem {
+		id?: number;
+		innerIp: string;
+		name: string;
+		sip: string;
+		channel1_sip: string;
+		channel2_sip: string;
+		channel3_sip: string;
+		channel4_sip: string;
+		channel5_sip: string;
+		siteId?: number;
+		talkbackNo?: number;
+		streams: String;
+	}
 	interface FromData {
 		innerIp: string;
 		name: string;
@@ -157,11 +163,10 @@ interface CameraItem  {
 		channel5_sip: string;
 		siteId?: number;
 		talkbackNo?: number;
-		streamUrls: Array<{ name: String; url: String }>;  
+		streamUrls: Array<{ name: String; url: String }>;
 	}
- 
- 
-    const emits =defineEmits(["saved"])
+
+	const emits = defineEmits(['saved']);
 	interface dialogDataType {
 		dialogVisible: boolean;
 		operation: 0 | 1 | number;
@@ -213,10 +218,10 @@ interface CameraItem  {
 			streamUrls: [],
 		},
 	});
-    interface SiteCategory {
+	interface SiteCategory {
 		List: Array<{ id: number; name: string }>;
 	}
-    const SiteCategoryRef = ref<SiteCategory>({ List: [] });
+	const SiteCategoryRef = ref<SiteCategory>({ List: [] });
 	const getSiteType = async () => {
 		const res = await site_api.select_svc();
 		if (res.code == 0) {
@@ -224,9 +229,9 @@ interface CameraItem  {
 		}
 	};
 	getSiteType();
-	const onOpenDialog = (operation: 0 | 1 ,item:CameraItem) => {
+	const onOpenDialog = (operation: 0 | 1, item: CameraItem) => {
 		form.dialogVisible = true;
-	   
+
 		form.dialogVisible = true;
 		form.operation = operation;
 		form.id = -1;
@@ -241,30 +246,30 @@ interface CameraItem  {
 				form.fromData.channel3_sip = '';
 				form.fromData.channel4_sip = '';
 				form.fromData.channel5_sip = '';
-				form.fromData.siteId = undefined;
+				form.fromData.siteId = item.siteId;
 				form.fromData.talkbackNo = undefined;
 				form.fromData.streamUrls = [];
 				break;
 			case 1:
-                if ( item&&item.id){
-                    const row=item
-                    form.id = item.id;
-                    form.title = '编辑';
-                    form.fromData.innerIp = row.innerIp;
-                    form.fromData.name = row.name;
-                    form.fromData.sip = row.sip;
-                    form.fromData.channel1_sip = row.channel1_sip;
-                    form.fromData.channel2_sip = row.channel2_sip;
-                    form.fromData.channel3_sip = row.channel3_sip;
-                    form.fromData.channel4_sip = row.channel4_sip;
-                    form.fromData.channel5_sip = row.channel5_sip;
-                    form.fromData.siteId = row.siteId;
-                    form.fromData.talkbackNo = row.talkbackNo;
-                    if (row.streams && typeof row.streams == 'string')
-                        form.fromData.streamUrls = JSON.parse(row.streams);
-                    else form.fromData.streamUrls = [];
-                }
-				
+				if (item && item.id) {
+					const row = item;
+					form.id = item.id;
+					form.title = '编辑';
+					form.fromData.innerIp = row.innerIp;
+					form.fromData.name = row.name;
+					form.fromData.sip = row.sip;
+					form.fromData.channel1_sip = row.channel1_sip;
+					form.fromData.channel2_sip = row.channel2_sip;
+					form.fromData.channel3_sip = row.channel3_sip;
+					form.fromData.channel4_sip = row.channel4_sip;
+					form.fromData.channel5_sip = row.channel5_sip;
+					form.fromData.siteId = row.siteId;
+					form.fromData.talkbackNo = row.talkbackNo;
+					if (row.streams && typeof row.streams == 'string')
+						form.fromData.streamUrls = JSON.parse(row.streams);
+					else form.fromData.streamUrls = [];
+				}
+
 				break;
 		}
 	};
@@ -283,7 +288,7 @@ interface CameraItem  {
 						if (res.code == 0) {
 							form.dialogVisible = false;
 							ElMessage.success(`增加成功`);
-                            emits("saved") 
+							emits('saved');
 						} else {
 							ElMessage.error(`增加失败:${res.message}`);
 						}
@@ -293,7 +298,7 @@ interface CameraItem  {
 						if (res.code == 0) {
 							form.dialogVisible = false;
 							ElMessage.success(`编辑成功`);
-                            emits("saved") 
+							emits('saved');
 						} else {
 							ElMessage.error(`编辑失败:${res.message}`);
 						}
@@ -334,8 +339,8 @@ interface CameraItem  {
 				form.fromData.streamUrls = streamUrl;
 			})
 			.catch(() => {});
-	}; 
-    defineExpose({
-		onOpenDialog
+	};
+	defineExpose({
+		onOpenDialog,
 	});
 </script>

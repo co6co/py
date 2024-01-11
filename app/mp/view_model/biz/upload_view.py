@@ -27,9 +27,7 @@ async def get_Device_id( db:DbOperations,param:m.Box_base_Param,upgrade=False):
         po=bizBoxPO()
         po.uuid=param.BoardId
         po.innerIp=param.BoardIp
-        po.ip=param.ip
-        po.deviceType=device_type.box.val
-
+        po.ip=param.ip 
         db.add(po)
         await db.commit()  
         return po.id
@@ -69,7 +67,7 @@ class Upload_view(BaseMethodView):
         po.subCategory=sub_category
         po.url=path 
         po.uid=uid
-        po.deviceId=device_id 
+        po.boxId=device_id 
         opt.add_all([po])
         return po    
 class Video_Upload_View(Upload_view):

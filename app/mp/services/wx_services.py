@@ -13,6 +13,7 @@ from model.pos.right import UserPO,AccountPO ,UserGroupPO,RolePO
 import datetime 
 from co6co.utils import log
 from wechatpy import  events
+import uuid
 
  
 async def createOrUpdateAccount(session:AsyncSession, wx_user:wxUser,accountStatus:str=None ):
@@ -21,6 +22,7 @@ async def createOrUpdateAccount(session:AsyncSession, wx_user:wxUser,accountStat
     """
     async with session:  
         opt=DbOperations(session)  
+        log.warn(f"userOpenId:{wx_user.openid}")
         select=(
              Select(WxUserPO) 
             .options(joinedload(WxUserPO.accountPO))  
@@ -48,6 +50,7 @@ async def createOrUpdateAccount(session:AsyncSession, wx_user:wxUser,accountStat
             a_po.accountName=wx_user.openid
             a_po.category=Account_category.wx.val 
             a_po.userPO=u_po
+            a_po.uid=str(uuid.uuid4())   
              
             w_po=WxUserPO()
             wx_user.to( w_po) 

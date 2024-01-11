@@ -2,53 +2,47 @@
 	<div class="ptz-controls show">
 		<div class="ptz-bg-active"></div>
 		<div
-			class="ptz-arrow ptz-arrow-up"
+			class="ptz-arrow ptz-arrow-up" :class="{disabled: !ptzEnable}"
 			data-arrow="up"
 			@mousedown="onOperater('up', 0)"
-			@mouseup="onOperater('up', 1)"
-		></div>
+			@mouseup="onOperater('up', 1)"></div>
 		<div
-			class="ptz-arrow ptz-arrow-right"
+			class="ptz-arrow ptz-arrow-right " :class="{disabled: !ptzEnable}"
 			data-arrow="right"
 			@mousedown="onOperater('right', 0)"
-			@mouseup="onOperater('right', 1)"
-		></div>
+			@mouseup="onOperater('right', 1)"></div>
 		<div
-			class="ptz-arrow ptz-arrow-down"
+			class="ptz-arrow ptz-arrow-down" :class="{disabled: !ptzEnable}"
 			data-arrow="down"
 			@mousedown="onOperater('down', 0)"
-			@mouseup="onOperater('down', 1)"
-		></div>
+			@mouseup="onOperater('down', 1)"></div>
 		<div
-			class="ptz-arrow ptz-arrow-left"
+			class="ptz-arrow ptz-arrow-left" :class="{disabled: !ptzEnable}"
 			data-arrow="left"
 			@mousedown="onOperater('left', 0)"
-			@mouseup="onOperater('left', 1)"
-		></div>
+			@mouseup="onOperater('left', 1)"></div>
 		<div
 			class="ptz-control"
-			@mousedown="onOperater('center', 0)"
-			@mouseup="onOperater('center', 1)"
-		><el-icon><Microphone /></el-icon>
-	</div>
+			@click="onCenter"
+			:class="{ active: centerActive, disabled:!takerEnable}">
+			<el-icon><Microphone /></el-icon>
+		</div>
 		<div class="ptz-btns">
 			<div class="ptz-btn">
 				<div
-					class="ptz-expand ptz-icon"
+					class="ptz-expand ptz-icon"  :class="{disabled: !ptzEnable}"
 					@mousedown="onOperater('zoomin', 0)"
-					@mouseup="onOperater('zoomin', 1)"
-				>
-					<i class="ptz-expand-icon"></i>
+					@mouseup="onOperater('zoomin', 1)">
+					<i class="ptz-expand-icon" ></i>
 					<span class="icon-title-tips">
 						<span class="icon-title">缩放+</span>
 					</span>
 				</div>
 				<div
-					class="ptz-narrow ptz-icon"
+					class="ptz-narrow ptz-icon" :class="{disabled: !ptzEnable}"
 					@mousedown="onOperater('zoomout', 0)"
-					@mouseup="onOperater('zoomout', 1)"
-				>
-					<i class="ptz-narrow-icon"></i>
+					@mouseup="onOperater('zoomout', 1)">
+					<i class="ptz-narrow-icon"  ></i>
 					<span class="icon-title-tips">
 						<span class="icon-title">缩放-</span>
 					</span>
@@ -58,12 +52,12 @@
 	</div>
 
 	<div class="zoom-controls">
-		<div class="zoom-narrow">
+		<div class="zoom-narrow" :class="{disabled: !ptzEnable}">
 			<i class="icon icon-narrow"></i>
 			<span class="icon-title-tips"><span class="icon-title">缩小</span></span>
 		</div>
 		<div class="zoom-tips">电子放大</div>
-		<div class="zoom-expand">
+		<div class="zoom-expand" :class="{disabled: !ptzEnable}">
 			<i class="icon icon-expand"></i>
 			<span class="icon-title-tips"><span class="icon-title">放大</span></span>
 		</div>
@@ -77,17 +71,22 @@
 </template>
 <script setup lang="ts">
 	import * as t from './types/ptz';
+	import { ref } from 'vue';
+
+	const props = defineProps({
+		ptzEnable: {
+			type: Boolean,
+			default: true,
+		},
+		takerEnable: {
+			type: Boolean,
+			default: true,
+		},
+	});
 	interface Emits {
 		(e: 'ptz', name: t.ptz_name, type: t.ptz_type): void;
 		(
-			e:
-				| 'uped'
-				| 'downed'
-				| 'righted'
-				| 'lefted'
-				| 'zoomined'
-				| 'zoomouted'
-				| 'centered'
+			e: 'uped' | 'downed' | 'righted' | 'lefted' | 'zoomined' | 'zoomouted'
 		): void;
 		(
 			e:
@@ -97,11 +96,12 @@
 				| 'lefting'
 				| 'zoomining'
 				| 'zoomouting'
-				| 'centering'
 		): void;
+		(e: 'centerClick', active: boolean): void;
 	}
 	const emits = defineEmits<Emits>();
 	const onOperater = (name: string, type: number) => {
+		if (!props.ptzEnable)return
 		switch (name) {
 			case 'up':
 				type == 1 ? emits('uped') : emits('uping');
@@ -121,19 +121,22 @@
 			case 'zoomout':
 				type == 1 ? emits('zoomouted') : emits('zoomouting');
 				break;
-			case 'center':
-				type == 1 ? emits('centered') : emits('centering');
-				break;
 			default:
 				return;
 		}
 		emits('ptz', name, type === 0 ? 'starting' : 'stop');
 	};
+	const centerActive = ref(false);
+	const onCenter = () => {
+		if (!props.takerEnable)return
+		centerActive.value = !centerActive.value;
+		emits('centerClick', centerActive.value);
+	};
 </script>
-<style scoped lang="less"> 
+<style scoped lang="less">
 	@normal-color: #fff;
 	@active-color: #706161;
-
+	
 	.inverted {
 		filter: invert(100%);
 	}
@@ -187,6 +190,15 @@
 		visibility: visible;
 		opacity: 1;
 	}
+
+	@keyframes anim1 {
+		25% {
+			color: darken(red, 20%);
+		}
+		50% {
+			color: darken(red, 10%);
+		}
+	}
 	.ptz-control {
 		cursor: pointer;
 		position: absolute;
@@ -196,15 +208,25 @@
 		height: 50px;
 		background: @normal-color;
 		border-radius: 50%;
-		transition: left 0.3s, top 0.3s;
-		&:hover ,&.active{
+		transition: left 0.3s, top 0.3s; 
+		&.active {
 			background: @active-color;
-			.el-icon{color: darken( @normal-color,10%);  ;}
+			.el-icon {
+				color: darken( @normal-color,10%);
+				animation-name: anim1;
+				animation-direction: alternate;
+				animation-timing-function: linear;
+				animation-delay: 0s;
+				animation-iteration-count: infinite;
+				animation-duration: 2s;
+			}
 		}
-		
-		.el-icon{
+		&.disabled{background:@normal-color;}
+		//filter: invert(52%) sepia(82%) saturate(2494%) hue-rotate(327deg) brightness(104%) contrast(92%);
+		.el-icon {
 			position: absolute;
-			left:18px;top:18px; 
+			left: 18px;
+			top: 18px;
 		}
 	}
 	.ptz-control.ptz-control-left {
@@ -262,31 +284,44 @@
 		height: 28px;
 		cursor: pointer;
 		/** + */
-		background: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABwAAAAcCAMAAABF0y+mAAAANlBMVEVfX19fX19fX19fX19fX19fX19fX19HcExfX19fX19fX1/////Pz8+oqKjCwsKhoaHn5+eWlpaOqTaDAAAAC3RSTlP/3CaKxwJiAELtp4ri/s4AAACuSURBVCjPfZPREoUgCERXBdPRyv7/Z6/Z1aQp9oWJMyYLiKUrOIpAJBdGCldgbzBkPM/QEoTI3jBEPBRDhwEvChe08Q1Ge0ImvIq4Qj8ljrLdH77CyQPWlCdHC0Q1e9rmmuC+oQN9Q4LwcQg40L6eyqm0uEpXSUqe3fKpkkqL+Y/o+07SrahNEO0T0LBsvOitf4xsLqiNTB32wtqaVKosGLO2mhUrS93+PZ4D99wPqzMJVcbEyA8AAAAASUVORK5CYII=')
-			no-repeat 50%;
+		background: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABwAAAAcCAMAAABF0y+mAAAAM1BMVEVHcEyZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZn////i4uLZ2dnIyMjExMS8vLy+iXNeAAAACnRSTlMAYomLxwEm9+NCLo6DKwAAALNJREFUKM99k9kWgyAMRIMmEMLm/39tKaVKFJkXl3sYJ4sAXeQ3ZOcYd0+gRYblFBuFLYoS2ot5lpvYn8zJQ65TO2GVNmdCmQq/qczw4gjpejD14BgmhziEIvCjVRlPioftHW6A7xBB1a8CCUMvsuSqEkPM7eZX6h8GrQ67bYpNIbRL6rb4/k2EfVXKsgmqfQrW9qnGq96a28jGQG1ky2HXpVysyYyeDIhWq7le6ua9P36HD6+2GRi8iBZBAAAAAElFTkSuQmCC')
+			no-repeat 50%; 
+		
 		background-size: 100% 100%;
 	}
 	.ptz-expand:hover .ptz-expand-icon {
 		/** + */
-		background: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABwAAAAcCAMAAABF0y+mAAAAM1BMVEVHcEyZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZn////i4uLZ2dnIyMjExMS8vLy+iXNeAAAACnRSTlMAYomLxwEm9+NCLo6DKwAAALNJREFUKM99k9kWgyAMRIMmEMLm/39tKaVKFJkXl3sYJ4sAXeQ3ZOcYd0+gRYblFBuFLYoS2ot5lpvYn8zJQ65TO2GVNmdCmQq/qczw4gjpejD14BgmhziEIvCjVRlPioftHW6A7xBB1a8CCUMvsuSqEkPM7eZX6h8GrQ67bYpNIbRL6rb4/k2EfVXKsgmqfQrW9qnGq96a28jGQG1ky2HXpVysyYyeDIhWq7le6ua9P36HD6+2GRi8iBZBAAAAAElFTkSuQmCC')
+		background: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABwAAAAcCAMAAABF0y+mAAAANlBMVEVfX19fX19fX19fX19fX19fX19fX19HcExfX19fX19fX1/////Pz8+oqKjCwsKhoaHn5+eWlpaOqTaDAAAAC3RSTlP/3CaKxwJiAELtp4ri/s4AAACuSURBVCjPfZPREoUgCERXBdPRyv7/Z6/Z1aQp9oWJMyYLiKUrOIpAJBdGCldgbzBkPM/QEoTI3jBEPBRDhwEvChe08Q1Ge0ImvIq4Qj8ljrLdH77CyQPWlCdHC0Q1e9rmmuC+oQN9Q4LwcQg40L6eyqm0uEpXSUqe3fKpkkqL+Y/o+07SrahNEO0T0LBsvOitf4xsLqiNTB32wtqaVKosGLO2mhUrS93+PZ4D99wPqzMJVcbEyA8AAAAASUVORK5CYII=')
 			no-repeat 50%;
-		background-size: 100% 100%;
+	}
+	.ptz-expand.disabled .ptz-expand-icon {
+		/** + */
+		background: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABwAAAAcCAMAAABF0y+mAAAAM1BMVEVHcEyZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZn////i4uLZ2dnIyMjExMS8vLy+iXNeAAAACnRSTlMAYomLxwEm9+NCLo6DKwAAALNJREFUKM99k9kWgyAMRIMmEMLm/39tKaVKFJkXl3sYJ4sAXeQ3ZOcYd0+gRYblFBuFLYoS2ot5lpvYn8zJQ65TO2GVNmdCmQq/qczw4gjpejD14BgmhziEIvCjVRlPioftHW6A7xBB1a8CCUMvsuSqEkPM7eZX6h8GrQ67bYpNIbRL6rb4/k2EfVXKsgmqfQrW9qnGq96a28jGQG1ky2HXpVysyYyeDIhWq7le6ua9P36HD6+2GRi8iBZBAAAAAElFTkSuQmCC')
+			no-repeat 50%; 
+			cursor: not-allowed;
 	}
 	.ptz-narrow .ptz-narrow-icon {
 		display: inline-block;
 		width: 28px;
 		height: 28px;
 		/* - */
-		background: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABwAAAAcCAMAAABF0y+mAAAAM1BMVEVHcExfX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX1/9/f2/v7/y8vLUObqxAAAADXRSTlMA3IrE6SZi9wI+y0gNXAn3CgAAAI5JREFUKM+Fk1kOwyAMBQ04bJHT3P+0JVUMNMWv8zvSk1cipfjAKXHwhR7k6KTjYp7dVuWLug1XWB5wz96T/JD2O3Phmv0k5ypL6lVVFIPYpLOka5WKSSFvS0/BloHYlkza5HkMzrvVLo8ZlRr7mtFYWBBsBQ4BjC//GTxcGVw2PpOVHQ6fJj7qS4936OoN2K4e5yE6N1UAAAAASUVORK5CYII=')
+		background: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABwAAAAcBAMAAACAI8KnAAAAJ1BMVEVHcEyZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZn+/v7X19ckk9ihAAAACnRSTlMA9+NCAsuKJsRiPv/2GwAAAJlJREFUGNNjYAAC5gxFoTYDBijw1FoFBIumQHjsUavAYGkBmGu0CgqUwRqlYNyFIO2Fq+BAnIGBJQrBXerAwLkKCUxgYELmKjBYIXMXM2Qhc5cxdCFzVzBoIXMXMYAcsRsMdgEdgs4FKT4DBqdAitGMQrMIzRkojlRB9wKaB9G8z+CMGjgshjCuMCjoWNxRAxYt2KGRYgJiAQAnZcjElaB/xwAAAABJRU5ErkJggg==')
 			no-repeat 50%;
+	
 		background-size: 100% 100%;
 		cursor: pointer;
 	}
 	.ptz-narrow:hover .ptz-narrow-icon {
 		/* - */
+		background: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABwAAAAcCAMAAABF0y+mAAAAM1BMVEVHcExfX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX1/9/f2/v7/y8vLUObqxAAAADXRSTlMA3IrE6SZi9wI+y0gNXAn3CgAAAI5JREFUKM+Fk1kOwyAMBQ04bJHT3P+0JVUMNMWv8zvSk1cipfjAKXHwhR7k6KTjYp7dVuWLug1XWB5wz96T/JD2O3Phmv0k5ypL6lVVFIPYpLOka5WKSSFvS0/BloHYlkza5HkMzrvVLo8ZlRr7mtFYWBBsBQ4BjC//GTxcGVw2PpOVHQ6fJj7qS4936OoN2K4e5yE6N1UAAAAASUVORK5CYII=')
+			no-repeat 50%; 
+	}
+	.ptz-narrow.disabled .ptz-narrow-icon {
+		/**- */
 		background: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABwAAAAcBAMAAACAI8KnAAAAJ1BMVEVHcEyZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZn+/v7X19ckk9ihAAAACnRSTlMA9+NCAsuKJsRiPv/2GwAAAJlJREFUGNNjYAAC5gxFoTYDBijw1FoFBIumQHjsUavAYGkBmGu0CgqUwRqlYNyFIO2Fq+BAnIGBJQrBXerAwLkKCUxgYELmKjBYIXMXM2Qhc5cxdCFzVzBoIXMXMYAcsRsMdgEdgs4FKT4DBqdAitGMQrMIzRkojlRB9wKaB9G8z+CMGjgshjCuMCjoWNxRAxYt2KGRYgJiAQAnZcjElaB/xwAAAABJRU5ErkJggg==')
 			no-repeat 50%;
-		background-size: 100% 100%;
+			cursor: not-allowed;
+
 	}
 	.ptz-aperture-far .ptz-aperture-icon {
 		display: inline-block;
@@ -355,9 +390,11 @@
 		top: 15px;
 		border: 7px solid transparent;
 		border-bottom: 10px solid @normal-color;
-		&:hover, &.active{
+		&:hover,
+		&.active {
 			border-bottom: 10px solid @active-color;
 		}
+		&.disabled{border-bottom: 10px solid @normal-color;}
 	}
 
 	.ptz-arrow-right {
@@ -365,27 +402,33 @@
 		right: 15px;
 		border: 7px solid transparent;
 		border-left: 10px solid @normal-color;
-		&:hover , &.active{
+		&:hover,
+		&.active {
 			border-left: 10px solid @active-color;
 		}
+		&.disabled{border-left: 10px solid @normal-color;}
 	}
 	.ptz-arrow-left {
 		left: 15px;
 		top: 71px;
 		border: 7px solid transparent;
 		border-right: 10px solid @normal-color;
-		&:hover, &.active {
+		&:hover,
+		&.active {
 			border-right: 10px solid @active-color;
 		}
+		&.disabled{border-right: 10px solid @normal-color;}
 	}
 	.ptz-arrow-down {
 		left: 71px;
 		bottom: 15px;
 		border: 7px solid transparent;
 		border-top: 10px solid @normal-color;
-		&:hover , &.active{
+		&:hover,
+		&.active {
 			border-top: 10px solid @active-color;
 		}
+		&.disabled{border-top: 10px solid @normal-color;}
 	}
 	.ptz-arrow-left-up {
 		transform: rotate(45deg);
@@ -393,9 +436,11 @@
 		top: 33px;
 		border: 7px solid transparent;
 		border-right: 10px solid @normal-color;
-		&:hover , &.active{
+		&:hover,
+		&.active {
 			border-right: 10px solid @active-color;
 		}
+		&.disabled{border-right: 10px solid @normal-color;}
 	}
 	.ptz-arrow-right-up {
 		transform: rotate(-45deg);
@@ -403,9 +448,11 @@
 		top: 33px;
 		border: 7px solid transparent;
 		border-left: 10px solid @normal-color;
-		&:hover , &.active{
+		&:hover,
+		&.active {
 			border-left: 10px solid @active-color;
 		}
+		&.disabled{border-left: 10px solid @normal-color;}
 	}
 	.ptz-arrow-left-down {
 		transform: rotate(45deg);
@@ -413,9 +460,11 @@
 		bottom: 33px;
 		border: 7px solid transparent;
 		border-top: 10px solid @normal-color;
-		&:hover ,&.active{
+		&:hover,
+		&.active {
 			border-top: 10px solid @active-color;
 		}
+		&.disabled{border-top: 10px solid @normal-color;}
 	}
 	.ptz-arrow-right-down {
 		transform: rotate(-45deg);
@@ -423,9 +472,11 @@
 		bottom: 33px;
 		border: 7px solid transparent;
 		border-top: 10px solid @normal-color;
-		&:hover , &.active{
+		&:hover,
+		&.active {
 			border-top: 10px solid @active-color;
 		}
+		&.disabled{	border-top: 10px solid @normal-color;}
 	}
 	.zoom-controls {
 		display: none;
@@ -587,4 +638,6 @@
 		white-space: nowrap;
 		color: #fff;
 	}
+
+	.disabled{cursor: not-allowed; }
 </style>
