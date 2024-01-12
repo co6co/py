@@ -5,3 +5,10 @@ export interface deviceItem {
   channel1_sip: string;
   channel2_sip: string;
 }
+
+export interface talkState{
+  state:number;
+  stateDesc:string;
+  talkNo:number 
+}
+ 

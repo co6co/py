@@ -16,6 +16,7 @@
 	import '../../../assets/jessi/jessibuca-pro-demo.js';
 	import '../../../assets/jessi/jessibuca-pro-talk-demo.js';
 	import '../../../assets/jessi/demo.js';
+	import { log } from 'console';
 
 	var showOperateBtns = false; // 是否显示按钮
 	const props = defineProps({
@@ -38,23 +39,42 @@
 		videoBufferDelay: 2,
 		useCanvasRender: false,
 	});
-	const _loaded=ref(false)
+	const _loaded = ref(false);
 	const jess_player_container = ref<HTMLElement>();
 	const jess_player = ref();
-	
-	const emits = defineEmits(['created', 'destroyed']); 
-	
+
+	const emits = defineEmits(['created', 'destroyed']);
+
 	const destroying = () => {
 		emits('destroyed');
 	};
 	const onPlay = () => {
 		try {
-			if (props.stream) jess_player.value.play(props.stream);
+			if (props.stream) {
+				console.info('111.');
+				let promise: Promise<any> = jess_player.value.play(props.stream);
+				console.info('2222.');
+				if (promise) {
+					promise
+						.then(function () {
+							// Automatic playback started!
+							console.info('auto player.');
+						})
+						.catch(function (error: any) {
+							// Automatic playback failed.
+							// Show a UI element to let the user manually start playback.
+							console.error(error);
+						}).finally(()=>{
+							console.log("finally.",promise) 
+						});
+						console.log("finally..",promise)  
+				}
+			}
 		} catch (e) {
-			console.error(e);
+			console.error('播放视频出现异常：', e);
 		}
 	};
-	const stop = (bck?: Function) => {  
+	const stop = (bck?: Function) => {
 		if (jess_player.value) {
 			jess_player.value.destroy().then(() => {
 				destroying();
@@ -64,8 +84,7 @@
 			if (bck) bck();
 		}
 	};
-	
-	
+
 	const create = () => {
 		console.info('create...');
 		const jessibuca = new JessibucaPro({
@@ -131,22 +150,21 @@
 		} catch (e) {
 			console.error(e);
 		}
-	}; 
+	};
 	watchEffect(() => {
-		try {  
-			if (props.stream) { 
+		try {
+			if (props.stream) {
 				nextTick(() => {
 					replay();
 				}); // 可能会死
-			} else { 
+			} else {
 				stop();
 			}
 		} catch (e) {
 			console.error(e);
 		}
 	});
-	onMounted(() => { 
-	});
+	onMounted(() => {});
 	onUnmounted(() => {
 		if (jess_player.value) jess_player.value.destroy().then(() => destroying());
 	});
@@ -159,5 +177,6 @@
 
 	defineExpose({
 		stop,
+		jess_player,
 	});
 </script>

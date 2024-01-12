@@ -35,7 +35,7 @@
 					</el-tooltip>
 				</li>
 
-				<li>
+				<li @click="onScreenshot()">
 					<el-tooltip content="截图">
 						<el-icon>
 							<PictureFilled />
@@ -132,22 +132,25 @@
 		CanelFullScreen,
 	} from '../../icons/screenIcon';
 	import * as types from './types';
+	import {types as dType} from '../../devices';
 	import { toggleFullScreen } from '../../../utils';
+
 	const props = defineProps({
 		playerList: {
 			type: Object as PropType<types.PlayerList>,
 			required: true,
 		},
-	});
-
+	});  
+	const emit = defineEmits<{ (event: 'selected', index:number,data?:dType.deviceItem): void  }>();
 	const setPlayerDom = (index: number, ele: HTMLElement) => {
 		props.playerList.players[index - 1].dom = ele;
+	
 	};
 
 	const onPlayerClick = (winIndex: number) => {
 		props.playerList.currentWin = winIndex;
-		props.playerList.currentStreams =
-			props.playerList.players[props.playerList.currentWin - 1].streamList;
+		props.playerList.currentStreams = props.playerList.players[props.playerList.currentWin - 1].streamList;
+		emit("selected",winIndex,props.playerList.players[winIndex - 1].data)
 	};
 
 	const onToggleFullScreens = () => {
@@ -164,13 +167,18 @@
 	const onCloseAll = () => {
 		for (let i = 0; i < props.playerList.players.length; i++) {
 			const dom = props.playerList.players[i].dom;
-			dom.stop();
+			if (dom.stop) dom.stop();
 		}
 	};
 	const onClose = () => {
 		const dom = props.playerList.players[props.playerList.currentWin - 1].dom;
-		dom.stop();
+		if (dom.stop)dom.stop();
 	};
+	const onScreenshot=()=>{
+		const dom = props.playerList.players[props.playerList.currentWin - 1].dom; 
+		if (dom.jess_player&& dom.jess_player.screenshot) dom.jess_player.screenshot()
+		else console.warn("player.screenshot is undenfine")
+	}
 </script>
 
 <style scoped lang="less">

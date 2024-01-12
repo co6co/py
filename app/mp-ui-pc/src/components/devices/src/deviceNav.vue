@@ -27,8 +27,10 @@
                                     <Avatar />
                                 </el-icon></i>
                             <span class="label">
-                                <el-tooltip :content=" data.deviceDesc||node.label">
+                                <el-tooltip :content=" data.deviceDesc||node.label"> 
+                                  <el-text truncated  > 
                                     {{ node.label }}
+			                            </el-text> 
                                 </el-tooltip>
                             </span>
                         </span>

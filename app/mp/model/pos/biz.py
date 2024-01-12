@@ -160,8 +160,7 @@ class bizResourcePO(BasePO):
     subCategory = Column("sub_category",Integer,comment="子资源类型")
     url = Column("url_path",String(255),comment="资源路径,针对根路径下的绝对路径")
     createTime=Column("create_time",DateTime , server_default=func.now())  
-    boxId = Column("box_id",ForeignKey("biz_dev_box.id",ondelete="CASCADE"),nullable=False,index=True)
-
+    boxId = Column("box_id",ForeignKey("biz_dev_box.id",ondelete="CASCADE"),nullable=False,index=True) 
     boxPO=Relationship("bizBoxPO",back_populates="resourcesPO")
 
 class bizAlarmTypePO(BasePO): 

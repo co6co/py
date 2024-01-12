@@ -65,6 +65,7 @@ declare module '@vue/runtime-core' {
     Stream: typeof import('./src/components/stream/src/stream.vue')['default']
     StreamPlayer: typeof import('./src/components/stream/src/streamPlayer.vue')['default']
     Tags: typeof import('./src/components/tags.vue')['default']
+    TaklerPtz: typeof import('./src/components/biz/src/taklerPtz.vue')['default']
     Talker: typeof import('./src/components/devices/src/talker.vue')['default']
   }
   export interface ComponentCustomProperties {

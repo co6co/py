@@ -16,7 +16,7 @@ class xTalker {
 	xTalkWebsocketConnection: any;
 	xTalkConnectAttempts = 0;
 	xTalkPeerID: string | undefined;
-	xTalkCallID: string | undefined;
+	xTalkCallID: number = -1;
 	xTalkSessionID: string | undefined;
 	// Promise for local stream after constraints are approved by the user
 	xTalkLocalStrmPromise: any;
@@ -70,15 +70,15 @@ class xTalker {
 		this.xTalkWebrtcPeerConnection
 			.setRemoteDescription(sdp)
 			.then(() => {
-				this.xTalkSetStatus('Remote SDP set');
+				that.xTalkSetStatus('Remote SDP set');
 				if (sdp.type != 'offer') return;
-				this.xTalkSetStatus('Got SDP offer');
-				this.xTalkLocalStrmPromise
+				that.xTalkSetStatus('Got SDP offer');
+				that.xTalkLocalStrmPromise
 					.then((stream: any) => {
-						this.xTalkSetStatus('Got local stream, creating answer');
-						this.xTalkWebrtcPeerConnection
+						that.xTalkSetStatus('Got local stream, creating answer');
+						that.xTalkWebrtcPeerConnection
 							.createAnswer()
-							.then(that.xTalkOnLocalDescription)
+							.then(that.xTalkOnLocalDescription.bind(that))
 							.catch(that.xTalkSetError);
 					})
 					.catch(that.xTalkSetError);
@@ -135,7 +135,7 @@ class xTalker {
 
 			console.log('Regist to ccws successed: ' + peer_id);
 
-			let xTalkCallID = 1;
+			this.xTalkCallID = 1;
 
 			var to_peer_str;
 			if (this.xtalk_xss_to_gb_url != 'none')
@@ -145,7 +145,7 @@ class xTalker {
 					'device=' + this.xtalk_xss_to_device_id + ' track=-1 gb=none';
 
 			this.xTalkWebsocketConnection.send(
-				'SESSION call_id=' + xTalkCallID + ' media=talk ' + to_peer_str
+				'SESSION call_id=' + this.xTalkCallID + ' media=talk ' + to_peer_str
 			);
 		} else if (msg_splits.length == 3 && msg_splits[0] == 'SESSION_OK') {
 			//SESSION_OK call_id=* session_id=*
@@ -294,8 +294,10 @@ class xTalker {
 	}
 
 	xTalkOnServerError(event: any) {
-		console.error('Unable to connect to server, did you add an exception for the certificate?')
-		  
+		console.error(
+			'Unable to connect to server, did you add an exception for the certificate?'
+		);
+
 		// Retry after 3 seconds
 		//window.setTimeout(xtalk_websocket_server_connect, 3000);
 	}
@@ -312,6 +314,7 @@ class xTalker {
 	}
 
 	xtalk_websocket_server_connect() {
+		let that =this
 		//xTalkConnectAttempts++;
 
 		//if (xTalkConnectAttempts > 3) {
@@ -366,12 +369,12 @@ class xTalker {
 		this.xTalkWebsocketConnection = new WebSocket(ws_url);
 
 		this.xTalkWebsocketConnection.addEventListener('open', (event: any) => {
-			this.xTalkSetStatus('Registering with server');
-			this.xTalkSetConnectState('Connected');
+			that.xTalkSetStatus('Registering with server');
+			that.xTalkSetConnectState('Connected');
 		});
 
 		if (this.xtalk_xss_mode) {
-			this.xTalkWebsocketConnection.addEventListener(
+			that.xTalkWebsocketConnection.addEventListener(
 				'message',
 				this.xTalkOnServerMessageXss.bind(this)
 			);
@@ -409,18 +412,19 @@ class xTalker {
 	xTalkCreateCall(msg: any) {
 		// Reset connection attempts because we connected successfully
 		this.xTalkConnectAttempts = 0;
+		let that = this;
 
 		console.log('Creating RTCPeerConnection');
 
 		this.xTalkWebrtcPeerConnection = new RTCPeerConnection(
 			this.xtalk_configuration
 		);
-		this.xTalkWebrtcPeerConnection.ontrack = this.xTalkOnRemoteTrack;
+		this.xTalkWebrtcPeerConnection.ontrack = this.xTalkOnRemoteTrack.bind(this);
 		/* Send our video/audio to the other peer */
 		this.xTalkLocalStrmPromise = this.xTalkGetLocalStream()
 			.then((stream) => {
 				console.log('Adding local stream');
-				this.xTalkWebrtcPeerConnection.addStream(stream);
+				that.xTalkWebrtcPeerConnection.addStream(stream);
 				return stream;
 			})
 			.catch(this.xTalkSetError);
@@ -437,19 +441,19 @@ class xTalker {
 				return;
 			}
 
-			if (!this.xtalk_xss_mode)
-				this.xTalkWebsocketConnection.send(
+			if (!that.xtalk_xss_mode)
+				that.xTalkWebsocketConnection.send(
 					JSON.stringify({ ice: event.candidate })
 				);
 			else
-				this.xTalkWebsocketConnection.send(
+				that.xTalkWebsocketConnection.send(
 					'PEER_MSG session_id=' +
 						this.xTalkSessionID +
 						' ' +
 						JSON.stringify({ ice: event.candidate })
 				);
 
-			this.xTalkSetStatus('Sending ICE ');
+			that.xTalkSetStatus('Sending ICE ');
 		};
 
 		if (msg != null)

@@ -85,14 +85,12 @@
 			required: true,
 		},
 	}); 
-	const imageOptions = computed(() => {
-		console.info("image computed.")
+	const imageOptions = computed(() => { 
 		return props.viewOption.filter((m) => m.type == 1);
 	});
 	
 
-	const videoOptions = computed(() => {
-		console.info("video  computed.")
+	const videoOptions = computed(() => { 
 		return props.viewOption.filter((m) => m.type == 0);
 	});
 
@@ -107,8 +105,7 @@
 	});
 	watch(()=>props.viewOption,(n,o)=>{
 		//watch 先于 计算属性
-		nextTick(()=>{
-			console.info("wztch  computed.") 
+		nextTick(()=>{ 
 			if (currentName.value=="Image")current_options.value = imageOptions.value[current_Index];
 			else current_options.value = videoOptions.value[current_Index]; 
 		}) 

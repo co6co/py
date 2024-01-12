@@ -91,8 +91,7 @@ function useMqtt() {
 		callback: OnMessageCallback
 	) => { 
 		//设置订阅地址
-		Ref_Mqtt.value = new MQTTing(getUrl(url), [topic]);
-		console.log(Ref_Mqtt.value);
+		Ref_Mqtt.value = new MQTTing(getUrl(url), [topic]); 
 		//初始化mqtt
 		Ref_Mqtt.value.init();
 		//链接mqtt

@@ -4,26 +4,18 @@
 			<el-main>
 				<el-scrollbar>
 					<div class="content">
-						<biz-player :player-list="playerList"></biz-player>
+						<biz-player :player-list="playerList" @selected="onPlayerChecked"></biz-player>
 					</div>
 				</el-scrollbar>
 			</el-main>
 			<el-footer>
 				<el-row>
 					<el-col :span="12">
-						<device-nav @node-click="play"></device-nav>
+						<device-nav @node-click="onClickNavDevice"></device-nav>
 					</el-col>
 					<el-col :span="12">
 						<div class="content">
-							<talker
-								ref="talkerRef"
-								@state-change="onTalkerChange"
-								:talk-no="currentDeviceData.data?.talkbackNo"></talker>
-							<ptz
-								@ptz="OnPtz"
-								@center-click="onTalker"
-								:ptz-enable="ptzEnable"
-								:taker-enable="talkerEnable"></ptz> 
+							<takler-ptz :current-device-data="currentDeviceData.data"></takler-ptz> 
 						</div>
 					</el-col>
 				</el-row>
@@ -65,9 +57,7 @@
 		Avatar,
 		ArrowUp,
 		ArrowDown,
-	} from '@element-plus/icons-vue';
-
-	//import * as api from '../api/device';
+	} from '@element-plus/icons-vue'; 
 	import * as api from '../api/site';
 	import { stream, ptz, streamPlayer } from '../components/stream';
 	import * as p from '../components/stream/src/types/ptz';
@@ -76,9 +66,9 @@
 	import * as d from '../store/types/devices';
 	import { showLoading, closeLoading } from '../components/Logining';
 	import { talker, deviceNav, types as dType } from '../components/devices';
-	import { bizPlayer, types } from '../components/biz';
+	import { bizPlayer,taklerPtz, types } from '../components/biz';
 
-	const deviceName = ref('');
+ 
 
 	/** 播放器 */
 	const playerList = reactive<types.PlayerList>({
@@ -94,127 +84,29 @@
 		],
 	});
 	const currentDeviceData = reactive<{ data?: dType.deviceItem }>({});
-	const play = (
+	const onClickNavDevice = (
 		streams: String | { url: string; name: string },
 		device: dType.deviceItem
 	) => {
 		let streamArr = null;
 		if (streams && typeof streams == 'string') streamArr = JSON.parse(streams);
 		else streamArr = streams;
+		playerList.players[playerList.currentWin - 1].data=device
 		if (streamArr) {
 			playerList.players[playerList.currentWin - 1].streamList = streamArr;
 			playerList.players[playerList.currentWin - 1].url = streamArr[0].url;
+
 		} else {
 			playerList.players[playerList.currentWin - 1].url = '';
 			playerList.players[playerList.currentWin - 1].streamList = [];
 			ElMessage.warning('未配置设备流地址');
 		}
 		currentDeviceData.data = device;
-	};
+	}; 
 
-	/** ptz */ 
-	const talkerRef = ref();
-	const talkerState = ref({state:0,text:""});
-	const onTalkerChange = (state: number,text:string) => {
-		talkerState.value.state = state;
-		talkerState.value.text = text;
-	};
-	const onTalker = (active: boolean) => {
-		if (active) talkerRef.value.connect();
-		else {
-			talkerRef.value.disconnect();
-		}
-	};
-	const ptzEnable = computed(() => {
-		if (currentDeviceData.data && currentDeviceData.data.sip) {
-			return true;
-		}
-		return false;
-	});
-	const talkerEnable = computed(() => {
-		if (currentDeviceData.data && currentDeviceData.data.talkbackNo) {
-			return true;
-		}
-		return false;
-	});
-
-	const { startMqtt, Ref_Mqtt } = useMqtt();
-	interface mqttMessage {
-		UUID?: string;
+	const onPlayerChecked=(index:number,data?: dType.deviceItem)=>{ 
+		currentDeviceData.data = data; 
 	}
-	let arr: Array<mqttMessage> = [];
-	let mqttInit=false;	
-	try {
-		startMqtt(
-			mqqt_server,
-			'/edge_app_controller_reply',
-			(topic: any, message: any) => {
-				const msg: mqttMessage = JSON.parse(message.toString());
-				arr.unshift(msg); //新增到数组起始位置
-				let data = unique(arr);
-				alert(JSON.stringify(data));
-				console.warn(unique(arr));
-			}
-		);
-		mqttInit=true;
-	} catch (e) {
-		ElMessage.error(`连接到MQTT服务器失败:${e}`)
-	}
-
-	function unique(arr: Array<mqttMessage>) {
-		const res = new Map();
-		return arr.filter((a) => !res.has(a.UUID) && res.set(a.UUID, 1));
-	}
-	const OnPtz = (name: p.ptz_name, type: p.ptz_type) => {
-		let param = {
-			payload: {
-				BoardId: 'RJ-BOX3-733E5155B1FBB3C3BB9EFC86EDDACA60',
-				Event: '/app_network_query_v2',
-			},
-			qos: 0,
-			retain: false,
-		};
-		let ptzcmd = 'A50F010800FA00B7';
-		if (!mqttInit){ElMessage.warning("MQtt 服务 未连接！");return}
-		if (type == 'starting') {
-			switch (name) {
-				case 'up':
-					ptzcmd = 'A50F010800FA00B7';
-					break;
-				case 'down':
-					ptzcmd = 'A50F010400FA00B3';
-					break;
-				case 'right':
-					ptzcmd = 'A50F0101FA0000B0';
-					break;
-				case 'left':
-					ptzcmd = 'A50F0102FA0000B1';
-					break;
-				case 'zoomin':
-					ptzcmd = 'A50F01200000A075';
-					break;
-				case 'zoomout':
-					ptzcmd = 'A50F01100000A065';
-					break;
-			}
-		} else {
-			ptzcmd = 'A50F0100000000B5';
-		}
-		let sip = currentDeviceData.data?.sip;
-		let sn = new Date().getMilliseconds();
-		let xml = `
-		<?xml version="1.0" encoding="UTF-8"?>
-		<Control>
-			<CmdType>DeviceControl</CmdType>
-			<SN>${sn}</SN>
-			<DeviceID>${sip}</DeviceID>
-			<PTZCmd>${ptzcmd}</PTZCmd>
-		</Control> 
-		`;
-		console.info('发送', xml);
-		Ref_Mqtt.value?.publish('/MANSCDP_cmd', xml);
-	};
-	//**end 打标签 */
 </script>
 <style scoped lang="less">
 	@import '../assets/css/player-split.css';

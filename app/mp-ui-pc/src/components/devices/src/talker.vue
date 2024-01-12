@@ -5,6 +5,7 @@
 	import { default as mqtt } from 'mqtt';
 	import {
 		ref,
+		watch,
 		reactive,
 		onBeforeMount,
 		onMounted,
@@ -20,6 +21,8 @@
 	//import * as r from  '../assets/js/xtalk-rtc.js';
 	import { xTalker } from '../../../utils/xtalk';
 	import { useAppDataStore } from '../../../store/appStore';
+	import { talkState } from './types';
+ 
 
 	const props = defineProps({
 		ip: {
@@ -42,17 +45,40 @@
 		}
 	});
 	onMounted(() => {});
-	let talker = new xTalker();  
-	const emit = defineEmits<{  (event: 'stateChange', connect: 0|1|number,connectDesc:string): void }>() 
+	let talker = new xTalker();
+	const emit = defineEmits<{ (event: 'stateChange', data: talkState): void ,(event: 'log', data: string): void }>();
+	talker.xTalkSetStatus=(value: string)=>{ 
+		emit("log",value)
+	}
+	talker.xTalkSetError=(value: string)=>{
+		console.warn("error",value)
+		emit("log",value)
+	}
 	talker.xTalkSetConnectState = (value: string) => {
 		talker.xtalk_conn_state = value;
-		let connect=0
-		console.info("talkerStateChange：",value)
-		if(value=="Connected") connect=1;
-		else connect=0
-		emit("stateChange",connect,value)
+		let connect = 0;
+		console.info('talkerStateChange：', value);
+		if (value == 'Connected') connect = 1;
+		else connect = 0;
+		emit('stateChange', {
+			state: connect,
+			stateDesc: value,
+			talkNo: talker.xtalk_xss_to_device_id 
+		});
 	};
-
+	 
+	watch(
+		() => props.talkNo,
+		(n, o) => {
+			if (n) {
+				let peer = n; 
+				if (typeof peer == 'number') talker.xtalk_xss_to_device_id = peer;
+				else if (typeof peer == 'string') talker.xtalk_xss_to_gb_url = peer;
+				if(connected.value)disconnect()
+				else talker.xTalkSetConnectState("Disonnected")
+			}
+		}
+	);
 	const connected = ref(false);
 	const connect = () => {
 		talker.xtalk_xss_mode = true;
@@ -61,10 +87,8 @@
 		talker.xtalk_audio_element_id = 'audiostrm';
 
 		//取对端标识，设备ID或者GB URL形式
-		let peer = props.talkNo;
-		if (typeof peer == 'number') talker.xtalk_xss_to_device_id = peer;
-		else if (typeof peer == 'string') talker.xtalk_xss_to_gb_url = peer;
-		talker.xtalk_websocket_server_connect(); 
+
+		talker.xtalk_websocket_server_connect();
 		connected.value = true;
 	};
 	const disconnect = () => {
@@ -91,6 +115,6 @@
 	defineExpose({
 		talker,
 		connect,
-		disconnect 
+		disconnect,
 	});
 </script>
