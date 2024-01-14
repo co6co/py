@@ -96,3 +96,18 @@ export const toggleFullScreen = (
 };
 
 
+
+
+//10进制转16进制补0
+export const number2hex=(dec:number, len:number)=> {
+	var hex = "";
+	while( dec ) {
+	var last = dec & 15;
+	hex = String.fromCharCode(((last>9)?55:48)+last) + hex;
+	dec >>= 4;
+	}
+	if(len) {
+	while(hex.length < len) hex = '0' + hex;
+	}
+	return hex;
+}

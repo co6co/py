@@ -12,3 +12,5 @@ chown -R username /wwww
 
 # 服务所在路径（Ubuntu/centos）
 `/usr/lib/systemd/system/`
+
+sudo systemctl start mosquitto

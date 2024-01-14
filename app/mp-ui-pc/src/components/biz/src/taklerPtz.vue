@@ -32,7 +32,7 @@
 	<div>
 		<el-text class="mx-1"> 信息: </el-text>
 		<el-row>
-			<el-tooltip   v-for="(item,index) in takerLogInfo">
+			<el-tooltip :key="index"   v-for="(item,index) in takerLogInfo">
                 <template #content>
                     {{item}}
                 </template>
@@ -47,6 +47,7 @@
 	import { PropType, ref,watch, reactive, computed } from 'vue';
 	import { useMqtt, mqqt_server } from '../../../utils/mqtting';
 	import { talker, types as dType } from '../../../components/devices';
+	import { ptz as cmd} from '../../../components/biz';
 	import { ptz } from '../../../components/stream';
 	import * as p from '../../../components/stream/src/types/ptz';
 
@@ -139,30 +140,48 @@
 			ElMessage.warning('MQtt 服务 未连接！');
 			return;
 		}
-		if (type == 'starting') {
+		if (props.currentDeviceData&&props.currentDeviceData.sip){
+			let str= cmd.ptzCmd( props.currentDeviceData?.sip,250,type,name)
+			console.info("cmd:",str)
+		}
+			
+		cmd.ptzCmdStr("A50F0108001F00DC")
+		if (type == 'starting') { 
 			switch (name) {
-				case 'up':
+				case 'up': 
+					//ptzcmd = "A50F0108001F00DC"
+					console.warn(1,"A50F0108001F00DC")
 					ptzcmd = 'A50F010800FA00B7';
+					console.warn(2,"A50F0108001F00DC")
 					break;
 				case 'down':
+					 
+					//ptzcmd = 'A50F0104001F00D8'
 					ptzcmd = 'A50F010400FA00B3';
 					break;
 				case 'right':
+					 
+					//ptzcmd = A50F01011F0000D5
 					ptzcmd = 'A50F0101FA0000B0';
 					break;
 				case 'left':
+					 
+					        //ptzcmd =A50F01021F0000D6
 					ptzcmd = 'A50F0102FA0000B1';
 					break;
 				case 'zoomin':
+				 
+					        //ptzcmd =A50F0120000010E5
 					ptzcmd = 'A50F01200000A075';
 					break;
-				case 'zoomout':
+				case 'zoomout': 
+							//ptzcmd =A50F0110000010D5
 					ptzcmd = 'A50F01100000A065';
 					break;
 			}
 		} else {
 			ptzcmd = 'A50F0100000000B5';
-		}
+		} 
 		let sip = props.currentDeviceData?.sip;
 		let sn = new Date().getMilliseconds();
 		let xml = `
@@ -175,6 +194,6 @@
 		</Control> 
 		`;
 		console.info('发送', xml);
-		Ref_Mqtt.value?.publish('/MANSCDP_cmd', xml);
+		//Ref_Mqtt.value?.publish('/MANSCDP_cmd', xml);
 	};
 </script>
