@@ -38,7 +38,8 @@ class db_service:
 
     def _createEngine(self, url: str):
         self.useAsync = True
-        echo =bool( self.settings.get("echo"))
+        #字符串 除了 bool(''/""/()/[]/{}/None )== False
+        echo = str(self.settings.get("echo")).lower().__eq__("true")
         pool_size = self.settings.get("pool_size")
         max_overflow = self.settings.get("max_overflow")
         if "sqlite" not in url:

@@ -8,8 +8,7 @@ export function setToken(token: any,secounds:number=7200) {
     //localStorage.setItem(authonKey, token);
     return Cookie.set(authonKey, token);
 }
-export function getToken() {
-    
+export function getToken() { 
     let token =storage.get(authonKey );
     if (!token) token = getCookie(authonKey);
     return token;

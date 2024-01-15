@@ -31,6 +31,7 @@
 			:class="{ active: centerState, disabled: !takerEnable }">
 			<el-icon><Microphone /> </el-icon>
 		</div>
+		<el-slider  v-model="speed" vertical placement="bottom" :min="1" height="156px"  :max="255" style="position: absolute; left:156px;top:0;   --el-slider-main-bg-color: #696970; " />
 		<div class="ptz-btns">
 			<div class="ptz-btn">
 				<div
@@ -55,6 +56,7 @@
 				</div>
 			</div>
 		</div>
+		
 	</div>
 
 	<div class="zoom-controls">
@@ -95,7 +97,7 @@
 		},
 	});
 	interface Emits {
-		(e: 'ptz', name: t.ptz_name, type: t.ptz_type): void;
+		(e: 'ptz', name: t.ptz_name, type: t.ptz_type,speed:number): void;
 		(
 			e: 'uped' | 'downed' | 'righted' | 'lefted' | 'zoomined' | 'zoomouted'
 		): void;
@@ -135,7 +137,7 @@
 			default:
 				return;
 		}
-		emits('ptz', name, type === 0 ? 'starting' : 'stop');
+		emits('ptz', name, type === 0 ? 'starting' : 'stop',speed.value);
 	};
 	const centerActive = ref(false);
 	const centerState = computed(() => {
@@ -150,6 +152,8 @@
 		centerActive.value = !centerActive.value;
 		emits('centerClick', centerActive.value);
 	};
+
+	const speed=ref(240)
 </script>
 <style scoped lang="less">
 	@normal-color: #fff;

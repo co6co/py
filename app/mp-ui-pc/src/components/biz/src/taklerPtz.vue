@@ -106,6 +106,7 @@
 	let arr: Array<mqttMessage> = [];
 	let mqttInit = false;
 	try {
+		console.info(mqqt_server)
 		startMqtt(
 			mqqt_server,
 			'/edge_app_controller_reply',
@@ -126,74 +127,17 @@
 		const res = new Map();
 		return arr.filter((a) => !res.has(a.UUID) && res.set(a.UUID, 1));
 	}
-	const OnPtz = (name: p.ptz_name, type: p.ptz_type) => {
-		let param = {
-			payload: {
-				BoardId: 'RJ-BOX3-733E5155B1FBB3C3BB9EFC86EDDACA60',
-				Event: '/app_network_query_v2',
-			},
-			qos: 0,
-			retain: false,
-		};
-		let ptzcmd = 'A50F010800FA00B7';
+	const OnPtz = (name: p.ptz_name,type: p.ptz_type,speed:number) => { 
 		if (!mqttInit) {
 			ElMessage.warning('MQtt 服务 未连接！');
 			return;
 		}
-		if (props.currentDeviceData&&props.currentDeviceData.sip){
-			let str= cmd.ptzCmd( props.currentDeviceData?.sip,250,type,name)
-			console.info("cmd:",str)
+		if (props.currentDeviceData&&props.currentDeviceData.sip){ 
+			//let strCmd=cmd.createPtzCmd(speed,type,name)
+			//cmd.testPtzCmdStr(strCmd)
+			let str= cmd.generatePtzXml(props.currentDeviceData?.sip,speed,type,name)
+			console.info("发送PTZ命令：", str)
+			Ref_Mqtt.value?.publish('/MANSCDP_cmd', str); 
 		}
-			
-		cmd.ptzCmdStr("A50F0108001F00DC")
-		if (type == 'starting') { 
-			switch (name) {
-				case 'up': 
-					//ptzcmd = "A50F0108001F00DC"
-					console.warn(1,"A50F0108001F00DC")
-					ptzcmd = 'A50F010800FA00B7';
-					console.warn(2,"A50F0108001F00DC")
-					break;
-				case 'down':
-					 
-					//ptzcmd = 'A50F0104001F00D8'
-					ptzcmd = 'A50F010400FA00B3';
-					break;
-				case 'right':
-					 
-					//ptzcmd = A50F01011F0000D5
-					ptzcmd = 'A50F0101FA0000B0';
-					break;
-				case 'left':
-					 
-					        //ptzcmd =A50F01021F0000D6
-					ptzcmd = 'A50F0102FA0000B1';
-					break;
-				case 'zoomin':
-				 
-					        //ptzcmd =A50F0120000010E5
-					ptzcmd = 'A50F01200000A075';
-					break;
-				case 'zoomout': 
-							//ptzcmd =A50F0110000010D5
-					ptzcmd = 'A50F01100000A065';
-					break;
-			}
-		} else {
-			ptzcmd = 'A50F0100000000B5';
-		} 
-		let sip = props.currentDeviceData?.sip;
-		let sn = new Date().getMilliseconds();
-		let xml = `
-		<?xml version="1.0" encoding="UTF-8"?>
-		<Control>
-			<CmdType>DeviceControl</CmdType>
-			<SN>${sn}</SN>
-			<DeviceID>${sip}</DeviceID>
-			<PTZCmd>${ptzcmd}</PTZCmd>
-		</Control> 
-		`;
-		console.info('发送', xml);
-		//Ref_Mqtt.value?.publish('/MANSCDP_cmd', xml);
 	};
 </script>

@@ -66,12 +66,7 @@
 			defineAsyncComponent(
 				() => import('../../../components/player/src/Player.vue')
 			)
-		),
-		Splayer: markRaw(
-			defineAsyncComponent(
-				() => import('../../../components/player/src/Splayer.vue')
-			)
-		),
+		), 
 		htmlPlayer: markRaw(
 			defineAsyncComponent(
 				() => import('../../../components/player/src/htmlPlayer.vue')
@@ -95,7 +90,7 @@
 	});
 
 	
-	const currentName = ref<'Image' | 'Video' | 'Splayer'|'htmlPlayer'>('Image');
+	const currentName = ref<'Image' | 'Video' |  'htmlPlayer'>('Image');
 	let current_Index =0;
 	const current_options = ref<resourceOption>({
 		url: '',

@@ -59,7 +59,7 @@ const redirectUrl = () => {
 	console.info(redirect_uri)
 	const scope = 1;
 	let redirectUrl = ''; 
-	if (debug) {
+	if (debug) { 
 		redirectUrl = RedirectWxService(
 			redirect_uri,
 			scope,

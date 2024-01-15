@@ -42,7 +42,7 @@ export class Storage implements StorageCls {
 				return null;
 			} else {
 				//否则成功返回
-				return   obj.value
+				return obj.value
 				 
 			}
 		} else {

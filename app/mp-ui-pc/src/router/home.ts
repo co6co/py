@@ -122,26 +122,26 @@ import { ticket_svc } from '../api/authen';
 import { showNotify } from 'vant';
  
 const debug = Boolean(Number(import.meta.env.VITE_IS_DEBUG));
+const appid = import.meta.env.VITE_ENV;
 const ticket = getQueryVariable('ticket');
 router.beforeEach((to, from, next) => {
 	document.title = `${to.meta.title} `;
 	const permiss = usePermissStore();
 	let token = getToken();
-	({ type: 'warning', message: token });
-	if (!token) { 
+	//({ type: 'warning', message: token }); 
+	if (!token) {  
 		if (ticket) {
 			ticket_svc(ticket).then((res) => {
 				if (res.code == 0) {
 					setToken(res.data.token, res.data.expireSeconds);
-					nextTick(()=>next())
-					
+					nextTick(()=>next()) 
 				}
 				else showNotify({ type: 'danger', message: res.message });
 			});
 		} else {
 			redirectUrl();
 		} 
-		//next('/403');
+		//next('/403'); 
 	} else {
 		next();
 	}

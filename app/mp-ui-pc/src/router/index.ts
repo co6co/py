@@ -117,7 +117,7 @@ router.beforeEach((to, from, next) => {
 	document.title = `${to.meta.title} `;
 	const role = storeage.get('username');
 	const permiss = usePermissStore();
-	let token = getToken();
+	let token = getToken(); 
 	if (!token && to.path !== '/login') {
 		next('/login');
 	} else if (to.meta.permiss && !permiss.key.includes(to.meta.permiss)) {
