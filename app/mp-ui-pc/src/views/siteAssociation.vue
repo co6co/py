@@ -291,10 +291,9 @@
 			form2.value.title = '路由器信息';
 		} else {
 			form2.value.title = '违停球信息';
-		}
-
+		} 
 		queryDeviceDetailInfo(row.id, category).then((res) => {
-			if (res.code == 0) {
+			if (res.code == 0) { 
 				let data = [];
 				for (let i = 0; i < res.data.length; i++) {
 					data.push({ name: res.data[i].name + '信息', data: res.data[i] });

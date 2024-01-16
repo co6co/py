@@ -64,7 +64,7 @@ class MQTTing {
 		});
 	}
 	publish(topic: string, message: string | Buffer) {
-		this.client.publish(topic, message);
+		return this.client.publish(topic, message);
 	}
 	//结束链接
 	close() {

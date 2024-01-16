@@ -83,7 +83,8 @@ export const generatePtzXml = (
 	name: p.ptz_name
 ) => {
 	const cmdstr = createPtzCmd(speed, type, name);
-	let sn = new Date().getMilliseconds();
+	let time=new Date()
+	let sn =time.getSeconds()*1000+ time.getMilliseconds();
 	let xml = `
     <?xml version="1.0" encoding="UTF-8"?>
     <Control>
@@ -93,6 +94,18 @@ export const generatePtzXml = (
         <PTZCmd>${cmdstr}</PTZCmd>
     </Control> 
     `;
+	xml=`
+	<?xml version="1.0" encoding="GB2312"?>
+	<Control>
+		<CmdType>DeviceControl</CmdType>
+		<SN>${sn}</SN>
+		<DeviceID>${sip}</DeviceID>
+		<PTZCmd>${cmdstr}</PTZCmd>
+		<Info>
+			<ControlPriority>5</ControlPriority>
+		</Info>
+	</Control>
+	`
 	return xml;
 };
 

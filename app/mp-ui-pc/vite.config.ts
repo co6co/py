@@ -12,7 +12,7 @@ import topLevelAwait from 'vite-plugin-top-level-await';
 export default defineConfig({
 	base: './UI',
 	//server:{hmr:{overlay:false} },
-	publicDir:"/pub",//静态文件目录
+	//publicDir:"/public",//静态文件目录
 	server: {
 		host: '0.0.0.0',
 		port: 5173,

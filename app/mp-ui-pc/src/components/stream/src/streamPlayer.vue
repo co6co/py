@@ -180,3 +180,6 @@
 		jess_player,
 	});
 </script>
+<style scoped>
+::v-deep .jess_player:first-child{ color: red;position: absolute;left: 1; } 
+</style>

@@ -10,7 +10,7 @@
 					<el-button type="primary" :icon="Search" @click="onSearch"
 						>搜索</el-button
 					>
-					<el-button type="primary" :icon="Plus" @click="onOpenAddDialog"
+					<el-button type="primary" :icon="Plus" @click="onOpenDialog"
 						>新增</el-button
 					>
 				</div>
@@ -36,7 +36,7 @@
 						<el-table-column label="状态" align="center">
 							<template #default="scope">
 								<el-tag>
-									{{ form_attach_data.getStateName(scope.row.state)?.label }}
+									{{m.state.getStateName(scope.row.state)?.label }}
 								</el-tag>
 							</template>
 						</el-table-column>
@@ -49,7 +49,7 @@
 								<el-button
 									text
 									:icon="Edit"
-									@click="onOpenEditDialog(scope.$index, scope.row)"
+									@click="onOpenDialog(  scope.row)"
 									v-permiss="15">
 									编辑
 								</el-button>
@@ -86,77 +86,9 @@
 			</el-footer>
 		</el-container>
 
-		<!-- 增加弹出框 -->
-		<el-dialog title="增加" v-model="addVisible" width="30%">
-			<el-form label-width="80px" :model="form" :rules="rules" ref="addForm">
-				<el-form-item label="用户名" prop="userName">
-					<el-input v-model="form.userName"></el-input>
-				</el-form-item>
-				<el-form-item label="密码" prop="password">
-					<el-input v-model="form.password" type="password" show-password>
-					</el-input>
-				</el-form-item>
-				<el-form-item label="用户角色" prop="roleId">
-					<el-select v-model="form.roleId" placeholder="请选择">
-						<el-option
-							v-for="item in form_attach_data.roleList"
-							:key="item.key"
-							:label="item.label"
-							:value="item.value" />
-					</el-select>
-				</el-form-item>
-				<el-form-item label="用户状态" prop="state">
-					<el-select v-model="form.state" placeholder="请选择">
-						<el-option
-							v-for="item in form_attach_data.stateList"
-							:key="item.key"
-							:label="item.label"
-							:value="item.value" />
-					</el-select>
-				</el-form-item>
-			</el-form>
-			<template #footer>
-				<span class="dialog-footer">
-					<el-button @click="addVisible = false">取 消</el-button>
-					<el-button type="primary" @click="onAddSave(addForm)"
-						>确 定</el-button
-					>
-				</span>
-			</template>
-		</el-dialog>
+		 
 
-		<!-- 编辑弹出框 -->
-		<el-dialog title="编辑" v-model="editVisible" width="30%">
-			<el-form label-width="70px">
-				<el-form-item label="用户名">
-					<el-input readonly v-model="form.userName"></el-input>
-				</el-form-item>
-				<el-form-item label="用户角色">
-					<el-select v-model="form.roleId" placeholder="请选择">
-						<el-option
-							v-for="item in form_attach_data.roleList"
-							:key="item.key"
-							:label="item.label"
-							:value="item.value" />
-					</el-select>
-				</el-form-item>
-				<el-form-item label="用户状态">
-					<el-select v-model="form.state" placeholder="请选择">
-						<el-option
-							v-for="item in form_attach_data.stateList"
-							:key="item.key"
-							:label="item.label"
-							:value="item.value" />
-					</el-select>
-				</el-form-item>
-			</el-form>
-			<template #footer>
-				<span class="dialog-footer">
-					<el-button @click="editVisible = false">取 消</el-button>
-					<el-button type="primary" @click="onEditSave">确 定</el-button>
-				</span>
-			</template>
-		</el-dialog>
+		<edit-user ref="editUserRef"  @saved="getData()"></edit-user>
 
 		<el-dialog title="重置密码" v-model="resetPwdVisible" width="30%">
 			<el-form label-width="70px" :model="resetPwdFrom" :rules="resetPwdRules">
@@ -200,6 +132,7 @@
 	} from '../api/user';
 
 	import { showLoading, closeLoading } from '../components/Logining';
+	import { editUser,model as m } from '../components/users';
 
 	interface TableItem {
 		id: number;
@@ -261,102 +194,15 @@
 			.catch(() => {});
 	};
 
-	let fromData = {
-		id: -1,
-		userName: '',
-		password: '',
-		roleId: -1,
-		state: -1,
-	};
-	let form = reactive(fromData);
-	let form_attach_data = reactive({
-		roleList: [
-			{ key: '超级用户', label: '超级用户', value: 1 },
-			{ key: '操作员', label: '操作员', value: 2 },
-		],
-		getRoleName(v: number) {
-			return this.roleList.find((m) => m.value == v);
-		},
-		stateList: [
-			{ key: '启用', label: '启用', value: 0 },
-			{ key: '锁定', label: '锁定', value: 1 },
-			{ key: '禁用', label: '禁用', value: 2 },
-		],
-		getStateName(v: number) {
-			return this.stateList.find((m) => m.value == v);
-		},
-	});
-	//add
-	const valid_userName = (rule: any, value: string, back: Function) => {
-		if (value.length < 3)
-			return (rule.message = '长度应该大于3'), back(new Error(rule.message));
-		exist_svc(value).then((res) => {
-			if (res.code == 0)
-				return (rule.message = res.message), back(new Error(rule.message));
-			else return back();
-		});
-	};
-	const addForm = ref<FormInstance>();
-	const addVisible = ref(false);
-	const rules: FormRules = {
-		userName: [
-			{
-				required: true,
-				validator: valid_userName,
-				message: '请输入用户名',
-				trigger: ['blur'],
-			},
-		],
-		password: [
-			{
-				required: true,
-				min: 6,
-				max: 20,
-				message: '请输入6-20位密码',
-				trigger: 'blur',
-			},
-		],
-		roleId: [
-			{
-				required: true,
-				message: '请选择用户角色',
-				trigger: ['blur', 'change'],
-			},
-		],
-		state: [
-			{
-				required: true,
-				message: '请选择用户状态',
-				trigger: ['blur', 'change'],
-			},
-		],
-	};
-	const onOpenAddDialog = () => {
-		addVisible.value = true;
-		form.userName = '';
-		form.password = '';
-		form.roleId = 2;
-		form.state = 0;
-	};
-	const onAddSave = (formEl: FormInstance | undefined) => {
-		if (!formEl) return;
-		formEl.validate((value) => {
-			if (value) {
-				add_svc(form).then((res) => {
-					if (res.code == 0) {
-						addVisible.value = false;
-						ElMessage.success(`增加用户成功`);
-						getData();
-					} else {
-						ElMessage.error(`增加用户失败:${res.message}`);
-					}
-				});
-			} else {
-				ElMessage.error('请检查输入的数据！');
-				return false;
-			}
-		});
-	};
+
+
+	//编辑增加用户
+	const editUserRef=ref()
+	const onOpenDialog = (row?: any) => { 
+		//有记录编辑无数据增加  
+		editUserRef.value.onOpenDialog(row?1:0,row);
+	};  
+
 	//重置密码
 	let resetPwdVisible = ref(false);
 	let resetPwdFrom = reactive({
@@ -400,13 +246,13 @@
 		form.id = row.id;
 		form.userName = row.userName;
 		form.state = row.state;
-		form.roleId = row.roleId;
+		form.userGroupId = row.userGroupId;
 		editVisible.value = true;
 	};
 	const onEditSave = () => {
 		edit_svc(form.id, {
 			userName: form.userName,
-			roleId: form.roleId,
+			roleId: form.userGroupId,
 			state: form.state,
 		}).then((res) => {
 			if (res.code == 0) {

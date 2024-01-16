@@ -21,8 +21,7 @@ class WxMenuPO(UserTimeStampedModelPO):
 class WxUserPO(TimeStampedModelPO):
     __tablename__ = "wx_user" 
     id = Column("id",Integer,comment="主键",autoincrement=True, primary_key=True)
-    accountUid=Column("account_uid",ForeignKey(f"sys_account.uuid",ondelete="CASCADE"),nullable=False,index=True )
-    
+    accountUid=Column("account_uid",ForeignKey(f"sys_account.uuid",ondelete="CASCADE"),nullable=False,index=True ) 
     openid = Column("open_id",String(64),  comment="用户OpenID",nullable=False)
     ownedAppid = Column("owned_app_id",String(64),comment="公众号appId",nullable=False)
     nickName=Column("nick_name",String(255).with_variant(VARCHAR(255, charset="utf8mb4"), "mysql", "mariadb"), comment="nick_name"   )
@@ -33,7 +32,7 @@ class WxUserPO(TimeStampedModelPO):
     country=Column("country",String(64),comment="国家")
     headimgUrl=Column("headimg_url",String(255),comment="图像URL")
     privilege=Column("privilege",String(255),comment="特权")
-
-    accountPO=Relationship("AccountPO",back_populates="wxUserPO" )
+    subscribe=Column("subscribe_msg_type",Integer,comment="订阅消息类型0:不订阅消息",server_default="0")
+    accountPO=Relationship("AccountPO",back_populates="wxUserPO")
 
 

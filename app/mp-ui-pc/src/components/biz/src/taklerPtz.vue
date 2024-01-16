@@ -12,15 +12,16 @@
 		:taker-enable="talkerEnable">
 	</ptz>
 	<div style="margin: 36px 0 5px 0">
-		<el-text class="mx-1">
-			状态:
+
+		<el-text class="mx-1" tag="p" >
+			xss状态:
 			<el-tag
 				class="ml-2"
 				:type="talkerState.data.state == 1 ? 'success' : 'info'"
 				>{{ talkerState.data.stateDesc }}</el-tag
-			>
+			> 
 		</el-text>
-		<el-text class="mx-1">
+		<el-text class="mx-1" tag="p" >
 			对讲号:
 			<el-tag
 				class="ml-2"
@@ -28,6 +29,15 @@
 				>{{ talkerState.data.talkNo }}</el-tag
 			>
 		</el-text>
+		<el-text class="mx-1" tag="p" >
+			Mqtt状态:
+			<el-tag  
+				class="ml-2"
+				:type="mqttConneted? 'success' : 'info'"
+				>{{ mqttConneted?"连接":"未连接" }}</el-tag
+			>
+		</el-text>
+		
 	</div>
 	<div>
 		<el-text class="mx-1"> 信息: </el-text>
@@ -51,7 +61,7 @@
 	import { ptz } from '../../../components/stream';
 	import * as p from '../../../components/stream/src/types/ptz';
 
-	import { ElMessage } from 'element-plus';
+	import { ElMessage } from 'element-plus'; 
 
 
 	const props = defineProps({
@@ -104,7 +114,7 @@
 		UUID?: string;
 	}
 	let arr: Array<mqttMessage> = [];
-	let mqttInit = false;
+	let mqttConneted = ref(false);
 	try {
 		console.info(mqqt_server)
 		startMqtt(
@@ -118,7 +128,7 @@
 				console.warn(unique(arr));
 			}
 		);
-		mqttInit = true;
+		mqttConneted .value= true;
 	} catch (e) {
 		ElMessage.error(`连接到MQTT服务器失败:${e}`);
 	}
@@ -128,16 +138,18 @@
 		return arr.filter((a) => !res.has(a.UUID) && res.set(a.UUID, 1));
 	}
 	const OnPtz = (name: p.ptz_name,type: p.ptz_type,speed:number) => { 
-		if (!mqttInit) {
+		if (!mqttConneted .value) {
 			ElMessage.warning('MQtt 服务 未连接！');
 			return;
 		}
 		if (props.currentDeviceData&&props.currentDeviceData.sip){ 
 			//let strCmd=cmd.createPtzCmd(speed,type,name)
-			//cmd.testPtzCmdStr(strCmd)
+			//cmd.testPtzCmdStr("A50F0100000000B5")
+			onTalkerLog(`ptz:${name}->${type},speed:${speed}`)
 			let str= cmd.generatePtzXml(props.currentDeviceData?.sip,speed,type,name)
 			console.info("发送PTZ命令：", str)
-			Ref_Mqtt.value?.publish('/MANSCDP_cmd', str); 
+			let client= Ref_Mqtt.value?.publish('/MANSCDP_cmd', str); 
+			console.info(client)
 		}
 	};
 </script>

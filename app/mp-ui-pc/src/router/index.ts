@@ -122,6 +122,7 @@ router.beforeEach((to, from, next) => {
 		next('/login');
 	} else if (to.meta.permiss && !permiss.key.includes(to.meta.permiss)) {
 		// 如果没有权限，则进入403
+		removeToken()
 		next('/403');
 	} else {
 		next();
