@@ -1,47 +1,60 @@
+import { NONAME } from 'dns';
+import { connect } from 'http2';
 import { default as mqtt } from 'mqtt';
 //const mqtt = require('mqtt/dist/mqtt'); //#CommonJS 模块中  tsconfig.json 文件中可以设置 module 选项来
-import type { MqttClient, OnMessageCallback } from 'mqtt';
+import type { MqttClient, OnMessageCallback,PacketCallback } from 'mqtt';
 import { ref, onUnmounted } from 'vue';
 
 const mqqt_server = import.meta.env.VITE_mqtt_server;
 const debug = Boolean(Number(import.meta.env.VITE_IS_DEBUG));
 
+type ConnectBck=(connected:boolean, error?:any)=>void
 class MQTTing {
 	url: string; // mqtt地址
 	topics: string[];
 	client!: MqttClient;
-	constructor(url: string, topics: string[]) {
+	connectBck?:ConnectBck
+	constructor(url: string, topics: string[],onConnectBck?:ConnectBck) {
 		// 虽然是mqtt但是在客户端这里必须采用websock的链接方式
 		//this.url = 'ws://xxx.xxx.xxx.x:xxxx/mqtt';
 		this.url = url;
 		this.topics = topics;
+		this.connectBck=onConnectBck
 	}
 	//初始化mqtt
 	init() {
 		const options = {
 			clean: true, // 保留会话
 			// 认证信息
-			clientId: 'clientId',
+			clientId: 'mqttjs_' + Math.random().toString(16),
 			username: 'mqttroot', //用户名 不用的话什么也不用填
 			password: 'hQEMA4fLSGZcsDhlAQf', //密码 不用的话什么也不用填
-			connectTimeout: 4000, // 超时时间
-			reconnectPeriod: 4000, // 重连时间间隔
+			connectTimeout: 50*1000, // 超时时间
+			reconnectPeriod:1000, // 两次重新连接之间的间隔，客户端 ID 重复、认证失败等客户端会重新连接；
+			keepalive:60 , //心跳 
 		};
-
-		this.client = mqtt.connect(this.url, options);
+		let that=this;
+		this.client = mqtt.connect(this.url, options); 
 		this.client.on('error', (error: any) => {
 			console.log(error);
+			if(that.connectBck)that.connectBck(false,error )
 		});
-		this.client.on('reconnect', () => {});
+		this.client.on('reconnect', () => {
+			if(that.connectBck)that.connectBck(false,"重新连接..." )
+			console.warn(new Date(), "重试重新连接....")
+		});
 	}
 	subscribe(topic?: string) {
+		let that=this;
 		if (topic != null) this.topics.push(topic);
 		this.topics.forEach((item) => {
 			this.client.on('connect', () => {
 				this.client.subscribe(item, (error: any) => {
 					if (!error) {
+						if(that.connectBck)that.connectBck(true )
 						console.log('订阅成功');
 					} else {
+						if(that.connectBck)that.connectBck(false )
 						console.log('订阅失败');
 					}
 				});
@@ -63,8 +76,8 @@ class MQTTing {
 			});
 		});
 	}
-	publish(topic: string, message: string | Buffer) {
-		return this.client.publish(topic, message);
+	publish(topic: string, message: string | Buffer,bck?:PacketCallback) {
+		return this.client.publish(topic, message,bck);
 	}
 	//结束链接
 	close() {
@@ -88,10 +101,12 @@ function useMqtt() {
 	const startMqtt = (
 		url: string,
 		topic: string,
-		callback: OnMessageCallback
+		callback: OnMessageCallback,
+		connectbck?:ConnectBck
 	) => { 
 		//设置订阅地址
-		Ref_Mqtt.value = new MQTTing(getUrl(url), [topic]); 
+		//"tcp://36.137.74.204:9101/mqtt"
+		Ref_Mqtt.value = new MQTTing(getUrl(url), [topic],connectbck); 
 		//初始化mqtt
 		Ref_Mqtt.value.init();
 		//链接mqtt

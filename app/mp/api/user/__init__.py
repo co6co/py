@@ -4,6 +4,7 @@ from sanic.response import  json
 from sanic import Blueprint,Request
 from sanic import exceptions
 from model.pos.right import UserPO ,AccountPO ,UserGroupPO,RolePO,UserRolePO
+from model.pos.wx import WxUserPO
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from co6co_web_db.utils import DbJSONEncoder as JSON_util
@@ -15,6 +16,7 @@ from co6co.utils import log
 from co6co_db_ext .db_operations import DbOperations,DbPagedOperations,and_,joinedload
 from sqlalchemy import func,text
 from sqlalchemy.sql import Select
+from sanic.request.parameters import RequestParameters
 
 user_api = Blueprint("user_API", url_prefix="/user")  
 
@@ -70,8 +72,14 @@ async def list(request:Request):
         session:AsyncSession=session 
         opt=DbOperations(session)   
         select=(
-            Select(UserPO.id,  UserPO.state,UserPO.createTime, UserPO.userName ,UserPO.userGroupId,UserGroupPO.name.label("groupName"),UserGroupPO.code.label("groupCode")  )
+            Select(UserPO.id,  UserPO.state,UserPO.createTime, UserPO.userName ,UserPO.userGroupId,
+                    UserGroupPO.name.label("groupName"),UserGroupPO.code.label("groupCode")
+                    ,WxUserPO.nickName,WxUserPO.ownedAppid
+                    )
             .join(UserGroupPO,isouter=True) 
+            .join(AccountPO,isouter=True,onclause=AccountPO.userId==UserPO.id)
+            .join(WxUserPO,isouter=True,onclause=AccountPO.uid==WxUserPO.accountUid)
+            
             .filter(and_(*param.filter()))
             .limit(param.limit).offset(param.offset)  
         ) 
@@ -106,9 +114,13 @@ async def exist(request:Request,userName:str):
     """
     用户名是否存在
     """
+    args:RequestParameters=request.args 
+    id=args.get("id")  
+    log.warn(id)
     async with request.ctx.session as session:  
         operation=DbOperations(session)
-        isExist=await operation.exist(UserPO.userName==userName,column=UserPO.id)
+        if id==None:isExist=await operation.exist(UserPO.userName==userName,column=UserPO.id)
+        else :isExist=await operation.exist(UserPO.userName==userName , UserPO.id!=id,column=UserPO.id)
         await session.commit()    
         if isExist:return JSON_util.response(Result.success(message=f"用户'{userName}'已存在。"))
         else: return JSON_util.response(Result.fail(  message=f"用户'{userName}'不已存在。"))
@@ -127,7 +139,7 @@ async def add(request:Request):
         operation=DbOperations(session)
         isExist=await operation.exist(UserPO.userName==user.userName,column=UserPO.id)
         if isExist:return JSON_util.response(Result.fail(message=f"增加用户'{user.userName}'已存在"))
-        user.id=None 
+        user.id=None  
         user.salt=user.generateSalt()  
         user.password=user.encrypt()
         user.createUser=current_user_id
@@ -145,17 +157,15 @@ async def edit(request:Request,pk:int):
     """
     user =UserPO()  
     user.__dict__.update(request.json)  
-    user.salt=user.generateSalt() 
-    if user.roleId not in [1,2]:
-        return JSON_util.response(Result.fail(message="选择的用户角色未知")) 
+    user.salt=user.generateSalt()  
     async with request.ctx.session as session: 
         session:AsyncSession=session
         async with session.begin(): 
             operation=DbOperations(session)
-            userPO= await operation.get_one_by_pk(UserPO,pk)
+            userPO:UserPO= await operation.get_one_by_pk(UserPO,pk)
             # 用户名修改 
             if(user.userName !=None and user.userName !="" ):userPO.userName = user.userName
-            userPO.roleId = user.roleId
+            userPO.userGroupId = user.userGroupId
             userPO.state = user.state  
             await session.commit()    
     return JSON_util.response(Result.success())

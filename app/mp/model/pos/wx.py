@@ -31,8 +31,7 @@ class WxUserPO(TimeStampedModelPO):
     province=Column("province",String(16),comment="城市")
     country=Column("country",String(64),comment="国家")
     headimgUrl=Column("headimg_url",String(255),comment="图像URL")
-    privilege=Column("privilege",String(255),comment="特权")
-    subscribe=Column("subscribe_msg_type",Integer,comment="订阅消息类型0:不订阅消息",server_default="0")
+    privilege=Column("privilege",String(255),comment="特权") 
     accountPO=Relationship("AccountPO",back_populates="wxUserPO")
 
 

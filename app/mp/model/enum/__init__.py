@@ -5,7 +5,9 @@ class User_Group(Base_Enum):
     用户组代码
     """
     wx_user="wx_user",0
+    
     wx_admin="wx_admin",1
+    wx_alarm="wx_alarm",2 #告警订阅订阅组
 
 class User_Role(Base_Enum):
     """

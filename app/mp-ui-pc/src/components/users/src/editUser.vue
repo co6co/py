@@ -3,12 +3,16 @@
 	<el-dialog
 		:title="form.title"
 		v-model="form.dialogVisible"
-		style="width: 50%; height: 80%">
-		<el-form label-width="70px">
+		style="width: 50%;">
+		<el-form label-width="70px"
+			ref="dialogForm"
+			:rules="rules"
+			:model="form.fromData"
+			>
 			<el-form-item label="用户名" prop="userName">
 				<el-input v-model="form.fromData.userName"></el-input>
 			</el-form-item>
-			<el-form-item label="密码" prop="password">
+			<el-form-item v-if="form.operation===0" label="密码" prop="password">
 				<el-input
 					v-model="form.fromData.password"
 					type="password"
@@ -16,13 +20,14 @@
 				</el-input>
 			</el-form-item>
 
-			<el-form-item label="用户组" prop="roleId">
+			<el-form-item label="用户组" prop="userGroupId">
 				<el-select
 					style="width: 160px" 
 					class="mr10"
 					clearable
 					v-model="form.fromData.userGroupId"
 					placeholder="请选择">
+					<el-option label="选择用户组" value="" />
 					<el-option
 						v-for="item in GroupCategoryRef.List"
 						:key="item.id"
@@ -31,9 +36,9 @@
 				</el-select>
 			</el-form-item>
 			<el-form-item label="用户状态" prop="state">
-				<el-select v-model="form.fromData.state" placeholder="请选择">
+				<el-select v-model="form.fromData.state" placeholder="请选择"> 
 					<el-option
-						v-for="item in state"
+						v-for="item in state.list"
 						:key="item.key"
 						:label="item.label"
 						:value="item.value" />
@@ -65,14 +70,14 @@
 		id: number;
 		userName: String;
 		password: String;
-		userGroupId: Number;
+		userGroupId?: Number;
 		state: Number;
 	}
 	interface dialogDataType {
 		dialogVisible: boolean;
 		operation: 0 | 1 | number;
 		title?: string;
-		id: number;
+		id?: number;
 		fromData: FromData;
 	}
 	const emits = defineEmits(['saved']);
@@ -80,9 +85,8 @@
 	const valid_userName = (rule: any, value: string, back: Function) => {
 		if (value.length < 3)
 			return (rule.message = '长度应该大于3'), back(new Error(rule.message));
-		api.exist_svc(value).then((res) => {
-			if (res.code == 0)
-				return (rule.message = res.message), back(new Error(rule.message));
+		api.exist_svc(value,form.id).then((res) => {
+			if (res.code == 0) return (rule.message = res.message), back(new Error(rule.message));
 			else return back();
 		});
 	};
@@ -104,10 +108,10 @@
 				trigger: 'blur',
 			},
 		],
-		roleId: [
+		userGroupId: [
 			{
 				required: true,
-				message: '请选择用户角色',
+				message: '请选择所属组',
 				trigger: ['blur', 'change'],
 			},
 		],
@@ -124,14 +128,13 @@
 	let form = reactive<dialogDataType>({
 		dialogVisible: false,
 		operation: 0,
-		id: 0,
-
+		id: 0, 
 		fromData: {
 			id: -1,
 			userName: '',
 			password: '',
 			userGroupId: -1,
-			state: -1,
+			state: 0,
 		},
 	});
 	interface GroupCategory {
@@ -150,14 +153,14 @@
 
 		form.dialogVisible = true;
 		form.operation = operation;
-		form.id = -1;
+		form.id = undefined;
 		switch (operation) {
 			case 0:
 				form.title = '增加';
 				form.fromData.userName = '';
 				form.fromData.password = '';
-				form.fromData.userGroupId = item.userGroupId;
-				form.fromData.state = 0;
+				form.fromData.userGroupId = undefined
+				form.fromData.state =state.list[0].value;
 				break;
 			case 1:
 				if (item && item.id) {
@@ -188,6 +191,10 @@
 						}
 					});
 				} else {
+					if (form.id==undefined) {
+						ElMessage.success("编辑用户Id不存在");
+						return
+					}
 					api.edit_svc(form.id, form.fromData).then((res) => {
 						if (res.code == 0) {
 							form.dialogVisible = false;

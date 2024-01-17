@@ -4,8 +4,9 @@ export const queryList_svc = (data:IpageParam): Promise<IPageResponse> => {
     return request.post(`${BASE_URL}/list`,data);
 };
 
-export const exist_svc = ( userName:string): Promise<IResponse> => {
-    return request.post(`${BASE_URL}/exist/${userName}`, {});
+export const exist_svc = (userName:string,id?:number ): Promise<IResponse> => {
+    if(id==undefined)return request.post(`${BASE_URL}/exist/${userName}`, {});
+    else return request.post(`${BASE_URL}/exist/${userName}?id=${id}`, {});
 };
 export const add_svc = ( data:any): Promise<IResponse> => {
     return request.post(`${BASE_URL}/add`, data);

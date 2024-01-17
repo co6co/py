@@ -1,4 +1,4 @@
-<template>
+<template >
 	<div class="ptz-controls show">
 		<div class="ptz-bg-active"></div>
 		<div
@@ -79,7 +79,7 @@
 </template>
 <script setup lang="ts">
 	import * as t from './types/ptz';
-	import { ref, watch, computed } from 'vue';
+	import { ref, watch, computed ,onMounted} from 'vue';
 	import { connected, nextTick } from 'process';
 
 	const props = defineProps({
@@ -97,48 +97,26 @@
 		},
 	});
 	interface Emits {
-		(e: 'ptz', name: t.ptz_name, type: t.ptz_type,speed:number): void;
-		(
-			e: 'uped' | 'downed' | 'righted' | 'lefted' | 'zoomined' | 'zoomouted'
-		): void;
-		(
-			e:
-				| 'uping'
-				| 'downing'
-				| 'righting'
-				| 'lefting'
-				| 'zoomining'
-				| 'zoomouting'
-		): void;
+		(e: 'ptz', name: t.ptz_name, type: t.ptz_type,speed:number): void; 
 		(e: 'centerClick', active: boolean): void;
 	}
 	const emits = defineEmits<Emits>();
-	const onOperater = (name: string, type: number) => {
-		if (!props.ptzEnable) return;
-		switch (name) {
-			case 'up':
-				type == 1 ? emits('uped') : emits('uping');
-				break;
-			case 'down':
-				type == 1 ? emits('downed') : emits('downing');
-				break;
-			case 'right':
-				type == 1 ? emits('righted') : emits('righting');
-				break;
-			case 'left':
-				type == 1 ? emits('lefted') : emits('lefting');
-				break;
-			case 'zoomin':
-				type == 1 ? emits('zoomined') : emits('zoomining');
-				break;
-			case 'zoomout':
-				type == 1 ? emits('zoomouted') : emits('zoomouting');
-				break;
-			default:
-				return;
-		}
-		emits('ptz', name, type === 0 ? 'starting' : 'stop',speed.value);
+	const starting=ref(false)
+	const onOperater = (name: t.ptz_name, type: number) => {
+		if (!props.ptzEnable) return; 
+		if(type === 0){
+			starting.value=true
+			emits('ptz', name,  'starting'  ,speed.value); 
+		} 
+		else {
+			starting.value=false 
+			//给一个Tick 发送 stop
+			nextTick(()=>{
+				emits('ptz', name,  'stop',speed.value); 
+			})
+		}  
 	};
+
 	const centerActive = ref(false);
 	const centerState = computed(() => {
 		if (props.takerState && centerActive.value) {
@@ -153,7 +131,17 @@
 		emits('centerClick', centerActive.value);
 	};
 
-	const speed=ref(240)
+	const speed=ref(240) 
+	onMounted(()=>{ 
+		document.body.addEventListener("mouseup", ()=>{ 
+			if(starting.value) {
+				//拖动鼠标等才会出现
+				console.warn("出现没有start的stop.")
+				starting.value=false
+				emits('ptz', 'up','stop',speed.value); 
+			} 
+		});
+	})
 </script>
 <style scoped lang="less">
 	@normal-color: #fff;

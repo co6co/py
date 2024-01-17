@@ -10,7 +10,7 @@
 					<el-button type="primary" :icon="Search" @click="onSearch"
 						>搜索</el-button
 					>
-					<el-button type="primary" :icon="Plus" @click="onOpenDialog"
+					<el-button type="primary" :icon="Plus" @click="onOpenDialog()"
 						>新增</el-button
 					>
 				</div>
@@ -33,6 +33,19 @@
 							align="center"></el-table-column>
 						<el-table-column prop="userName" label="用户名"></el-table-column>
 						<el-table-column label="用户组" prop="groupName"> </el-table-column>
+						<el-table-column label="微信昵称" prop="nickName"> </el-table-column>
+						<el-table-column label="微信昵称" prop="nickName"> </el-table-column>
+						<el-table-column
+							label="所属公众号"
+							width="120"
+							sortable
+							prop="flowStatus">
+							<template #default="scope">
+								<el-tag
+									>{{ config.getItem(scope.row.ownedAppid)?.name }}
+								</el-tag></template
+							>
+							</el-table-column>
 						<el-table-column label="状态" align="center">
 							<template #default="scope">
 								<el-tag>
@@ -133,6 +146,7 @@
 
 	import { showLoading, closeLoading } from '../components/Logining';
 	import { editUser,model as m } from '../components/users';
+	import { wx_config_store } from '../store/wx';
 
 	interface TableItem {
 		id: number;
@@ -146,11 +160,13 @@
 		pageIndex: 1,
 		pageSize: 10,
 	});
+	const config = wx_config_store();
 	const tableData = ref<TableItem[]>([]);
 	const pageTotal = ref(0);
 	// 获取表格数据
-	const getData = () => {
+	const getData = async () => {
 		showLoading();
+		await config.getConfig();
 		queryList_svc(query)
 			.then((res) => {
 				if (res.code == 0) {
@@ -200,6 +216,7 @@
 	const editUserRef=ref()
 	const onOpenDialog = (row?: any) => { 
 		//有记录编辑无数据增加  
+		console.info("ddd",row)
 		editUserRef.value.onOpenDialog(row?1:0,row);
 	};  
 
@@ -236,40 +253,7 @@
 				ElMessage.error(`重置密码失败:${res.message}`);
 			}
 		});
-	};
-	// 表格编辑时弹窗和保存
-	const editVisible = ref(false);
-
-	let idx: number = -1;
-	const onOpenEditDialog = (index: number, row: any) => {
-		idx = index;
-		form.id = row.id;
-		form.userName = row.userName;
-		form.state = row.state;
-		form.userGroupId = row.userGroupId;
-		editVisible.value = true;
-	};
-	const onEditSave = () => {
-		edit_svc(form.id, {
-			userName: form.userName,
-			roleId: form.userGroupId,
-			state: form.state,
-		}).then((res) => {
-			if (res.code == 0) {
-				editVisible.value = false;
-				ElMessage.success(
-					`修改‘${form.userName}’第 ${
-						idx + 1
-					}行成功,修改了功能相关的,需要注销，重新登录才会生效`
-				);
-				getData();
-			} else {
-				ElMessage.error(
-					`修改‘${form.userName}’第 ${idx + 1} 行修改失败:${res.message}`
-				);
-			}
-		});
-	};
+	}; 
 </script>
 
 <style scoped lang="less">
