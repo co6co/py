@@ -19,7 +19,7 @@ from model.enum import wx_menu_state
 class config_View(wx_authon_views):
     async def get(self, request:Request): 
        """
-       获取微信公众号配置的 [{openId,name}]
+       获取微信公众号配置的 [{openId,name},...]
        """ 
        return JSON_util.response(Result.success(self.get_wx_configs(request)))
 
@@ -98,6 +98,9 @@ class menus_Api(wx_authon_views):
         return text("”") 
     
 class menu_Api(wx_authon_views):
+    """
+    与本地数据库相关 
+    """
     def push_menu(self, request:Request,openId:str,content:str)->Tuple[bool,str]:
         try:
             client=self.cteate_wx_client(request,openId) 

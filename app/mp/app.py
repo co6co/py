@@ -38,20 +38,13 @@ def init (app:Sanic,customConfig):
     #from static import res 
     #app.blueprint(res) 
     #service=db_service(app,app.config.db_settings,BasePO)
-   # service.sync_init_tables() 
-    settings: dict = {
-        'DB_HOST': 'localhost',
-        'DB_NAME': '',
-        'DB_USER': 'root',
-        'DB_PASSWORD': '',
-        'echo': True,
-        'pool_size': 20,
-        'max_overflow': 0
-    }
- 
+    #service.sync_init_tables()  
     injectDbSessionFactory(app,app.config.db_settings) 
     app.blueprint(api)
     app.add_task(update_device_poster_task(app))
+    app.ctx.data=1
+    log.warn(f"*app****Data:id:{id(app.ctx.data)},value:{app.ctx.data}") 
+    app.ctx.data=app.ctx.data+1
     
 if __name__ == "__main__":     
     parser=argparse.ArgumentParser(description="audit service.")

@@ -2,8 +2,7 @@
 from functools import wraps
 from sanic import Blueprint,Sanic
 from sanic.response import  json
-from sanic.request import Request
-from sanic.log import logger
+from sanic.request import Request 
 from co6co_web_db.services .jwt_service import validToken
 from co6co_db_ext.res.result import Result
 from co6co_sanic_ext.utils import JSON_util
@@ -67,6 +66,9 @@ async def generateUserToken(request:Result,data=None,userId:int=None,userOpenId:
 
 
 def authorized(f): 
+    '''
+    慢慢 移走 不需要在这里
+    '''
     @wraps(f)
     async def decorated_function(request, *args, **kwargs):
         # run some method that checks the request

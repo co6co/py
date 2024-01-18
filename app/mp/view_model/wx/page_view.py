@@ -15,7 +15,7 @@ from typing import List,Optional,Tuple
 from co6co.utils import log  
 from datetime import datetime
 from model.enum import wx_menu_state
-from view_model.wx.fn_oauth import Authon_param,oauth,oauth_debug
+from view_model.aop.wx_auth_aop import Authon_param,oauth,oauth_debug
 
 class Authon_View(wx_base_view): 
     def get_wx_authon_param(self,request:Request,appid:str)->Authon_param:

@@ -18,6 +18,7 @@ from model.pos.biz import bizResourcePO  ,bizAlarmAttachPO,bizAlarmTypePO,bizAla
 
 import multipart,uuid,datetime
 from view_model import get_upload_path
+from view_model.aop .alarm_aop import Alarm_Save_Succ_AOP
 
  
 #@lru_cache(maxsize=20)
@@ -94,7 +95,9 @@ class Video_Upload_View(Upload_view):
         if root==None:return  JSON_util.response(m.Video_Response.fail("未配置上传目录"))
         # 1. 保存文件
         file:multipart.MultipartPart=files.get("Video") 
-        if file==None:return  JSON_util.response(m.Video_Response.fail("上传[file['Video']]未找到视频文件"))
+        if file==None: 
+            log.warn("未找到上传的视频内容Video")
+            return JSON_util.response(m.Video_Response.fail("上传[file['Video']]未找到视频文件"))
         
         try:
             #2. 保存到数据库
@@ -164,6 +167,10 @@ class Alarm_Upload_View(Upload_view):
         fullPath,filePath=self.getFullPath(root,fileName) 
         File.writeBase64ToFile(fullPath,base64) 
         return filePath 
+    @Alarm_Save_Succ_AOP
+    @staticmethod
+    def alarm_success(request:Request ,po:bizAlarmPO):
+        return None
     async def post(self, request:Request): 
         """
         上传告警信息
@@ -194,9 +201,11 @@ class Alarm_Upload_View(Upload_view):
                 result= await opt.exist(bizAlarmPO.uuid==po.uuid) 
                 if result: 
                     res:m.Response=m.Response.success(message=f"数据“{po.uuid}”重复上传")
-                    log.warn(f"告警信息删除重复{po.uuid}")
+                    #通知公众号订阅者
+                    Alarm_Upload_View.alarm_success(request,po)
+                    log.warn(f"告警信息uuid重复{po.uuid}")
                     return JSON_util.response(res)
-                #视频资源
+                #关联视频资源 视频资源可能为空，有UUID 但没有资源
                 po.videoUid=self.createResourceUUID(p.VideoFile)
                 po.rawImageUid=u1
                 po.markedImageUid=u2
@@ -208,8 +217,9 @@ class Alarm_Upload_View(Upload_view):
                 session.add(po) 
                 await opt.commit()  
                 res:m.Response=m.Response.success()
-                return JSON_util.response(res)
-
+                #通知公众号订阅者
+                Alarm_Upload_View.alarm_success(request,po)
+                return JSON_util.response(res) 
         except Exception as e:
             log.err(f"上告警失败：{e}")
             res:m.Response=m.Response.fail( message=e)

@@ -15,6 +15,7 @@ import uuid
 
 def createUuid():
     return uuid.uuid4()
+
 def oauth(func):
     def warpper(request:Request):
         if request.session.get('user_info', None) is None:
@@ -37,7 +38,6 @@ def oauth(func):
         return func(request)
     return warpper
 
- 
 
 def remove_repetition_message(func):
     message_ids=[]
