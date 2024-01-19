@@ -24,9 +24,9 @@
  
 <script setup lang="ts">
 import { watch, PropType,reactive, ref , computed ,onMounted, onUnmounted, onBeforeUnmount,nextTick, watchEffect} from 'vue';  
-import "../../../assets/jessi/jessibuca-pro-demo.js";
-import "../../../assets/jessi/jessibuca-pro-talk-demo.js";
-import "../../../assets/jessi/demo.js";   
+import '../../../assets/jessi/jessibuca-pro.js';
+	import '../../../assets/jessi/jessibuca-pro-talk.js';
+	import '../../../assets/jessi/demo.js'; 
  
 var showOperateBtns = true; // 是否显示按钮 
 const props = defineProps({

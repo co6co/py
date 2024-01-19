@@ -4,7 +4,7 @@
 		:title="form.title"
 		v-model="form.dialogVisible"
 		style="width: 50%;">
-		<el-form label-width="70px"
+		<el-form label-width="90px"
 			ref="dialogForm"
 			:rules="rules"
 			:model="form.fromData"
@@ -48,7 +48,7 @@
 		<template #footer>
 			<span class="dialog-footer">
 				<el-button @click="form.dialogVisible = false">关闭</el-button>
-				<el-button @click="onDialogSave(dialogForm)">保存</el-button>
+				<el-button  :loading="form.loading" :disabled="form.loading" @click="onDialogSave(dialogForm)">保存</el-button>
 			</span>
 		</template>
 	</el-dialog>
@@ -78,6 +78,7 @@
 		operation: 0 | 1 | number;
 		title?: string;
 		id?: number;
+		loading:boolean;
 		fromData: FromData;
 	}
 	const emits = defineEmits(['saved']);
@@ -129,6 +130,7 @@
 		dialogVisible: false,
 		operation: 0,
 		id: 0, 
+		loading:false,
 		fromData: {
 			id: -1,
 			userName: '',
@@ -154,6 +156,7 @@
 		form.dialogVisible = true;
 		form.operation = operation;
 		form.id = undefined;
+		
 		switch (operation) {
 			case 0:
 				form.title = '增加';
@@ -180,6 +183,7 @@
 		if (!formEl) return;
 		formEl.validate((value) => {
 			if (value) {
+				form.loading=true
 				if (form.operation == 0) {
 					api.add_svc(form.fromData).then((res) => {
 						if (res.code == 0) {
@@ -189,7 +193,7 @@
 						} else {
 							ElMessage.error(`增加失败:${res.message}`);
 						}
-					});
+					}).finally(()=>{form.loading=false});
 				} else {
 					if (form.id==undefined) {
 						ElMessage.success("编辑用户Id不存在");
@@ -203,7 +207,7 @@
 						} else {
 							ElMessage.error(`编辑失败:${res.message}`);
 						}
-					});
+					}).finally(()=>{form.loading=false});
 				}
 			} else {
 				ElMessage.error('请检查输入的数据！');

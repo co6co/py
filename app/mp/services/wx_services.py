@@ -41,8 +41,8 @@ async def createOrUpdateAccount(session:AsyncSession, wx_user:wxUser,accountStat
             #用戶角色
             rolePo:RolePO=await opt.get_one(RolePO,RolePO.code==User_Role.wx_user.name)
             #用戶組
-            userGroupPO:UserGroupPO=await opt.get_one(UserGroupPO,UserGroupPO.code==User_Group.wx_user.key)
-            if rolePo==None or userGroupPO ==None: raise Exception(f"数据库为找到相关用户组{User_Group.wx_user.name}或者用户角色{User_Role.wx_user.name}")
+            userGroupPO:UserGroupPO=await opt.get_one(UserGroupPO,UserGroupPO.code==User_Group.wx_user.name)
+            if rolePo==None or userGroupPO ==None: raise Exception(f"数据库中未找到相关用户组{User_Group.wx_user.name}  或者用户角色{User_Role.wx_user.name}  ")
             u_po.userGroupPO=userGroupPO
             u_po.rolePOs=[rolePo] 
              

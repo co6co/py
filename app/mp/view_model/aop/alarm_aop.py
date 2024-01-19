@@ -11,9 +11,10 @@ from services.bll.wx_user import wx_user_bll
 from services.bll.aralm import alarm_bll
 import asyncio
 from threading import Thread
-from time import sleep, ctime
-from utils.threadLoop  import ThreadEventLoop
- 
+from time import sleep, ctime 
+from co6co.task.thread import ThreadEvent
+import json 
+from co6co_sanic_ext.utils import JSON_util
 
 def Alarm_Save_Succ_AOP(func):
     @wraps(func)
@@ -30,43 +31,62 @@ def Alarm_Save_Succ_AOP(func):
 def startAlarmPush(config: WechatConfig,app:Sanic,po:bizAlarmPO):
     # 通过查询订阅该公众号的用户
     try:  
-        sleep(1)
+        sleep(0.5)
         log.warn("任务... ")  
-        t=ThreadEventLoop()    
-        bll=wx_user_bll(app,t.loop)
-        # 1. asyncio.run 在 没有正在运行的事件循环 的情况下运行协程的
-        #wx_user_dict:list[dict]=asyncio.run(bll.get_subscribe_alarm_user(config.appid)) 
-        #alarm= alarm_bll(app)
-        #po:bizAlarmTypePO=asyncio.run(alarm.get_alram_type_desc(po.alarmType))
-        # 2. 正在运行的事件循环
-        # This event loop is already running   
-        # import nest_asyncio 
-        #loop = asyncio.get_event_loop()
-        #wx_user_dict:list[dict]=loop.run_until_complete(bll.get_subscribe_alarm_user(config.appid))
-
-        # 3. 创建任务
-        #task=asyncio.create_task(bll.get_subscribe_alarm_user(config.appid))
-        #wx_user_dict:list[dict]=asyncio.run(task) 
-        # 4.底层使用
-        #asyncio.ensure_future(coro())
-        # 5. 
-       
+        t=ThreadEvent()    
+        bll=wx_user_bll(app,t.loop) 
         wx_user_dict:list[dict]=t.runTask(bll.get_subscribe_alarm_user,config.appid) 
+        if wx_user_dict==None or len( wx_user_dict)==0 :
+            log.warn("需要告警的用户为0,不推送告警。")
+            return
         alarm= alarm_bll(app,t.loop)
         print(po.alarmType)
         typePO=t.runTask( alarm.get_alram_type_desc,po.alarmType) 
         # 推送  
-        if wx_user_dict!=None and len( wx_user_dict)>0 and typePO!=None:
-            client=crate_wx_cliet_by_config(config)  
-            
-            msg=f'发现违反规则：{typePO.get("alarmType") }->{typePO.get("desc")}' 
-            log.warn(f"通告信息。{config.name}。 。{msg},{client.access_token}") 
-            log.err(wx_user_dict)
-            for u in  wx_user_dict:   
-                log.info(f"yshu Id:{u.get('appid')}，{u.get('appid')},type{type(u)}")
-                #client.message.send_text(u.get("appid"),msg)
+        if typePO!=None:
+            log.info(f"需发送用户数：{len( wx_user_dict)}")
+            client=crate_wx_cliet_by_config(config)   
+            alarmType=typePO.get("alarmType")
+            alarmDesc=typePO.get("desc")
+            templatId=None
+            data=None
+            msg=None
+            if config.alarm_tamplate_id==None:
+                msg=f'发现违反规则：{ alarmType}->{alarmDesc}'  
+            else: 
+                templatId=config.alarm_tamplate_id
+                data={
+                    "alarmType":{"value":alarmType},
+                    "alarmDesc":{"value":alarmDesc},
+                    "alarmTime":{"value":po.alarmTime}  
+                } 
+                #date 无法使用默认序列化   
+                data=JSON_util().encode(data) 
+                data=json.loads(data) 
+            for u in  wx_user_dict:
+                openid=u.get("openid")
+                nickName=u.get("nickName")
+                log.warn(f'发送 告警消息 {templatId or msg}\t to \t{openid}{nickName}')
+                if templatId==None: sendMessage(client,openid,msg,nickName)
+                else: sendTemplateMessage(client,openid,nickName,templatId,data)
     except Exception  as e:
         log.err(f"告警失败：{e}")
+def sendMessage(client:WeChatClient, openId, msg:str ,nickName:str):
+    try: 
+        # 45015
+        # send_text 用户长期为与公众号联系将不能发送消息
+        jsonData=client.message.send_text(openId,msg) 
+        log.warn(f"发送文本消息<<：{jsonData}" )
+    except Exception as e:
+        log.err(f"发送文本消息-->{openId}{nickName}失败：{e}")
+
+def sendTemplateMessage(client:WeChatClient, openId,nickName:str, tempId, data ,url:str=None):
+    try:  
+        jsonData=client.message.send_template(openId,tempId,data=data,url=url)
+        log.warn(f"发送模板消息<<：{jsonData}" )
+    except Exception as e:
+        log.err(f"发送模板消息-->{openId}{nickName}失败：{e}")
+
  
 
 

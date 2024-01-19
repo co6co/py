@@ -114,7 +114,7 @@
 		<template #footer>
 			<span class="dialog-footer">
 				<el-button @click="form.dialogVisible = false">关闭</el-button>
-				<el-button @click="onDialogSave(dialogForm)">保存</el-button>
+				<el-button :loading="form.loading" :disabled="form.loading" @click="onDialogSave(dialogForm)">保存</el-button>
 			</span>
 		</template>
 	</el-dialog>
@@ -172,6 +172,7 @@
 		operation: 0 | 1 | number;
 		title?: string;
 		id: number;
+		loading:boolean;
 		fromData: FromData;
 	}
 	const dialogForm = ref<FormInstance>();
@@ -206,6 +207,7 @@
 		dialogVisible: false,
 		operation: 0,
 		id: 0,
+		loading:false,
 		fromData: {
 			innerIp: '',
 			name: '',
@@ -283,6 +285,7 @@
 		if (!formEl) return;
 		formEl.validate((value) => {
 			if (value) {
+				form.loading=true
 				if (form.operation == 0) {
 					api.add_camera_svc(form.fromData).then((res) => {
 						if (res.code == 0) {
@@ -292,7 +295,7 @@
 						} else {
 							ElMessage.error(`增加失败:${res.message}`);
 						}
-					});
+					}).finally(()=>{form.loading=false});
 				} else {
 					api.edit_camera_svc(form.id, form.fromData).then((res) => {
 						if (res.code == 0) {
@@ -302,7 +305,7 @@
 						} else {
 							ElMessage.error(`编辑失败:${res.message}`);
 						}
-					});
+					}).finally(()=>{form.loading=false});
 				}
 			} else {
 				ElMessage.error('请检查输入的数据！');

@@ -176,16 +176,25 @@ async  def delete(request:Request,pk:int):
     删除用户
     """
     if pk == 1 : return JSON_util.response(Result.fail(message= "不能删除系统默认用户！"))
-    async with request.ctx.session as session: 
+    async with request.ctx.session as session,session.begin(): 
         session:AsyncSession=session
         operation=DbOperations(session)
-        user= await operation.get_one_by_pk(UserPO,pk) 
+        select=(
+            Select(UserPO)
+            .options(joinedload(UserPO.rolePOs) )
+            .filter(UserPO.id==pk)
+        )
+        #user:UserPO=await session.get_one(UserPO,pk)
+        #user:UserPO= await operation.get_one_by_pk(UserPO,pk) 
+        executer=await session.execute(select)
+        user:UserPO=executer.scalar()
+        
         if user==None:
-            return JSON_util.response(Result.fail(message=f"未找到该用户{pk}!"))  
-        await session.delete(user) 
-        await session.commit()    
+            return JSON_util.response(Result.fail(message=f"未找到该用户{pk}!"))   
+        log.warn(user.rolePOs)  
+        await session.delete(user)  
         return JSON_util.response(Result.success())
-
+    
 @user_api.route("/currentUser")
 @authorized
 async def currentUser(request:Request ):

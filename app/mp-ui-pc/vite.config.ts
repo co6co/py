@@ -61,13 +61,14 @@ function pathResolve(dir: string) {
 export const useConfig = ({ command, mode }: ConfigEnv): UserConfig => {
 	let env = {} as any;
 	const isBuild = command === 'build';
-	if (!isBuild) {
+	console.warn("编译参数:",process.argv)
+	if (isBuild) {
+		env = loadEnv(mode, root);		
+	} else { 
 		env = loadEnv(
 			process.argv[3] === '--mode' ? process.argv[4] : process.argv[3],
 			root
 		);
-	} else {
-		env = loadEnv(mode, root);
 	}
 	return {
 		base: env.API_URL_BASE,

@@ -33,8 +33,7 @@
 							align="center"></el-table-column>
 						<el-table-column prop="userName" label="用户名"></el-table-column>
 						<el-table-column label="用户组" prop="groupName"> </el-table-column>
-						<el-table-column label="微信昵称" prop="nickName"> </el-table-column>
-						<el-table-column label="微信昵称" prop="nickName"> </el-table-column>
+						<el-table-column label="微信昵称" prop="nickName"> </el-table-column> 
 						<el-table-column
 							label="所属公众号"
 							width="120"

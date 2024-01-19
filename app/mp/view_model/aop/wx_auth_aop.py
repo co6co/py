@@ -51,7 +51,7 @@ def oauth(method):
     微信页面 认证
     """
     @wraps(method)
-    async def  warpper(request:Request,param:Authon_param ):  
+    async def warpper(request:Request,param:Authon_param ):  
         try: 
             config=get_wx_config(request,param.appid) 
             # 这样需要优化 ，仅第一次需要调用其他需要调用刷新
@@ -59,7 +59,7 @@ def oauth(method):
             #oauth .check_access_token()
             # 第二步 通过code换取网页授权access_token
             data=oauth.fetch_access_token(param.code)  
-            log.info(f"access_token:{data}")
+            #log.info(f"access_token:{data}")
 
             # 第三步 刷新 access_token
             #access_token拥有较短的有效期，当access_token超时后，
@@ -95,6 +95,7 @@ async def get_snsapi_userinfo(oauth:WeChatOAuth,request:Request,param:Authon_par
     """
     获取用户信息入库
     //todo 需要优化
+    //网页授权获取用户基本信息  其他的口需要端口号
     """
     try:
         if param.scope==wx_authon_scope.snsapi_userinfo: 

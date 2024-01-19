@@ -35,7 +35,9 @@
             "appSecret":"0b19ad3a1be39f71028409c05351a43a",
             "token":"token123456",  
             "encodingAESKey":"",	 
-            "encrypt_mode":"normal"
+            "encrypt_mode":"normal" ,
+            "alarm_tamplate_id":"G6ockp-Y-qCZ1mBfvZrkmaFFboqMY4WvixLm0W90xZk"
+           
         }
     ]
 }

@@ -105,6 +105,15 @@ function checkSupportSIMD() {
     return WebAssembly && WebAssembly.validate(new Uint8Array([0, 97, 115, 109, 1, 0, 0, 0, 1, 5, 1, 96, 0, 1, 123, 3, 2, 1, 0, 10, 10, 1, 8, 0, 65, 0, 253, 15, 253, 98, 11]));
 }
 
+function supportSharedArrayBuffer() {
+    try {
+        new SharedArrayBuffer(1);
+        return true;
+    } catch (e) {
+        return false;
+    }
+}
+
 let support = document.getElementById('mseSupport');
 let notSupport = document.getElementById('mseNotSupport');
 if (support && notSupport) {
@@ -169,6 +178,18 @@ if (supportSimd && notSupportSimd) {
         supportSimd.style.display = 'inline-block';
     } else {
         notSupportSimd.style.display = 'inline-block'
+    }
+}
+
+let supportSimdMtSupport = document.getElementById('simdMtSupport');
+var notSupportSimdMtSupport = document.getElementById('simdMtNotSupport');
+
+
+if (supportSimdMtSupport) {
+    if (supportSharedArrayBuffer()) {
+        supportSimdMtSupport.style.display = 'inline-block';
+    } else {
+        notSupportSimdMtSupport.style.display = 'inline-block';
     }
 }
 

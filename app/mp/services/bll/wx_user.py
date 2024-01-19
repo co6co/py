@@ -4,6 +4,7 @@ from model.pos.right import UserPO,UserGroupPO,AccountPO
 from model.pos.wx import WxUserPO
 from sqlalchemy import Select
 from co6co.utils import log
+from model.enum import User_Group
 import asyncio
 class wx_user_bll(baseBll): 
     async def get_subscribe_alarm_user(self,ownedAppid:str):
@@ -14,12 +15,10 @@ class wx_user_bll(baseBll):
             async with self.session as session,session.begin():  
                 select=( 
                     Select(UserPO.id,UserPO.userName ,WxUserPO.openid,WxUserPO.nickName)
-                    .join(UserGroupPO,isouter=True) 
-                    .join(AccountPO,isouter=True,onclause=AccountPO.userId==UserPO.id)
-                    .join(WxUserPO,isouter=True,onclause=AccountPO.uid==WxUserPO.accountUid) 
-                    .filter(WxUserPO.ownedAppid== ownedAppid) 
-                )  
-               
+                    .join_from(WxUserPO,AccountPO,isouter=True,onclause=AccountPO.uid==WxUserPO.accountUid)  
+                    .join(UserPO,isouter=True,onclause=AccountPO.userId==UserPO.id) 
+                    .filter(WxUserPO.ownedAppid== ownedAppid,UserPO.userGroupId==User_Group.wx_alarm.val) 
+                )   
                 executer=await session.execute(select)  
                 result = executer.mappings().fetchall() 
                 result = [dict(a) for a in result]  
