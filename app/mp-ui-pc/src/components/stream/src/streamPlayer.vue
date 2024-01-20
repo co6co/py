@@ -1,8 +1,7 @@
 <template>
-	<div>
-	{{ props.stream }}
+	 
 	<div class="jess_player" ref="jess_player_container"></div>
-</div>
+ 
 </template>
 
 <script setup lang="ts">
@@ -18,12 +17,14 @@
 		nextTick,
 		watchEffect,
 	} from 'vue';
-	/**
+	
 	import '../../../assets/jessi/jessibuca-pro.js';
+	import '../../../assets/jessi/demo.js'; 
+	/**
 	import '../../../assets/jessi/jessibuca-pro-talk.js';
 	  import '../../../assets/jessi/demo.js'; 
 	   */  
-	import '../../../assets/jessi/jessibuca-pro-demo.js';
+	//import '../../../assets/jessi/jessibuca-pro-demo.js';
 	//import '../../../assets/jessi/jessibuca-pro-talk-demo.js';
 	 
 
@@ -61,7 +62,7 @@
 	};
 	const onPlay = () => {
 		try {
-			if (props.stream) { 
+			if (props.stream) {  
 				let promise: Promise<any> = jess_player.value.play(props.stream); 
 				if (promise) {
 					promise
@@ -97,20 +98,22 @@
 	const create = () => {
 		console.info('create...');
 		const jessibuca = new JessibucaPro({
-			container: jess_player_container.value,
+			container: jess_player_container.value, 
 			videoBuffer: player_option.videoBuffer, // 缓存时长
-			videoBufferDelay: player_option.videoBufferDelay, // 1000s
-			isResize: false,
+			videoBufferDelay: player_option.videoBufferDelay, // 1000s 
+            isResize: false,
 			text: 'text',
 			loadingText: '加载中',
 			debug: false,
-			debugLevel: 'debug',
+			debugLevel: '',//'debug',
+			isMulti: true,
+			hasAudio: false,
 			useMSE: player_option.type == 'MediaSource', // $useMSE.checked === true,
 			useSIMD: player_option.type == 'Webcodec', // $useSIMD.checked === true,
 			useWCS: player_option.type == 'SIMD', //$useWCS.checked === true,
 
 			showBandwidth: showOperateBtns, // 显示网速
-			//showPerformance: showOperateBtns, // 显示性能
+			showPerformance: showOperateBtns, // 显示性能
 			operateBtns: {
 				fullscreen: showOperateBtns,
 				screenshot: showOperateBtns,
@@ -120,7 +123,7 @@
 				quality: showOperateBtns,
 				performance: showOperateBtns,
 			},
-
+			isFlv: true,
 			timeout: 10000,
 			heartTimeoutReplayUseLastFrameShow: true,
 			audioEngine: 'worklet',
@@ -132,6 +135,15 @@
 			useWebGPU: player_option.useWebGPU,
 			//controlHtml:'<div>我是 <span style="color: red">test</span>文案</div>',
 			supportHls265: true,
+			watermarkConfig: {
+                text: {
+                    content: 'jshwx'
+                },
+                right: 0,
+                top: 0
+            },
+            demuxUseWorker:   true,
+			
 		});
 		jessibuca.on('ptz', (arrow: number) => {
 			console.log('ptz', arrow);
