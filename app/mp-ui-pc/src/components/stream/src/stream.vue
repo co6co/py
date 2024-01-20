@@ -24,9 +24,15 @@
  
 <script setup lang="ts">
 import { watch, PropType,reactive, ref , computed ,onMounted, onUnmounted, onBeforeUnmount,nextTick, watchEffect} from 'vue';  
-import '../../../assets/jessi/jessibuca-pro.js';
-	import '../../../assets/jessi/jessibuca-pro-talk.js';
-	import '../../../assets/jessi/demo.js'; 
+
+    //import '../../../assets/jessi/jessibuca-pro.js';
+	//import '../../../assets/jessi/jessibuca-pro-talk.js';
+    //import '../../../assets/jessi/demo.js'; 
+  
+    import '../../../assets/jessi/jessibuca-pro-demo.js';
+	import '../../../assets/jessi/jessibuca-pro-talk-demo.js';
+   // import '../../../assets/jessi/demo.js'; 
+	
  
 var showOperateBtns = true; // 是否显示按钮 
 const props = defineProps({
@@ -192,4 +198,4 @@ const onPause=()=>{
     background: hsla(0, 0%, 50%, 0.5);
     padding: 0px 4px 0px 4px;
 } 
-</style>
+</style>../../../assets/jessi--/jessibuca-pro-demo.js../../../assets/jessi--/jessibuca-pro-talk-demo.js../../../assets/jessi--/demo.js

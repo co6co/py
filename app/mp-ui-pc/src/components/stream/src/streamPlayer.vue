@@ -1,4 +1,9 @@
-<template><div class="jess_player" ref="jess_player_container"></div></template>
+<template>
+	<div>
+	{{ props.stream }}
+	<div class="jess_player" ref="jess_player_container"></div>
+</div>
+</template>
 
 <script setup lang="ts">
 	import {
@@ -13,9 +18,16 @@
 		nextTick,
 		watchEffect,
 	} from 'vue';
+	/**
 	import '../../../assets/jessi/jessibuca-pro.js';
 	import '../../../assets/jessi/jessibuca-pro-talk.js';
-	import '../../../assets/jessi/demo.js'; 
+	  import '../../../assets/jessi/demo.js'; 
+	   */  
+	import '../../../assets/jessi/jessibuca-pro-demo.js';
+	//import '../../../assets/jessi/jessibuca-pro-talk-demo.js';
+	 
+
+	 
 
 	var showOperateBtns = false; // 是否显示按钮
 	const props = defineProps({
@@ -49,10 +61,8 @@
 	};
 	const onPlay = () => {
 		try {
-			if (props.stream) {
-				console.info('111.');
-				let promise: Promise<any> = jess_player.value.play(props.stream);
-				console.info('2222.');
+			if (props.stream) { 
+				let promise: Promise<any> = jess_player.value.play(props.stream); 
 				if (promise) {
 					promise
 						.then(function () {
