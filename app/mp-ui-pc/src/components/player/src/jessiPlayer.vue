@@ -1,4 +1,4 @@
-<template> 
+<template>  
 	<div class="jess_player" ref="jess_player_container"></div> 
 </template>
 
@@ -18,14 +18,16 @@
 	
 	import '../../../assets/jessi/jessibuca-pro.js';
 	import '../../../assets/jessi/demo.js';  
+	import '../../../assets/jessi/vconsole.js';  
+	import { videoOption } from './types';
 
 	var showOperateBtns = false; // 是否显示按钮
 	const props = defineProps({
-		stream: {
-			type: String,
-			//required: true,
-		},
 		option: {
+			type: Object as PropType<videoOption>,
+			required: true,
+		},
+		options: {
 			type: Object as PropType<player_option>,
 			required: false,
 		},
@@ -52,11 +54,10 @@
  
 	const onPlay = () => {
 		try {
-			if (props.stream) {  
-				let promise: Promise<any> = jess_player.value.play(props.stream); 
+			if (props.option.url) {  
+				let promise: Promise<any> = jess_player.value.play(props.option.url); 
 				if (promise) {
-					promise
-						.then(function () {
+					promise .then(function () {
 							// Automatic playback started!
 							//console.info('auto player.');
 						})
@@ -68,6 +69,8 @@
 							//console.log("finally.",promise) 
 						});  
 				}
+			}else{
+				console.warn("url is NULL")
 			}
 		} catch (e) {
 			console.error('播放视频出现异常：', e);
@@ -92,13 +95,13 @@
             isResize: false,
 			text: 'text',
 			loadingText: '加载中',
-			debug: false,
-			debugLevel: '',//'debug',
+			debug: true,
+			debugLevel: 'debug',//'debug',
 			isMulti: true,
 			hasAudio: false,
 			useMSE: true,//player_option.type == 'MediaSource', // $useMSE.checked === true,
-			useSIMD: false,//player_option.type == 'Webcodec', // $useSIMD.checked === true,
-			useWCS:false,// player_option.type == 'SIMD', //$useWCS.checked === true,
+			useSIMD: true,//player_option.type == 'Webcodec', // $useSIMD.checked === true,
+			useWCS:true,// player_option.type == 'SIMD', //$useWCS.checked === true,
 
 			showBandwidth: showOperateBtns, // 显示网速
 			showPerformance: showOperateBtns, // 显示性能
@@ -115,22 +118,34 @@
 			timeout: 10000,
 			heartTimeoutReplayUseLastFrameShow: true,
 			audioEngine: 'worklet',
-			forceNoOffscreen: true,
+			forceNoOffscreen: false,
 			isNotMute: false,
 			heartTimeout: 10,
-			ptzZoomShow: true,
+			ptzZoomShow: false,
 			useCanvasRender: player_option.renderDom == 'canvas',
 			useWebGPU: player_option.useWebGPU,
 			//controlHtml:'<div>我是 <span style="color: red">test</span>文案</div>',
-			supportHls265: true,
-			watermarkConfig: {
+			supportHls265: true, 
+			 
+            
+            
+            qualityConfig: ['普清', '高清', '超清', '4K', '8K'], 
+            
+            ptzClickType: 'mouseDownAndUp',
+           
+            ptzMoreArrowShow: true,
+            ptzApertureShow: true,
+            ptzFocusShow: true,
+            useVideoRender:  'video', 
+			recordType:'mp4', //flv | webm
+			watermarkConfig: {	
                 text: {
                     content: 'jshwx'
                 },
                 right: 0,
                 top: 0
             },
-            demuxUseWorker:   false,  ////硬解码
+            demuxUseWorker:false, ////硬解码
 			
 		});
 		jessibuca.on('ptz', (arrow: number) => {
@@ -162,10 +177,10 @@
 	};
 	watchEffect(() => {
 		try {
-			if (props.stream) {
+			if (props.option.url) {
 				nextTick(() => {
 					replay();
-				}); // 可能会死
+				});  
 			} else {
 				stop();
 			}
@@ -173,7 +188,9 @@
 			console.error(e);
 		}
 	});
-	onMounted(() => {});
+	onMounted(() => {
+		replay()
+	});
 	onUnmounted(() => {
 		if (jess_player.value) jess_player.value.destroy().then(() => destroying());
 	});
@@ -191,4 +208,9 @@
 </script>
 <style scoped>
 ::v-deep .jess_player:first-child{ color: red;position: absolute;left: 1; } 
+video {
+		width: 100%;
+		height: 100%;
+		object-fit: fill;
+	}
 </style>

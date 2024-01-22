@@ -57,6 +57,7 @@ declare module '@vue/runtime-core' {
     HtmlPlayer: typeof import('./src/components/player/src/htmlPlayer.vue')['default']
     Image: typeof import('./src/components/player/src/Image.vue')['default']
     ImgVideo: typeof import('./src/components/player/src/imgVideo.vue')['default']
+    JessiPlayer: typeof import('./src/components/player/src/jessiPlayer.vue')['default']
     Log: typeof import('./src/components/log/src/log.vue')['default']
     Player: typeof import('./src/components/player/src/Player.vue')['default']
     Ptz: typeof import('./src/components/stream/src/ptz.vue')['default']

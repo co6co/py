@@ -59,17 +59,22 @@
 	const compoents = reactive({
 		Image: markRaw(
 			defineAsyncComponent(
-				() => import('../../../components/player/src/Image.vue')
+				() => import('./Image.vue')
 			)
 		),
 		Video: markRaw(
 			defineAsyncComponent(
-				() => import('../../../components/player/src/Player.vue')
+				() => import('./Player.vue')
 			)
 		), 
 		htmlPlayer: markRaw(
 			defineAsyncComponent(
-				() => import('../../../components/player/src/htmlPlayer.vue')
+				() => import('./htmlPlayer.vue')
+			)
+		),
+		jessiPlayer: markRaw(
+			defineAsyncComponent(
+				() => import('./jessiPlayer.vue')
 			)
 		),
 	});
@@ -90,7 +95,7 @@
 	});
 
 	
-	const currentName = ref<'Image' | 'Video' |  'htmlPlayer'>('Image');
+	const currentName = ref<'Image' | 'Video' |  'htmlPlayer'|'jessiPlayer'>('Image');
 	let current_Index =0;
 	const current_options = ref<resourceOption>({
 		url: '',
@@ -106,7 +111,7 @@
 		}) 
 	})
 	const onShow = (option: resourceOption, index: number) => { 
-		if (option.type == 0) currentName.value = 'htmlPlayer';
+		if (option.type == 0) currentName.value = 'jessiPlayer';
 		else currentName.value = 'Image';
 		current_Index=index
 		current_options.value = option;

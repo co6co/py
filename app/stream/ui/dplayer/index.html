@@ -1,0 +1,22 @@
+
+
+<html>
+<head>
+<div id="dplayer"></div>
+    <script src="./flv.min.js"></script>
+    <script src="./hls.min.js"></script>
+    <script src="./dash.all.min.js"></script>
+    <script src="./webtorrent.min.js"></script>
+    <script src="./DPlayer.min.js"></script>
+</head>
+<body>
+ 
+<script>
+const dp = new DPlayer({
+    container: document.getElementById('dplayer'),
+    video: {
+        url: '../1.mp4',
+    },
+}); 
+</body>
+</html>
