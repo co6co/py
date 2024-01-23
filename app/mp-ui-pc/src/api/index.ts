@@ -67,7 +67,6 @@ export const download_svc= (url:string,fileName:string)=>{
             document.body.removeChild(down);//下载完成移除 
         }catch(e){
             console.error(e)
-        }
-       
+        } 
     })   
 }

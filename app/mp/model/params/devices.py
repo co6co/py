@@ -25,7 +25,7 @@ class cameraParam:
 
     def set_po(self, po:bizCameraPO):
         print(self.cameraType)
-        po.CameraType=self.cameraType
+        po.cameraType=self.cameraType
         po.innerIp=self.innerIp
         po.name=self.name
         

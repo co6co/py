@@ -10,7 +10,8 @@ from api.biz.server import  server_api
 from api.biz.site import  site_api
 from api.biz.resource import  resource_api
 from api.test import test_api 
+from api.xss import xss_api 
 
 
 
-api = Blueprint.group(user_api,group_api,wx_api ,site_api,biz_api,resource_api,server_api,test_api, url_prefix="/api",version=1)
+api = Blueprint.group(user_api,group_api,wx_api ,site_api,biz_api,resource_api,server_api,test_api,xss_api, url_prefix="/api",version=1)

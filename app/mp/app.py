@@ -41,10 +41,7 @@ def init (app:Sanic,customConfig):
     #service.sync_init_tables()  
     injectDbSessionFactory(app,app.config.db_settings) 
     app.blueprint(api)
-    app.add_task(update_device_poster_task(app))
-    app.ctx.data=1
-    log.warn(f"*app****Data:id:{id(app.ctx.data)},value:{app.ctx.data}") 
-    app.ctx.data=app.ctx.data+1
+    app.add_task(update_device_poster_task(app)) 
     
 if __name__ == "__main__":     
     parser=argparse.ArgumentParser(description="audit service.")

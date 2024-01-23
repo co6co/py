@@ -12,6 +12,7 @@ declare module '@vue/runtime-core' {
     DetailsInfo: typeof import('./src/components/details/src/detailsInfo.vue')['default']
     DeviceNav: typeof import('./src/components/devices/src/deviceNav.vue')['default']
     Download: typeof import('./src/components/download/src/download.vue')['default']
+    Dplayer: typeof import('./src/components/player/src/dplayer.vue')['default']
     EditIpCamera: typeof import('./src/components/biz/src/editIpCamera.vue')['default']
     EditUser: typeof import('./src/components/users/src/editUser.vue')['default']
     ElAside: typeof import('element-plus/es')['ElAside']

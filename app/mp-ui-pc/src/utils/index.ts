@@ -8,6 +8,10 @@ export const str2Obj = (str: string) => {
 	return JSONbig.parse(str);
 };
 
+export const sleep = (time:number) => {
+	return new Promise(resolve => setTimeout(resolve, time))
+  }
+  
 /// 创建开始结束时间
 export const createStateEndDatetime = (type: number, beforeHour: number) => {
 	let endDate = null;

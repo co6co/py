@@ -83,7 +83,10 @@ class Sites_View(AuthMethodView):
                 if a.boxPO:d.update({"box":a.boxPO.to_dict()})
                 for pa in a.camerasPO: 
                     pa:bizCameraPO=pa 
-                    devices.append(pa.to_dict())  
+                    dict=pa.to_dict()
+                    if "streams" in dict and  dict.get("streams")!=None: 
+                        dict.update({"streams":json.loads(dict.get("streams"))}) 
+                    devices.append(dict)  
                 d.update({"devices":devices})
                 data.append(d)  
             pageList=Page_Result.success(data ,total=total)   

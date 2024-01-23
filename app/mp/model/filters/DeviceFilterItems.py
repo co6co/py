@@ -21,7 +21,7 @@ class DeviceFilterItems(absFilterItems):
     def __init__(self):
         super().__init__(bizCameraPO)
         self.listSelectFields = [
-            bizCameraPO.id, bizCameraPO.uuid, bizCameraPO.name, bizCameraPO.CameraType, bizCameraPO.createTime, bizCameraPO.ip, bizCameraPO.innerIp,
+            bizCameraPO.id, bizCameraPO.uuid, bizCameraPO.name, bizCameraPO.cameraType, bizCameraPO.createTime, bizCameraPO.ip, bizCameraPO.innerIp,
             bizCameraPO.streams,bizCameraPO.poster
         ]
 
@@ -33,7 +33,7 @@ class DeviceFilterItems(absFilterItems):
         if self.checkFieldValue(self.name):
             filters_arr.append(bizCameraPO.name.like(f"%{self.name}%"))
         if self.checkFieldValue(self.category):
-            filters_arr.append(bizCameraPO.CameraType.__eq__(self.category))
+            filters_arr.append(bizCameraPO.cameraType.__eq__(self.category))
         if self.datetimes and len(self.datetimes) == 2:
             filters_arr.append(bizCameraPO.createTime.between(
                 self.datetimes[0], self.datetimes[1]))

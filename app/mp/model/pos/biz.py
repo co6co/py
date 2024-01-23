@@ -67,7 +67,7 @@ class bizCameraPO(UserTimeStampedModelPO):
     name=Column("name",String(64),comment="设备名称") 
     no = Column("no",Integer,comment="球机编号")
     siteId=Column("site_id",ForeignKey(f"biz_site.id" ) )
-    CameraType= Column("type",String(16))
+    cameraType= Column("type",String(16))
     poster = Column("poster",String(255)) 
     streams = Column("stream_urls",String(2048),comment="json 对象[{url:xx,name:xx}]")  
     sip= Column("sip_address",String(64),comment="SIP地址") 
