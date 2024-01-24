@@ -5,9 +5,11 @@ export  enum  DeviceState{
 } 
 export interface Stream {
   url: string;
+  valid:boolean;// 是否有效
   name: string;
 }
 export interface DeviceData {
+  [key:string]:number|string|Stream[]|undefined;
   cameraType?: number;
   channel1_sip: string;
   channel2_sip: string;
@@ -26,12 +28,12 @@ export interface DeviceData {
   innerConfigUrl: string;
   innerIp: string;
   ip: string;
-  name: String;
+  name: string;
   no: number;
   poster: string;
   sip: string;
   siteId: number; 
-  streams: Stream;
+  streams: Stream[];
   talkbackNo: number;
   updateTime: string;
   updateUser?: number;

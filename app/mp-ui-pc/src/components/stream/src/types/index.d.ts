@@ -19,6 +19,7 @@ interface PlayerOption{
 } 
 interface stream_source{
   url:String
+  valid:boolean
   name:String //// ['普清', '高清', '超清', '4K', '8K']
 }
  

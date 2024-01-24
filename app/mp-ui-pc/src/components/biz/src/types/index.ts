@@ -1,15 +1,15 @@
 import {types} from '../../../devices'
 export interface player {
-    dom?: any;
+    //dom?: any;
     url: string;
-    data?: types.deviceItem
-    streamList: Array<stream_source>;
+    data?: types.DeviceData
+    streamList: Array<types.Stream>;
 }
 export interface PlayerList {
     splitNum: number;
     isFullScreen: boolean;
     currentWin: number;
-    currentStreams: Array<stream_source>;
+    currentStreams: Array<types.Stream>;
     players: Array<player>;
 }
 

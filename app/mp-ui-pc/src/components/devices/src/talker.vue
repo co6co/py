@@ -110,8 +110,7 @@
 			talker.xtalk_websocket_server_connect();
 			console.info(talker.xtalk_conn_state);
 		}
-	}
-
+	} 
 	defineExpose({
 		talker,
 		connect,

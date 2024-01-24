@@ -3,7 +3,9 @@ import { usePermissStore } from '../store/permiss';
 import wxHome from '../views2/wxHome.vue';
 import { getToken, removeToken, setToken } from '../utils/auth'; 
 import { nextTick } from 'vue'; 
+import { Storage,SessionKey } from '../store/Storage';
 
+let storeage = new Storage();
 const routes: RouteRecordRaw[] = [
 	{
 		path: '/',
@@ -78,17 +80,7 @@ const routes: RouteRecordRaw[] = [
 					permiss: '2',
 				},
 				component: () => import('../views2/alarmPreview.vue'),
-			},
-
-			{
-				path: '/preview.html',
-				name: 'preview',
-				meta: {
-					title: '视频监控',
-					permiss: '2',
-				},
-				component: () => import('../views2/devicesPreview.vue'),
-			},
+			}, 
 
 			{
 				path: '/devicesManage.html',
@@ -133,7 +125,8 @@ router.beforeEach((to, from, next) => {
 		if (ticket) {
 			ticket_svc(ticket).then((res) => {
 				if (res.code == 0) {
-					setToken(res.data.token, res.data.expireSeconds);
+					setToken(res.data.token, res.data.expireSeconds); 
+					storeage.set(SessionKey, res.data.sessionId, res.data.expireSeconds);
 					nextTick(()=>next()) 
 				}
 				else showNotify({ type: 'danger', message: res.message });

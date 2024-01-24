@@ -53,7 +53,6 @@ declare module '@vue/runtime-core' {
     ElTag: typeof import('element-plus/es')['ElTag']
     ElText: typeof import('element-plus/es')['ElText']
     ElTooltip: typeof import('element-plus/es')['ElTooltip']
-    ElTree: typeof import('element-plus/es')['ElTree']
     Header: typeof import('./src/components/header.vue')['default']
     HtmlPlayer: typeof import('./src/components/player/src/htmlPlayer.vue')['default']
     Image: typeof import('./src/components/player/src/Image.vue')['default']

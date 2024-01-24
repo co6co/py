@@ -2,11 +2,11 @@ import path, { resolve } from 'path';
 import { loadEnv } from 'vite';
 import { defineConfig, UserConfig, ConfigEnv } from 'vite';
 import vue from '@vitejs/plugin-vue';
-import VueSetupExtend from 'vite-plugin-vue-setup-extend';
+import VueSetupExtend from 'vite-plugin-vue-setup-extend'; 
+import vueJs from '@vitejs/plugin-vue-jsx'
 import AutoImport from 'unplugin-auto-import/vite';
 import Components from 'unplugin-vue-components/vite';
-import { ElementPlusResolver } from 'unplugin-vue-components/resolvers';
-
+import { ElementPlusResolver } from 'unplugin-vue-components/resolvers'; 
 import topLevelAwait from 'vite-plugin-top-level-await';
 
 export default defineConfig({
@@ -20,7 +20,8 @@ export default defineConfig({
 	//esbuild:{jsx: "preserve"},
 	plugins: [
 		vue(),
-		VueSetupExtend(),
+		VueSetupExtend(), 
+		vueJs(),
 		AutoImport({
 			resolvers: [ElementPlusResolver()],
 		}),

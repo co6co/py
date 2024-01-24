@@ -2,7 +2,7 @@ export enum Expire {
 	expire = '__expire__',
 	permanent = 'permanent',
 }
-
+export const SessionKey= "sessionId"
 export type Key = string; //key类型
 export type expire = Expire.permanent | number; //有效期类型
 export interface Data<T> {

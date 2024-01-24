@@ -24,90 +24,11 @@
 	</div>
 </template>
 
-<script setup lang="ts" name="basetable">
-	import {
-		ref,
-		watch,
-		reactive,
-		watchEffect,
-		nextTick,
-		PropType,
-		onMounted,
-		onBeforeUnmount,
-		computed,
-	} from 'vue';
-	import {
-		ElMessage,
-		ElMessageBox,
-		FormRules,
-		FormInstance,
-		ElTreeSelect,
-	} from 'element-plus';
-	import { TreeNode } from 'element-plus/es/components/tree-v2/src/types';
-	import { TreeNodeData } from 'element-plus/es/components/tree/src/tree.type';
-	import {
-		Delete,
-		Edit,
-		Search,
-		Compass,
-		MoreFilled,
-		Download,
-		CloseBold,
-		VideoCamera,
-		Avatar,
-		ArrowUp,
-		ArrowDown,
-	} from '@element-plus/icons-vue';
-
-	//import * as api from '../api/device';
-	import * as api from '../api/site';
-	import { stream, ptz, streamPlayer } from '../components/stream';
-	import * as p from '../components/stream/src/types/ptz';
-	import { toggleFullScreen } from '../utils';
-	import { useMqtt, mqqt_server } from '../utils/mqtting';
-	import * as d from '../store/types/devices';
-	import { showLoading, closeLoading } from '../components/Logining';
-	import { talker, deviceNav, types as dType } from '../components/devices';
-	import { bizPlayer,taklerPtz, types } from '../components/biz';
-
-	const deviceName = ref('');
-
-	/** 播放器 */
-	const playerList = reactive<types.PlayerList>({
-		splitNum: 1,
-		isFullScreen: false,
-		currentWin: 1,
-		currentStreams: [],
-		players: [
-			{ dom: {}, url: '', streamList: [{ name: '', url: '' }] },
-			{ dom: {}, url: '', streamList: [{ name: '', url: '' }] },
-			{ dom: {}, url: '', streamList: [{ name: '', url: '' }] },
-			{ dom: {}, url: '', streamList: [{ name: '', url: '' }] },
-		],
-	});
-	const currentDeviceData = reactive<{ data?: dType.deviceItem }>({});
-	const onClickNavDevice = (
-		streams: String | { url: string; name: string },
-		device: dType.deviceItem
-	) => {
-		let streamArr = null;
-		if (streams && typeof streams == 'string') streamArr = JSON.parse(streams);
-		else streamArr = streams;
-		playerList.players[playerList.currentWin - 1].data=device
-		if (streamArr) {
-			playerList.players[playerList.currentWin - 1].streamList = streamArr;
-			playerList.players[playerList.currentWin - 1].url = streamArr[0].url;
-		} else {
-			playerList.players[playerList.currentWin - 1].url = '';
-			playerList.players[playerList.currentWin - 1].streamList = [];
-			ElMessage.warning('未配置设备流地址');
-		}
-		currentDeviceData.data = device;
-	};
-	const onPlayerChecked=(index:number,data?: dType.deviceItem)=>{  
-		currentDeviceData.data = data; 
-	}
- 
+<script setup lang="ts" name="basetable">    
+	import {   deviceNav } from '../components/devices';
+	import { bizPlayer,taklerPtz  } from '../components/biz'; 
+	import {playerList,currentDeviceData,onClickNavDevice,onPlayerChecked}   from '../components/devices/preview'; 
+	 
 </script>
 <style scoped lang="less">
 	@import '../assets/css/player-split.css';

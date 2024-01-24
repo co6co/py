@@ -1,4 +1,4 @@
-<template> 
+<template>  
 	<div class="jess_player" ref="jess_player_container"></div> 
 </template>
 
@@ -52,7 +52,7 @@
  
 	const onPlay = () => {
 		try {
-			if (props.stream) {  
+			if (props.stream) {    
 				let promise: Promise<any> = jess_player.value.play(props.stream); 
 				if (promise) {
 					promise

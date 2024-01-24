@@ -64,7 +64,14 @@
 	</el-card>
 </template>
 <script setup lang="ts">
-	import { ref, reactive, computed, onMounted, onUnmounted } from 'vue';
+	import {
+		ref,
+		reactive,
+		computed,
+		onMounted,
+		onUnmounted,
+		markRaw,
+	} from 'vue';
 	import {
 		ElMessage,
 		ElMessageBox,
@@ -96,9 +103,14 @@
 	import * as gb_api from '../../..//api/deviceState';
 	import { showLoading, closeLoading } from '../../../components/Logining';
 	import * as types from './types';
+	import { GbDeviceState } from '../gb28181';
+
+	import { Storage,SessionKey } from '../../../store/Storage';
+
+let storeage = new Storage();
 
 	interface Emits {
-		(e: 'nodeClick', streams: types.Stream, device: types.DeviceData): void;
+		(e: 'nodeClick', streams?: types.Stream[], device?: types.DeviceData): void;
 	}
 	const emits = defineEmits<Emits>();
 	const treeRef = ref<InstanceType<typeof ElTree>>();
@@ -147,6 +159,7 @@
 			label: 'name',
 		},
 	});
+	let sessionId=storeage.get(SessionKey)
 	// 获取表格数据
 	const getData = () => {
 		showLoading();
@@ -174,6 +187,7 @@
 					}
 					tree_module.data = res.data;
 					tree_module.total = res.total || -1;
+					onSyncState();
 				} else {
 					ElMessage.error(res.message);
 				}
@@ -183,32 +197,34 @@
 			});
 	};
 	const hasData = computed(() => tree_module.data.length > 0);
-
 	const onNodeCheck = (row: types.Site | types.DeviceData) => {
-		let data = row as types.Site;
-		let device = row as types.DeviceData;
-		if (data) {
-			tree_module.currentItem = data;
-			//只有一个设备的点
-			if (data.device) {
-				let device = data.device;
+		if (row) {
+			if ((row as types.Site).device) {
+				let data = row as types.Site;
+				tree_module.currentItem = data;
+				//只有一个设备的点
+				if (data.device) {
+					let device = data.device;
+					tree_module.currentDevice = device;
+					let stream = device.streams;
+					emits('nodeClick', stream, device);
+				}
+				//有多个设备的点 ，仅展开
+				else if (data.devices) console.info('展开');
+			} else if ((row as types.DeviceData).streams) {
+				let device = row as types.DeviceData;
+				//点位
 				tree_module.currentDevice = device;
-				let stream = device.streams;
-				emits('nodeClick', stream, device);
+				emits('nodeClick', device.streams, device);
+			} else {
+				emits('nodeClick', undefined, undefined);
 			}
-			//有多个设备的点 ，仅展开
-			else if (data.devices) console.info('展开');
-		}
-		if (device) {
-			//点位
-			tree_module.currentDevice = device;
-			emits('nodeClick', device.streams, device);
+		} else {
+			console.info('row is None');
 		}
 	};
 	// 状态
-	const state_0 = Loading;
-	const state_1 = VideoCamera;
-
+	const comMap = reactive([markRaw(Loading), markRaw(VideoCamera)]);
 	const setStatueComponent = (
 		data: types.Site | types.DeviceData,
 		state: types.DeviceState
@@ -216,70 +232,96 @@
 		data.state = state;
 		switch (state) {
 			case types.DeviceState.loading:
-				data.statueComponent = state_0;
+				data.statueComponent = comMap[0];
 				break;
 			case types.DeviceState.Connected:
-				data.statueComponent = state_1;
+				data.statueComponent = comMap[1];
 				break;
 			default:
-				data.statueComponent = state_1;
+				data.statueComponent = comMap[1];
 				break;
 		}
 	};
+ 
+	//查询通道是否在线
+	const queryChannel = (
+		stateArray: gb_api.gbDeviceState[],
+		channel_sip: string
+	): boolean => {
+		let result: gb_api.gbDeviceState[] = stateArray.filter((m) =>
+			m.uri.includes(channel_sip)
+		);
+		return result.length > 0;
+	};
 
-	let timer: NodeJS.Timeout | null = null;
-	const onSyncState = () => {
-		if (timer) clearInterval(timer);
-		gb_api
-			.get_gb_device_state()
-			.then((res) => { 
-        let stateArray=res.data
-        console.info("gb device State:",stateArray)
-				for (let i = 0; i < tree_module.data.length; i++) {
-					let site = tree_module.data[i];
-					if (site.box) {
-						if (site.devices) {
-							for (let j = 0; j < site.devices.length; j++) {
-								setStatueComponent(
-									site.devices[j],
-									types.DeviceState.Connected
-								);
-							}
-						} else if (site.device) {
-							setStatueComponent(site, types.DeviceState.Disconected);
-						}
-					} else {
-						if (site.devices) {
-							for (let j = 0; j < site.devices.length; j++) {
-								setStatueComponent(
-									site.devices[j],
-									types.DeviceState.Disconected
-								);
-							}
-						} else if (site.device) {
-							setStatueComponent(site, types.DeviceState.Disconected);
-						}
-						setStatueComponent(site, types.DeviceState.Disconected);
-					}
+	const syncChannelState = (
+		devices: types.DeviceData | types.DeviceData[],
+		stateArray: gb_api.gbDeviceState[]
+	) => {
+		if (Array.isArray(devices)) {
+			for (let i = 0; i < devices.length; i++) {
+				syncChannelState(devices[i], stateArray);
+			}
+		} else if (devices.streams && devices.streams.length > 0) {
+			for (let i = 0; i < devices.streams.length; i++) {
+				let channelKey = `channel${i + 1}_sip`;
+				let chanelSip = devices[channelKey];
+				if (chanelSip && typeof chanelSip == 'string') {
+					let exist = queryChannel(stateArray, chanelSip);
+					devices.streams[i].valid = exist; 
+					if (!devices.streams[i].url.includes("userid=")&& sessionId)devices.streams[i].url=devices.streams[i].url+"&userid="+sessionId
+				} else {
+					console.warn('未与sip通道对应的视频流可用状态为:true');
+					devices.streams[i].valid = true;
 				}
-			})
-			.finally(() => {
-				timer = setInterval(onSyncState, 30000);
-			});
-
-      gb_api
-			.get_rtc_device_state().then((res)=>{ console.info("rtc",res) })
+			}
+		}
+	};
+	const onSynDeviceState = (stateArray: gb_api.gbDeviceState[]) => {
+		for (let i = 0; i < tree_module.data.length; i++) {
+			let site = tree_module.data[i];
+			if (site.box) {
+				if (site.devices) {
+					for (let j = 0; j < site.devices.length; j++) {
+						site.devices[j].channel1_sip;
+						let exist = queryChannel(stateArray, site.devices[j].channel1_sip);
+						setStatueComponent(
+							site.devices[j],
+							exist
+								? types.DeviceState.Connected
+								: types.DeviceState.Disconected
+						);
+					}
+					syncChannelState(site.devices, stateArray);
+				} else if (site.device) {
+					let exist = queryChannel(stateArray, site.device.channel1_sip);
+					setStatueComponent(
+						site,
+						exist ? types.DeviceState.Connected : types.DeviceState.Disconected
+					);
+					syncChannelState(site.device, stateArray);
+				}
+			} else {
+				if (site.devices) {
+					for (let j = 0; j < site.devices.length; j++) {
+						setStatueComponent(site.devices[j], types.DeviceState.Disconected);
+					}
+					syncChannelState(site.devices, stateArray);
+				} else if (site.device) {
+					setStatueComponent(site, types.DeviceState.Disconected);
+					syncChannelState(site.device, stateArray);
+				}
+				setStatueComponent(site, types.DeviceState.Disconected);
+			}
+		}
+	};
+	const onSyncState = () => {
+		GbDeviceState(onSynDeviceState)
 	};
 	onMounted(() => {
 		getData();
-		timer = setInterval(() => {
-			onSyncState();
-		}, 500);
 	});
-	onUnmounted(() => {
-		if (timer) clearInterval(timer);
-		timer = null;
-	});
+ 
 </script>
 <style lang="less" scoped>
 	::v-deep .el-card__body {

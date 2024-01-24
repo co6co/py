@@ -35,7 +35,7 @@ async def getAccountuuid(request:Result ,userOpenId:str=None):
 
     return accountuuid
 
-async def generateUserToken(request:Result,data=None,userId:int=None,userOpenId:str=None,expire_seconds:int=86400): 
+async def generateUserToken(request:Result,sessionId:str,data=None,userId:int=None,userOpenId:str=None,expire_seconds:int=86400): 
     token=""  
     SECRET=request.app.config.SECRET 
     if data!=None:
@@ -44,10 +44,11 @@ async def generateUserToken(request:Result,data=None,userId:int=None,userOpenId:
         async with request.ctx.session as session:
             session:AsyncSession=session
             operation=DbOperations(session)  
+            
             try:  
                 if userId!=None:
                     user:UserPO=await operation.get_one(UserPO,UserPO.id.__eq__(userId) )   
-                    token=await createToken(SECRET,user.to_dict())  
+                    token=await createToken(SECRET,user.to_dict())   
                 elif userOpenId!=None:
                     select=(
                         Select(AccountPO) 
@@ -57,12 +58,13 @@ async def generateUserToken(request:Result,data=None,userId:int=None,userOpenId:
                     a:AccountPO=await operation._get_one(select,False)  
                     token=await createToken(SECRET,  a.userPO.to_dict(),expire_seconds) 
                    
+                   
             except Exception as e:
                 log.err(f"创建Token失败:{e}")
             finally:
                 await operation.commit() 
 
-    return  { "token":token,"expireSeconds":expire_seconds}
+    return  { "token":token,"expireSeconds":expire_seconds,"sessionId":str(sessionId)}
 
 
 def authorized(f): 

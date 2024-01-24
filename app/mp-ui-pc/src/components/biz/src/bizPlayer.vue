@@ -1,4 +1,5 @@
 <template>
+	<!--分屏-->
 	<div class="playerList" id="playerList">
 		<div class="video-list" :class="'video-split-' + playerList.splitNum">
 			<template v-for="i in playerList.splitNum" :key="`video-item-${i}`">
@@ -11,8 +12,10 @@
 					</div>
 					<div class="js">
 						<stream-player
-							:ref="(el: HTMLElement) => setPlayerDom(i, el)"
-							:stream="playerList.players[i - 1].url"></stream-player>
+							ref="domRefs" 
+							:stream="playerList.players[i - 1].url">
+							 <!--:ref="(el: HTMLElement) => {setPlayerDom(i, el)}"-->
+						</stream-player>
 					</div>
 				</div>
 			</template>
@@ -61,10 +64,9 @@
 							v-model="playerList.players[playerList.currentWin - 1].url"
 							placeholder="选择码流">
 							<el-option
-								v-for="(item, index) in playerList.players[
-									playerList.currentWin - 1
-								].streamList"
+								v-for="(item, index) in playerList.players[ playerList.currentWin - 1 ].streamList"
 								:key="index"
+								:disabled="!item.valid"
 								:label="item.name"
 								:value="item.url" />
 						</el-select>
@@ -134,6 +136,7 @@
 	import * as types from './types';
 	import {types as dType} from '../../devices';
 	import { toggleFullScreen } from '../../../utils';
+	import {  streamPlayer } from '../../../components/stream';
 
 	const props = defineProps({
 		playerList: {
@@ -141,11 +144,12 @@
 			required: true,
 		},
 	});  
-	const emit = defineEmits<{ (event: 'selected', index:number,data?:dType.deviceItem): void  }>();
-	const setPlayerDom = (index: number, ele: HTMLElement) => {
-		props.playerList.players[index - 1].dom = ele;
-	
-	};
+	const   domRefs = ref<any>([]);
+	const getCurrentDom=()=>{
+		return domRefs.value[props.playerList.currentWin - 1]
+	}
+	const emit = defineEmits<{ (event: 'selected', index:number,data?:dType.DeviceData): void  }>();
+ 
 
 	const onPlayerClick = (winIndex: number) => {
 		props.playerList.currentWin = winIndex;
@@ -166,16 +170,16 @@
 
 	const onCloseAll = () => {
 		for (let i = 0; i < props.playerList.players.length; i++) {
-			const dom = props.playerList.players[i].dom;
+			const dom =domRefs.value[i]
 			if (dom.stop) dom.stop();
 		}
 	};
-	const onClose = () => {
-		const dom = props.playerList.players[props.playerList.currentWin - 1].dom;
+	const onClose = () => { 
+		const dom = getCurrentDom(); 
 		if (dom.stop)dom.stop();
 	};
 	const onScreenshot=()=>{
-		const dom = props.playerList.players[props.playerList.currentWin - 1].dom; 
+		const dom = getCurrentDom(); 
 		if (dom.jess_player&& dom.jess_player.screenshot) dom.jess_player.screenshot()
 		else console.warn("player.screenshot is undenfine")
 	}

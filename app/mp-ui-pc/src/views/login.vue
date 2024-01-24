@@ -119,7 +119,7 @@
 	import { login_svc } from '../api/authen';
 	import { json } from 'stream/consumers';
 	import { setToken } from '../utils/auth';
-	import { Storage } from '../store/Storage';
+	import { Storage,SessionKey } from '../store/Storage';
 	import { pkg } from '../utils';
 	import logo from '../assets/img/logo3.png';
 	//import logo from '../assets/img/logo.jpg';
@@ -196,6 +196,7 @@
 						if (res.code == 0) { 
 							setToken(res.data.token, res.data.expireSeconds);
 							storeage.set('username', param.username, res.data.expireSeconds);
+							storeage.set(SessionKey, res.data.sessionId, res.data.expireSeconds);
 							const keys =
 								permiss.defaultList[
 									param.username == 'admin' ? 'admin' : 'user'

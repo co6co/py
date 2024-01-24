@@ -76,11 +76,12 @@
 	import * as p from '../../../components/stream/src/types/ptz';
 
 	import { ElMessage } from 'element-plus';
-	import { connected } from 'process';
+	import {RtcOnlineState,RtcSessionState} from '../../../components/devices/gb28181';
+
 
 	const props = defineProps({
 		currentDeviceData: {
-			type: Object as PropType<dType.deviceItem>,
+			type: Object as PropType<dType.DeviceData>,
 		},
 	});
 	const talkbackNo = computed(() => {
@@ -93,8 +94,21 @@
 		() => props.currentDeviceData,
 		(n, o) => {
 			takerLogInfo.value = [];
+			if (props.currentDeviceData){
+				RtcOnlineState(onDeviceOnline)
+				RtcSessionState(onDeviceSession)
+			}
+			
 		}
 	);
+	//gb 设备在线/空闲 
+	const onDeviceOnline=(data:any)=>{
+
+	}
+	const onDeviceSession=(data:any)=>{
+
+	}
+	// 
 	const talkerRef = ref();
 	const talkerState = reactive<{ data: dType.talkState }>({
 		data: { state: -1, stateDesc: '', talkNo: -1 },
@@ -163,8 +177,7 @@
 	function unique(arr: Array<mqttMessage>) {
 		const res = new Map();
 		return arr.filter((a) => !res.has(a.UUID) && res.set(a.UUID, 1));
-	}
-
+	} 
 	const OnPtz = (name: p.ptz_name, type: p.ptz_type, speed: number) => {
 		if (!mqttConneted.value) {
 			ElMessage.warning('MQtt 服务 未连接！');
