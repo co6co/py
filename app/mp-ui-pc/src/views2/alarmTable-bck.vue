@@ -86,6 +86,7 @@ import  * as api from '../api/alarm';
 
 import  { imgVideo,types} from '../components/player';    
 import {useAppDataStore} from '../store/appStore'
+import {  createStateEndDatetime } from '../utils';
 
 //页面跳转相关 1.
 import { useRouter } from "vue-router";
@@ -146,26 +147,9 @@ const table_module = reactive<table_module>({
     data:[],
 	pageTotal:-1,  
 }); 
-const setDatetime=(t:number, i:number)=>{ 
-	let endDate=null
-	let startDate=null
-	switch (t){
-		case 0:
-			endDate=new Date();
-			const times=endDate.getTime()-i*3600*1000
-			startDate=new Date(times)
-			break
-		case 1:
-			startDate=new Date( dayjs(new Date()) .format('YYYY/MM/DD'))
-			endDate=startDate.getTime()+24*3600*1000-1000
-			break
-		default:
-			startDate=new Date( dayjs(new Date()) .format('YYYY/MM/DD'))
-			endDate=startDate.getTime()+24*3600*1000 -1000
-			break
-	}  
-	table_module.query.datetimes=[dayjs(startDate) .format('YYYY-MM-DD HH:mm:ss'),dayjs(endDate) .format('YYYY-MM-DD HH:mm:ss')]
-}
+const setDatetime = (t: number, i: number) => {
+		table_module.query.datetimes = createStateEndDatetime(t, i);
+};
  
    // 排序
 const onColChange = (column:any) =>  {  
