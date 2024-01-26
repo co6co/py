@@ -167,6 +167,7 @@ class Alarm_Upload_View(Upload_view):
         fullPath,filePath=self.getFullPath(root,fileName) 
         File.writeBase64ToFile(fullPath,base64) 
         return filePath 
+    
     @Alarm_Save_Succ_AOP
     @staticmethod
     def alarm_success(request:Request ,po:bizAlarmPO):
