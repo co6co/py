@@ -207,7 +207,7 @@ class Alarm_Upload_View(Upload_view):
                     log.warn(f"告警信息uuid重复{po.uuid}")
                     return JSON_util.response(res)
                 #关联视频资源 视频资源可能为空，有UUID 但没有资源
-                po.videoUid=self.createResourceUUID(p.VideoFile)
+                if p.VideoFile !=None and p.VideoFile!='':po.videoUid=self.createResourceUUID(p.VideoFile)
                 po.rawImageUid=u1
                 po.markedImageUid=u2
                 poa=bizAlarmAttachPO()  # 附加信息

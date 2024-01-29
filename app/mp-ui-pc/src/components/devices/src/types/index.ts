@@ -1,7 +1,9 @@
 export  enum  DeviceState{
-  loading,
-  Connected,
-  Disconected
+  loading,    //0
+  Connected, //AI 和球机都连接 
+  Disconected,
+  AIConnected, //AI 连接 
+  CameraConnected,//球机连接
 } 
 export interface Stream {
   url: string;

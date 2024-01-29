@@ -29,14 +29,16 @@
 							<i v-if="data.devices"
 								><el-icon> <Avatar /> </el-icon
 							></i>
-							<i v-else>
-								<el-icon
+							<i v-else> 
+								<el-tooltip :content="types.DeviceState[data.state]">
+								<el-icon 
 									:class="[
 										{ 'is-loading': data.state == 0 },
 										'state_' + data.state,
 									]">
-									<component :is="data.statueComponent" /> </el-icon
-							></i>
+									<component :is="data.statueComponent" /> </el-icon >
+								</el-tooltip>
+							</i>
 							<span class="label">
 								<el-tooltip :content="data.deviceDesc || node.label">
 									<el-text truncated>{{ node.label }} </el-text>
@@ -98,16 +100,19 @@
 		ArrowUp,
 		ArrowDown,
 		Loading,
-	} from '@element-plus/icons-vue';
+		Link,
+		Connection,
+		Refresh
+		} from '@element-plus/icons-vue';
 	import * as api from '../../..//api/site';
 	import * as gb_api from '../../..//api/deviceState';
 	import { showLoading, closeLoading } from '../../../components/Logining';
 	import * as types from './types';
 	import { GbDeviceState } from '../gb28181';
 
-	import { Storage,SessionKey } from '../../../store/Storage';
+	import { Storage, SessionKey } from '../../../store/Storage';
 
-let storeage = new Storage();
+	let storeage = new Storage();
 
 	interface Emits {
 		(e: 'nodeClick', streams?: types.Stream[], device?: types.DeviceData): void;
@@ -159,7 +164,7 @@ let storeage = new Storage();
 			label: 'name',
 		},
 	});
-	let sessionId=storeage.get(SessionKey)
+	let sessionId = storeage.get(SessionKey);
 	// 获取表格数据
 	const getData = () => {
 		showLoading();
@@ -199,7 +204,8 @@ let storeage = new Storage();
 	const hasData = computed(() => tree_module.data.length > 0);
 	const onNodeCheck = (row: types.Site | types.DeviceData) => {
 		if (row) {
-			if ((row as types.Site).device) {
+			let site=(row as types.Site)
+			if (site.device||site.devices) {
 				let data = row as types.Site;
 				tree_module.currentItem = data;
 				//只有一个设备的点
@@ -242,7 +248,7 @@ let storeage = new Storage();
 				break;
 		}
 	};
- 
+
 	//查询通道是否在线
 	const queryChannel = (
 		stateArray: gb_api.gbDeviceState[],
@@ -268,8 +274,10 @@ let storeage = new Storage();
 				let chanelSip = devices[channelKey];
 				if (chanelSip && typeof chanelSip == 'string') {
 					let exist = queryChannel(stateArray, chanelSip);
-					devices.streams[i].valid = exist; 
-					if (!devices.streams[i].url.includes("userid=")&& sessionId)devices.streams[i].url=devices.streams[i].url+"&userid="+sessionId
+					devices.streams[i].valid = exist;
+					if (!devices.streams[i].url.includes('userid=') && sessionId)
+						devices.streams[i].url =
+							devices.streams[i].url + '&userid=' + sessionId;
 				} else {
 					console.warn('未与sip通道对应的视频流可用状态为:true');
 					devices.streams[i].valid = true;
@@ -277,51 +285,50 @@ let storeage = new Storage();
 			}
 		}
 	};
+	const getAiAndCameraOnlineState = (
+		aiExist: boolean,
+		cameraExist: boolean
+	) => {
+		let result = types.DeviceState.Disconected;
+		if (aiExist) {
+			result = cameraExist
+				? types.DeviceState.Connected
+				: types.DeviceState.AIConnected;
+		} else {
+			result = cameraExist
+				? types.DeviceState.CameraConnected
+				: types.DeviceState.Disconected;
+		}
+		return result
+	};
 	const onSynDeviceState = (stateArray: gb_api.gbDeviceState[]) => {
 		for (let i = 0; i < tree_module.data.length; i++) {
 			let site = tree_module.data[i];
-			if (site.box) {
-				if (site.devices) {
-					for (let j = 0; j < site.devices.length; j++) {
-						site.devices[j].channel1_sip;
-						let exist = queryChannel(stateArray, site.devices[j].channel1_sip);
-						setStatueComponent(
-							site.devices[j],
-							exist
-								? types.DeviceState.Connected
-								: types.DeviceState.Disconected
-						);
-					}
-					syncChannelState(site.devices, stateArray);
-				} else if (site.device) {
-					let exist = queryChannel(stateArray, site.device.channel1_sip);
-					setStatueComponent(
-						site,
-						exist ? types.DeviceState.Connected : types.DeviceState.Disconected
-					);
-					syncChannelState(site.device, stateArray);
+			let aiExist=false;
+			if (site.box)  aiExist = queryChannel(stateArray, site.box.sip); 
+			else aiExist=false;
+			if (site.devices) {
+				for (let j = 0; j < site.devices.length; j++) {
+					site.devices[j].channel1_sip;
+					let exist = queryChannel(stateArray, site.devices[j].channel1_sip); 
+					setStatueComponent(site.devices[j],getAiAndCameraOnlineState(aiExist,exist) );
 				}
-			} else {
-				if (site.devices) {
-					for (let j = 0; j < site.devices.length; j++) {
-						setStatueComponent(site.devices[j], types.DeviceState.Disconected);
-					}
-					syncChannelState(site.devices, stateArray);
-				} else if (site.device) {
-					setStatueComponent(site, types.DeviceState.Disconected);
-					syncChannelState(site.device, stateArray);
-				}
-				setStatueComponent(site, types.DeviceState.Disconected);
+				syncChannelState(site.devices, stateArray);
+			} else if (site.device) {
+				let exist = queryChannel(stateArray, site.device.channel1_sip); 
+				setStatueComponent( site,getAiAndCameraOnlineState(aiExist,exist) );
+				syncChannelState(site.device, stateArray);
+			}  else{
+				setStatueComponent( site,getAiAndCameraOnlineState(aiExist,false) );
 			}
 		}
 	};
 	const onSyncState = () => {
-		GbDeviceState(onSynDeviceState)
+		GbDeviceState(onSynDeviceState);
 	};
 	onMounted(() => {
 		getData();
 	});
- 
 </script>
 <style lang="less" scoped>
 	::v-deep .el-card__body {
@@ -348,5 +355,11 @@ let storeage = new Storage();
 	}
 	.state_2 {
 		color: red;
+	}
+	.state_3 { //AIConnected  
+		color: rgb(102, 177, 255);
+	}
+	.state_4 { //CameraConnected
+		color: rgb(83, 168, 255);
 	}
 </style>

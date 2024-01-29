@@ -19,6 +19,7 @@ export const createStateEndDatetime = (type: number, beforeHour: number) => {
 	switch (type) {
 		case 0:
 			endDate = new Date();
+			// eslint-disable-next-line no-case-declarations
 			const times = endDate.getTime() - beforeHour * 3600 * 1000;
 			startDate = new Date(times);
 			break;
@@ -42,8 +43,8 @@ export const randomString = (
 	len: number,
 	chars: string = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
 ) => {
-	var result = '';
-	for (var i = len; i > 0; --i)
+	let result = '';
+	for (let i = len; i > 0; --i)
 		result += chars[Math.floor(Math.random() * chars.length)];
 	return result;
 };
@@ -51,18 +52,20 @@ export const randomString = (
 export const getQueryVariable = (key: string) => {
 	try {
 		//var query = window.location.search.substring(1);
-		var query = window.location.href.substring(
+		const query = window.location.href.substring(
 			window.location.href.indexOf('?') + 1
 		);
-		var vars = query.split('&');
-		for (var i = 0; i < vars.length; i++) {
-			var pair = vars[i].split('=');
+		const vars = query.split('&');
+		for (let i = 0; i < vars.length; i++) {
+			const pair = vars[i].split('=');
 			if (pair[0] == key) {
 				return pair[1];
 			}
 		}
 		return null;
-	} catch (e) {}
+	} catch (e) {
+		console.error("queryVariable Error:",e)
+	}
 	return null;
 };
 
@@ -104,14 +107,12 @@ export const toggleFullScreen = (
 
 //10进制转16进制补0
 export const number2hex=(dec:number, len:number)=> {
-	var hex = "";
+	let hex = "";
 	while( dec ) {
-	var last = dec & 15;
-	hex = String.fromCharCode(((last>9)?55:48)+last) + hex;
-	dec >>= 4;
+		const last = dec & 15;
+		hex = String.fromCharCode(((last>9)?55:48)+last) + hex;
+		dec >>= 4;
 	}
-	if(len) {
-	while(hex.length < len) hex = '0' + hex;
-	}
+	if(len)  while(hex.length < len) hex = '0' + hex; 
 	return hex;
 }
