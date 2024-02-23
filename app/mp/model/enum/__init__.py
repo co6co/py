@@ -33,6 +33,8 @@ class resource_category(Base_Enum):
     """
     video="video",0
     image="image",1
+    hwx ="hwx",2
+
 class resource_image_sub_category(Base_Enum):
     """
     图片子资源类型

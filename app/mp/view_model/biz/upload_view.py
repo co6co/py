@@ -172,6 +172,7 @@ class Alarm_Upload_View(Upload_view):
     @staticmethod
     def alarm_success(request:Request ,po:bizAlarmPO):
         return None
+    
     async def post(self, request:Request): 
         """
         上传告警信息
