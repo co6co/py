@@ -19,7 +19,7 @@ from sanic import Blueprint,Request
 from typing import TypeVar
 from co6co_db_ext.db_session import db_service 
 
-def injectDbSessionFactory(app:Sanic,settings:dict={},engineUrl:str=None ):
+def injectDbSessionFactory(app:Sanic,settings:dict={},engineUrl:str=None,sessionApi:list=["/api"] ):
     """
     挂在 DBSession_factory
     """
@@ -33,10 +33,18 @@ def injectDbSessionFactory(app:Sanic,settings:dict={},engineUrl:str=None ):
         app.shared_ctx.cache=multiprocessing.Manager().dict()
         app.shared_ctx.cache["db_session_factory"]=_async_session_factory 
 
-    ''' 
+    '''
+    def checkApi(request:Request):
+        for api in sessionApi:
+           if api in request.path:return True
+        return False
+
+
+
     @app.middleware("request")
     async def inject_session(request:Request): 
-        if "/api" in request.path:
+        
+        if checkApi(request):
             #logger.info("mount DbSession 。。。")
             if service.useAsync:
                 request.app.ctx.session_fatcory=service.async_session_factory

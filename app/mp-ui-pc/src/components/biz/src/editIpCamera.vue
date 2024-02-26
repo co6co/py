@@ -106,7 +106,7 @@
 							placeholder="视频流地址"
 							required></el-input>
 					</el-form-item>
-					<el-button @click="removeStream" :icon="Minus"> </el-button>
+					<el-button @click="removeStream(index)" :icon="Minus"> </el-button>
 				</el-card>
 				<el-button @click="addStream" :icon="Plus"></el-button>
 			</el-form-item>
@@ -331,7 +331,7 @@
 					if (value && value.length == 20) {
 						let t = {
 							name: '通道' + (i + 1),
-							url: `wss://stream.jshwx.com.cn:8441/flv_ws?device=gb${value}?type=rt.flv`,
+							url: `wss://stream.jshwx.com.cn:8441/flv_ws?device=gb${value}&type=rt.flv`,
 						};
 						streamUrl.push(t);
 					}

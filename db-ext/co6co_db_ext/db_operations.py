@@ -26,6 +26,10 @@ from co6co.utils import log
 
 class DbOperations:
 	# 实体类存在字段
+	"""
+	一些用法
+	https://www.cnblogs.com/gcxblogs/p/14979274.html#subquery
+	"""
 
 	def __init__(self,db_session:AsyncSession) -> None:
 		self.db_session = db_session 

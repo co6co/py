@@ -254,7 +254,7 @@
 	//编辑球机
 	const editIpCameraRef = ref(); 
 	const onOpenIpCameraDialog = ( category:string, row: TableRow) => { 
-    queryDeviceDetailInfo(row.id, category).then((res) => {
+    	queryDeviceDetailInfo(row.id, category).then((res) => {
 			if (res.code == 0) { 
 				let data={siteId:row.id}
 				if ( res.data.length>0)  data= res.data[0];

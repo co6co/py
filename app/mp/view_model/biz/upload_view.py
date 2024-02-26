@@ -19,6 +19,7 @@ from model.pos.biz import bizResourcePO  ,bizAlarmAttachPO,bizAlarmTypePO,bizAla
 import multipart,uuid,datetime
 from view_model import get_upload_path
 from view_model.aop .alarm_aop import Alarm_Save_Succ_AOP
+from utils import createUuid
 
  
 #@lru_cache(maxsize=20)
@@ -55,8 +56,8 @@ class Upload_view(BaseMethodView):
                 index=name.index("_")+1
                 result=name[index:].lower()
                 if len(result)==36:return result
-            elif len(name)==36:return fileName
-        return str(uuid.uuid4())   
+            elif len(name)==36:return fileName 
+        return str(createUuid())   
     
     async def saveResourceToDb(self,opt:DbOperations,device_id,category:resource_category,path:str,sub_category:int=None,uid:str=None)->bizResourcePO:
         """
@@ -70,7 +71,32 @@ class Upload_view(BaseMethodView):
         po.uid=uid
         po.boxId=device_id 
         opt.add_all([po])
-        return po    
+        return po  
+    
+    async def syncCheckEntity(self,app:Sanic,param:dict):
+        """
+        同步 检测类型 表 
+        param: {Type:"告警类型","Description":"告警描述"}
+        """ 
+        if "Type" in  param and "Description" in  param:
+            session:AsyncSession=app.ctx.session_fatcory()
+            opt=DbOperations(session)
+            try: 
+                one:bizAlarmTypePO=await opt.get_one(bizAlarmTypePO,bizAlarmTypePO.alarmType==param.get("Type")) 
+                if one==None:
+                    one=bizAlarmTypePO()
+                    one.alarmType=param.get("Type")
+                    one.desc=param.get("Description")
+                    opt.add(one)
+                else:
+                    one.desc=param.get("Description")
+                    one.updateTime=datetime.datetime.now()
+                await opt.commit()
+            except Exception as e:
+                log.err(f"执行同步syncCheckEntity，失败{e}")
+            finally:
+                await opt.db_session.close() 
+        else: log.warn("同步告警类型参数不正确！")  
 class Video_Upload_View(Upload_view):
 
     
@@ -134,31 +160,7 @@ class Video_Upload_View(Upload_view):
 class Alarm_Upload_View(Upload_view):
     """
     盒子告警
-    """
-    async def syncCheckEntity(self,app:Sanic,param:m.Alert_Param):
-        """
-        同步 检测类型 表
-        """
-
-        if "Type" in  param.Result and "Description" in  param.Result:
-            session:AsyncSession=app.ctx.session_fatcory()
-            opt=DbOperations(session)
-            try: 
-                one:bizAlarmTypePO=await opt.get_one(bizAlarmTypePO,bizAlarmTypePO.alarmType==param.Result.get("Type")) 
-                if one==None:
-                    one=bizAlarmTypePO()
-                    one.alarmType=param.Result.get("Type")
-                    one.desc=param.Result.get("Description")
-                    opt.add(one)
-                else:
-                    one.desc=param.Result.get("Description")
-                    one.updateTime=datetime.datetime.now()
-                await opt.commit()
-            except Exception as e:
-                log.err(f"执行同步syncCheckEntity，失败{e}")
-            finally:
-                await opt.db_session.close() 
-
+    """ 
     async def _saveImage(self,request:Request,fileName:str, base64:str):
         config=request.app.config
         root=get_upload_path(config)
@@ -181,7 +183,7 @@ class Alarm_Upload_View(Upload_view):
         p.__dict__.update(request.json )
         p.ip=request.client_ip
         log.warn(p.VideoFile)
-        request.app.add_task(self. syncCheckEntity( request.app,p),name="同步检测类型")
+        request.app.add_task(self. syncCheckEntity( request.app,p.Result),name="同步检测类型")
         ## debug
         await self.save_body(request,get_upload_path(request.app.config))
         try:

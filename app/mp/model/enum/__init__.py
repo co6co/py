@@ -57,4 +57,13 @@ class device_type(Base_Enum):
      mqqt_server="mqtt服务器",4
      xss_server="语音对讲服务器",5
      sip_server="sip服务器",6
- 
+class hwx_alarm_type(Base_EC_Enum):
+    """
+    惠纬讯告警类型
+    """
+    alarm1="CHUNBO-v2-5","告警类型1",1
+    @staticmethod
+    def get(key:str):
+        for item in hwx_alarm_type:
+            if(item.key==key):return item 
+        return None   

@@ -3,6 +3,7 @@ from decimal import Decimal
 from model.pos.biz import bizAlarmPO,bizAlarmAttachPO
 from datetime import datetime
 import json
+from utils import createUuid
 
 class Response:
     """
@@ -86,6 +87,7 @@ class Alert_Param(Box_base_Param):
         return ""
 
 
+
 class HWX_Param:
     """
     惠纬讯设备上传 结构
@@ -115,9 +117,30 @@ class HWX_Param:
     break_rules: str  # ": "CHUNBO-v2-5",
     serial: int  # ": 5
 
+    def _toAlarmTime(self):
+        return datetime.utcfromtimestamp(self.dt_alarm/1000000)
+    def _getUrl(self,name,p):
+        return f"{self.record_dir}/{name}{p}"
+    
+    def getResources(self):
+        date=self._toAlarmTime()
+        name=date.strftime("%Y%m%d%H%M%S") 
+        num=self.jpeg_num
+        urls=[]
+        #20200119154638-0.txt
+        #20200119154638-1.mp4
+        #20200119154638-2jPg
+        urls.append(self._getUrl(name,"1.mp4"))
+        for i in range(0,num,1):
+            t=i+2
+            urls.append(self._getUrl(name, f"{t}.jpg")) 
+        return urls
     def to_po(self):
         po=bizAlarmPO()
-        poa=bizAlarmAttachPO()  # 附加信息
+        po.uuid=str(createUuid())
+        po.alarmTime=self._toAlarmTime()
+        po.alarmType=self.break_rules
+        poa=bizAlarmAttachPO()  # 附加信息 
         poa.result=json.dumps({ 
             "m": self.m,"snvr": self.snvr,    
             "vcam": self.vcam ,"capture_type": self.capture_type,
@@ -137,8 +160,7 @@ class HWX_Param:
             "scene":self.scene,
             "break_rules":self.break_rules,
             "serial":self.serial,
-        }) 
-         
+        })  
         poa.gps=json.dumps({ "alarm_lat": self.alarm_lat, "alarm_lng": self. alarm_lng ,"gps_speed": self. gps_speed ,"gps_dir": self.gps_dir}) 
         po.alarmAttachPO=poa 
         return po

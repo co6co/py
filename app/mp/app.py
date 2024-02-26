@@ -35,12 +35,15 @@ def init (app:Sanic,customConfig):
     log.warn(customConfig)
     attach_cors(app) 
     from api import api
+    from api.hwx import hwx_api
     #from static import res 
     #app.blueprint(res) 
     #service=db_service(app,app.config.db_settings,BasePO)
     #service.sync_init_tables()  
-    injectDbSessionFactory(app,app.config.db_settings) 
+    injectDbSessionFactory(app,app.config.db_settings,sessionApi=["/api","/nyzh"]) 
     app.blueprint(api)
+    app.blueprint(hwx_api)
+    
     app.add_task(update_device_poster_task(app)) 
     
 if __name__ == "__main__":     

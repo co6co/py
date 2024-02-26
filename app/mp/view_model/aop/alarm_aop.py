@@ -20,8 +20,8 @@ def Alarm_Save_Succ_AOP(func):
     @wraps(func)
     def warpper(request:Request ,po:bizAlarmPO):
         allConfig:list[WechatConfig]=get_wx_configs(request)  
-        loop = asyncio.get_event_loop()
-        log.warn(f"主{id(loop)}") 
+        #loop = asyncio.get_event_loop()
+        #log.warn(f"主{id(loop)}") 
         for c in allConfig:  
             thread_tts = Thread(target=startAlarmPush,name=f"alarm_thread" ,args=(c,request.app,po))
             thread_tts.start()   
@@ -40,7 +40,6 @@ def startAlarmPush(config: WechatConfig,app:Sanic,po:bizAlarmPO):
             log.warn("需要告警的用户为0,不推送告警。")
             return
         alarm= alarm_bll(app,t.loop)
-        print(po.alarmType)
         typePO=t.runTask( alarm.get_alram_type_desc,po.alarmType) 
         # 推送  
         if typePO!=None:

@@ -5,7 +5,16 @@ from sqlalchemy.engine.row import  Row
 from .po import BasePO
 from sqlalchemy.sql import Select
 
-class db_tools: 
+class db_tools:
+    """
+    数据转换工具
+    1. 
+    data=  exec.mappings().all() 
+    result=[dict(zip( a.keys(),a._to_tuple_instance())) for a in  data] 
+    
+    2.
+    [dict(zip(a._fields,a))  for a in  executeResult]
+    """ 
     __po_has_field__:str="_sa_instance_state" 
     @staticmethod
     def remove_db_instance_state( poInstance_or_poList:Iterator| Any )->List[Dict]|Dict:
