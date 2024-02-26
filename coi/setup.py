@@ -13,8 +13,8 @@ with open(path.join(currentDir, 'README.md'), encoding='utf-8') as f: long_descr
 setup(
     name="co6co",
     version=VERSION,
-    description="基础模块",
-    packages=find_packages(),
+    description="基础模块", 
+    packages=find_packages( ),  
     long_description=long_description,
     long_description_content_type='text/markdown',
     classifiers=[ "Programming Language :: Python :: 3", "Programming Language :: Python :: 3.6" ],
