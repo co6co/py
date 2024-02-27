@@ -18,75 +18,15 @@ from model.pos.biz import bizResourcePO  ,bizAlarmAttachPO,bizAlarmTypePO,bizAla
 import multipart,uuid,datetime
 from view_model import get_upload_path
 from view_model.aop .alarm_aop import Alarm_Save_Succ_AOP
-from view_model.base_view import  BaseMethodView
-from view_model.biz.upload_view import Upload_view
+from view_model.base_view import  BaseMethodView 
 from sqlalchemy.sql import Select
 from co6co_sanic_ext.model.res.result import Result
+from view_model.biz.upload_view import syncCheckEntity,createResourceUUID,saveResourceToDb,alarm_success
   
 
 hwx_api = Blueprint( "hwx", url_prefix="/nyzh/pubApi") 
 
 
-
-def createResourceUUID( fileName:str=None)->str:
-        """
-        创建/或读取 资源UUID
-        如果 file =="VIDEO_4AA8CBEB-59C7-4644-AD95-CCBC865E0FFD.mp4",从文件名获取UUID 
-        返回: 36小写
-        """ 
-        if fileName!=None: 
-            name,_=os.path.splitext(fileName)
-            if "_" in name: 
-                index=name.index("_")+1
-                result=name[index:].lower()
-                if len(result)==36:return result
-            elif len(name)==36:return fileName 
-        return str(createUuid())   
-    
-async def saveResourceToDb(opt:DbOperations,device_id,category:resource_category,path:str,sub_category:int=None,uid:str=None)->bizResourcePO:
-    """
-    资源保存
-    """ 
-    if uid==None:uid=createResourceUUID()
-    po=bizResourcePO()
-    po.category= category.val
-    po.subCategory=sub_category
-    po.url=path 
-    po.uid=uid
-    po.boxId=device_id 
-    opt.add_all([po])
-    return po  
-
-async def syncCheckEntity(app:Sanic,param:dict):
-    """
-    同步 检测类型 表 
-    param: {Type:"告警类型","Description":"告警描述"}
-    """ 
-    if "Type" in  param and "Description" in  param:
-        session:AsyncSession=app.ctx.session_fatcory()
-        opt=DbOperations(session)
-        try: 
-            one:bizAlarmTypePO=await opt.get_one(bizAlarmTypePO,bizAlarmTypePO.alarmType==param.get("Type")) 
-            if one==None:
-                one=bizAlarmTypePO()
-                one.alarmType=param.get("Type")
-                one.desc=param.get("Description")
-                opt.add(one)
-            else:
-                one.desc=param.get("Description")
-                one.updateTime=datetime.datetime.now()
-            await opt.commit()
-        except Exception as e:
-            log.err(f"执行同步syncCheckEntity，失败{e}")
-        finally:
-            await opt.db_session.close() 
-    else: log.warn("同步告警类型参数不正确！")  
-
-
-@Alarm_Save_Succ_AOP
-@staticmethod
-def alarm_success(request:Request ,po:bizAlarmPO):
-    return None
 async def getSiteId(p:m.HWX_Param):
         """
         获取站点ID
@@ -166,8 +106,7 @@ async def alarmEvent(request:Request):
             alarm_success(request,po)
             return JSON_util.response(res) 
     except Exception as e:
-        log.err(f"上告HWX警失败：{e}") 
-        raise
+        log.err(f"上告HWX警失败：{e}")  
         res:m.Response=m.Response.fail( message=e)
         return JSON_util.response(res)  
 

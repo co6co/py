@@ -31,7 +31,7 @@
 			:class="{ active: centerState, disabled: !takerEnable }">
 			<el-icon><Microphone /> </el-icon>
 		</div>
-		<el-slider  v-model="speed" vertical placement="bottom" :min="1" height="156px"  :max="255" style="position: absolute; left:156px;top:0;   --el-slider-main-bg-color: #696970; " />
+		<el-slider  v-model="speed" vertical placement="bottom"  :format-tooltip="formatTooltip" :min="1" height="156px"  :max="255" style="position: absolute; left:156px;top:0;   --el-slider-main-bg-color: #696970; " />
 		<div class="ptz-btns">
 			<div class="ptz-btn">
 				<div
@@ -124,14 +124,16 @@
 		}
 		return false;
 	});
-
+	const formatTooltip = (val: number) => {
+ 		 return "速度："+val
+	}
 	const onCenter = () => {
 		if (!props.takerEnable) return;
 		centerActive.value = !centerActive.value;
 		emits('centerClick', centerActive.value);
 	};
 
-	const speed=ref(240) 
+	const speed=ref(10) 
 	onMounted(()=>{ 
 		document.body.addEventListener("mouseup", ()=>{ 
 			if(starting.value) {

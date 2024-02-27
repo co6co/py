@@ -39,65 +39,72 @@ async def get_Device_id( db:DbOperations,param:m.Box_base_Param,upgrade=False):
         po.innerIp=param.BoardIp
         po.ip=param.ip 
         await db.commit() 
-    return one  
+    return one 
 
- 
 
-class Upload_view(BaseMethodView): 
-    def createResourceUUID(self, fileName:str=None)->str:
-        """
-        创建/或读取 资源UUID
-        如果 file =="VIDEO_4AA8CBEB-59C7-4644-AD95-CCBC865E0FFD.mp4",从文件名获取UUID 
-        返回: 36小写
-        """ 
-        if fileName!=None: 
-            name,_=os.path.splitext(fileName)
-            if "_" in name: 
-                index=name.index("_")+1
-                result=name[index:].lower()
-                if len(result)==36:return result
-            elif len(name)==36:return fileName 
-        return str(createUuid())   
+def createResourceUUID( fileName:str=None)->str:
+    """
+    创建/或读取 资源UUID
+    如果 file =="VIDEO_4AA8CBEB-59C7-4644-AD95-CCBC865E0FFD.mp4",从文件名获取UUID 
+    返回: 36小写
+    """ 
+    if fileName!=None: 
+        name,_=os.path.splitext(fileName)
+        if "_" in name: 
+            index=name.index("_")+1
+            result=name[index:].lower()
+            if len(result)==36:return result
+        elif len(name)==36:return fileName 
+    return str(createUuid())   
     
-    async def saveResourceToDb(self,opt:DbOperations,device_id,category:resource_category,path:str,sub_category:int=None,uid:str=None)->bizResourcePO:
-        """
-        资源保存
-        """ 
-        if uid==None:uid=self.createResourceUUID()
-        po=bizResourcePO()
-        po.category= category.val
-        po.subCategory=sub_category
-        po.url=path 
-        po.uid=uid
-        po.boxId=device_id 
-        opt.add_all([po])
-        return po  
-    
-    async def syncCheckEntity(self,app:Sanic,param:dict):
-        """
-        同步 检测类型 表 
-        param: {Type:"告警类型","Description":"告警描述"}
-        """ 
-        if "Type" in  param and "Description" in  param:
-            session:AsyncSession=app.ctx.session_fatcory()
-            opt=DbOperations(session)
-            try: 
-                one:bizAlarmTypePO=await opt.get_one(bizAlarmTypePO,bizAlarmTypePO.alarmType==param.get("Type")) 
-                if one==None:
-                    one=bizAlarmTypePO()
-                    one.alarmType=param.get("Type")
-                    one.desc=param.get("Description")
-                    opt.add(one)
-                else:
-                    one.desc=param.get("Description")
-                    one.updateTime=datetime.datetime.now()
-                await opt.commit()
-            except Exception as e:
-                log.err(f"执行同步syncCheckEntity，失败{e}")
-            finally:
-                await opt.db_session.close() 
-        else: log.warn("同步告警类型参数不正确！")  
-class Video_Upload_View(Upload_view):
+async def saveResourceToDb(opt:DbOperations,device_id,category:resource_category,path:str,sub_category:int=None,uid:str=None)->bizResourcePO:
+    """
+    资源保存
+    """ 
+    if uid==None:uid=createResourceUUID()
+    po=bizResourcePO()
+    po.category= category.val
+    po.subCategory=sub_category
+    po.url=path 
+    po.uid=uid
+    po.boxId=device_id 
+    opt.add_all([po])
+    return po  
+
+async def syncCheckEntity(app:Sanic,param:dict):
+    """
+    同步 检测类型 表 
+    param: {Type:"告警类型","Description":"告警描述"}
+    """ 
+    if "Type" in  param and "Description" in  param:
+        session:AsyncSession=app.ctx.session_fatcory()
+        opt=DbOperations(session)
+        try: 
+            one:bizAlarmTypePO=await opt.get_one(bizAlarmTypePO,bizAlarmTypePO.alarmType==param.get("Type")) 
+            if one==None:
+                one=bizAlarmTypePO()
+                one.alarmType=param.get("Type")
+                one.desc=param.get("Description")
+                opt.add(one)
+            else:
+                one.desc=param.get("Description")
+                one.updateTime=datetime.datetime.now()
+            await opt.commit()
+        except Exception as e:
+            log.err(f"执行同步syncCheckEntity，失败{e}")
+        finally:
+            await opt.db_session.close() 
+    else: log.warn("同步告警类型参数不正确！")  
+
+
+@Alarm_Save_Succ_AOP 
+def alarm_success(request:Request ,po:bizAlarmPO):
+    """
+    apo
+    """
+    return None
+   
+class Video_Upload_View(BaseMethodView):
 
     
     """
@@ -131,7 +138,7 @@ class Video_Upload_View(Upload_view):
                 ## 1.1 查询以前是否上传过
                 session:AsyncSession=session
                 operation=DbOperations(session)
-                uid=self.createResourceUUID(file.filename)
+                uid=createResourceUUID(file.filename)
                 
                 isExist=await operation.exist(bizResourcePO.uid==uid,column=bizResourcePO.id)
                 
@@ -157,7 +164,7 @@ class Video_Upload_View(Upload_view):
               
 
 
-class Alarm_Upload_View(Upload_view):
+class Alarm_Upload_View(BaseMethodView):
     """
     盒子告警
     """ 
@@ -170,11 +177,7 @@ class Alarm_Upload_View(Upload_view):
         File.writeBase64ToFile(fullPath,base64) 
         return filePath 
     
-    @Alarm_Save_Succ_AOP
-    @staticmethod
-    def alarm_success(request:Request ,po:bizAlarmPO):
-        return None
-    
+ 
     async def post(self, request:Request): 
         """
         上传告警信息
@@ -183,7 +186,7 @@ class Alarm_Upload_View(Upload_view):
         p.__dict__.update(request.json )
         p.ip=request.client_ip
         log.warn(p.VideoFile)
-        request.app.add_task(self. syncCheckEntity( request.app,p.Result),name="同步检测类型")
+        request.app.add_task( syncCheckEntity( request.app,p.Result),name="同步检测类型")
         ## debug
         await self.save_body(request,get_upload_path(request.app.config))
         try:
@@ -193,12 +196,12 @@ class Alarm_Upload_View(Upload_view):
                 opt=DbOperations(session)
                 device_id=await get_Device_id(opt,p)
                 ## 2.1 保存图片 
-                u1=self.createResourceUUID()
-                u2=self.createResourceUUID()
+                u1=createResourceUUID()
+                u2=createResourceUUID()
                 p1=await self._saveImage(request,f"SRC_{u1}.jpeg",p.ImageData ) 
                 p2=await self._saveImage(request,f"Labeled_{u2}.jpeg",p.ImageDataLabeled ) 
-                await self.saveResourceToDb(opt,device_id,resource_category.image,p1,sub_category=resource_image_sub_category.raw.val,uid= u1)
-                await self.saveResourceToDb(opt,device_id,resource_category.image,p2,sub_category=resource_image_sub_category.marked.val,uid=u2)
+                await saveResourceToDb(opt,device_id,resource_category.image,p1,sub_category=resource_image_sub_category.raw.val,uid= u1)
+                await saveResourceToDb(opt,device_id,resource_category.image,p2,sub_category=resource_image_sub_category.marked.val,uid=u2)
                 await opt.commit()
                 po=p.to_po() 
                 po.boxId=device_id
@@ -206,11 +209,11 @@ class Alarm_Upload_View(Upload_view):
                 if result: 
                     res:m.Response=m.Response.success(message=f"数据“{po.uuid}”重复上传")
                     #通知公众号订阅者
-                    Alarm_Upload_View.alarm_success(request,po)
+                    alarm_success(request,po)
                     log.warn(f"告警信息uuid重复{po.uuid}")
                     return JSON_util.response(res)
                 #关联视频资源 视频资源可能为空，有UUID 但没有资源
-                if p.VideoFile !=None and p.VideoFile!='':po.videoUid=self.createResourceUUID(p.VideoFile)
+                if p.VideoFile !=None and p.VideoFile!='':po.videoUid=createResourceUUID(p.VideoFile)
                 po.rawImageUid=u1
                 po.markedImageUid=u2
                 poa=bizAlarmAttachPO()  # 附加信息
@@ -222,7 +225,7 @@ class Alarm_Upload_View(Upload_view):
                 await opt.commit()  
                 res:m.Response=m.Response.success()
                 #通知公众号订阅者
-                Alarm_Upload_View.alarm_success(request,po)
+                alarm_success(request,po)
                 return JSON_util.response(res) 
         except Exception as e:
             log.err(f"上告警失败：{e}")
