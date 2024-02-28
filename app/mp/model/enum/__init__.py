@@ -61,7 +61,13 @@ class hwx_alarm_type(Base_EC_Enum):
     """
     惠纬讯告警类型
     """
-    alarm1="CHUNBO-v2-5","告警类型1",1
+    alarm1="CHUNBO-v2-5","使用手机时间超过5分钟",1
+    alarm2="CHUNBO-v2-13","违规吸烟",2
+    alarm3="CHUNBO-v2-14","违规使用手机",3
+    alarm4="CHUNBO-v2-20","危化品作业期间未按时巡检",4
+    alarm5="fb_FireWarning","红外火灾预警",5
+    
+
     @staticmethod
     def get(key:str):
         for item in hwx_alarm_type:

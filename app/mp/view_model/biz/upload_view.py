@@ -146,7 +146,7 @@ class Video_Upload_View(BaseMethodView):
                     fullPath,filePath=self.getFullPath(root,file.filename)
                     file.save_as(fullPath) 
                     device_id=await get_Device_id(operation,p,True) 
-                    po:bizResourcePO =await self.saveResourceToDb(operation,device_id,resource_category.video, filePath,uid= uid) 
+                    po:bizResourcePO =await saveResourceToDb(operation,device_id,resource_category.video, filePath,uid= uid) 
                     await session.commit() 
                     log.succ(f"返回的VideoID：uid:{uid},id:{po.id}") 
                 else:

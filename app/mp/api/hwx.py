@@ -24,9 +24,7 @@ from co6co_sanic_ext.model.res.result import Result
 from view_model.biz.upload_view import syncCheckEntity,createResourceUUID,saveResourceToDb,alarm_success
   
 
-hwx_api = Blueprint( "hwx", url_prefix="/nyzh/pubApi") 
-
-
+hwx_api = Blueprint( "hwx", url_prefix="/nyzh/pubApi")  
 async def getSiteId(p:m.HWX_Param):
         """
         获取站点ID
@@ -104,7 +102,7 @@ async def alarmEvent(request:Request):
             res:m.Response=m.Response.success()
             #通知公众号订阅者
             alarm_success(request,po)
-            return JSON_util.response(res) 
+            return text("200-ok")
     except Exception as e:
         log.err(f"上告HWX警失败：{e}")  
         res:m.Response=m.Response.fail( message=e)

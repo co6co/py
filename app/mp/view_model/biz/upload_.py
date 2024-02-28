@@ -109,31 +109,33 @@ class HWX_Param:
     alarm_lng: str  # ":"119.046082E",
     gps_speed: float  # ": 9.754,
     gps_dir: str  # ": 41.060,
-    odo_update_st: int  # ": 1700095503227940,
-    odo_name: str  # ": "据吴淞口310",
-    odo_mileage: float  # ":310.000,
-    yz_saildir: int  # ":2,
+    #odo_update_st: int  # ": 1700095503227940,
+    #odo_name: str  # ": "据吴淞口310",
+    #odo_mileage: float  # ":310.000,
+    #yz_saildir: int  # ":2,
     scene: str  # ":"sailing",
     break_rules: str  # ": "CHUNBO-v2-5",
     serial: int  # ": 5
 
     def _toAlarmTime(self):
-        return datetime.utcfromtimestamp(self.dt_alarm/1000000)
+        #注意时区问题
+        #return datetime.utcfromtimestamp(self.dt_alarm/1000000)
+        return datetime.fromtimestamp(self.dt_alarm/1000000)
     def _getUrl(self,name,p):
         return f"{self.record_dir}/{name}{p}"
     
     def getResources(self):
         date=self._toAlarmTime()
-        name=date.strftime("%Y%m%d%H%M%S") 
+        name=date.strftime("%Y%m%d%H%M%S%f")[:-3] #%f 6位[0,999999]
         num=self.jpeg_num
         urls=[]
         #20200119154638-0.txt
         #20200119154638-1.mp4
         #20200119154638-2jPg
-        urls.append(self._getUrl(name,"1.mp4"))
+        urls.append(self._getUrl(name,"-1.mp4"))
         for i in range(0,num,1):
             t=i+2
-            urls.append(self._getUrl(name, f"{t}.jpg")) 
+            urls.append(self._getUrl(name, f"-{t}.jpg")) 
         return urls
     def to_po(self):
         po=bizAlarmPO()
@@ -153,10 +155,10 @@ class HWX_Param:
             "jpeg_num":self.jpeg_num,
             "capture_type":self.capture_type,
             "file_upload_type":self.file_upload_type, 
-            "odo_update_st":self.odo_update_st,
-            "odo_name":self.odo_name,
-            "odo_mileage":self.odo_mileage,
-            "yz_saildir":self.yz_saildir,
+            #"odo_update_st":self.odo_update_st,
+            #"odo_name":self.odo_name,
+            #"odo_mileage":self.odo_mileage,
+            #"yz_saildir":self.yz_saildir,
             "scene":self.scene,
             "break_rules":self.break_rules,
             "serial":self.serial,

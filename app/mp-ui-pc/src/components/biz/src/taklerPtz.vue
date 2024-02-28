@@ -194,8 +194,7 @@
 				type,
 				name
 			);
-			console.info('发送PTZ命令：', str);
-			console.info(Ref_Mqtt.value);
+			console.info('发送PTZ命令：', str); 
 			const client = Ref_Mqtt.value?.publish(
 				'/MANSCDP_cmd',
 				str,

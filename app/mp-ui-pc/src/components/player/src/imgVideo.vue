@@ -1,7 +1,8 @@
 <template>
 	<el-row class="Image">
 		<!--显示大图-->
-		<el-col :span="24" > 
+
+		<el-col :span="24" >  
 			<component
 				:key="currentName"
 				:is="compoents[currentName]"
@@ -111,7 +112,7 @@
 		}) 
 	})
 	const onShow = (option: resourceOption, index: number) => { 
-		if (option.type == 0) currentName.value = 'jessiPlayer';
+		if (option.type == 0) currentName.value = 'htmlPlayer';
 		else currentName.value = 'Image';
 		current_Index=index
 		current_options.value = option;

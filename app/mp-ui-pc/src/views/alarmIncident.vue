@@ -419,26 +419,32 @@
 	const onOpen2Dialog = (row: TableRow) => {
 		//form2.value.dialogVisible = true;
 		//table_module.currentRow = row;
-		form2.value.data = [
-			{
+		let data:Array<types.resourceOption>=[]
+		if (row.rawImageUid){
+			data.push({
 				url: getResultUrl(row.rawImageUid),
 				name: '原始图片',
 				poster: getResultUrl(row.rawImageUid, true),
 				type: 1,
-			},
-			{
+			})
+		}
+		if (row.markedImageUid){
+			data.push({
 				url: getResultUrl(row.markedImageUid),
 				name: '标注图片',
 				poster: getResultUrl(row.markedImageUid, true),
 				type: 1,
-			},
-			{
+			})
+		}
+		if (row.videoUid){
+			data.push( {
 				url: getResultUrl(row.videoUid),
 				name: '原始视频',
 				poster: getResultUrl(row.videoUid, true),
 				type: 0,
-			},
-		];
+			})
+		} 
+		form2.value.data = data;
 	};
 </script>
 <style scoped lang="less">

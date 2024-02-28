@@ -5,24 +5,32 @@
 			class="ptz-arrow ptz-arrow-up"
 			:class="{ disabled: !ptzEnable }"
 			data-arrow="up"
+			@touchstart="onOperater('up', 0)"
+			@touchend="onOperater('up', 1)"
 			@mousedown="onOperater('up', 0)"
 			@mouseup="onOperater('up', 1)"></div>
 		<div
 			class="ptz-arrow ptz-arrow-right"
 			:class="{ disabled: !ptzEnable }"
 			data-arrow="right"
+			@touchstart="onOperater('right', 0)"
+			@touchend="onOperater('right', 1)"
 			@mousedown="onOperater('right', 0)"
 			@mouseup="onOperater('right', 1)"></div>
 		<div
 			class="ptz-arrow ptz-arrow-down"
 			:class="{ disabled: !ptzEnable }"
 			data-arrow="down"
+			@touchstart="onOperater('down', 0)"
+			@touchend="onOperater('down', 1)"
 			@mousedown="onOperater('down', 0)"
 			@mouseup="onOperater('down', 1)"></div>
 		<div
 			class="ptz-arrow ptz-arrow-left"
 			:class="{ disabled: !ptzEnable }"
 			data-arrow="left"
+			@touchstart="onOperater('left', 0)"
+			@touchend="onOperater('left', 1)"
 			@mousedown="onOperater('left', 0)"
 			@mouseup="onOperater('left', 1)"></div>
 		<div
@@ -37,6 +45,8 @@
 				<div
 					class="ptz-expand ptz-icon"
 					:class="{ disabled: !ptzEnable }"
+					@touchstart="onOperater('zoomin', 0)"
+					@touchend="onOperater('zoomin', 1)"
 					@mousedown="onOperater('zoomin', 0)"
 					@mouseup="onOperater('zoomin', 1)">
 					<i class="ptz-expand-icon"></i>
@@ -47,6 +57,8 @@
 				<div
 					class="ptz-narrow ptz-icon"
 					:class="{ disabled: !ptzEnable }"
+					@touchstart="onOperater('zoomout', 0)"
+					@touchend="onOperater('zoomout', 1)"
 					@mousedown="onOperater('zoomout', 0)"
 					@mouseup="onOperater('zoomout', 1)">
 					<i class="ptz-narrow-icon"></i>
