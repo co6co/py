@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia';
 import * as d from './types/devices';
 import * as s from '../api/server';
+import {type AlarmItem} from "../components/biz"
 
 interface Object {
 	[key: string]: any;
@@ -18,7 +19,7 @@ export const useAppDataStore = defineStore('app_Data', {
 		};*/
 		return {
 			data: {
-				row: {},
+				row: <AlarmItem>{},
 				xssConfig: <XssConfig>{},
 			},
 		};

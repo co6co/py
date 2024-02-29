@@ -3,7 +3,7 @@ export interface resourceOption{
     poster:string,
     type: 0|1 ,//0 视频 1： 图片
     name:string,
-} 
+}
  
 export interface imageOption{
     url:string,  

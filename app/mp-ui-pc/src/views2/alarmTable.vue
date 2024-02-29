@@ -103,40 +103,7 @@
 					</el-pagination>
 				</div>
 			</el-footer>
-		</el-container>
-
-		<!-- 弹出框 -->
-		<el-dialog
-			title="详细信息"
-			v-model="form.dialogVisible"
-			style="width: 80%; height: 76%"
-			@keydown.ctrl="keyDown">
-			<details-info :data="form.data"></details-info>
-			<template #footer>
-				<span class="dialog-footer">
-					<el-button @click="form.dialogVisible = false">取 消</el-button>
-				</span>
-			</template>
-		</el-dialog>
-
-		<!-- 弹出框 -->
-		<el-dialog
-			title="详细信息"
-			v-model="form2.dialogVisible"
-			style="width: 98%; height: 90%"
-			@keydown.ctrl="keyDown">
-			<el-row>
-				<el-col :span="12">
-					<img-video :viewOption="form2.data"></img-video>
-				</el-col>
-				<el-col :span="12"> </el-col>
-			</el-row>
-			<template #footer>
-				<span class="dialog-footer">
-					<el-button @click="form2.dialogVisible = false">取 消</el-button>
-				</span>
-			</template>
-		</el-dialog> 
+		</el-container> 
 </template>
 
 <script setup lang="ts" name="basetable">
@@ -178,17 +145,9 @@
 
 	import { showLoading, closeLoading } from '../components/Logining';
 	import { getTableIndex } from '../utils/tables';
+	import { type AlarmItem,getResources } from '../components/biz';
 
-	interface TableRow {
-		id: number;
-		uuid: string;
-		alarmType: string;
-		videoUid: string;
-		rawImageUid: string;
-		markedImageUid: string;
-		alarmTime: string;
-		createTime: string;
-	}
+	 
 	interface AlertCategory {
 		alarmType: string;
 		desc: string;
@@ -200,8 +159,8 @@
 	interface table_module {
 		query: Query;
 		moreOption: boolean;
-		data: TableRow[];
-		currentRow?: TableRow;
+		data: AlarmItem[];
+		currentRow?: AlarmItem;
 		pageTotal: number;
 		categoryList: AlertCategory[];
 	}
@@ -229,9 +188,7 @@
 		if (table_module.moreOption) return ArrowUp;
 		else return ArrowDown;
 	});
-	const setDatetime = (t: number, i: number) => {
-		table_module.query.datetimes = createStateEndDatetime(t, i);
-	};
+	 
 	// 排序
 	const onColChange = (column: any) => {
 		table_module.query.order = column.order === 'descending' ? 'desc' : 'asc';
@@ -242,9 +199,7 @@
 	const tableRowProp = (data: { row: any; rowIndex: number }) => {
 		data.row.index = data.rowIndex;
 	};
-	const onRefesh = () => {
-		getData();
-	};
+ 
 	// 查询操作
 	const onSearch = () => {
 		getData();
@@ -289,66 +244,12 @@
 		else if (pageIndex > totalPage) ElMessage.error('已经是最后一页了');
 		else (table_module.query.pageIndex = pageIndex), getData();
 	};
-	const setTableSelectItem = (index: number) => {
-		if (
-			tableInstance._value.data &&
-			index > -1 &&
-			index < tableInstance._value.data.length
-		) {
-			let row = tableInstance._value.data[index];
-			tableInstance._value.setCurrentRow(row);
-			onTableSelect(row);
-		}
-	};
+	 
 	const onTableSelect = (row: any) => {
 		currentTableItemIndex.value = row.index;
 		table_module.currentRow = row;
 		onOpen2Dialog(row);
-	};
-	const keyDown = (e: KeyboardEvent) => {
-		if (e.ctrlKey) {
-			if (['ArrowLeft', 'ArrowRight'].indexOf(e.key) > -1) {
-				let current = table_module.query.pageIndex.valueOf();
-				let v =
-					e.key == 'ArrowRight' || e.key == 'd' ? current + 1 : current - 1;
-				onPageChange(v);
-			}
-			if (['ArrowUp', 'ArrowDown'].indexOf(e.key) > -1) {
-				let current = currentTableItemIndex.value;
-				if (!current) current = 0;
-				let v =
-					e.key == 'ArrowDown' || e.key == 's' ? current + 1 : current - 1;
-				if (0 <= v && v < tableInstance._value.data.length) {
-					setTableSelectItem(v);
-				} else {
-					if (v < 0) ElMessage.error('已经是第一条了');
-					else if (v >= tableInstance._value.data.length)
-						ElMessage.error('已经是最后一条了');
-				}
-			}
-		}
-		//process_view.value.keyDown(e)
-		e.stopPropagation();
-	};
-	//**详细信息 */
-	interface dialogDataType {
-		dialogVisible: boolean;
-		data: Array<any>;
-	}
-	let dialogData = {
-		dialogVisible: false,
-		data: [],
-	};
-	let form = reactive<dialogDataType>(dialogData);
-	const onOpenDialog = (row?: any) => {
-		form.dialogVisible = true;
-		table_module.currentRow = row;
-		form.data = [
-			{ name: '检测结果信息', data: str2Obj(row.alarmAttachPO.result) },
-			{ name: '视频流信息', data: str2Obj(row.alarmAttachPO.media) },
-			{ name: 'GPS信息', data: str2Obj(row.alarmAttachPO.gps) },
-		];
-	};
+	}; 
 	//**查看视频图片信息 */
 	interface dialog2DataType {
 		dialogVisible: boolean;
@@ -358,65 +259,9 @@
 		dialogVisible: false,
 		data: [],
 	};
-	let form2 = ref<dialog2DataType>(dialog2Data);
-	const setVideoResource = (uuid: string, option: types.videoOption) => {
-		res_api
-			.request_resource_svc(
-				import.meta.env.VITE_BASE_URL + `/api/resource/poster/${uuid}`
-			)
-			.then((res) => {
-				option.poster = res;
-			})
-			.catch((e) => (option.poster = ''));
-		res_api
-			.request_resource_svc(
-				import.meta.env.VITE_BASE_URL + `/api/resource/${uuid}`
-			)
-			.then((res) => {
-				option.url = res;
-			})
-			.catch((e) => (option.url = ''));
-	};
-	const setImageResource = (uuid: string, option: types.imageOption) => {
-		res_api
-			.request_resource_svc(
-				import.meta.env.VITE_BASE_URL + `/api/resource/${uuid}`
-			)
-			.then((res) => {
-				option.url = res;
-			})
-			.catch((e) => (option.url = ''));
-	};
-	const getResultUrl = (uuid: string, isposter: boolean = false) => {
-		if (isposter)
-			return (
-				import.meta.env.VITE_BASE_URL + `/api/resource/poster/${uuid}/700/600`
-			);
-		return import.meta.env.VITE_BASE_URL + `/api/resource/${uuid}`;
-	};
-	const onOpen2Dialog = (row: TableRow) => {
-		//form2.value.dialogVisible = true;
-		//table_module.currentRow = row;
-		form2.value.data = [
-			{
-				url: getResultUrl(row.rawImageUid),
-				name: '原始图片',
-				poster: getResultUrl(row.rawImageUid, true),
-				type: 1,
-			},
-			{
-				url: getResultUrl(row.markedImageUid),
-				name: '标注图片',
-				poster: getResultUrl(row.markedImageUid, true),
-				type: 1,
-			},
-			{
-				url: getResultUrl(row.videoUid),
-				name: '原始视频',
-				poster: getResultUrl(row.videoUid, true),
-				type: 0,
-			},
-		];
+	let form2 = ref<dialog2DataType>(dialog2Data); 
+	const onOpen2Dialog = (row: AlarmItem) => { 
+		form2.value.data = getResources(row)
 	};
 </script>
 <style scoped lang="less">

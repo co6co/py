@@ -196,21 +196,13 @@
 	import * as res_api from '../api';
 	import { detailsInfo } from '../components/details';
 	import { imgVideo, types } from '../components/player';
+	import { type AlarmItem,getResources } from '../components/biz';
 	import { str2Obj, createStateEndDatetime } from '../utils';
 
 	import { showLoading, closeLoading } from '../components/Logining';
 	import { getTableIndex } from '../utils/tables';
 
-	interface TableRow {
-		id: number;
-		uuid: string;
-		alarmType: string;
-		videoUid: string;
-		rawImageUid: string;
-		markedImageUid: string;
-		alarmTime: string;
-		createTime: string;
-	}
+ 
 	interface AlertCategory {
 		alarmType: string;
 		desc: string;
@@ -222,8 +214,8 @@
 	interface table_module {
 		query: Query;
 		moreOption: boolean;
-		data: TableRow[];
-		currentRow?: TableRow;
+		data: AlarmItem[];
+		currentRow?: AlarmItem;
 		pageTotal: number;
 		categoryList: AlertCategory[];
 	}
@@ -380,35 +372,7 @@
 		dialogVisible: false,
 		data: [],
 	};
-	let form2 = ref<dialog2DataType>(dialog2Data);
-	const setVideoResource = (uuid: string, option: types.videoOption) => {
-		res_api
-			.request_resource_svc(
-				import.meta.env.VITE_BASE_URL + `/api/resource/poster/${uuid}`
-			)
-			.then((res) => {
-				option.poster = res;
-			})
-			.catch((e) => (option.poster = ''));
-		res_api
-			.request_resource_svc(
-				import.meta.env.VITE_BASE_URL + `/api/resource/${uuid}`
-			)
-			.then((res) => {
-				option.url = res;
-			})
-			.catch((e) => (option.url = ''));
-	};
-	const setImageResource = (uuid: string, option: types.imageOption) => {
-		res_api
-			.request_resource_svc(
-				import.meta.env.VITE_BASE_URL + `/api/resource/${uuid}`
-			)
-			.then((res) => {
-				option.url = res;
-			})
-			.catch((e) => (option.url = ''));
-	};
+	let form2 = ref<dialog2DataType>(dialog2Data); 
 	const getResultUrl = (uuid: string, isposter: boolean = false) => {
 		if (isposter)
 			return (
@@ -416,35 +380,8 @@
 			);
 		return import.meta.env.VITE_BASE_URL + `/api/resource/${uuid}`;
 	};
-	const onOpen2Dialog = (row: TableRow) => {
-		//form2.value.dialogVisible = true;
-		//table_module.currentRow = row;
-		let data:Array<types.resourceOption>=[]
-		if (row.rawImageUid){
-			data.push({
-				url: getResultUrl(row.rawImageUid),
-				name: '原始图片',
-				poster: getResultUrl(row.rawImageUid, true),
-				type: 1,
-			})
-		}
-		if (row.markedImageUid){
-			data.push({
-				url: getResultUrl(row.markedImageUid),
-				name: '标注图片',
-				poster: getResultUrl(row.markedImageUid, true),
-				type: 1,
-			})
-		}
-		if (row.videoUid){
-			data.push( {
-				url: getResultUrl(row.videoUid),
-				name: '原始视频',
-				poster: getResultUrl(row.videoUid, true),
-				type: 0,
-			})
-		} 
-		form2.value.data = data;
+	const onOpen2Dialog = (row: AlarmItem) => {  
+		form2.value.data = getResources(row);
 	};
 </script>
 <style scoped lang="less">
