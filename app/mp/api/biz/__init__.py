@@ -19,4 +19,4 @@ biz_api.add_route(Alarm_category_View.as_view(),"/biz/alarm/category",name=Alarm
 biz_api.add_route(Devices_View.as_view(),"/biz/device",name=Devices_View.__name__) 
 biz_api.add_route(IP_Cameras_View.as_view(),"/biz/device/camera",name=IP_Cameras_View.__name__) 
 biz_api.add_route(IP_Camera_View.as_view(),"/biz/device/camera/<pk:int>",name=IP_Camera_View.__name__) 
-biz_api.add_route(IP_Camera_poster_View.as_view(),"/biz/device/poster/<pk:int>",name=IP_Camera_poster_View.__name__) 
+biz_api.add_route(IP_Camera_poster_View.as_view(),"/biz/device/poster/<pk:int>",name=IP_Camera_poster_View.__name__)  

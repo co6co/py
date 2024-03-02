@@ -140,7 +140,7 @@
       </template>
       <div>
         <el-button type="primary" size="small" :icon="Setting" @click="openBlankPage(0)">内网配置</el-button>
-        <el-button type="primary" size="small" :icon="Setting" @click="openBlankPage(0)">外网配置</el-button>
+        <el-button type="primary" size="small" :icon="Setting" @click="openBlankPage(1)">外网配置</el-button>
       </div> 
 		</el-dialog> 
 
@@ -421,6 +421,7 @@
 
 	const openBlankPage = (type:number ) => {  
       if(!configDialog_model.deviceData){ElMessage.warning('未关联该设备数据！');return;}
+	  console.info(type,configDialog_model.deviceData)
       switch(type){
         case 0:
         window.open( configDialog_model.deviceData.innerConfigUrl, '_blank' );

@@ -2,7 +2,7 @@ from sqlalchemy.ext.asyncio import AsyncSession,AsyncSessionTransaction
 import asyncio
 from co6co_db_ext .db_operations import DbOperations
 from co6co_db_ext.db_utils import db_tools
-from sanic import  Request 
+from sanic import  Request ,redirect
 from sanic.response import text,raw,empty,file_stream
 from co6co_sanic_ext.utils import JSON_util
 import json
@@ -109,7 +109,7 @@ class Sites_View(AuthMethodView):
         except Exception as e:
             return JSON_util.response(Result.fail(message=e))
         
-class Site_View(BaseMethodView):
+class Site_View(BaseMethodView): 
     """
     资源视图
     """

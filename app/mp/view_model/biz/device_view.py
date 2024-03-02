@@ -1,6 +1,6 @@
 
 
-from sanic import Request
+from sanic import Request,redirect
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -16,7 +16,7 @@ from co6co_sanic_ext.model.res.result import Result, Page_Result
 from co6co_db_ext .db_utils import db_tools
 from sqlalchemy.sql import Select
 
-
+from co6co.utils import hash
 import os
 from utils import createUuid
 import datetime
@@ -54,9 +54,32 @@ class Devices_View(AuthMethodView):
             await session.commit()
         return JSON_util.response(pageList)
 
+class Device_Config_View(AuthMethodView):
+    async def camera(self,request: Request,deviceId:int):
+        async with request.ctx.session as session:
+            session: AsyncSession = session
+            select=(Select(bizCameraPO).filter(bizCameraPO.id==deviceId))
+            executer = await session.execute(select)
+            po :bizCameraPO= executer.fetchone() 
+            if po ==None: return redirect("/",404)
+            else:
+                #https://www.jshwx.com.cn/webshell/page/webssh.html?dOption=eyJwYXNzd29yZCI6Imh3eDEyMyIsIm9wZXJhdGUiOiJjb25uZWN0IiwicG9ydCI6IjIyIiwiaG9zdCI6IjEwLjYuMS4xODEiLCJkZXZuYW1lIjoi6ZW/5rGfNjIwMzMiLCJkZXZtb2RlbCI6IkhZQ1lfMDYiLCJ1c2VybmFtZSI6InJvb3QiLCJuZ3Jva1Rva2VuIjoiMDVmZjNhNmVjYzIzM2UwZSJ9
+                dict={"operate":"connect","host":po.ip,"username":"root","password":"hwx123","decname":po.name,"devmodel":'',"ngrokToken":""}
+                v=hash.enbase64(f"{dict}")
+                return redirect (f"https://www.jshwx.com.cn/webshell/page/webssh.html?dOption={v}")
 
-class IP_Cameras_View(AuthMethodView):
 
+
+    async def get(self, request: Request,type:device_type,deviceId:int):
+        """
+        跳转到设备配置
+        """
+        if(type==device_type.ip_camera) : return await self.camera(request,type,deviceId)
+        if(type==device_type.box):return redirect("/",404)
+        if(type==device_type.router):return redirect("/",404)
+
+
+class IP_Cameras_View(AuthMethodView): 
     async def put(self, request: Request):
         """
         增加相机
@@ -113,8 +136,7 @@ class IP_Camera_poster_View(Image_View):
         return empty(status=404)
 
 
-class IP_Camera_View(AuthMethodView):
-
+class IP_Camera_View(AuthMethodView): 
     async def put(self, request: Request, pk: int):
         """
         编辑相机
@@ -154,4 +176,6 @@ class IP_Camera_View(AuthMethodView):
         except Exception as e: 
             log.err(f"删除相机{pk}失败：{e}")
             return JSON_util.response(Result.fail(message=e))
+
+
     

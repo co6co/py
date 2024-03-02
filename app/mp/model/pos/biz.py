@@ -48,8 +48,8 @@ class bizBoxPO(UserTimeStampedModelPO):
     channel2_sip= Column("channel2_sip",String(64),comment="通道2 sip 地址") 
     channel3_sip= Column("channel3_sip",String(64),comment="通道3 sip 地址") 
 
-    innerConfigUrl= Column("inner_config_url",String(255),comment="设备配置URL") 
-    configUrl= Column("config_url",String(255),comment="设备配置URL")  
+    innerConfigUrl= Column("inner_config_url",String(2048),comment="设备配置URL") 
+    configUrl= Column("config_url",String(2048),comment="设备配置URL")  
     
     resourcesPO=Relationship("bizResourcePO", uselist=True,  back_populates="boxPO")
     sitePO =Relationship("bizSitePo",  back_populates="boxPO")
@@ -83,8 +83,8 @@ class bizCameraPO(UserTimeStampedModelPO):
     channel9_sip= Column("channel9_sip",String(64),comment="通道9 sip 地址") 
     channel10_sip= Column("channel10_sip",String(64),comment="通道10 sip 地址") 
 
-    innerConfigUrl= Column("inner_config_url",String(255),comment="设备配置URL") 
-    configUrl= Column("config_url",String(255),comment="设备配置URL")  
+    innerConfigUrl= Column("inner_config_url",String(2048),comment="设备配置URL") 
+    configUrl= Column("config_url",String(2048),comment="设备配置URL")  
        
     sitePO=Relationship("bizSitePo",back_populates="camerasPO")
     
@@ -153,8 +153,8 @@ class bizRouterPO(UserTimeStampedModelPO):
     ssd= Column("wifi_ssd",String(32))
     password= Column("wifi_password",String(32))    
 
-    innerConfigUrl= Column("inner_config_url",String(255),comment="设备配置URL") 
-    configUrl= Column("config_url",String(255),comment="设备配置URL")  
+    innerConfigUrl= Column("inner_config_url",String(2048),comment="设备配置URL") 
+    configUrl= Column("config_url",String(2048),comment="设备配置URL")  
 
     sitePO=Relationship("bizSitePo",back_populates="routerPO") 
     
