@@ -141,6 +141,7 @@
       <div>
         <el-button type="primary" size="small" :icon="Setting" @click="openBlankPage(0)">内网配置</el-button>
         <el-button type="primary" size="small" :icon="Setting" @click="openBlankPage(1)">外网配置</el-button>
+		<el-button type="primary" size="small" v-if="configDialog_model.deviceData&&configDialog_model.deviceData.sshConfigUrl"  :icon="Setting" @click="openBlankPage(2)">SSH配置</el-button>
       </div> 
 		</el-dialog> 
 
@@ -425,13 +426,18 @@
       switch(type){
         case 0:
         window.open( configDialog_model.deviceData.innerConfigUrl, '_blank' );
+		case 1:
+        window.open( configDialog_model.deviceData.configUrl, '_blank' ); 
+        break
+		case 2:
+        window.open( configDialog_model.deviceData.sshConfigUrl, '_blank' );
         break
         default:
         window.open( configDialog_model.deviceData.configUrl, '_blank' ); 
       } 
 	};
  
-  const configDialog_model=reactive<{showDialog:boolean,deviceData?:{ configUrl: string, innerConfigUrl: string;}}>({
+  const configDialog_model=reactive<{showDialog:boolean,deviceData?:{ configUrl: string, innerConfigUrl: string,sshConfigUrl?:string}}>({
     showDialog:false, 
   })
 

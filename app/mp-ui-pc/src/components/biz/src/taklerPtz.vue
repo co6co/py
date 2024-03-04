@@ -3,11 +3,12 @@
 		ref="talkerRef"
 		@state-change="onTalkerChange"
 		@log="onTalkerLog"
+		@on-message="onMessage"
 		:talk-no="talkbackNo"></talker>
 	<ptz
 		@ptz="OnPtz"
 		@center-click="onTalker"
-		:taker-state="talkerState.data.state == 1"
+		:taker-state="allowTakler"
 		:ptz-enable="ptzEnable"
 		:taker-enable="talkerEnable">
 	</ptz>
@@ -16,20 +17,32 @@
 			<div style="height: 100%;">
 				<div style="margin: 36px 0 5px 0">
 					<el-text class="mx-1" tag="p">
+						对讲用户:{{talkerState.userName}}
+					</el-text>
+					<el-text class="mx-1" tag="p">
 						xss状态:
 						<el-tag
 							class="ml-2"
 							:type="talkerState.data.state == 1 ? 'success' : 'info'"
 							>{{ talkerState.data.stateDesc }}</el-tag
 						>
+						<el-tag
+							class="ml-2"
+							:type="talkerState.online ? 'success' : 'info'"
+							>{{ talkerState.online?"设备在线":"设备不在线"}}</el-tag
+						>
+						<el-tag
+							class="ml-2"
+							:type="talkerState.busy ? 'info' : 'success'"
+							>{{ talkerState.busy?"设备忙":"可对讲"}} </el-tag
+						> 
 					</el-text>
 					<el-text class="mx-1" tag="p">
 						对讲号:
 						<el-tag
 							class="ml-2"
 							:type="talkerState.data.state == 1 ? 'success' : 'info'"
-							>{{ talkerState.data.talkNo }}</el-tag
-						>
+							>{{ talkerState.data.talkNo }}</el-tag> 
 					</el-text>
 					<el-text class="mx-1" tag="p">
 						Mqtt状态:
@@ -77,8 +90,11 @@
 
 	import { ElMessage } from 'element-plus';
 	import {RtcOnlineState,RtcSessionState} from '../../../components/devices/gb28181';
+	import {type gbTaklerOnlineList,type gbTaklerOnlineSessionList} from '../../../api/deviceState';
+import { nextTick } from 'process';
+import { onMounted } from 'vue';
 
-
+	 
 	const props = defineProps({
 		currentDeviceData: {
 			type: Object as PropType<dType.DeviceData>,
@@ -90,29 +106,68 @@
 		}
 		return -1;
 	});
+	//允许对讲
+	const allowTakler=computed(()=>{
+		//对讲服务器在线 
+		//对讲设备在线
+		if(talkerState.data.state == 1&&talkerState.online&&!talkerState.busy)return true
+		return false;
+		
+	})
 	watch(
 		() => props.currentDeviceData,
 		(n, o) => {
 			takerLogInfo.value = [];
 			if (props.currentDeviceData){
+				console.info("changeed",props.currentDeviceData.talkbackNo)
 				RtcOnlineState(onDeviceOnline)
 				RtcSessionState(onDeviceSession)
 			}
 			
-		}
+		},{deep:true}
 	);
-	//gb 设备在线/空闲 
-	const onDeviceOnline=(data:any)=>{
-
-	}
-	const onDeviceSession=(data:any)=>{
-
-	}
-	// 
-	const talkerRef = ref();
-	const talkerState = reactive<{ data: dType.talkState }>({
+ 
+	const talkerState = reactive<{ data: dType.talkState }&{online:boolean;busy:boolean,userName:string}&{sessionId:string}>({
 		data: { state: -1, stateDesc: '', talkNo: -1 },
+		online:false,busy:true,userName:"",
+		sessionId:""
 	});
+	//gb 设备在线/空闲 
+	const onDeviceOnline=(data:gbTaklerOnlineList)=>{
+		console.info("changeed",data)
+		if(props.currentDeviceData&&props.currentDeviceData.talkbackNo>-1&&data&&data.count>0){
+			
+			for(let i=0;i<data.data.length;i++){
+				let item=data.data[i];
+				if(item['device-id']==props.currentDeviceData.talkbackNo){
+					talkerState.online=true;
+					break
+				}
+			}
+		}
+	}
+	//设备忙或者空闲
+	const onDeviceSession=(data:gbTaklerOnlineSessionList)=>{  
+		if(props.currentDeviceData&&props.currentDeviceData.talkbackNo>-1&&data){
+			let f=false
+			for(let i=0;i<data.data.length;i++){
+				let item=data.data[i];
+				if(item['call-info'].device==props.currentDeviceData.talkbackNo){
+					talkerState.busy=true;
+					talkerState.userName=item['call-info'].from_userid
+					if(talkerState.sessionId==item['session-id']){ 
+						talkerState.userName="正在对讲..."
+					}
+					f=true
+					break
+				}
+			}
+			//不在列表中
+			if (!f){talkerState.busy=false;}
+		}
+	} 
+	const talkerRef = ref();
+	
 	const takerLogInfo = ref<string[]>([]);
 	const onTalkerChange = (state: dType.talkState) => {
 		talkerState.data = state;
@@ -126,7 +181,14 @@
 		else {
 			talkerRef.value.disconnect();
 		}
+		nextTick(()=>{
+			//更新状态
+			RtcSessionState(onDeviceSession)
+		}) 
 	};
+	const onMessage=(data:dType.talkerMessageData)=>{ 
+		talkerState.sessionId=data.SessionId 
+	} 
 	const ptzEnable = computed(() => {
 		if (props.currentDeviceData && props.currentDeviceData.sip) {
 			return true;

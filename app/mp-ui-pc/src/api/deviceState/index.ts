@@ -19,17 +19,54 @@ export interface gbDeviceState {
 	factory: string;
 	model: string;
 }
- 
+
+export interface gbTaklerDeviceMedia{
+	device:number
+	track:number
+	gburl:string
+}
+export interface gbTaklerDevice{
+	"peer-id":string
+	"device-id":number,
+	ipaddr:string,
+	port:number,
+	media:Array<gbTaklerDeviceMedia>
+} 
+//语音对讲设备在线状态
+export interface gbTaklerOnlineList{
+	count:number
+	data:Array<gbTaklerDevice> 
+}
+
+export interface CallInfo{
+	from_userid:string //unknown
+	media:string	//talk
+	device:number	//6
+	track:number //-1
+	gburl:string; //none
+}
+export interface gbTaklerBusy{
+	"session-id":string,
+	"caller-id":string,
+	"callee-id":string,
+	"call-info":CallInfo,
+	"duration":number
+}
+//语音对讲设备忙
+export interface gbTaklerOnlineSessionList{
+	count:number
+	data:Array<gbTaklerBusy> 
+} 
 export const get_gb_device_state = (): Promise<{
 	data: Array<gbDeviceState>;
 }> => {
     return request.get(`${gb_BASE_URL}?dev=gb` );
 };
 
-export const get_rtc_device_state = () => {
+export const get_takler_online = (): Promise<gbTaklerOnlineList> => {
     return request.get(`${gb_BASE_URL}?atv=rtc-device` );
 };
 
-export const get_rtc_session_state = () => {
+export const get_takler_online_session = (): Promise<gbTaklerOnlineSessionList> => {
 	return request.get(`${gb_BASE_URL}?atv=rtc-session` );
 };

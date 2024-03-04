@@ -19,9 +19,9 @@
 	//对讲模块
 	import '../../../assets/js/adapter-latest.js';
 	//import * as r from  '../assets/js/xtalk-rtc.js';
-	import { xTalker } from '../../../utils/xtalk';
+	import { xTalker } from '../xtalk';
 	import { useAppDataStore } from '../../../store/appStore';
-	import { talkState } from './types';
+	import { type talkState ,type talkerMessageData} from './types';
  
 
 	const props = defineProps({
@@ -46,7 +46,10 @@
 	});
 	onMounted(() => {});
 	let talker = new xTalker();
-	const emit = defineEmits<{ (event: 'stateChange', data: talkState): void ,(event: 'log', data: string): void }>();
+	const emit = defineEmits<{ 
+		(event: 'stateChange', data: talkState): void ,
+		(event: 'log', data: string): void
+		(event: 'onMessage', data: any):void }>();
 	talker.xTalkSetStatus=(value: string)=>{ 
 		emit("log",value)
 	}
@@ -66,7 +69,9 @@
 			talkNo: talker.xtalk_xss_to_device_id 
 		});
 	};
-	 
+	talker.onMessage = (value: talkerMessageData) => {  
+		emit('onMessage', value);
+	};
 	watch(
 		() => props.talkNo,
 		(n, o) => {

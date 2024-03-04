@@ -6,7 +6,8 @@ from sanic_ext import Extend
 from sanic.response import text,raw
 from co6co_sanic_ext.utils import JSON_util
 import json
-from utils import createUuid 
+from utils import createUuid
+from utils.cache import Cache 
 from view_model.base_view import  BaseMethodView  
 from model.enum import hwx_alarm_type, resource_category,resource_image_sub_category,device_type
 from typing import List,Optional ,Dict,Any
@@ -113,4 +114,10 @@ async def post(  request:Request):
     """
     心跳
     """
+   
+    param=m.HWX_Alive()
+    param.__dict__.update(request.json)
+    #cache:Cache=request.app.shared_ctx.cache  
+    #print("cache:",await cache.get("mapData" ))
+    #await cache.set("mapData", param, ex=30)
     return text("200-ok")

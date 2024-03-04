@@ -50,6 +50,7 @@ class bizBoxPO(UserTimeStampedModelPO):
 
     innerConfigUrl= Column("inner_config_url",String(2048),comment="设备配置URL") 
     configUrl= Column("config_url",String(2048),comment="设备配置URL")  
+    sshConfigUrl= Column("ssh_config_url",String(2048),comment="SSH配置")  
     
     resourcesPO=Relationship("bizResourcePO", uselist=True,  back_populates="boxPO")
     sitePO =Relationship("bizSitePo",  back_populates="boxPO")

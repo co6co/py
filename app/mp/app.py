@@ -13,7 +13,7 @@ from sanic.response import text,json
 import argparse 
 from co6co_sanic_ext .model.res .result import Result
 from pathlib import Path
-
+from utils.cache import Cache
 from view_model.tasks.devices_tasks import update_device_poster_task
 
 '''from model.pos.right import *  
@@ -45,6 +45,12 @@ def init (app:Sanic,customConfig):
     app.blueprint(hwx_api)
     
     app.add_task(update_device_poster_task(app)) 
+    config = {
+    'serializer': 'ujson',
+    'default': {'engine': 'memory'},
+    #'redis': {'host': 'localhost', 'port': 6379, 'db': 4},
+    }
+    #app.shared_ctx.cache= Cache(config)
     
 if __name__ == "__main__":     
     parser=argparse.ArgumentParser(description="audit service.")

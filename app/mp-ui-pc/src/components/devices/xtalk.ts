@@ -1,3 +1,4 @@
+import { type talkerMessageData } from './src/types';
 class xTalker {
 	xtalk_xss_mode: boolean = false;
 	xtalk_constraints: any = { video: false, audio: true };
@@ -120,23 +121,24 @@ class xTalker {
 			.addIceCandidate(candidate)
 			.catch(this.xTalkSetError);
 	}
-
+	//这里的做法就是用到那个字段去解析那个字段
+	onMessage(data:talkerMessageData){ 
+		console.log('Received ' + data); 
+	}
 	xTalkOnServerMessageXss(event: any) {
 		var msg;
 		var msg_splits;
-		var sdp_ice_msg;
-
-		console.log('Received ' + event.data);
-
+		var sdp_ice_msg; 
 		msg_splits = event.data.split(' ');
+		//['PEER_MSG', 'session_id=4446fbdf-9be0-4900-818d-b0a6138eca3f', '{"ice":{"sdpMLineIndex":0,"candidate":"candidate:4', '1', 'UDP', '2015363583', '10.6.3.135', '33009', 'typ', 'host"}}']
+		
 		if (msg_splits.length == 2 && msg_splits[0] == 'REGIST_OK') {
 			//REGIST_OK ****
 			let peer_id = msg_splits[1];
 
 			console.log('Regist to ccws successed: ' + peer_id);
 
-			this.xTalkCallID = 1;
-
+			this.xTalkCallID = 1; 
 			var to_peer_str;
 			if (this.xtalk_xss_to_gb_url != 'none')
 				to_peer_str = 'device=-1 track=-1 gb=' + this.xtalk_xss_to_gb_url;
@@ -211,8 +213,10 @@ class xTalker {
 			var to_ssid;
 
 			ssid_splits = msg_splits[1].split('=', 2);
-			if (ssid_splits.length == 2 && ssid_splits[0] == 'session_id')
+			if (ssid_splits.length == 2 && ssid_splits[0] == 'session_id'){
 				to_ssid = ssid_splits[1];
+				this.onMessage({SessionId:to_ssid})
+			} 
 
 			if (this.xTalkSessionID == null || to_ssid != this.xTalkSessionID) return;
 
@@ -242,9 +246,7 @@ class xTalker {
 		}
 	}
 
-	xTalkOnServerMessage(event: any) {
-		console.log('Received ' + event.data);
-
+	xTalkOnServerMessage(event: any) {  
 		if (event.data.startsWith('ERROR')) {
 			this.xTalkHandleIncomingError(event.data);
 			return;

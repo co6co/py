@@ -1,91 +1,97 @@
 
 from decimal import Decimal
-from model.pos.biz import bizAlarmPO,bizAlarmAttachPO
+from model.pos.biz import bizAlarmPO, bizAlarmAttachPO
 from datetime import datetime
 import json
 from utils import createUuid
+from typing import List
+
 
 class Response:
     """
     基础响应
     """
-    Code:int
-    Desc:str
+    Code: int
+    Desc: str
 
     @classmethod
-    def success(cls, message:str="上传成功") : 
-        obj :Response= object.__new__(cls)  
-        obj.Code=0
-        obj.Desc=message
+    def success(cls, message: str = "上传成功"):
+        obj: Response = object.__new__(cls)
+        obj.Code = 0
+        obj.Desc = message
         return obj
+
     @classmethod
-    def fail(cls, message:str="上传失败"):
-        obj:Response=object.__new__(cls) 
-        obj.Code=500
-        obj.Desc=message
+    def fail(cls, message: str = "上传失败"):
+        obj: Response = object.__new__(cls)
+        obj.Code = 500
+        obj.Desc = message
         return obj
+
 
 class Video_Response(Response):
-    VideoId:str
+    VideoId: str
+
 
 class Box_base_Param:
-    BoardId:str
-    BoardIp:str   
-    GBDeviceId:str
-    GBTaskChnId:str
-    ip:str
+    BoardId: str
+    BoardIp: str
+    GBDeviceId: str
+    GBTaskChnId: str
+    ip: str
 
 
 class Video_Param(Box_base_Param):
     """
     盒子上传视频参数
-    """  
-    Video:str
-    
+    """
+    Video: str
+
+
 class Alert_Param(Box_base_Param):
     """
     盒子上传视频参数
     """
-    UniqueId:str
-    Summary:str # 告警类型 
-    VideoFile:str
-    Result:dict
-    Media:dict
-    GPS:dict  
-    TimeStamp:int 
-    Addition:str
-    AlarmId:str
-    #原始图片
-    ImageData:str 
-    #标注过图片
-    ImageDataLabeled:str
-   
-    LocalRawPath:str
-    LocalLabeledPath:str 
-    TaskSession:str
-    TaskDesc:str
-    Time:str 
-   
-    Type:str
-    RelativeBox:str
-    RelativeRegion:str
-    Properties:str
-    property:str
-    desc:str
-    value:str
-    display:str
+    UniqueId: str
+    Summary: str  # 告警类型
+    VideoFile: str
+    Result: dict
+    Media: dict
+    GPS: dict
+    TimeStamp: int
+    Addition: str
+    AlarmId: str
+    # 原始图片
+    ImageData: str
+    # 标注过图片
+    ImageDataLabeled: str
+
+    LocalRawPath: str
+    LocalLabeledPath: str
+    TaskSession: str
+    TaskDesc: str
+    Time: str
+
+    Type: str
+    RelativeBox: str
+    RelativeRegion: str
+    Properties: str
+    property: str
+    desc: str
+    value: str
+    display: str
 
     def to_po(self):
-        po= bizAlarmPO()
-        po.uuid=self.UniqueId
-        po.alarmType=self.Summary 
-        po.taskSession=self.TaskSession
-        po.taskDesc=self.TaskDesc 
-        po.alarmTime=datetime.fromisoformat(self.Time)
+        po = bizAlarmPO()
+        po.uuid = self.UniqueId
+        po.alarmType = self.Summary
+        po.taskSession = self.TaskSession
+        po.taskDesc = self.TaskDesc
+        po.alarmTime = datetime.fromisoformat(self.Time)
         return po
+
     def date(self):
         return ""
-
 
 
 class HWX_Param:
@@ -109,60 +115,101 @@ class HWX_Param:
     alarm_lng: str  # ":"119.046082E",
     gps_speed: float  # ": 9.754,
     gps_dir: str  # ": 41.060,
-    #odo_update_st: int  # ": 1700095503227940,
-    #odo_name: str  # ": "据吴淞口310",
-    #odo_mileage: float  # ":310.000,
-    #yz_saildir: int  # ":2,
+    # odo_update_st: int  # ": 1700095503227940,
+    # odo_name: str  # ": "据吴淞口310",
+    # odo_mileage: float  # ":310.000,
+    # yz_saildir: int  # ":2,
     scene: str  # ":"sailing",
     break_rules: str  # ": "CHUNBO-v2-5",
     serial: int  # ": 5
 
     def _toAlarmTime(self):
-        #注意时区问题
-        #return datetime.utcfromtimestamp(self.dt_alarm/1000000)
+        # 注意时区问题
+        # return datetime.utcfromtimestamp(self.dt_alarm/1000000)
         return datetime.fromtimestamp(self.dt_alarm/1000000)
-    def _getUrl(self,name,p):
+
+    def _getUrl(self, name, p):
         return f"{self.record_dir}/{name}{p}"
-    
+
     def getResources(self):
-        date=self._toAlarmTime()
-        name=date.strftime("%Y%m%d%H%M%S%f")[:-3] #%f 6位[0,999999]
-        num=self.jpeg_num
-        urls=[]
-        #20200119154638-0.txt
-        #20200119154638-1.mp4
-        #20200119154638-2jPg
-        urls.append(self._getUrl(name,"-1.mp4"))
-        for i in range(0,num,1):
-            t=i+2
-            urls.append(self._getUrl(name, f"-{t}.jpg")) 
+        date = self._toAlarmTime()
+        name = date.strftime("%Y%m%d%H%M%S%f")[:-3]  # %f 6位[0,999999]
+        num = self.jpeg_num
+        urls = []
+        # 20200119154638-0.txt
+        # 20200119154638-1.mp4
+        # 20200119154638-2jPg
+        urls.append(self._getUrl(name, "-1.mp4"))
+        for i in range(0, num, 1):
+            t = i+2
+            urls.append(self._getUrl(name, f"-{t}.jpg"))
         return urls
+
     def to_po(self):
-        po=bizAlarmPO()
-        po.uuid=str(createUuid())
-        po.alarmTime=self._toAlarmTime()
-        po.alarmType=self.break_rules
-        poa=bizAlarmAttachPO()  # 附加信息 
-        poa.result=json.dumps({ 
-            "m": self.m,"snvr": self.snvr,    
-            "vcam": self.vcam ,"capture_type": self.capture_type,
-            "record_ver":self.record_ver,
-            "capture_type":self.capture_type,
-            "capture_user":self.capture_user,
-            "dt_alarm":self.dt_alarm,
-            "record_dir":self.record_dir,
-            "clip_secs":self.clip_secs,
-            "jpeg_num":self.jpeg_num,
-            "capture_type":self.capture_type,
-            "file_upload_type":self.file_upload_type, 
-            #"odo_update_st":self.odo_update_st,
-            #"odo_name":self.odo_name,
-            #"odo_mileage":self.odo_mileage,
-            #"yz_saildir":self.yz_saildir,
-            "scene":self.scene,
-            "break_rules":self.break_rules,
-            "serial":self.serial,
-        })  
-        poa.gps=json.dumps({ "alarm_lat": self.alarm_lat, "alarm_lng": self. alarm_lng ,"gps_speed": self. gps_speed ,"gps_dir": self.gps_dir}) 
-        po.alarmAttachPO=poa 
+        po = bizAlarmPO()
+        po.uuid = str(createUuid())
+        po.alarmTime = self._toAlarmTime()
+        po.alarmType = self.break_rules
+        poa = bizAlarmAttachPO()  # 附加信息
+        poa.result = json.dumps({
+            "m": self.m, "snvr": self.snvr,
+            "vcam": self.vcam, "capture_type": self.capture_type,
+            "record_ver": self.record_ver,
+            "capture_type": self.capture_type,
+            "capture_user": self.capture_user,
+            "dt_alarm": self.dt_alarm,
+            "record_dir": self.record_dir,
+            "clip_secs": self.clip_secs,
+            "jpeg_num": self.jpeg_num,
+            "capture_type": self.capture_type,
+            "file_upload_type": self.file_upload_type,
+            # "odo_update_st":self.odo_update_st,
+            # "odo_name":self.odo_name,
+            # "odo_mileage":self.odo_mileage,
+            # "yz_saildir":self.yz_saildir,
+            "scene": self.scene,
+            "break_rules": self.break_rules,
+            "serial": self.serial,
+        })
+        poa.gps = json.dumps({"alarm_lat": self.alarm_lat, "alarm_lng": self. alarm_lng,
+                             "gps_speed": self. gps_speed, "gps_dir": self.gps_dir})
+        po.alarmAttachPO = poa
         return po
+
+
+class Alive_cam:
+    serial:str  #: "VCAM-SZQA-Y009-0001",
+    name:str    #: "可见光",
+    sip:str     #: "34020000001329900001",
+    #reg_status:str  #: "success",
+    in_fps:int  #: 15
+
+    
+class HWX_Alive:
+    """
+    心跳json 
+    字段尽量少用,虽然文档给了这些 但可能有突然少了
+
+    """
+    #m: str  # :"device_keep_alive",
+    #device_type: str  # :"SNVR",
+    #device_model: str  # :"SZAQY_01",
+    device_serial: str  # :"SNVR-SZQA-Y009-0001",
+    #device_name: str  # :"数字安全员09",
+    #device_number: str  # :"db1621908e0604bd",
+    #install_location: str  # :"宜兴",
+    eth0_addr: str  # :"192.168.9.102",
+    ppp0_addr: str  # :"10.6.3.147",
+    #cpuload: str                 #: "0.00",
+    #memload: str                 #: "5.60",
+    #cputemp: str                 #: "31.46",
+    #uptime: str                  #: "122.61",
+    #longitude: str                   #: "0.000000",
+    #long_c: str                  #: "E",
+    #latitude: str                    #: "0.000000",
+    #lat_c: str                   #: "N",
+    #gps_speed: str                   #: "0.000",
+    #gps_dir: str                 #: "0.000",
+    #version: str                 #: "10.10.1020220903",
+    camera_datetime: str  # :"2024/02/25 16:51:32"
+    in_cam: List[Alive_cam]

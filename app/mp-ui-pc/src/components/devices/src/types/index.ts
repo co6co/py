@@ -88,10 +88,8 @@ export interface talkState{
   talkNo:number 
 }
  
-
-export interface talkState{
-  state:number;
-  stateDesc:string;
-  talkNo:number 
+ //xtalk 
+ //用到再加
+export interface talkerMessageData{
+	SessionId:string;
 }
- 
