@@ -7,7 +7,7 @@ from sanic.response import text,raw
 from co6co_sanic_ext.utils import JSON_util
 import json
 from utils import createUuid
-from utils.cache import Cache 
+from cacheout import Cache
 from view_model.base_view import  BaseMethodView  
 from model.enum import hwx_alarm_type, resource_category,resource_image_sub_category,device_type
 from typing import List,Optional ,Dict,Any
@@ -23,7 +23,7 @@ from view_model.base_view import  BaseMethodView
 from sqlalchemy.sql import Select
 from co6co_sanic_ext.model.res.result import Result
 from view_model.biz.upload_view import syncCheckEntity,createResourceUUID,saveResourceToDb,alarm_success
-  
+
 
 hwx_api = Blueprint( "hwx", url_prefix="/nyzh/pubApi")  
 async def getSiteId(p:m.HWX_Param):
@@ -115,9 +115,11 @@ async def post(  request:Request):
     心跳
     """
    
-    param=m.HWX_Alive()
-    param.__dict__.update(request.json)
-    #cache:Cache=request.app.shared_ctx.cache  
-    #print("cache:",await cache.get("mapData" ))
-    #await cache.set("mapData", param, ex=30)
+    param=m.HWX_Alive() 
+    param.__dict__ = request.json  
+    cache:Cache=request.app.ctx.Cache 
+    p=param.__dict__.get("in_cam")
+    print("p",p)
+    for a in p:
+        cache.set(a.get("sip"),True)
     return text("200-ok")

@@ -253,7 +253,7 @@
 	const queryChannel = (
 		stateArray: gb_api.gbDeviceState[],
 		channel_sip: string
-	): boolean => {
+	): boolean => {  
 		let result: gb_api.gbDeviceState[] = stateArray.filter((m) =>
 			m.uri.includes(channel_sip)
 		);
@@ -301,7 +301,7 @@
 		}
 		return result
 	};
-	const onSynDeviceState = (stateArray: gb_api.gbDeviceState[]) => {
+	const onSynDeviceState = (stateArray: gb_api.gbDeviceState[]) => { 
 		for (let i = 0; i < tree_module.data.length; i++) {
 			let site = tree_module.data[i];
 			let aiExist=false;

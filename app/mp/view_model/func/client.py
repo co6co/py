@@ -28,7 +28,7 @@ class WeChatMenu(BaseWeChatAPI):
     def get(self):
         return self
 
-class WeChatClient三(BaseWeChatClient):
+class WeChatClient(BaseWeChatClient):
     API_BASE_URL = "https://api.weixin.qq.com/cgi-bin/" 
     menu = WeChatMenu()
     
