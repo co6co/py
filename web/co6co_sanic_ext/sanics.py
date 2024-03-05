@@ -27,8 +27,10 @@ def startApp(configFile:str,apiInit:Optional[Callable[[Sanic,Any], None]] ):
     loader = AppLoader(factory=partial(_create_App,config=configFile,apiMount=apiInit)) 
     app = loader.load() 
     if app!=None and app.config!=None: 
-        setting=app.config.web_setting  
-        app.prepare( host=setting.get("host"), port=setting.get("port"),debug=setting.get("debug"), access_log=setting.get("access_log") ,dev=setting.get("dev")) 
+        setting=app.config.web_setting 
+        backlog=1024
+        if "backlog" in  setting:backlog=setting.get("backlog")
+        app.prepare( host=setting.get("host"),backlog=backlog, port=setting.get("port"),debug=setting.get("debug"), access_log=setting.get("access_log") ,dev=setting.get("dev"))  
         Sanic.serve(primary=app, app_loader=loader)
         #app.run(host=setting.get("host"), port=setting.get("port"),debug=True, access_log=True) 
     return app

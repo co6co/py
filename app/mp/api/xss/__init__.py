@@ -39,7 +39,7 @@ async def list(request:Request):
     atv=request.get_args( ).get("atv")
     url=None
     if dev=="gb": 
-        #url="https://stream.jshwx.com.cn:8441/list?dev=gb" 
+        url="https://stream.jshwx.com.cn:8441/list?dev=gb" 
         return await listForCache(request)
     if atv!=None: url=f"https://stream.jshwx.com.cn:8441/list?atv={atv}" 
     if url==None:return JSON_util.response(Result.fail(message="未知操作"))

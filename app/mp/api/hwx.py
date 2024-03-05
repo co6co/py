@@ -112,14 +112,17 @@ async def alarmEvent(request:Request):
 @hwx_api.route("/ipncAlive",methods=["POST",])
 async def post(  request:Request):
     """
-    心跳
-    """
-   
-    param=m.HWX_Alive() 
-    param.__dict__ = request.json  
-    cache:Cache=request.app.ctx.Cache 
-    p=param.__dict__.get("in_cam")
-    print("p",p)
-    for a in p:
-        cache.set(a.get("sip"),True)
+    心跳 
+    """  
+    #body=request.body.decode('UTF-8') 
+    try: 
+        param=m.HWX_Alive()  
+        param.__dict__ = request.json   #//json.loads(body)# 
+        cache:Cache=request.app.ctx.Cache   
+        for a in param.in_cam:
+            aA=m.Alive_cam()
+            aA.__dict__=a  
+            cache.set(aA.sip,True)
+    except Exception as e:
+        log.err(f"Alive,Error,保存信息失败：{e}") 
     return text("200-ok")

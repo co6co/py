@@ -25,18 +25,18 @@
 							class="ml-2"
 							:type="talkerState.data.state == 1 ? 'success' : 'info'"
 							>{{ talkerState.data.stateDesc }}</el-tag
-						>
+						> 
+						
+					</el-text>
+					<el-text class="mx-1" tag="p">
+						对讲设备状态:
 						<el-tag
 							class="ml-2"
-							:type="talkerState.online ? 'success' : 'info'"
-							>{{ talkerState.online?"设备在线":"设备不在线"}}</el-tag
-						>
-						<el-tag
-							class="ml-2"
-							:type="talkerState.busy ? 'info' : 'success'"
-							>{{ talkerState.busy?"设备忙":"可对讲"}} </el-tag
+							:type="(!talkerState.busy&&talkerState.online||talkerState.busy&&talkerState.online&&talkerState.isCurrentUser)  ? 'success' : 'info'"
+							>{{ taklerDesc}} </el-tag
 						> 
 					</el-text>
+
 					<el-text class="mx-1" tag="p">
 						对讲号:
 						<el-tag
@@ -106,13 +106,19 @@ import { onMounted } from 'vue';
 		}
 		return -1;
 	});
-	//允许对讲
+	//正在对讲状态
 	const allowTakler=computed(()=>{
 		//对讲服务器在线 
 		//对讲设备在线
-		if(talkerState.data.state == 1&&talkerState.online&&!talkerState.busy)return true
+		if(talkerState.data.state == 1&&talkerState.online&&talkerState.busy&&talkerState.isCurrentUser)return true
 		return false;
 		
+	})
+	const taklerDesc=computed(()=>{
+		if(!talkerState.online){return "不在线"}
+		if(talkerState.isCurrentUser&&talkerState.busy){return "对讲中..."}
+		if(talkerState.busy){return "设备忙"} 
+		return "空闲"
 	})
 	watch(
 		() => props.currentDeviceData,
@@ -127,24 +133,25 @@ import { onMounted } from 'vue';
 		},{deep:true}
 	);
  
-	const talkerState = reactive<{ data: dType.talkState }&{online:boolean;busy:boolean,userName:string}&{sessionId:string}>({
+	const talkerState = reactive<{ data: dType.talkState }&{online:boolean;busy:boolean,userName:string}&{sessionId:string,isCurrentUser:boolean}>({
 		data: { state: -1, stateDesc: '', talkNo: -1 },
 		online:false,busy:true,userName:"",
-		sessionId:""
+		sessionId:"",isCurrentUser:false,
 	});
 	//gb 设备在线/空闲 
 	const onDeviceOnline=(data:gbTaklerOnlineList)=>{
-		console.info("changeed",data)
-		if(props.currentDeviceData&&props.currentDeviceData.talkbackNo>-1&&data&&data.count>0){
-			
+		let f=false
+		if(props.currentDeviceData&&props.currentDeviceData.talkbackNo>-1&&data&&data.count>0){ 
 			for(let i=0;i<data.data.length;i++){
 				let item=data.data[i];
 				if(item['device-id']==props.currentDeviceData.talkbackNo){
 					talkerState.online=true;
+					f=true;
 					break
 				}
 			}
 		}
+		if(!f)talkerState.online=false;
 	}
 	//设备忙或者空闲
 	const onDeviceSession=(data:gbTaklerOnlineSessionList)=>{  
@@ -155,15 +162,22 @@ import { onMounted } from 'vue';
 				if(item['call-info'].device==props.currentDeviceData.talkbackNo){
 					talkerState.busy=true;
 					talkerState.userName=item['call-info'].from_userid
-					if(talkerState.sessionId==item['session-id']){ 
-						talkerState.userName="正在对讲..."
+					//当前会话
+					if(talkerState.sessionId==item['session-id']){  
+						talkerState.isCurrentUser=true
+					}else{
+						talkerState.isCurrentUser=false
 					}
 					f=true
 					break
 				}
 			}
 			//不在列表中
-			if (!f){talkerState.busy=false;}
+			if (!f){
+				talkerState.userName=""
+				talkerState.busy=false;
+				talkerState.isCurrentUser=false
+			}
 		}
 	} 
 	const talkerRef = ref();
@@ -177,14 +191,15 @@ import { onMounted } from 'vue';
 		takerLogInfo.value.push(log);
 	};
 	const onTalker = (active: boolean) => {
-		if (active) talkerRef.value.connect();
-		else {
-			talkerRef.value.disconnect();
-		}
-		nextTick(()=>{
-			//更新状态
-			RtcSessionState(onDeviceSession)
-		}) 
+		let f=false
+		if (active&&!talkerState.busy&&talkerState.online)f=true, talkerRef.value.connect();
+		else if(!active&&talkerState.isCurrentUser)   f=true,talkerRef.value.disconnect();
+		if(f){
+			nextTick(()=>{
+				//更新状态
+				RtcSessionState(onDeviceSession)
+			}) 
+		} 
 	};
 	const onMessage=(data:dType.talkerMessageData)=>{ 
 		talkerState.sessionId=data.SessionId 

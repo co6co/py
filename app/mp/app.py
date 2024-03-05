@@ -50,6 +50,15 @@ def init (app:Sanic,customConfig):
     app.add_task(update_device_poster_task(app))  
     cache = Cache(maxsize=256, ttl=30, timer=time.time, default=None) 
     app.ctx.Cache=cache 
+
+    '''
+    @app.middleware("request")
+    async def inject_session(request:Request):  
+        #logger.info("mount DbSession 。。。")
+        if "/nyzh/pubApi/ipncAlive" in request.path:
+            print("原始数据：",request.headers,request.body)
+    '''
+
     
 if __name__ == "__main__":     
     parser=argparse.ArgumentParser(description="audit service.")
