@@ -70,7 +70,11 @@ def startAlarmPush(config: WechatConfig,app:Sanic,po:bizAlarmPO):
                 else: sendTemplateMessage(client,openid,nickName,templatId,data)
     except Exception  as e:
         log.err(f"告警失败：{e}")
+
 def sendMessage(client:WeChatClient, openId, msg:str ,nickName:str):
+    """
+    发送普通消息
+    """
     try: 
         # 45015
         # send_text 用户长期为与公众号联系将不能发送消息
@@ -80,6 +84,9 @@ def sendMessage(client:WeChatClient, openId, msg:str ,nickName:str):
         log.err(f"发送文本消息-->{openId}{nickName}失败：{e}")
 
 def sendTemplateMessage(client:WeChatClient, openId,nickName:str, tempId, data ,url:str=None):
+    """
+    发送模板消息
+    """
     try:  
         jsonData=client.message.send_template(openId,tempId,data=data,url=url)
         log.warn(f"发送模板消息<<：{jsonData}" )

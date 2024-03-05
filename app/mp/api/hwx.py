@@ -124,5 +124,5 @@ async def post(  request:Request):
             aA.__dict__=a  
             cache.set(aA.sip,True)
     except Exception as e:
-        log.err(f"Alive,Error,保存信息失败：{e}") 
+        log.err(f"Alive,Error,缓存信息失败：{e}") 
     return text("200-ok")
