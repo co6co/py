@@ -51,19 +51,40 @@ def init (app:Sanic,customConfig):
     cache = Cache(maxsize=256, ttl=30, timer=time.time, default=None) 
     app.ctx.Cache=cache 
 
+    @app.main_process_start
+    async def main_process_start(*_):
+        print(">>>>>>main_process_start_start <<<<<<")
+
+    @app.before_server_start
+    async def server_start(*_):
+        print(">>>>>>before_server_start <<<<<<")
+    @app.after_server_start
+    async def server_started(*_):
+        print(">>>>>>after_server_start <<<<<<")
+
+    @app.before_server_stop
+    async def app_before_stop(*_):
+        print(">>>>>>before_server_stop <<<<<<")
+    @app.after_server_stop
+    async def after_server_stop(*_):
+        print(">>>>>>after_server_stop <<<<<<")
+
+    @app.main_process_stop
+    async def main_process_stop(*_):
+        print(">>>>>>main_process_stop <<<<<<")
+
     '''
     @app.middleware("request")
     async def inject_session(request:Request):  
         #logger.info("mount DbSession 。。。")
         if "/nyzh/pubApi/ipncAlive" in request.path:
             print("原始数据：",request.headers,request.body)
-    '''
-
-    
+    ''' 
 if __name__ == "__main__":     
     parser=argparse.ArgumentParser(description="audit service.")
     parser.add_argument("-c","--config",default="app_config.json")
     args=parser.parse_args() 
     sanics.startApp(args.config,init) 
+    
 
 

@@ -39,6 +39,7 @@ class AlarmFilterItems(absFilterItems):
     告警
     """
     alarmType: str = None
+    siteName: str = None
     datetimes: List[str]
 
     def __init__(self):
@@ -63,6 +64,8 @@ class AlarmFilterItems(absFilterItems):
         filters_arr = []
         if self.checkFieldValue(self.alarmType):
             filters_arr.append(bizAlarmPO.alarmType.__eq__(self.alarmType))
+        if self.checkFieldValue(self.siteName):
+            filters_arr.append(bizSitePo.name.like(f'%{self.siteName}%'))
         if self.datetimes and len(self.datetimes) == 2:
             filters_arr.append(bizAlarmPO.alarmTime.between(
                 self.datetimes[0], self.datetimes[1]))
@@ -93,4 +96,4 @@ class AlarmFilterItems(absFilterItems):
         """
         默认排序
         """
-        return (bizAlarmPO.id.desc(),)
+        return (bizAlarmPO.alarmTime.desc(),)

@@ -11,8 +11,43 @@ from co6co_db_ext.db_operations import DbOperations
 import json,os
 from typing import List
 from co6co.utils.File import File 
+from sanic import Sanic
+import requests 
+from co6co.task.thread import ThreadEvent
+from threading import Thread
  
 import time
+from services.bll import baseBll
+
+class DemoTest( ):
+    app:Sanic
+    def __init__(self,app:Sanic) -> None:
+        self.app=app
+        pass
+    def checkService(self):
+        try:  
+            response=requests.get("http://127.0.0.1:8084/v1/api/test",timeout=3)  
+            if response.status_code==200:return True
+            return False
+        except Exception as e:
+            print("error:",e)
+            return False
+    def run(self):
+        app=self.app
+        log.start_mark("tast state")
+        print("Name:", app.m.name)
+        print("PID:", app.m.pid)
+        print("状态：", app.m.state)
+        print("workers:", app.m.workers)
+        log.end_mark("tast state")
+        #app.m.terminate() # 关闭整个应用及其所有的进程  
+        isRuning=self. checkService()
+        if  not isRuning: 
+            print(">>>> 服务未能提供服务，即将重启 worker...")
+            app.m.restart() # 仅重启 worker
+        else:
+            print("service is runing.") 
+        #app.m.name.restart("","") # 重启特点的 worker 
 
 class stream:
     name:str
@@ -22,23 +57,25 @@ class stream:
         self.url=url
         pass
  
-    
-async def update_device_poster_task(app): 
-    filter=posterTaskFilterItems()
-    service:db_service=app.ctx.service
 
+async def update_device_poster_task(app:Sanic): 
+    filter=posterTaskFilterItems()
+    service:db_service=app.ctx.service 
     while True:
         session:AsyncSession=None
         try: 
-            await asyncio.sleep(800)	# 设定任务休眠时间 
-             
+            await asyncio.sleep(300)	# 设定任务休眠时间 
+            #t=ThreadEvent()     
+            bll=DemoTest(app ) 
+            Thread(target=bll.run ).start()
+            log.warn("this is 1..")
             #log.warn("tasking")
             #time.sleep(60)
             #log.warn("tasked")
             continue
             session:AsyncSession=service.async_session_factory()
             sanrc=await session.execute(filter.count_select)
-            count=sanrc.scalar()
+            count=sanrc.scalar() 
             log.succ(f"获取设备视频poster：{count}")
             if count>0 and filter.pageIndex<=filter.getMaxPageIndex(count): 
                 await queryData(session,filter)

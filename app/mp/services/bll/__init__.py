@@ -12,13 +12,17 @@ import json,os
 from typing import List
 from co6co.utils.File import File 
 import asyncio
+from sanic import Sanic
 
 class baseBll: 
     session:AsyncSession=None 
     loop=None
-    def __init__(self,app,loop) -> None:
+    app:Sanic
+    def __init__(self,app:Sanic,loop) -> None:
+        self.app=app
         _service:db_service=db_service(app.config.db_settings) 
         self.session:AsyncSession=_service.async_session_factory() 
+
         '''
         service:db_service=app.ctx.service
         self.session:AsyncSession=service.async_session_factory()

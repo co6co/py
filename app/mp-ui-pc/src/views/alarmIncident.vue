@@ -3,6 +3,11 @@
 		<el-container>
 			<el-header>
 				<div class="handle-box">
+					<el-input 	style="width: 160px"
+						v-model="table_module.query.siteName"
+						placeholder="站点名"
+						class="handle-input mr10"></el-input>
+
 					<el-select
 						style="width: 160px"
 						class="mr10"
@@ -210,6 +215,7 @@
 	interface Query extends IpageParam {
 		datetimes: Array<string>;
 		alarmType: String;
+		siteName:string;
 	}
 	interface table_module {
 		query: Query;
@@ -228,6 +234,7 @@
 	const table_module = reactive<table_module>({
 		query: {
 			alarmType: '',
+			siteName:'',
 			datetimes: [],
 			pageIndex: 1,
 			pageSize: 15,
