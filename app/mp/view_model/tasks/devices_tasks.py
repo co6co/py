@@ -33,21 +33,26 @@ class DemoTest( ):
             print("error:",e)
             return False
     def run(self):
-        app=self.app
-        log.start_mark("tast state")
-        print("Name:", app.m.name)
-        print("PID:", app.m.pid)
-        print("状态：", app.m.state)
-        print("workers:", app.m.workers)
-        log.end_mark("tast state")
-        #app.m.terminate() # 关闭整个应用及其所有的进程  
-        isRuning=self. checkService()
-        if  not isRuning: 
-            print(">>>> 服务未能提供服务，即将重启 worker...")
+        try:
+            app=self.app
+            log.start_mark("tast state")
+            print("Name:", app.m.name)
+            print("PID:", app.m.pid)
+            print("状态：", app.m.state)
+            print("workers:", app.m.workers)
+            log.end_mark("tast state")
+            #app.m.terminate() # 关闭整个应用及其所有的进程  
+            isRuning=self. checkService()
+            if  not isRuning: 
+                print(">>>> 服务未能提供服务，即将重启 worker...")
+                app.m.restart() # 仅重启 worker
+            else:
+                print("service is runing.") 
+            #app.m.name.restart("","") # 重启特点的 worker 
+        except Exception as e:
+            log.err("檢測任務失敗,即将重启 worker...")
             app.m.restart() # 仅重启 worker
-        else:
-            print("service is runing.") 
-        #app.m.name.restart("","") # 重启特点的 worker 
+
 
 class stream:
     name:str

@@ -19,12 +19,15 @@ from co6co_sanic_ext.utils import JSON_util
 def Alarm_Save_Succ_AOP(func):
     @wraps(func)
     def warpper(request:Request ,po:bizAlarmPO):
-        allConfig:list[WechatConfig]=get_wx_configs(request)  
-        #loop = asyncio.get_event_loop()
-        #log.warn(f"主{id(loop)}") 
-        for c in allConfig:  
-            thread_tts = Thread(target=startAlarmPush,name=f"alarm_thread" ,args=(c,request.app,po))
-            thread_tts.start()   
+        try:
+            allConfig:list[WechatConfig]=get_wx_configs(request)  
+            #loop = asyncio.get_event_loop()
+            #log.warn(f"主{id(loop)}") 
+            for c in allConfig:  
+                thread_tts = Thread(target=startAlarmPush,name=f"alarm_thread" ,args=(c,request.app,po))
+                thread_tts.start()
+        except Exception as e:
+            log.err("warpper告警失败：:{e}")   
         return func(request,po)
     return warpper
 
