@@ -1,3 +1,4 @@
+from model.enum import hwx_alarm_type
 from services.bll import baseBll
 from view_model.base_view import BaseMethodView,Request 
 from sanic.response import text,raw
@@ -64,7 +65,13 @@ class TestView(BaseMethodView):
         await bll.get()
         return text("执行完毕2。")
     
+from view_model.biz.upload_view import syncCheckEntity,createResourceUUID,saveResourceToDb,alarm_success
+
 class TestsView(BaseMethodView):
     def get(self,request:Request ):
+        po=bizAlarmPO()
+        po.alarmType=hwx_alarm_type.alarm1.key
+        po.alarmTime=datetime.now()
+        alarm_success(request,po)
         return text(f"请求成功，你可以试试其他的:{request.args}") 
         

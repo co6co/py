@@ -2,7 +2,7 @@ import { number2hex } from '../../../utils';
 import * as p from '../../../components/stream/src/types/ptz';
 import { ptz } from '..';
 import { Console } from 'console';
-
+import {ref} from 'vue'
 const str2ByteArray = (ptzCmd: string) => {
 	if (ptzCmd && ptzCmd.length != 16) console.error('命令不符规格');
 	let arr: number[] = [0, 0, 0, 0, 0, 0, 0, 0];
@@ -21,9 +21,9 @@ const checkSum = (ptzCmd: number[]) => {
 	if (ptzCmd[7] == check % 256) return true;
 	return false;
 };
-
+//检验和
 const genPtzCommd = (ptzCmd: number[]) => {
-	//检验和
+
 	let check: number = 0;
 	let cmdstr: string = '';
 	for (let i = 0; i <= 6; i++) {
@@ -54,7 +54,7 @@ export const createPtzCmd = (speed: number, type: p.ptz_type, name: p.ptz_name) 
 				ptzCmd[3] = 0x02;
 				ptzCmd[4] = speed & 0xff;
 				break;
-			case 'zoomin':
+			case 'zoomout':
 				ptzCmd[3] = 0x20;
 				ptzCmd[6] = speed & 0xf0;
                 if (ptzCmd[6]<0x10){
@@ -62,7 +62,7 @@ export const createPtzCmd = (speed: number, type: p.ptz_type, name: p.ptz_name) 
                     console.warn("zome is 0,设置为8") 
                 }
 				break;
-			case 'zoomout':
+			case 'zoomin':
 				ptzCmd[3] = 0x10; 
 				ptzCmd[6] = speed & 0xf0;
                 if (ptzCmd[6]<0x10){
@@ -76,15 +76,19 @@ export const createPtzCmd = (speed: number, type: p.ptz_type, name: p.ptz_name) 
 	}
 	return genPtzCommd(ptzCmd);
 };
+export const snRef=ref(0)
 export const generatePtzXml = (
 	sip: string,
 	speed: number,
 	type: p.ptz_type,
 	name: p.ptz_name
-) => {
+) :{sn:number,xml:string}=> {
 	const cmdstr = createPtzCmd(speed, type, name);
 	let time=new Date()
-	let sn =time.getSeconds()*1000+ time.getMilliseconds();
+	snRef.value+=1
+	//let sn = time.getSeconds()*1000+ time.getMilliseconds();
+	let sn=snRef.value;
+	/*
 	let xml = `
     <?xml version="1.0" encoding="UTF-8"?>
     <Control>
@@ -106,7 +110,19 @@ export const generatePtzXml = (
 		</Info>
 	</Control>
 	`
-	return xml;
+	*/
+	let xml=`<?xml version="1.0"?>
+    <Control>
+        <CmdType>DeviceControl</CmdType>
+        <SN>${sn}</SN>
+        <DeviceID>${sip}</DeviceID>
+        <PTZCmd>${cmdstr}</PTZCmd>
+		<Info>
+			<ControlPriority>5</ControlPriority>
+		</Info>
+    </Control>  
+	`
+	return {sn:sn,xml:xml};
 };
 
 export const testPtzCmdStr = (ptzCmd: string) => {

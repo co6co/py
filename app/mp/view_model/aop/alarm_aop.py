@@ -25,7 +25,7 @@ def Alarm_Save_Succ_AOP(func):
             #log.warn(f"主{id(loop)}") 
             for c in allConfig:  
                 thread_tts = Thread(target=startAlarmPush,name=f"alarm_thread" ,args=(c,request.app,po))
-                thread_tts.start()
+                thread_tts.start() 
         except Exception as e:
             log.err("warpper告警失败：:{e}")   
         return func(request,po)

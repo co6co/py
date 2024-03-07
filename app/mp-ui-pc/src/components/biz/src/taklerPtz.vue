@@ -81,18 +81,17 @@
 	</div>
 </template>
 <script setup lang="ts">
-	import { PropType, ref, watch, reactive, computed } from 'vue';
+	import { PropType, ref, watch, reactive, computed,nextTick } from 'vue';
 	import { useMqtt, mqqt_server } from '../../../utils/mqtting';
 	import { talker, types as dType } from '../../../components/devices';
-	import { ptz as cmd } from '../../../components/biz';
+	import { ptz as cmd  } from '../../../components/biz';
 	import { ptz } from '../../../components/stream';
 	import * as p from '../../../components/stream/src/types/ptz';
 
 	import { ElMessage } from 'element-plus';
 	import {RtcOnlineState,RtcSessionState} from '../../../components/devices/gb28181';
 	import {type gbTaklerOnlineList,type gbTaklerOnlineSessionList} from '../../../api/deviceState';
-import { nextTick } from 'process';
-import { onMounted } from 'vue';
+ 
 
 	 
 	const props = defineProps({
@@ -263,18 +262,18 @@ import { onMounted } from 'vue';
 		}
 		if (props.currentDeviceData && props.currentDeviceData.sip) {
 			//let strCmd=cmd.createPtzCmd(speed,type,name)
-			//cmd.testPtzCmdStr("A50F0100000000B5")
-			onTalkerLog(`ptz:${name}->${type},speed:${speed}`);
-			let str = cmd.generatePtzXml(
+			//cmd.testPtzCmdStr("A50F0100000000B5") 
+			let obj = cmd.generatePtzXml(
 				props.currentDeviceData?.sip,
 				speed,
 				type,
 				name
 			);
-			console.info('发送PTZ命令：', str); 
+			onTalkerLog(`ptz:${name}->${type},speed:${speed},sn:${obj.sn},`);
+			console.info('发送PTZ命令：', obj.xml); 
 			const client = Ref_Mqtt.value?.publish(
 				'/MANSCDP_cmd',
-				str,
+				obj.xml,
 				(err, pkg) => {
 					setMessageState();
 				}

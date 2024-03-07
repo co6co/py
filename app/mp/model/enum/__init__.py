@@ -3,6 +3,7 @@ from co6co.enums import Base_Enum,Base_EC_Enum
 class User_Group(Base_Enum):
     """
     用户组代码
+    差不数据表时 不能使用 val
     """
     wx_user="wx_user",0
     

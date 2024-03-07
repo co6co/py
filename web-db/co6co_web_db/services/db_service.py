@@ -23,9 +23,11 @@ def injectDbSessionFactory(app:Sanic,settings:dict={},engineUrl:str=None,session
     """
     挂在 DBSession_factory
     """
-    service=db_service(settings,engineUrl)
-    app.ctx.service=service
-    service.sync_init_tables() 
+    service:db_service=None
+    if settings !=None or engineUrl !=None:
+        service=db_service(settings,engineUrl)
+        app.ctx.service=service
+        service.sync_init_tables() 
     '''
     @app.main_process_start
     async def inject_session_factory(app:Sanic):
@@ -46,18 +48,18 @@ def injectDbSessionFactory(app:Sanic,settings:dict={},engineUrl:str=None,session
         
         if checkApi(request):
             #logger.info("mount DbSession 。。。")
-            if service.useAsync:
+            if service!=None and service.useAsync:
                 request.app.ctx.session_fatcory=service.async_session_factory
                 request.ctx.session=service.async_session_factory() 
                 request.ctx.session_ctx_token = service.base_model_session_ctx.set(request.ctx.session) 
-            else:
+            elif service!=None:
                 request.ctx.session=service.session 
         
     @app.middleware("response")
     async def close_session(request:Request, response):
         if hasattr(request.ctx, "session_ctx_token"):
             try:
-                if service.useAsync:
+                if service!=None and service.useAsync:
                     service.base_model_session_ctx.reset(request.ctx.session_ctx_token) 
                     await request.ctx.session.close()
                 #logger.info("close DbSession。")

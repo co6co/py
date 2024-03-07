@@ -16,8 +16,10 @@ class wx_user_bll(baseBll):
                 select=( 
                     Select(UserPO.id,UserPO.userName ,WxUserPO.openid,WxUserPO.nickName)
                     .join_from(WxUserPO,AccountPO,isouter=True,onclause=AccountPO.uid==WxUserPO.accountUid)  
+                    
                     .join(UserPO,isouter=True,onclause=AccountPO.userId==UserPO.id) 
-                    .filter(WxUserPO.ownedAppid== ownedAppid,UserPO.userGroupId==User_Group.wx_alarm.val) 
+                    .join(UserGroupPO,isouter=True,onclause=UserPO.userGroupId==UserGroupPO.id)  
+                    .filter(WxUserPO.ownedAppid== ownedAppid,UserGroupPO.code==User_Group.wx_alarm.key) 
                 )   
                 executer=await session.execute(select)  
                 result = executer.mappings().fetchall() 
