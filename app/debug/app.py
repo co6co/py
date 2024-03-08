@@ -19,12 +19,10 @@ from tasks.test1 import monitor
 def init (app:Sanic,customConfig):
     """ 
     初始化
-    """ 
-    log.warn(customConfig)
+    """  
     attach_cors(app) 
-    from api import api
-     
-    injectDbSessionFactory(app,None,sessionApi=["/api"]) 
+    from api import api 
+    #injectDbSessionFactory(app,None ) 
     app.blueprint(api) 
     app.add_task(monitor)
     
@@ -33,6 +31,3 @@ if __name__ == "__main__":
     parser.add_argument("-c","--config",default="app_config.json")
     args=parser.parse_args() 
     sanics.startApp(args.config,init) 
-    
-
-

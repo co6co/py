@@ -13,7 +13,7 @@
 							</el-col>
 							<el-col :span="5">
 								<div class="content">
-									<takler-ptz :current-device-data="currentDeviceData.data"></takler-ptz> 
+									<takler-ptz :data="currentItem"></takler-ptz> 
 								</div>
 							</el-col>
 						</el-row>
@@ -27,7 +27,7 @@
 <script setup lang="ts" name="basetable">    
 	import {   deviceNav } from '../components/devices';
 	import { bizPlayer,taklerPtz  } from '../components/biz'; 
-	import {playerList,currentDeviceData,onClickNavDevice,onPlayerChecked}   from '../components/devices/preview'; 
+	import {playerList,currentItem,onClickNavDevice,onPlayerChecked}   from '../components/devices/preview'; 
 	 
 </script>
 <style scoped lang="less">

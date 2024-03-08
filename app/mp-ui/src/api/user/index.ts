@@ -4,8 +4,9 @@ export const queryList_svc = (data:IpageParam): Promise<IPageResponse> => {
     return request.post(`${BASE_URL}/list`,data);
 };
 
-export const exist_svc = ( userName:string): Promise<IResponse> => {
-    return request.post(`${BASE_URL}/exist/${userName}`, {});
+export const exist_svc = (userName:string,id?:number ): Promise<IResponse> => {
+    if(id==undefined)return request.post(`${BASE_URL}/exist/${userName}`, {});
+    else return request.post(`${BASE_URL}/exist/${userName}?id=${id}`, {});
 };
 export const add_svc = ( data:any): Promise<IResponse> => {
     return request.post(`${BASE_URL}/add`, data);
@@ -30,6 +31,3 @@ export const get_user_name_List_svc =( ): Promise<IResponse> => {
     return request.get(`${BASE_URL}/userList`);
 };
 
-export const ticket_svc =(ticket:string ): Promise<IResponse> => {
-    return request.post(`${BASE_URL}/ticket/${ticket}`);
-};

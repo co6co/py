@@ -56,19 +56,15 @@ export const createPtzCmd = (speed: number, type: p.ptz_type, name: p.ptz_name) 
 				break;
 			case 'zoomout':
 				ptzCmd[3] = 0x20;
-				ptzCmd[6] = speed & 0xf0;
-                if (ptzCmd[6]<0x10){
-                    ptzCmd[6] =0x80
-                    console.warn("zome is 0,设置为8") 
-                }
+				//低四位转高四位,后取高四位
+				ptzCmd[6] =speed<<4 & 0xf0; 
+				if (speed>15)ptzCmd[6]=0xf0
 				break;
 			case 'zoomin':
 				ptzCmd[3] = 0x10; 
-				ptzCmd[6] = speed & 0xf0;
-                if (ptzCmd[6]<0x10){
-                    ptzCmd[6] =0x80
-                    console.warn("zome is 0,设置为8") 
-                }
+				//低四位转高四位,后取高四位
+				ptzCmd[6] =speed<<4 & 0xf0; 
+				if (speed>15)ptzCmd[6]=0xf0
 				break;
 		}
 	} else {

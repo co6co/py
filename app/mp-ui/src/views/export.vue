@@ -18,8 +18,7 @@
 
 <script setup lang="ts" name="export">
 import { ref } from 'vue';
-import * as XLSX from 'xlsx';
-
+import * as XLSX from 'xlsx'; 
 interface TableItem {
     id: number;
     name: string;

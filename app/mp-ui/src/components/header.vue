@@ -5,10 +5,11 @@
 			<el-icon v-if="sidebar.collapse"><Expand /></el-icon>
 			<el-icon v-else><Fold /></el-icon>
 		</div>
-		<div class="logo">后台管理系统</div>
+		<div class="logo">{{systemName}}</div>
 		<div class="header-right">
 			<div class="header-user-con">
 				<!-- 消息中心 -->
+				<!--
 				<div class="btn-bell" @click="router.push('/tabs')">
 					<el-tooltip
 						effect="dark"
@@ -19,6 +20,7 @@
 					</el-tooltip>
 					<span class="btn-bell-badge" v-if="message"></span>
 				</div>
+				-->
 				<!-- 用户头像 -->
 				<el-avatar class="user-avator" :size="30" :src="imgurl" />
 				<!-- 用户名下拉菜单 -->
@@ -46,14 +48,20 @@
 	</div>
 </template>
 <script setup lang="ts">
-import { onMounted } from 'vue';
+import { onMounted,ref } from 'vue';
 import { useSidebarStore } from '../store/sidebar';
 import { useRouter } from 'vue-router';
 import imgurl from '../assets/img/img.jpg';
+import { removeToken} from "../utils/auth"
+
+import {pkg} from '../utils'
+
 
 const username: string | null = localStorage.getItem('ms_username');
 const message: number = 2;
 
+const systemName=ref()
+systemName.value=pkg.name
 const sidebar = useSidebarStore();
 // 侧边栏折叠
 const collapseChage = () => {
@@ -71,7 +79,7 @@ onMounted(() => {
 const router = useRouter();
 const handleCommand = (command: string) => {
 	if (command == 'loginout') {
-		localStorage.removeItem('ms_username');
+		removeToken() 
 		router.push('/login');
 	} else if (command == 'user') {
 		router.push('/user');

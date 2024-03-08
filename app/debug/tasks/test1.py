@@ -19,14 +19,7 @@ class DemoTest( ):
             print("error:",e)
             return False
     def run(self):
-        try:
-            app=self.app
-            log.start_mark("tast state")
-            print("Name:", app.m.name)
-            print("PID:", app.m.pid)
-            print("状态：", app.m.state)
-            print("workers:", app.m.workers)
-            log.end_mark("tast state")
+        try: 
             #app.m.terminate() # 关闭整个应用及其所有的进程  
             isRuning=self. checkService()
             if  not isRuning: 
@@ -42,7 +35,7 @@ class DemoTest( ):
 async def monitor(app:Sanic): 
     while True: 
         try: 
-            await asyncio.sleep(15)	
+            await asyncio.sleep(300 )	
             demo=DemoTest(app)
             Thread(target=demo.run ).start()
         except Exception as e:

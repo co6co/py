@@ -11,7 +11,7 @@ from co6co_db_ext.db_operations import DbOperations
 import json,os
 from typing import List
 from co6co.utils.File import File 
-from sanic import Sanic
+from sanic import Blueprint, Sanic
 import requests 
 from co6co.task.thread import ThreadEvent
 from threading import Thread
@@ -63,7 +63,8 @@ class stream:
         pass
  
 
-async def update_device_poster_task(app:Sanic): 
+async def update_device_poster_task(app:Sanic|Blueprint): 
+    
     filter=posterTaskFilterItems()
     service:db_service=app.ctx.service 
     while True:

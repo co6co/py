@@ -1,54 +1,57 @@
-import path,{ resolve } from 'path' //todo 
-//import path from "path"; //这个path用到了上面安装的@types/node
-import { loadEnv } from 'vite'
-import { defineConfig, UserConfig, ConfigEnv  } from 'vite';
-import vue from '@vitejs/plugin-vue';
-import VueSetupExtend from 'vite-plugin-vue-setup-extend';
+import { fileURLToPath, URL } from 'node:url'
+import path, { resolve } from 'path';
+import { loadEnv } from 'vite';
+import { defineConfig, UserConfig, ConfigEnv } from 'vite';
+import vue from '@vitejs/plugin-vue';  
+import vueJsx from '@vitejs/plugin-vue-jsx'
 import AutoImport from 'unplugin-auto-import/vite';
 import Components from 'unplugin-vue-components/vite';
-import { ElementPlusResolver } from 'unplugin-vue-components/resolvers';
+import { ElementPlusResolver } from 'unplugin-vue-components/resolvers'; 
+import topLevelAwait from 'vite-plugin-top-level-await';
 
-import topLevelAwait from 'vite-plugin-top-level-await' 
-
-export default  defineConfig({
+export default defineConfig({
 	base: './',
+	//server:{hmr:{overlay:false} },
+	//publicDir:"/public",//静态文件目录
 	server: {
 		host: '0.0.0.0',
-		port: 5174,
-		cors:true
+		port: 5173,
 	},
-	build: {
-        target: ['esnext']
-    },
+	//esbuild:{jsx: "preserve"},
 	plugins: [
 		vue(),
-		VueSetupExtend(),
-		AutoImport({
-			resolvers: [ElementPlusResolver()]
-		}),
 		Components({
-			resolvers: [ElementPlusResolver()]
-		}),
+		resolvers: [ElementPlusResolver()]
+	}),
+	AutoImport({
+		resolvers: [ElementPlusResolver()]
+	}),
 		topLevelAwait({
 			promiseExportName: '__tla',
-			promiseImportName: i => `__tla_${i}`
-		}), 
+			promiseImportName: (i) => `__tla_${i}`,
+		}),
+		//"@vue/babel-plugin-jsx"
 	],
-	optimizeDeps: {
-		include: ['schart.js']
+ 
+
+	resolve: {
+	 alias: {
+      '@': fileURLToPath(new URL('./src', import.meta.url))
+    }
 	},
-	 //这里进行配置别名
-	 resolve: {
-		alias: {
-		  "@": path.resolve("./src"), // @代替src
-		  "#": path.resolve("./types"), // #代替types
+	build: {
+		rollupOptions: {
+			input: {
+				pbIndex: path.resolve(__dirname, 'index.html'),
+				mpIndex: path.resolve(__dirname, 'home.html'),
+			},
 		},
-	  }, 
+	},
 });
 
-const root = process.cwd()
+const root = process.cwd();
 function pathResolve(dir: string) {
-	return resolve(root, '.', dir)
+	return resolve(root, '.', dir);
 }
 
 export const useConfig= ({ command, mode }: ConfigEnv): UserConfig => {
@@ -60,7 +63,6 @@ export const useConfig= ({ command, mode }: ConfigEnv): UserConfig => {
 	  env = loadEnv(mode, root)
 	}
 	return {
-		base: env.API_URL_BASE, 
-
-	}
-}
+		base: env.API_URL_BASE,
+	};
+};

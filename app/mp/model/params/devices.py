@@ -21,7 +21,7 @@ class cameraParam:
     channel4_sip: str=None
     channel5_sip: str=None
     siteId: int=None
-    talkbackNo: int=None
+    #talkbackNo: int=None
 
     def set_po(self, po:bizCameraPO):
         print(self.cameraType)
@@ -37,4 +37,4 @@ class cameraParam:
         po.channel4_sip=self.channel4_sip
         po.channel5_sip=self.channel5_sip
         po.siteId=self.siteId
-        po.talkbackNo=self.talkbackNo
+        #po.talkbackNo=self.talkbackNo

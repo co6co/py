@@ -9,6 +9,17 @@ const mqqt_server = import.meta.env.VITE_mqtt_server;
 const debug = Boolean(Number(import.meta.env.VITE_IS_DEBUG));
 
 type ConnectBck=(connected:boolean, error?:any)=>void
+interface MqttOption{
+	clean: boolean, // 保留会话
+	// 认证信息
+	clientId:string,
+	username: string, 				//用户名 不用的话什么也不用填
+	password: string, 	//密码 不用的话什么也不用填
+	connectTimeout:number, 			// 超时时间
+	reconnectPeriod:number, 	 			// 两次重新连接之间的间隔，客户端 ID 重复、认证失败等客户端会重新连接；
+	keepalive:number , 	
+
+}
 class MQTTing {
 	url: string; // mqtt地址
 	topics: string[];
@@ -22,19 +33,20 @@ class MQTTing {
 		this.connectBck=onConnectBck
 	}
 	//初始化mqtt
-	init() {
-		const options = {
+	init(option: Partial< MqttOption>) {
+		const default_config:MqttOption= {
 			clean: true, // 保留会话
 			// 认证信息
 			clientId: 'mqttjs_' + Math.random().toString(16),
-			username: 'mqttroot', //用户名 不用的话什么也不用填
-			password: 'hQEMA4fLSGZcsDhlAQf', //密码 不用的话什么也不用填
-			connectTimeout: 50*1000, // 超时时间
-			reconnectPeriod:1000, // 两次重新连接之间的间隔，客户端 ID 重复、认证失败等客户端会重新连接；
-			keepalive:60 , //心跳 
+			username: 'mqttroot', 				//用户名 不用的话什么也不用填
+			password: 'hQEMA4fLSGZcsDhlAQf', 	//密码 不用的话什么也不用填
+			connectTimeout: 50*1000, 			// 超时时间
+			reconnectPeriod:1000, 	 			// 两次重新连接之间的间隔，客户端 ID 重复、认证失败等客户端会重新连接；
+			keepalive:60 , 		     			//心跳 
 		};
+		
 		let that=this;
-		this.client = mqtt.connect(this.url, options); 
+		this.client = mqtt.connect(this.url, {... default_config, ...option}); 
 		this.client.on('error', (error: any) => {
 			console.log(error);
 			if(that.connectBck)that.connectBck(false,error )
@@ -101,14 +113,15 @@ function useMqtt() {
 	const startMqtt = (
 		url: string,
 		topic: string,
+		option: Partial< MqttOption>,
 		callback: OnMessageCallback,
 		connectbck?:ConnectBck
 	) => { 
 		//设置订阅地址
 		//"tcp://36.137.74.204:9101/mqtt"
-		Ref_Mqtt.value = new MQTTing(getUrl(url), [topic],connectbck); 
+		Ref_Mqtt.value = new MQTTing(getUrl(url), [topic], connectbck); 
 		//初始化mqtt
-		Ref_Mqtt.value.init();
+		Ref_Mqtt.value.init(option);
 		//链接mqtt
 		Ref_Mqtt.value.subscribe();
 		getMessage(callback);
@@ -139,17 +152,18 @@ function useMqtting() {
 	const startMqtt = (
 		url: string,
 		topics: string[],
+		option: Partial< MqttOption>,
 		callback: OnMessageCallback
 	) => {
 		topicData = topics;
 		//设置订阅地址
 		Ref_Mqtt.value = new MQTTing(getUrl(url), topics);
 		//初始化mqtt
-		Ref_Mqtt.value.init();
+		Ref_Mqtt.value.init(option);
 		Ref_Mqtt.value?.subscribe();
 		getMessage(callback);
-	};
-
+	}; 
+	
 	const getMessage = (callback: OnMessageCallback) => {
 		// PublicMqtt.value?.client.on('message', callback);
 		Ref_Mqtt.value?.getMessage(callback);
@@ -168,41 +182,4 @@ function useMqtting() {
 	};
 }
 
-export { useMqtt, useMqtting, MQTTing, mqqt_server };
-/**
- * 
- * 
- * // 使用
-// import {useMqtt} from '@/utils/mqtt';
-// const { startMqtt } = useMqtt();
-// startMqtt('主题topic', (topic, message) => {
-//    const msg = JSON.parse(message.toString());
-//    console.log(msg);
-// });
- 
-
- * 
- * useMqtting
- * 
- * <script lang="ts" setup>
-// 自我封装
-import {userMqtting} from "@/utils/mqtt";
-const { startMqtt } = useMqtt();
- 
-let arr = [];
-startMqtt(
-  ["地址1", "地址2", "地址3"],
-  (topic: any, message: any) => {
-    const msg = JSON.parse(message.toString());
-    arr.unshift(msg);
-    console.log(unique(arr))
-  }
-);
-//这里我每秒都会接收到数据 进行数据去重
-function unique(arr) {
-  const res = new Map();
-  return arr.filter((a) => !res.has(a.UUID) && res.set(a.UUID, 1));
-}
-</script> 
- * 
- */
+export { useMqtt, useMqtting, MQTTing, mqqt_server }; 

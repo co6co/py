@@ -41,12 +41,14 @@ class bizBoxPO(UserTimeStampedModelPO):
     cpuNo = Column("cpu_serial_number",String(255)) 
     mac = Column("mac",String(128)) 
     license= Column("license",String(255)) 
-    sip= Column("sip_address",String(64),comment="盒子SIP地址") 
-    talkbackNo = Column("talkbackNo",Integer,comment="对讲号") 
    
+    talkbackNo = Column("talkbackNo",Integer,comment="对讲号") 
+    '''
+    sip= Column("sip_address",String(64),comment="盒子SIP地址") 
     channel1_sip= Column("channel1_sip",String(64),comment="通道1 sip 地址") 
     channel2_sip= Column("channel2_sip",String(64),comment="通道2 sip 地址") 
     channel3_sip= Column("channel3_sip",String(64),comment="通道3 sip 地址") 
+    '''
 
     innerConfigUrl= Column("inner_config_url",String(2048),comment="设备配置URL") 
     configUrl= Column("config_url",String(2048),comment="设备配置URL")  
@@ -55,6 +57,14 @@ class bizBoxPO(UserTimeStampedModelPO):
     resourcesPO=Relationship("bizResourcePO", uselist=True,  back_populates="boxPO")
     sitePO =Relationship("bizSitePo",  back_populates="boxPO")
     alarmPO=Relationship("bizAlarmPO",back_populates="boxPO" )
+class bizMqttTopicPO(UserTimeStampedModelPO):
+    __tablename__ = "biz_mqtt_topic" 
+    
+    id = Column("id",Integer, primary_key=True,autoincrement=True)
+    code = Column("code",String(64),comment="code通过代码和category 唯一关联一个主题") 
+    category=Column("category",String(64),comment="类别") 
+    mqttServerId=Column("mqtt_server_id",Integer,comment="mqtt 服务器Id")  
+    topic=Column("topic",String(255),comment="publish topic")
     
 class bizCameraPO(UserTimeStampedModelPO):
     """
@@ -72,7 +82,7 @@ class bizCameraPO(UserTimeStampedModelPO):
     poster = Column("poster",String(255)) 
     streams = Column("stream_urls",String(2048),comment="json 对象[{url:xx,name:xx}]")  
     sip= Column("sip_address",String(64),comment="SIP地址") 
-    talkbackNo = Column("talkbackNo",Integer,comment="对讲号")  
+    #talkbackNo = Column("talkbackNo",Integer,comment="对讲号")  
     channel1_sip= Column("channel1_sip",String(64),comment="通道1 sip 地址") 
     channel2_sip= Column("channel2_sip",String(64),comment="通道2 sip 地址") 
     channel3_sip= Column("channel3_sip",String(64),comment="通道3 sip 地址") 
@@ -85,14 +95,12 @@ class bizCameraPO(UserTimeStampedModelPO):
     channel10_sip= Column("channel10_sip",String(64),comment="通道10 sip 地址") 
 
     innerConfigUrl= Column("inner_config_url",String(2048),comment="设备配置URL") 
-    configUrl= Column("config_url",String(2048),comment="设备配置URL")  
-       
-    sitePO=Relationship("bizSitePo",back_populates="camerasPO")
-    
+    configUrl= Column("config_url",String(2048),comment="设备配置URL")
+
+    sitePO=Relationship("bizSitePo",back_populates="camerasPO") 
     def __repr__(self) -> str:
         return f"{self.__class__} id:{self.id},streams:{self.streams},createTime:{self.createTime}"
- 
-
+     
 class bizMqttPO(UserTimeStampedModelPO):
     """
     Mqtt 服务器

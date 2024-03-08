@@ -19,6 +19,7 @@ interface PlayerOption{
 } 
 interface stream_source{
   url:String
+  valid:boolean
   name:String //// ['普清', '高清', '超清', '4K', '8K']
 }
  
@@ -32,5 +33,9 @@ interface player_option{
 declare module  'JessibucaPro'
 declare  class JessibucaPro { 
   constructor(opt:any)
-  on(eventName:string, x:function)
+  on(eventName:string, x:Function)
 } 
+
+
+
+ 

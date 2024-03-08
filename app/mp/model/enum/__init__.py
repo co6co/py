@@ -73,4 +73,4 @@ class hwx_alarm_type(Base_EC_Enum):
     def get(key:str):
         for item in hwx_alarm_type:
             if(item.key==key):return item 
-        return None   
+        return None    

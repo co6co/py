@@ -16,13 +16,15 @@ declare interface IpageParam<T=any>{
 
 // 枚举类型
 interface EnumType {
-  key: number|string;
-  value: string; 
+  uid:string;
+  key: string;
+  value: number|string; 
 }
 
 interface EnumsType extends EnumType { 
   label:string
 }
+
 interface sideBarItem{
   icon:string ,
   index:string,
@@ -110,6 +112,7 @@ interface download_config{
 declare module 'vue3-video-play'
 declare module 'wangeditor'
 declare module  "json-bigint"
+declare module "ckplayer" 
  
 
 

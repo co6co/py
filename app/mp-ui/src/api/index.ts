@@ -1,6 +1,6 @@
 import axios  from '../utils/request';
-import  {ResponseType,Method} from 'axios';
-import  {AxiosInstance, AxiosError, AxiosResponse, AxiosRequestConfig} from 'axios';
+import  type{AxiosInstance, ResponseType,Method,AxiosResponse,AxiosRequestConfig} from 'axios';
+import  { AxiosError    } from 'axios';
  
 //创建 Blob 资源
 export const create_URL_resource=(resource:{data:Blob }):string=>{
@@ -15,12 +15,13 @@ export const download_blob_resource=(resource:{data:Blob,fileName:string})=>{
   window.URL.revokeObjectURL(link.href) 
 }
 // 请求文件资源
-export const request_resource_svc=async (url:string, axios_config:AxiosRequestConfig={method:"get", responseType :"blob"}) =>{ 
-    let default_config:{method:Method, url:string,  timeout:number,params:any}={
+//todo mp 端 没有 baseURL:""
+export const request_resource_svc=async (url:string,axios_config:AxiosRequestConfig={method:"get", responseType :"blob"}) =>{ 
+    let default_config:{method:Method, url:string,  baseURL:"",   timeout:number }={
         method:'get',//请求方式
         url:url,//请求地址  会加上 baseURL  
         timeout:30000,
-        params:{noLogin: true}
+        baseURL:"" 
     } 
     const res = await axios({... default_config, ...axios_config})   
     //const blob = new Blob([res.data]);//处理文档流  
@@ -32,13 +33,12 @@ export const request_resource_svc=async (url:string, axios_config:AxiosRequestCo
 //下载文件
 //download_config 为默认时获取文件长度
 export const download_fragment_svc=(url:string,config:download_config={method:"HEAD"})=>{ 
-    let default_config:{method:Method,baseURL:string,url:string,responseType:ResponseType,timeout:number,params:any}={
+    let default_config:{method:Method,baseURL:string,url:string,responseType:ResponseType,timeout:number }={
         method:'get',//请求方式
         url:url,//请求地址  会加上 baseURL
         responseType :"blob",//文件流将会被转成blob 
         baseURL:"",
-        timeout:30000,
-        params:{noLogin: true}
+        timeout:30000 
     }
     //Object.assign({},default_config,config) 
     return axios({... default_config, ...config}  ) 
@@ -67,7 +67,6 @@ export const download_svc= (url:string,fileName:string)=>{
             document.body.removeChild(down);//下载完成移除 
         }catch(e){
             console.error(e)
-        }
-       
+        } 
     })   
 }

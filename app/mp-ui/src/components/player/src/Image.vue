@@ -1,5 +1,5 @@
-<template>
-	<el-image
+<template >   
+	<el-image v-if="option.url"  v-loading="loading"
 		:src="result"
 		style="width: 100%; height: 100%"
 		:title="option.name"
@@ -9,6 +9,7 @@
 		fit="cover"
 		:preview-src-list="srcList"
 	></el-image>
+	<el-empty v-else description="未加载数据" />
 </template>
 
 <script lang="ts" setup>
@@ -22,13 +23,16 @@
 		},
 	});
 	const result = ref('');
+	const loading=ref(true)
 	const srcList = computed(() => [props.option.url]);
 	watch(
 		() => props.option,
 		(n, o) => {
+			loading.value=true;
 			res_api
 				.request_resource_svc(props.option.url)
-				.then((response) => (result.value = response));
+				.then((response) => (result.value = response))
+				.finally(()=>loading.value=false)
 		},
 		{ immediate: true }
 	);

@@ -15,8 +15,8 @@ interface memuConfig {
 export const wx_config_store = defineStore('wx_config',{
 	state: () => {
 		return {
-			list: <ListItem[]>[],
-			memuConfig:<memuConfig>{},
+			list:[] as ListItem[],
+			memuConfig:{} as memuConfig, 
 		};
 	},
 	getters: {
@@ -29,15 +29,25 @@ export const wx_config_store = defineStore('wx_config',{
 	},
 	actions: {
 		async refesh( ) {
-			const res =await get_config_svc() 
-			if(res.code==0) this.list = await res.data 
-			const res2 =await get_menu_svc() 
-			if(res2.code==0) {
-				const data=await res2.data
-				this.memuConfig=data
-			}
+			await this.getConfig(true) 
+			await this.getMemuConfig(true) 
 		} ,
-		getItem(v:string){ 
+		async getConfig(refesh:boolean=false ) {   
+			if (this.list.length==0||refesh){
+				const res =await get_config_svc() 
+				if(res.code==0) this.list = res.data  
+			} 
+		} ,
+		async getMemuConfig(refesh:boolean=false){
+			if(!this.memuConfig.menuStates||refesh){ 
+				const res2 =await get_menu_svc() 
+				if(res2.code==0) {
+					const data=await res2.data
+					this.memuConfig=data
+				}
+			} 
+		},
+		getItem(v:string){  
 			if (v==null)return {name:"未设置",openId:""}
 			return this.list.find(m=>m.openId=== v ) 
 		},
