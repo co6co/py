@@ -21,21 +21,21 @@ class DemoTest( ):
     def run(self):
         try: 
             #app.m.terminate() # 关闭整个应用及其所有的进程  
-            isRuning=self. checkService()
+            isRuning=self. checkService() 
             if  not isRuning: 
                 log.info(">>>> 服务未能提供服务，即将重启 alarm...") 
                 result=os.system('systemctl stop alarm.service && systemctl start alarm.service')
                 log.warn(f">>>> 重启结果alarm...{result}")  
             else:
                 log.info("8084 service is runing.") 
-            #app.m.name.restart("","") # 重启特点的 worker 
+            #app.m.name.restart("","") # 重启特点的 worker  
         except Exception as e:
             log.err(f"檢測任務失敗。{e}")  
             
 async def monitor(app:Sanic): 
     while True: 
         try: 
-            await asyncio.sleep(300 )	
+            await asyncio.sleep(60)	
             demo=DemoTest(app)
             Thread(target=demo.run ).start()
         except Exception as e:

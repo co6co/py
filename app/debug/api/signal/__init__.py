@@ -3,6 +3,7 @@ from sanic.request import Request
 from datetime import datetime
 from co6co_web_db.utils import JSON_util
 from co6co.utils import log
+from sanic import Sanic
  
   
 signal_api = Blueprint("sigin_API")
@@ -31,8 +32,8 @@ async def wait_for_event(app):
 
 
 @signal_api.after_server_start
-async def after_server_start(app, loop):
-    app.add_task(wait_for_event(app))
+async def after_server_start(app:Sanic, loop):
+    app.add_task(wait_for_event(app),name="信号任务",register= True)
 
 @signal_api.route("/signal", methods=["POST","GET"]) 
 async def trigger(request:Request):

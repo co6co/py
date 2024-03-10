@@ -1,0 +1,9 @@
+join upate:
+
+UPDATE  biz_dev_router r 
+left join biz_site s
+on r.site_id=s.id
+left join biz_dev_box  b
+on b.site_id =s.id
+
+set r.config_url=   CONCAT('http://' , b.cpu_serial_number , '-baidu.com')  

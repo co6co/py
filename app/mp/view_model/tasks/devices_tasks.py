@@ -35,6 +35,7 @@ class DemoTest( ):
     def run(self):
         try:
             app=self.app
+            '''
             log.start_mark("tast state")
             print("Name:", app.m.name)
             print("PID:", app.m.pid)
@@ -42,6 +43,7 @@ class DemoTest( ):
             print("workers:", app.m.workers)
             log.end_mark("tast state")
             #app.m.terminate() # 关闭整个应用及其所有的进程  
+            '''
             isRuning=self. checkService()
             if  not isRuning: 
                 print(">>>> 服务未能提供服务，即将重启 worker...")
@@ -73,7 +75,7 @@ async def update_device_poster_task(app:Sanic|Blueprint):
             await asyncio.sleep(300)	# 设定任务休眠时间 
             #t=ThreadEvent()     
             bll=DemoTest(app ) 
-            Thread(target=bll.run ).start()
+            Thread(target=bll.run() ).start()
             log.warn("this is 1..")
             #log.warn("tasking")
             #time.sleep(60)

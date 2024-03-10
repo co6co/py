@@ -24,7 +24,7 @@ def init (app:Sanic,customConfig):
     from api import api 
     #injectDbSessionFactory(app,None ) 
     app.blueprint(api) 
-    app.add_task(monitor)
+    app.add_task(monitor(app))
     
 if __name__ == "__main__":     
     parser=argparse.ArgumentParser(description="audit service.")
