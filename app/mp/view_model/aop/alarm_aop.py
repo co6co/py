@@ -13,7 +13,7 @@ import asyncio
 from threading import Thread
 from time import sleep, ctime 
 from co6co.task.thread import ThreadEvent
-import json 
+import json , traceback
 from co6co_sanic_ext.utils import JSON_util
 
 def Alarm_Save_Succ_AOP(func):
@@ -70,8 +70,8 @@ def startAlarmPush(config: WechatConfig,app:Sanic,po:bizAlarmPO):
                 log.warn(f'发送 告警消息 {templatId or msg}\t to \t{openid}{nickName}')
                 if templatId==None: sendMessage(client,openid,msg,nickName)
                 else: sendTemplateMessage(client,openid,nickName,templatId,data)
-    except Exception  as e:
-        log.err(f"告警失败：{e}")
+    except Exception  as e: 
+        log.err(f"告警失败：{e},{traceback.format_exc()}")
 
 def sendMessage(client:WeChatClient, openId, msg:str ,nickName:str):
     """
