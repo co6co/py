@@ -23,7 +23,7 @@
 </template>
  
 <script setup lang="ts">
-import { watch, PropType,reactive, ref , computed ,onMounted, onUnmounted, onBeforeUnmount,nextTick, watchEffect} from 'vue';  
+import { watch, type PropType,reactive, ref , computed ,onMounted, onUnmounted, onBeforeUnmount,nextTick, watchEffect} from 'vue';  
 
     import '../../../assets/jessi/jessibuca-pro.js';
 	//import '../../../assets/jessi/jessibuca-pro-talk.js';

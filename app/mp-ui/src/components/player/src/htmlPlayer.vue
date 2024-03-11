@@ -10,13 +10,11 @@
 	<el-empty v-else description="未加载数据" />
 </template>
 
-<script lang="ts" setup>
-	import { AnyNsRecord } from 'dns';
-	import { constants } from 'fs';
+<script lang="ts" setup> 
 	import {
 		watch,
 		watchEffect,
-		PropType,
+		type PropType,
 		reactive,
 		ref,
 		computed,
@@ -24,7 +22,7 @@
 		onBeforeUnmount,
 		nextTick,
 	} from 'vue';
-	import { videoOption } from './types';
+	import { type videoOption } from './types';
 	const props = defineProps({
 		option: {
 			type: Object as PropType<videoOption>,

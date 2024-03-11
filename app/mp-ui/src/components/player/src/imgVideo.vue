@@ -43,7 +43,7 @@
 <script setup lang="ts">
 	import {
 		watch,
-		PropType,
+		 type PropType,
 		reactive,
 		ref,
 		markRaw,
@@ -55,7 +55,7 @@
 		nextTick,
 	} from 'vue';
 	import 'vue3-video-play/dist/style.css';
-	import { resourceOption } from './types';
+	import { type resourceOption } from './types';
 	import { ElImage } from 'element-plus';
 	const compoents = reactive({
 		Image: markRaw(

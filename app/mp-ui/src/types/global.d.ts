@@ -114,6 +114,7 @@ declare module 'wangeditor'
 declare module  "json-bigint"
 declare module "ckplayer" 
  
+declare module "md-editor-v3"
 
 
 

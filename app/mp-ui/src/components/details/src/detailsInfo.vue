@@ -1,5 +1,5 @@
 <template>
-	<div class="container">  
+	<div class="container">   
         <el-collapse v-model="activeNames" @change="handleChange"> 
           <el-collapse-item  v-for=" (item,index) in data" :key="index" :title="item.name" :name="index"> 
             <div> 
@@ -16,10 +16,9 @@
 	</div>
 </template>
 <script setup lang="ts">   
-import { watch, PropType,reactive, ref , computed ,onMounted, onBeforeUnmount,nextTick} from 'vue';  
+import { watch, type PropType,reactive, ref , computed ,onMounted, onBeforeUnmount,nextTick} from 'vue';  
 import {ElImage, ElDescriptions,ElDescriptionsItem,ElTag,ElDivider,ElMessage } from 'element-plus';
-import {Check,  Delete, Edit,Message,Notebook,Star,Pointer,WarningFilled,UploadFilled,CaretRight} from '@element-plus/icons-vue'
- 
+import {Check,  Delete, Edit,Message,Notebook,Star,Pointer,WarningFilled,UploadFilled,CaretRight} from '@element-plus/icons-vue' 
   
 interface detailsInfo{
     name:string
@@ -31,6 +30,7 @@ const props = defineProps({
     required: true
   } 
 })
+//点击时 会变化
 const activeNames = ref([0])
 const handleChange = (val: string[]) => {
   console.log(val)
@@ -48,8 +48,7 @@ ul{
         svg{position: absolute; left: 40%; top: 38%; width: 20%;}
       } 
     } 
-}
-
+} 
 .ellipsis {
   white-space: nowrap;
   overflow: hidden;

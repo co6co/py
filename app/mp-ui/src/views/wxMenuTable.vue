@@ -165,8 +165,8 @@
 	import {
 		ElMessage,
 		ElMessageBox,
-		FormRules,
-		FormInstance,
+		type FormRules,
+		type FormInstance,
 		ElLoading,
 	} from 'element-plus';
 	import {

@@ -5,7 +5,7 @@
 <script setup lang="ts">
 	import {
 		watch,
-		PropType,
+		type PropType,
 		reactive,
 		ref,
 		computed,
@@ -19,7 +19,7 @@
 	import '../../../assets/jessi/jessibuca-pro.js';
 	import '../../../assets/jessi/demo.js';  
 	import '../../../assets/jessi/vconsole.js';  
-	import { videoOption } from './types';
+	import { type videoOption } from './types';
 
 	var showOperateBtns = false; // 是否显示按钮
 	const props = defineProps({

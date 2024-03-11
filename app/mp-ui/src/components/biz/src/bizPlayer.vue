@@ -108,7 +108,7 @@
 		ref,
 		watch,
 		reactive,
-		PropType,
+		 type PropType,
 		onMounted,
 		onBeforeUnmount,
 		computed,

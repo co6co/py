@@ -71,7 +71,7 @@
 <script setup lang="ts" name="user">
 import { reactive, ref } from 'vue';
 import VueCropper from 'vue-cropperjs';
-import {ElMessage,  FormRules,FormInstance } from 'element-plus';
+import {ElMessage, type FormRules,type FormInstance } from 'element-plus';
 import 'cropperjs/dist/cropper.css';
 import avatar from '../assets/img/img.jpg';
 import { changePwd_svc,currentUser_svc  } from '../api/user';

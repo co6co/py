@@ -12,7 +12,7 @@ import { get_xss_config_svc } from '../../api/server/index.js';
 //对讲模块
 import '../../assets/js/adapter-latest.js';
 //import * as r from  '../assets/js/xtalk-rtc.js';
-import { xTalker } from '../../utils/xtalk.js';
+import { xTalker } from '../../components/devices/xtalk.js';
 
 const xss_config = await get_xss_config_svc();
 if (xss_config.code != 0)

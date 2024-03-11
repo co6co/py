@@ -9,6 +9,7 @@ declare module 'vue' {
   export interface GlobalComponents {
     BizPlayer: typeof import('./src/components/biz/src/bizPlayer.vue')['default']
     CaptureFace: typeof import('./src/components/details/src/CaptureFace.vue')['default']
+    Detail: typeof import('./src/components/common/detail.vue')['default']
     DetailsInfo: typeof import('./src/components/details/src/detailsInfo.vue')['default']
     DeviceNav: typeof import('./src/components/devices/src/deviceNav.vue')['default']
     Download: typeof import('./src/components/download/src/download.vue')['default']
@@ -36,7 +37,6 @@ declare module 'vue' {
     ElIcon: typeof import('element-plus/es')['ElIcon']
     ElImage: typeof import('element-plus/es')['ElImage']
     ElInput: typeof import('element-plus/es')['ElInput']
-    ElInputNumber: typeof import('element-plus/es')['ElInputNumber']
     ElLink: typeof import('element-plus/es')['ElLink']
     ElMain: typeof import('element-plus/es')['ElMain']
     ElMenu: typeof import('element-plus/es')['ElMenu']

@@ -18,7 +18,7 @@
 					<el-col :span="12">
 						<div class="content">
 							<takler-ptz
-								:current-device-data="currentDeviceData.data"></takler-ptz>
+								:current-device-data="currentItem"></takler-ptz>
 						</div>
 					</el-col>
 				</el-row>
@@ -32,7 +32,7 @@
 	import { bizPlayer, taklerPtz, types } from '../components/biz';
 	import {
 		playerList,
-		currentDeviceData,
+		currentItem,
 		onClickNavDevice,
 		onPlayerChecked,
 	} from '../components/devices/preview';

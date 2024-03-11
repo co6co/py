@@ -130,8 +130,8 @@
 	import {
 		ElMessage,
 		ElMessageBox,
-		FormRules,
-		FormInstance,
+		type FormRules,
+		type FormInstance,
 	} from 'element-plus';
 	import { Delete, Edit, Search, Compass, Plus } from '@element-plus/icons-vue';
 	import {

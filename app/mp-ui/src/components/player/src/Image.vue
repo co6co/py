@@ -13,8 +13,8 @@
 </template>
 
 <script lang="ts" setup>
-	import { watch, PropType, ref, computed } from 'vue';
-	import { imageOption } from './types';
+	import { watch, type PropType, ref, computed } from 'vue';
+	import {type imageOption } from './types';
 	import * as res_api from '../../../api';
 	const props = defineProps({
 		option: {

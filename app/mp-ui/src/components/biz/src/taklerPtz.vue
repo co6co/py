@@ -81,7 +81,7 @@
 	</div>
 </template>
 <script setup lang="ts">
-	import { PropType, ref, watch, reactive, computed,nextTick } from 'vue';
+	import { type PropType, ref, watch, reactive, computed,nextTick } from 'vue';
 	import { useMqtt, mqqt_server } from '../../../utils/mqtting';
 	import { talker, types as dType } from '../../../components/devices';
 	import { ptz as cmd  } from '../../../components/biz';

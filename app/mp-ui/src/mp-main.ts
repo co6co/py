@@ -14,8 +14,7 @@ import router from './router/home';
 import { usePermissStore } from './store/permiss';
  
 import './assets/css/icon.css'; 
-
-
+ 
 app.use(createPinia());
 app.use(router); 
 
@@ -23,8 +22,7 @@ import * as ElementPlusIconsVue from '@element-plus/icons-vue';
 // 注册elementplus图标
 for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
     app.component(key, component);
-}
- 
+} 
 // 自定义权限指令
 const permiss = usePermissStore();
 app.directive('permiss', {

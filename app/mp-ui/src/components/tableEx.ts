@@ -3,7 +3,7 @@ import {
 	watch,
 	reactive,
 	nextTick,
-	PropType,
+	type PropType,
 	onMounted,
 	onBeforeUnmount,
 	computed,

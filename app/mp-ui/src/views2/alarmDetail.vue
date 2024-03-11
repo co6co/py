@@ -7,7 +7,7 @@ import {
     watch,
     reactive,
     nextTick,
-    PropType,
+    type PropType,
     onMounted,
     onBeforeUnmount,
     computed
@@ -15,8 +15,8 @@ import {
 import {
     ElMessage,
     ElMessageBox,
-    FormRules,
-    FormInstance,
+    type  FormRules,
+    type  FormInstance,
     ElTreeSelect,
     dayjs
 } from "element-plus";

@@ -56,7 +56,7 @@ def __log(msg,type: int = 0,foregroundColor:int=37, bg=40, e=None, hasPrefix:boo
     t=threading.currentThread()
     time = datetime.datetime.now() 
     err=e.__traceback__.tb_lineno if e !=None else ""
-    prefix=f"['{time.strftime('%Y.%m.%d-%H:%M:%S')}'] [{t.ident}|{t.name}]\t"
+    prefix=f"['{time.strftime('%Y-%m-%d %H:%M:%S')}'] [{t.ident}|{t.name}]\t"
     if not hasPrefix:prefix=""
     print(f"{prefix}\033[{type};{foregroundColor};{bg}m{msg}{err}\033[0m")
 def log(msg:str):__log(msg)

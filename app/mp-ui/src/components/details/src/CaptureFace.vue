@@ -16,7 +16,7 @@
 	</div>
 </template>
 <script setup lang="ts">   
-import { watch, PropType,reactive, ref , computed ,onMounted, onBeforeUnmount,nextTick} from 'vue';  
+import { watch, type PropType,reactive, ref , computed ,onMounted, onBeforeUnmount,nextTick} from 'vue';  
 import {ElImage, ElDescriptions,ElDescriptionsItem,ElTag,ElDivider,ElMessage } from 'element-plus';
 import {Check,  Delete, Edit,Message,Notebook,Star,Pointer,WarningFilled,UploadFilled,CaretRight} from '@element-plus/icons-vue'
  

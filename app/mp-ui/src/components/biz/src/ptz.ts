@@ -1,6 +1,7 @@
+import {ref} from 'vue'
 import { number2hex } from '../../../utils';
 import * as p from '../../../components/stream/src/types/ptz';
-import {ref} from 'vue'
+
 const str2ByteArray = (ptzCmd: string) => {
 	if (ptzCmd && ptzCmd.length != 16) console.error('命令不符规格');
 	let arr: number[] = [0, 0, 0, 0, 0, 0, 0, 0];

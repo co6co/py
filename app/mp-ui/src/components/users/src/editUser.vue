@@ -55,12 +55,12 @@
 </template>
 
 <script setup lang="ts">
-	import { ref, reactive, PropType } from 'vue';
+	import { ref, reactive, type PropType } from 'vue';
 	import {
 		ElMessage,
 		ElMessageBox,
-		FormRules,
-		FormInstance,
+		type FormRules,
+		type FormInstance,
 	} from 'element-plus';
 	import { Plus, Minus } from '@element-plus/icons-vue';
 	import * as api from '../../../api/user';

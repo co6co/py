@@ -1,4 +1,4 @@
-import { createRouter, createWebHashHistory, RouteRecordRaw } from 'vue-router';
+import { createRouter, createWebHistory,type RouteRecordRaw} from 'vue-router';
 import { usePermissStore } from '../store/permiss'; 
 import wxHome from '../views2/wxHome.vue';
 import { getToken, removeToken, setToken } from '../utils/auth'; 
@@ -68,10 +68,7 @@ const routes: RouteRecordRaw[] = [
 					permiss: '2',
 				},
 				component: () => import('../views2/devicesPreview2.vue'),
-			},
-
-
-			
+			}, 
 			{
 				path: '/alarmpreview.html',
 				name: 'alarmPreview',
@@ -103,15 +100,17 @@ const routes: RouteRecordRaw[] = [
 	},
 ];
 
+ 
 const router = createRouter({
-	history: createWebHashHistory(),
+	history:  createWebHistory("/home.html/#/"), 
 	routes,
 });
+console.info(router)
  
 import { getQueryVariable } from '../utils';
 import { redirectUrl } from '../components/wx';
 import { ticket_svc } from '../api/authen';
-import { showNotify } from 'vant';
+import { showNotify } from 'vant'; 
  
 const debug = Boolean(Number(import.meta.env.VITE_IS_DEBUG));
 const appid = import.meta.env.VITE_ENV;
@@ -120,7 +119,7 @@ router.beforeEach((to, from, next) => {
 	document.title = `${to.meta.title} `;
 	const permiss = usePermissStore();
 	let token = getToken();
-	//({ type: 'warning', message: token }); 
+	//console.info({ type: 'warning', token: token },to.fullPath); 
 	if (!token) {  
 		if (ticket) {
 			ticket_svc(ticket).then((res) => {

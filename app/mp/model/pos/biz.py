@@ -22,6 +22,17 @@ class bizSitePo(TimeStampedModelPO):
     routerPO=Relationship("bizRouterPO",uselist=False,back_populates="sitePO") 
     camerasPO=Relationship("bizCameraPO",uselist=True, back_populates="sitePO") 
 
+class bizSiteConfigPO(UserTimeStampedModelPO):
+    __tablename__ = "biz_site_config" 
+    
+    id = Column("id",Integer, primary_key=True,autoincrement=True)
+    siteId = Column("site_id",Integer,comment="站点名称") 
+    name = Column("name",String(64),comment="配置名称") 
+    category = Column("category",String(64),comment="配置类别:0: 设备URL") 
+    code = Column("code",String(64),comment="配置代码") 
+    value=Column("value",String(2048),comment="类别") 
+    
+
 class bizBoxPO(UserTimeStampedModelPO):
     """
     盒子设备
@@ -50,13 +61,14 @@ class bizBoxPO(UserTimeStampedModelPO):
     channel3_sip= Column("channel3_sip",String(64),comment="通道3 sip 地址") 
     '''
 
-    innerConfigUrl= Column("inner_config_url",String(2048),comment="设备配置URL") 
-    configUrl= Column("config_url",String(2048),comment="设备配置URL")  
-    sshConfigUrl= Column("ssh_config_url",String(2048),comment="SSH配置")  
+    #innerConfigUrl= Column("inner_config_url",String(2048),comment="设备配置URL") 
+    #configUrl= Column("config_url",String(2048),comment="设备配置URL")  
+    #sshConfigUrl= Column("ssh_config_url",String(2048),comment="SSH配置")  
     
     resourcesPO=Relationship("bizResourcePO", uselist=True,  back_populates="boxPO")
     sitePO =Relationship("bizSitePo",  back_populates="boxPO")
     alarmPO=Relationship("bizAlarmPO",back_populates="boxPO" )
+
 class bizMqttTopicPO(UserTimeStampedModelPO):
     __tablename__ = "biz_mqtt_topic" 
     
@@ -94,8 +106,8 @@ class bizCameraPO(UserTimeStampedModelPO):
     channel9_sip= Column("channel9_sip",String(64),comment="通道9 sip 地址") 
     channel10_sip= Column("channel10_sip",String(64),comment="通道10 sip 地址") 
 
-    innerConfigUrl= Column("inner_config_url",String(2048),comment="设备配置URL") 
-    configUrl= Column("config_url",String(2048),comment="设备配置URL")
+    #innerConfigUrl= Column("inner_config_url",String(2048),comment="设备配置URL") 
+    #configUrl= Column("config_url",String(2048),comment="设备配置URL")
 
     sitePO=Relationship("bizSitePo",back_populates="camerasPO") 
     def __repr__(self) -> str:
@@ -162,8 +174,8 @@ class bizRouterPO(UserTimeStampedModelPO):
     ssd= Column("wifi_ssd",String(32))
     password= Column("wifi_password",String(32))    
 
-    innerConfigUrl= Column("inner_config_url",String(2048),comment="设备配置URL") 
-    configUrl= Column("config_url",String(2048),comment="设备配置URL")  
+    #innerConfigUrl= Column("inner_config_url",String(2048),comment="设备配置URL") 
+    #configUrl= Column("config_url",String(2048),comment="设备配置URL")  
 
     sitePO=Relationship("bizSitePo",back_populates="routerPO") 
     

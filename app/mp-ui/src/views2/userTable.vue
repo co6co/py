@@ -131,7 +131,7 @@
 
 <script setup lang="ts" name="basetable">
 import { ref, reactive } from 'vue';
-import { ElMessage, ElMessageBox,FormRules,FormInstance } from 'element-plus';
+import { ElMessage, ElMessageBox, type FormRules,type FormInstance } from 'element-plus';
 import { Delete, Edit, Search, Compass ,Plus} from '@element-plus/icons-vue'; 
 import { queryList_svc, exist_svc,add_svc, edit_svc,del_svc ,retsetPwd_svc} from '../api/user'; 
 

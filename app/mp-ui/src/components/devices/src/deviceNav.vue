@@ -77,16 +77,16 @@
 	import {
 		ElMessage,
 		ElMessageBox,
-		FormRules,
-		FormInstance,
+		 type FormRules,
+		 type  FormInstance,
 		ElTreeSelect,
 		ElTree,
 	} from 'element-plus';
 	import {
-		TreeNode,
-		TreeOptionProps,
+		type  TreeNode,
+		type  TreeOptionProps,
 	} from 'element-plus/es/components/tree-v2/src/types';
-	import { TreeNodeData } from 'element-plus/es/components/tree/src/tree.type';
+	import {type   TreeNodeData } from 'element-plus/es/components/tree/src/tree.type';
 	import {
 		Delete,
 		Edit,
@@ -305,25 +305,34 @@
 		}
 		return result
 	};
+	/**
+	 * 在线状态 
+	 * 1. sip 在线  sip 地址实在 盒子上还是在相机上  现在认为在相机上
+	 * 2. 通道sip是否在线
+	 */
 	const onSynDeviceState = (stateArray: gb_api.gbDeviceState[]) => { 
 		for (let i = 0; i < tree_module.data.length; i++) {
 			let site = tree_module.data[i];
 			let aiExist=false;
-			if (site.box)  aiExist = queryChannel(stateArray, site.box.sip); 
-			else aiExist=false;
+			//if (site.box) aiExist = queryChannel(stateArray, site.box.sip); 
+			//else aiExist=false;
 			if (site.devices) {
-				for (let j = 0; j < site.devices.length; j++) {
+				for (let j = 0; j < site.devices.length; j++) { 
+					if (j==0){
+						aiExist = queryChannel(stateArray, site.devices[j].sip); 
+					}
 					site.devices[j].channel1_sip;
 					let exist = queryChannel(stateArray, site.devices[j].channel1_sip); 
 					setStatueComponent(site.devices[j],getAiAndCameraOnlineState(aiExist,exist) );
 				}
 				syncChannelState(site.devices, stateArray);
 			} else if (site.device) {
+				aiExist = queryChannel(stateArray, site.device.sip); 
 				let exist = queryChannel(stateArray, site.device.channel1_sip); 
 				setStatueComponent( site,getAiAndCameraOnlineState(aiExist,exist) );
 				syncChannelState(site.device, stateArray);
 			}  else{
-				setStatueComponent( site,getAiAndCameraOnlineState(aiExist,false) );
+				setStatueComponent(site,getAiAndCameraOnlineState(aiExist,false) );
 			}
 		}
 	};

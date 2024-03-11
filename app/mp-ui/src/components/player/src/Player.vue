@@ -9,7 +9,7 @@
 <script lang="ts" setup>
 	import {
 		watch,
-		PropType,
+	 type	PropType,
 		reactive,
 		ref,
 		computed,
@@ -19,7 +19,7 @@
 	} from 'vue';
 	import 'vue3-video-play/dist/style.css';
 	import { videoPlay } from 'vue3-video-play';
-	import { videoOption } from './types';
+	import { type videoOption } from './types';
 	const props = defineProps({
 		option: {
 			type: Object as PropType<videoOption>,

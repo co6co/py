@@ -27,7 +27,7 @@
 </template>
 
 <script setup lang="ts" name="import">
-import { UploadProps } from 'element-plus';
+import { type UploadProps } from 'element-plus';
 import { ref, reactive } from 'vue';
 import * as XLSX from 'xlsx';
 

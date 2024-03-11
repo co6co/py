@@ -5,7 +5,7 @@
 <script setup lang="ts">
 	import {
 		watch,
-		PropType,
+		 type PropType,
 		reactive,
 		ref,
 		computed,

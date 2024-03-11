@@ -112,7 +112,7 @@
 		watch,
 		reactive,
 		nextTick,
-		PropType,
+		type PropType,
 		onMounted,
 		onBeforeUnmount,
 		computed,
@@ -120,13 +120,13 @@
 	import {
 		ElMessage,
 		ElMessageBox,
-		FormRules,
-		FormInstance,
+		type	FormRules,
+		type	FormInstance,
 		ElTreeSelect,
 		dayjs,
 	} from 'element-plus';
-	import { TreeNode } from 'element-plus/es/components/tree-v2/src/types';
-	import { TreeNodeData } from 'element-plus/es/components/tree/src/tree.type';
+	import {type TreeNode } from 'element-plus/es/components/tree-v2/src/types';
+	import {type TreeNodeData } from 'element-plus/es/components/tree/src/tree.type';
 	import {
 		Delete,
 		Edit,

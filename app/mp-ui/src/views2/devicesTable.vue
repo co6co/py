@@ -169,7 +169,7 @@ import {
     watch,
     reactive,
     nextTick,
-    PropType,
+    type PropType,
     onMounted,
     onBeforeUnmount,
     computed
@@ -177,13 +177,14 @@ import {
 import {
     ElMessage,
     ElMessageBox,
-    FormRules,
-    FormInstance,
+    type  FormRules,
+    type  FormInstance,
     ElTreeSelect,
-    dayjs
+    dayjs,
+    ElTable
 } from "element-plus";
-import { TreeNode } from "element-plus/es/components/tree-v2/src/types";
-import { TreeNodeData } from "element-plus/es/components/tree/src/tree.type";
+import {type TreeNode } from "element-plus/es/components/tree-v2/src/types";
+import {type TreeNodeData } from "element-plus/es/components/tree/src/tree.type";
 import {
     Delete,
     Edit,
@@ -210,8 +211,7 @@ const onOpenPage = (path: string, row: any) => {
         //后面两个参数没用到
         query: {
             mode: "edit"
-        },
-        params: { data: "123456" }
+        } 
     });
 };
 
@@ -240,7 +240,7 @@ const elTreeInstance = ref<any>(null);
 const selectedVal = ref<any[]>();
 const cacheData = [{ value: 5, label: "位置信息" }];
 const form_attach_data = {};
-const tableInstance = ref<any>(null);
+const tableInstance=ref<InstanceType< typeof ElTable>>(); 
 const currentTableItemIndex = ref<number>();
 const table_module = reactive<table_module>({
     query: {
@@ -268,6 +268,7 @@ const onColChange = (column: any) => {
 
 const tableRowProp = (data: { row: any; rowIndex: number }) => {
     data.row.index = data.rowIndex;
+    return ''
 };
 const onRefesh = () => {
     getData();
@@ -302,13 +303,13 @@ const onPageChange = (pageIndex: number) => {
     else (table_module.query.pageIndex = pageIndex), getData();
 };
 const setTableSelectItem = (index: number) => {
-    if (
-        tableInstance._value.data &&
+    if ( tableInstance.value&&
+        tableInstance.value.data &&
         index > -1 &&
-        index < tableInstance._value.data.length
+        index < tableInstance.value.data.length
     ) {
-        let row = tableInstance._value.data[index];
-        tableInstance._value.setCurrentRow(row);
+        let row = tableInstance.value.data[index];
+        tableInstance.value.setCurrentRow(row);
         onTableSelect(row);
     }
 };
@@ -333,11 +334,11 @@ const keyDown = (e: KeyboardEvent) => {
                 e.key == "ArrowDown" || e.key == "s"
                     ? current + 1
                     : current - 1;
-            if (0 <= v && v < tableInstance._value.data.length) {
+            if (tableInstance.value&&0 <= v && v < tableInstance.value.data.length) {
                 setTableSelectItem(v);
             } else {
                 if (v < 0) ElMessage.error("已经是第一条了");
-                else if (v >= tableInstance._value.data.length)
+                else if (tableInstance.value&&v >= tableInstance.value.data.length)
                     ElMessage.error("已经是最后一条了");
             }
         }
