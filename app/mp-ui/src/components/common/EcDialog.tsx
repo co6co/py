@@ -1,21 +1,19 @@
-import { reactive, defineComponent, type SlotsType, defineExpose } from 'vue'
+import { reactive, defineComponent, type SlotsType,inject } from 'vue'
 import { ElDialog, ElButton, ElMessage } from 'element-plus'
+import { type ObjectType } from './types'
 
 export interface dialogDataType {
   visible: boolean
   title?: string
-}
-
+} 
 /**
  * provide 主组件使用
- * inject  子组件使用
- *
- *
+ * inject  子组件使用 
  */
 
 export default defineComponent({
   name: 'EcDialog',
-
+ 
   //定义事件类型
   emits: {
     //事件名可以使用字符
@@ -26,21 +24,21 @@ export default defineComponent({
     buttons: () => any
   }>,
 
-  setup(_, ctx) {
+  setup(prop, ctx) {
     /*
     '''
     // props.data
     // ctx.attrs    ctx.slots    ctx.emit 
     '''
-    */
-
+    */ 
+    const title:string=inject("title")||"弹出框"
     const diaglogData = reactive<dialogDataType>({
       visible: false
     })
     //其他api 操作
     //end
+
     const onOpenDialog = (title: string) => {
-      console.info('ddddd')
       diaglogData.visible = true
       diaglogData.title = title
     }
@@ -62,37 +60,36 @@ export default defineComponent({
         )
       }
     }
-    /* 不能使用
-    ctx.expose({
-      openDialog: onOpenDialog
-    })
-    defineExpose( {openDialog: onOpenDialog})  //在 tsx  不起作用
-    */
-
-    /*
-    return  {
-      openDialog: onOpenDialog,
-      reader:  (
-        <>
-          <ElDialog title={ diaglogData.title} v-model={diaglogData.visible} v-slots={dialogSlots}>
-            {ctx.slots.default?ctx.slots.default():null}
-          </ElDialog>
-        </>
-      )
-    } 
-   
-*/
-    ctx.expose({
-      openDialog: onOpenDialog
-    })
-    return () => {
-      return (
-        <>
-          <ElDialog title={diaglogData.title} v-model={diaglogData.visible} v-slots={dialogSlots}>
+    const rander = (): ObjectType => {
+      /**
+       * 还能在该位置写一些计算每次状态改变都能被渲染
+       */
+      return ( 
+          <ElDialog title={title} v-model={diaglogData.visible} v-slots={dialogSlots}>
             {ctx.slots.default ? ctx.slots.default() : null}
-          </ElDialog>
-        </>
+          </ElDialog> 
       )
     }
-  }//end setup
+    //必须导出不然运行时就 没有了
+    const expose = {
+      openDialog: onOpenDialog,
+      data:diaglogData
+    }
+    ctx.expose(expose)
+    //defineExpose( {openDialog: onOpenDialog})  //在 tsx  不起作用
+
+    /*
+    Object.keys(expose).forEach((key, index, keys) => {
+      console.info("Keys",key,index)
+      let o:ObjectType=expose  
+      rander.openDialog=o[key]
+    })
+    */
+
+    //为了让ts能检测到
+    rander.openDialog = expose.openDialog
+    rander.data=diaglogData
+    //有模板的不能返回对象只能是 Function
+    return rander
+  } //end setup
 })

@@ -147,9 +147,9 @@ class Site_View(BaseMethodView):
         """ 
         try: 
             po=bizSitePo()
-            po.__dict__.update(request.json) 
-            async with request.ctx.session as session,session.begin(): 
-                session: AsyncSession = session  
+            po.__dict__.update(request.json)
+            session: AsyncSession = request.ctx.session   
+            async with session,session.begin():  
                 oldPo:bizSitePo=await session.get_one(bizSitePo,pk) 
                 if oldPo == None: return JSON_util.response(Result.fail(message="未找到设备!"))  
                 oldPo.name = po.name 
@@ -159,7 +159,10 @@ class Site_View(BaseMethodView):
                 oldPo.updateTime=datetime.datetime.now()   
             return JSON_util.response(Result.success())
         except Exception as e: 
+            raise
             return JSON_util.response(Result.fail(message=e))
+        
+
 
 class Site_config_View(BaseMethodView): 
     """

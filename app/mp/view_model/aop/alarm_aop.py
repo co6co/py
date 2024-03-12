@@ -16,6 +16,8 @@ from co6co.task.thread import ThreadEvent
 import json , traceback
 from co6co_sanic_ext.utils import JSON_util
 
+t=ThreadEvent()   
+
 def Alarm_Save_Succ_AOP(func):
     @wraps(func)
     def warpper(request:Request ,po:bizAlarmPO):
@@ -35,8 +37,7 @@ def startAlarmPush(config: WechatConfig,app:Sanic,po:bizAlarmPO):
     # 通过查询订阅该公众号的用户
     try:  
         sleep(0.5)
-        log.warn("任务... ")  
-        t=ThreadEvent()    
+        log.warn("任务... ")   
         alarm= alarm_bll(app,t.loop)
         wx_user_dict:list[dict]=t.runTask(alarm.get_subscribe_alarm_user,config.appid) 
         if wx_user_dict==None or len( wx_user_dict)==0 :

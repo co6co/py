@@ -155,32 +155,7 @@
     </el-dialog>
 
     <!-- 弹出框 -->
-    <el-dialog :title="form.title" v-model="form.dialogVisible">
-      <el-form label-width="90px" ref="dialogForm" :rules="rules" :model="form.fromData">
-        <el-form-item label="名称" prop="name">
-          <el-input v-model="form.fromData.name" placeholder="设备名称"></el-input>
-        </el-form-item>
-        <el-form-item label="设备代码" prop="deviceCode">
-          <el-input v-model="form.fromData.deviceCode" placeholder="设备代码"></el-input>
-        </el-form-item>
-        <el-form-item label="设备位置" prop="postionInfo">
-          <el-input v-model="form.fromData.postionInfo" type="textarea" placeholder="位置信息" />
-        </el-form-item>
-        <el-form-item label="用途" prop="deviceDesc">
-          <el-input
-            v-model="form.fromData.deviceDesc"
-            type="textarea"
-            placeholder="安装用途，抓拍描述等"
-          />
-        </el-form-item>
-      </el-form>
-      <template #footer>
-        <span class="dialog-footer">
-          <el-button @click="form.dialogVisible = false">关闭</el-button>
-          <el-button @click="onDialogSave(dialogForm)">保存</el-button>
-        </span>
-      </template>
-    </el-dialog>
+    <edit-box ref="editBoxDialogRef" :label-width="90" @saved="getData"  :model="form.fromData" :title="form.title" style="width:40%;height:56%;"></edit-box> 
   </div>
 </template>
 
@@ -198,6 +173,7 @@ import {
 } from 'vue'
 import {
   ElMessage,
+  ElForm,
   ElMessageBox,
   type FormRules,
   type FormInstance,
@@ -230,15 +206,10 @@ import { str2Obj, createStateEndDatetime } from '../utils'
 import { showLoading, closeLoading } from '../components/Logining'
 import { pagedOption, type PagedOption } from '../components/tableEx'
 
-interface TableRow {
-  id: number
-  name: string
-  postionInfo: string
-  deviceCode: string
-  deviceDesc: string
-  createTime: string
-  updateTime: string
-}
+import editBox,{ type Item} from '../components/biz/src/editBox'
+
+ 
+ 
 interface Query extends IpageParam {
   name: string
   category?: number
@@ -247,8 +218,8 @@ interface Query extends IpageParam {
 interface table_module {
   query: Query
   moreOption: boolean
-  data: TableRow[]
-  currentRow?: TableRow
+  data: Item[]
+  currentRow?: Item
   pageTotal: number
 }
 
@@ -321,96 +292,43 @@ const onTableSelect = (row: any) => {
 }
 
 //**详细信息 */
-interface FromData {
-  name: string
-  postionInfo: string
-  deviceCode: string
-  deviceDesc: string
-}
+ 
 interface dialogDataType {
   dialogVisible: boolean
   operation: 0 | 1 | number
   title?: string
   id: number
-  fromData: FromData
+  fromData: Item
 }
 let dialogData = {
   dialogVisible: false,
   operation: 0,
   id: 0,
   fromData: {
+    id:-1,
     name: '',
     postionInfo: '',
     deviceCode: '',
-    deviceDesc: ''
+    deviceDesc: '',
+    createTime: "",
+  updateTime: ""
   }
-}
-const dialogForm = ref<FormInstance>()
-const rules: FormRules = {
-  name: [{ required: true, message: '请输入设备名称', trigger: 'blur' }],
-  postionInfo: [{ required: true, message: '请输入位置信息', trigger: 'blur' }],
-  deviceCode: [{ required: true, message: '请输入设备代码', trigger: 'blur' }],
-  deviceDesc: [{ required: true, message: '请输入设备用途', trigger: 'blur' }]
-}
+} 
+const editBoxDialogRef=ref<InstanceType <typeof editBox>>()
 let form = reactive<dialogDataType>(dialogData)
-const onOpenDialog = (operation: 0 | 1, row?: any) => {
-  form.dialogVisible = true
+const onOpenDialog = (operation: 0 | 1, row?: Item) => { 
   table_module.currentRow = row
-
-  form.dialogVisible = true
-  form.operation = operation
-  form.id = -1
   switch (operation) {
     case 0:
-      form.title = '增加'
-      form.fromData.name = ''
-      form.fromData.deviceCode = ''
-      form.fromData.deviceDesc = ''
-      form.fromData.postionInfo = ''
+      form.title = '增加' 
       break
-    case 1:
-      form.id = row.id
-      form.title = '编辑'
-      form.fromData.name = row.name
-      form.fromData.deviceCode = row.deviceCode
-      form.fromData.deviceDesc = row.deviceDesc
-      form.fromData.postionInfo = row.postionInfo
+    case 1: 
+      form.title = '编辑' 
       break
-  }
+  } 
+  editBoxDialogRef.value?.openDialog(operation,row) 
 }
-
-const onDialogSave = (formEl: FormInstance | undefined) => {
-  if (!formEl) return
-  formEl.validate((value) => {
-    if (value) {
-      if (form.operation == 0) {
-        api.add_site_svc(form.fromData).then((res) => {
-          if (res.code == 0) {
-            form.dialogVisible = false
-            ElMessage.success(`增加成功`)
-            getData()
-          } else {
-            ElMessage.error(`增加失败:${res.message}`)
-          }
-        })
-      } else {
-        api.edit_site_svc(form.id, form.fromData).then((res) => {
-          if (res.code == 0) {
-            form.dialogVisible = false
-            ElMessage.success(`编辑成功`)
-            getData()
-          } else {
-            ElMessage.error(`编辑失败:${res.message}`)
-          }
-        })
-      }
-    } else {
-      ElMessage.error('请检查输入的数据！')
-      return false
-    }
-  })
-}
-
+ 
 const openBlankPage = (type: number) => {
   if (!configDialog_model.deviceData) {
     ElMessage.warning('未关联该设备数据！')
@@ -438,7 +356,7 @@ const configDialog_model = reactive<{
   showDialog: false
 }) 
 //打开配置页面
-const onOpenConfigPage = (category: string, row: TableRow) => {
+const onOpenConfigPage = (category: string, row: Item) => {
   api.getDetailInfo(row.id, category).then((res) => {
     if (res.code == 0) {
       let data = []

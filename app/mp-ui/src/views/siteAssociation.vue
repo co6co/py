@@ -101,30 +101,9 @@
       </el-footer>
     </el-container>
     <!-- 编辑监控球机 -->
-    <edit-ip-camera
-      ref="editIpCameraRef"
-      :allow-modify-site="false"
-      @saved="onIpcamerSave()"
-    ></edit-ip-camera>
+    <edit-ip-camera ref="editIpCameraRef"  :allow-modify-site="false"  @saved="onIpcamerSave()" ></edit-ip-camera>
     <!-- 详细信息 -->
-     <diaglog-detail ref="diaglogRef" :data="form2.data" ></diaglog-detail>  
-	   <!-- 
-    <el-dialog :title="form2.title" v-model="form2.dialogVisible" style="width: 70%; height: 76%">
-      <el-row>
-        <el-col>
-          <el-scrollbar>
-           <EcDetail :data="form2.data"></EcDetail>
-         <details-info :data="form2.data"></details-info> 
-          </el-scrollbar>
-        </el-col>
-      </el-row>
-      <template #footer>
-        <span class="dialog-footer">
-          <el-button @click="form2.dialogVisible = false">取 消</el-button>
-        </span>
-      </template>
-    </el-dialog>
-    -->
+     <diaglog-detail ref="diaglogRef" :column="2"  :title="form2.title" :data="form2.data" style="width:50%;height:76%" ></diaglog-detail>  
   </div>
 </template>
 
@@ -151,11 +130,10 @@ import * as t from '../store/types/devices'
 import { detailsInfo } from '../components/details'
 import { imgVideo, types } from '../components/player'
 import { str2Obj, createStateEndDatetime } from '../utils'
-import { showLoading, closeLoading } from '../components/Logining'
-import { pagedOption, type PagedOption } from '../components/tableEx'
+import { showLoading, closeLoading } from '../components/Logining' 
 
 import { editIpCamera } from '../components/biz'
-import diaglogDetail from '../components/biz/src/diaglogDetail'
+import diaglogDetail from '../components/common/diaglogDetail'
  
 
 interface TableRow {
@@ -250,8 +228,7 @@ const onTableSelect = (row: any) => {
 
 const queryDeviceDetailInfo = (siteId: number, deviceType: string) => {
   return api.getDetailInfo(siteId, deviceType)
-}
-
+} 
 //编辑球机
 const editIpCameraRef = ref()
 const onOpenIpCameraDialog = (category: string, row: TableRow) => {
@@ -276,21 +253,16 @@ interface dataContent {
   data: any
 }
 interface DataType {
-  title: String
-  dialogVisible: boolean
+  title: string 
   data: dataContent[]
 }
 
 let form2 = ref<DataType>({
-  title: '',
-  dialogVisible: false,
+  title: '', 
   data: []
 })
-const onOpen2Dialog = (category: string, row: TableRow) => {
-
-  diaglogRef.value?.openDiaLog()
-
-  form2.value.dialogVisible = true
+const onOpen2Dialog = (category: string, row: TableRow) => { 
+  
   if (category == 'box') {
     form2.value.title = '盒子信息'
   } else if (category == 'router') {
@@ -301,13 +273,10 @@ const onOpen2Dialog = (category: string, row: TableRow) => {
   queryDeviceDetailInfo(row.id, category).then((res) => {
     if (res.code == 0) {
       let data = []
-      for (let i = 0; i < res.data.length; i++) {
-        data.push({ name: res.data[i].name + '信息', data: res.data[i] })
-        data.push({ name: res.data[i].name + '信息', data: res.data[i] })
-      }
-      if (res.data.length == 0)
-        (form2.value.dialogVisible = false), ElMessage.warning('未找到关联设备')
-      else form2.value.data = data
+      for (let i = 0; i < res.data.length; i++) 
+        data.push({ name: res.data[i].name + '信息', data: res.data[i] }) 
+      if (res.data.length == 0) ElMessage.warning('未找到关联设备')
+      else (diaglogRef.value?.openDiaLog(),form2.value.data = data)
     }
   })
 }

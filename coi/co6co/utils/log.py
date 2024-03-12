@@ -2,6 +2,7 @@
 
 import datetime,sys,threading,os
 from loguru import logger 
+import traceback
 
 '''
 loguru 日志配置
@@ -90,14 +91,14 @@ def warn(msg:str):
 def err(msg:str,e=None):
     """
     错误日志
-    """
-    __log(msg,7,31,40,e)
+    """ 
+    __log(f'{msg}-->{traceback.format_exc()}',7,31,40,e)
 
 def critical(msg:str):
     """
     危急日志
-    """
-    __log(msg,0,37,40)
+    """ 
+    __log(f'{msg}-->{traceback.format_exc()}',7,37,40)
 
 if __name__ == "__main__" :
     logger.trace("文件日志")

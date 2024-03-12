@@ -1,5 +1,5 @@
-import { ref, reactive, defineComponent, type PropType } from 'vue'
-import { objectForEach } from '../../utils'
+import { ref,  defineComponent, type PropType } from 'vue'
+import type{  Direction } from './types'
 import {
   ElCollapse,
   type CollapseModelValue,
@@ -15,7 +15,7 @@ export interface Details {
   name: string
   data: Info
 }
-export type Direction ="vertical" | "horizontal"
+
 export default defineComponent({
   name: 'EcDetail',
   props: {
@@ -28,7 +28,7 @@ export default defineComponent({
       default:3
     } 
     ,direction:{ 
-      type: Object as PropType< Direction>,
+      type: String as  PropType< Direction>,
       default:"vertical"
     }
   },
@@ -41,8 +41,8 @@ export default defineComponent({
     const handleChange = (val: CollapseModelValue) => {
       context.emit('activeChange', val, activeNames.value)
     }
-    return () => {
-      console.info(prop.data)
+    return () => { 
+      
       //可以写某些代码
       return (
         <>

@@ -15,6 +15,7 @@ import {
   type FormRules,
   ElInput
 } from 'element-plus'
+import type { ObjectType } from './types'
 export interface formDataType {
   visible: boolean
   title?: string
@@ -23,84 +24,60 @@ export interface formDataType {
 export default defineComponent({
   name: 'EcForm',
   props: {
-    rules:{
+    rules: {
       type: Object as PropType<FormRules>,
-      required:false
+      required: false
     },
     model: {
-      type: Object as PropType<ObjectConstructor>,
+      type: Object, //as PropType<ObjectConstructor>,
       required: true
+    },
+    labelWidth: {
+      type: Number, //as PropType<ObjectConstructor>,
+      default: 150
     }
   },
-  emits: {
-    close: () => true
+  emits:{
+    error:(msg:string)=>true,
+    submit:( )=>true
   },
-  setup(prop, context) {
-    const formRef = ref<FormInstance>()
-    const formData = reactive<formDataType>({
-      visible: false,
-      loading: false
-    })
-    //其他api 操作
-    //end
-    const onOpenDialog = (title: string) => {
-      formData.visible = true
-      formData.title = title
-    }
-    const save = (formEl: FormInstance | undefined) => {
-      if (!formEl) return
+  setup(prop, {attrs,slots,emit,expose}) {
+    const formRef = ref<FormInstance>() 
 
-      formEl.validate((value) => {
-        if (value) {
-          /**
-             formData.loading = true
-             api
-            .set_svc({ data: to_parm()  })
-            .then((res) => {
-                if (pd_api.isSuccess(res)) {
-                ElMessage.success(`编辑成功`)
-                getData()
-                } else {
-                ElMessage.error(`编辑失败:${res.message}`)
-                }
-            })
-            .finally(() => {
-                form.loading = false
-            })
-             */
-        } else {
-          ElMessage.error('请检查输入的数据！')
+    const save = (instance: FormInstance | undefined) => {
+      if (!instance) {
+        ElMessage.error('表单对象为空！')
+        emit("error","表单对象为空！") 
+        return
+      }
+      console.info("formData",prop.model)
+      instance.validate((value) => {
+        if (!value) {
+          ElMessage.error('请检查输入的数据！') 
+          emit("error","请检查输入的数据！") 
           return false
         }
+        //提交数据 
+        emit("submit")  
       })
+    } 
+    const onSave=()=>{
+      save(formRef.value)
     }
-    context.expose({
-      onOpenDialog
-    })
-    const dialogSlots = {
-      footer: () => {
-        return (
-          <span class="dialog-footer">
-            <ElButton
-              onClick={() => {
-                formData.visible = false
-                context.emit('close')
-              }}
-            >
-              关闭
-            </ElButton>
-            <slot name="buttons"></slot>
-          </span>
-        )
-      }
-    }
-    return () => {
+    const render = (): ObjectType => {
       //可以写某些代码
       return (
-        <>
-          <ElForm labelWidth={150} ref={formRef} rules={prop.rules}  model={prop.model}></ElForm>
-        </>
+        <ElForm labelWidth={prop.labelWidth} ref={formRef} rules={prop.rules} model={prop.model}>
+          {slots.default ? slots.default():null}
+        </ElForm>
       )
     }
+    expose({
+      formInstance:formRef ,
+      save:onSave  
+    }) 
+    render.formInstance = formRef
+    render.save=onSave
+    return render
   }
 })
