@@ -37,7 +37,8 @@
             "token":"token123456",  
             "encodingAESKey":"",	 
             "encrypt_mode":"normal" ,
-            "alarm_tamplate_id":"G6ockp-Y-qCZ1mBfvZrkmaFFboqMY4WvixLm0W90xZk"
+            "alarm_tamplate_id":"G6ockp-Y-qCZ1mBfvZrkmaFFboqMY4WvixLm0W90xZk",
+            "alarm_tamplate_url":"http://wx.co6co.top:444/home.html#/alarmdetail.html?uid="
            
         }
     ]

@@ -4,10 +4,8 @@ import { getToken, removeToken } from './auth';
 import { ElLoading, ElMessage } from 'element-plus';
 import { useRouter } from 'vue-router';
 import router from '../router/index';
-import JSONbig from 'json-bigint';
+import JSONbig from 'json-bigint'; 
 
-//console.log(import.meta.env)
-//console.info(import.meta.env.BASE_URL)
 const service: AxiosInstance = axios.create({
 	//baseURL: "/v1",//process.env.API_URL_BASE,
 	baseURL: import.meta.env.VITE_BASE_URL,
@@ -32,18 +30,23 @@ service.interceptors.request.use(
 
 //增加响应拦截器
 service.interceptors.response.use(
-	(response: AxiosResponse) => {
+	(response: AxiosResponse<IResponse>) => {
 		//2xx 范围的都会触发该方法
 		//if (elLoading) elLoading.close();
 		if (response.status === 200) {
 			if (response.headers['content-type'] == 'application/json') {
 				if (typeof response.data == 'string') return JSONbig.parse(response.data);
-				return response.data;
-			} else return response;
+				if (response.data.code==0){
+					return response.data
+				}else { 
+					console.warn(response.data) 
+					return	Promise.reject(response.data.message||"请求出错！"); 
+				} 
+			}else return response;
 		}
 		if (response.status === 206) return response;
 		else {
-			Promise.reject();
+			return 	Promise.reject(response.statusText);
 		}
 	},
 	(error: AxiosError) => {

@@ -366,7 +366,7 @@ class xTalker {
 
 			ws_url = 'wss://' + ws_host + ':' + ws_port + '/' + 'rtc' + '?media=talk';
 		}
-
+		console.info("Connecting",ws_url)
 		this.xTalkSetStatus('Connecting to server ' + ws_url);
 		this.xTalkWebsocketConnection = new WebSocket(ws_url);
 

@@ -72,6 +72,7 @@ class TestsView(BaseMethodView):
         po=bizAlarmPO()
         po.alarmType=hwx_alarm_type.alarm1.key
         po.alarmTime=datetime.now()
+        po.uuid="ALARM_0D719D7F-4D0D-46D0-A779-D419A22BED94"
         alarm_success(request,po)
         return text(f"请求成功，你可以试试其他的:{request.args}") 
         

@@ -31,9 +31,10 @@ class ThreadEvent:
 		return self._loop
 
 	def __init__(self):
-		self._loop =asyncio. new_event_loop()
+		self._loop =asyncio.new_event_loop() 
 		#log.warn(f"ThreadEventLoop:{id(self._loop)}")
-		Thread(target=self._start_background, daemon=True).start()
+		Thread(target=self._start_background, daemon=True) .start()
+		
 
 	def _start_background(self):
 		asyncio.set_event_loop(self.loop)
@@ -43,5 +44,9 @@ class ThreadEvent:
 		#log.warn(f"ThreadEventLoop22:{id(self._loop)}")
 		task=asyncio.run_coroutine_threadsafe(tastFun(*args, **kwargs), loop=self._loop)
 		return task.result()
+	def __del__(self):
+		log.info("loop close...")
+		self._loop .close()
+		log.info("loop close.")
 	
 		

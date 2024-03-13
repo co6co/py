@@ -12,7 +12,7 @@ export const GbDeviceState = (bck: (data: gb_api.gbDeviceState[]) => void) => {
 	gb_api
 		.get_gb_device_state()
 		.then((res) => {
-			let stateArray = res.data;
+			let stateArray = res.data.data;
 			if (bck) bck(stateArray);
 		})
 		.finally(() => {
@@ -30,7 +30,7 @@ export const RtcOnlineState = (bck: (data: gb_api.gbTaklerOnlineList) => void) =
 	gb_api
 		.get_takler_online()
 		.then((res) => { 
-			if (bck) bck(res);
+			if (bck) bck(res.data);
 		})
 		.finally(() => {
 			rtc_timer = setInterval(RtcOnlineState, Interval, bck);
@@ -50,7 +50,7 @@ export const RtcSessionState = (
 	gb_api
 		.get_takler_online_session()
 		.then((res) => { 
-			if (bck) bck(res);
+			if (bck) bck(res.data);
 		})
 		.finally(() => {
 			rtc_session_timer = setInterval(RtcSessionState, Interval, bck);

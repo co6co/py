@@ -6,14 +6,17 @@ import * as ptz from './src/ptz'
 import { types as pType } from '../player'
 
 interface AlarmItem {
-  id: number
-  uuid: string
+  id: number 
+  uid:string;
+  siteName:string
+  boxName:string;
   alarmType: string
+  alarmTypeDesc:string
   videoUid: string
   rawImageUid: string
   markedImageUid: string
   alarmTime: string
-  createTime: string
+  createTime: string 
 }
 const getResourceUrl = (uuid: string, isposter: boolean = false) => {
   if (isposter) return import.meta.env.VITE_BASE_URL + `/api/resource/poster/${uuid}/700/600`

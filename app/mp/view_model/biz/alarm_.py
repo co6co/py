@@ -47,6 +47,7 @@ class AlarmFilterItems(absFilterItems):
         super().__init__(bizAlarmPO)
 
         self.listSelectFields =[bizAlarmPO.id,
+                                bizAlarmPO.uuid.label("uid"),
                                  bizAlarmPO.alarmType,
                                  bizAlarmPO.videoUid,
                                  bizAlarmPO.markedImageUid,  

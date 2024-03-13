@@ -78,17 +78,13 @@ export const getQueryVariable = (key: string) => {
 export const toggleFullScreen = (elem: HTMLElement | any, fullScreen: boolean = true) => {
   if (!elem) elem = document.documentElement
   if (fullScreen) {
-    if (elem.requestFullscreen) {
-      console.info('1')
+    if (elem.requestFullscreen) { 
       elem.requestFullscreen()
-    } else if (elem.mozRequestFullScreen) {
-      console.info('2')
+    } else if (elem.mozRequestFullScreen) { 
       elem.mozRequestFullScreen()
-    } else if (elem.webkitRequestFullscreen) {
-      console.info('3')
+    } else if (elem.webkitRequestFullscreen) { 
       elem.webkitRequestFullscreen()
-    } else if (elem.msRequestFullscreen) {
-      console.info('4')
+    } else if (elem.msRequestFullscreen) { 
       elem.msRequestFullscreen()
     }
   } else {

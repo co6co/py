@@ -42,9 +42,9 @@ class bizBoxPO(UserTimeStampedModelPO):
     """
     __tablename__ = "biz_dev_box" 
     id = Column("id",Integer, primary_key=True,autoincrement=True)
-    siteId=Column("site_id",ForeignKey(f"biz_site.id" ))
-
-    uuid = Column("uuid",String(64),comment="设备唯一标识，主要与设备通行使用")  
+    siteId=Column("site_id",ForeignKey(f"biz_site.id" )) 
+    uuid = Column("uuid",String(64),comment="设备唯一标识，主要与设备通行使用") 
+    code = Column("code",String(64), comment= "设备代码,hwx上传记录使用")
     innerIp=Column("inner_ip",String(64),comment="内部IP")
     ip=Column("ip",String(64),comment="外网IP")
     name=Column("name",String(64),comment="设备名称") 
@@ -85,6 +85,7 @@ class bizCameraPO(UserTimeStampedModelPO):
     __tablename__ = "biz_camera" 
     id = Column("id",Integer, primary_key=True,autoincrement=True)
     uuid = Column("device_uuid",String(64),comment="设备唯一标识，主要与设备通行使用") 
+    code = Column("code",String(64), comment= "设备代码,hwx上传记录使用")
     innerIp=Column("inner_ip",String(64),comment="内部IP")
     ip=Column("ip",String(64),comment="外网IP")
     name=Column("name",String(64),comment="设备名称") 
@@ -205,6 +206,8 @@ class bizAlarmPO(BasePO):
     __tablename__ = "biz_alarm"
     id = Column("id",BigInteger,comment="主键",autoincrement=True, primary_key=True)
     boxId = Column("device_id",ForeignKey(f"{bizBoxPO.__tablename__}.{bizBoxPO.id.name}"),comment="产生记录的设备" )
+    channelCode = Column("channel_code",String(64),comment="产生记录的通道代码,与相机的Code 对应" )
+    
     uuid = Column("uuid",String(64),unique=True,comment= "全局ID盒子上传")
     alarmType= Column("alarm_type",ForeignKey(f"{bizAlarmTypePO.__tablename__}.{bizAlarmTypePO.alarmType.name}",ondelete="CASCADE"))
    

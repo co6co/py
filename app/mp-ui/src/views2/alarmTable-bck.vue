@@ -83,6 +83,7 @@ import { type  TreeNode } from 'element-plus/es/components/tree-v2/src/types'
 import {type   TreeNodeData } from 'element-plus/es/components/tree/src/tree.type'
 import { Delete, Edit, Search, Compass,MoreFilled,Download } from '@element-plus/icons-vue'; 
 import  * as api from '../api/alarm'; 
+import { type AlarmItem, getResources } from '../components/biz'
 
 import  { imgVideo,types} from '../components/player';    
 import {useAppDataStore} from '../store/appStore'
@@ -107,16 +108,6 @@ const onOpenPage=(path:string,row:any)=>{
 	});
 }
 
-interface TableRow {
-    id: number,
-    uuid:string
-    alarmType:string
-    videoUid:string,
-    rawImageUid:string,
-    markedImageUid:string,
-    alarmTime:string,
-    createTime:string 
-}
 interface Query extends IpageParam{
   datetimes:Array<string>,
   alarmType:String,  
@@ -124,8 +115,8 @@ interface Query extends IpageParam{
 interface table_module  {
     query:Query, 
     moreOption:boolean,
-    data:TableRow[],
-    currentRow?:TableRow,
+    data:AlarmItem[],
+    currentRow?:AlarmItem,
     pageTotal:number,
 } 
 const elTreeInstance=ref<any>(null) 

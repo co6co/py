@@ -24,7 +24,6 @@ class Sites_View(AuthMethodView):
     """
     安全员站点s
     """
-
     async def get(self,request:Request):
         """
         获取站点列表 [{id:1,name:站点}]

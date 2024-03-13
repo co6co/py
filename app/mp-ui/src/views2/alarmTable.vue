@@ -54,7 +54,7 @@
 								header-cell-class-name="table-header">
 								<el-table-column
 									label="序号"
-									width="119"
+									width="90"
 									align="center"
 									:show-overflow-tooltip="true">
 									<template #default="scope">
@@ -66,14 +66,14 @@
 								<el-table-column
 									prop="siteName"
 									label="安全员"
-									width="119"
+									width="80"
 									sortable
 									:show-overflow-tooltip="true"></el-table-column>
 
 								<el-table-column
 									prop="alarmTypeDesc"
 									label="告警类型"
-									width="119"
+									width="90"
 									sortable
 									:show-overflow-tooltip="true"></el-table-column>
 

@@ -209,17 +209,8 @@
 	import { imgVideo, types } from '../components/player';
 	import { str2Obj, createStateEndDatetime } from '../utils';
 	import { showLoading, closeLoading } from '../components/Logining';
+	import { type AlarmItem, getResources } from '../components/biz'
 
-	interface TableRow {
-		id: number;
-		uuid: string;
-		alarmType: string;
-		videoUid: string;
-		rawImageUid: string;
-		markedImageUid: string;
-		alarmTime: string;
-		createTime: string;
-	}
 	interface AlertCategory {
 		alarmType: string;
 		desc: string;
@@ -231,8 +222,8 @@
 	interface table_module {
 		query: Query;
 		moreOption: boolean;
-		data: TableRow[];
-		currentRow?: TableRow;
+		data: AlarmItem[];
+		currentRow?: AlarmItem;
 		pageTotal: number;
 		categoryList: AlertCategory[];
 	}
@@ -425,7 +416,7 @@
 			);
 		return import.meta.env.VITE_BASE_URL + `/api/resource/${uuid}`;
 	};
-	const onOpen2Dialog = (row: TableRow) => {
+	const onOpen2Dialog = (row: AlarmItem) => {
 		form2.value.dialogVisible = true;
 		table_module.currentRow = row;
 		form2.value.data = [

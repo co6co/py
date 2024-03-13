@@ -57,16 +57,16 @@ export interface gbTaklerOnlineSessionList{
 	count:number
 	data:Array<gbTaklerBusy> 
 } 
-export const get_gb_device_state = (): Promise<{
+export const get_gb_device_state = (): Promise<IResponse<{
 	data: Array<gbDeviceState>;
-}> => {
+}>> => {
     return request.get(`${gb_BASE_URL}?dev=gb` );
 };
 
-export const get_takler_online = (): Promise<gbTaklerOnlineList> => {
+export const get_takler_online = (): Promise<IResponse<gbTaklerOnlineList> > => {
     return request.get(`${gb_BASE_URL}?atv=rtc-device` );
 };
 
-export const get_takler_online_session = (): Promise<gbTaklerOnlineSessionList> => {
+export const get_takler_online_session = (): Promise<IResponse<gbTaklerOnlineSessionList>> => {
 	return request.get(`${gb_BASE_URL}?atv=rtc-session` );
 };

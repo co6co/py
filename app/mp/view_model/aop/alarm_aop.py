@@ -16,7 +16,7 @@ from co6co.task.thread import ThreadEvent
 import json , traceback
 from co6co_sanic_ext.utils import JSON_util
 
-t=ThreadEvent()   
+
 
 def Alarm_Save_Succ_AOP(func):
     @wraps(func)
@@ -37,7 +37,8 @@ def startAlarmPush(config: WechatConfig,app:Sanic,po:bizAlarmPO):
     # 通过查询订阅该公众号的用户
     try:  
         sleep(0.5)
-        log.warn("任务... ")   
+        log.warn("任务... ")  
+        t=ThreadEvent()    
         alarm= alarm_bll(app,t.loop)
         wx_user_dict:list[dict]=t.runTask(alarm.get_subscribe_alarm_user,config.appid) 
         if wx_user_dict==None or len( wx_user_dict)==0 :
@@ -58,6 +59,8 @@ def startAlarmPush(config: WechatConfig,app:Sanic,po:bizAlarmPO):
             else: 
                 templatId=config.alarm_tamplate_id
                 data={
+                    "alarmId":{"value":po.id},
+                    "alarmUid":{"value":po.uuid},
                     "alarmType":{"value":alarmType},
                     "alarmDesc":{"value":alarmDesc},
                     "alarmTime":{"value":po.alarmTime}  
@@ -70,7 +73,11 @@ def startAlarmPush(config: WechatConfig,app:Sanic,po:bizAlarmPO):
                 nickName=u.get("nickName")
                 log.warn(f'发送 告警消息 {templatId or msg}\t to \t{openid}{nickName}')
                 if templatId==None: sendMessage(client,openid,msg,nickName)
-                else: sendTemplateMessage(client,openid,nickName,templatId,data)
+                else:
+                    url=config.alarm_tamplate_url
+                    if url!=None and po.uuid!=None: url=url+po.uuid
+                    sendTemplateMessage(client,openid,nickName,templatId,data,url)
+                    
     except Exception  as e: 
         log.err(f"告警失败：{e},{traceback.format_exc()}")
 

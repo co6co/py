@@ -198,6 +198,7 @@ import * as api from "../api/alarm";
 import { imgVideo, types } from "../components/player";
 import { useAppDataStore } from "../store/appStore";
 import {  createStateEndDatetime } from '../utils';
+import { type AlarmItem, getResources } from '../components/biz'
 
 //页面跳转相关 1.
 import { useRouter } from "vue-router";
@@ -215,16 +216,7 @@ const onOpenPage = (path: string, row: any) => {
     });
 };
 
-interface TableRow {
-    id: number;
-    uuid: string;
-    alarmType: string;
-    videoUid: string;
-    rawImageUid: string;
-    markedImageUid: string;
-    alarmTime: string;
-    createTime: string;
-}
+  
 interface Query extends IpageParam {
     datetimes: Array<string>;
     alarmType: String;
@@ -232,8 +224,8 @@ interface Query extends IpageParam {
 interface table_module {
     query: Query;
     moreOption: boolean;
-    data: TableRow[];
-    currentRow?: TableRow;
+    data: AlarmItem[];
+    currentRow?: AlarmItem;
     pageTotal: number;
 }
 const elTreeInstance = ref<any>(null);

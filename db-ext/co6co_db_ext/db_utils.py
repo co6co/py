@@ -1,9 +1,11 @@
 
 
 from typing import TypeVar,Tuple,List,Dict,Any,Union,Iterator
-from sqlalchemy.engine.row import  Row
+from sqlalchemy.engine.row import  Row,RowMapping
 from .po import BasePO
-from sqlalchemy.sql import Select
+from sqlalchemy.sql import Select 
+from co6co.utils import log
+
 
 class db_tools:
     """
@@ -53,7 +55,24 @@ class db_tools:
                 '''
                 d.update({key:c})
         return d
-
-    def mapping(executeResult:any)-> List[dict]:  
+    @staticmethod
+    def one2Dict(fetchone:Row|RowMapping)->Dict:
+        """
+        Row:        execute.fetchmany() | execute.fetchone()
+        RowMapping: execute.mappings().fetchall()|execute.mappings().fetchone()  
+        """
+        if type(fetchone)==Row: return dict(zip(fetchone._fields,fetchone)) 
+        elif  type(fetchone)==RowMapping: return dict(fetchone)
+        log.warn(f"未知类型：‘{type(fetchone)}’,直接返回")
+        return fetchone
+    
+    @staticmethod
+    def list2Dict(list:List[Row|RowMapping])->List[dict]: 
+        return [db_tools.one2Dict(a)  for a in  list]
+    
+    def mapping(executeResult:any)-> List[dict]: 
+        """
+        不在使用
+        """ 
         #sqlalchemy.engine.result.ChunkedIteratorResult 
         return [dict(zip(a._fields,a))  for a in  executeResult]
