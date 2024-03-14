@@ -19,9 +19,8 @@ async def debug(request:Request):
     header={"time:":datetime.now(),"ip":request.client_ip}
     for k in  request.headers.keys():
         header.update({k:request.headers.get(k)}) 
-    t=ThreadEvent()
-
+    t=ThreadEvent() 
     print( t.runTask(tt))
-    t=None
+    t.close() 
     
     return JSON_util.response(header)

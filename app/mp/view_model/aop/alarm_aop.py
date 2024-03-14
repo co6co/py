@@ -35,16 +35,17 @@ def Alarm_Save_Succ_AOP(func):
 
 def startAlarmPush(config: WechatConfig,app:Sanic,po:bizAlarmPO):
     # 通过查询订阅该公众号的用户
+    t=ThreadEvent()    
     try:  
         sleep(0.5)
-        log.warn("任务... ")  
-        t=ThreadEvent()    
+        log.warn("任务... ")   
         alarm= alarm_bll(app,t.loop)
         wx_user_dict:list[dict]=t.runTask(alarm.get_subscribe_alarm_user,config.appid) 
         if wx_user_dict==None or len( wx_user_dict)==0 :
             log.warn("需要告警的用户为0,不推送告警。")
             return 
         typePO=t.runTask( alarm.get_alram_type_desc,po.alarmType) 
+       
         # 推送  
         if typePO!=None:
             log.info(f"需发送用户数：{len( wx_user_dict)}")
@@ -80,6 +81,8 @@ def startAlarmPush(config: WechatConfig,app:Sanic,po:bizAlarmPO):
                     
     except Exception  as e: 
         log.err(f"告警失败：{e},{traceback.format_exc()}")
+    finally:
+         t.close()
 
 def sendMessage(client:WeChatClient, openId, msg:str ,nickName:str):
     """
