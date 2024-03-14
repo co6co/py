@@ -38,8 +38,8 @@ def startAlarmPush(config: WechatConfig,app:Sanic,po:bizAlarmPO):
     t=ThreadEvent()    
     try:  
         sleep(0.5)
-        log.warn("任务... ")   
-        alarm= alarm_bll(app,t.loop)
+        log.warn(f"{config.name} 任务... ")   
+        alarm= alarm_bll(app.config.db_settings)
         wx_user_dict:list[dict]=t.runTask(alarm.get_subscribe_alarm_user,config.appid) 
         if wx_user_dict==None or len( wx_user_dict)==0 :
             log.warn("需要告警的用户为0,不推送告警。")

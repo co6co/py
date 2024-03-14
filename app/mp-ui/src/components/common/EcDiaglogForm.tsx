@@ -1,8 +1,9 @@
-import { defineComponent, ref, reactive, type PropType, computed, inject } from 'vue'
+import { defineComponent, ref, reactive,  computed, inject } from 'vue'
+import type{InjectionKey,PropType} from 'vue'
 import EcDialog, { type dialogDataType } from './EcDialog'
 import { default as EcForm } from './EcForm'
 import type { ObjectType, FormData } from './types'
-import { FormOperation } from './types'
+import { FormOperation } from './types' 
 
 import {
   ElButton,
@@ -14,7 +15,18 @@ import {
 } from 'element-plus'
 
 //Omit、Pick、Partial、Required
+export interface Item {
+  id: number
+  name: string
+  postionInfo: string
+  deviceCode: string
+  deviceDesc: string
+  createTime: string
+  updateTime: string
+}
+//Omit、Pick、Partial、Required 
 
+export type FormItem = Omit<Item, 'id' | 'createTime' | 'updateTime'>
 export default defineComponent({
   name: 'EcdiaglogForm',
   props: {
@@ -27,7 +39,7 @@ export default defineComponent({
     labelWidth: {
         type: Number, //as PropType<ObjectConstructor>,
         default: 150
-      }
+    }
   },
   emits: {
     submit: () => true
@@ -43,14 +55,17 @@ export default defineComponent({
     const slots = {
       buttons: () => (
         <>
-          <ElButton onClick={() => formInstance.value?.save()}>保存</ElButton>
+          <ElButton onClick={() => formInstance.value?.validate()}>保存</ElButton>
         </>
       )
-    }
-
-    const data: Object = inject('formData') || {}
-    //console.warn("data",data)
-    const openDialog = (oper: FormOperation, item?: any) => {
+    } 
+   // const data: Object = inject('formData') || {}
+   
+   const data: Object = inject('formData') || {}
+ 
+ 
+    
+    const openDialog = (oper: FormOperation, item?: any) => { 
       if (dialogRef.value) {
         dialogRef.value.data.title = prop.title||"弹出框"
         setDiaglogVisible(true)
@@ -59,34 +74,40 @@ export default defineComponent({
     const closeDialog = () => {
       setDiaglogVisible(false)
     }
-    ctx.expose({
-      openDialog,
-      closeDialog,
-      formInstance
-    })
-    const rander = (): ObjectType => {
+   
+    const rander = (): ObjectType => { 
       return (
-        <EcDialog
+        <EcDialog title={prop.title}
           style={ctx.attrs}
           ref={dialogRef}
           v-slots={ctx.slots.buttons ? { buttons: ctx.slots.buttons } : slots}
         >
-          <EcForm
+          <EcForm  style="0 45px 0 0"
             labelWidth={prop.labelWidth}
             v-slots={ctx.slots.default}
             ref={formInstance}
             rules={prop.rules}
-            model={data}
-            onSubmit={() => { 
-              ctx.emit('submit')
-            }}
+            model={data} 
           ></EcForm>
         </EcDialog>
       )
     }
+    //暴露方法给父组件
+
+    const validate=(success:()=>void)=>{
+      formInstance.value?.validate(success)
+    }
+    ctx.expose({
+      openDialog,
+      closeDialog,
+      formInstance,
+      validate
+    })
+
     rander.openDialog = openDialog
     rander.closeDialog = closeDialog
     rander.formInstance = formInstance
+    rander.validate=validate
     return rander
   } //end setup
 })

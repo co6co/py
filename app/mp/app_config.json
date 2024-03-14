@@ -17,7 +17,7 @@
         "DB_NAME": "wx_dbs",
         "DB_USER": "root", 
         "DB_PASSWORD":"mysql123456",
-        "echo": "False",
+        "echo": "True",
         "pool_size": 1,
         "max_overflow": 1
     },

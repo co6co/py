@@ -13,6 +13,12 @@ export interface dialogDataType {
 
 export default defineComponent({
   name: 'EcDialog',
+  props:{
+    title: {
+      type: String,
+      default:'弹出框'
+    },
+  },
  
   //定义事件类型
   emits: {
@@ -30,17 +36,15 @@ export default defineComponent({
     // props.data
     // ctx.attrs    ctx.slots    ctx.emit 
     '''
-    */ 
-    const title:string=inject("title")||"弹出框"
+    */  
     const diaglogData = reactive<dialogDataType>({
       visible: false
     })
     //其他api 操作
     //end
 
-    const onOpenDialog = (title: string) => {
-      diaglogData.visible = true
-      diaglogData.title = title
+    const onOpenDialog = ( ) => {
+      diaglogData.visible = true 
     }
 
     const dialogSlots = {
@@ -65,7 +69,7 @@ export default defineComponent({
        * 还能在该位置写一些计算每次状态改变都能被渲染
        */
       return ( 
-          <ElDialog title={title} v-model={diaglogData.visible} v-slots={dialogSlots}>
+          <ElDialog title={prop.title} v-model={diaglogData.visible} v-slots={dialogSlots}>
             {ctx.slots.default ? ctx.slots.default() : null}
           </ElDialog> 
       )

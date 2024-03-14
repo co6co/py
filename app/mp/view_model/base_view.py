@@ -4,7 +4,7 @@ from services import authorized
 class AuthMethodView(BaseMethodView): 
    decorators=[authorized] 
    
-   def getUserId(self, request: Request):
+   def getUserId(self, request: Request)->int:
       """
       获取用户ID
       """

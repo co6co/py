@@ -6,20 +6,46 @@ from sanic import  Request ,redirect
 from sanic.response import text,raw,empty,file_stream
 from co6co_sanic_ext.utils import JSON_util
 import json
-from model.enum import device_type
-from typing import TypeVar
+from model.enum import device_type ,SiteConfigCategory
 from model.filters.SiteFilterItems import SiteFilterItems, SiteDiveceFilterItems
 from co6co_sanic_ext.model.res.result import Result, Page_Result
 
 from view_model import get_upload_path
 from view_model.base_view import BaseMethodView, AuthMethodView
-from model.pos.biz import bizCameraPO,bizRouterPO,bizBoxPO,  bizResourcePO,bizSitePo,bizSiteConfigPO
+from model.pos.biz import  bizCameraPO,bizRouterPO,bizBoxPO,  bizResourcePO,bizSitePo,bizSiteConfigPO
 import os ,datetime
 from co6co.utils import log
 from sqlalchemy.engine.row import RowMapping
 from sqlalchemy import Select
+from typing import List
+from sqlalchemy.sql import delete
 
 
+
+async def editOrAddSiteConfig(request:Request,currentUserId:int, siteID:int, session:AsyncSession):
+    configs:list= request.json.get("configs") 
+    removeConfig:List[int]=request.json.get("removeConfig")  
+    configPOList=[]
+    if configs!=None:
+        configPOList=[bizSiteConfigPO(**c) for c in configs]  
+    for cPo in configPOList:
+        if cPo.id !=None:
+            oldPo:bizSiteConfigPO=await session.get_one(bizSiteConfigPO,cPo.id) 
+            oldPo.name=cPo.name
+            oldPo.siteId=siteID
+            oldPo.category=cPo.category
+            oldPo.value=cPo.value
+            oldPo.updateUser=currentUserId
+            oldPo.updateTime=datetime.datetime.now() 
+        else:
+            cPo.createUser=currentUserId
+            cPo.siteId=siteID
+            cPo.createTime=datetime.datetime.now()
+            session.add(cPo)
+    if removeConfig!=None and len(removeConfig )>0: 
+        stmt = delete(bizSiteConfigPO).where(bizSiteConfigPO.id.in_(removeConfig))
+        await session.execute(stmt) 
+        
 class Sites_View(AuthMethodView):
     """
     安全员站点s
@@ -100,15 +126,17 @@ class Sites_View(AuthMethodView):
         """
         try:
             po = bizSitePo()
-            po.__dict__.update(request.json) 
-            async with request.ctx.session as session,session.begin():
-                session: AsyncSession = session  
+            po.__dict__.update(request.json)  
+            async with self.get_db_session(request) as  session,session.begin():  
                 session.add(po) 
+                await session.flush() 
+                await editOrAddSiteConfig(request, self. getUserId(request) ,po.id, session) 
             return JSON_util.response(Result.success())
         except Exception as e:
+            log.err(e)
             return JSON_util.response(Result.fail(message=e))
         
-class Site_View(BaseMethodView): 
+class Site_View(AuthMethodView): 
     """
     安全员站点
     """
@@ -146,69 +174,47 @@ class Site_View(BaseMethodView):
         """ 
         try: 
             po=bizSitePo()
-            po.__dict__.update(request.json)
-            session: AsyncSession = request.ctx.session   
-            async with session,session.begin():  
+            po.__dict__.update(request.json)   
+            async with self.get_db_session(request) as session,session.begin():  
                 oldPo:bizSitePo=await session.get_one(bizSitePo,pk) 
                 if oldPo == None: return JSON_util.response(Result.fail(message="未找到设备!"))  
                 oldPo.name = po.name 
                 oldPo.deviceCode = po.deviceCode 
                 oldPo.postionInfo = po.postionInfo 
                 oldPo.deviceDesc = po.deviceDesc 
-                oldPo.updateTime=datetime.datetime.now()   
+                oldPo.updateTime=datetime.datetime.now()
+                #编辑配置  
+                await editOrAddSiteConfig(request, self. getUserId(request),pk ,session)
+                
             return JSON_util.response(Result.success())
-        except Exception as e: 
-            raise
-            return JSON_util.response(Result.fail(message=e))
+        except Exception as e:  
+            log.err("Err:",e)
+            return JSON_util.response(Result.fail(message=e)) 
         
-
-
-class Site_config_View(BaseMethodView): 
+class Site_config_View(AuthMethodView): 
     """
     安全员站点配置
-    """
+    """ 
     async def post(self,request:Request,pk:int):
         """
-        获取详细信息内容
+        获取站配置
         """ 
-        try:
+        try:    
             data=request.json.get("category")
-            type:device_type=device_type.value_of(data)
-            async with request.ctx.session as session,session.begin(): 
-                session:AsyncSession=session  
-                if type==device_type.router: 
-                    select=(Select(bizRouterPO).where(bizRouterPO.siteId==pk).order_by(bizRouterPO.id.asc()) )
-                if type==device_type.ip_camera: 
-                    select=(Select(bizCameraPO).where(bizCameraPO.siteId==pk) .order_by(bizCameraPO.id.asc()) )
-                if type==device_type.box: 
-                    select=(Select(bizBoxPO).where(bizBoxPO.siteId==pk).order_by(bizBoxPO.id.asc())  )
+            type:SiteConfigCategory=SiteConfigCategory.value_of(data)
+            async with self.get_db_session(request) as session,session.begin():   
+                select=(
+                    Select(bizSiteConfigPO.id,bizSiteConfigPO.name,bizSiteConfigPO.value, bizSiteConfigPO.code,bizSiteConfigPO.category)
+                    .where(bizSiteConfigPO.siteId==pk,bizSiteConfigPO.category==type.key).order_by(bizSiteConfigPO.id.asc()) 
+                ) 
                 executer= await session.execute(select)
-                poList=executer.scalars().all()
-                result=db_tools.remove_db_instance_state(poList)
-                return JSON_util.response(Result.success(result))
+                result=executer.fetchall()
+                list=db_tools.list2Dict(result) 
+                return JSON_util.response(Result.success(list))
         except Exception as e: 
             log.err(e)
             return JSON_util.response(Result.fail(message=e)) 
          
-    async def put(self, request: Request,pk:int):
-        """
-        编辑站点
-        """ 
-        try: 
-            po=bizSitePo()
-            po.__dict__.update(request.json) 
-            async with request.ctx.session as session,session.begin(): 
-                session: AsyncSession = session  
-                oldPo:bizSitePo=await session.get_one(bizSitePo,pk) 
-                if oldPo == None: return JSON_util.response(Result.fail(message="未找到设备!"))  
-                oldPo.name = po.name 
-                oldPo.deviceCode = po.deviceCode 
-                oldPo.postionInfo = po.postionInfo 
-                oldPo.deviceDesc = po.deviceDesc 
-                oldPo.updateTime=datetime.datetime.now()   
-            return JSON_util.response(Result.success())
-        except Exception as e: 
-            return JSON_util.response(Result.fail(message=e))
 
 
 

@@ -1,9 +1,14 @@
-import { defineComponent, ref, reactive, type PropType, provide } from 'vue'
+import { defineComponent, ref, reactive, type PropType, provide, inject } from 'vue'
+import type { InjectionKey } from 'vue'
 import { default as EcDiaglogForm } from '../../common/EcDiaglogForm'
-import type { ObjectType, FormData } from '../../common/types'
+
 import { FormOperation } from '../../common/types'
+import type { ObjectType, FormData } from '../../common/types'
+
 import * as api from '../../../api/site'
 import {
+  ElRow,
+  ElCol,
   ElButton,
   ElFormItem,
   ElInput,
@@ -11,6 +16,7 @@ import {
   type FormRules,
   type FormInstance
 } from 'element-plus'
+import { Plus, Minus } from '@element-plus/icons-vue'
 
 export interface Item {
   id: number
@@ -23,6 +29,7 @@ export interface Item {
 }
 //Omit、Pick、Partial、Required
 export type FormItem = Omit<Item, 'id' | 'createTime' | 'updateTime'>
+ 
 export default defineComponent({
   name: 'diaglogForm',
   props: {
@@ -31,7 +38,7 @@ export default defineComponent({
     },
     labelWidth: {
       type: Number, //as PropType<ObjectConstructor>,
-      default: 150
+      default: 90
     }
   },
   emits: {
@@ -39,22 +46,27 @@ export default defineComponent({
   },
   setup(prop, ctx) {
     const diaglogForm = ref<InstanceType<typeof EcDiaglogForm>>()
-    const data = reactive<FormData<number, FormItem>>({
+
+    const data = reactive<FormData<number, FormItem & { configs: Partial<api.ConfigItem>[] } &{removeConfig:number[]}>>({
       operation: FormOperation.add,
       id: 0,
       fromData: {
         name: '',
         postionInfo: '',
         deviceCode: '',
-        deviceDesc: ''
+        deviceDesc: '',
+        configs: [],
+        removeConfig:[]
       }
     })
-
+    const key = Symbol('formData') as InjectionKey<FormItem> //'formData'
     provide('formData', data.fromData)
-    console.info("ddddd",prop.title)
     provide('title', prop.title)
+
     const init_data = (oper: FormOperation, item?: Item) => {
       data.operation = oper
+      data.fromData.configs = []
+      data.fromData.removeConfig=[]
       switch (oper) {
         case FormOperation.add:
           data.id = -1
@@ -70,6 +82,12 @@ export default defineComponent({
           data.fromData.postionInfo = item.postionInfo
           data.fromData.deviceCode = item.deviceCode
           data.fromData.deviceDesc = item.deviceDesc
+
+          if (item) {
+            api.get_config_svc(item.id, api.ConfigCategory.devConfig).then((res) => {
+              data.fromData.configs = res.data
+            })
+          }
           break
       }
       return true
@@ -105,12 +123,21 @@ export default defineComponent({
       })
     }
 
+    const removeConfig = (index: number,item:Partial<api.ConfigItem>) => {
+      if (item.id){
+        data.fromData.removeConfig.push(item.id)
+      }
+      data.fromData.configs.splice(index, 1)
+    }
+    const addConfig = () => {
+      data.fromData.configs.push({ name: '', category: api.ConfigCategory.devConfig, value: '' })
+    }
     const fromSlots = {
       buttons: () => (
         <>
           <ElButton
             onClick={() => {
-              diaglogForm.value?.formInstance?.save()
+              diaglogForm.value?.validate(save)
             }}
           >
             保存
@@ -139,24 +166,70 @@ export default defineComponent({
               placeholder="位置信息"
             ></ElInput>
           </ElFormItem>
+          {data.fromData.configs.map((item, index) => {
+            return (
+              <ElRow>
+                <ElCol span={6}>
+                  <ElFormItem
+                    label={`配置${index + 1}名称`}
+                    prop={'configs.' + index + '.name'}
+                    rules={{
+                      required: true,
+                      message: `配置${index + 1}名称`,
+                      trigger: 'blur'
+                    }}
+                  >
+                    <ElInput v-model={item.name} placeholder="配置名称"></ElInput>
+                  </ElFormItem>
+                </ElCol>
+                <ElCol span={16}>
+                  <ElFormItem
+                    label={`配置${index}内容`}
+                    prop={'configs.' + index + '.value'}
+                    rules={{
+                      required: true,
+                      message: `配置${index + 1}内容`,
+                      trigger: 'blur'
+                    }}
+                  >
+                    <ElInput v-model={item.value} placeholder="配置内容"></ElInput>
+                  </ElFormItem>
+                </ElCol>
+                <ElCol span={2}>
+                  <ElButton
+                    onClick={() => {
+                      removeConfig(index,item)
+                    }}
+                    icon={Minus}
+                  ></ElButton>
+                </ElCol>
+              </ElRow>
+            )
+          })}
+          <ElRow>
+            <ElCol span={22}></ElCol>
+            <ElCol span={2}>
+              <ElButton onClick={addConfig} icon={Plus}></ElButton>
+            </ElCol>
+          </ElRow>
         </>
       )
     }
-    const openDialog = (oper: FormOperation, item?: any) => {
+    const openDialog = (oper: FormOperation, item?: Item) => {
       init_data(oper, item)
+
       diaglogForm.value?.openDialog(oper, item)
     }
 
     const rander = (): ObjectType => {
       return (
         <EcDiaglogForm
+          title={prop.title}
+          labelWidth={prop.labelWidth}
           style={ctx.attrs}
           rules={rules}
           ref={diaglogForm}
           v-slots={fromSlots}
-          onSubmit={() => {
-            save()
-          }}
         ></EcDiaglogForm>
       )
     }

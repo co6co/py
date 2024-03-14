@@ -6,11 +6,13 @@ from co6co_db_ext.db_operations import DbPagedOperations,DbOperations,Instrument
 from co6co_sanic_ext.model.res.result import Page_Result
 from co6co_sanic_ext.utils import  JSON_util
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import scoped_session 
 from typing import TypeVar,Dict,List,Any
 from co6co_sanic_ext.model.res.result import Result,Page_Result
 import aiofiles,os,multipart
 from io import BytesIO
 from co6co_web_db.utils import DbJSONEncoder
+from typing import Tuple
 
 
 
@@ -26,6 +28,8 @@ class BaseMethodView(HTTPMethodView):
     view.DELETE :---> del
 
     """ 
+
+
     def response_json(self,data:Result|Page_Result):
         return DbJSONEncoder.json(data)  
 
@@ -52,7 +56,7 @@ class BaseMethodView(HTTPMethodView):
         async with aiofiles.open(filePath, 'wb') as f:
             await f.write( request.body) 
         ## end 保存上传的内容
-    async def parser_multipart_body(self,request:Request)->(Dict[str,tuple|Any],Dict[str,multipart.MultipartPart]):
+    async def parser_multipart_body(self,request:Request)->Tuple[Dict[str,tuple|Any],Dict[str,multipart.MultipartPart]]:
         """
         解析内容: multipart/form-data; boundary=------------------------XXXXX,
         的内容
@@ -122,14 +126,24 @@ class BaseMethodView(HTTPMethodView):
             await operation.delete(po) 
             await operation.commit()    
             return JSON_util.response(Result.success())
-    def getFullPath(self,root, fileName:str)->(str,str):
+        
+    def getFullPath(self,root, fileName:str)->Tuple[str,str]:
         """
         获取去路径和相对路径
         """
         filePath="/".join(["",getDateFolder(),fileName] ) 
         fullPath=os.path.join(root,filePath[1:])
 
-        return fullPath,filePath
+        return fullPath,filePath 
+    
+    def get_db_session(self,request:Request)->AsyncSession|scoped_session:
+        session=request.ctx.session 
+        if isinstance(session,AsyncSession) :return session
+        elif isinstance(session,scoped_session): return session
+        raise Exception("未实现DbSession")
+        return session
+        
+
 """
 class AuthMethodView(BaseMethodView): 
    decorators=[authorized] 

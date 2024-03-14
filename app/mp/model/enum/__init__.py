@@ -75,6 +75,6 @@ class hwx_alarm_type(Base_EC_Enum):
             if(item.key==key):return item 
         return None    
 
-class SiteConfig(Base_Enum):
+class SiteConfigCategory(Base_Enum):
     devURL="devURL",0
     

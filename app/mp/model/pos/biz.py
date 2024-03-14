@@ -26,11 +26,11 @@ class bizSiteConfigPO(UserTimeStampedModelPO):
     __tablename__ = "biz_site_config" 
     
     id = Column("id",Integer, primary_key=True,autoincrement=True)
-    siteId = Column("site_id",Integer,comment="站点名称") 
+    siteId = Column("site_id",Integer,comment="站点") 
     name = Column("name",String(64),comment="配置名称") 
     category = Column("category",String(64),comment="配置类别:0: 设备URL") 
     code = Column("code",String(64),comment="配置代码") 
-    value=Column("value",String(2048),comment="类别") 
+    value=Column("value",String(2048),comment="配置值") 
     
 
 class bizBoxPO(UserTimeStampedModelPO):

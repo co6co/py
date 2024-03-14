@@ -74,6 +74,10 @@ export const getQueryVariable = (key: string) => {
   }
   return null
 }
+/** 新窗口打开URL */
+export const openBlankPage = (url:string) => {
+  window.open(url, '_blank')
+}
 
 export const toggleFullScreen = (elem: HTMLElement | any, fullScreen: boolean = true) => {
   if (!elem) elem = document.documentElement

@@ -1,4 +1,5 @@
-import { ref, reactive, defineComponent, type PropType } from 'vue'
+import { ref, reactive, defineComponent, type PropType, inject, provide } from 'vue'
+import type { InjectionKey } from 'vue'
 
 import {
   ElForm,
@@ -21,6 +22,8 @@ export interface formDataType {
   title?: string
   loading: boolean
 }
+ 
+
 export default defineComponent({
   name: 'EcForm',
   props: {
@@ -37,47 +40,47 @@ export default defineComponent({
       default: 150
     }
   },
-  emits:{
-    error:(msg:string)=>true,
-    submit:( )=>true
+  emits: {
+    error: (msg: string) => true,  
+    submit: ( ) => true,  
   },
-  setup(prop, {attrs,slots,emit,expose}) {
-    const formRef = ref<FormInstance>() 
+  setup(prop, { attrs, slots, emit, expose }) {
+    const formRef = ref<FormInstance>()
 
-    const save = (instance: FormInstance | undefined) => {
+    const _checkData = (instance: FormInstance | undefined,successBck?:()=>void) => {
       if (!instance) {
         ElMessage.error('表单对象为空！')
-        emit("error","表单对象为空！") 
-        return
+        emit('error', '表单对象为空！')
+        return false
       }
-      console.info("formData",prop.model)
       instance.validate((value) => {
         if (!value) {
-          ElMessage.error('请检查输入的数据！') 
-          emit("error","请检查输入的数据！") 
+          ElMessage.error('请检查输入的数据！')
+          emit('error', '请检查输入的数据！')
           return false
         }
-        //提交数据 
-        emit("submit")  
+        //提交数据
+        if(successBck)successBck() 
+        emit('submit' )
       })
-    } 
-    const onSave=()=>{
-      save(formRef.value)
     }
+    const validate = (successBck?:()=>void ) => {
+      _checkData(formRef.value,successBck)
+    } 
     const render = (): ObjectType => {
       //可以写某些代码
       return (
-        <ElForm labelWidth={prop.labelWidth} ref={formRef} rules={prop.rules} model={prop.model}>
-          {slots.default ? slots.default():null}
+        <ElForm  style={attrs} labelWidth={prop.labelWidth} ref={formRef} rules={prop.rules} model={prop.model}>
+          {slots.default ? slots.default() : null}
         </ElForm>
       )
     }
     expose({
-      formInstance:formRef ,
-      save:onSave  
-    }) 
+      formInstance: formRef,
+      validate: validate
+    })
     render.formInstance = formRef
-    render.save=onSave
+    render.validate = validate
     return render
   }
 })

@@ -15,27 +15,20 @@ import asyncio
 from sanic import Sanic
 
 class baseBll: 
-    session:AsyncSession=None 
-    loop=None
-    app:Sanic
-    def __init__(self,app:Sanic,loop) -> None:
-        self.app=app
-        _service:db_service=db_service(app.config.db_settings) 
-        self.session:AsyncSession=_service.async_session_factory() 
-
+    session:AsyncSession=None   
+    def __init__(self,db_settings:dict) -> None:
+        
+        _service:db_service=db_service(db_settings) 
+        self.session:AsyncSession=_service.async_session_factory()  
         '''
         service:db_service=app.ctx.service
         self.session:AsyncSession=service.async_session_factory()
-        '''
-        self.loop=loop
+        ''' 
         log.warn(f"..创建session。。")
         pass
     def __del__(self)->None:  
         log.info(f"{self}...关闭session")
         if self.session:asyncio.run(self.session.close())
-        #if self.session: await self.session.close() 
-
-    
-
+        #if self.session: await self.session.close()   
     def __repr__(self) -> str:
         return f'{self.__class__}'

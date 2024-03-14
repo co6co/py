@@ -3,6 +3,8 @@ from threading import Thread
 from time import sleep, ctime
 from co6co.utils import log
 from functools import partial
+from types import FunctionType
+from co6co.utils import isCallable
 
 class ThreadEvent:
 	"""
@@ -30,26 +32,35 @@ class ThreadEvent:
 	@property
 	def loop(self):
 		return self._loop
+	
+	bck:FunctionType=None
 
-	def __init__(self,threadName:str=None):
+	def __init__(self,threadName:str=None,quitBck:FunctionType=None):
 		self._loop =asyncio.new_event_loop() 
 		#log.warn(f"ThreadEventLoop:{id(self._loop)}")
 		Thread(target=self._start_background, daemon=True,name=threadName) .start()
-		
+		self.bck=quitBck
 
 	def _start_background(self):
 		asyncio.set_event_loop(self.loop)
-		self._loop.run_forever()
-		log.warn("线程退出。")
-		
+		self._loop.run_forever() 
+		if self.bck !=None and isCallable(self.bck):self.bck()
+		 
 	def runTask(self, tastFun , *args, **kwargs):
 		#log.warn(f"ThreadEventLoop22:{id(self._loop)}")
 		task=asyncio.run_coroutine_threadsafe(tastFun(*args, **kwargs), loop=self._loop)
 		return task.result()
 	
 	def _shutdown(self):
-		 self._loop.stop()
+		self._loop.stop()
+		#print("running:", self._loop.is_running()) #True
+		#print("closed.", self._loop.is_closed())   #False
 		  
 	def close(self): 
 		self._loop.call_soon_threadsafe(partial(self._shutdown )) 
+	def __del__(self): 
+		self._loop.close()
+		#log.warn("closed")
+		#print("running:", self._loop.is_running()) #False
+		#print("closed.", self._loop.is_closed())   #True
 		

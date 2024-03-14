@@ -24,6 +24,7 @@
             ref="tableInstance"
             @row-click="onTableSelect"
             header-cell-class-name="table-header"
+            @row-contextmenu="onRowContext"
           >
             <el-table-column
               prop="id"
@@ -86,14 +87,8 @@
             <el-table-column label="操作" align="center">
               <template #default="scope">
                 <el-button text :icon="Edit" @click="onOpenDialog(1, scope.row)"> 修改 </el-button>
-                <el-button text :icon="Setting" @click="onOpenConfigPage('router', scope.row)">
-                  路由器
-                </el-button>
-                <el-button text :icon="Setting" @click="onOpenConfigPage('box', scope.row)">
-                  AI盒子
-                </el-button>
-                <el-button text :icon="Setting" @click="onOpenConfigPage('ip_camera', scope.row)">
-                  监控球机
+                <el-button text :icon="Setting" @click="onRowContext(scope.row, 1, $event)">
+                  前端设备配置
                 </el-button>
               </template>
             </el-table-column>
@@ -119,43 +114,17 @@
         </div>
       </el-footer>
     </el-container>
-
     <!-- 弹出框 -->
-    <el-dialog
-      title="打开配置网址"
-      draggable
-      class="setting"
-      v-model="configDialog_model.showDialog"
-      style="width: 36%"
-    >
-      <template #header>
-        <el-text>
-          <el-icon>
-            <Setting />
-          </el-icon>
-          打开配置网址
-        </el-text>
-      </template>
-      <div>
-        <el-button type="primary" size="small" :icon="Setting" @click="openBlankPage(0)"
-          >内网配置</el-button
-        >
-        <el-button type="primary" size="small" :icon="Setting" @click="openBlankPage(1)"
-          >外网配置</el-button
-        >
-        <el-button
-          type="primary"
-          size="small"
-          v-if="configDialog_model.deviceData && configDialog_model.deviceData.sshConfigUrl"
-          :icon="Setting"
-          @click="openBlankPage(2)"
-          >SSH配置</el-button
-        >
-      </div>
-    </el-dialog>
+    <edit-box
+      ref="editBoxDialogRef"
+      :label-width="100"
+      @saved="getData"
+      :model="form.fromData"
+      :title="form.title"
+      style="width: 60%; height: 70%"
+    ></edit-box>
 
-    <!-- 弹出框 -->
-    <edit-box ref="editBoxDialogRef" :label-width="90" @saved="getData"  :model="form.fromData" :title="form.title" style="width:40%;height:56%;"></edit-box> 
+    <ec-context-menu ref="contextMenuRef" @checked="onCheckedMenu"></ec-context-menu>
   </div>
 </template>
 
@@ -202,14 +171,13 @@ import * as res_api from '../api'
 import * as t from '../store/types/devices'
 import { detailsInfo } from '../components/details'
 import { imgVideo, types } from '../components/player'
-import { str2Obj, createStateEndDatetime } from '../utils'
+import { str2Obj, createStateEndDatetime, openBlankPage } from '../utils'
 import { showLoading, closeLoading } from '../components/Logining'
 import { pagedOption, type PagedOption } from '../components/tableEx'
 
-import editBox,{ type Item} from '../components/biz/src/editBox'
+import editBox, { type Item } from '../components/biz/src/editBox'
+import EcContextMenu, { type ContextMenuItem } from '../components/common/EcContextMenu'
 
- 
- 
 interface Query extends IpageParam {
   name: string
   category?: number
@@ -292,7 +260,7 @@ const onTableSelect = (row: any) => {
 }
 
 //**详细信息 */
- 
+
 interface dialogDataType {
   dialogVisible: boolean
   operation: 0 | 1 | number
@@ -305,68 +273,44 @@ let dialogData = {
   operation: 0,
   id: 0,
   fromData: {
-    id:-1,
+    id: -1,
     name: '',
     postionInfo: '',
     deviceCode: '',
     deviceDesc: '',
-    createTime: "",
-  updateTime: ""
+    createTime: '',
+    updateTime: ''
   }
-} 
-const editBoxDialogRef=ref<InstanceType <typeof editBox>>()
+}
+/** 编辑 */
+const editBoxDialogRef = ref<InstanceType<typeof editBox>>()
 let form = reactive<dialogDataType>(dialogData)
-const onOpenDialog = (operation: 0 | 1, row?: Item) => { 
+const onOpenDialog = (operation: 0 | 1, row?: Item) => {
   table_module.currentRow = row
   switch (operation) {
     case 0:
-      form.title = '增加' 
+      form.title = '增加'
       break
-    case 1: 
-      form.title = '编辑' 
-      break
-  } 
-  editBoxDialogRef.value?.openDialog(operation,row) 
-}
- 
-const openBlankPage = (type: number) => {
-  if (!configDialog_model.deviceData) {
-    ElMessage.warning('未关联该设备数据！')
-    return
-  }
-  console.info(type, configDialog_model.deviceData)
-  switch (type) {
-    case 0:
-      window.open(configDialog_model.deviceData.innerConfigUrl, '_blank')
     case 1:
-      window.open(configDialog_model.deviceData.configUrl, '_blank')
+      form.title = '编辑'
       break
-    case 2:
-      window.open(configDialog_model.deviceData.sshConfigUrl, '_blank')
-      break
-    default:
-      window.open(configDialog_model.deviceData.configUrl, '_blank')
   }
+  editBoxDialogRef.value?.openDialog(operation, row)
 }
+//右键菜单
+const contextMenuRef = ref<InstanceType<typeof EcContextMenu>>()
+const onRowContext = (row: Item, column: any, event: any) => {
+  event.preventDefault() //阻止鼠标右键默认行为
+  api.get_config_svc(row.id, api.ConfigCategory.devConfig).then((res) => { 
+    console.info(res.data)
 
-const configDialog_model = reactive<{
-  showDialog: boolean
-  deviceData?: { configUrl: string; innerConfigUrl: string; sshConfigUrl?: string }
-}>({
-  showDialog: false
-}) 
-//打开配置页面
-const onOpenConfigPage = (category: string, row: Item) => {
-  api.getDetailInfo(row.id, category).then((res) => {
-    if (res.code == 0) {
-      let data = []
-      for (let i = 0; i < res.data.length; i++) {
-        data.push({ name: res.data[i].name + '信息', data: res.data[i] })
-      }
-      if (res.data.length == 0) ElMessage.warning('未关联该设备！')
-      else (configDialog_model.showDialog = true), (configDialog_model.deviceData = res.data[0])
-    }
+    if(res.data&&res.data.length>0)
+    contextMenuRef.value?.open(res.data,event)
+    else ElMessage.error(`站点‘${row.name}’未找到相关配置`)
   })
+}
+const onCheckedMenu = (index: number, item: ContextMenuItem) => {
+  openBlankPage((item as api.ConfigItem).value)
 }
 </script>
 <style scoped lang="less">
