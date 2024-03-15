@@ -38,14 +38,15 @@ service.interceptors.response.use(
 				if (typeof response.data == 'string') return JSONbig.parse(response.data);
 				if (response.data.code==0){
 					return response.data
-				}else { 
-					console.warn(response.data) 
+				}else {  
+					ElMessage.error(`请求出错：${response.data.message}`)
 					return	Promise.reject(response.data.message||"请求出错！"); 
 				} 
 			}else return response;
 		}
 		if (response.status === 206) return response;
 		else {
+
 			return 	Promise.reject(response.statusText);
 		}
 	},

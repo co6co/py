@@ -26,6 +26,7 @@ from sqlalchemy.engine.row import RowMapping
 from view_model.biz.poster_view import Image_View
 
 
+
 class Devices_View(AuthMethodView):
     """
     设备API
@@ -83,6 +84,7 @@ class IP_Cameras_View(AuthMethodView):
     async def put(self, request: Request):
         """
         增加相机
+        如果没有可以删除
         """
         try:
             param = cameraParam()
@@ -92,8 +94,8 @@ class IP_Cameras_View(AuthMethodView):
                 session: AsyncSession = session
                 po = bizCameraPO()
                 param.set_po(po) 
-                po.createTime=datetime.datetime.now()
                 po.uuid=createUuid() 
+                po.createTime=datetime.datetime.now() 
                 po.createUser=id 
                 session.add(po)
                 await session.commit()
@@ -140,6 +142,7 @@ class IP_Camera_View(AuthMethodView):
     async def put(self, request: Request, pk: int):
         """
         编辑相机
+        如果没有可以删除
         """
         try:
             param  = cameraParam()

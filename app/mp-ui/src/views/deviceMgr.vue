@@ -131,8 +131,10 @@
 			</el-footer>
 		</el-container>
 
-		<!-- 弹出框 -->
-		<edit-ip-camera ref="editIpCameraRef" @saved="onIpcamerSave()"></edit-ip-camera> 
+		<!-- 弹出框 
+		<edit-ip-camera :title="编辑" :label-width="100" ref="editIpCameraRef" @saved="onIpcamerSave()"></edit-ip-camera> 
+		-->
+		 
 	</div>
 </template>
 
@@ -177,7 +179,7 @@
 	import { str2Obj, createStateEndDatetime } from '../utils';
 	import { showLoading, closeLoading } from '../components/Logining';
 	import { getTableIndex } from '../utils/tables';
-	import { editIpCamera } from '../components/biz';
+	import   editIpCamera  from '../components/biz/src/editCamera';
 
 	interface TableRow {
 		id: number;
@@ -342,10 +344,10 @@
 			.catch(() => {});
 	};
 	//**监控球机 */
-	const editIpCameraRef = ref();
+	const editIpCameraRef = ref<InstanceType<typeof editIpCamera>>();
 	const onOpenDialog = (row?: any) => { 
 		//有记录编辑无数据增加  
-		editIpCameraRef.value.onOpenDialog(row?1:0,row);
+		//editIpCameraRef.value.openDialog(row.siteId, row.id);
 	}; 
 	const onIpcamerSave = () => {
 		getData();

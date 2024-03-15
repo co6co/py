@@ -59,13 +59,9 @@ export default defineComponent({
         </>
       )
     } 
-   // const data: Object = inject('formData') || {}
-   
-   const data: Object = inject('formData') || {}
- 
- 
-    
-    const openDialog = (oper: FormOperation, item?: any) => { 
+   // const data: Object = inject('formData') || {} 
+  const data: Object = inject('formData') || {} 
+  const openDialog = (  ) => { 
       if (dialogRef.value) {
         dialogRef.value.data.title = prop.title||"弹出框"
         setDiaglogVisible(true)

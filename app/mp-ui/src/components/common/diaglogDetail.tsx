@@ -22,8 +22,7 @@ export default defineComponent({
   setup(prop, ctx) {
     const dialogRef = ref<InstanceType<typeof EcDialog>>()
     const openDiaLog = () => {
-      if (dialogRef.value) {
-        dialogRef.value.data.title = prop.title
+      if (dialogRef.value) { 
         dialogRef.value.data.visible = true
       }
     }
@@ -36,7 +35,7 @@ export default defineComponent({
     })
     const rander = (): ObjectType => {
       return ( 
-          <EcDialog style={ctx.attrs} ref={dialogRef} v-slots={slots}></EcDialog> 
+          <EcDialog title={prop.title} style={ctx.attrs} ref={dialogRef} v-slots={slots}></EcDialog> 
       )
     }
     rander.openDiaLog = openDiaLog

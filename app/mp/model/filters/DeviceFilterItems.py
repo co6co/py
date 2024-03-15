@@ -51,7 +51,7 @@ class DeviceFilterItems(absFilterItems):
         """
         默认排序
         """
-        return (bizCameraPO.id.asc(),)
+        return (bizCameraPO.createTime.desc(),)
 
 
 class CameraFilterItems(absFilterItems):

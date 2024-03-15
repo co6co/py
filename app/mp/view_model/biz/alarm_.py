@@ -39,14 +39,14 @@ class AlarmFilterItems(absFilterItems):
     告警
     """
     alarmType: str = None
-    siteName: str = None
+    siteId: int = None
     datetimes: List[str]
 
     def __init__(self):
         self.datetimes = []
         super().__init__(bizAlarmPO)
 
-        self.listSelectFields =[bizAlarmPO.id,
+        self.listSelectFields =[bizAlarmPO.id,bizSitePo.id.label("siteId"),
                                 bizAlarmPO.uuid.label("uid"),
                                  bizAlarmPO.alarmType,
                                  bizAlarmPO.videoUid,
@@ -54,7 +54,7 @@ class AlarmFilterItems(absFilterItems):
                                  bizAlarmPO.alarmTime, 
                                  bizAlarmPO.rawImageUid,  
                                  bizAlarmPO.createTime,
-                                 bizSitePo.name.label("boxName"),
+                                 bizBoxPO.name.label("boxName"),
                                  bizSitePo.name.label("siteName"),
                                  bizAlarmTypePO.desc.label("alarmTypeDesc")
                                 ] 
@@ -65,8 +65,8 @@ class AlarmFilterItems(absFilterItems):
         filters_arr = []
         if self.checkFieldValue(self.alarmType):
             filters_arr.append(bizAlarmPO.alarmType.__eq__(self.alarmType))
-        if self.checkFieldValue(self.siteName):
-            filters_arr.append(bizSitePo.name.like(f'%{self.siteName}%'))
+        if self.checkFieldValue(self.siteId):
+            filters_arr.append(bizSitePo.id==self.siteId)
         if self.datetimes and len(self.datetimes) == 2:
             filters_arr.append(bizAlarmPO.alarmTime.between(
                 self.datetimes[0], self.datetimes[1]))
@@ -77,20 +77,9 @@ class AlarmFilterItems(absFilterItems):
             Select(*self.listSelectFields)
             .join(bizAlarmTypePO, isouter=True, onclause=bizAlarmPO.alarmType == bizAlarmTypePO.alarmType)
             .join(bizBoxPO, isouter=True, onclause=bizAlarmPO.boxId == bizBoxPO.id)
-            .join(bizSitePo, isouter=True, onclause=bizSitePo.id == bizBoxPO.siteId)
-            
-            #.options(joinedload(bizAlarmPO.alarmTypePO))
-            #.options(joinedload(bizAlarmPO.alarmAttachPO))
-            # .options( contains_eager(bizBoxPO))
+            .join(bizSitePo, isouter=True, onclause=bizSitePo.id == bizBoxPO.siteId) 
             .filter(*self.filter())
-        )
-        '''
-        select = (
-            Select( bizAlarmPO)
-            .options(joinedload(bizAlarmPO.alarmTypePO))
-            .options(joinedload(bizAlarmPO.alarmAttachPO))
-            .filter(*self.filter())
-        )'''
+        ) 
         return select
 
     def getDefaultOrderBy(self) -> Tuple[InstrumentedAttribute]:

@@ -1,6 +1,9 @@
-import { ref, reactive, defineComponent, type PropType, inject, provide, computed ,onMounted,onUnmounted} from 'vue'
+import { ref, reactive, defineComponent,  inject, provide, computed ,onMounted,onUnmounted} from 'vue'
+import type { CSSProperties,PropType } from 'vue'
+import { ElCard, ElMenu, ElMenuItem ,useNamespace} from 'element-plus'
+//const ns = useNamespace('abc') 
 
-import { ElCard, ElMenu, ElMenuItem } from 'element-plus'
+
 import type { ObjectType } from './types'
 
 export interface ContextMenuItem {
@@ -12,31 +15,34 @@ export interface IContextMenu {
   left: number
   top: number
   data: ContextMenuItem[]
+  context?:any
 }
 export default defineComponent({
-  name: 'EcForm',
+  name: 'EcContextMenu',
   emits: {
-    checked: (index: number, item: ContextMenuItem) => true
+    checked: (index: number, item: ContextMenuItem,context?:any) => true
   },
   setup(prop, { attrs, slots, emit, expose }) {
     const menuData = reactive<IContextMenu>({
       visible: false,
       left: 0,
       top: 0,
-      data: []
+      data: [], 
     })
-    const open = (data: ContextMenuItem[], event: MouseEvent) => {
+
+   
+    const open = (data: ContextMenuItem[], event: MouseEvent,context?:any) => {
       event.preventDefault() //阻止鼠标右键默认行为
       menuData.data = data
       menuData.left = event.clientX
       menuData.top = event.pageY
-      menuData.visible = true
-      console.info('ddddddd', data)
+      menuData.visible = true 
+      menuData.context=context
     }
 
     const onSelectMenu = (index: number, item: ContextMenuItem) => {
       menuData.visible = false
-      emit('checked', index, item)
+      emit('checked', index, item,menuData.context)
     }
     const style = computed(() => {
       return {
@@ -45,7 +51,7 @@ export default defineComponent({
         position: 'fixed',
         'z-index': 9
       }
-    })
+    }) 
     const close=()=>{
       menuData.visible = false
     }
@@ -60,8 +66,8 @@ export default defineComponent({
       return (
         <>
           {menuData.visible ? (
-            <div style={style.value}> 
-                <ElMenu mode="vertical" style="">
+            <div style={style.value as CSSProperties}> 
+                <ElMenu mode="vertical">
                   {menuData.data.map((item, index) => {
                     return (
                       <ElMenuItem

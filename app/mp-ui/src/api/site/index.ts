@@ -1,8 +1,9 @@
 import request from '../../utils/request'
 const BASE_URL = '/api/biz/site'
 const CONFIG_URL = `${BASE_URL}/config`
+import type { SelectItem } from '../types'
 
-export const select_svc = (): Promise<IPageResponse> => {
+export const select_svc = (): Promise<IResponse<SelectItem[]>> => {
   return request.get(`${BASE_URL}`)
 }
 
@@ -19,10 +20,10 @@ export const list2_svc = (data: any): Promise<IPageResponse> => {
 export const getDetailInfo = (id: number, category: string): Promise<IPageResponse> => {
   return request.post(`${BASE_URL}/${id}`, { category: category })
 }
-export const add_site_svc = (data: any): Promise<IPageResponse> => {
+export const add_site_svc = (data: any): Promise<IResponse> => {
   return request.put(`${BASE_URL}`, data)
 }
-export const edit_site_svc = (id: number, data: any): Promise<IPageResponse> => {
+export const edit_site_svc = (id: number, data: any): Promise<IResponse> => {
   return request.put(`${BASE_URL}/${id}`, data)
 }
 
@@ -32,9 +33,9 @@ export interface ConfigItem {
   value: string
   code: string
   category: string
-} 
-export enum ConfigCategory{
-  devConfig="devURL" 
+}
+export enum ConfigCategory {
+  devConfig = 'devURL'
 }
 export const get_config_svc = (id: number, category: string): Promise<IResponse<ConfigItem[]>> => {
   return request.post(`${CONFIG_URL}/${id}`, { category: category })

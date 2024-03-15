@@ -5,25 +5,24 @@ import { default as EcDiaglogForm } from '../../common/EcDiaglogForm'
 import { FormOperation } from '../../common/types'
 import type { ObjectType, FormData } from '../../common/types'
 
-import * as api from '../../../api/site/aiBox'
-
+import * as api from '../../../api/site/router'
 import {
   ElRow,
   ElCol,
   ElButton,
   ElFormItem,
-  ElInputNumber,
   ElInput,
   ElMessage,
   type FormRules,
   type FormInstance
 } from 'element-plus'
+import { Plus, Minus } from '@element-plus/icons-vue'
 
 //Omit、Pick、Partial、Required
 export type FormItem = Omit<api.Item, 'id' | 'createTime' | 'updateTime'>
 
 export default defineComponent({
-  name: 'EditAIBox',
+  name: 'diaglogForm',
   props: {
     title: {
       type: String
@@ -46,18 +45,15 @@ export default defineComponent({
         name: '',
         siteId: 0,
         uuid: '',
-        code: '',
         innerIp: '',
         ip: '',
-        cpuNo: '',
-        mac: '',
-        license: '',
-        talkbackNo: ''
+        sim: '',
+        ssd: '',
+        password: ''
       }
     })
     const key = Symbol('formData') as InjectionKey<FormItem> //'formData'
     provide('formData', data.fromData)
-
     provide('title', prop.title)
 
     const init_data = (oper: FormOperation, siteId: number, item?: api.Item) => {
@@ -65,47 +61,42 @@ export default defineComponent({
       switch (oper) {
         case FormOperation.add:
           data.id = -1
-          data.fromData.siteId = siteId
           data.fromData.name = ''
+          data.fromData.siteId = siteId
           data.fromData.uuid = ''
-          data.fromData.code = ''
           data.fromData.innerIp = ''
           data.fromData.ip = ''
-          data.fromData.cpuNo = ''
-          data.fromData.mac = ''
-          data.fromData.license = ''
-          data.fromData.talkbackNo = ''
+          data.fromData.sim = ''
+          data.fromData.ssd = ''
+          data.fromData.password = ''
           break
         case FormOperation.edit:
           if (!item) return false
           data.id = item.id
           data.fromData.name = item.name
-          data.fromData.name = item.name
+          data.fromData.siteId = siteId
           data.fromData.uuid = item.uuid
-          data.fromData.code = item.code
           data.fromData.innerIp = item.innerIp
           data.fromData.ip = item.ip
-          data.fromData.cpuNo = item.cpuNo
-          data.fromData.mac = item.mac
-          data.fromData.license = item.license
-          data.fromData.talkbackNo = item.talkbackNo
+          data.fromData.sim = item.sim
+          data.fromData.ssd = item.ssd
+          data.fromData.password = item.password
           break
       }
       return true
     }
-
     const rules: FormRules = {
-      name: [{ required: true, message: '请输入名称', trigger: 'blur' }],
-      code: [{ required: true, message: '请输入设备编码', trigger: 'blur' }],
-      innerIp: [{ required: true, message: '请输入设备内部IP', trigger: 'blur' }],
-      ip: [{ required: true, message: '请输入设备IP地址', trigger: 'blur' }],
-      mac: [{ required: true, message: '请输入设备MAC地址', trigger: 'blur' }],
-      talkbackNo: [{ type: 'number', required: true, message: '请输入对讲号', trigger: 'blur' }]
+      name: [{ required: true, message: '请输入设备名称', trigger: 'blur' }],
+      innerIp: [{ required: true, message: '请输入位置信息', trigger: 'blur' }],
+      ip: [{ required: true, message: '请输入设备代码', trigger: 'blur' }],
+      password: [{ required: true, message: '请输入设备代码', trigger: 'blur' }],
+      sim: [{ required: true, message: '请输入设备用途', trigger: 'blur' }],
+      ssd: [{ required: true, message: '请输入设备代码', trigger: 'blur' }]
     }
 
     const save = () => {
       //提交数据
-      let promist: Promise<IResponse<any>>
+      let promist: Promise<IPageResponse<any>>
       switch (data.operation) {
         case FormOperation.add:
           promist = api.add_svc(data.fromData)
@@ -151,8 +142,8 @@ export default defineComponent({
               </ElFormItem>
             </ElCol>
             <ElCol span={12}>
-              <ElFormItem label="设备编码" prop="code">
-                <ElInput v-model={data.fromData.code}></ElInput>
+              <ElFormItem label="设备密码" prop="password">
+                <ElInput v-model={data.fromData.password}></ElInput>
               </ElFormItem>
             </ElCol>
           </ElRow>
@@ -172,35 +163,15 @@ export default defineComponent({
 
           <ElRow>
             <ElCol span={12}>
-              <ElFormItem label="CPU序列号" prop="cpuNo">
-                <ElInput v-model={data.fromData.cpuNo}></ElInput>
+              <ElFormItem label="sim号" prop="sim">
+                <ElInput v-model={data.fromData.sim}></ElInput>
               </ElFormItem>
             </ElCol>
             <ElCol span={12}>
-              <ElFormItem label="设备MAC地址" prop="mac">
-                <ElInput v-model={data.fromData.mac}></ElInput>
+              <ElFormItem label="WIFI ssd" prop="ssd">
+                <ElInput v-model={data.fromData.ssd}></ElInput>
               </ElFormItem>
             </ElCol>
-          </ElRow>
-          <ElRow>
-            <ElCol span={12}>
-              <ElFormItem label="对讲号" prop="talkbackNo">
-                <ElInputNumber
-                  v-model={data.fromData.talkbackNo}
-                  placeholder="对讲号"
-                ></ElInputNumber>
-              </ElFormItem>
-            </ElCol>
-            <ElCol span={12}></ElCol>
-          </ElRow>
-
-          <ElRow>
-            <ElCol span={16}>
-              <ElFormItem label="授权码" prop="license">
-                <ElInput v-model={data.fromData.license} type="textarea"></ElInput>
-              </ElFormItem>
-            </ElCol>
-            <ElCol span={12}></ElCol>
           </ElRow>
         </>
       )

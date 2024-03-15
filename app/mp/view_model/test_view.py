@@ -25,7 +25,7 @@ class TestBll(baseBll):
 
     
 class TestView(BaseMethodView):
-    def get(self,request:Request ): 
+    def get(self,request:Request ):  
         return text(f"请求成功，你可以试试其他的:{request.args}") 
     
     async def post(self,request:Request):

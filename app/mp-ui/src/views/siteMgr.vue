@@ -114,16 +114,15 @@
         </div>
       </el-footer>
     </el-container>
-    <!-- 弹出框 -->
-    <edit-box
-      ref="editBoxDialogRef"
+    <!-- 编辑站点 -->
+    <edit-site
+      ref="editSiteDialogRef"
       :label-width="100"
       @saved="getData"
       :model="form.fromData"
       :title="form.title"
       style="width: 60%; height: 70%"
-    ></edit-box>
-
+    ></edit-site> 
     <ec-context-menu ref="contextMenuRef" @checked="onCheckedMenu"></ec-context-menu>
   </div>
 </template>
@@ -175,7 +174,7 @@ import { str2Obj, createStateEndDatetime, openBlankPage } from '../utils'
 import { showLoading, closeLoading } from '../components/Logining'
 import { pagedOption, type PagedOption } from '../components/tableEx'
 
-import editBox, { type Item } from '../components/biz/src/editBox'
+import editSite, { type Item } from '../components/biz/src/editSite'
 import EcContextMenu, { type ContextMenuItem } from '../components/common/EcContextMenu'
 
 interface Query extends IpageParam {
@@ -283,7 +282,7 @@ let dialogData = {
   }
 }
 /** 编辑 */
-const editBoxDialogRef = ref<InstanceType<typeof editBox>>()
+const editSiteDialogRef = ref<InstanceType<typeof editSite>>()
 let form = reactive<dialogDataType>(dialogData)
 const onOpenDialog = (operation: 0 | 1, row?: Item) => {
   table_module.currentRow = row
@@ -295,7 +294,7 @@ const onOpenDialog = (operation: 0 | 1, row?: Item) => {
       form.title = '编辑'
       break
   }
-  editBoxDialogRef.value?.openDialog(operation, row)
+  editSiteDialogRef.value?.openDialog(operation, row)
 }
 //右键菜单
 const contextMenuRef = ref<InstanceType<typeof EcContextMenu>>()

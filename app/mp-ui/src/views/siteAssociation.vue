@@ -51,6 +51,7 @@
 
             <el-table-column label="路由器" align="center">
               <template #default="scope">
+                <el-button text :icon="Edit" @click="onOpenRouterDialog(scope.row)"> 修改 </el-button>
                 <el-button text :icon="Message" @click="onOpen2Dialog('router', scope.row)">
                   路由器
                 </el-button>
@@ -59,6 +60,7 @@
 
             <el-table-column label="AI盒子" align="center">
               <template #default="scope">
+                <el-button text :icon="Edit" @click="onOpenAiBoxDialog(scope.row)"> 修改 </el-button>
                 <el-button text :icon="Message" @click="onOpen2Dialog('box', scope.row)">
                   AI盒子
                 </el-button>
@@ -67,13 +69,7 @@
 
             <el-table-column label="监控球机" align="center">
               <template #default="scope">
-                <el-button
-                  text
-                  :icon="Message"
-                  @click="onOpenIpCameraDialog('ip_camera', scope.row)"
-                >
-                  修改
-                </el-button>
+                <el-button text :icon="Edit" @click="onRowContext(scope.row,$event)"> 修改 </el-button> 
                 <el-button text :icon="Message" @click="onOpen2Dialog('ip_camera', scope.row)">
                   监控球机
                 </el-button>
@@ -100,10 +96,47 @@
         </div>
       </el-footer>
     </el-container>
+
+    <!-- 编辑AI盒子 -->
+    <edit-box
+      :label-width="120"
+      title="编辑AI盒子信息"
+      ref="editBoxRef"
+      @saved="getData"
+      style="width: 60%; height: 60%"
+    ></edit-box>
+
+    <edit-camera
+      :label-width="120"
+      title="编辑监控球机信息"
+      ref="editCameraRef"
+      @saved="getData"
+      style="width: 60%; height: 70%"
+    ></edit-camera>
+    <ec-context-menu ref="contextMenuRef" @checked="onCheckedMenu"></ec-context-menu>
+    <edit-router
+      :label-width="100"
+      title="编辑路由器信息"
+      ref="editRouterRef"
+      @saved="getData"
+      style="width: 60%; height: 70%"
+    ></edit-router>
+
     <!-- 编辑监控球机 -->
-    <edit-ip-camera ref="editIpCameraRef"  :allow-modify-site="false"  @saved="onIpcamerSave()" ></edit-ip-camera>
+    <edit-ip-camera
+      ref="editIpCameraRef"
+      :allow-modify-site="false"
+      @saved="getData"
+    ></edit-ip-camera>
+
     <!-- 详细信息 -->
-     <diaglog-detail ref="diaglogRef" :column="2"  :title="form2.title" :data="form2.data" style="width:50%;height:76%" ></diaglog-detail>  
+    <diaglog-detail
+      ref="diaglogRef"
+      :column="3"
+      :title="form2.title"
+      :data="form2.data"
+      style="width: 70%; height: 76%"
+    ></diaglog-detail>
   </div>
 </template>
 
@@ -123,18 +156,22 @@ import {
   Cpu,
   VideoCamera
 } from '@element-plus/icons-vue'
-import * as api from '../api/site'
+import * as api from '../api/site' 
+import * as  ipCamera_Api from '../api/site/ipCamera'
 import * as dev_api from '../api/device'
 import * as res_api from '../api'
 import * as t from '../store/types/devices'
 import { detailsInfo } from '../components/details'
 import { imgVideo, types } from '../components/player'
 import { str2Obj, createStateEndDatetime } from '../utils'
-import { showLoading, closeLoading } from '../components/Logining' 
+import { showLoading, closeLoading } from '../components/Logining'
 
-import { editIpCamera } from '../components/biz'
-import diaglogDetail from '../components/common/diaglogDetail'
  
+import editBox from '../components/biz/src/editBox'
+import editCamera from '../components/biz/src/editCamera'
+import EcContextMenu, { type ContextMenuItem } from '../components/common/EcContextMenu'
+import editRouter from '../components/biz/src/editRouter'
+import diaglogDetail from '../components/common/diaglogDetail'
 
 interface TableRow {
   id: number
@@ -228,55 +265,66 @@ const onTableSelect = (row: any) => {
 
 const queryDeviceDetailInfo = (siteId: number, deviceType: string) => {
   return api.getDetailInfo(siteId, deviceType)
-} 
+}
+
+//编辑AIBOX
+const editBoxRef = ref<InstanceType<typeof editBox>>()
+const onOpenAiBoxDialog = (row: TableRow) => {
+  editBoxRef.value?.openDialog(row.id)
+}
+//编辑路由器信息
+const editRouterRef = ref<InstanceType<typeof editRouter>>()
+const onOpenRouterDialog = (row: TableRow) => {
+  editRouterRef.value?.openDialog(row.id)
+}
 //编辑球机
-const editIpCameraRef = ref()
-const onOpenIpCameraDialog = (category: string, row: TableRow) => {
-  queryDeviceDetailInfo(row.id, category).then((res) => {
-    if (res.code == 0) {
-      let data = { siteId: row.id }
-      if (res.data.length > 0) data = res.data[0]
-      if (res.data.length > 1) console.warn('site对应了多个球机,现只能编辑一个！')
-      //有记录编辑无数据增加
-      editIpCameraRef.value.onOpenDialog(res.data.length > 0 ? 1 : 0, data)
-    }
+const editCameraRef = ref<InstanceType<typeof editCamera>>()
+const onOpenCameraDialog = (sietId:number,ipCameraId?:number) => {
+  editCameraRef.value?.openDialog(sietId,ipCameraId)
+}
+//右键菜单
+const contextMenuRef = ref<InstanceType<typeof EcContextMenu>>()
+const onRowContext = (row:TableRow, event: any) => {
+  event.preventDefault() //阻止鼠标右键默认行为
+  ipCamera_Api.select_svc(row.id ).then((res) => {
+    //有数据  
+     let slectItem={id:-1,name:"新增"}
+    if(res.data&&res.data.length>0) res.data.push(slectItem)
+    else res.data=[slectItem] 
+    contextMenuRef.value?.open(res.data,event,row.id )
   })
 }
-const onIpcamerSave = () => {
-  getData()
-}
+const onCheckedMenu = (index: number, item: ContextMenuItem,siteId:number) => { 
+  if (item.id==-1)onOpenCameraDialog(siteId)
+  else if (typeof item.id=="number") onOpenCameraDialog(siteId,item.id)
+} 
 //**详细下信息 */
-const diaglogRef=ref<InstanceType<typeof diaglogDetail >>()
- 
+const diaglogRef = ref<InstanceType<typeof diaglogDetail>>()
+
 interface dataContent {
   name: string
   data: any
 }
 interface DataType {
-  title: string 
+  title: string
   data: dataContent[]
 }
 
 let form2 = ref<DataType>({
-  title: '', 
+  title: '',
   data: []
 })
-const onOpen2Dialog = (category: string, row: TableRow) => { 
-  
-  if (category == 'box') {
-    form2.value.title = '盒子信息'
-  } else if (category == 'router') {
-    form2.value.title = '路由器信息'
-  } else {
-    form2.value.title = '违停球信息'
-  }
+const onOpen2Dialog = (category: string, row: TableRow) => {
+  if (category == 'box') form2.value.title = '盒子信息'
+  else if (category == 'router') form2.value.title = '路由器信息'
+  else form2.value.title = '违停球信息'
   queryDeviceDetailInfo(row.id, category).then((res) => {
     if (res.code == 0) {
       let data = []
-      for (let i = 0; i < res.data.length; i++) 
-        data.push({ name: res.data[i].name + '信息', data: res.data[i] }) 
+      for (let i = 0; i < res.data.length; i++)
+        data.push({ name: res.data[i].name + '信息', data: res.data[i] })
       if (res.data.length == 0) ElMessage.warning('未找到关联设备')
-      else (diaglogRef.value?.openDiaLog(),form2.value.data = data)
+      else diaglogRef.value?.openDiaLog(), (form2.value.data = data)
     }
   })
 }

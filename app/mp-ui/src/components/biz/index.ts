@@ -1,6 +1,5 @@
 import bizPlayer from './src/bizPlayer.vue'
-import * as types from './src/types'
-import editIpCamera from './src/editIpCamera.vue'
+import * as types from './src/types' 
 import taklerPtz from './src/taklerPtz.vue'
 import * as ptz from './src/ptz'
 import { types as pType } from '../player'
@@ -50,4 +49,4 @@ const getResources = (item: AlarmItem) => {
   }
   return data
 }
-export { bizPlayer, types, editIpCamera, taklerPtz, ptz, type AlarmItem, getResources }
+export { bizPlayer, types,  taklerPtz, ptz, type AlarmItem, getResources }
