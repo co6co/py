@@ -26,7 +26,7 @@ class DemoTest( ):
         pass
     def checkService(self):
         try:  
-            response=requests.get("http://127.0.0.1:8084/v1/api/test",timeout=3)  
+            response=requests.get("http://127.0.0.1:8084/v1/api/test",timeout=10)  
             if response.status_code==200:return True
             return False
         except Exception as e:
@@ -46,10 +46,10 @@ class DemoTest( ):
             '''
             isRuning=self. checkService()
             if  not isRuning: 
-                print(">>>> 服务未能提供服务，即将重启 worker...")
+                log.log(">>>> 服务未能提供服务，即将重启 worker...")
                 app.m.restart() # 仅重启 worker
             else:
-                print("service is runing.") 
+                log.log("service is runing.") 
             #app.m.name.restart("","") # 重启特点的 worker 
         except Exception as e:
             log.err("檢測任務失敗,即将重启 worker...")
@@ -75,8 +75,9 @@ async def update_device_poster_task(app:Sanic|Blueprint):
             await asyncio.sleep(300)	# 设定任务休眠时间 
             #t=ThreadEvent()     
             bll=DemoTest(app ) 
-            Thread(target=bll.run() ).start()
-            log.warn("this is 1..")
+            # thread target run(),与 run 是有区别的，run()将在主线程执行
+            Thread(target=bll.run,name='check_task' ).start()
+            log.warn("task main done.")
             #log.warn("tasking")
             #time.sleep(60)
             #log.warn("tasked")

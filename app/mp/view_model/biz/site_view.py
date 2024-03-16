@@ -113,9 +113,10 @@ class Sites_View(AuthMethodView):
                 d.update({"devices": devices})
                 data.append(d)
             pageList = Page_Result.success(data, total=total)
-        except Exception as e:
-            log.err(f"session ... e:{e}")
-            pageList = Page_Result.fail(message=f"请求失败：{e}")
+        except Exception as e: 
+            errorCode=log.generateCode(e)
+            log.err(f"导航站点列表：{errorCode} ... ")
+            pageList = Page_Result.fail(message=f"请求失败：{errorCode}")
         return JSON_util.response(pageList)
 
     async def put(self, request: Request):

@@ -68,8 +68,7 @@
 import { ref, reactive, computed, onMounted, onUnmounted, markRaw } from 'vue'
 import {
   ElMessage,
-  ElMessageBox,
-  type FormRules,
+  ElMessageBox, 
   type FormInstance,
   ElTreeSelect,
   ElTree
@@ -97,10 +96,9 @@ import * as api from '../../..//api/site'
 import * as gb_api from '../../..//api/deviceState'
 import { showLoading, closeLoading } from '../../../components/Logining'
 import * as types from './types'
-import { GbDeviceState } from '../gb28181'
-
+import { GbDeviceState } from '../gb28181' 
 import { Storage, SessionKey } from '../../../store/Storage'
-
+import {GreenVideoCamera,RedVideoCamera} from '../../../components/icons/screenIcon'
 let storeage = new Storage()
 
 interface Emits {
@@ -191,8 +189,7 @@ const getData = () => {
     })
 }
 const hasData = computed(() => tree_module.data.length > 0)
-const onNodeCheck = (row: types.Site | types.DeviceData, b: any, c: any, d: any) => {
-  console.info('b:', b, 'c:', c, 'd:', d)
+const onNodeCheck = (row: types.Site | types.DeviceData, b: any, c: any, d: any) => { 
   if (row) {
     let site = row as types.Site
     if (site.device || site.devices) {
@@ -202,9 +199,7 @@ const onNodeCheck = (row: types.Site | types.DeviceData, b: any, c: any, d: any)
       if (data.device) {
         let device = data.device
         tree_module.currentDevice = device
-
-        let stream = device.streams
-
+        let stream = device.streams 
         emits('nodeClick', data.box, device, stream)
       }
       //有多个设备的点 ，仅展开
@@ -223,7 +218,7 @@ const onNodeCheck = (row: types.Site | types.DeviceData, b: any, c: any, d: any)
   }
 }
 // 状态
-const comMap = reactive([markRaw(Loading), markRaw(VideoCamera)])
+const comMap = reactive([markRaw(Loading), markRaw(VideoCamera),markRaw(GreenVideoCamera),markRaw(RedVideoCamera)])
 const setStatueComponent = (data: types.Site | types.DeviceData, state: types.DeviceState) => {
   data.state = state
   switch (state) {
@@ -231,10 +226,10 @@ const setStatueComponent = (data: types.Site | types.DeviceData, state: types.De
       data.statueComponent = comMap[0]
       break
     case types.DeviceState.Connected:
-      data.statueComponent = comMap[1]
+      data.statueComponent = comMap[2]
       break
     default:
-      data.statueComponent = comMap[1]
+      data.statueComponent = comMap[3]
       break
   }
 }

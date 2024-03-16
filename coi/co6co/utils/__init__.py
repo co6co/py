@@ -27,4 +27,5 @@ def isCallable(func):
     return type(func) is FunctionType 
     return hasattr (func,"__call__")
 
+
  

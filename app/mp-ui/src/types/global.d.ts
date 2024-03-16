@@ -42,8 +42,8 @@ interface ProcessQuery extends IpageParam{
   auditStateEq?:Boolean,
   breakRules:String
   datetimes:Array<string>, 
-  pageIndex: Number,
-  pageSize: Number,
+  pageIndex: number,
+  pageSize: number,
   order:String,
   orderBy:String,
   groupIds:Array<Number>,
@@ -113,7 +113,6 @@ declare module 'vue3-video-play'
 declare module 'wangeditor'
 declare module  "json-bigint"
 declare module "ckplayer" 
- 
 declare module "md-editor-v3"
 
 

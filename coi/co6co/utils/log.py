@@ -53,6 +53,7 @@ for level in LEVEL_LIST:
  36           46        青蓝色
  37           47        白色
 """
+
 def __log(msg,type: int = 0,foregroundColor:int=37, bg=40, e=None, hasPrefix:bool=True):
     t=threading.currentThread()
     time = datetime.datetime.now() 
@@ -62,6 +63,13 @@ def __log(msg,type: int = 0,foregroundColor:int=37, bg=40, e=None, hasPrefix:boo
     print(f"{prefix}\033[{type};{foregroundColor};{bg}m{msg}{err}\033[0m")
 def log(msg:str):__log(msg)
 
+def generateCode(data:any):
+    """
+    通过 对象 转字符串 
+    生成  大小  hash值
+    """
+    s=str(data) 
+    return  hex( s.__hash__()).upper()
 
 def start_mark(msg:str,f:str="--",start:str="\r\n",end:str=">",num:int=36):
     """
