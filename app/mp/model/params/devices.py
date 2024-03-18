@@ -24,6 +24,7 @@ class cameraParam:
     channel5_sip: str=None
     channel6_sip: str=None
     siteId: int=None
+    ptzTopic:str=None
     #talkbackNo: int=None
 
     def set_po(self, po:bizCameraPO): 

@@ -1,5 +1,5 @@
-from model.enum import device_type
-from model.pos.biz import bizCameraPO
+from model.enum import TopicCategory, device_type
+from model.pos.biz import bizCameraPO, bizMqttTopicPO
 from sqlalchemy .orm.attributes import InstrumentedAttribute
 from typing import Tuple
 from co6co_db_ext.db_filter import absFilterItems
@@ -44,6 +44,7 @@ class CameraFilterItems(absFilterItems):
             bizCameraPO.channel10_sip,
             bizCameraPO.createTime,
             bizCameraPO.updateTime,
+            bizMqttTopicPO.topic.label("ptzTopic")
         ]
 
     def filter(self) -> list:
@@ -58,11 +59,15 @@ class CameraFilterItems(absFilterItems):
         if self.datetimes and len(self.datetimes) == 2:
             filters_arr.append(bizCameraPO.createTime.between(
                 self.datetimes[0], self.datetimes[1]))
+        #ptz 主题
+        filters_arr.append(or_(bizMqttTopicPO.category ==
+                           TopicCategory.ptz.key, bizMqttTopicPO.category == None))
         return filters_arr
 
     def create_List_select(self):
         select = (
             Select(*self.listSelectFields)
+            .join_from(bizMqttTopicPO, onclause=bizMqttTopicPO.code == bizCameraPO.id)
             .filter(and_(*self.filter()))
         )
         return select

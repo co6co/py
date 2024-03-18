@@ -53,17 +53,7 @@ class bizBoxPO(UserTimeStampedModelPO):
     mac = Column("mac",String(128)) 
     license= Column("license",String(255)) 
    
-    talkbackNo = Column("talkbackNo",Integer,comment="对讲号") 
-    '''
-    sip= Column("sip_address",String(64),comment="盒子SIP地址") 
-    channel1_sip= Column("channel1_sip",String(64),comment="通道1 sip 地址") 
-    channel2_sip= Column("channel2_sip",String(64),comment="通道2 sip 地址") 
-    channel3_sip= Column("channel3_sip",String(64),comment="通道3 sip 地址") 
-    '''
-
-    #innerConfigUrl= Column("inner_config_url",String(2048),comment="设备配置URL") 
-    #configUrl= Column("config_url",String(2048),comment="设备配置URL")  
-    #sshConfigUrl= Column("ssh_config_url",String(2048),comment="SSH配置")  
+    talkbackNo = Column("talkbackNo",Integer,comment="对讲号")  
     
     resourcesPO=Relationship("bizResourcePO", uselist=True,  back_populates="boxPO")
     sitePO =Relationship("bizSitePo",  back_populates="boxPO")
@@ -94,8 +84,7 @@ class bizCameraPO(UserTimeStampedModelPO):
     cameraType= Column("type",String(16))
     poster = Column("poster",String(255)) 
     streams = Column("stream_urls",String(2048),comment="json 对象[{url:xx,name:xx}]")  
-    sip= Column("sip_address",String(64),comment="SIP地址") 
-    #talkbackNo = Column("talkbackNo",Integer,comment="对讲号")  
+    sip= Column("sip_address",String(64),comment="SIP地址")  
     channel1_sip= Column("channel1_sip",String(64),comment="通道1 sip 地址") 
     channel2_sip= Column("channel2_sip",String(64),comment="通道2 sip 地址") 
     channel3_sip= Column("channel3_sip",String(64),comment="通道3 sip 地址") 
@@ -105,10 +94,7 @@ class bizCameraPO(UserTimeStampedModelPO):
     channel7_sip= Column("channel7_sip",String(64),comment="通道7 sip 地址") 
     channel8_sip= Column("channel8_sip",String(64),comment="通道8 sip 地址") 
     channel9_sip= Column("channel9_sip",String(64),comment="通道9 sip 地址") 
-    channel10_sip= Column("channel10_sip",String(64),comment="通道10 sip 地址") 
-
-    #innerConfigUrl= Column("inner_config_url",String(2048),comment="设备配置URL") 
-    #configUrl= Column("config_url",String(2048),comment="设备配置URL")
+    channel10_sip= Column("channel10_sip",String(64),comment="通道10 sip 地址")  
 
     sitePO=Relationship("bizSitePo",back_populates="camerasPO") 
     def __repr__(self) -> str:

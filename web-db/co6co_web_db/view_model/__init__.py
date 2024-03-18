@@ -55,7 +55,7 @@ class BaseMethodView(HTTPMethodView):
 
     async def save_body(self, request: Request, root: str):
         # 保存上传的内容
-        subDir= getDateFolder(format='%Y-%m-%d-%H-%M-%S')
+        subDir = getDateFolder(format='%Y-%m-%d-%H-%M-%S')
         filePath = os.path.join(root, getDateFolder(), f"{subDir}.data")
         filePath = os.path.abspath(filePath)  # 转换为 os 所在系统路径
         folder = os.path.dirname(filePath)
@@ -194,7 +194,7 @@ class BaseMethodView(HTTPMethodView):
             pageList = Page_Result.fail(message=f"请求失败：{e}")
             return JSON_util.response(pageList)
 
-    async def add(self, request: Request, po: BasePO, userId=None, func=None):
+    async def add(self, request: Request, po: BasePO, userId=None, beforeFun=None, afterFun=None):
         """
         增加
         """
@@ -205,13 +205,18 @@ class BaseMethodView(HTTPMethodView):
                 if isinstance(po, UserTimeStampedModelPO):
                     po.createTime = datetime.now()
                     po.createUser = userId
-                if func != None: func(po)
+                if beforeFun != None:
+                    await beforeFun(po, session)
                 session.add(po)
+                if afterFun != None:
+                    session.flush()
+                    await afterFun(po, session)
+
             return JSON_util.response(Result.success())
         except Exception as e:
             return JSON_util.response(Result.fail(message=e))
 
-    async def edit(self, request: Request, pk: any, po: BasePO, poType: TypeVar, userId=None, func=None):
+    async def edit(self, request: Request, pk: any, po: BasePO, poType: TypeVar, userId=None, fun=None):
         """
         编辑
         """
@@ -224,13 +229,14 @@ class BaseMethodView(HTTPMethodView):
                 if isinstance(oldPo, UserTimeStampedModelPO):
                     oldPo.updateTime = datetime.now()
                     oldPo.updateUser = userId
-                if func != None:
-                    func(oldPo, po)
+                if fun != None:
+                    await fun(oldPo, po, session)
+
                 return JSON_util.response(Result.success())
         except Exception as e:
             return JSON_util.response(Result.fail(message=e))
 
-    async def remove(self, request: Request, pk: any,   poType: TypeVar):
+    async def remove(self, request: Request, pk: any,   poType: TypeVar,  beforeFun=None, afterFun=None):
         """
         删除
         """
@@ -239,7 +245,11 @@ class BaseMethodView(HTTPMethodView):
                 oldPo: poType = await session.get_one(poType, pk)
                 if oldPo == None:
                     return JSON_util.response(Result.fail(message=f"未查到‘{pk}’对应的信息!"))
+                if beforeFun != None:
+                    await beforeFun(oldPo, session)
                 await session.delete(oldPo)
+                if afterFun != None:
+                    await afterFun(session)
                 return JSON_util.response(Result.success())
         except Exception as e:
             return JSON_util.response(Result.fail(message=e))

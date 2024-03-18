@@ -60,7 +60,7 @@ class Router_View(AuthMethodView):
         编辑
         """
         po = bizRouterPO() 
-        def settingValue(old: bizRouterPO, param: bizRouterPO): 
+        async def settingValue(old: bizRouterPO, param: bizRouterPO): 
             old.innerIp = param.innerIp
             old.ip = param.ip 
             old.innerIp=param.innerIp

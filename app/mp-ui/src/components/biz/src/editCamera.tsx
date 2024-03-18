@@ -66,7 +66,8 @@ export default defineComponent({
         channel5_sip: '',
         channel6_sip: '',
         streams: '',
-        streamUrls: []
+        streamUrls: [],
+        ptzTopic: '/MANSCDP_cmd'
       }
     })
     const key = Symbol('formData') as InjectionKey<FormItem> //'formData'
@@ -88,6 +89,7 @@ export default defineComponent({
           data.fromData.channel4_sip = ''
           data.fromData.channel5_sip = ''
           data.fromData.siteId = siteId
+          data.fromData.ptzTopic = '/MANSCDP_cmd'
           data.fromData.streamUrls = []
           break
         case FormOperation.edit:
@@ -102,6 +104,7 @@ export default defineComponent({
           data.fromData.channel3_sip = item.channel3_sip
           data.fromData.channel4_sip = item.channel4_sip
           data.fromData.channel5_sip = item.channel5_sip
+          data.fromData.ptzTopic = item.ptzTopic
           data.fromData.siteId = item.siteId
           if (item.streams && typeof item.streams == 'string')
             data.fromData.streamUrls = JSON.parse(item.streams)
@@ -121,7 +124,12 @@ export default defineComponent({
 
       innerIp: [{ required: true, message: '请输入设备IP', trigger: ['blur'] }],
       streamName: [{ required: true, message: '请视频地址名称', trigger: ['blur'] }],
-      streamUrl: [{ required: true, message: '请视频地址', trigger: ['blur'] }]
+      streamUrl: [{ required: true, message: '请视频地址', trigger: ['blur'] }],
+      ptzTopic:[
+        { required: true,    message: '请视频地址', trigger: ['blur'] },
+        { pattern: /^((\/)[a-zA-z0-9-_.]{1,}){1,}$/, message: '请输入主题名,必须以 / 开头', trigger: 'blur' }
+ 
+      ]
     }
     const save = () => {
       //提交数据
@@ -226,7 +234,9 @@ export default defineComponent({
               </ElFormItem>
             </ElCol>
           </ElRow>
-
+          <ElFormItem label="云台控制主题" prop="ptzTopic">
+            <ElInput v-model={data.fromData.ptzTopic}></ElInput>
+          </ElFormItem>
           <ElFormItem label="SIP地址" prop="sip">
             <ElInput v-model={data.fromData.sip}></ElInput>
           </ElFormItem>

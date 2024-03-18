@@ -12,6 +12,7 @@ export interface Item {
  
   name: string
   code:string
+  ptzTopic:string //云台控制主题
   innerIp: string
   ip: string
   sip: string

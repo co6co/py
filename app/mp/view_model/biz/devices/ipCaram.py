@@ -14,7 +14,8 @@ from view_model.biz.devices import getSiteId
 from utils import createUuid
  
 
-
+async def updatePtzTopic( po :bizCameraPO,session: AsyncSession):
+    return ""
 class IpCameras_View(AuthMethodView):
     """
     设备s: 监控球机
@@ -49,6 +50,8 @@ class IpCameras_View(AuthMethodView):
         )
         return await self.query_mapping(request, select)
 
+   
+
 
     async def put(self, request: Request):
         """
@@ -57,11 +60,13 @@ class IpCameras_View(AuthMethodView):
         po = bizCameraPO()
         param = cameraParam()
         param.__dict__.update(request.json)
-        def settingValue(po: bizCameraPO): 
+        async def settingValue(po: bizCameraPO): 
             param.set_po(po) 
-            po.uuid=createUuid() 
-        return await self.add(request, po, self. getUserId(request),settingValue)
+            po.uuid=createUuid()  
 
+        return await self.add(request, po, self. getUserId(request),settingValue, updatePtzTopic)
+        # ptz 主题
+    
 
 class IpCamera_View(AuthMethodView):
     """
@@ -75,9 +80,11 @@ class IpCamera_View(AuthMethodView):
         po = bizCameraPO() 
         param = cameraParam()
         param.__dict__.update(request.json)
-        def settingValue(old: bizCameraPO, po: bizCameraPO):
+        async def settingValue(old: bizCameraPO, po: bizCameraPO,session):
             param.set_po(old)  
             if old.uuid==None:old.uuid=createUuid()  
+            await updatePtzTopic(old,session)
+            
         return await self.edit(request, pk, po, bizCameraPO, self. getUserId(request), settingValue)
     
     async def patch(self, request: Request, pk: int):

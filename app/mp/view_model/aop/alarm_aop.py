@@ -102,7 +102,7 @@ def sendTemplateMessage(client:WeChatClient, openId,nickName:str, tempId, data ,
     """
     try:  
         jsonData=client.message.send_template(openId,tempId,data=data,url=url)
-        log.warn(f"发送模板消息完成<<：{jsonData}" )
+        log.info(f"发送模板消息完成<<：{jsonData}" )
     except Exception as e:
         log.warn(f"发送模板消息-->{openId}{nickName}失败：{e}")
 

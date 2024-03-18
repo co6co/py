@@ -78,3 +78,5 @@ class hwx_alarm_type(Base_EC_Enum):
 class SiteConfigCategory(Base_Enum):
     devURL="devURL",0
     
+class TopicCategory(Base_Enum):
+    ptz='ptz',"云台控制"
