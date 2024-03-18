@@ -206,11 +206,11 @@ class BaseMethodView(HTTPMethodView):
                     po.createTime = datetime.now()
                     po.createUser = userId
                 if beforeFun != None:
-                    await beforeFun(po, session)
+                    await beforeFun(po, session,request)
                 session.add(po)
                 if afterFun != None:
                     session.flush()
-                    await afterFun(po, session)
+                    await afterFun(po, session,request)
 
             return JSON_util.response(Result.success())
         except Exception as e:
@@ -230,7 +230,7 @@ class BaseMethodView(HTTPMethodView):
                     oldPo.updateTime = datetime.now()
                     oldPo.updateUser = userId
                 if fun != None:
-                    await fun(oldPo, po, session)
+                    await fun(oldPo, po, session,request)
 
                 return JSON_util.response(Result.success())
         except Exception as e:
@@ -249,7 +249,7 @@ class BaseMethodView(HTTPMethodView):
                     await beforeFun(oldPo, session)
                 await session.delete(oldPo)
                 if afterFun != None:
-                    await afterFun(session)
+                    await afterFun(oldPo,session,request)
                 return JSON_util.response(Result.success())
         except Exception as e:
             return JSON_util.response(Result.fail(message=e))

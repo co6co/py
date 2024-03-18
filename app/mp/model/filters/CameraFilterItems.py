@@ -60,14 +60,13 @@ class CameraFilterItems(absFilterItems):
             filters_arr.append(bizCameraPO.createTime.between(
                 self.datetimes[0], self.datetimes[1]))
         #ptz 主题
-        filters_arr.append(or_(bizMqttTopicPO.category ==
-                           TopicCategory.ptz.key, bizMqttTopicPO.category == None))
+        filters_arr.append(or_(bizMqttTopicPO.category == TopicCategory.ptz.key, bizMqttTopicPO.category == None))
         return filters_arr
 
     def create_List_select(self):
         select = (
             Select(*self.listSelectFields)
-            .join_from(bizMqttTopicPO, onclause=bizMqttTopicPO.code == bizCameraPO.id)
+            .join_from(bizMqttTopicPO, onclause=bizMqttTopicPO.code == bizCameraPO.id) 
             .filter(and_(*self.filter()))
         )
         return select
