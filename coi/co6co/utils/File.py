@@ -4,6 +4,7 @@ import json,base64,os
 from  co6co.utils import hash
 
 class File:
+    
     @staticmethod
     def readFile2Base64(filePath:str):
         """

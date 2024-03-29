@@ -58,7 +58,7 @@ class Box_View(AuthMethodView):
         """
         po = bizBoxPO()
 
-        async def settingValue(old: bizBoxPO, param: bizBoxPO):
+        async def settingValue(old: bizBoxPO, param: bizBoxPO,session,request):
             old.code = param.code
             old.innerIp = param.innerIp
             old.ip = param.ip

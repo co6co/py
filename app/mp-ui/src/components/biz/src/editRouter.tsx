@@ -17,6 +17,8 @@ import {
   type FormInstance
 } from 'element-plus'
 import { Plus, Minus } from '@element-plus/icons-vue'
+import {  showLoading, closeLoading } from '@/components/Logining'
+
 
 //Omit、Pick、Partial、Required
 export type FormItem = Omit<api.Item, 'id' | 'createTime' | 'updateTime'>
@@ -107,6 +109,7 @@ export default defineComponent({
         default:
           return
       }
+      showLoading()
       promist.then((res) => {
         if (res.code == 0) {
           diaglogForm.value?.closeDialog()
@@ -115,6 +118,9 @@ export default defineComponent({
         } else {
           ElMessage.error(`操作失败:${res.message}`)
         }
+      })
+      .finally(() => {
+        closeLoading()
       })
     }
 
