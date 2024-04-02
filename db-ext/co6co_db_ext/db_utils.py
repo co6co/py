@@ -6,6 +6,8 @@ from .po import BasePO
 from sqlalchemy.sql import Select 
 from co6co.utils import log
 
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import Select
 
 class db_tools:
     """
@@ -63,6 +65,7 @@ class db_tools:
         """
         if type(fetchone)==Row: return dict(zip(fetchone._fields,fetchone)) 
         elif  type(fetchone)==RowMapping: return dict(fetchone)
+        elif  type(fetchone)==dict: return fetchone
         log.warn(f"未知类型：‘{type(fetchone)}’,直接返回")
         return fetchone
     
@@ -76,3 +79,23 @@ class db_tools:
         """ 
         #sqlalchemy.engine.result.ChunkedIteratorResult 
         return [dict(zip(a._fields,a))  for a in  executeResult]
+
+
+class DbCallable:
+    session:AsyncSession=None
+    def __init__(self,session:AsyncSession):
+        self.session=session
+    async def __call__(self, func ):
+        async with self.session,self.session.begin():
+            if func!=None:return await func(self.session)
+            
+        
+class QueryListCallable(DbCallable):  
+    async def __call__(self, select :Select):
+        async def exec(session:AsyncSession):
+            exec=await session.execute(select)  
+            data=  exec.mappings().all() 
+            result=db_tools.list2Dict(data)  
+            return result 
+        #return await super(QueryListCallable,self).__call__(exec) #// 2.x 写法
+        return await super().__call__(exec)

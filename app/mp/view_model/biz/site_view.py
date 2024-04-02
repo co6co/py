@@ -43,8 +43,7 @@ async def editOrAddSiteConfig(request: Request, currentUserId: int, siteID: int,
             cPo.createTime = datetime.datetime.now()
             session.add(cPo)
     if removeConfig != None and len(removeConfig) > 0:
-        stmt = delete(bizSiteConfigPO).where(
-            bizSiteConfigPO.id.in_(removeConfig))
+        stmt = delete(bizSiteConfigPO).where( bizSiteConfigPO.id.in_(removeConfig))
         await session.execute(stmt)
 
 
