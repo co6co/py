@@ -76,7 +76,7 @@
 		() => props.talkNo,
 		(n, o) => {
 			if (n) {
-				let peer = n; 
+				let peer = n;  
 				if (typeof peer == 'number') talker.xtalk_xss_to_device_id = peer;
 				else if (typeof peer == 'string') talker.xtalk_xss_to_gb_url = peer;
 				if(connected.value)disconnect()
@@ -89,10 +89,8 @@
 		talker.xtalk_xss_mode = true;
 		talker.xtalk_xss_addr = store.data.xssConfig.ip;
 		talker.xtalk_xss_port = store.data.xssConfig.port;
-		talker.xtalk_audio_element_id = 'audiostrm';
-
-		//取对端标识，设备ID或者GB URL形式
-
+		talker.xtalk_audio_element_id = 'audiostrm'; 
+		//取对端标识，设备ID或者GB URL形式 
 		talker.xtalk_websocket_server_connect();
 		connected.value = true;
 	};

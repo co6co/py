@@ -106,17 +106,22 @@ class IpCamera_View(AuthMethodView):
         """
         编辑
         """
-        po = bizCameraPO()
-        param = cameraParam()
-        param.__dict__.update(request.json)
+        try:
+            po = bizCameraPO()
+            param = cameraParam()
+            param.__dict__.update(request.json)
 
-        async def settingValue(old: bizCameraPO, po: bizCameraPO, session, request: Request):
-            param.set_po(old)
-            if old.uuid == None:
-                old.uuid = createUuid()
-            await updatePtzTopic(old, session, request)
+            async def settingValue(old: bizCameraPO, po: bizCameraPO, session, request: Request):
+                print("23333")
+                param.set_po(old)
+                if old.uuid == None:
+                    old.uuid = createUuid()
+                print("1111111111111111111")
+                await updatePtzTopic(old, session, request)
 
-        return await self.edit(request, pk, po, bizCameraPO, self. getUserId(request), settingValue)
+            return await self.edit(request, pk, po, bizCameraPO, self. getUserId(request), settingValue)
+        except Exception as e:
+            raise e
 
     async def patch(self, request: Request, pk: int):
         """

@@ -15,3 +15,6 @@ AOOQiv+aqKKE0ap4tZUXlDqEkOAclAgWqQcmMy0jTcdzGtrV+C9XjDa3vDiqWj4Y
 MrfNJ4kHkaLD4kq3qDtZlnHaDplStmrlbN3YR20Fwf1KqrY=
 =wVh9
 -----END PGP MESSAGE-----
+
+
+告警类型：{{alarmType.DATA}} 告警说明：{{alarmDesc.DATA}} 告警时间：{{alarmTime.DATA}}

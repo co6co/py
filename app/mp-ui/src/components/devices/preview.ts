@@ -34,7 +34,7 @@ export const onClickNavDevice = (
 		playerList.players[playerList.currentWin - 1].url = '';
 		playerList.players[playerList.currentWin - 1].streamList = [];
 		ElMessage.warning('未配置设备流地址');
-	} 
+	}  
 }; 
 export const onPlayerChecked = (index: number, item?:dType.CurrentItem) => {
 	if (item){
@@ -43,6 +43,6 @@ export const onPlayerChecked = (index: number, item?:dType.CurrentItem) => {
 	}else{
 		currentItem.box=undefined
 		currentItem.device=undefined
-	}
+	} 
 	
 };

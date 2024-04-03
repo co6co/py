@@ -28,8 +28,7 @@ const _createElementBlock = (dOrPathArr: dOrEle[], xml: any = undefined) => {
         d: d
       })
     } else {
-      let ds = Object.keys(d) //只能有一个key
-      console.info(ds, d[ds[0]])
+      let ds = Object.keys(d) //只能有一个key 
       return createElementVNode(ds[0], d[ds[0]])
     }
   })

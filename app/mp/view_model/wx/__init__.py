@@ -8,6 +8,13 @@ from co6co.utils import log
 #from wechatpy.enterprise import WeChatClient  #企业号客户端
 from view_model.wx_config_utils import get_wx_config,crate_wx_cliet
 
+class wx_resposne:
+    """
+    调用微信接口返回
+    """
+    errcode:int
+    errmsg:str
+
 class wx_base_view(BaseMethodView): 
     """
     公众号视图基类

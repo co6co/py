@@ -103,9 +103,8 @@ class menu_Api(wx_authon_views):
     """
     def push_menu(self, request:Request,openId:str,content:str)->Tuple[bool,str]:
         try:
-            client=self.cteate_wx_client(request,openId) 
-           
-            client.menu.update(json.loads(content))
+            client=self.cteate_wx_client(request,openId)  
+            client.menu.update(json.loads(content)) 
             return True,""
         except Exception as e: 
             return False, str(e)

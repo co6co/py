@@ -12,7 +12,7 @@
 		:ptz-enable="ptzEnable"
 		:taker-enable="talkerEnable">
 	</ptz>
-	<div id="stateInfo">
+	<div id="stateInfo"> 
 		<el-container>
 			<div style="height: 100%;">
 				<div style="margin: 36px 0 5px 0">
@@ -102,7 +102,7 @@
 	//对讲日志打印
 	const takerLogInfo = ref<string[]>([]);
 	//对讲号
-	const talkbackNo = computed(() => {
+	const talkbackNo = computed(() => {  
 		if (props.data&&props.data.box)   return props.data.box.talkbackNo; 
 		return -1;
 	});
@@ -192,7 +192,8 @@
 		}
 	} 
 	
-	const onTalkerChange = (state: dType.talkState) => {
+	const onTalkerChange = (state:dType.talkState) => {
+		console.info("talkerState:",state)
 		talkerState.data = state;
 	};
 	const onTalkerLog = (log: string) => {
@@ -268,7 +269,7 @@
 			ElMessage.warning('MQtt 服务 未连接！');
 			messangeSendRef.value.send = false;
 			return;
-		}
+		} 
 		if (props.data &&props.data.device &&props.data.device.sip) {
 			//let strCmd=cmd.createPtzCmd(speed,type,name)
 			//cmd.testPtzCmdStr("A50F0100000000B5") 
