@@ -17,8 +17,7 @@
 					</el-col>
 					<el-col :span="12">
 						<div class="content">
-							<takler-ptz
-								:current-device-data="currentItem"></takler-ptz>
+							<takler-ptz :data="currentItem"></takler-ptz> 
 						</div>
 					</el-col>
 				</el-row>
@@ -28,8 +27,8 @@
 </template>
 
 <script setup lang="ts" name="basetable">
-	import { talker, deviceNav, types as dType } from '../components/devices';
-	import { bizPlayer, taklerPtz, types } from '../components/biz';
+	import {  deviceNav } from '../components/devices';
+	import { bizPlayer, taklerPtz } from '../components/biz';
 	import {
 		playerList,
 		currentItem,
