@@ -65,7 +65,7 @@ class DbOperations:
 				else:return row # 返回后面这个不好使用 [{row._fields[i]:row[i]} for i in range(0,len(row))]
 		except Exception as e:
 			log.warn(f"在未找到!\terror:{e}")
-			return None
+			return None  
 		
 	async def _get_scalar(self ,select:select)->Any:
 		data=await self.db_session.execute(select)

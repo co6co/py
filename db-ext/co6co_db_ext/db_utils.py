@@ -80,6 +80,11 @@ class db_tools:
         #sqlalchemy.engine.result.ChunkedIteratorResult 
         return [dict(zip(a._fields,a))  for a in  executeResult]
 
+'''
+exec.fetchone() //None| (data,)
+exec.mappings().fetchone()  // {'id': 1, 'userName': 'admin'} | {"userPO":PO}
+exec..fetchone()    //(1, 'admin') || po
+'''
 
 class DbCallable:
     session:AsyncSession=None
@@ -89,7 +94,21 @@ class DbCallable:
         async with self.session,self.session.begin():
             if func!=None:return await func(self.session)
             
-        
+class QueryOneCallable(DbCallable):  
+    async def __call__(self, select :Select,isPO:bool=True):
+        async def exec(session:AsyncSession):
+            exec=await session.execute(select)  
+            if isPO:  
+                data=exec.fetchone()
+                # 返回的是元组
+                if data!=None:return data[0]
+                else: return None
+            else:
+                data=exec.mappings().fetchone()
+                result=db_tools.one2Dict(data)  
+                return result 
+        return await super().__call__(exec)
+         
 class QueryListCallable(DbCallable):  
     async def __call__(self, select :Select):
         async def exec(session:AsyncSession):
