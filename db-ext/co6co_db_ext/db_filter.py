@@ -1,5 +1,5 @@
 
-from abc import ABC, abstractclassmethod 
+from abc import ABC, abstractmethod 
 from .page_param import Page_param
 from typing import TypeVar,Tuple,List,Dict,Any,Union,Iterator
 from sqlalchemy .orm.attributes import InstrumentedAttribute
@@ -26,7 +26,9 @@ class absFilterItems(ABC, Page_param):
 		return self.pageSize
 	
 
-	@abstractclassmethod
+	#@abstractclassmethod 
+	@classmethod
+	@abstractmethod
 	def filter(self)->List[ColumnElement[bool]]:
 		raise NotADirectoryError("Can't instantiate abstract clas") 
 	def _getOrderby(self)->List[Dict[str,str]]:
@@ -47,7 +49,8 @@ class absFilterItems(ABC, Page_param):
 			return [{b:"asc"} for b in by if b ]
 		return [] 
 	
-	@abstractclassmethod
+	@classmethod
+	@abstractmethod
 	def getDefaultOrderBy(self)->Tuple[InstrumentedAttribute]:
 		raise NotADirectoryError("Can't instantiate abstract clas") 
 	 
@@ -75,8 +78,9 @@ class absFilterItems(ABC, Page_param):
 		if type(fielValue) == int :return True
 		if type(fielValue) == bool :return True
 		return False
-
-	@abstractclassmethod
+	
+	@classmethod
+	@abstractmethod
 	def create_List_select(self):
 		select=(
 				Select(*self.listSelectFields)#.join(device.deviceCategoryPO,isouter=True)
