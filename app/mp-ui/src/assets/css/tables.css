@@ -1,8 +1,11 @@
 /*table 页面*/
 .el-container{height: 82vh; overflow: hidden;}
+.el-container .el-container{height: 100%;}
 .el-main{padding-top: 0;padding-bottom: 0; height: 90%; overflow: hidden;}
 .el-header .container{ border: 1px solid #ddd;    border-radius: 5px;}
+.el-header{height: auto;}
 .el-scrollbar{background: #fff;}
+
 .handle-box {
     margin: 3px 0;
 }
@@ -36,3 +39,13 @@
     width: 40px;
     height: 40px;
 }
+
+.formItem {
+    display: flex;
+    align-items: center; 
+    .label {
+      display: inline-block;
+      color: #aaa;
+      padding: 0 5px;
+    }
+  }
