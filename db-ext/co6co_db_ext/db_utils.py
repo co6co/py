@@ -120,19 +120,21 @@ class QueryListCallable(DbCallable):
         return await super().__call__(exec)
 
 class QueryPagedCallable(DbCallable):  
-    async def __call__(self, countSelect:Select, select :Select) ->Tuple[int,List[dict]]:
+    async def __call__(self, countSelect:Select, select :Select,isPO:bool=True,remove_db_instance=True) ->Tuple[int,List[dict]]:
         async def exec(session:AsyncSession):
             total=await session.execute(countSelect)
             total=total.scalar() 
             exec=await session.execute(select)  
-            data=  exec.mappings().all() 
-            result=db_tools.list2Dict(data)  
-            return total,result 
-        #return await super(QueryListCallable,self).__call__(exec) #// 2.x 写法
+            if isPO and remove_db_instance:
+                result= db_tools.remove_db_instance_state(exec.scalars().fetchall())  
+            elif isPO and not remove_db_instance:result= exec.scalars().fetchall() 
+            else: 
+                data=  exec.mappings().all()  
+                result=db_tools.list2Dict(data)  
+            return total,result  
         return await super().__call__(exec)
 
 class QueryPagedByFilterCallable(QueryPagedCallable):  
-    async def __call__(self, filter:absFilterItems) ->Tuple[int,List[dict]]: 
-        #return await super(QueryListCallable,self).__call__(exec) #// 2.x 写法
-        return await super().__call__(filter.count_select,filter.list_select) 
+    async def __call__(self, filter:absFilterItems,isPO:bool=True,remove_db_instance=True) ->Tuple[int,List[dict]]:   
+        return await super().__call__(filter.count_select,filter.list_select,isPO ,remove_db_instance) 
 

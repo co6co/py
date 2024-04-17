@@ -1,7 +1,7 @@
 from functools import wraps
 from sanic.views import HTTPMethodView  # 基于类的视图
 from sanic import Request
-from co6co_db_ext.db_utils import db_tools
+from co6co_db_ext.db_utils import db_tools,QueryPagedByFilterCallable
 from co6co_db_ext.db_filter import absFilterItems
 from co6co_db_ext.db_operations import DbPagedOperations, DbOperations, InstrumentedAttribute
 from co6co_sanic_ext.model.res.result import Page_Result
@@ -111,33 +111,9 @@ class BaseMethodView(HTTPMethodView):
                 await self.save_file(file, savePath[i])
                 i += 1
 
-    async def _get_list(self, request: Request, filterItems: absFilterItems, field: InstrumentedAttribute = "*"):
-        """
-        列表
-        """
-        filterItems.__dict__.update(request.json)
-        async with request.ctx.session as session:
-            opt = DbPagedOperations(session, filterItems)
-            total = await opt.get_count(field)
-            result = await opt.get_paged()
-            pageList = Page_Result.success(result)
-            pageList.total = total
-            await opt.commit()
-            return JSON_util.response(pageList)
 
-    async def _del_po(self, request: Request, poType: TypeVar, pk: int):
-        """
-        删除数据库对象
-        """
-        async with request.ctx.session as session:
-            session: AsyncSession = session
-            operation = DbOperations(session)
-            po = await operation.get_one_by_pk(poType, pk)
-            if po == None:
-                return JSON_util.response(Result.fail(message=f"未该'{pk}'对应得数据!"))
-            await operation.delete(po)
-            await operation.commit()
-            return JSON_util.response(Result.success())
+
+
 
     def getFullPath(self, root, fileName: str) -> Tuple[str, str]:
         """
@@ -154,8 +130,7 @@ class BaseMethodView(HTTPMethodView):
             return session
         elif isinstance(session, scoped_session):
             return session
-        raise Exception("未实现DbSession")
-        return session
+        raise Exception("未实现DbSession") 
 
     async def query_mapping(self, request: Request, select: Select, oneRecord: bool = False):
         """
@@ -174,13 +149,19 @@ class BaseMethodView(HTTPMethodView):
                     return JSON_util.response(result)
         except Exception as e:
             result = Result.fail(message=f"请求失败：{e}")
+            
 
-    async def query_page(self, request: Request, filter: absFilterItems):
+    async def query_page(self, request: Request, filter: absFilterItems,isPO:bool=True,remove_db_instance=True):
         """
         分页查询
         """
-        filter.__dict__.update(request.json)
+        filter.__dict__.update(request.json) 
         try:
+            query=QueryPagedByFilterCallable(self.get_db_session(request))
+            total,result= await query(filter,isPO,remove_db_instance)
+            pageList = Page_Result.success(result, total=total)
+            return JSON_util.response(pageList)
+            '''
             async with self.get_db_session(request) as session, session.begin():
                 session: AsyncSession = session
                 total = await session.execute(filter.count_select)
@@ -190,6 +171,8 @@ class BaseMethodView(HTTPMethodView):
                 result = db_tools.list2Dict(result)
                 pageList = Page_Result.success(result, total=total)
                 return JSON_util.response(pageList)
+            '''
+            
         except Exception as e:
             pageList = Page_Result.fail(message=f"请求失败：{e}")
             return JSON_util.response(pageList)
@@ -244,7 +227,7 @@ class BaseMethodView(HTTPMethodView):
             async with self.get_db_session(request) as session, session.begin():
                 oldPo: poType = await session.get_one(poType, pk)
                 if oldPo == None:
-                    return JSON_util.response(Result.fail(message=f"未查到‘{pk}’对应的信息!"))
+                    return JSON_util.response(Result.fail(message=f"未找到‘{pk}’对应的信息!"))
                 if beforeFun != None:
                     await beforeFun(oldPo, session)
                 await session.delete(oldPo)
@@ -253,6 +236,8 @@ class BaseMethodView(HTTPMethodView):
                 return JSON_util.response(Result.success())
         except Exception as e:
             return JSON_util.response(Result.fail(message=e))
+        
+ 
 
 
 """
