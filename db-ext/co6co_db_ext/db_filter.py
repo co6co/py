@@ -11,11 +11,13 @@ class absFilterItems(ABC, Page_param):
 	抽象过滤器
 	配合 DbOperations 使用
 	"""
-	listSelectFields: List[InstrumentedAttribute] # 使用该数据 dictor
+	listSelectFields: List[InstrumentedAttribute]=None# 使用该数据 dictor
+	po_type:TypeVar=None
 	def __init__(self,po:TypeVar) -> None:
 		super().__init__() 
 
 		self.po_type=po # 与排序相关
+		 
 		pass
 
 	@property
@@ -27,10 +29,10 @@ class absFilterItems(ABC, Page_param):
 	
 
 	#@abstractclassmethod 
-	@classmethod
 	@abstractmethod
 	def filter(self)->List[ColumnElement[bool]]:
 		raise NotADirectoryError("Can't instantiate abstract clas") 
+	
 	def _getOrderby(self)->List[Dict[str,str]]:
 		"""
 		orderBy:id,name
@@ -48,8 +50,7 @@ class absFilterItems(ABC, Page_param):
 			by=self.orderBy.split(",")
 			return [{b:"asc"} for b in by if b ]
 		return [] 
-	
-	@classmethod
+	 
 	@abstractmethod
 	def getDefaultOrderBy(self)->Tuple[InstrumentedAttribute]:
 		raise NotADirectoryError("Can't instantiate abstract clas") 
@@ -78,14 +79,18 @@ class absFilterItems(ABC, Page_param):
 		if type(fielValue) == int :return True
 		if type(fielValue) == bool :return True
 		return False
-	
-	@classmethod
-	@abstractmethod
+	 
 	def create_List_select(self):
-		select=(
+		if self.listSelectFields !=None and len(self.listSelectFields)>0: 
+			select=(
 				Select(*self.listSelectFields)#.join(device.deviceCategoryPO,isouter=True)
 				.filter(and_(*self.filter()))  
-		) 
+			)
+		else :
+			select=(
+				Select(self.po_type)#.join(device.deviceCategoryPO,isouter=True)
+				.filter(and_(*self.filter()))  
+			) 
 		return select
 	
 	@property

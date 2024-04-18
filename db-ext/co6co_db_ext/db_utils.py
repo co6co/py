@@ -8,6 +8,7 @@ from co6co.utils import log
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import Select
 from .db_filter import absFilterItems
+from  sqlalchemy.engine.result import ChunkedIteratorResult
 
 class db_tools:
     """
@@ -79,6 +80,35 @@ class db_tools:
         """ 
         #sqlalchemy.engine.result.ChunkedIteratorResult 
         return [dict(zip(a._fields,a))  for a in  executeResult]
+    
+    async def execForMappings(session:AsyncSession,select:Select):
+        """
+        session: AsyncSession
+        select:Select 
+
+        return list
+        """ 
+        exec=await session.execute(select)  
+        data=  exec.mappings().all()  
+        result=db_tools.list2Dict(data)  
+        return result
+    
+    async def execForPos(session:AsyncSession,select:Select, remove_db_instance_state:bool=True):
+        """
+        session: AsyncSession
+        select:Select
+        remove_db_instance_state: bool
+
+        return list
+        """
+
+        exec:ChunkedIteratorResult=await session.execute(select)
+        if remove_db_instance_state:
+            return db_tools.remove_db_instance_state(exec.scalars().fetchall())  
+        else:
+            return exec.scalars().fetchall() 
+
+    
 
 '''
 exec.fetchone() //None| (data,)
@@ -112,10 +142,8 @@ class QueryOneCallable(DbCallable):
 class QueryListCallable(DbCallable):  
     async def __call__(self, select :Select):
         async def exec(session:AsyncSession):
-            exec=await session.execute(select)  
-            data=  exec.mappings().all() 
-            result=db_tools.list2Dict(data)  
-            return result 
+            result=await db_tools.execForMappings(session,select)
+            return result
         #return await super(QueryListCallable,self).__call__(exec) #// 2.x 写法
         return await super().__call__(exec)
 
@@ -123,14 +151,12 @@ class QueryPagedCallable(DbCallable):
     async def __call__(self, countSelect:Select, select :Select,isPO:bool=True,remove_db_instance=True) ->Tuple[int,List[dict]]:
         async def exec(session:AsyncSession):
             total=await session.execute(countSelect)
-            total=total.scalar() 
-            exec=await session.execute(select)  
-            if isPO and remove_db_instance:
-                result= db_tools.remove_db_instance_state(exec.scalars().fetchall())  
-            elif isPO and not remove_db_instance:result= exec.scalars().fetchall() 
+            total=total.scalar()  
+            if isPO: 
+                result=await db_tools.execForPos(session,select,remove_db_instance)
             else: 
-                data=  exec.mappings().all()  
-                result=db_tools.list2Dict(data)  
+                result=await db_tools.execForMappings(session,select) 
+
             return total,result  
         return await super().__call__(exec)
 
