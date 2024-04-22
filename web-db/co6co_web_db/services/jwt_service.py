@@ -42,11 +42,10 @@ async def validToken(request:Request,SECRET:str):
     request.app.config.SECRET
     """
     svc=JWT_service(SECRET)
-    log.succ(f"token:{request.token}")
+    if request.token==None:
+        log.warn("token is None")
+        return False
     result=svc.decode(request.token) 
-
-    log.succ(f"tokenparse:{result}")
-    if result ==None or 'data' not in  result:return False
-    request.ctx.current_user=result["data"]
-    log.succ(request.ctx.current_user)
+    if result ==None or 'data' not in result:return False
+    request.ctx.current_user=result["data"] 
     return True

@@ -73,9 +73,9 @@ class UserGroupPO(UserTimeStampedModelPO):
     """
     __tablename__ = "sys_user_group" 
     id = Column("id",Integer,autoincrement=True, primary_key=True)
+    parentId= Column("parent_id",Integer)
     name = Column("group_name",String(64) ) 
-    code = Column("group_code",String(64), unique=True) 
-    
+    code = Column("group_code",String(64), unique=True)  
     userPOs=Relationship("UserPO",back_populates="userGroupPO",uselist=True,passive_deletes=True) 
 
 class RolePO(TimeStampedModelPO):
@@ -104,7 +104,7 @@ class UserGroupRolePO(UserTimeStampedModelPO):
     """
     用户组_角色表
     """
-    __tablename__ = "sys_user_role"
+    __tablename__ = "sys_user_group_role"
 
     userGroupId= Column("user_group_id",ForeignKey(f"{UserGroupPO.__tablename__}.{UserGroupPO.id.name}"),   comment="主键id",primary_key=True)
     roleId = Column("role_id",ForeignKey(f"{RolePO.__tablename__}.{RolePO.id.name}"),   comment="主键id",primary_key=True)
@@ -115,19 +115,21 @@ class permissionPO(UserTimeStampedModelPO):
 
     id = Column("id",Integer,comment="主键",autoincrement=True, primary_key=True) 
     parentId= Column("parent_id",Integer)
-    category= Column("category",Integer)
+    category= Column("category",Integer,comment='0:后台URL,1:view,2:button')
     icon= Column("icon",String(128))
-    name = Column("name",String(64),   comment="名称")
-    code = Column("code",String(64), unique=True,  comment="权限为code")
+    name = Column("name",String(64), comment="名称")
+    code = Column("code",String(64), unique=True,  comment="code")
     url = Column("url",String(255)) 
+    method = Column("方法名",String(16),comment='方法名:GET|POST|DELETE|PUT|PATCH') 
+    permissionKey = Column("permission_key",String(64), comment="view 与button 有效")
+  
     order = Column("order",Integer) 
     status = Column("status",Integer)
     remark = Column("remark",String(255),comment="备注")
 
     rolePOs=Relationship("RolePO",secondary="sys_permission_role",back_populates="permissionPOs",passive_deletes=True)
     
-
- 
+    
 class permissionRolePO(UserTimeStampedModelPO):
     """
     权限_角色表
@@ -136,4 +138,17 @@ class permissionRolePO(UserTimeStampedModelPO):
 
     permission= Column("user_id",ForeignKey(f"{permissionPO.__tablename__}.{permissionPO.id.name}",ondelete="CASCADE"),   comment="主键id",primary_key=True)
     role = Column("role_id",ForeignKey(f"{RolePO.__tablename__}.{RolePO.id.name}",ondelete="CASCADE"),   comment="主键id",primary_key=True)
+
+'''
+class data_permission_base(UserTimeStampedModelPO):
+    """
+    数据权限
+    1. 根据具体业务创建相关人员或组字段，以满足需求
+    """
+    createUser= Column("create_user", BigInteger,comment="创建人")  
+    ownUser= Column("own_user", BigInteger,comment="所有者")  
+    ownGroup= Column("own_group", BigInteger,comment="所属组")  
+    ownSales= Column("own_sales", BigInteger,comment="所属销售")
+    ownMaintain= Column("own_maintain", BigInteger,comment="所属维护")
     
+'''

@@ -22,5 +22,5 @@ def authorized(f):
             return response
         else:
             # the user is not authorized.
-            return json( JSON_util().encode(Result.fail(message="not_authorized"))  , 403)
+            return JSON_util.response(Result.fail(message="not_authorized"), status= 403)
     return decorated_function 

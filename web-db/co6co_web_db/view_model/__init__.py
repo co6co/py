@@ -18,6 +18,8 @@ from co6co_web_db.utils import DbJSONEncoder
 from sqlalchemy import Select
 from co6co_db_ext.po import BasePO, UserTimeStampedModelPO
 from datetime import datetime
+from co6co.utils.tool_util import list_to_tree 
+from co6co_db_ext.db_utils  import db_tools,  DbCallable,QueryOneCallable, QueryListCallable,QueryPagedByFilterCallable
 
 
 from co6co.utils import log, getDateFolder
@@ -109,11 +111,7 @@ class BaseMethodView(HTTPMethodView):
             for file in request.files:
                 file = request.files.get('file')
                 await self.save_file(file, savePath[i])
-                i += 1
-
-
-
-
+                i += 1 
 
     def getFullPath(self, root, fileName: str) -> Tuple[str, str]:
         """
@@ -147,6 +145,21 @@ class BaseMethodView(HTTPMethodView):
                     result = executer.mappings().all()
                     result = Result.success(db_tools.list2Dict(result))
                     return JSON_util.response(result)
+        except Exception as e:
+            result = Result.fail(message=f"请求失败：{e}")
+
+    async def query_tree(self, request: Request, select: Select,rootValue:any=None,pid_field:str="pid", id_field:str="id"):
+        """
+        执行查询: tree列表 
+        """
+        try: 
+            session:AsyncSession=request.ctx.session  
+            query=QueryListCallable(session)
+            data=await query(select)  
+            result=db_tools.list2Dict(data)   
+            treeList=list_to_tree(result,rootValue,pid_field,id_field)   
+            if len(treeList)==0: return JSON_util.response(Result.success(data=[]))
+            return JSON_util.response(Result.success(data=treeList))  
         except Exception as e:
             result = Result.fail(message=f"请求失败：{e}")
             
@@ -183,8 +196,23 @@ class BaseMethodView(HTTPMethodView):
         """
         try:
             po.__dict__.update(request.json)
-            async with self.get_db_session(request) as session, session.begin():
+            async def exec(session:AsyncSession):
+                if isinstance(po, UserTimeStampedModelPO):
+                    po.createTime = datetime.now()
+                    po.createUser = userId
+                if beforeFun != None:
+                    await beforeFun(po, session,request)
                 session.add(po)
+                if afterFun != None:
+                    session.flush()
+                    await afterFun(po, session,request)
+                return JSON_util.response(Result.success())
+            
+            callable=DbCallable(self.get_db_session(request))
+            return await callable(exec)
+            '''
+
+            async with self.get_db_session(request) as session, session.begin(): 
                 if isinstance(po, UserTimeStampedModelPO):
                     po.createTime = datetime.now()
                     po.createUser = userId
@@ -196,6 +224,7 @@ class BaseMethodView(HTTPMethodView):
                     await afterFun(po, session,request)
 
             return JSON_util.response(Result.success())
+            '''
         except Exception as e:
             return JSON_util.response(Result.fail(message=e))
 

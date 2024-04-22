@@ -19,7 +19,7 @@ class JSON_util(sys_json.JSONEncoder):
         elif hasattr(obj,"__dict__"):  return obj.__dict__ 
         return None
     
-    def response(res:any,jsonEncoder:sys_json.JSONEncoder=None):
+    def response(res:any,jsonEncoder:sys_json.JSONEncoder=None, **kwargs):
         if jsonEncoder==None: return res_json(sys_json.loads(JSON_util().encode(res)))
-        else: return res_json(sys_json.loads(jsonEncoder.encode(res)))
+        else: return res_json(sys_json.loads(jsonEncoder.encode(res)),**kwargs)
     
