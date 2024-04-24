@@ -1,0 +1,9 @@
+src
+node_modules
+lib/tests
+tsconfig.json
+tslint.json
+.prettierrc
+package-lock.json
+readme.md
+jestconfig.json

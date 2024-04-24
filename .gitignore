@@ -1,6 +1,8 @@
 /**/__pycache__/
 /**/*.egg-info/
 /**/dist/
+/**/node_modules/
+/**/lib/
 /**/build/
 /coi/XXXX
 /**/.fleet/ 

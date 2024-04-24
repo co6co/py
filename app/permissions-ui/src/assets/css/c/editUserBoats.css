@@ -1,0 +1,11 @@
+.el-form-item{  position: relative;}
+.el-form-item__label {
+  margin-bottom: 0;
+
+}
+.el-form-item__content {
+  position: initial;
+}
+.el-form-item__error {
+  left: 24px;
+}
