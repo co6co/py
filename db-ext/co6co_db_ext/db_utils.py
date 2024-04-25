@@ -140,9 +140,12 @@ class QueryOneCallable(DbCallable):
         return await super().__call__(exec)
          
 class QueryListCallable(DbCallable):  
-    async def __call__(self, select :Select):
+    async def __call__(self, select :Select,isPO:bool=True,remove_db_instance=True):
         async def exec(session:AsyncSession):
-            result=await db_tools.execForMappings(session,select)
+            if isPO: 
+               result=await db_tools.execForPos(session,select,remove_db_instance)
+            else:
+               result=await db_tools.execForMappings(session,select)
             return result
         #return await super(QueryListCallable,self).__call__(exec) #// 2.x 写法
         return await super().__call__(exec)

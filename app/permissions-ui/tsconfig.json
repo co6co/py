@@ -1,21 +1,15 @@
-{ 
+{
   "compilerOptions": {
-    "plugins": [{ "name": "typescript-plugin-css-modules" }],
-    "declaration": true, 
-    "outDir": "./lib" ,
-    "declarationDir": "./lib/types"
-  },
-  "references": [
-    {
-      "path": "./tsconfig.node.json"
-    },
-    {
-      "path": "./tsconfig.app.json"
-    },
-    {
-      "path": "./tsconfig.vitest.json"
-    }
-  ],
+    "target": "es5",
+    "module": "esnext",
 
-  
+    "outDir": "./lib",
+    "declaration": true,
+    "declarationDir": "./lib/types",
+    "strict": true,
+    "jsx": "preserve",
+    "lib": ["es6"]
+  },
+  "include": ["src"],
+  "exclude": ["node_modules", "**/__tests__/*"]
 }

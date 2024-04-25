@@ -25,6 +25,23 @@ from co6co_db_ext.db_utils  import db_tools,  DbCallable,QueryOneCallable, Query
 from co6co.utils import log, getDateFolder
 # from api.auth import authorized
 
+def get_db_session(request: Request) -> AsyncSession | scoped_session:
+    """
+    获取db session
+    """
+    session = request.ctx.session
+    if isinstance(session, AsyncSession):
+        return session
+    elif isinstance(session, scoped_session):
+        return session
+    raise Exception("未实现DbSession") 
+
+async def get_one(request:Request,select:Select):
+    """
+    获取一条记录
+    """
+    call=QueryOneCallable(get_db_session(request))
+    return await call(select)
 
 class BaseMethodView(HTTPMethodView):
     """
@@ -123,13 +140,11 @@ class BaseMethodView(HTTPMethodView):
         return fullPath, filePath
 
     def get_db_session(self, request: Request) -> AsyncSession | scoped_session:
-        session = request.ctx.session
-        if isinstance(session, AsyncSession):
-            return session
-        elif isinstance(session, scoped_session):
-            return session
-        raise Exception("未实现DbSession") 
-
+        return get_db_session(request)
+    
+    async def get_one(self,request:Request,select:Select):
+        return await get_one(request,select)
+    
     async def query_mapping(self, request: Request, select: Select, oneRecord: bool = False):
         """
         执行查询: 一个列表|一条记录
@@ -148,14 +163,14 @@ class BaseMethodView(HTTPMethodView):
         except Exception as e:
             result = Result.fail(message=f"请求失败：{e}")
 
-    async def query_tree(self, request: Request, select: Select,rootValue:any=None,pid_field:str="pid", id_field:str="id"):
+    async def query_tree(self, request: Request, select: Select,rootValue:any=None,pid_field:str="pid", id_field:str="id", isPO: bool = True, remove_db_instance: bool = True):
         """
         执行查询: tree列表 
         """
         try: 
             session:AsyncSession=request.ctx.session  
             query=QueryListCallable(session)
-            data=await query(select)  
+            data=await query(select,isPO,remove_db_instance)  
             result=db_tools.list2Dict(data)   
             treeList=list_to_tree(result,rootValue,pid_field,id_field)   
             if len(treeList)==0: return JSON_util.response(Result.success(data=[]))

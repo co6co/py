@@ -1,4 +1,4 @@
-import { type IPageParam } from '../api/types'
+import { type IPageParam } from '../types/index'
 import {reactive} from 'vue'
 
 /**

@@ -1,12 +1,13 @@
 {
-	"compilerOptions": {
-		"target": "es5",
-		"module": "commonjs",
-		"declaration": true,
-		"outDir": "./lib",
-		"strict": true,
-		"lib": ["es6"]
-	},
-	"include": ["src"],
-	"exclude": ["node_modules", "**/__tests__/*"]
+  "compilerOptions": {
+    "target": "ES5",
+    "module": "CommonJS", 
+    "outDir": "./lib",
+    "declaration": true,
+    "declarationDir": "./lib/types",
+    "strict": true,
+    "lib": ["es6"]
+  },
+  "include": ["src"],
+  "exclude": ["node_modules", "**/__tests__/*"]
 }

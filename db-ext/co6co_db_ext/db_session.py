@@ -93,6 +93,6 @@ class db_service:
                 asyncio.run(self.init_tables())
                 break
             except Exception as e:
-                log.err(f"创建数据表失败{e}")
+                log.warn(f"同步数据表失败{e}!")
                 log.info(f"{retryTime*5}s后重试...")
                 time.sleep(retryTime*5)

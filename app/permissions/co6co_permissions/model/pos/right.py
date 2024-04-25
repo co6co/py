@@ -44,11 +44,11 @@ class UserPO(UserTimeStampedModelPO):
         验证输入的密码是否正确
         """
         return hash.md5(self.salt+plainText)==self.password
-    def to_dict(self):
+    def to_jwt_dict(self):
         """
         jwt 保存内容
         """
-        return {"id":self.id,"userName":self.userName, "group_id":self.userGroupId}
+        return {"id":self.id,"userName":self.userName, "group_id":self.userGroupId}  
  
     
 class AccountPO(UserTimeStampedModelPO):

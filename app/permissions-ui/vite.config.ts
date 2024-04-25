@@ -16,7 +16,7 @@ const root = process.cwd()
 function pathResolve(dir: string) {
   return resolve(root, '.', dir)
 }
-export default (option:{model:string}) => {
+export default (option:{mode:string}) => {
   process.env = { ...process.env, ...loadEnv(option.mode, process.cwd()) }
 
   return defineConfig({

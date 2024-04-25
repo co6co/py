@@ -1,3 +1,7 @@
+
+export type ObjectType = { [key: string]: any }
+export type Direction = 'vertical' | 'horizontal'
+
 export interface IResponse<T = any> {
   code: number
   message: string
@@ -29,11 +33,26 @@ export enum Operation {
   Edit,
   Del
 }
-
+export enum FormOperation {
+  add,
+  edit
+} 
 export const getEleTagTypeByBoolean = (v: number | boolean) => {
   let isSuccess = true
   if (typeof v == 'number') isSuccess = Boolean(v)
   else isSuccess = v
   if (isSuccess) return 'success'
   return 'danger'
+}
+
+
+
+
+/**
+ * 加|编 表单所有模块 
+ */
+export interface FormData<TKey, T> {
+  operation: FormOperation
+  id: TKey
+  fromData: T
 }
