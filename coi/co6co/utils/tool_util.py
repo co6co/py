@@ -1,5 +1,10 @@
 import re
 
+import inspect
+
+def get_current_function_name():
+    return inspect.currentframe().f_back.f_code.co_name
+
 def to_camelcase(name: str) -> str:
     """
     下划线转驼峰(小驼峰)

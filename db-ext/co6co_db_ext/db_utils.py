@@ -7,7 +7,12 @@ from co6co.utils import log
 
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import Select
+from sqlalchemy.future import select
+from sqlalchemy import and_
+from sqlalchemy import func,text
 from .db_filter import absFilterItems
+from sqlalchemy.sql.elements import ColumnElement
+from sqlalchemy.orm.attributes import InstrumentedAttribute
 from  sqlalchemy.engine.result import ChunkedIteratorResult
 
 class db_tools:
@@ -79,7 +84,22 @@ class db_tools:
         不在使用
         """ 
         #sqlalchemy.engine.result.ChunkedIteratorResult 
-        return [dict(zip(a._fields,a))  for a in  executeResult]
+        return [dict(zip(a._fields,a))  for a in  executeResult] 
+    
+    async def count(session:AsyncSession,*filters:ColumnElement[bool],column:InstrumentedAttribute="*" )->int: 
+        """
+        count
+        """
+        exec=await session.execute(select(func.count(column)).filter(and_(*filters)))  
+        return exec.scalar() 
+    
+    async def exist(session:AsyncSession,*filters:ColumnElement[bool],column:InstrumentedAttribute="*" )->bool: 
+        """
+        exist
+        """
+        count=await db_tools.count(session,*filters,column=column)
+        if count>0:return True
+        else:return False 
     
     async def execForMappings(session:AsyncSession,select:Select):
         """
