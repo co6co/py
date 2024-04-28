@@ -202,7 +202,8 @@ class BaseMethodView(HTTPMethodView):
         """
         try: 
             result =   await self._query(request, select,   isPO , remove_db_instance)  
-            treeList = list_to_tree(result, rootValue, pid_field, id_field)
+            if result ==None:treeList=[]
+            else :treeList = list_to_tree(result, rootValue, pid_field, id_field)
             if len(treeList) == 0:
                 return JSON_util.response(Result.success(data=[]))
             return JSON_util.response(Result.success(data=treeList))

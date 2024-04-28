@@ -1,18 +1,13 @@
 
-from sanic.views import HTTPMethodView,stream # 基于类的视图
-from sanic.response import text,redirect
+from sanic.response import text
 from sanic import  Request  
 from co6co_sanic_ext.utils import JSON_util
-from co6co_sanic_ext.model.res.result import Page_Result, Result  
-from co6co_db_ext.db_operations import DbOperations
-from sqlalchemy.ext.asyncio import AsyncSession
-
-from co6co .utils import log
-from datetime import datetime
+from co6co_sanic_ext.model.res.result import  Result   
+from sqlalchemy.ext.asyncio import AsyncSession 
 
 from sqlalchemy.sql import Select
-from co6co_db_ext.db_utils  import db_tools,  DbCallable,QueryOneCallable, QueryListCallable,QueryPagedByFilterCallable
-from co6co.utils.tool_util import list_to_tree 
+from co6co_db_ext.db_utils  import db_tools
+ 
 
 from .base_view import AuthMethodView
 from ..model.pos.right import UserGroupPO
@@ -38,7 +33,9 @@ class user_groups_tree_view(AuthMethodView):
         """ 
         param=user_group_filter()
         param.__dict__.update(request.json)   
-        return await self.query_tree(request,param.list_select,rootValue=0, pid_field='parentId',id_field="id") 
+        if len( param.filter())>0:
+            return await self.query_list(request,param.list_select)
+        return await self.query_tree(request,param.create_List_select(),rootValue=0, pid_field='parentId',id_field="id") 
 
 
 class user_groups_view(AuthMethodView):
