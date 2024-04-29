@@ -15,6 +15,8 @@ from ..model.filters.user_group_filter import user_group_filter
 
 
 class user_groups_tree_view(AuthMethodView):
+    routePath="/tree"
+    
     async def get(self, request:Request):
         """
         树形选择下拉框数据
@@ -34,11 +36,12 @@ class user_groups_tree_view(AuthMethodView):
         param=user_group_filter()
         param.__dict__.update(request.json)   
         if len( param.filter())>0:
-            return await self.query_list(request,param.list_select)
+            return await self.query_page(request,param)
         return await self.query_tree(request,param.create_List_select(),rootValue=0, pid_field='parentId',id_field="id") 
 
 
 class user_groups_view(AuthMethodView):
+    
     async def get(self, request:Request):
         """
         树形选择下拉框数据
@@ -68,31 +71,32 @@ class user_groups_view(AuthMethodView):
         async def before( po:UserGroupPO, session:AsyncSession,request):   
             exist=await db_tools.exist(session,  UserGroupPO.code.__eq__(po.code),column=UserGroupPO.id) 
             if exist:return JSON_util.response(Result.fail(message=f"'{po.code}'已存在！") )
-        return await self.add(request,po,userId,before) 
+        return await self.add(request,po,userId= userId,beforeFun= before) 
 
     def patch(self, request:Request):
         return text("I am patch method")
 
 class user_group_view(AuthMethodView):
+    routePath="/<pk:int>"
+    
     async def put(self,request:Request,pk:int):  
         """
         编辑
-        """  
-        po=UserGroupPO()
+        """   
         async def before(oldPo:UserGroupPO, po:UserGroupPO, session:AsyncSession,request):  
             exist=await db_tools.exist(session, UserGroupPO.id!=oldPo.id,UserGroupPO.code.__eq__(po.code),column=UserGroupPO.id)
             if exist:return JSON_util.response(Result.fail(message=f"'{po.code}'已存在！") )
-            if po.parentId==oldPo.id:return JSON_util.response(Result.fail(message=f"'父节点选择错误！") )
-            oldPo.code=po.code
-            oldPo.name=po.name
-            oldPo.parentId=po.parentId
+            if po.parentId==oldPo.id:return JSON_util.response(Result.fail(message=f"'父节点选择错误！") ) 
 
-        return await self.edit(request,pk,po,UserGroupPO,self.getUserId(request),before) 
+        return await self.edit(request,pk,UserGroupPO,userId= self.getUserId(request),fun=before) 
     async def delete(self,request:Request,pk:int):  
         """
         删除
         """   
-        return await self.remove(request,pk,UserGroupPO ) 
+        async def before(po:UserGroupPO,session:AsyncSession):
+            count=await db_tools.count(session  ,UserGroupPO.parentId==po.id ,column=UserGroupPO.id)
+            if count>0:return JSON_util.response(Result.fail(message=f"该'{po.name}'节点下有‘{count}’节点，不能删除！"))
+        return await self.remove(request,pk,UserGroupPO,beforeFun=before ) 
      
 
 

@@ -1,3 +1,4 @@
+from __future__ import annotations 
 from co6co_db_ext.po import BasePO ,TimeStampedModelPO,UserTimeStampedModelPO
 from sqlalchemy import func,INTEGER, Integer,UUID,  INTEGER,BigInteger, Column, ForeignKey, String,DateTime
 from sqlalchemy.orm import  relationship,declarative_base,Relationship
@@ -7,6 +8,7 @@ import sqlalchemy
 from sqlalchemy.schema import DDL 
 from sqlalchemy import MetaData  
 import uuid 
+
 
 #metadata = MetaData() 
 #BasePO = declarative_base(metadata=metadata)
@@ -62,8 +64,7 @@ class AccountPO(UserTimeStampedModelPO):
     accountName = Column("account_name",String(64), unique=True)
     attachInfo= Column("attach_info",String(255),comment="有些信息需要存下来，才能配合账号使用")
     category = Column("category",INTEGER)
-    status = Column("status",String(16),comment="状态,根据账号类型，有不同得解释") 
-
+    status = Column("status",String(16),comment="状态,根据账号类型，有不同得解释")
     userPO=Relationship(UserPO,back_populates="accountPOs") 
 
 
@@ -74,22 +75,37 @@ class UserGroupPO(UserTimeStampedModelPO):
     __tablename__ = "sys_user_group" 
     id = Column("id",Integer,autoincrement=True, primary_key=True)
     parentId= Column("parent_id",Integer)
-    name = Column("group_name",String(64) ) 
-    code = Column("group_code",String(64), unique=True)  
+    name = Column("name",String(64) ) 
+    code = Column("code",String(64), unique=True)  
+    order = Column("order",Integer) 
     userPOs=Relationship("UserPO",back_populates="userGroupPO",uselist=True,passive_deletes=True) 
+
+    def update(self,po:UserGroupPO):
+        self.code=po.code
+        self.name=po.name
+        self.parentId=po.parentId
+        self.order=po.order
 
 class RolePO(TimeStampedModelPO):
     """
-    给用户赋予权限需要通过角色
+    角色表
     """
     __tablename__ = "sys_role"
 
     id = Column("id",BigInteger,comment="主键",autoincrement=True, primary_key=True)
-    name = Column("role_name",String(64) ,comment="角色名") 
-    code = Column("role_code",String(64), unique=True) 
+    name = Column("name",String(64) ,comment="角色名") 
+    code = Column("code",String(64), unique=True) 
+    order = Column("order",Integer) 
+    remark = Column("remark",String(255),comment="备注")
 
     userPOs=Relationship("UserPO",secondary="sys_user_role",back_populates="rolePOs",passive_deletes=True)
     menuPOs=Relationship("menuPO",secondary="sys_menu_role",back_populates="rolePOs",passive_deletes=True)
+    
+    def update(self,po:RolePO):
+        self.code=po.code
+        self.name=po.name
+        self.remark=po.remark
+        self.order=po.order
 
 class UserRolePO(UserTimeStampedModelPO):
     """
@@ -97,8 +113,9 @@ class UserRolePO(UserTimeStampedModelPO):
     """
     __tablename__ = "sys_user_role"
 
-    user= Column("user_id",ForeignKey(f"{UserPO.__tablename__}.{UserPO.id.name}"),   comment="主键id",primary_key=True)
-    role = Column("role_id",ForeignKey(f"{RolePO.__tablename__}.{RolePO.id.name}"),   comment="主键id",primary_key=True)
+    userId= Column("user_id",ForeignKey(f"{UserPO.__tablename__}.{UserPO.id.name}"),   comment="主键id",primary_key=True)
+    roleId = Column("role_id",ForeignKey(f"{RolePO.__tablename__}.{RolePO.id.name}"),   comment="主键id",primary_key=True)
+    
 
 class UserGroupRolePO(UserTimeStampedModelPO):
     """
@@ -131,6 +148,20 @@ class menuPO(UserTimeStampedModelPO):
     remark = Column("remark",String(255),comment="备注")
 
     rolePOs=Relationship("RolePO",secondary="sys_menu_role",back_populates="menuPOs",passive_deletes=True)
+
+    def update(self,po:menuPO):
+        self.code = po.code
+        self.name = po.name
+        self.parentId = po.parentId
+        self.category = po.category
+        self.icon = po.icon
+        self.url = po.url 
+        self.methods =  po.methods
+        self.permissionKey = po.permissionKey
+        self.component = po.component
+        self.order = po.order
+        self.status = po.status
+        self.remark = po.remark
     
     
 class MenuRolePO(UserTimeStampedModelPO):

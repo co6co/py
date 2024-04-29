@@ -1,14 +1,14 @@
 # -*- coding:utf-8 -*-
 
 import datetime,sys,threading,os
-from loguru import logger 
+#from loguru import logger 
 import traceback
 
 '''
 loguru 日志配置
 '''
-logger.remove()
-logger.add(sys.stdout,level="INFO",format="{file}\t{line}\t{message}")
+#logger.remove()
+#logger.add(sys.stdout,level="INFO",format="{file}\t{line}\t{message}")
 '''
 #https://blog.csdn.net/Kangyucheng/article/details/112794185
 TRACE           5   trace()
@@ -28,7 +28,7 @@ elif os.name == "posix": folder = "./log"
 for level in LEVEL_LIST:
     fileNamePart=f"{level}.log"
     p=os.path.join(folder,"loguru_{time:YY-MM}_"+fileNamePart)
-    logger.add(p, rotation="5 MB", level=level, encoding="utf-8", retention='7 days', format="{time:YY-MM-DD HH:mm:ss}\t{level}\t{file}\t{line}\t{message}")
+    #logger.add(p, rotation="5 MB", level=level, encoding="utf-8", retention='7 days', format="{time:YY-MM-DD HH:mm:ss}\t{level}\t{file}\t{line}\t{message}")
  
 '''
 控制台日志 日志配置
@@ -53,15 +53,18 @@ for level in LEVEL_LIST:
  36           46        青蓝色
  37           47        白色
 """
+def __getMessage(*msg:str): 
+    return "\t".join([str(m) for m in msg])
 
-def __log(msg,type: int = 0,foregroundColor:int=37, bg=40, e=None, hasPrefix:bool=True):
+def __log(*msg:str,type: int = 0,foregroundColor:int=37, bg=40, e=None, hasPrefix:bool=True):
     t=threading.currentThread()
     time = datetime.datetime.now() 
     err=e.__traceback__.tb_lineno if e !=None else ""
     prefix=f"['{time.strftime('%Y-%m-%d %H:%M:%S')}'] [{t.ident}|{t.name}]\t"
-    if not hasPrefix:prefix=""
-    print(f"{prefix}\033[{type};{foregroundColor};{bg}m{msg}{err}\033[0m")
-def log(msg:str):__log(msg)
+    if not hasPrefix:prefix="" 
+    print(f"{prefix}\033[{type};{foregroundColor};{bg}m{__getMessage(*msg)}{err}\033[0m")
+
+def log(*msg:str):__log(*msg)
 
 def generateCode(data:any):
     """
@@ -82,32 +85,36 @@ def end_mark(msg:str,f:str="==",start:str="\r\n<",end:str="\r\n\r\n",num:int=36)
     """
     __log(start+f*num+ msg +f*num+end,hasPrefix=False)
 
-def info(msg:str):__log(msg)
+def info(*msg:str):__log(*msg)
 
-def succ(msg:str):
+def succ(*msg:str):
     """
     成功日志
     """
-    __log(msg,7,32,40)
+    __log(*msg,type=7,foregroundColor=32,bg=40)
 
-def warn(msg:str):
+def warn(*msg:str):
     """
     警告日志
     """
-    __log(msg,7,33,40)
+    __log(*msg,type=7,foregroundColor=33,bg=40)
 
-def err(msg:str,e=None):
+def err(*msg:str,e=None):
     """
     错误日志
-    """ 
-    __log(f'{msg}-->{traceback.format_exc()}',7,31,40,e)
+    """  
+    message=__getMessage(*msg)
+    __log(f'{message}-->{traceback.format_exc()}',type=7,foregroundColor=31,bg=40,e=e)
 
 def critical(msg:str):
     """
     危急日志
     """ 
-    __log(f'{msg}-->{traceback.format_exc()}',7,37,40)
+    message=__getMessage(*msg) 
+    __log(f'{message}-->{traceback.format_exc()}',type=7,foregroundColor=37,bg=40)
 
+'''
 if __name__ == "__main__" :
     logger.trace("文件日志")
     logger.success("*arg:{}{}\t\t**kwargs:'ab:{ab},cd:{cd}'","元数据1","元数据2",ab="字典数据1",cd="字典数据2")
+'''

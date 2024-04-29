@@ -13,6 +13,10 @@ from ..model.pos.right import menuPO
 from ..model.filters.menu_filter import menu_filter
 from ..model.enum import menu_type, menu_state
 
+"""
+__init__.py 还是有其他用处的
+
+"""
 
 @menu_api.route("/status", methods=["GET", "POST"])
 @authorized
@@ -26,3 +30,4 @@ async def getMenuStatus(request: Request):
 async def getMenuCategory(request: Request):
     states = menu_type.to_dict_list()
     return JSON_util.response(Result.success(data=states))
+

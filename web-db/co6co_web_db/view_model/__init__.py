@@ -16,7 +16,8 @@ import multipart
 from io import BytesIO
 from co6co_web_db.utils import DbJSONEncoder
 from sqlalchemy import Select
-from co6co_db_ext.po import BasePO, UserTimeStampedModelPO
+from co6co_sanic_ext .view_model import BaseView
+from co6co_db_ext.po import BasePO, TimeStampedModelPO, UserTimeStampedModelPO
 from datetime import datetime
 from co6co.utils.tool_util import list_to_tree,get_current_function_name
 from co6co_db_ext.db_utils import db_tools,  DbCallable, QueryOneCallable, QueryListCallable, QueryPagedByFilterCallable
@@ -49,7 +50,7 @@ def errorLog(request: Request,module:str,method:str):
     log.err(f"执行[{request.method}]{request.path} 所属模块:{module}.{method} Error")
 
 
-class BaseMethodView(HTTPMethodView):
+class BaseMethodView(BaseView):
     """
     视图基类： 约定 增删改查，其他未约定方法可根据实际情况具体使用
     views.POST  : --> query list
@@ -57,94 +58,7 @@ class BaseMethodView(HTTPMethodView):
     view.PUT    :---> Edit
     view.DELETE :---> del
 
-    """
-
-    def response_json(self, data: Result | Page_Result):
-        return DbJSONEncoder.json(data)
-
-    def usable_args(self, request: Request) -> dict:
-        """
-        去除列表
-        request.args={name:['123'],groups:["a","b"]}
-        return {name:'123',groups:["a","b"]}
-        """
-        args: dict = request.args
-        data_result = {}
-        for key in args:
-            value = args.get(key)
-            if len(value) == 1:
-                data_result.update({key: value[0]})
-            else:
-                data_result.update({key: value})
-        return data_result
-
-    async def save_body(self, request: Request, root: str):
-        # 保存上传的内容
-        subDir = getDateFolder(format='%Y-%m-%d-%H-%M-%S')
-        filePath = os.path.join(root, getDateFolder(), f"{subDir}.data")
-        filePath = os.path.abspath(filePath)  # 转换为 os 所在系统路径
-        folder = os.path.dirname(filePath)
-        if not os.path.exists(folder):
-            os.makedirs(folder)
-        async with aiofiles.open(filePath, 'wb') as f:
-            await f.write(request.body)
-        # end 保存上传的内容
-
-    async def parser_multipart_body(self, request: Request) -> Tuple[Dict[str, tuple | Any], Dict[str, multipart.MultipartPart]]:
-        """
-        解析内容: multipart/form-data; boundary=------------------------XXXXX,
-        的内容
-        """
-        env = {
-            "REQUEST_METHOD": "POST",
-            "CONTENT_LENGTH": request.headers.get("content-length"),
-            "CONTENT_TYPE": request.headers.get("content-type"),
-            "wsgi.input": BytesIO(request.body)
-        }
-        data, file = multipart.parse_form_data(env)
-        data_result = {}
-        # log.info(data.__dict__)
-        for key in data.__dict__.get("dict"):
-            value = data.__dict__.get("dict").get(key)
-            if len(value) == 1:
-                data_result.update({key: value[0]})
-            else:
-                data_result.update({key: value})
-        # log.info(data_result)
-        return data_result, file
-
-    async def save_file(self, file, path: str):
-        """
-        保存上传的文件
-        file.name
-        """
-        async with aiofiles.open(path, 'wb') as f:
-            await f.write(file.body)
-
-    async def _save_file(self, request: Request, *savePath: str, fileFieldName: str = None):
-        """
-        保存上传的文件
-        """
-        p_len = len(savePath)
-        if fileFieldName != None and p_len == 1:
-            file = request.files.get(fileFieldName)
-            await self.save_file(file, *savePath)
-        elif p_len == len(request.files):
-            i: int = 0
-            for file in request.files:
-                file = request.files.get('file')
-                await self.save_file(file, savePath[i])
-                i += 1
-
-    def getFullPath(self, root, fileName: str) -> Tuple[str, str]:
-        """
-        获取去路径和相对路径
-        """
-        filePath = "/".join(["", getDateFolder(), fileName])
-        fullPath = os.path.join(root, filePath[1:])
-
-        return fullPath, filePath
-
+    """  
     def get_db_session(self, request: Request) -> AsyncSession | scoped_session:
         return get_db_session(request)
 
@@ -238,17 +152,27 @@ class BaseMethodView(HTTPMethodView):
             pageList = Page_Result.fail(message=f"请求失败：{e}")
             return JSON_util.response(pageList)
 
-    async def add(self, request: Request, po: BasePO, userId=None, beforeFun=None, afterFun=None):
+    async def add(self, request: Request, po: BasePO, json2Po:bool=True, userId=None, beforeFun=None, afterFun=None):
         """
-        增加
+        增加 
+
+        request: Request, 
+        po: BasePO,      #实体类对象 
+        userId=None, # 用户ID
+        beforeFun(po, session, request),    # 执行一些其他操作，返回值将直接返回客户端，回滚数据库操作
+        afterFun(po, session, request),     # 可在实体中获取 自增id
+
+        return JSONResponse
         """
         try:
-            po.__dict__.update(request.json)
-
-            async def exec(session: AsyncSession):
-                if isinstance(po, UserTimeStampedModelPO):
-                    po.createTime = datetime.now()
+            if json2Po:po.__dict__.update(request.json)
+            async def exec(session: AsyncSession): 
+                if isinstance(po, UserTimeStampedModelPO): 
+                    po.createTime = datetime.now() 
                     po.createUser = userId
+                elif isinstance(po,TimeStampedModelPO):
+                    po.createTime = datetime.now() 
+
                 if beforeFun != None:
                     result = await beforeFun(po, session, request)
                     if result != None: 
@@ -266,19 +190,36 @@ class BaseMethodView(HTTPMethodView):
             errorLog(request,self.__class__,get_current_function_name())
             return JSON_util.response(Result.fail(message=e))
 
-    async def edit(self, request: Request, pk: any, po: BasePO, poType: TypeVar, userId=None, fun=None):
+    async def edit(self, request: Request, pk: any, poType: TypeVar, po:BasePO=None, userId=None, fun=None,json2Po:bool=True):
         """
         编辑
+
+        request: Request, 
+        pk: any,          # 主键
+        poType: TypeVar,  # 实体类型
+        po:BasePO    ,    # None:根据传入的 poType创建,用 request.json赋值
+        userId=None, # 用户ID
+        fun=None,    # 执行一些其他操作，返回值将直接返回客户端，回滚数据库操作
+        json2Po:bool # 根据 请求的json 转换的对象更新 实体对象，在 fun 之前执行
+
+        return JSONResponse
         """
         try:
-            po.__dict__.update(request.json)
+            if po==None:
+                po=poType()
+                po.__dict__.update(request.json)
             async with self.get_db_session(request) as session, session.begin():
                 oldPo: poType = await session.get_one(poType, pk)
                 if oldPo == None:
                     return JSON_util.response(Result.fail(message=f"未查到‘{pk}’对应的信息!"))
-                if isinstance(oldPo, UserTimeStampedModelPO):
-                    oldPo.updateTime = datetime.now()
+                if isinstance(oldPo, UserTimeStampedModelPO): 
+                    oldPo.updateTime = datetime.now() 
                     oldPo.updateUser = userId
+                elif isinstance(oldPo,TimeStampedModelPO):
+                    oldPo.updateTime = datetime.now()  
+
+                if json2Po:
+                    oldPo.update(po)
                 if fun != None:
                     result = await fun(oldPo, po, session, request) 
                     if result != None:
@@ -289,9 +230,17 @@ class BaseMethodView(HTTPMethodView):
             errorLog(request,self.__class__,get_current_function_name())
             return JSON_util.response(Result.fail(message=e))
 
-    async def remove(self, request: Request, pk: any,   poType: TypeVar,  beforeFun=None, afterFun=None):
+    async def remove(self, request: Request, pk: any,poType: TypeVar,  beforeFun=None, afterFun=None):
         """
-        删除
+        删除 
+
+        request: Request, 
+        pk: any,      #主键值
+        poType: TypeVar # 实体类型
+        beforeFun(oldPo, session),    # 执行一些其他操作，返回值将直接返回客户端，回滚数据库操作
+        afterFun(oldPo, session, request),     # 返回值将直接返回客户端，回滚数据库操作
+
+        return JSONResponse
         """
         try:
             async with self.get_db_session(request) as session, session.begin():

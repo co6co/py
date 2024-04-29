@@ -17,6 +17,10 @@ class BasePO(DeclarativeBase):
     def to_dict2(self):
         return {to_camelcase(c.name): getattr(self,to_camelcase(c.name), None) for c in self.__table__.columns}
     
+    def update(self,po:DeclarativeBase):
+        pass
+
+       
 class TimeStampedModelPO(BasePO):
     __abstract__=True
                  
