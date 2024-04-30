@@ -6,13 +6,69 @@ from co6co_sanic_ext.model.res.result import  Result
 from sqlalchemy.ext.asyncio import AsyncSession 
 
 from sqlalchemy.sql import Select
-from co6co_db_ext.db_utils  import db_tools
+from co6co_db_ext.db_utils  import db_tools,DbCallable
  
 
 from .base_view import AuthMethodView
 from ..model.pos.right import RolePO,MenuRolePO,UserRolePO,UserGroupRolePO
 from ..model.filters.role_filter import role_filter
- 
+from ..model.pos.right import menuPO 
+from ..model.params import associationParam
+class roles_ass_view(AuthMethodView) :
+    routePath="/association/<roleId:int>"
+    async def post(self, request:Request,roleId:int): 
+        """
+        获取角色关联菜单
+        """
+        subSelect=Select(MenuRolePO.menuId,MenuRolePO.roleId).filter(MenuRolePO.roleId==roleId).subquery() 
+        select = (
+            Select(menuPO.id, menuPO.name, menuPO.code, menuPO.parentId,subSelect.c.roleId)
+            .outerjoin_from(menuPO,subSelect,onclause=subSelect.c.menuId==menuPO.id,full=False) 
+            .order_by(menuPO.parentId.asc())
+        ) 
+        return await self.query_tree(request, select, rootValue=0, pid_field='parentId', id_field="id", isPO=False)
+
+    async def put(self, request:Request,roleId:int):
+        """
+        保存角色关联菜单
+        """
+        param=associationParam()
+        param.__dict__.update(request.json)   
+        session:AsyncSession=self.get_db_session(request)
+        callable=DbCallable(session)
+        async def exec(session:AsyncSession):
+            """
+            """
+            try: 
+                isChanged=False
+                # 移除
+                if(param.remove!=None and len(param.remove)>0):
+                    select=(
+                        Select(MenuRolePO).filter(MenuRolePO.roleId==roleId,MenuRolePO.menuId .in_(param.remove ))
+                    )
+                    exec =await session.execute(select)
+                    removePos=exec.scalars(). all()
+                    for p in removePos:
+                        isChanged=True
+                        await session.delete(p)
+                # 增加
+                if(param.add!=None and len(param.add)>0):
+                    addpoList=[]
+                    for menuId in param.add:
+                        po=MenuRolePO()
+                        po.menuId=menuId
+                        po.roleId=roleId
+                        addpoList.append(po)
+                    if len(addpoList)>0:
+                        isChanged=True
+                        session.add_all(addpoList)  
+                if isChanged: return JSON_util.response(Result.success())
+                else:return JSON_util.response(Result.fail(message="未改变"))
+            except Exception as e: 
+                return JSON_util.response(Result.fail(message=f"出现错误：{e}"))
+
+        return await callable(exec) 
+        
 class roles_view(AuthMethodView):
     async def get(self, request:Request):
         """

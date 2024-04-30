@@ -8,10 +8,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.sql import Select
 from co6co_db_ext.db_utils import db_tools
 from .base_view import AuthMethodView
-from ..model.pos.right import menuPO
+from ..model.pos.right import menuPO 
 from ..model.filters.menu_filter import menu_filter
- 
-
   
 class menu_tree_view(AuthMethodView):
     routePath="/tree"
