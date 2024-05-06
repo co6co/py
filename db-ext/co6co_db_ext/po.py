@@ -26,6 +26,12 @@ class TimeStampedModelPO(BasePO):
                  
     createTime= Column("create_time",DateTime,server_default=func.now(),comment="创建时间")
     updateTime= Column("update_time", DateTime,comment="更新时间") 
+
+class CreateUserStampedModelPO(BasePO):
+     __abstract__=True
+     createUser= Column("create_user", BigInteger,comment="创建人")  
+     createTime= Column("create_time",DateTime,server_default=func.now(),comment="创建时间")
+
 class UserTimeStampedModelPO(TimeStampedModelPO):
     __abstract__=True
 

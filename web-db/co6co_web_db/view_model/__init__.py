@@ -15,15 +15,18 @@ import os
 import multipart
 from io import BytesIO
 from co6co_web_db.utils import DbJSONEncoder
-from sqlalchemy import Select
+
+from sqlalchemy import Select,Column, Integer, String, Update,Delete
 from co6co_sanic_ext .view_model import BaseView
-from co6co_db_ext.po import BasePO, TimeStampedModelPO, UserTimeStampedModelPO
+from co6co_db_ext.po import BasePO, TimeStampedModelPO, UserTimeStampedModelPO,CreateUserStampedModelPO
 from datetime import datetime
 from co6co.utils.tool_util import list_to_tree,get_current_function_name
-from co6co_db_ext.db_utils import db_tools,  DbCallable, QueryOneCallable, QueryListCallable, QueryPagedByFilterCallable
+from co6co_db_ext.db_utils import db_tools,  DbCallable, QueryOneCallable,UpdateOneCallable, QueryListCallable, QueryPagedByFilterCallable
 
 
 from co6co.utils import log, getDateFolder
+
+from ..model.params import associationParam
 # from api.auth import authorized
 
 
@@ -39,12 +42,12 @@ def get_db_session(request: Request) -> AsyncSession | scoped_session:
     raise Exception("未实现DbSession")
 
 
-async def get_one(request: Request, select: Select):
+async def get_one(request: Request, select: Select,isPO:bool=True):
     """
     获取一条记录
     """
     call = QueryOneCallable(get_db_session(request))
-    return await call(select)
+    return await call(select,isPO) 
 
 def errorLog(request: Request,module:str,method:str):
     log.err(f"执行[{request.method}]{request.path} 所属模块:{module}.{method} Error")
@@ -62,8 +65,14 @@ class BaseMethodView(BaseView):
     def get_db_session(self, request: Request) -> AsyncSession | scoped_session:
         return get_db_session(request)
 
-    async def get_one(self, request: Request, select: Select):
-        return await get_one(request, select)
+    async def get_one(self, request: Request, select: Select,isPO:bool=True):
+        return await get_one(request, select,isPO)
+    async def update_one(self, request: Request, select: Select,editFn:None ):
+        
+        call=UpdateOneCallable(self.get_db_session(request))
+        result= await call(select,editFn)  
+        if result!=None:return result
+        else: return Result.fail(message=f"请求失败,未更新数据")
 
     async def query_mapping(self, request: Request, select: Select, oneRecord: bool = False):
         """
@@ -82,11 +91,11 @@ class BaseMethodView(BaseView):
                     return JSON_util.response(result)
         except Exception as e:
             errorLog(request,self.__class__,get_current_function_name())
-            result = Result.fail(message=f"请求失败：{e}")
+            return Result.fail(message=f"请求失败：{e}")
 
     async def _query(self, request: Request, select: Select  , isPO: bool = True, remove_db_instance: bool = True):
         """
-        执行查询:  列表 
+        执行查询: 列表 
         """
         try:
             session: AsyncSession = request.ctx.session
@@ -96,7 +105,7 @@ class BaseMethodView(BaseView):
             return result 
         except Exception as e:
             errorLog(request,self.__class__,get_current_function_name())
-            return None
+            return None 
 
     async def query_list(self, request: Request, select: Select,   isPO: bool = True, remove_db_instance: bool = True):
         """
@@ -108,6 +117,7 @@ class BaseMethodView(BaseView):
         except Exception as e:
             errorLog(request,self.__class__,get_current_function_name())
             result = Result.fail(message=f"请求失败：{e}")
+            return JSON_util.response(Result.success(data=result))
 
 
     async def query_tree(self, request: Request, select: Select, rootValue: any = None, pid_field: str = "pid", id_field: str = "id", isPO: bool = True, remove_db_instance: bool = True):
@@ -124,6 +134,7 @@ class BaseMethodView(BaseView):
         except Exception as e:
             errorLog(request,self.__class__,get_current_function_name())
             result = Result.fail(message=f"请求失败：{e}")
+            return JSON_util.response(Result.success(data=result))
 
     async def query_page(self, request: Request, filter: absFilterItems, isPO: bool = True, remove_db_instance=True):
         """
@@ -134,19 +145,7 @@ class BaseMethodView(BaseView):
             query = QueryPagedByFilterCallable(self.get_db_session(request))
             total, result = await query(filter, isPO, remove_db_instance)
             pageList = Page_Result.success(result, total=total)
-            return JSON_util.response(pageList)
-            '''
-            async with self.get_db_session(request) as session, session.begin():
-                session: AsyncSession = session
-                total = await session.execute(filter.count_select)
-                total = total.scalar()
-                executer = await session.execute(filter.list_select)
-                result = executer.mappings().fetchall()
-                result = db_tools.list2Dict(result)
-                pageList = Page_Result.success(result, total=total)
-                return JSON_util.response(pageList)
-            '''
-
+            return JSON_util.response(pageList) 
         except Exception as e:
             errorLog(request,self.__class__,get_current_function_name())
             pageList = Page_Result.fail(message=f"请求失败：{e}")
@@ -186,7 +185,7 @@ class BaseMethodView(BaseView):
 
             callable = DbCallable(self.get_db_session(request))
             return await callable(exec) 
-        except Exception as e:
+        except Exception as e: 
             errorLog(request,self.__class__,get_current_function_name())
             return JSON_util.response(Result.fail(message=e))
 
@@ -227,6 +226,7 @@ class BaseMethodView(BaseView):
                         return result
                 return JSON_util.response(Result.success())
         except Exception as e:
+            await session.rollback()
             errorLog(request,self.__class__,get_current_function_name())
             return JSON_util.response(Result.fail(message=e))
 
@@ -260,11 +260,60 @@ class BaseMethodView(BaseView):
                         return result
                 return JSON_util.response(Result.success())
         except Exception as e:
-            errorLog(request,self.__class__,get_current_function_name())
+            await session.rollback()
+            errorLog(request,self.__class__,get_current_function_name()) 
             return JSON_util.response(Result.fail(message=e))
+    
+    async def save_association(self, request: Request, currentUser:int,delSml:Delete,createPo): 
+        """
+        保存关联菜单
+        delSml:Delete 删除语句
+        createPo:(id)=>basePO
+        """
+        param=associationParam()
+        param.__dict__.update(request.json)   
+        session:AsyncSession=self.get_db_session(request)
+        callable=DbCallable(session) 
+        async def exec(session:AsyncSession): 
+            try: 
+                isChanged=False
+                # 移除
+                if(param.remove!=None and len(param.remove)>0): 
+                    result= await db_tools.execSQL(session,delSml)
+                    if result>0:
+                        isChanged=True
+                # 增加
+                if(param.add!=None and len(param.add)>0):
+                    addpoList=[]
+                    for id in param.add: 
+                        po=await createPo(session,id)  
+                        if isinstance(po, CreateUserStampedModelPO) or  isinstance(po,UserTimeStampedModelPO): 
+                            po.createTime = datetime.now() 
+                            po.createUser = currentUser 
+                        addpoList.append(po)
+                    if len(addpoList)>0:
+                        isChanged=True
+                        session.add_all(addpoList)  
+                if isChanged: return JSON_util.response(Result.success())
+                else:return JSON_util.response(Result.fail(message="未改变"))
+            except Exception as e: 
+                await session.rollback()
+                return JSON_util.response(Result.fail(message=f"出现错误：{e}"))
+
+        return await callable(exec) 
+
 
 
 """
 class AuthMethodView(BaseMethodView): 
    decorators=[authorized] 
+
+
+    def update():
+         stmt = (
+            Update(BoatGroupPO)
+            .where(BoatGroupPO.groupType==Device_Group_type.site.key)
+            .values(priority=99999)
+        ) 
+        return await session.execute(stmt) 
 """

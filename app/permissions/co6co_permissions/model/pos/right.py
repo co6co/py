@@ -1,5 +1,5 @@
 from __future__ import annotations 
-from co6co_db_ext.po import BasePO ,TimeStampedModelPO,UserTimeStampedModelPO
+from co6co_db_ext.po import BasePO ,TimeStampedModelPO,UserTimeStampedModelPO,CreateUserStampedModelPO
 from sqlalchemy import func,INTEGER, Integer,UUID,  INTEGER,BigInteger, Column, ForeignKey, String,DateTime
 from sqlalchemy.orm import  relationship,declarative_base,Relationship
 import co6co.utils as tool
@@ -27,6 +27,13 @@ class UserPO(UserTimeStampedModelPO):
     accountPOs=Relationship("AccountPO",back_populates="userPO",uselist=True,passive_deletes=True)
     userGroupPO=Relationship("UserGroupPO",back_populates="userPOs") 
     rolePOs=Relationship("RolePO",secondary="sys_user_role",back_populates="userPOs",passive_deletes=True)
+
+    def update(self,po:UserPO):
+        self.userName = po.userName
+        self.category=po.category
+        self.userGroupId = po.userGroupId
+        self.state = po.state  
+        self.remark=po.remark
     
     @staticmethod
     def generateSalt( )->str:
@@ -107,7 +114,7 @@ class RolePO(TimeStampedModelPO):
         self.remark=po.remark
         self.order=po.order
 
-class UserRolePO(UserTimeStampedModelPO):
+class UserRolePO(CreateUserStampedModelPO):
     """
     用户_角色表
     """
@@ -117,7 +124,7 @@ class UserRolePO(UserTimeStampedModelPO):
     roleId = Column("role_id",ForeignKey(f"{RolePO.__tablename__}.{RolePO.id.name}"),   comment="主键id",primary_key=True)
     
 
-class UserGroupRolePO(UserTimeStampedModelPO):
+class UserGroupRolePO(CreateUserStampedModelPO):
     """
     用户组_角色表
     """
@@ -164,7 +171,7 @@ class menuPO(UserTimeStampedModelPO):
         self.remark = po.remark
     
     
-class MenuRolePO(UserTimeStampedModelPO):
+class MenuRolePO(CreateUserStampedModelPO):
     """
     权限_角色表
     """

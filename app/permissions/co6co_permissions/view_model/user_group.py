@@ -5,13 +5,44 @@ from co6co_sanic_ext.utils import JSON_util
 from co6co_sanic_ext.model.res.result import  Result   
 from sqlalchemy.ext.asyncio import AsyncSession 
 
-from sqlalchemy.sql import Select
+from sqlalchemy.sql import Select,Delete
 from co6co_db_ext.db_utils  import db_tools
- 
+from co6co_web_db.model.params import associationParam
 
 from .base_view import AuthMethodView
-from ..model.pos.right import UserGroupPO
+from ..model.pos.right import UserGroupPO,RolePO,UserGroupRolePO
 from ..model.filters.user_group_filter import user_group_filter
+
+class user_group_ass_view(AuthMethodView) :
+    routePath="/association/<userGroupId:int>"
+    async def post(self, request:Request,userGroupId:int): 
+        """
+        获取用户组关联的角色
+        """
+        subSelect=Select(UserGroupRolePO.roleId,UserGroupRolePO.userGroupId).filter(UserGroupRolePO.userGroupId==userGroupId).subquery() 
+        select = (
+            Select(RolePO.id, RolePO.name, RolePO.code,subSelect.c.roleId.label("associatedValue"))
+            .outerjoin_from(RolePO,subSelect,onclause=subSelect.c.roleId==RolePO.id,full=False) 
+            .order_by(RolePO.name.asc())
+        ) 
+        return await self.query_list(request, select, isPO=False)
+    async def put(self, request:Request,userGroupId:int):
+        """
+        保存角色关联菜单
+        """ 
+        param=associationParam()
+        param.__dict__.update(request.json)   
+        userId=self.getUserId(request)
+
+        sml=(
+            Delete(UserGroupRolePO).filter(UserGroupRolePO.userGroupId==userGroupId,UserGroupRolePO.roleId .in_(param.remove ))
+        )
+        async def createPo(_, roleId:int):
+            po=UserGroupRolePO()
+            po.roleId=roleId
+            po.userGroupId=userGroupId
+            return po 
+        return await self.save_association(request,userId,sml,createPo)
 
 
 class user_groups_tree_view(AuthMethodView):

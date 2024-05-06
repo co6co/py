@@ -3,7 +3,7 @@ from typing import List
 
 class associationParam:
     """
-    用户关联船保存
+    关联参数
     """ 
     add: List[int]
     remove: List[int]

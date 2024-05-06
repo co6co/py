@@ -12,4 +12,11 @@ class AuthMethodView(BaseMethodView):
       获取用户ID
       """  
       return request.ctx.current_user["id"]  
+   
+   def getUserName(self, request: Request): 
+       """
+       获取当前用户名
+       """
+       current_user=request.ctx.current_user  
+       return current_user.get("userName") 
       

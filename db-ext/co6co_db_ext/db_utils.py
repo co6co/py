@@ -6,14 +6,17 @@ from .po import BasePO
 from co6co.utils import log
 
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import Select
+from sqlalchemy import Select,Update,Insert,Delete
 from sqlalchemy.future import select
 from sqlalchemy import and_
 from sqlalchemy import func,text
-from .db_filter import absFilterItems
 from sqlalchemy.sql.elements import ColumnElement
 from sqlalchemy.orm.attributes import InstrumentedAttribute
-from  sqlalchemy.engine.result import ChunkedIteratorResult
+from sqlalchemy.engine.result import ChunkedIteratorResult
+from sqlalchemy.engine.cursor import CursorResult
+
+from .db_filter import absFilterItems
+
 
 class db_tools:
     """
@@ -127,6 +130,14 @@ class db_tools:
             return db_tools.remove_db_instance_state(exec.scalars().fetchall())  
         else:
             return exec.scalars().fetchall() 
+        
+    async def execSQL(session:AsyncSession,sql:Update|Insert|Delete)-> int:
+        """
+        执行简单SQL语句
+        """
+        data:CursorResult=await session.execute(sql)
+        return data.rowcount
+    
 
     
 
@@ -157,7 +168,26 @@ class QueryOneCallable(DbCallable):
                 data=exec.mappings().fetchone()
                 result=db_tools.one2Dict(data)  
                 return result 
-        return await super().__call__(exec)
+        return await super().__call__(exec) 
+    
+class UpdateOneCallable(DbCallable):
+    async def __call__(self, queryOneSelect :Select,editFn:None):
+        async def exec(session:AsyncSession):
+            try:
+                exec=await session.execute(queryOneSelect)   
+                data=exec.fetchone()
+                # 返回的是元组 
+                one=None
+                if data!=None:one= data[0]
+                else: one=  None
+                if editFn!=None:return await editFn(session,one)  
+            except Exception as e:
+                await session.rollback()
+                log.warn("执行'UpdateOneCallable'异常",e)
+                return None
+
+        return await super().__call__(exec) 
+
          
 class QueryListCallable(DbCallable):  
     async def __call__(self, select :Select,isPO:bool=True,remove_db_instance=True):
