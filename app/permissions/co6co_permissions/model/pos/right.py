@@ -57,7 +57,7 @@ class UserPO(UserTimeStampedModelPO):
         """
         jwt 保存内容
         """
-        return {"id":self.id,"userName":self.userName, "group_id":self.userGroupId}  
+        return {"id":self.id,"userName":self.userName, "group_id":self.userGroupId}   
  
     
 class AccountPO(UserTimeStampedModelPO):
@@ -179,6 +179,26 @@ class MenuRolePO(CreateUserStampedModelPO):
 
     menuId= Column("menu_id",ForeignKey(f"{menuPO.__tablename__}.{menuPO.id.name}",ondelete="CASCADE"),   comment="主键id",primary_key=True)
     roleId = Column("role_id",ForeignKey(f"{RolePO.__tablename__}.{RolePO.id.name}",ondelete="CASCADE"),   comment="主键id",primary_key=True)
+
+class LoginLogPO(CreateUserStampedModelPO):
+    """
+    登录日志
+    """
+    __tablename__ = "sys_login_log"
+    id = Column("id",Integer,comment="主键",autoincrement=True, primary_key=True) 
+    name = Column("name",String(64), comment="名称")
+    state = Column("state",String(64),   comment="状态")
+    ipAddress= Column("ip_address",String(64))
+    message= Column("message",String(254)) 
+
+class OperationLogPO(CreateUserStampedModelPO):
+    __tablename__ = "sys_operation_log"
+    id = Column("id",Integer,comment="主键",autoincrement=True, primary_key=True) 
+    category = Column("category",String(64), comment="类型")
+    name = Column("name",String(64), comment="名称") # 修改用户
+    state = Column("state",String(64),    comment="状态")
+    target= Column("target",String(64),   comment="修改目标,数据表中的某个关键字段[eg. admin 用户]")
+    data =Column("data",String(2048),comment="数据" ) 
 
 '''
 class data_permission_base(UserTimeStampedModelPO):

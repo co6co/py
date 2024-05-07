@@ -1,5 +1,5 @@
 
-from ..pos.right import UserPO
+from ..pos.right import UserPO,UserGroupPO
 from sqlalchemy .orm.attributes import InstrumentedAttribute
 from typing import Tuple
 from co6co_db_ext.db_filter import absFilterItems
@@ -18,6 +18,8 @@ class user_filter(absFilterItems):
         super().__init__(UserPO)
         self.name = userName
         self.userGroupId = userGroupId
+        self.listSelectFields=[UserPO.id,UserPO.userGroupId,UserPO.state,UserPO.createTime, UserPO.userName]
+         
 
     def filter(self) -> list:
         """
@@ -31,10 +33,15 @@ class user_filter(absFilterItems):
         return filters_arr
 
     def create_List_select(self):
-        pass
+        select=(
+				Select(UserPO.id,UserPO.userGroupId,UserPO.state,UserPO.createTime, UserPO.userName,UserGroupPO.name.label("groupName"),UserGroupPO.id.label("groupId"))
+                .join(UserGroupPO,isouter=True,onclause=UserPO.userGroupId==UserGroupPO.id)
+				.filter(and_(*self.filter()))  
+		)
+        return select
 
     def getDefaultOrderBy(self) -> Tuple[InstrumentedAttribute]:
         """
         默认排序
         """
-        return (UserPO.id.asc(),)
+        return (UserPO.createTime.desc(),)

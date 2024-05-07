@@ -18,7 +18,11 @@ class changePwd_view(AuthMethodView):
     routePath="/changePwd" 
     async def post(self, request:Request ): 
         """
-        修改密码
+        修改密码：
+        {
+               oldPassword:""
+               newPassword:""
+        }
         """ 
         data=request.json
         current_user=request.ctx.current_user 
@@ -36,11 +40,20 @@ class changePwd_view(AuthMethodView):
 
 class user_info_view(AuthMethodView):
     routePath="/currentUser" 
-    async def get(self, request:Request ):
+    async def get(self, request:Request):
         """
-        当前用户信息
+        当前用户信息  
+        return {
+            data:{
+                avatar:""
+                remark:""
+            } 
+        }
         """ 
         userName=self.getUserName(request)
         select=Select(UserPO.avatar,UserPO.remark).filter(UserPO.userName==userName)
         dict= self.get_one(request,select,isPO=False)
-        return JSON_util.response(Result.success(data=dict))  
+        return JSON_util.response(Result.success(data=dict)) 
+     
+
+            

@@ -68,11 +68,21 @@ class BaseMethodView(BaseView):
     async def get_one(self, request: Request, select: Select,isPO:bool=True):
         return await get_one(request, select,isPO)
     async def update_one(self, request: Request, select: Select,editFn:None ):
-        
-        call=UpdateOneCallable(self.get_db_session(request))
-        result= await call(select,editFn)  
-        if result!=None:return result
-        else: return Result.fail(message=f"请求失败,未更新数据")
+        """
+        更新 PO
+        editFn(session,basePO): 对select 的第一条记录赋值,没有赋值或者没有更改->不执行update
+                                返回一个对象:http 应答，
+                                        None:滚数据请求失败
+
+        """
+        try:
+            call=UpdateOneCallable(self.get_db_session(request))
+            result= await call(select,editFn)  
+            if result!=None:return result
+            else: return JSON_util.response(Result.fail(message=f"更新失败"))
+        except Exception as e:
+            errorLog(request,self.__class__,get_current_function_name())
+            return Result.fail(message=f"请求异常：{e}")
 
     async def query_mapping(self, request: Request, select: Select, oneRecord: bool = False):
         """

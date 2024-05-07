@@ -1,4 +1,5 @@
 import re
+from types import FunctionType,MethodType # 对象的叫方法[method]，其他未函数[Function]
 
 import inspect
 
@@ -25,13 +26,20 @@ def list_to_tree( data_list:list, root:any, pid_field:str, id_field:str):
     list 转 tree 
 
     data_list: 数据列表,
-    root: 通过 `.get(pid_field) == root ` 查出所有根节点,
+    root: 通过 `.get(pid_field) == root ` 查出所有根节点, 或者是找到 根的 一个方法
     pid_field: 关联父节点的字段,
     id_field:  主键id
 
     return 树形 包含 children 字段
     """ 
-    resp_list = [i for i in data_list if i.get(pid_field)== root]  
+    getRoot=root
+    def _getRoot(a__data_list:dict):
+        return a__data_list.get(pid_field)== root
+
+    if not isinstance(root,FunctionType):
+        getRoot=_getRoot
+
+    resp_list = [i for i in data_list if getRoot(i)]  
     for i in data_list:
         i['children'] = [j for j in data_list if i.get(id_field) == j.get(pid_field)] 
     return resp_list 

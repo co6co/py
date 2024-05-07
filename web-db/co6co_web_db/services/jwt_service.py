@@ -47,5 +47,13 @@ async def validToken(request:Request,SECRET:str):
         return False
     result=svc.decode(request.token) 
     if result ==None or 'data' not in result:return False
-    request.ctx.current_user=result["data"] 
+    await setCurrentUser(request,result["data"]) 
+    return True
+
+
+async def setCurrentUser(request:Request,data:dict):
+    """
+    设置当前用户
+    """   
+    request.ctx.current_user=data
     return True

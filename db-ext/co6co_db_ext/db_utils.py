@@ -169,6 +169,17 @@ class QueryOneCallable(DbCallable):
                 result=db_tools.one2Dict(data)  
                 return result 
         return await super().__call__(exec) 
+
+class InsertCallable(DbCallable):
+    async def __call__(self, *po:BasePO ):
+        async def exec(session:AsyncSession):
+            try: 
+                session.add_all(po) 
+            except Exception as e:
+                await session.rollback()
+                log.warn("执行'InsertOneCallable'异常",e)
+                raise 
+        return await super().__call__(exec) 
     
 class UpdateOneCallable(DbCallable):
     async def __call__(self, queryOneSelect :Select,editFn:None):
@@ -180,11 +191,14 @@ class UpdateOneCallable(DbCallable):
                 one=None
                 if data!=None:one= data[0]
                 else: one=  None
-                if editFn!=None:return await editFn(session,one)  
+                if editFn!=None:
+                    result= await editFn(session,one)  
+                    if result==None: await session.rollback()
+                    return result
             except Exception as e:
                 await session.rollback()
                 log.warn("执行'UpdateOneCallable'异常",e)
-                return None
+                raise
 
         return await super().__call__(exec) 
 

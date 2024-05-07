@@ -8,7 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.sql import Select,Delete
 from co6co_db_ext.db_utils  import db_tools
 from co6co_web_db.model.params import associationParam
-
+from co6co.utils import getRandomStr
 
 from .base_view import AuthMethodView
 from ..model.pos.right import UserPO, RolePO,UserRolePO,AccountPO
@@ -33,8 +33,7 @@ class user_ass_view(AuthMethodView) :
         """ 
         param=associationParam()
         param.__dict__.update(request.json)   
-        userId=self.getUserId(request)
-
+        currentUserId=self.getUserId(request) 
         sml=(
             Delete(UserRolePO).filter(UserRolePO.userId==userId,UserRolePO.roleId .in_(param.remove ))
         )
@@ -43,7 +42,7 @@ class user_ass_view(AuthMethodView) :
             po.roleId=roleId
             po.userId=userId
             return po 
-        return await self.save_association(request,userId,sml,createPo)
+        return await self.save_association(request,currentUserId,sml,createPo)
 
  
 class users_view(AuthMethodView): 
@@ -55,7 +54,7 @@ class users_view(AuthMethodView):
         select=(
             Select(UserPO.userName.label("name"),UserPO.id)  
             .order_by(UserPO.id.asc())
-        )  
+        ) 
         return await self.query_list(request,select,  isPO=False) 
     
     async def post(self, request:Request):
@@ -65,7 +64,7 @@ class users_view(AuthMethodView):
         """ 
         param=user_filter()
         param.__dict__.update(request.json)   
-        return await self.query_list(request,param.list_select ) 
+        return await self.query_page(request,param ,isPO=False) 
     
     async def put(self,request:Request):  
         """
@@ -76,10 +75,9 @@ class users_view(AuthMethodView):
         async def before( po:UserPO, session:AsyncSession,request):   
             exist=await db_tools.exist(session,  UserPO.userName.__eq__(po.userName),column=UserPO.id) 
             if exist:return JSON_util.response(Result.fail(message=f"'{po.userName}'已存在！") )
+            if po.salt==None:po.salt=getRandomStr(6) 
         return await self.add(request,po,userId= userId,beforeFun= before) 
-
-    def patch(self, request:Request):
-        return text("I am patch method")
+    
 
 class user_view(AuthMethodView):
     routePath="/<pk:int>"
@@ -100,7 +98,7 @@ class user_view(AuthMethodView):
         if pk == 1 : return JSON_util.response(Result.fail(message= "不能删除系统默认用户！"))
         async def before(po:UserPO,session:AsyncSession):
             #用户角色关联
-            count=await db_tools.count(session,UserRolePO.userId==po.id ,column=UserRolePO.id)
+            count=await db_tools.count(session,UserRolePO.userId==po.id ,column=UserRolePO.userId)
             if count>0:return JSON_util.response(Result.fail(message=f"该'{po.userName}'用户关联有‘{count}’角色，不能删除！"))
             count=await db_tools.count(session,AccountPO.userId==po.id ,column=AccountPO.uid)
             if count>0:return JSON_util.response(Result.fail(message=f"该'{po.userName}'用户关联有‘{count}’账号，不能删除！"))
@@ -118,10 +116,14 @@ class sys_users_view(AuthMethodView):
         userName=data["userName"]
         password=data["password"]
         select=(Select(UserPO).filter(UserPO.userName==userName))
+        if userName==None or password==None or len(password)<6:
+            return  JSON_util.response(Result.fail(message="请检查提交的用户和密码！"))
         async def edit(_,one:UserPO):
             if one!=None:
                 one.password=one.encrypt(password)
-            return JSON_util.response(Result.success())
+                return JSON_util.response(Result.success())
+            else:
+                return JSON_util.response(Result.fail(message=f"所提供的用户名[{userName}]不存在，请刷新重试！"))
 
         return await self.update_one(request,select,edit)
 

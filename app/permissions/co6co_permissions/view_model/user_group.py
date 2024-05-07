@@ -12,7 +12,7 @@ from co6co_web_db.model.params import associationParam
 from .base_view import AuthMethodView
 from ..model.pos.right import UserGroupPO,RolePO,UserGroupRolePO
 from ..model.filters.user_group_filter import user_group_filter
-
+from co6co.utils import log
 class user_group_ass_view(AuthMethodView) :
     routePath="/association/<userGroupId:int>"
     async def post(self, request:Request,userGroupId:int): 
@@ -48,7 +48,7 @@ class user_group_ass_view(AuthMethodView) :
 class user_groups_tree_view(AuthMethodView):
     routePath="/tree"
     
-    async def get(self, request:Request):
+    async def get(self, request:Request,rootValue:int=None):
         """
         树形选择下拉框数据
         selectTree :  el-Tree
@@ -57,7 +57,8 @@ class user_groups_tree_view(AuthMethodView):
             Select(UserGroupPO.id,UserGroupPO.name,UserGroupPO.code,UserGroupPO.parentId)  
             .order_by(UserGroupPO.parentId.asc())
         ) 
-        return await self.query_tree(request,select,  pid_field='parentId',id_field="id",isPO=False) 
+        log.warn("key:",rootValue)
+        return await self.query_tree(request,select, rootValue=rootValue, pid_field='parentId',id_field="id",isPO=False) 
     
     async def post(self, request:Request):
         """
@@ -69,6 +70,14 @@ class user_groups_tree_view(AuthMethodView):
         if len( param.filter())>0:
             return await self.query_page(request,param)
         return await self.query_tree(request,param.create_List_select(),rootValue=0, pid_field='parentId',id_field="id") 
+    
+class user_groups_sub_tree_view(user_groups_tree_view):
+    routePath="/tree/<parendId:int>"
+    async def get(self, request:Request,parendId:int):
+        """
+        返回子 树形选择下拉框数据
+        """
+        return await super().get(request,parendId)
 
 
 class user_groups_view(AuthMethodView):
