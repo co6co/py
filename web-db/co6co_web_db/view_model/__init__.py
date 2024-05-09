@@ -24,6 +24,7 @@ from co6co.utils.tool_util import list_to_tree,get_current_function_name
 from co6co_db_ext.db_utils import db_tools,  DbCallable, QueryOneCallable,UpdateOneCallable, QueryListCallable, QueryPagedByFilterCallable
 
 
+
 from co6co.utils import log, getDateFolder
 
 from ..model.params import associationParam
@@ -274,14 +275,15 @@ class BaseMethodView(BaseView):
             errorLog(request,self.__class__,get_current_function_name()) 
             return JSON_util.response(Result.fail(message=e))
     
-    async def save_association(self, request: Request, currentUser:int,delSml:Delete,createPo): 
+    async def save_association(self, request: Request, currentUser:int,delSml:Delete,createPo:any,param:associationParam=None):
         """
         保存关联菜单
         delSml:Delete 删除语句
         createPo:(id)=>basePO
         """
-        param=associationParam()
-        param.__dict__.update(request.json)   
+        if param==None:
+            param=associationParam()
+            param.__dict__.update(request.json)   
         session:AsyncSession=self.get_db_session(request)
         callable=DbCallable(session) 
         async def exec(session:AsyncSession): 
