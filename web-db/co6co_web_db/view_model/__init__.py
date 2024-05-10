@@ -16,7 +16,7 @@ import multipart
 from io import BytesIO
 from co6co_web_db.utils import DbJSONEncoder
 
-from sqlalchemy import Select,Column, Integer, String, Update,Delete
+from sqlalchemy import Select,Column, Integer, String, Update,Delete,Insert
 from co6co_sanic_ext .view_model import BaseView
 from co6co_db_ext.po import BasePO, TimeStampedModelPO, UserTimeStampedModelPO,CreateUserStampedModelPO
 from datetime import datetime
@@ -161,6 +161,25 @@ class BaseMethodView(BaseView):
             errorLog(request,self.__class__,get_current_function_name())
             pageList = Page_Result.fail(message=f"请求失败：{e}")
             return JSON_util.response(pageList)
+        
+    async def execSqls(self, request: Request,*sml:Update|Delete|Insert,callBck=None):
+        callable = DbCallable(self.get_db_session(request))
+        async def exec(session:AsyncSession):
+            try:
+                result=[]
+                for sql in sml: 
+                    r=await db_tools.execSQL(session,sql)
+                    result.append(r)
+                if callBck!=None:
+                    return callBck(*result)
+            except Exception as e:
+                await session.rollback()
+                errorLog(request,self.__class__,get_current_function_name())
+                return JSON_util.response(Result.fail(e))
+
+        return await callable(exec) 
+
+
 
     async def add(self, request: Request, po: BasePO, json2Po:bool=True, userId=None, beforeFun=None, afterFun=None):
         """
