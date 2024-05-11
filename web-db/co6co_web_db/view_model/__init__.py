@@ -167,11 +167,11 @@ class BaseMethodView(BaseView):
         async def exec(session:AsyncSession):
             try:
                 result=[]
-                for sql in sml: 
-                    r=await db_tools.execSQL(session,sql)
-                    result.append(r)
-                if callBck!=None:
-                    return callBck(*result)
+                for sql in sml:  
+                    r=await db_tools.execSQL(session,sql) 
+                    result.append(r) 
+                if callBck!=None: 
+                    return await callBck(*result)
             except Exception as e:
                 await session.rollback()
                 errorLog(request,self.__class__,get_current_function_name())
