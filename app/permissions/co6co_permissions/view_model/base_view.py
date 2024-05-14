@@ -5,7 +5,9 @@ from .aop.api_auth import authorized
 
 
 def getCtxUserId(request:Request):
-   return request.ctx.current_user["id"]  
+   if request.ctx.current_user!=None:
+      return request.ctx.current_user["id"]  
+   return None
 
 def getCtxData(user:UserPO):
    """

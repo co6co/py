@@ -104,26 +104,26 @@ class BaseMethodView(BaseView):
             errorLog(request,self.__class__,get_current_function_name())
             return Result.fail(message=f"请求失败：{e}")
 
-    async def _query(self, request: Request, select: Select  , isPO: bool = True, remove_db_instance: bool = True):
+    async def _query(self, request: Request, select: Select  , isPO: bool = True, remove_db_instance: bool = True,param:Dict|List|Tuple=None):
         """
         执行查询: 列表 
         """
         try:
             session: AsyncSession = request.ctx.session
             query = QueryListCallable(session)
-            data = await query(select, isPO, remove_db_instance)
+            data = await query(select, isPO, remove_db_instance,param)
             result = db_tools.list2Dict(data)
             return result 
         except Exception as e:
             errorLog(request,self.__class__,get_current_function_name())
             return None 
 
-    async def query_list(self, request: Request, select: Select,   isPO: bool = True, remove_db_instance: bool = True):
+    async def query_list(self, request: Request, select: Select,   isPO: bool = True, remove_db_instance: bool = True,param:Dict|List|Tuple=None):
         """
         执行查询:  列表 
         """
         try:
-            result=await self._query(request, select,   isPO , remove_db_instance)  
+            result=await self._query(request, select,   isPO , remove_db_instance,param)  
             return JSON_util.response(Result.success(data=result))
         except Exception as e:
             errorLog(request,self.__class__,get_current_function_name())
@@ -131,12 +131,12 @@ class BaseMethodView(BaseView):
             return JSON_util.response(Result.success(data=result))
 
 
-    async def query_tree(self, request: Request, select: Select, rootValue: any = None, pid_field: str = "pid", id_field: str = "id", isPO: bool = True, remove_db_instance: bool = True):
+    async def query_tree(self, request: Request, select: Select, rootValue: any = None, pid_field: str = "pid", id_field: str = "id", isPO: bool = True, remove_db_instance: bool = True,param:Dict|List|Tuple=None):
         """
         执行查询: tree列表 
         """
         try: 
-            result =   await self._query(request, select,   isPO , remove_db_instance)  
+            result =   await self._query(request, select,   isPO , remove_db_instance,param)  
             if result ==None:treeList=[]
             else :treeList = list_to_tree(result, rootValue, pid_field, id_field)
             if len(treeList) == 0:
@@ -162,14 +162,19 @@ class BaseMethodView(BaseView):
             pageList = Page_Result.fail(message=f"请求失败：{e}")
             return JSON_util.response(pageList)
         
-    async def execSqls(self, request: Request,*sml:Update|Delete|Insert,callBck=None):
+    async def execSqls(self, request: Request,*sml:Update|Delete|Insert,callBck=None,smlParamList:List[Dict|Tuple|List]=None):
         callable = DbCallable(self.get_db_session(request))
         async def exec(session:AsyncSession):
             try:
                 result=[]
-                for sql in sml:  
-                    r=await db_tools.execSQL(session,sql) 
+                index=0
+                for sql in sml: 
+                     
+                    param= None
+                    if smlParamList!=None and len(smlParamList)==len(sml):param=smlParamList[index]
+                    r=await db_tools.execSQL(session,sql,param) 
                     result.append(r) 
+                    index+=1
                 if callBck!=None: 
                     return await callBck(*result)
             except Exception as e:
@@ -294,7 +299,7 @@ class BaseMethodView(BaseView):
             errorLog(request,self.__class__,get_current_function_name()) 
             return JSON_util.response(Result.fail(message=e))
     
-    async def save_association(self, request: Request, currentUser:int,delSml:Delete,createPo:any,param:associationParam=None):
+    async def save_association(self, request: Request, currentUser:int,delSml:Delete,createPo:any,param:associationParam=None,delSmlParam:Dict|List|Tuple=None):
         """
         保存关联菜单
         delSml:Delete 删除语句
@@ -310,7 +315,7 @@ class BaseMethodView(BaseView):
                 isChanged=False
                 # 移除
                 if(param.remove!=None and len(param.remove)>0): 
-                    result= await db_tools.execSQL(session,delSml)
+                    result= await db_tools.execSQL(session,delSml,delSmlParam)
                     if result>0:
                         isChanged=True
                 # 增加

@@ -104,19 +104,19 @@ class db_tools:
         if count>0:return True
         else:return False 
     
-    async def execForMappings(session:AsyncSession,select:Select):
+    async def execForMappings(session:AsyncSession,select:Select,params: Dict|Tuple|List= None):
         """
         session: AsyncSession
         select:Select 
 
         return list
         """ 
-        exec=await session.execute(select)  
+        exec=await session.execute(select,params)  
         data=  exec.mappings().all()  
         result=db_tools.list2Dict(data)  
         return result
     
-    async def execForPos(session:AsyncSession,select:Select, remove_db_instance_state:bool=True):
+    async def execForPos(session:AsyncSession,select:Select, remove_db_instance_state:bool=True,params:Dict|List|Tuple=None):
         """
         session: AsyncSession
         select:Select
@@ -125,17 +125,17 @@ class db_tools:
         return list
         """
 
-        exec:ChunkedIteratorResult=await session.execute(select)
+        exec:ChunkedIteratorResult=await session.execute(select,params)
         if remove_db_instance_state:
             return db_tools.remove_db_instance_state(exec.scalars().fetchall())  
         else:
             return exec.scalars().fetchall() 
         
-    async def execSQL(session:AsyncSession,sql:Update|Insert|Delete)-> int:
+    async def execSQL(session:AsyncSession,sql:Update|Insert|Delete,sqlParam:Dict|List|Tuple=None)-> int:
         """
         执行简单SQL语句
         """
-        data:CursorResult=await session.execute(sql)
+        data:CursorResult=await session.execute(sql,sqlParam)
         return data.rowcount
     
 
@@ -156,9 +156,9 @@ class DbCallable:
             if func!=None:return await func(self.session)
             
 class QueryOneCallable(DbCallable):  
-    async def __call__(self, select :Select,isPO:bool=True):
+    async def __call__(self, select :Select,isPO:bool=True,param:Dict|List|Tuple=None):
         async def exec(session:AsyncSession):
-            exec=await session.execute(select)  
+            exec=await session.execute(select,param)  
             if isPO:  
                 data=exec.fetchone()
                 # 返回的是元组
@@ -182,10 +182,10 @@ class InsertCallable(DbCallable):
         return await super().__call__(exec) 
     
 class UpdateOneCallable(DbCallable):
-    async def __call__(self, queryOneSelect :Select,editFn:None):
+    async def __call__(self, queryOneSelect:Select,editFn:None,param:Dict|List|Tuple=None):
         async def exec(session:AsyncSession):
             try:
-                exec=await session.execute(queryOneSelect)   
+                exec=await session.execute(queryOneSelect,param)   
                 data=exec.fetchone()
                 # 返回的是元组 
                 one=None
@@ -204,30 +204,30 @@ class UpdateOneCallable(DbCallable):
 
          
 class QueryListCallable(DbCallable):  
-    async def __call__(self, select :Select,isPO:bool=True,remove_db_instance=True):
+    async def __call__(self, select:Select,isPO:bool=True,remove_db_instance=True,param:Dict|List|Tuple=None ):
         async def exec(session:AsyncSession):
             if isPO: 
-               result=await db_tools.execForPos(session,select,remove_db_instance)
+               result=await db_tools.execForPos(session,select,remove_db_instance,params=param)
             else:
-               result=await db_tools.execForMappings(session,select)
+               result=await db_tools.execForMappings(session,select,params=param)
             return result
         #return await super(QueryListCallable,self).__call__(exec) #// 2.x 写法
         return await super().__call__(exec)
 
 class QueryPagedCallable(DbCallable):  
-    async def __call__(self, countSelect:Select, select :Select,isPO:bool=True,remove_db_instance=True) ->Tuple[int,List[dict]]:
+    async def __call__(self, countSelect:Select, select :Select,isPO:bool=True,remove_db_instance=True,param:Dict|List|Tuple=None) ->Tuple[int,List[dict]]:
         async def exec(session:AsyncSession):
-            total=await session.execute(countSelect)
+            total=await session.execute(countSelect,param)
             total=total.scalar()  
             if isPO: 
-                result=await db_tools.execForPos(session,select,remove_db_instance)
+                result=await db_tools.execForPos(session,select,remove_db_instance,param)
             else: 
-                result=await db_tools.execForMappings(session,select) 
+                result=await db_tools.execForMappings(session,select,param) 
 
             return total,result  
         return await super().__call__(exec)
 
 class QueryPagedByFilterCallable(QueryPagedCallable):  
-    async def __call__(self, filter:absFilterItems,isPO:bool=True,remove_db_instance=True) ->Tuple[int,List[dict]]:   
-        return await super().__call__(filter.count_select,filter.list_select,isPO ,remove_db_instance) 
+    async def __call__(self, filter:absFilterItems,isPO:bool=True,remove_db_instance=True,param:Dict|List|Tuple=None) ->Tuple[int,List[dict]]:   
+        return await super().__call__(filter.count_select,filter.list_select,isPO ,remove_db_instance,param) 
 
