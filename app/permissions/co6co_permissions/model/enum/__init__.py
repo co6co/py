@@ -8,7 +8,8 @@ class menu_type(Base_EC_Enum):
     group = "group","分组", 0  # 分组菜单
     api = "api","API接口", 1   # api
     view = "view", "页面视图",2  # a视图
-    button = "button","视图功能", 3  # 视图中的按钮等。
+    subView = "subView", "页面子视图",3  # a视图
+    button = "button","视图功能", 10  # 视图中的按钮等。
    
 
 class menu_state(Base_EC_Enum):
