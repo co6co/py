@@ -13,6 +13,7 @@ class user_filter(absFilterItems):
     """
     name: str = None
     userGroupId: int = None
+    state:int=None
 
     def __init__(self, userName=None, userGroupId: int = None):
         super().__init__(UserPO)
@@ -28,6 +29,8 @@ class user_filter(absFilterItems):
         filters_arr = []
         if self.checkFieldValue(self.userGroupId):
             filters_arr.append(UserPO.userGroupId.__eq__(self.userGroupId))
+        if self.checkFieldValue(self.state):
+            filters_arr.append(UserPO.state.__eq__(self.state))
         if self.checkFieldValue(self.name):
             filters_arr.append(UserPO.userName.like(f"%{self.name}%"))
         return filters_arr

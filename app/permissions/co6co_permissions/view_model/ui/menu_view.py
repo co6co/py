@@ -48,7 +48,7 @@ class ui_tree_view(AuthMethodView):
         log.warn(roleList)
         roleList=[d.get("role_id") for d in roleList]
         select = (
-            Select(menuPO.id, menuPO.category, menuPO.parentId,menuPO.name, menuPO.code, menuPO.icon,  menuPO.url,menuPO.component,menuPO.permissionKey )
+            Select(menuPO.id, menuPO.category, menuPO.parentId,menuPO.name, menuPO.code, menuPO.icon,  menuPO.url,menuPO.component,menuPO.permissionKey ,menuPO.methods)
             .join(MenuRolePO,onclause=MenuRolePO.menuId==menuPO.id) 
             .filter(and_( or_(menuPO.category.__eq__(menu_type.group.val),menuPO.category.__eq__(menu_type.subView.val), menuPO.category.__eq__(menu_type.view.val),menuPO.category.__eq__(menu_type.button.val)),MenuRolePO.roleId.in_(roleList)))
             .order_by(menuPO.parentId.asc(),menuPO.order.asc())
