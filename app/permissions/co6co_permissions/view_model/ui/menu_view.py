@@ -7,14 +7,16 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from sqlalchemy.sql import Select ,or_,and_,text as sqlText
 from co6co_db_ext.db_utils import db_tools
-from ..base_view import AuthMethodView
+from co6co_web_db.view_model import BaseMethodView,Request
+from ..aop.api_auth import getCtxUserId
+from ..base_view import CtxMethodView
 from ...model.enum import menu_type
 from ...model.pos.right import menuPO,MenuRolePO, UserPO, UserGroupRolePO,UserRolePO 
 from ...model.filters.menu_filter import menu_filter
 from co6co.utils import log
 
   
-class ui_tree_view(AuthMethodView):
+class ui_tree_view(CtxMethodView):
     routePath="/tree/"
     
     async def get(self, request: Request): 
@@ -35,8 +37,7 @@ class ui_tree_view(AuthMethodView):
             where u.id=:userId)
             """
         ) 
-        currentId=self.getUserId(request) 
-
+        currentId=getCtxUserId(request)  
         userRolesSelect = (
             Select(UserRolePO.roleId ).filter(UserRolePO.userId==UserPO.id,UserPO.id==currentId)
         ) 
@@ -51,7 +52,7 @@ class ui_tree_view(AuthMethodView):
             Select(menuPO.id, menuPO.category, menuPO.parentId,menuPO.name, menuPO.code, menuPO.icon,  menuPO.url,menuPO.component,menuPO.permissionKey ,menuPO.methods)
             .join(MenuRolePO,onclause=MenuRolePO.menuId==menuPO.id) 
             .filter(and_( or_(menuPO.category.__eq__(menu_type.group.val),menuPO.category.__eq__(menu_type.subView.val), menuPO.category.__eq__(menu_type.view.val),menuPO.category.__eq__(menu_type.button.val)),MenuRolePO.roleId.in_(roleList)))
-            #.order_by(menuPO.parentId.asc(),menuPO.order.asc())
+            .order_by(menuPO.parentId.asc(),menuPO.order.asc())
         ).distinct(menuPO.id)
 
         return await self.query_tree(request,select,rootValue=0, pid_field='parentId', id_field="id", isPO=False)

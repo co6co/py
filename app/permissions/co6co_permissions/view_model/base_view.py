@@ -1,19 +1,8 @@
 from co6co_web_db.view_model import BaseMethodView,Request
-from ..model.pos.right import UserPO
-
-from .aop.api_auth import authorized
-
-
-def getCtxUserId(request:Request):
-   if request.ctx.current_user!=None:
-      return request.ctx.current_user["id"]  
-   return None
-
-def getCtxData(user:UserPO):
-   """
-   通过user获取 dict 保存在 request.ctx.current_user 中 
-   """
-   return user.to_jwt_dict()
+from .aop.api_auth import authorized,ctx,getCtxUserId
+ 
+class CtxMethodView(BaseMethodView): 
+   decorators=[ctx]  
 
 class AuthMethodView(BaseMethodView): 
    decorators=[authorized] 
@@ -30,4 +19,4 @@ class AuthMethodView(BaseMethodView):
        """
        current_user=request.ctx.current_user  
        return current_user.get("userName") 
-      
+

@@ -13,6 +13,8 @@ from .base_view import AuthMethodView
 from ..model.pos.right import UserGroupPO,RolePO,UserGroupRolePO
 from ..model.filters.user_group_filter import user_group_filter
 from co6co.utils import log
+from .aop.api_auth import userRoleChanged
+
 class user_group_ass_view(AuthMethodView) :
     routePath="/association/<userGroupId:int>"
     async def post(self, request:Request,userGroupId:int): 
@@ -26,6 +28,8 @@ class user_group_ass_view(AuthMethodView) :
             .order_by(RolePO.name.asc())
         ) 
         return await self.query_list(request, select, isPO=False)
+    
+    @userRoleChanged
     async def put(self, request:Request,userGroupId:int):
         """
         保存角色关联菜单

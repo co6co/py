@@ -10,6 +10,8 @@ from co6co_db_ext.db_utils import db_tools
 from .base_view import AuthMethodView
 from ..model.pos.right import menuPO 
 from ..model.filters.menu_filter import menu_filter
+from .aop.api_auth import menuChanged
+
   
 class menu_tree_view(AuthMethodView):
     routePath="/tree"
@@ -48,7 +50,8 @@ class menus_view(AuthMethodView):
             .order_by(menuPO.parentId.asc())
         )
         return await self.query_list(request, select,  isPO=False)
-
+    
+    
     async def post(self, request: Request):
         """
         树形 table数据
@@ -58,7 +61,8 @@ class menus_view(AuthMethodView):
         param.__dict__.update(request.json)
 
         return await self.query_list(request, param.list_select)
-
+    
+    @menuChanged
     async def put(self, request: Request):
         """
         增加
@@ -72,6 +76,7 @@ class menus_view(AuthMethodView):
             exist = await db_tools.exist(session,  menuPO.code.__eq__(po.code), column=menuPO.id)
             if exist:
                 return JSON_util.response(Result.fail(message=f"'{po.code}'已存在！")) 
+ 
         return await self.add(request, po, json2Po=False, userId= userId, beforeFun= before)
 
     def patch(self, request: Request):
@@ -80,6 +85,8 @@ class menus_view(AuthMethodView):
 
 class menu_view(AuthMethodView):
     routePath="/<pk:int>"
+    
+    @menuChanged
     async def put(self, request: Request, pk: int):
         """
         编辑
@@ -94,10 +101,10 @@ class menu_view(AuthMethodView):
             if exist:
                 return JSON_util.response(Result.fail(message=f"'{po.code}'已存在！"))
             if po.parentId == oldPo.id:
-                return JSON_util.response(Result.fail(message=f"'父节点选择错误！")) 
-
+                return JSON_util.response(Result.fail(message=f"'父节点选择错误！"))  
         return await self.edit(request,pk,menuPO,po=po,userId=self.getUserId(request), fun= before)
-
+    
+    @menuChanged
     async def delete(self, request: Request, pk: int):
         """
         删除

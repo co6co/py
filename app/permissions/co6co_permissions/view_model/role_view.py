@@ -15,6 +15,7 @@ from .base_view import AuthMethodView
 from ..model.pos.right import RolePO,MenuRolePO,UserRolePO,UserGroupRolePO
 from ..model.filters.role_filter import role_filter
 from ..model.pos.right import menuPO 
+from .aop.api_auth import userRoleChanged
 
 class roles_ass_view(AuthMethodView) :
     routePath="/association/<roleId:int>"
@@ -29,7 +30,8 @@ class roles_ass_view(AuthMethodView) :
             .order_by(menuPO.parentId.asc())
         ) 
         return await self.query_tree(request, select, rootValue=0, pid_field='parentId', id_field="id", isPO=False)
-
+    
+    @userRoleChanged
     async def put(self, request:Request,roleId:int):
         """
         保存角色关联菜单

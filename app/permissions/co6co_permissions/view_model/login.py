@@ -1,6 +1,5 @@
 
 from co6co_web_db.view_model import BaseMethodView
-from .base_view import getCtxData
 
 from sanic.response import text
 from sanic import  Request  
@@ -16,6 +15,7 @@ from co6co.utils import log
 from co6co_web_db.view_model import get_one
 from ..model.pos.right import UserPO, RolePO,UserRolePO,AccountPO 
 from .aop.login_log import loginLog
+from .aop import getCtxData
 
 async def generateUserToken(request:Result,sessionId:str,data=None,userId:int=None,userOpenId:str=None,expire_seconds:int=86400): 
     token=""  
@@ -47,7 +47,7 @@ class login_view(BaseMethodView):
                 token=await generateUserToken(request,user.id,user.to_jwt_dict(),expire_seconds=86400,userOpenId=user.userGroupId)
                 await setCurrentUser(request,user.to_jwt_dict()) # loginLog 获取登录ID等
                 return  JSON_util.response(Result.success(data=token, message="登录成功"))
-            else :return JSON_util.response(Result.fail(message="登录用户名或者密码不正确!"))
+            else:return JSON_util.response(Result.fail(message="登录用户名或者密码不正确!"))
         else:
             log.warn(f"未找到用户名[{where.userName}]。")
             return JSON_util.response(Result.fail(message="登录用户名或者密码不正确!")) 

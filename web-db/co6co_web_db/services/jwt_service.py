@@ -23,9 +23,12 @@ class JWT_service :
 
     def decode(self,token:str)->Any|None: 
         try:
+            if token==None or token =="":
+                log.warn("token is None!")
+                return None
             return jwt.decode(token,self._secret,issuer=self._issuer,algorithms=['HS256']) # 解密签名  //
         except Exception as e:
-            log.err(e)
+            log.warn("校验失败:",e)
             return None
 
 async def createToken(SECRET:str,data:dict,expire_seconds:int=86400):

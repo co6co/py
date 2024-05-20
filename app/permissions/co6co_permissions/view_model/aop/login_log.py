@@ -2,7 +2,7 @@
 from functools import wraps 
 from sanic.request import Request  
 from ...model.pos.right import LoginLogPO
-from ..base_view import getCtxUserId
+from .api_auth import getCtxUserId
 
 from datetime import datetime
 from sanic.response import JSONResponse

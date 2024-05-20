@@ -13,6 +13,7 @@ from co6co.utils import getRandomStr
 from .base_view import AuthMethodView
 from ..model.pos.right import UserPO, RolePO,UserRolePO,AccountPO
 from ..model.filters.user_filter import user_filter
+from .aop.api_auth import userRoleChanged
 
 class user_ass_view(AuthMethodView) :
     routePath="/association/<userId:int>"
@@ -27,6 +28,8 @@ class user_ass_view(AuthMethodView) :
             .order_by(RolePO.id.asc())
         ) 
         return await self.query_list(request, select, isPO=False)
+    
+    @userRoleChanged
     async def put(self, request:Request,userId:int):
         """
         保存用户关联角色
