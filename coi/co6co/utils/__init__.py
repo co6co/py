@@ -1,7 +1,7 @@
 #-*- coding:utf-8 -*-
 import re,random,string,time,datetime
 from types import FunctionType
-
+import inspect
 def isBase64(content:str)->bool:
     _reg="^([A-Za-z0-9+/]{4})*([A-Za-z0-9+/]{4}|[A-Za-z0-9+/]{3}=|[A-Za-z0-9+/]{2}==)$"
     group=re.match(_reg,content)
@@ -26,6 +26,12 @@ def isCallable(func):
     return callable(func) # 返回true 也不一定能调用成功/返回失败一定调用失败
     return type(func) is FunctionType 
     return hasattr (func,"__call__")
+ 
+def is_async(func):
+    """
+    方法是否是异步的
+    """
+    return inspect.iscoroutinefunction(func) or inspect.isasyncgenfunction(func)
 
 
  

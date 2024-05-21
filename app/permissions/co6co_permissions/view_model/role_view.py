@@ -66,7 +66,8 @@ class roles_view(AuthMethodView):
         """
         table数据 
         """ 
-        param=role_filter()
+        param=role_filter(request)
+        await param.init()
         param.__dict__.update(request.json)   
         return await self.query_page(request,param ) 
     

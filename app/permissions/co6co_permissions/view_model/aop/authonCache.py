@@ -8,7 +8,7 @@ from . import getCtxUserId
 from ...model.enum import menu_type
 from ...model.pos.right import UserPO,UserRolePO,UserGroupRolePO,menuPO,MenuRolePO
 from multiprocessing.managers import DictProxy
-from typing import  Any
+ 
 class AuthonCacheManage:
     request:Request=None
     def __init__(self,request:Request) -> None:
@@ -40,7 +40,7 @@ class AuthonCacheManage:
         return f'roleids_{self.userId}_valid'
     
     @property
-    async def currentRoles(self):
+    async def currentRoles(self)->list[int]:
         """
         当前用户角色
         """
@@ -55,7 +55,7 @@ class AuthonCacheManage:
         设置角色缓存无效
         """  
         for key in self.cache.keys():
-            if "roleids_"  in key and '_valid' in key:
+            if "roleids_" in key and '_valid' in key:
                 self.cache[key]=False
                 
     async def queryUserRoles(self):
@@ -97,7 +97,7 @@ class AuthonCacheManage:
         """
         所有菜单数据
         """
-        if self._menuCacheKey in self.cache and self.cache[self._menuCacheKey]:
+        if self._menuCacheKey in self.cache and self.cache[self._menuCacheValueKey]:
             return self.cache[self._menuCacheKey]
         else:
             await self.queryMenus()

@@ -15,6 +15,7 @@ from co6co.utils import log
 from ...model.pos.right import UserPO,UserRolePO,UserGroupRolePO,menuPO,MenuRolePO
 from ...model.enum import menu_type
 from . import getCtxUserId 
+from .api_check import apiPermissionCheck
 from .authonCache import AuthonCacheManage
  
 
@@ -22,9 +23,10 @@ async def checkApi(request:Request):
     """
     查询当前用户的对当前API是否有权限
     """ 
-    cacheManage=AuthonCacheManage(request) 
-    log.warn(request.path,request.method,await cacheManage.currentRoles,await cacheManage.menuData)  
-    return True
+    check= apiPermissionCheck(request)
+    await check.init()
+    return check.check() 
+
 def authorized(f):
     """
     认证

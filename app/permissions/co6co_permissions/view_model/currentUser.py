@@ -25,15 +25,18 @@ class changePwd_view(AuthMethodView):
         }
         """ 
         data=request.json
-        current_user=request.ctx.current_user 
-        self.getUserId()
-        userName=current_user.get("userName") 
+       
+        userId=self.getUserId(request)
+        userName=self.getUserName(request)
+
         oldPassword=data["oldPassword"]
         password=data["newPassword"] 
         select=(Select(UserPO).filter(UserPO.userName==userName))
         async def edit(_,one:UserPO): 
             if one!=None:
                 if one.password!=one.encrypt(oldPassword) :return JSON_util.response(Result.fail(message="输入的旧密码不正确！"))
+                if one.encrypt(password)==one.encrypt(oldPassword):return JSON_util.response(Result.fail(message="输入的旧密码与新密码一样！"))
+
                 one.password=one.encrypt(password)
             return JSON_util.response(Result.success()) 
         return await self.update_one(request,select,edit) 
