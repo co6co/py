@@ -21,9 +21,7 @@ export default (option:{mode:string}) => {
 
   return defineConfig({
     base: process.env.VITE_APP_BASE, //生成 引用 css 文件和js 文件 增加的前缀
-    build: {
-      outDir: process.env.VITE_APP_DIR //build 发布目录
-    },
+ 
     plugins: [
       vue(),
       vueJsx(),
@@ -40,8 +38,26 @@ export default (option:{mode:string}) => {
     ],
     resolve: {
       alias: {
-        '@': fileURLToPath(new URL('./src', import.meta.url))
+        '@': fileURLToPath(new URL('./src', import.meta.url)),
+        packages: resolve("src"),
       }
-    }
+    },
+    build: {
+      outDir: process.env.VITE_APP_DIR ,//build 发布目录
+      rollupOptions: { 
+        external: ['vue'], // 请确保外部化那些你的库中不需要的依赖
+        output: {
+          // 在 UMD 构建模式下为这些外部化的依赖提供一个全局变量
+          globals: {
+            vue: 'Vue',
+          },
+        },
+      },
+      lib: {
+        entry: 'packages/index.ts',
+        name: 'co6co-vue',
+        fileName: (format) => `co6co-vue.${format}.js`,
+      },
+    },
   })
 } 
