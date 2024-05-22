@@ -19,7 +19,13 @@
     "noUnusedLocals": false, //忽略未使用错误
     "noUnusedParameters": false,
     "noFallthroughCasesInSwitch": true,
-    "plugins": [{"name": "typescript-plugin-css-modules"}]
+    "plugins": [{"name": "typescript-plugin-css-modules"}],
+    "baseUrl": "./",//默认当前目录
+    "paths": {
+      "@/*":["src/*"],
+      "@com/*":["src/components/*"],
+    }
+
  
   },
   "include": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.vue","./*.d.ts"],

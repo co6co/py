@@ -28,7 +28,9 @@ export default defineConfig({
 	],
 	resolve: {
 		alias: {
-			'@': resolve('examples'),
+			'@':path.resolve('./src'), // 相对路径别名配置，使用@代替src
+			'@e': resolve('./examples'),
+			'@com':path.resolve('./src/components'),
 		},
 	},
 
