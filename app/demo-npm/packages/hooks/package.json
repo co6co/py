@@ -1,0 +1,14 @@
+{ 
+  "name": "@co6co/hooks",
+  "version": "0.0.1",
+  "description": "hook",
+  "license": "MIT",
+  "main": "index.ts",
+  "module": "index.ts",
+  "unpkg": "index.js",
+  "jsdelivr": "index.js",
+  "types": "index.d.ts",
+  "peerDependencies": {
+    "vue": "^3.4.21"
+  }
+}
