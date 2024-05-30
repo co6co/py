@@ -2,16 +2,12 @@
   "name": "@co6co/theme",
   "version": "0.0.1",
   "description": "Element   theme.",
-  "keywords": [
-     
-  ],
-  
+  "keywords": [],
   "license": "MIT",
   "author": "co6cog@xxx.xxx",
   "main": "index.css",
   "unpkg": "index.css",
   "jsdelivr": "index.css",
-  
   "style": "index.css",
   "scripts": {
     "clean": "rimraf dist",

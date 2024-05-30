@@ -22,7 +22,6 @@
     "@co6co/build": "workspace:*",
     "@co6co/build-constants": "workspace:*",
     "@co6co/build-utils": "workspace:*",
-    
     "@types/lodash-es": "^4.17.6",
     "chalk": "^5.3.0",
     "consola": "^2.15.3",

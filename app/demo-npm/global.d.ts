@@ -7,7 +7,5 @@ declare module '*.vue' {
 	export default component;
 }*/
 declare interface Window {
-	Vue: any;
+  Vue: any
 }
-
- 

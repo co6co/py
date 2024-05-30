@@ -1,1 +1,2 @@
-export const INSTALLED_KEY = Symbol('INSTALLED_KEY')
+// eslint-disable-next-line prettier/prettier
+export const INSTALLED_KEY: unique symbol = Symbol('INSTALLED_KEY')

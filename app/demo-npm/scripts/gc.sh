@@ -51,7 +51,7 @@ const props = defineProps(${INPUT_NAME}Props)
 EOF
 
 cat > $DIRNAME/src/$INPUT_NAME.ts <<EOF
-import { buildProps } from '@element-plus/utils'
+import { buildProps } from '@co6co/utils'
 
 import type { ExtractPropTypes } from 'vue'
 import type $NAME from './$INPUT_NAME.vue'
@@ -63,7 +63,7 @@ export type ${NAME}Instance = InstanceType<typeof $NAME>
 EOF
 
 cat <<EOF >"$DIRNAME/index.ts"
-import { withInstall } from '@element-plus/utils'
+import { withInstall } from '@co6co/utils'
 import $NAME from './src/$INPUT_NAME.vue'
 
 export const El$NAME = withInstall($NAME)

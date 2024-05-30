@@ -5,13 +5,12 @@ export const pkgRoot = resolve(projRoot, 'packages')
 export const buildRoot = resolve(projRoot, 'internal', 'build')
 
 export const compRoot = resolve(pkgRoot, 'components')
-export const themeRoot = resolve(pkgRoot, 'theme-chalk')
+export const themeRoot = resolve(pkgRoot, 'theme')
 export const hookRoot = resolve(pkgRoot, 'hooks')
 export const localeRoot = resolve(pkgRoot, 'locale')
 export const directiveRoot = resolve(pkgRoot, 'directives')
 export const epRoot = resolve(pkgRoot, 'co6co')
 export const utilRoot = resolve(pkgRoot, 'utils')
-
 
 // Docs
 export const docsDirName = 'docs'

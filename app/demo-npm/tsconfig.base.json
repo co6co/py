@@ -13,11 +13,12 @@
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
     "removeComments": false,
+
     "rootDir": ".",
     "types": [],
-    "paths": { 
-      "@co6co/*": ["internal/*"],
-      "@co6co/build": ["internal/build"],
+    "paths": {
+      "@co6co/*": ["packages/*"],
+      "@co6co/build": ["internal/build"]
     }
   }
 }

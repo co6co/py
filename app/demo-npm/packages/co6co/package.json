@@ -1,10 +1,9 @@
-
 {
   "name": "co6co",
   "version": "0.0.1",
   "description": "A Component Library for Vue 3",
-  "keywords": [ 
-    "co6co", 
+  "keywords": [
+    "co6co",
     "ui base",
     "ui",
     "vue3"
@@ -17,7 +16,6 @@
   "main": "lib/index.js",
   "module": "es/index.mjs",
   "types": "es/index.d.ts",
- 
   "exports": {
     ".": {
       "types": "./es/index.d.ts",
@@ -61,25 +59,22 @@
   },
   "unpkg": "dist/index.full.js",
   "jsdelivr": "dist/index.full.js",
- 
-
   "publishConfig": {
     "access": "public"
   },
   "style": "dist/index.css",
   "sideEffects": [
     "dist/*",
-    "theme-chalk/**/*.css",
-    "theme-chalk/src/**/*.scss",
+    "theme/**/*.css",
+    "theme/src/**/*.scss",
+    "theme/src/**/*.less",
     "es/components/*/style/*",
     "lib/components/*/style/*"
   ],
   "peerDependencies": {
     "vue": "^3.2.0"
   },
- 
   "dependencies": {
-    "element-plus": "^2.7.3",
     "@ctrl/tinycolor": "^3.4.1",
     "@element-plus/icons-vue": "^2.3.1",
     "@floating-ui/dom": "^1.0.1",
@@ -89,6 +84,7 @@
     "@vueuse/core": "^9.1.0",
     "async-validator": "^4.2.5",
     "dayjs": "^1.11.3",
+    "element-plus": "^2.7.3",
     "escape-html": "^1.0.3",
     "lodash": "^4.17.21",
     "lodash-es": "^4.17.21",

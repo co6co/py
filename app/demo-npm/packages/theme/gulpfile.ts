@@ -61,7 +61,7 @@ function compressWithCssnano() {
 }
 
 /**
- * compile theme-chalk scss & minify
+ * compile theme  scss & minify
  * not use sass.sync().on('error', sass.logError) to throw exception
  * @returns
  */
@@ -88,7 +88,7 @@ function buildThemeChalk() {
  */
 function buildDarkCssVars() {
   const sass = gulpSass(dartSass)
-  return src(path.resolve(__dirname, 'src/dark/css-vars.scss'))
+  return src(path.resolve(__dirname, 'src/dark/css-vars.less'))
     .pipe(sass.sync())
     .pipe(autoprefixer({ cascade: false }))
     .pipe(compressWithCssnano())
@@ -96,7 +96,7 @@ function buildDarkCssVars() {
 }
 
 /**
- * copy from packages/theme-chalk/dist to dist/element-plus/theme-chalk
+ * copy from packages/theme/dist to dist/co6co/theme
  */
 export function copyThemeChalkBundle() {
   return src(`${distFolder}/**`).pipe(dest(distBundle))

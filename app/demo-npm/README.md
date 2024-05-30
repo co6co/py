@@ -1,12 +1,15 @@
 1. 创建项目
+
 ```
 npm create vite
 >projec_name
 >vue
->ts 
+>ts
 
 ```
-2. 根目录建立ts 声明文件
+
+2. 根目录建立 ts 声明文件
+
 ```
 //env.d.ts
 declare module "*.vue" {
@@ -16,9 +19,11 @@ declare module "*.vue" {
 }
 declare interface Window {
   Vue: any,
-} 
+}
 ```
-## 2.1 在tsconfig.json 中的include加入申明文件，不然在ts文件导入vue模块会报错
+
+## 2.1 在 tsconfig.json 中的 include 加入申明文件，不然在 ts 文件导入 vue 模块会报错
+
 ```
 {
   "compilerOptions": {
@@ -46,15 +51,17 @@ declare interface Window {
 ```
 
 # 3. 改造目录
- 
-- 将src-重命名->examples 目录，用作示例
+
+- 将 src-重命名->examples 目录，用作示例
 - 创建新的 src 存放源码
-- 启动项目时，默认入口`src/main.ts`,在index.html中把`/src/main.ts`改为`/examples/main.ts`
+- 启动项目时，默认入口`src/main.ts`,在 index.html 中把`/src/main.ts`改为`/examples/main.ts`
 
 # 4. 组件开发
-在新src目录开发组件，创建组件每个目录为一个组件 el-button目录中有src目录和index.ts文件
+
+在新 src 目录开发组件，创建组件每个目录为一个组件 el-button 目录中有 src 目录和 index.ts 文件
 
 # 5. 组件全局注册
+
 ```
 //src\index.ts
 // 导入单个组件
@@ -89,14 +96,17 @@ export default {
 ```
 
 # 6. 本地导入组件测试
+
 将 src 为基础导入组件
+
 ```
 在examples 中App.vue 导入测试
 ```
 
-# 7. 编写  package.json 文件
+# 7. 编写 package.json 文件
+
 ```
- 
+
   "files": [
     "dist/*",
     "co6co-demo.d.ts"
@@ -106,6 +116,7 @@ export default {
 ```
 
 # 8. 编写 vite.config.ts 文件
+
 ```
 import { defineConfig } from 'vite';
 import vue from '@vitejs/plugin-vue';
@@ -118,7 +129,7 @@ export default defineConfig({
 	plugins: [vue(), vueJsx()],
 	resolve: {
 		alias: {
-			'@': resolve('examples'), 
+			'@': resolve('examples'),
 		},
 	},
 	build: {
@@ -146,4 +157,5 @@ export default defineConfig({
 #9 `pnpm run build `
 
 # 10. 本地模拟
-以发布的dict 为为主导入组件测试模拟
+
+以发布的 dict 为为主导入组件测试模拟

@@ -1,0 +1,11 @@
+{
+  "name": "@co6co/locale",
+  "version": "0.0.1",
+  "description": "co6co locale",
+  "license": "MIT",
+  "main": "index.ts",
+  "module": "index.ts",
+  "unpkg": "index.js",
+  "jsdelivr": "index.js",
+  "types": "index.d.ts"
+}

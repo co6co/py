@@ -10,7 +10,7 @@
     "internal/**/*",
     "internal/**/*.json",
     "scripts/**/*",
-    "packages/theme-chalk/*",
+    "packages/theme/*",
     "packages/co6co/version.ts",
     "packages/co6co/package.json"
   ],

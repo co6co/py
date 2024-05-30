@@ -3,7 +3,7 @@
   "version": "0.0.1",
   "description": "Build constants for co6co",
   "keywords": [
-    "element-plus"
+    "build-constants"
   ],
   "license": "MIT",
   "main": "./dist/index.cjs",

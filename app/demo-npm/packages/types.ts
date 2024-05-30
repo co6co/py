@@ -15,11 +15,11 @@ export interface IPageParam<T = any> {
 }
 
 export interface ISelect {
-  id: number | BigInt
+  id: number | bigint
   name: string
 }
 export interface IEnumSelect {
-  uid: number | BigInt //  Enum key
+  uid: number | bigint //  Enum key
   key: string
   label: string
   value: number | string
@@ -27,21 +27,21 @@ export interface IEnumSelect {
 
 export enum FormOperation {
   add,
-  edit
+  edit,
 }
 export enum Operation {
   Add,
   Edit,
-  Del
+  Del,
 }
-export interface Table_Module_Base{
+export interface Table_Module_Base {
   pageTotal: number
   diaglogTitle?: string
 }
 
 export type ObjectType = { [key: string]: any }
 export type Direction = 'vertical' | 'horizontal'
-export type ElTagType='success'|'info'|'warning'|'danger'|''
+export type ElTagType = 'success' | 'info' | 'warning' | 'danger' | ''
 /**
  * 增|编 表单所有模块
  */
@@ -78,6 +78,6 @@ export interface ITreeSelect {
 }
 
 export interface IAssociation {
-  add: Array<number|string>
-  remove: Array<number|string>
+  add: Array<number | string>
+  remove: Array<number | string>
 }
