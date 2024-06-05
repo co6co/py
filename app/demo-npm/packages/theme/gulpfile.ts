@@ -88,11 +88,11 @@ function buildThemeChalk() {
  */
 function buildDarkCssVars() {
   const sass = gulpSass(dartSass)
-  return src(path.resolve(__dirname, 'src/dark/css-vars.less'))
+  return src(path.resolve(__dirname, 'src/*.less'))
     .pipe(sass.sync())
     .pipe(autoprefixer({ cascade: false }))
     .pipe(compressWithCssnano())
-    .pipe(dest(`${distFolder}/dark`))
+    .pipe(dest(`${distFolder}/`))
 }
 
 /**

@@ -2,8 +2,8 @@
 import { defineComponent, h, onMounted, ref, resolveComponent } from 'vue'
 import { ElEmpty, ElIcon, ElOption, ElSelect } from 'element-plus'
 import * as icon from '@element-plus/icons-vue'
-import iconStyle from '@co6co/theme/css/eciconselect.module.less'
-//import iconStyle from '@../assets/css/eciconselect.module.less'
+import iconStyle from '@co6co/theme/eciconselect.module.css'
+//import '@co6co/theme/dist/eciconselect.module.css'
 
 export default defineComponent({
   name: 'EcIconSelect',

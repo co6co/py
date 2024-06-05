@@ -20,7 +20,7 @@ export default defineComponent({
   name: 'EcDetail',
   props: {
     data: {
-      type: Array<Details>,
+      type: Object as PropType<Array<Details>>,
       required: true,
     },
     column: {

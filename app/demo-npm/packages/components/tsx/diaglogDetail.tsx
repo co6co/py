@@ -1,4 +1,4 @@
-import { defineComponent, ref } from 'vue'
+import { defineComponent, ref, type PropType } from 'vue'
 import { type ObjectType } from '@co6co/constants'
 import EcDialog from './EcDialog'
 
@@ -15,7 +15,7 @@ export default defineComponent({
       default: 3,
     },
     data: {
-      type: Array<Details>,
+      type: Object as PropType<Array<Details>>,
       required: true,
     },
   },

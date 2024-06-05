@@ -1,4 +1,4 @@
-import { defineComponent, ref } from 'vue'
+import { defineComponent, ref, type PropType } from 'vue'
 import { ElOption, ElSelect } from 'element-plus'
 import type { IEnumSelect } from '@co6co/constants'
 
@@ -6,7 +6,7 @@ export default defineComponent({
   name: 'EnumSelect',
   props: {
     data: {
-      type: Array<IEnumSelect>,
+      type: Object as PropType<Array<IEnumSelect>>,
       required: true,
     },
     modelValue: {

@@ -53,7 +53,7 @@ export default defineComponent({
       ),
     }
     // const data: Object = inject('formData') || {}
-    const data = inject('formData') || {}
+    const data = (inject('formData') || {}) as Record<string, any>
     const openDialog = () => {
       if (dialogRef.value) {
         dialogRef.value.data.title = prop.title || '弹出框'
