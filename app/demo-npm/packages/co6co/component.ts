@@ -4,6 +4,7 @@ import { ElIcon } from '@co6co/components/icon'
 import type { Plugin } from 'vue'
 export default [
   ElAlert,
+  ElIcon,
   /*,
   EcContextMenu,
   EcDetail,
