@@ -1,45 +1,43 @@
-
-{ 
-    "SECRET":"81aa5d9ce2",
-    "biz_config":{
-        "upload_path":"d:/temp/upload"
+{
+    "SECRET": "81aa5d9ce2",
+    "biz_config": {
+        "upload_path": "d:/temp/upload"
     },
-    "web_setting":{
-        "port":8084,
-        "host":"0.0.0.0",
-        "backlog":2048,
+    "web_setting": {
+        "port": 8084,
+        "host": "0.0.0.0",
+        "backlog": 2048,
         "debug": "False",
-        "access_log":"True",
-        "dev":"False" 
+        "access_log": "True",
+        "dev": "False"
     },
-    "db_settings" : {
+    "db_settings": {
         "DB_HOST": "localhost",
         "DB_NAME": "wx_dbs",
-        "DB_USER": "root", 
-        "DB_PASSWORD":"mysql123456",
+        "DB_USER": "root",
+        "DB_PASSWORD": "mysql123456",
         "echo": "True",
         "pool_size": 1,
         "max_overflow": 1
     },
-    "wx_config":[
+    "wx_config": [
         {
-            "name":"公众1", 
-            "appid":"wxa96e7921ab04afab",
-            "appSecret":"0e2fe5bded860a9d8466fab5d1680ef1",
-            "token":"abc_cy",  
-            "encodingAESKey":"Rxsoy3HI275p1AcyHuw1VZXfAqy9meJ23kKNofF1xLI",	 
-            "encrypt_mode":"normal"
+            "name": "公众1",
+            "appid": "wxa96e7921ab04afab",
+            "appSecret": "0e2fe5bded860a9d8466fab5d1680ef1",
+            "token": "abc_cy",
+            "encodingAESKey": "Rxsoy3HI275p1AcyHuw1VZXfAqy9meJ23kKNofF1xLI",
+            "encrypt_mode": "normal"
         },
         {
-            "name":"测试公众号", 
-            "appid":"wx181aa5d9ce286cf0", 
-            "appSecret":"0b19ad3a1be39f71028409c05351a43a",
-            "token":"token123456",  
-            "encodingAESKey":"",	 
-            "encrypt_mode":"normal" ,
-            "alarm_tamplate_id":"G6ockp-Y-qCZ1mBfvZrkmaFFboqMY4WvixLm0W90xZk",
-            "alarm_tamplate_url":"http://wx.co6co.top:444/home.html#/alarmdetail.html?uid="
-           
+            "name": "测试公众号",
+            "appid": "wx181aa5d9ce286cf0",
+            "appSecret": "0b19ad3a1be39f71028409c05351a43a",
+            "token": "token123456",
+            "encodingAESKey": "",
+            "encrypt_mode": "normal",
+            "alarm_tamplate_id": "G6ockp-Y-qCZ1mBfvZrkmaFFboqMY4WvixLm0W90xZk",
+            "alarm_tamplate_url": "http://wx.co6co.top:444/home.html#/alarmdetail.html?uid="
         }
     ]
 }

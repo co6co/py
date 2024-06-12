@@ -1,1 +1,1 @@
-import '@element-plus/components/base/style'
+import '@co6co/components/base'

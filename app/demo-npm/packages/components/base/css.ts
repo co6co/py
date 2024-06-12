@@ -1,1 +1,1 @@
-import '@co6co/theme/dist/base.css'
+import '@co6co/theme/base.css'

@@ -28,11 +28,11 @@ class db_service:
         'echo': True,
         'pool_size': 20,
         'max_overflow': 10,
-        'pool_pre_ping':True, # 执行sql语句前悲观地检查db是否可用
-        # 'pool_recycle':1800
+        'pool_pre_ping': True,  # 执行sql语句前悲观地检查db是否可用
+        # 'pool_recycle':1800 #超时时间 单位s
 
     }
-    settings={}
+    settings = {}
     session: scoped_session  # 同步连接
     async_session_factory: sessionmaker  # 异步连接
     useAsync: bool
@@ -41,36 +41,39 @@ class db_service:
 
     def _createEngine(self, url: str):
         self.useAsync = True
-        #字符串 除了 bool(''/""/()/[]/{}/None )== False
-        echo = self.settings.get("echo") 
-        ping = self.settings.get("pool_pre_ping") 
-        if type(echo)!= bool: echo=True 
+        # 字符串 除了 bool(''/""/()/[]/{}/None )== False
+        echo = self.settings.get("echo")
+        ping = self.settings.get("pool_pre_ping")
+        if type(echo) != bool:
+            echo = True
 
         pool_size = self.settings.get("pool_size")
         max_overflow = self.settings.get("max_overflow")
         if "sqlite" in url:
             self.useAsync = False
-            self.engine = create_engine(url, echo=echo, poolclass=NullPool,pool_pre_ping=ping)
+            self.engine = create_engine(
+                url, echo=echo, poolclass=NullPool, pool_pre_ping=ping)
             self.session = scoped_session(sessionmaker(
                 autoflush=False, autocommit=False, bind=self.engine))
-            BasePO.query = self.session.query_property() 
-        else: # AsyncSession
+            BasePO.query = self.session.query_property()
+        else:  # AsyncSession
             self.engine = create_async_engine(
-                url, echo= echo, pool_size=pool_size, max_overflow=max_overflow,pool_pre_ping=ping)
+                url, echo=echo, pool_size=pool_size, max_overflow=max_overflow, pool_pre_ping=ping)
             self.async_session_factory = sessionmaker(
                 self.engine, expire_on_commit=False, class_=AsyncSession)  # AsyncSession,
-            
+
         self.base_model_session_ctx = ContextVar("session")
         pass
 
     def __init__(self, config: dict, engineUrl: str = None) -> None:
-        self.settings =self.default_settings.copy()
-      
+        self.settings = self.default_settings.copy()
+
         if engineUrl != None:
             self._createEngine(engineUrl)
         else:
             self.settings .update(config)
-            engineUrl = f"mysql+aiomysql://{self.settings['DB_USER']}:{self.settings['DB_PASSWORD']}@{self.settings['DB_HOST']}/{self.settings['DB_NAME']}"
+            engineUrl = f"mysql+aiomysql://{self.settings['DB_USER']}:{
+                self.settings['DB_PASSWORD']}@{self.settings['DB_HOST']}/{self.settings['DB_NAME']}"
             self._createEngine(engineUrl)
         pass
 
