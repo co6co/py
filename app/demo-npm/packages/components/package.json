@@ -10,7 +10,8 @@
   "unpkg": "index.js",
   "jsdelivr": "index.js",
   "peerDependencies": {
-    "vue": "^3.4.21"
+    "element-plus": "^2.7.3",
+    "vue": "^3.2.0"
   },
   "types": "index.d.ts",
   "sideEffects": false

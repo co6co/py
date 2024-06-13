@@ -1,4 +1,4 @@
-import { withInstall } from 'element-plus/es/utils'
+import { withInstall } from 'element-plus/es/utils/index'
 import diaglogDetail from './diaglogDetail'
 export const EcDiaglogDetail = withInstall(diaglogDetail)
 export default EcDiaglogDetail

@@ -1,4 +1,4 @@
-import { withInstall } from 'element-plus/lib/utils'
+import { withInstall } from 'element-plus/es/utils/index'
 
 import Alert from './src/alert.vue'
 

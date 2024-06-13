@@ -17,8 +17,7 @@
     "rootDir": ".",
     "types": [],
     "paths": {
-      "@co6co/*": ["packages/*"],
-      "@co6co/build": ["internal/build"]
+      "@co6co/*": ["packages/*"]
     }
   }
 }

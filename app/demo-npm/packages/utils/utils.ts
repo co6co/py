@@ -1,7 +1,7 @@
 /* eslint-disable no-console */
-import JSONbig from 'json-bigint'
-import { dayjs } from 'element-plus'
 
+import JSONbig from 'json-bigint'
+import dayjs from 'dayjs'
 import type { ITreeSelect } from '@co6co/constants'
 
 export const str2Obj = (str: string) => {

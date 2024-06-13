@@ -1,4 +1,4 @@
-import Cookie from 'js-cookie' //npm i --save-dev @types/js-cookie
+import Cookie from 'js-cookie'
 import { Storage } from './storage'
 
 const authonKey = 'Authorization'

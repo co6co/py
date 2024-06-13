@@ -1,4 +1,8 @@
-import { TypeComponentsMap, buildProps, keysOf } from 'element-plus/es/utils'
+import {
+  TypeComponentsMap,
+  buildProps,
+  keysOf,
+} from 'element-plus/es/utils/index'
 import type { ExtractPropTypes } from 'vue'
 
 export const alertEffects = ['light', 'dark'] as const

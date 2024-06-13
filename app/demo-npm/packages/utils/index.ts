@@ -1,6 +1,6 @@
 export * from './auth'
 export * from './date'
-export * from './request'
+//export * from './request'
 export * from './tables'
 export * from './utils'
 export * from './storage'
