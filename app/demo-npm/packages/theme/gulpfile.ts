@@ -13,6 +13,7 @@ import { epOutput } from '@co6co/build-utils'
 import type Vinly from 'vinyl'
 
 const distFolder = path.resolve(__dirname, 'dist')
+
 const distBundle = path.resolve(epOutput, 'theme')
 
 /**
@@ -33,6 +34,7 @@ function compressWithCssnano() {
       ],
     }),
   ])
+
   return new Transform({
     objectMode: true,
     transform(chunk, _encoding, callback) {
@@ -65,7 +67,7 @@ function compressWithCssnano() {
  * not use sass.sync().on('error', sass.logError) to throw exception
  * @returns
  */
-function buildThemeChalk() {
+function buildTheme() {
   const sass = gulpSass(dartSass)
   const noElPrefixFile = /(index|base|display)/
   return src(path.resolve(__dirname, 'src/*.scss'))
@@ -88,7 +90,7 @@ function buildThemeChalk() {
  */
 function buildDarkCssVars() {
   const sass = gulpSass(dartSass)
-  return src(path.resolve(__dirname, 'src/*.less'))
+  return src(path.resolve(__dirname, 'src/*.scss'))
     .pipe(sass.sync())
     .pipe(autoprefixer({ cascade: false }))
     .pipe(compressWithCssnano())
@@ -98,7 +100,7 @@ function buildDarkCssVars() {
 /**
  * copy from packages/theme/dist to dist/co6co/theme
  */
-export function copyThemeChalkBundle() {
+export function copyThemeBundle() {
   return src(`${distFolder}/**`).pipe(dest(distBundle))
 }
 
@@ -106,15 +108,15 @@ export function copyThemeChalkBundle() {
  * copy source file to packages
  */
 
-export function copyThemeChalkSource() {
+export function copyThemeSource() {
   return src(path.resolve(__dirname, 'src/**')).pipe(
     dest(path.resolve(distBundle, 'src'))
   )
 }
 
 export const build: TaskFunction = parallel(
-  copyThemeChalkSource,
-  series(buildThemeChalk, buildDarkCssVars, copyThemeChalkBundle)
+  copyThemeSource,
+  series(buildTheme, buildDarkCssVars, copyThemeBundle)
 )
 
 export default build

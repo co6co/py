@@ -1,4 +1,4 @@
-import { defineComponent, ref, type PropType } from 'vue'
+import { type PropType, defineComponent, ref } from 'vue'
 import { ElOption, ElSelect } from 'element-plus'
 import type { IEnumSelect } from '@co6co/constants'
 

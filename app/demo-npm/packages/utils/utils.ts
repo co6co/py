@@ -1,5 +1,5 @@
 /* eslint-disable no-console */
-
+/// <reference types="../../typings/global" />
 import JSONbig from 'json-bigint'
 import dayjs from 'dayjs'
 import type { ITreeSelect } from '@co6co/constants'

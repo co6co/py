@@ -39,10 +39,10 @@
 </template>
 <script lang="ts" setup>
 import { computed, ref, useSlots } from 'vue'
-import { ElIcon } from '@co6co/components/icon'
 
 import { TypeComponents, TypeComponentsMap } from 'element-plus/es/utils/index'
 import { useNamespace } from 'element-plus'
+import { ElIcon } from '@co6co/components/icon'
 import { alertEmits, alertProps } from './alert'
 
 const { Close } = TypeComponents
