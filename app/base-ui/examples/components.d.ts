@@ -8,11 +8,6 @@ export {}
 declare module 'vue' {
   export interface GlobalComponents {
     Download: typeof import('./src/components/download/src/download.vue')['default']
-    ElButton: typeof import('element-plus/es')['ElButton']
-    ElForm: typeof import('element-plus/es')['ElForm']
-    ElFormItem: typeof import('element-plus/es')['ElFormItem']
-    ElIcon: typeof import('element-plus/es')['ElIcon']
-    ElInput: typeof import('element-plus/es')['ElInput']
     Header: typeof import('./src/components/header.vue')['default']
     HtmlPlayer: typeof import('./src/components/player/src/htmlPlayer.vue')['default']
     Image: typeof import('./src/components/player/src/Image.vue')['default']

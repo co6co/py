@@ -5,10 +5,9 @@ import axios, {
   type CreateAxiosDefaults,
   type InternalAxiosRequestConfig,
 } from 'axios'
-import { ElMessage } from 'element-plus'
+import { type ElLoading, ElMessage } from 'element-plus'
 import JSONbig from 'json-bigint'
 import { getToken, removeToken } from './auth'
-import type { ElLoading } from 'element-plus'
 
 const crateService = (config?: CreateAxiosDefaults<any> | undefined) => {
   const service: AxiosInstance = axios.create(

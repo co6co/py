@@ -198,8 +198,8 @@ export default defineComponent({
     //end
     const save = (formEl: FormInstance | undefined) => {
       if (!formEl) return
-      formEl.validate((value) => {
-        if (value) {
+      formEl.validate((isValid) => {
+        if (isValid) {
           form.loading = true
           api
             .set_svc({ data: form.fromData })
@@ -216,7 +216,7 @@ export default defineComponent({
             })
         } else {
           ElMessage.error('请检查输入的数据！')
-          return false
+          return Promise.reject('valid Form Error')
         }
       })
     }

@@ -108,8 +108,8 @@ export default defineComponent({
     }
     const save = (formEl: FormInstance | undefined) => {
       if (!formEl) return
-      formEl.validate((value) => {
-        if (value) {
+      formEl.validate((isValid) => {
+        if (isValid) {
           form.loading = true
           console.info(form.fromData)
           if (form.operation == types.Operation.Add) {
@@ -132,7 +132,7 @@ export default defineComponent({
           }
         } else {
           ElMessage.error('请检查输入的数据！')
-          return false
+          return Promise.reject('valid Form Error')
         }
       })
     }

@@ -1,13 +1,13 @@
 import { usePermissStore } from './hook'
 import type { DirectiveBinding, ObjectDirective } from 'vue'
-const store = usePermissStore()
 
-const Permiss: ObjectDirective = {
+const permissDirective: ObjectDirective = {
   mounted(el: HTMLElement, binding: DirectiveBinding) {
+    const store = usePermissStore()
     if (!store.includes(String(binding.value))) {
       el['hidden'] = true
     }
   },
 }
-
-export { Permiss }
+export default permissDirective
+export { usePermissStore }

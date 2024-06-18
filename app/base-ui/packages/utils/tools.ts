@@ -7,8 +7,9 @@ import type { ITreeSelect } from '@co6co/constants'
 export const str2Obj = (str: string) => {
   return JSONbig.parse(str)
 }
+//需要根据正式项目配置的 env 才能生效 在此使用永久返回 false
+//export const isDebug = Boolean(Number(import.meta.env.VITE_IS_DEBUG))
 
-export const isDebug = Boolean(Number(import.meta.env.VITE_IS_DEBUG))
 export const sleep = (time: number) => {
   return new Promise((resolve) => setTimeout(resolve, time))
 }

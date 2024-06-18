@@ -49,13 +49,16 @@ export default defineComponent({
         return false
       }
       if (validateBefore) validateBefore()
-      instance.validate((value) => {
-        if (!value) {
+      instance.validate((isValid) => {
+        if (!isValid) {
           ElMessage.error('请检查输入的数据！')
           emit('error', '请检查输入的数据！')
+          /*
           return new Promise((resolve) => {
             resolve()
           })
+          */
+          return Promise.reject('valid Form Error')
           //return false;
         }
         //提交数据

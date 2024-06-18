@@ -1,10 +1,6 @@
 import { type PropType, defineComponent, ref } from 'vue'
 import { type ObjectType } from '@co6co/constants'
-import {
-  type DetailInstance,
-  type Details,
-  default as EcDetail,
-} from '@co6co/components/detail'
+import { type Details, default as EcDetail } from '@co6co/components/detail'
 import { type DialogInstance, EcDialog } from '@co6co/components/dialog'
 
 export default defineComponent({

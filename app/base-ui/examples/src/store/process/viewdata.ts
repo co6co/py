@@ -61,9 +61,8 @@ export const form_attach_data: ItemAattachData = {
     return this.program_audit_state.find((m) => m.value === v)
   },
   statue2TagType(v?: number) {
+    if (v === null) return 'info'
     switch (v) {
-      case null:
-        return 'info'
       case 0:
         return 'danger'
       //case 1:return 'primary'

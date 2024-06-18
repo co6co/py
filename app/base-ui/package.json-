@@ -36,6 +36,7 @@
     "@co6co/locale": "workspace:*",
     "@co6co/theme": "workspace:*",
     "@co6co/utils": "workspace:*",
+     "element-plus": "^2.7.3",
     "@element-plus/icons-vue": "^2.3.1",
     "axios": "^1.7.2",
     "element-plus": "^2.7.3",

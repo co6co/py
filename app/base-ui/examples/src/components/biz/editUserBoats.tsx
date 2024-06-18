@@ -231,8 +231,8 @@ export default defineComponent({
         form.fromData.remove = minus(form.treeDefaultChecked, siteNode) as number[]
       }
       if (!formEl) return
-      formEl.validate((value) => {
-        if (value) {
+      formEl.validate((isValid) => {
+        if (isValid) {
           form.loading = true
           api
             .edits_svc(form.fromData)
@@ -251,7 +251,7 @@ export default defineComponent({
             })
         } else {
           ElMessage.error('请检查输入的数据！')
-          return false
+          return Promise.reject('valid Form Error')
         }
       })
     }

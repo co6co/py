@@ -269,8 +269,8 @@ const onOpenDialog = (type: number, row?: any) => {
 }
 const onDialogSave = (formEl: FormInstance | undefined) => {
   if (!formEl) return
-  formEl.validate((value) => {
-    if (value) {
+  formEl.validate((isValid) => {
+    if (isValid) {
       if (form.operation == 0) {
         add_svc(form.fromData).then((res) => {
           if (res.code == 0) {
@@ -294,7 +294,7 @@ const onDialogSave = (formEl: FormInstance | undefined) => {
       }
     } else {
       ElMessage.error('请检查输入的数据！')
-      return false
+      return Promise.reject('valid Form Error')
     }
   })
 }

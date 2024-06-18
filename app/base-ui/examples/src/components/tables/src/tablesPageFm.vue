@@ -69,8 +69,8 @@ import {
   ArrowDown
 } from '@element-plus/icons-vue'
 import { showLoading, closeLoading } from '../../Logining'
-import { createStateEndDatetime } from '../../../utils'
-import * as api_types from '../../../api/types'
+import { createStateEndDatetime } from 'co6co'
+import * as api_types from 'co6co'
 
 interface TableRow {
   id: number
@@ -94,7 +94,7 @@ interface Table_Module extends api_types.Table_Module_Base {
   query: Query
   moreOption: boolean
   data: TableRow[]
-  currentRow?: TableRow 
+  currentRow?: TableRow
   categoryList: AlertCategory[]
 }
 const table_module = reactive<Table_Module>({
@@ -144,7 +144,7 @@ const getQuery = () => {
 // 获取表格数据
 const getData = () => {
   showLoading()
-  getQuery() 
+  getQuery()
 }
 
 // 分页导航

@@ -4,10 +4,17 @@
       <el-header>
         <div class="handle-box" style="text-align: right">
           <el-button type="primary" :icon="Search" @click="onSearch">刷新</el-button>
-          <el-button v-permiss="getPermissKey(ViewFeature.add)" type="primary" :icon="Plus" @click="onOpenDialog()">新增</el-button>
-          <el-button v-permiss="getPermissKey(ViewFeature.effective)"
+          <el-button
+            v-permiss="getPermissKey(ViewFeature.add)"
+            type="primary"
+            :icon="Plus"
+            @click="onOpenDialog()"
+            >新增</el-button
+          >
+          <el-button
+            v-permiss="getPermissKey(ViewFeature.effective)"
             type="warning"
-            :disabled="!table_module.priorityChanged" 
+            :disabled="!table_module.priorityChanged"
             :icon="Connection"
             @click="onPriorityChanged"
             >优先级立即生效</el-button
@@ -65,14 +72,14 @@
             ></el-table-column>
             <el-table-column
               prop="priority"
-              label="优先级" 
+              label="优先级"
               sortable="custom"
               :show-overflow-tooltip="true"
             ></el-table-column>
 
             <el-table-column
               prop="baseRule"
-              label="基础规则" 
+              label="基础规则"
               sortable="custom"
               :show-overflow-tooltip="true"
             ></el-table-column>
@@ -94,17 +101,22 @@
               sortable="custom"
               :show-overflow-tooltip="true"
             ></el-table-column>
-            
+
             <el-table-column label="人工复审" prop="manualReview" width="110" sortable="custom">
               <template #default="scope">
                 <el-tag :type="getEleTagTypeByBoolean(scope.row.manualReview)"
-                  >{{ scope.row.manualReview +(scope.row.manualReview == 1 ? '-复审' : '-AI审') }}
+                  >{{ scope.row.manualReview + (scope.row.manualReview == 1 ? '-复审' : '-AI审') }}
                 </el-tag></template
               >
             </el-table-column>
             <el-table-column label="操作" width="194" align="center">
               <template #default="scope">
-                <el-button text :icon="Edit" @click="onOpenDialog(scope.row)" v-permiss="getPermissKey(ViewFeature.edit)">
+                <el-button
+                  text
+                  :icon="Edit"
+                  @click="onOpenDialog(scope.row)"
+                  v-permiss="getPermissKey(ViewFeature.edit)"
+                >
                   编辑
                 </el-button>
                 <el-button
@@ -164,27 +176,27 @@ import {
   ArrowDown
 } from '@element-plus/icons-vue'
 import { showLoading, closeLoading } from '../components/Logining'
-import { createStateEndDatetime } from '../utils'
-import { getTableIndex } from '../utils/tables'
+import { createStateEndDatetime } from 'co6co'
+import { getTableIndex } from 'co6co'
 import * as api from '../api/boat/rules'
 import * as dp_api from '../api/pd'
-import * as api_types from '../api/types'
-import EditRule ,{type Item,type FromData} from '../components/biz/EditRule'
-import {getEleTagTypeByBoolean,type IPageParam} from '../api/types' 
-import useNotifyAudit,{NotifyType} from '../hook/useNotifyAudit'
-import {usePermission,ViewFeature} from '../hook/sys/useRoute'
-const {getPermissKey}= usePermission()
+import * as api_types from 'co6co'
+import EditRule, { type Item, type FromData } from '../components/biz/EditRule'
+import { getEleTagTypeByBoolean, type IPageParam } from 'co6co'
+import useNotifyAudit, { NotifyType } from '../hook/useNotifyAudit'
+import { usePermission, ViewFeature } from '../hook/sys/useRoute'
+const { getPermissKey } = usePermission()
 interface Query extends IPageParam {
   datetimes: Array<string>
   alarmType: String
 }
-interface Table_Module  extends api_types.Table_Module_Base{
+interface Table_Module extends api_types.Table_Module_Base {
   query: Query
   moreOption: boolean
   data: Item[]
-  currentRow?: Item 
-  priorityTemp?:number;
-  priorityChanged:boolean
+  currentRow?: Item
+  priorityTemp?: number
+  priorityChanged: boolean
 }
 const table_module = reactive<Table_Module>({
   query: {
@@ -198,7 +210,7 @@ const table_module = reactive<Table_Module>({
   moreOption: false,
   data: [],
   pageTotal: -1,
-  priorityChanged:false
+  priorityChanged: false
 })
 const tableInstance = ref<InstanceType<typeof ElTable>>()
 // 排序
@@ -237,8 +249,7 @@ const getData = () => {
     .then((res) => {
       if (res.code == 0) {
         table_module.data = res.data
-        table_module.pageTotal=res.total || 0
-
+        table_module.pageTotal = res.total || 0
       } else {
         ElMessage.error(res.message)
       }
@@ -247,7 +258,6 @@ const getData = () => {
 }
 
 getData()
-
 
 // 分页导航
 const onPageChange = (pageIndex: number) => {
@@ -260,22 +270,27 @@ const onTableSelect = (row: Item) => {}
 const editViewRef = ref<typeof EditRule>()
 const onOpenDialog = (row?: Item) => {
   // 临时保存优先级
-  table_module.priorityTemp=row?.priority
+  table_module.priorityTemp = row?.priority
   //有记录编辑无数据增加
   editViewRef.value?.onOpenDialog(row ? api_types.Operation.Edit : api_types.Operation.Add, row)
 }
-const onAddEditSaved=(saveData:FromData)=>{ 
-  if (table_module.priorityTemp!=saveData.priority && !table_module.priorityChanged){
-    table_module.priorityChanged=true
+const onAddEditSaved = (saveData: FromData) => {
+  if (table_module.priorityTemp != saveData.priority && !table_module.priorityChanged) {
+    table_module.priorityChanged = true
   }
   getData()
 }
- 
-const { notifyAuditSystem}=useNotifyAudit()
-const onPriorityChanged=()=>{
-  notifyAuditSystem({type: NotifyType.rule_priority_changed,state: true, failMessage:"规则优先级通知失败",message:"规则优先级通知成功"})
+
+const { notifyAuditSystem } = useNotifyAudit()
+const onPriorityChanged = () => {
+  notifyAuditSystem({
+    type: NotifyType.rule_priority_changed,
+    state: true,
+    failMessage: '规则优先级通知失败',
+    message: '规则优先级通知成功'
+  })
 }
- 
+
 const onDelete = (index: number, row: Item) => {
   // 二次确认删除
   ElMessageBox.confirm(`确定要删除"${row.name}"吗？`, '提示', {

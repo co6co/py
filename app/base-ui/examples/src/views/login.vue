@@ -36,14 +36,16 @@ import { ref, reactive } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { Lock, User } from '@element-plus/icons-vue'
-import { setToken, isDebug } from 'co6co'
+import { setToken } from 'co6co'
+import { isDebug } from '../utils'
 import { useTagsStore } from '../store/tags'
 // eslint-disable-next-line camelcase
 import { login_svc } from '../api/sys/user'
-import { Storage, SessionKey } from '../store/Storage'
+import { Storage, SessionKey } from 'co6co'
 import { showLoading, closeLoading } from '../components/Logining'
 import { registerRoute } from '../router/hooks'
 import type { FormInstance, FormRules } from 'element-plus'
+import { ValidateFieldsError } from 'async-validator'
 interface LoginInfo {
   username: string
   password: string
@@ -99,7 +101,7 @@ const submitForm = (formEl: FormInstance | undefined) => {
         })
     } else {
       message.value = '数据验证失败'
-      return false
+      return Promise.reject('valid Form Error')
     }
   })
 }
