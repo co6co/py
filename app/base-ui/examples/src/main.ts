@@ -1,5 +1,4 @@
 import { createApp } from 'vue'
-import { createPinia } from 'pinia'
 import * as ElementPlusIconsVue from '@element-plus/icons-vue'
 import App from './App.vue'
 import setupRouter from './router'
@@ -8,19 +7,18 @@ import 'element-plus/dist/index.css'
 import './assets/css/icon.css'
 
 const app = createApp(App)
-//app.use(createPinia())
-//app.use(router);
-setupRouter(app)
 try {
   const { install, version } = makeInstaller()
   install(app)
-  console.info('版本cp6cp', version)
-  // 注册elementplus图标
+  //app.use(router);
+  setupRouter(app)
+  console.info('version：', version)
+  // 注册图标
   for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
     app.component(key, component)
   }
 } catch (e) {
-  console.info('main:', e)
+  console.error('main:', e)
 }
 
 // 自定义权限指令

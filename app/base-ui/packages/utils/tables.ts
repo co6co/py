@@ -1,4 +1,4 @@
-import { type IPageParam } from '../types'
+import { type IPageParam } from '@co6co/constants'
 
 /**
  * 获取table 行索引号

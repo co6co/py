@@ -1,6 +1,6 @@
 import { defineComponent, ref, reactive, type PropType, provide, inject } from 'vue'
 import type { InjectionKey } from 'vue'
-import { default as EcDiaglogForm } from '../common/EcDiaglogForm'
+import { default as EcDialogForm } from '../common/EcDialogForm'
 
 import { FormOperation } from 'co6co'
 import type { ObjectType, FormData } from 'co6co'
@@ -43,7 +43,7 @@ export default defineComponent({
     saved: (response: any, submitData: FormItem) => true
   },
   setup(prop, ctx) {
-    const diaglogForm = ref<InstanceType<typeof EcDiaglogForm>>()
+    const diaglogForm = ref<InstanceType<typeof EcDialogForm>>()
 
     const data = reactive<FormData<number, FormItem>>({
       operation: FormOperation.add,
@@ -141,14 +141,14 @@ export default defineComponent({
 
     const rander = (): ObjectType => {
       return (
-        <EcDiaglogForm
+        <EcDialogForm
           title={prop.title}
           labelWidth={prop.labelWidth}
           style={ctx.attrs}
           rules={rules}
           ref={diaglogForm}
           v-slots={fromSlots}
-        ></EcDiaglogForm>
+        ></EcDialogForm>
       )
     }
     ctx.expose({

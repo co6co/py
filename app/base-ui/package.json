@@ -36,6 +36,7 @@
     "postinstall": "pnpm stub && concurrently \"pnpm gen:version\" \"pnpm run -C internal/metadata dev\""
   },
   "peerDependencies": {
+    "axios": "^1.7.2",
     "element-plus": "^2.7.3",
     "json-bigint": "^1.0.0",
     "pinia": "^2.1.7",

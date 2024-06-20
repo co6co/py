@@ -14,5 +14,5 @@
     "packages/co6co/version.ts",
     "packages/co6co/package.json"
   ],
-  "exclude": ["**/__tests__/**", "**/tests/**", "**/dist"]
+  "exclude": ["**/__tests__/**", "node_modules", "**/tests/**", "**/dist"]
 }

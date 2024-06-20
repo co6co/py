@@ -1,6 +1,6 @@
 import { defineComponent, ref, reactive, computed, type PropType, provide, inject } from 'vue'
 import type { InjectionKey } from 'vue'
-import { EcDiaglogForm } from 'co6co'
+import { EcDialogForm } from 'co6co'
 import { type ObjectType, type FormData, FormOperation } from 'co6co'
 import * as api_type from 'co6co'
 import { retsetPwd_svc } from '../../api/sys/user'
@@ -47,7 +47,7 @@ export default defineComponent({
   setup(prop, ctx) {
     const { treeSelectData, refresh } = useTree(0)
     const { selectData } = useState()
-    const diaglogForm = ref<InstanceType<typeof EcDiaglogForm>>()
+    const diaglogForm = ref<InstanceType<typeof EcDialogForm>>()
     const DATA = reactive<FormData<number, FormItem>>({
       operation: FormOperation.add,
       id: 0,
@@ -124,14 +124,14 @@ export default defineComponent({
 
     const rander = (): ObjectType => {
       return (
-        <EcDiaglogForm
+        <EcDialogForm
           title={prop.title}
           labelWidth={prop.labelWidth}
           style={ctx.attrs}
           rules={rules.value}
           ref={diaglogForm}
           v-slots={fromSlots}
-        ></EcDiaglogForm>
+        ></EcDialogForm>
       )
     }
     const openDialog = (item?: Item) => {

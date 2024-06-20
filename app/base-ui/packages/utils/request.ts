@@ -104,5 +104,7 @@ const crateService2 = (config?: CreateAxiosDefaults<any> | undefined) => {
   })
   return Axios
 }
-
+export function cccccc() {
+  console.info('cccccc')
+}
 export { crateService2 as crateAuthorizationService, crateService }

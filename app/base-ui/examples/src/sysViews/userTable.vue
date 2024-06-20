@@ -129,7 +129,7 @@ import { showLoading, closeLoading } from '../components/Logining'
 import modifyDiaglog, { type Item } from '../components/sys/modifyUser'
 import resetPwdDiaglog from '../components/sys/resetPwd'
 import * as api_types from 'co6co'
-import EnumSelect from '../components/common/EnumSelect'
+import EnumSelect from 'co6co'
 import useDelete from '../hook/sys/useDelete'
 
 import associatedDiaglog from '../components/sys/associated'

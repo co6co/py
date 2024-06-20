@@ -4,7 +4,7 @@
 import { defineComponent, h, onMounted, ref, resolveComponent } from 'vue'
 import { ElEmpty, ElIcon, ElOption, ElSelect } from 'element-plus'
 import * as icon from '@element-plus/icons-vue'
-import iconStyle from '@co6co/theme/eciconselect.module.css'
+//import iconStyle from '@co6co/theme/eciconselect.module.css'
 
 export default defineComponent({
   name: 'EcIconSelect',
@@ -31,11 +31,14 @@ export default defineComponent({
     })
     const vsolft = {
       default: () => {
+        //ul  class={iconStyle.iconList}
+        //class={iconStyle.icon_item}
+
         return (
-          <ul class={iconStyle.iconList}>
+          <ul>
             {Object.keys(icon).map((key, index) => {
               return (
-                <ElOption key={index} class={iconStyle.icon_item} value={key}>
+                <ElOption key={index} value={key}>
                   <ElIcon>{h(resolveComponent(key))}</ElIcon>
                 </ElOption>
               )

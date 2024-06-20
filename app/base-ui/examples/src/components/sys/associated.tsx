@@ -9,7 +9,7 @@ import {
   nextTick
 } from 'vue'
 import type { InjectionKey } from 'vue'
-import { EcDiaglogForm } from 'co6co'
+import { EcDialogForm } from 'co6co'
 import { type ObjectType, type FormData, FormOperation } from 'co6co'
 import * as api_type from 'co6co'
 
@@ -111,7 +111,7 @@ export default defineComponent({
     saved: (data: any) => true
   },
   setup(prop, ctx) {
-    const diaglogForm = ref<InstanceType<typeof EcDiaglogForm>>()
+    const diaglogForm = ref<InstanceType<typeof EcDialogForm>>()
     const DATA = reactive<FormData<number, FormItem> & FormTree>({
       treeSelectData: [],
       operation: FormOperation.add,
@@ -300,14 +300,14 @@ export default defineComponent({
     })
     const rander = (): ObjectType => {
       return (
-        <EcDiaglogForm
+        <EcDialogForm
           title={prop.title}
           labelWidth={prop.labelWidth}
           style={ctx.attrs}
           rules={rules.value}
           ref={diaglogForm}
           v-slots={fromSlots}
-        ></EcDiaglogForm>
+        ></EcDialogForm>
       )
     }
     const openDialog = (
