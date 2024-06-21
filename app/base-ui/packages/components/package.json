@@ -10,6 +10,7 @@
   "unpkg": "index.js",
   "jsdelivr": "index.js",
   "peerDependencies": {
+    "@vue/babel-plugin-jsx": "^1.2.2",
     "element-plus": "^2.7.3",
     "vue": "^3.2.0"
   },

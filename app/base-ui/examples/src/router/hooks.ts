@@ -60,7 +60,7 @@ export function setupRouterHooks() {
   router.beforeEach((to, from, next) => {
     //pageRefresh(to)
     //console.info('route.before...')
-    document.title = `${to.meta.title}`
+    document.title = to.meta.title ? `${to.meta.title}` : import.meta.env.VITE_SYSTEM_NAME
     const token = getToken()
     // console.info( "permiss" ,to.meta.permiss,to.path)
 

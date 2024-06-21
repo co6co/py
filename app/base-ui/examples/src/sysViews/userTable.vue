@@ -103,18 +103,22 @@
       </el-footer>
     </el-container>
     <!--编辑-->
+    <!--
     <modify-diaglog
       :title="table_module.diaglogTitle"
       ref="modifyDiaglogRef"
       @saved="getData"
     ></modify-diaglog>
+-->
     <!--重置密码-->
+
     <reset-pwd-diaglog ref="resetPwdDiaglogRef" title="重置密码"></reset-pwd-diaglog>
+    <!--
     <associated-diaglog
       ref="associatedDiaglogRef"
       style="width: 30%"
       title="关联角色"
-    ></associated-diaglog>
+    ></associated-diaglog>  -->
   </div>
 </template>
 

@@ -1,0 +1,40 @@
+<template>
+  <ElDialog v-model="visible" v-slots="{ slots }" :title="title">
+    <template #header>
+      <slot v-if="!$slots.title" name="header" :close="close" />
+      <slot v-else name="title" />
+    </template>
+    <ElScrollbar>
+      <div style="max-height: 55vh">
+        <slot />
+      </div>
+    </ElScrollbar>
+    <template v-if="$slots.footer" #footer>
+      <div class="dialog-footer">
+        <el-button @click="close">关闭</el-button>
+        <slot name="footer" />
+      </div>
+    </template>
+  </ElDialog>
+</template>
+<script lang="ts" setup>
+import { reactive, useSlots } from 'vue'
+import { ElDialog } from 'element-plus'
+import { dialogEmits, dialogProps } from './dialog.ts.txt'
+import type { dialogDataType } from './dialog.ts.txt'
+
+defineOptions({
+  name: 'EcDialog',
+})
+const diaglogData = reactive<dialogDataType>({
+  visible: false,
+})
+defineProps(dialogProps)
+const emit = defineEmits(dialogEmits)
+const slots = useSlots()
+
+const close = (evt: MouseEvent) => {
+  diaglogData.visible = false
+  emit('close', evt)
+}
+</script>

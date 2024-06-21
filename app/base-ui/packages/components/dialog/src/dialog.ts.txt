@@ -1,0 +1,37 @@
+import { buildProps } from '@co6co/utils'
+import type { ExtractPropTypes } from 'vue'
+
+export interface dialogDataType {
+  visible: boolean
+}
+export const dialogProps = buildProps({
+  visible: {
+    type: Boolean,
+    default: false,
+  },
+  title: {
+    type: String,
+    default: '',
+  },
+  description: {
+    type: String,
+    default: '',
+  },
+
+  closable: {
+    type: Boolean,
+    default: true,
+  },
+  closeText: {
+    type: String,
+    default: '',
+  },
+  showIcon: Boolean,
+  center: Boolean,
+} as const)
+export type DialogProps = ExtractPropTypes<typeof dialogProps>
+
+export const dialogEmits = {
+  close: (evt: MouseEvent) => evt instanceof MouseEvent,
+}
+export type DialogEmits = typeof dialogEmits

@@ -26,6 +26,7 @@
           <el-button type="primary" @click="submitForm(login)">登录</el-button>
         </div>
         <p class="login-tips">Tips : {{ message }}</p>
+        <el-alert type="warning">123456</el-alert>
       </el-form>
     </div>
   </div>
@@ -36,7 +37,7 @@ import { ref, reactive } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { Lock, User } from '@element-plus/icons-vue'
-import { setToken } from 'co6co'
+import { setToken, ElAlert } from 'co6co'
 import { isDebug } from '../utils'
 import { useTagsStore } from '../store/tags'
 // eslint-disable-next-line camelcase
