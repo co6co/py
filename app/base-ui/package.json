@@ -60,6 +60,7 @@
     "async-validator": "^4.2.5",
     "dayjs": "^1.11.3",
     "escape-html": "^1.0.3",
+    "jsx-transform": "^2.4.1",
     "lodash": "^4.17.21",
     "lodash-es": "^4.17.21",
     "lodash-unified": "^1.0.2",
@@ -133,7 +134,9 @@
   "pnpm": {
     "peerDependencyRules": {
       "ignoreMissing": [
-        "vite"
+        "vite",
+        "react",
+        "react-dom"
       ]
     }
   },

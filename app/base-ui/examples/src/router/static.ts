@@ -1,14 +1,16 @@
 import { type RouteRecordRaw } from 'vue-router'
 
-const Login = () => import('@/views/login.vue')
-const page403 = () => import('@/views/403.vue')
-const home =()=> import('@/views/home.vue')
+const Login = () => import('../views/login.vue')
+const page403 = () => import('../views/403.vue')
+const page404 = () => import('../views/404.vue')
+const home = () => import('../views/home.vue')
+const demo = () => import('../views/demo.vue')
 
 // 基础路由，不需要设置权限
 export const basicRoutes: RouteRecordRaw[] = [
   {
     path: '/',
-    redirect: '/processAudit', //processAudit
+    redirect: '/processAudit' //processAudit
   },
   {
     path: '/login',
@@ -23,8 +25,19 @@ export const basicRoutes: RouteRecordRaw[] = [
     component: page403
   },
   {
+    path: '/404',
+    name: '404',
+    meta: { title: '未找到' },
+    component: page403
+  },
+  {
     path: '/home',
     name: 'home',
     component: home
+  },
+  {
+    path: '/demo',
+    name: 'demo',
+    component: demo
   }
 ]
