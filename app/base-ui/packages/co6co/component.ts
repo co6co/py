@@ -9,6 +9,7 @@ import { EcDialogForm } from '@co6co/components/dialogForm'
 import { closeLoading, showLoading } from '@co6co/components/glogining'
 import { EcIconSelect } from '@co6co/components/iconSelect'
 import { ElIcon } from '@co6co/components/icon'
+import { EcHello } from '@co6co/components/hello'
 import type { Plugin } from 'vue'
 export default [
   ElAlert,
@@ -21,4 +22,5 @@ export default [
   EcIconSelect,
   closeLoading,
   showLoading,
+  EcHello,
 ] as Plugin[]

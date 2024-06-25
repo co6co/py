@@ -2,6 +2,8 @@ import { createApp } from 'vue'
 import * as ElementPlusIconsVue from '@element-plus/icons-vue'
 import App from './App.vue'
 import setupRouter from './router'
+//import { usePermiss } from 'co6co'
+
 import { usePermiss } from 'co6co'
 import { createPinia } from 'pinia'
 import 'element-plus/dist/index.css'

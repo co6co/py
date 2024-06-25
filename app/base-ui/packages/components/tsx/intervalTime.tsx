@@ -1,4 +1,5 @@
 import { defineComponent, onUnmounted, ref } from 'vue'
+//tsx 组件：https://juejin.cn/post/7174438569212116999
 //https://zhuanlan.zhihu.com/p/500610564
 /**
 const Interval = 5000 //30s

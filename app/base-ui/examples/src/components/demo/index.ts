@@ -1,3 +1,4 @@
 import EcIconSelect from './EcIconSelect'
 import EnumSelect from './EnumSelect'
-export { EcIconSelect, EnumSelect }
+import EcHello from './EcHello'
+export { EcIconSelect, EnumSelect, EcHello }
