@@ -15,8 +15,11 @@ import sqlite3
 import concurrent.futures
 from typing import Tuple,List
 import argparse
-class WebFinger():
 
+
+requests.packages.urllib3.disable_warnings()
+class WebFinger():
+    dbFile:str="./cms_finger.db"
     def __init__(self, host, threadNum=30):
         self.host =   host
         self.finger = []
@@ -26,7 +29,7 @@ class WebFinger():
         self.re_bracket = re.compile(r'\((.*)\)')
         self.threads = threadNum
 
-    requests.packages.urllib3.disable_warnings()
+        
 
     def run(self):
         print("-"*20 + "Start WebFinger Matching" + "-"*20)
@@ -74,17 +77,18 @@ class WebFinger():
         '''
         获取表fofa总记录数 
         '''
-        with sqlite3.connect(os.getcwd() + "./cms_finger.db") as conn:
+        with sqlite3.connect(f"{os.getcwd()}{ self. dbFile}") as conn:
             cursor = conn.cursor()
             result = cursor.execute('select count(id) from `fofa`')
         for row in result:
             return row[0] 
  
-    def select( name:str)->List[Tuple[str,str]]|None:
+    @classmethod 
+    def select(clc, name:str)->List[Tuple[str,str]]|None:
         '''
         通过名称查询 name,keys
         ''' 
-        with sqlite3.connect(os.getcwd() + "./cms_finger.db") as conn:
+        with sqlite3.connect(f"{os.getcwd()}{ clc. dbFile}") as conn:
             cursor = conn.cursor()
             inject=['--','#','(',')',',','||','+','\'','&',';','%','@','"','\\\'','\\"',"<",">"]
             la=lambda c:c in inject
@@ -195,7 +199,7 @@ if __name__ == "__main__":
     elif args.checkurl:
         web = WebFinger(args.url,args.threadcount)
         web.run()
-    else: 
+    else:  
         lst=WebFinger.select(args.name)
         for a,b in lst:
             print(a.rjust(50),"\t",b)
