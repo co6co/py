@@ -5,7 +5,9 @@ import setupRouter from './router'
 //import { usePermiss } from 'co6co'
 
 import { installPermissDirective } from 'co6co'
+import { MenuTreeView } from 'co6co-right'
 import { createPinia } from 'pinia'
+import 'co6co/dist/index.css'
 import 'element-plus/dist/index.css'
 import './assets/css/icon.css'
 

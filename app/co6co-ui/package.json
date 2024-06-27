@@ -1,23 +1,30 @@
 {
   "name": "co6co",
   "private": true,
-  "version": "0.0.0",
+  "version": "0.0.2",
   "type": "module",
   "files": [
     "dist"
   ],
-  "main": "./dist/co6co.umd.cjs",
-  "module": "./dist/co6co.js",
+  "main": "./dist/index-es.js",
+  "module": "./dist/index-umd.js",
   "types": "./dist/index.d.ts",
   "exports": {
-    "types": "./dist/typings/index.d.ts",
-    "import": "./dist/co6co.js",
-    "require": "./dist/co6co.umd.cjs"
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index-es.js",
+      "require": "./dist/index-umd.js"
+    },
+    "./dist/index.css": {
+      "import": "./dist/index.css",
+      "require": "./dist/index.css"
+    }
   },
   "scripts": {
     "dev": "vite",
     "build:old": "tsc && vite build",
-    "build": "vite build && tsc"
+    "build": "vite build",
+    "types": "tsc -p tsconfig.types.json"
   },
   "devDependencies": {
     "@element-plus/icons-vue": "^2.3.1",
@@ -31,6 +38,7 @@
     "type-fest": "^4.20.1",
     "typescript": "^5.4.5",
     "vite": "^5.2.10",
+    "vite-plugin-dts": "^3.9.1",
     "vue": "^3.4.30"
   },
   "dependencies": {

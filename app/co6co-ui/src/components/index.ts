@@ -8,3 +8,4 @@ export * from './detail';
 export * from './dialog';
 export * from './dialogForm';
 export * from './dialogDetail';
+export * from './associated';

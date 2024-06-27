@@ -1,5 +1,5 @@
 import { ref, defineComponent } from 'vue';
-import { IEnumSelect } from 'co6co';
+import { IEnumSelect } from '@/constants';
 import { ElSelect, ElOption } from 'element-plus';
 
 export default defineComponent({

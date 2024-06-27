@@ -9,6 +9,7 @@ import {
 	Hello,
 	IconSelect,
 	IntervalTime,
+	Associated,
 } from './components';
 import type { Plugin } from 'vue';
 const components = [
@@ -21,5 +22,6 @@ const components = [
 	Hello,
 	IconSelect,
 	IntervalTime,
+	Associated,
 ] as Plugin[];
 export default makeInstaller(components);

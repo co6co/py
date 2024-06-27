@@ -1,0 +1,54 @@
+{
+  "name": "co6co-right",
+  "private": true,
+  "version": "0.0.1",
+  "type": "module",
+  "files": [
+    "dist"
+  ],
+  "main": "./dist/index-es.js",
+  "module": "./dist/index-umd.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index-es.js",
+      "require": "./dist/index-umd.js"
+    },
+    "./dist/index.css": {
+      "import": "./dist/index.css",
+      "require": "./dist/index.css"
+    }
+  },
+  "scripts": {
+    "dev": "vite",
+    "build:old": "tsc && vite build",
+    "build": "vite build",
+    "types": "tsc -p tsconfig.types.json"
+  },
+  "devDependencies": {
+    "@element-plus/icons-vue": "^2.3.1",
+    "@types/node": "^20.14.8",
+    "@vitejs/plugin-vue": "^5.0.5",
+    "@vitejs/plugin-vue-jsx": "^4.0.0",
+    "@vue/shared": "^3.4.30",
+    "install": "^0.13.0",
+    "less": "^4.2.0",
+    "path": "^0.12.7",
+    "type-fest": "^4.20.1",
+    "typescript": "^5.4.5",
+    "vite": "^5.2.10",
+    "vite-plugin-dts": "^3.9.1",
+    "vue": "^3.4.30"
+  },
+  "dependencies": {
+    "axios": "^1.7.2",
+    "co6co": "http://127.0.0.1/co6co/co6co-0.0.2.tgz",
+    "dayjs": "^1.11.11",
+    "element-plus": "^2.7.6",
+    "js-cookie": "^3.0.5",
+    "json-bigint": "^1.0.0",
+    "pinia": "^2.1.7",
+    "vue-router": "^4.4.0"
+  }
+}

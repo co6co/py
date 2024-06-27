@@ -6,6 +6,8 @@ const page404 = () => import('../views/404.vue')
 const home = () => import('../views/home.vue')
 const demo = () => import('../views/demo.vue')
 
+import { UserTableView } from 'co6co-right'
+
 // 基础路由，不需要设置权限
 export const basicRoutes: RouteRecordRaw[] = [
   {
@@ -39,5 +41,10 @@ export const basicRoutes: RouteRecordRaw[] = [
     path: '/demo',
     name: 'demo',
     component: demo
+  },
+  {
+    path: '/sysDemo',
+    name: 'sysDemo',
+    component: UserTableView
   }
 ]

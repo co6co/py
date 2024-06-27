@@ -1,3 +1,4 @@
+export { makeInstaller } from './make-installer';
 import installer from './defaults';
 export * from './components';
 export * from './constants';
