@@ -9,17 +9,6 @@ import {
 import type { InjectionKey } from 'vue';
 
 import {
-	DialogForm,
-	type ObjectType,
-	type FormData,
-	FormOperation,
-	type ITreeSelect,
-	type IAssociation,
-	type IResponse,
-	DialogFormInstance,
-} from 'co6co';
-
-import {
 	ElRow,
 	ElCol,
 	ElButton,
@@ -37,8 +26,23 @@ import {
 	type TreeKey,
 } from 'element-plus/es/components/tree/src/tree.type';
 
-import { minus, traverseTreeData, showLoading, closeLoading } from 'co6co';
-import { tree_props } from '@/constants';
+import { minus, traverseTreeData } from '@/utils';
+import {
+	showLoading,
+	closeLoading,
+	DialogForm,
+	DialogFormInstance,
+} from '@/components';
+
+import {
+	tree_props,
+	type ObjectType,
+	type FormData,
+	FormOperation,
+	type ITreeSelect,
+	type IAssociation,
+	type IResponse,
+} from '@/constants';
 
 //Omit、Pick、Partial、Required
 //export type FormItem = Omit<Item, 'createUser' | 'updateUser' | 'createTime' | 'updateTime'>

@@ -11,6 +11,7 @@ import {
 	IntervalTime,
 	Associated,
 } from './components';
+//import { MenuTreeView } from './view';
 import type { Plugin } from 'vue';
 const components = [
 	Detail,
@@ -23,5 +24,6 @@ const components = [
 	IconSelect,
 	IntervalTime,
 	Associated,
+	//MenuTreeView,
 ] as Plugin[];
 export default makeInstaller(components);

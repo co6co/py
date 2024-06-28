@@ -1,4 +1,4 @@
-import { router } from './index'
+import { router, ViewObjects } from './index'
 
 import { type RouteRecordRaw, type RouteLocationNormalized } from 'vue-router'
 import { usePermissStore, getToken, removeToken } from 'co6co'
@@ -7,15 +7,12 @@ import { MenuCateCategory as RouteItemType } from '../hook/sys/useMenuSelect'
 
 const { queryRouteData } = useRouteData()
 
-// vue3 + vite中的动态引入组件的方法
-const viewArr = import.meta.glob(['../views/**/*.vue', '../sysViews/**/*.vue'])
-
 // 动态添加路由
 export function addRoutes(menu: IRouteData[]) {
   menu.forEach((item) => {
     // 只将页面信息添加到路由中
     if (item.category == RouteItemType.VIEW || item.category == RouteItemType.SubVIEW) {
-      const component = viewArr[`${item.component}`] //loadView[`../views${e.component}.vue`]
+      const component = ViewObjects[`${item.component}`] //loadView[`../views${e.component}.vue`]
       //console.info("add route",item.name,item.code,"=>",item.component)
       component
         ? router.addRoute('home', {

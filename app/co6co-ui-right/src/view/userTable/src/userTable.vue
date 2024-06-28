@@ -123,11 +123,18 @@
 <script setup lang="ts" name="basetable">
 	import { ref, reactive, onMounted, onUnmounted } from 'vue';
 	import {
+		ElTag,
 		ElMessage,
-		ElMessageBox,
+		ElContainer,
+		ElButton,
+		ElInput,
+		ElMain,
+		ElHeader,
 		ElTable,
-		type FormRules,
-		type FormInstance,
+		ElTableColumn,
+		ElScrollbar,
+		ElPagination,
+		ElFooter,
 	} from 'element-plus';
 	import {
 		Delete,
@@ -140,7 +147,9 @@
 	import * as icons from '@element-plus/icons-vue';
 	import { useState } from '@/hooks/useUserSelect';
 	import api, { association_service as ass_api } from '@/api/sys/user';
-	import modifyDiaglog, { type Item } from '@/components/modifyUser';
+	import modifyDiaglog, {
+		type UserItem as Item,
+	} from '@/components/modifyUser';
 	import resetPwdDiaglog from '@/components/resetPwd';
 
 	import {

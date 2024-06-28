@@ -25,7 +25,7 @@ export const useState = () => {
 					return 'warning';
 			}
 		}
-		return '';
+		return 'info';
 	};
 	onMounted(() => {
 		refresh();

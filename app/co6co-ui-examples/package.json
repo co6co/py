@@ -17,8 +17,8 @@
   "dependencies": {
     "@element-plus/icons-vue": "^2.3.1",
     "axios": "^1.6.7",
-    "co6co": "http://127.0.0.1/co6co/co6co-0.0.0.tgz",
-    "co6co-right": "http://127.0.0.1/co6co-right-0.0.1.tgz",
+    "co6co": "http://127.0.0.1/packs/co6co-0.0.2.tgz",
+    "co6co-right": "http://127.0.0.1/packs/co6co-right-0.0.1.tgz",
     "element-plus": "^2.5.3",
     "js-cookie": "^3.0.5",
     "json-bigint": "^1.0.0",

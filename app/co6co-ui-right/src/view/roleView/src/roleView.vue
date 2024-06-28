@@ -139,8 +139,16 @@
 	import {
 		ElMessage,
 		ElMessageBox,
-		type FormRules,
-		type FormInstance,
+		ElContainer,
+		ElButton,
+		ElInput,
+		ElMain,
+		ElHeader,
+		ElTable,
+		ElTableColumn,
+		ElScrollbar,
+		ElPagination,
+		ElFooter,
 	} from 'element-plus';
 	import {
 		Delete,
@@ -153,7 +161,9 @@
 		Connection,
 	} from '@element-plus/icons-vue';
 
-	import modifyDiaglog, { type Item } from '@/components/modifyRole';
+	import modifyDiaglog, {
+		type RoleItem as Item,
+	} from '@/components/modifyRole';
 	import {
 		showLoading,
 		closeLoading,

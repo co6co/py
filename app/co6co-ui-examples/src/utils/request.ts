@@ -1,11 +1,11 @@
 import axios, { type AxiosInstance, type InternalAxiosRequestConfig } from 'axios'
-
-import { crateService, getToken } from 'co6co'
-
+import { createAxiosInstance, getToken } from 'co6co'
+/*
 const service: AxiosInstance = crateService({
   baseURL: import.meta.env.VITE_BASE_URL,
   timeout: 5000
-})
+})*/
+const service: AxiosInstance = createAxiosInstance()
 export default service
 const Axios: AxiosInstance = axios.create({
   baseURL: import.meta.env.VITE_BASE_URL,

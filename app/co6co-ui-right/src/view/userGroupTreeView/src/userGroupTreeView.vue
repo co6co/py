@@ -145,8 +145,16 @@
 	import {
 		ElMessage,
 		ElMessageBox,
-		type FormRules,
-		type FormInstance,
+		ElContainer,
+		ElButton,
+		ElInput,
+		ElMain,
+		ElHeader,
+		ElTable,
+		ElTableColumn,
+		ElScrollbar,
+		ElPagination,
+		ElFooter,
 	} from 'element-plus';
 	import {
 		Delete,
@@ -164,11 +172,13 @@
 		FormOperation,
 		type IPageParam,
 		type Table_Module_Base,
+		Associated as associatedDiaglog,
 	} from 'co6co';
 
-	import modifyDiaglog, { type Item } from '@/components/modifyUserGroup';
+	import modifyDiaglog, {
+		type UserGroupItem as Item,
+	} from '@/components/modifyUserGroup';
 	import useUserGroupSelect from '@/hooks/useUserGroupSelect';
-	import { Associated as associatedDiaglog } from 'co6co';
 	import api, { association_service as ass_api } from '@/api/sys/userGroup';
 	import { usePermission, ViewFeature } from '@/hooks/useRoute';
 	const { getPermissKey } = usePermission();

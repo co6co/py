@@ -1,6 +1,6 @@
 <template>
 	<div class="container-layout">
-		<el-container>
+		<ElContainer>
 			<el-header>
 				<div class="handle-box">
 					<el-input
@@ -27,8 +27,8 @@
 					>
 				</div>
 			</el-header>
-			<el-container>
-				<el-container>
+			<ElContainer>
+				<ElContainer>
 					<el-main>
 						<el-scrollbar>
 							<el-table
@@ -114,9 +114,9 @@
 								@current-change="onPageChange"></el-pagination>
 						</div>
 					</el-footer>
-				</el-container>
-			</el-container>
-		</el-container>
+				</ElContainer>
+			</ElContainer>
+		</ElContainer>
 		<modify-diaglog
 			:title="table_module.diaglogTitle"
 			ref="modifyDiaglogRef"
@@ -126,7 +126,20 @@
 
 <script setup lang="ts" name="basetable">
 	import { ref, reactive, onMounted } from 'vue';
-	import { ElMessage, ElMessageBox } from 'element-plus';
+	import {
+		ElMessage,
+		ElMessageBox,
+		ElContainer,
+		ElButton,
+		ElInput,
+		ElMain,
+		ElHeader,
+		ElTable,
+		ElTableColumn,
+		ElScrollbar,
+		ElPagination,
+		ElFooter,
+	} from 'element-plus';
 
 	import {
 		Delete,
@@ -140,7 +153,9 @@
 	} from '@element-plus/icons-vue';
 
 	import api from '@/api/sys/menu';
-	import modifyDiaglog, { type Item } from '@/components/modifyMenu';
+	import modifyDiaglog, {
+		type MenuItem as Item,
+	} from '@/components/modifyMenu';
 	import {
 		showLoading,
 		closeLoading,

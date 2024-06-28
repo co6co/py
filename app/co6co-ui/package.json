@@ -21,7 +21,7 @@
     }
   },
   "scripts": {
-    "dev": "vite",
+    "devNothing": "vite",
     "build:old": "tsc && vite build",
     "build": "vite build",
     "types": "tsc -p tsconfig.types.json"

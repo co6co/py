@@ -4,8 +4,7 @@ import App from './App.vue'
 import setupRouter from './router'
 //import { usePermiss } from 'co6co'
 
-import { installPermissDirective } from 'co6co'
-import { MenuTreeView } from 'co6co-right'
+import { installPermissDirective, getStoreInstance } from 'co6co'
 import { createPinia } from 'pinia'
 import 'co6co/dist/index.css'
 import 'element-plus/dist/index.css'
@@ -14,7 +13,13 @@ import './assets/css/icon.css'
 const app = createApp(App)
 const pinia = createPinia()
 app.use(pinia)
-app.use(installPermissDirective, { pipiaInstance: pinia })
+app.use(installPermissDirective, { instance: pinia })
+const store = getStoreInstance()
+const baseUrl = import.meta.env.VITE_BASE_URL
+store.setBaseUrl(baseUrl)
+
+console.warn(store.getBaseUrl())
+
 //app.use(usePermiss)
 try {
   //const { install, version } = makeInstaller()
