@@ -25,6 +25,7 @@ try {
   //const { install, version } = makeInstaller()
   //install(app)
   //app.use(router);
+  app.config.globalProperties.$baseUrl=import.meta.env.VITE_BASE_URL
   setupRouter(app)
   //console.info('version：', version)
   // 注册图标
