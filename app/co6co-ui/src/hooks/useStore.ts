@@ -8,8 +8,8 @@ interface ViewObjects {
 	[key: string]: any;
 }
 const baseUrl = 'baseURL';
-
-export const useCo6coStore = defineStore('co6co_store', {
+ 
+export const useStore = defineStore('co6co_store', {
 	state: () => {
 		return {
 			ViewObject: <ViewObjects>{},
