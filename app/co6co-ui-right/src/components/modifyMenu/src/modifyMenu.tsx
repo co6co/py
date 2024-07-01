@@ -6,6 +6,7 @@ import {
 	showLoading,
 	closeLoading,
 	DialogFormInstance,
+	ViewSelect,
 	type ObjectType,
 	type FormData,
 	FormOperation,
@@ -73,7 +74,6 @@ export default defineComponent({
 		const menuCategoryData = useMenuCategory();
 		const httpMethods = useHttpMethods();
 		const pageFeature = usePageFeature();
-
 		const diaglogForm = ref<DialogFormInstance>();
 		const DATA = reactive<FormData<number, FormItem>>({
 			operation: FormOperation.add,
@@ -311,10 +311,10 @@ export default defineComponent({
 							<ElRow>
 								<ElCol span={12}>
 									<ElFormItem label="组件地址" prop="component">
-										<ElInput
+										<ViewSelect
 											clearable={true}
 											v-model={DATA.fromData.component}
-											placeholder="组件地址"></ElInput>
+										/>
 									</ElFormItem>
 								</ElCol>
 								<ElCol span={12}>

@@ -1,6 +1,6 @@
 {
   "name": "co6co",
-  "private": true,
+  "private": false,
   "version": "0.0.2",
   "type": "module",
   "files": [
@@ -18,13 +18,18 @@
     "./dist/index.css": {
       "import": "./dist/index.css",
       "require": "./dist/index.css"
+    },
+    "./css/*.css": {
+      "import": "./dist/css/*.css",
+      "require": "./dist/css/*.css"
     }
   },
   "scripts": {
     "devNothing": "vite",
     "build:old": "tsc && vite build",
     "build": "vite build",
-    "types": "tsc -p tsconfig.types.json"
+    "types": "tsc -p tsconfig.types.json",
+    "published": "npm publish --access public"
   },
   "devDependencies": {
     "@element-plus/icons-vue": "^2.3.1",

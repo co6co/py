@@ -285,5 +285,5 @@
 	});
 </script>
 <style scoped lang="less">
-	@import '@/assets/css/tables.css';
+	@import 'co6co/css/tables.css';
 </style>

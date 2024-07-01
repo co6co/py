@@ -1,5 +1,5 @@
-import { defineStore, getActivePinia } from 'pinia';
-
+import { defineStore } from 'pinia';
+import { piniaInstance } from '../index';
 type ConfigValue = string | number | boolean;
 interface Config {
 	[key: string]: ConfigValue;
@@ -8,7 +8,7 @@ interface ViewObjects {
 	[key: string]: any;
 }
 const baseUrl = 'baseURL';
- 
+
 export const useStore = defineStore('co6co_store', {
 	state: () => {
 		return {
@@ -55,6 +55,6 @@ export const useStore = defineStore('co6co_store', {
 });
 
 export const getStoreInstance = () => {
-	const store = useCo6coStore(getActivePinia());
+	const store = useStore(piniaInstance);
 	return store;
 };

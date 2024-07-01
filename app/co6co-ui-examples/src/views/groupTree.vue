@@ -244,7 +244,7 @@ import setGroupPriority, {
 import { showLoading, closeLoading, Operation, type ITreeSelect, type IPageParam } from 'co6co'
 
 import useNotifyAudit, { NotifyType } from '../hook/useNotifyAudit'
-import associatedDiaglog from '../components/sys/associated'
+import { Associated as associatedDiaglog } from 'co6co'
 import { usePermission, ViewFeature } from '../hook/sys/useRoute'
 const { getPermissKey } = usePermission()
 

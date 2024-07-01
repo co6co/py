@@ -1,7 +1,7 @@
 {
   "name": "co6co-right",
   "moduleName": "permission",
-  "private": true,
+  "private": false,
   "version": "0.0.1",
   "type": "module",
   "files": [
@@ -25,7 +25,8 @@
     "devNothing": "vite",
     "build:old": "tsc && vite build",
     "build": "vite build",
-    "types": "tsc -p tsconfig.types.json"
+    "types": "tsc -p tsconfig.types.json",
+    "published": "npm publish --access public"
   },
   "devDependencies": {
     "@element-plus/icons-vue": "^2.3.1",

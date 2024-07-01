@@ -111,8 +111,8 @@ npm view 包名
 npm init
 npm init -y   # ts 项目使用  tsc --init
 # 删除
-npm unpublish dzmtest@1.0.1 --force
-npm unpublish dzmtest --force
+npm unpublish co6co --force #删除库包之后，24小时之内 无法再次上传同名的库包到 npm，需要更改包名，或者等过了 24小时之后 在上传。
+npm unpublish co6co@0.0.1 --force
 npm unpublish --force # 删除 package.json 的包名相应的版本
 
 # 废弃 安装时会有警示，并不影响使用。

@@ -264,6 +264,6 @@
 		onLoadData();
 	});
 </script>
-<style scoped lang="less">
-	@import '@/assets/css/tables.css';
+<style scoped>
+	@import 'co6co/css/tables.css';
 </style>

@@ -9,6 +9,15 @@ import { type ElLoading, ElMessage } from 'element-plus';
 import JSONbig from 'json-bigint';
 import { getToken, removeToken } from './auth';
 import { getStoreInstance } from '@/hooks';
+/**
+ * 获取 apiBaseURL
+ * @returns string
+ */
+export const getBaseUrl = () => {
+	const store = getStoreInstance();
+	const baseUrl = store.getBaseUrl();
+	return baseUrl;
+};
 
 const crateService = (config?: CreateAxiosDefaults<any> | undefined) => {
 	const service: AxiosInstance = axios.create(
@@ -106,12 +115,17 @@ const crateService2 = (config?: CreateAxiosDefaults<any> | undefined) => {
 	return Axios;
 };
 
-export { crateService2 as crateAuthorizationService, crateService };
-
-export const createAxiosInstance = (timeout: number = 5000) => {
-	const store = getStoreInstance();
-	const baseUrl = store.getBaseUrl();
+export const createServiceInstance = (timeout: number = 5000) => {
+	const baseUrl = getBaseUrl();
 	const service: AxiosInstance = crateService({
+		baseURL: baseUrl,
+		timeout: timeout,
+	});
+	return service;
+};
+export const createAxiosInstance = (timeout: number = 5000) => {
+	const baseUrl = getBaseUrl();
+	const service: AxiosInstance = crateService2({
 		baseURL: baseUrl,
 		timeout: timeout,
 	});

@@ -1,14 +1,16 @@
-import axios, { Axios } from '@/utils/request';
+import { createServiceInstance, createAxiosInstance } from 'co6co';
 import { IDownloadConfig } from '@/constants';
 import { type ResponseType, type Method, type AxiosRequestConfig } from 'axios';
 import * as api_type from 'co6co';
 
+/*
 export const fetchData = () => {
-	return axios({
+	return createService()({
 		url: './table.json',
 		method: 'get',
 	});
 };
+*/
 //创建 Blob 资源
 export const create_URL_resource = (resource: { data: Blob }): string => {
 	return URL.createObjectURL(resource.data);
@@ -33,7 +35,10 @@ export const request_resource_svc = async (
 		url: url, //请求地址  会加上 baseURL
 		timeout: 3 * 60 * 1000,
 	};
-	const res = await axios({ ...default_config, ...axios_config });
+	const res = await createServiceInstance()({
+		...default_config,
+		...axios_config,
+	});
 	//const blob = new Blob([res.data]);//处理文档流
 	const result = create_URL_resource({ data: res.data });
 	return result;
@@ -53,7 +58,7 @@ export const download_header_svc = (url: string) => {
 		method: 'HEAD', //请求方式
 		timeout: 30 * 1000,
 	};
-	return Axios({ ...default_config });
+	return createAxiosInstance()({ ...default_config });
 };
 //下载文件
 //download_config 为默认时获取文件长度
@@ -75,7 +80,7 @@ export const download_fragment_svc = (
 		timeout: 30 * 1000,
 	};
 	//Object.assign({},default_config,config)
-	return Axios({ ...default_config, ...config });
+	return createAxiosInstance()({ ...default_config, ...config });
 };
 //单独下载
 //需要认证的下载
@@ -84,11 +89,12 @@ export const download_svc = (
 	fileName: string,
 	bck?: () => void
 ) => {
-	Axios.get(url, {
-		method: 'get', //请求方式
-		responseType: 'blob', //文件流将会被转成blob
-		timeout: 60 * 1000,
-	})
+	createAxiosInstance()
+		.get(url, {
+			method: 'get', //请求方式
+			responseType: 'blob', //文件流将会被转成blob
+			timeout: 60 * 1000,
+		})
 		.then((res) => {
 			try {
 				//console.info(res,res)
@@ -117,22 +123,22 @@ export const create_svc = (baseUrl: string) => {
 	const get_select_svc = (
 		data?: any
 	): Promise<api_type.IResponse<api_type.ISelect[]>> => {
-		return axios.get(`${baseUrl}`, data);
+		return createServiceInstance().get(`${baseUrl}`, data);
 	};
 	const get_table_svc = (data: any): Promise<api_type.IPageResponse> => {
-		return axios.post(`${baseUrl}`, data);
+		return createServiceInstance().post(`${baseUrl}`, data);
 	};
 	const exist_svc = (code: string): Promise<api_type.IResponse> => {
-		return axios.post(`${baseUrl}/exist/${code}`);
+		return createServiceInstance().post(`${baseUrl}/exist/${code}`);
 	};
 	const add_svc = (data: any): Promise<api_type.IResponse> => {
-		return axios.put(`${baseUrl}`, data);
+		return createServiceInstance().put(`${baseUrl}`, data);
 	};
 	const edit_svc = (id: number, data: any): Promise<api_type.IResponse> => {
-		return axios.put(`${baseUrl}/${id}`, data);
+		return createServiceInstance().put(`${baseUrl}/${id}`, data);
 	};
 	const del_svc = (id: number): Promise<api_type.IResponse> => {
-		return axios.delete(`${baseUrl}/${id}`, {});
+		return createServiceInstance().delete(`${baseUrl}/${id}`, {});
 	};
 	return {
 		get_select_svc,
@@ -147,11 +153,12 @@ export const create_tree_svc = (baseUrl: string) => {
 	const get_select_tree_svc = (
 		key?: number | string
 	): Promise<api_type.IPageResponse> => {
-		if (key != undefined) return axios.get(`${baseUrl}/tree/${key}`);
-		else return axios.get(`${baseUrl}/tree`);
+		if (key != undefined)
+			return createServiceInstance().get(`${baseUrl}/tree/${key}`);
+		else return createServiceInstance().get(`${baseUrl}/tree`);
 	};
 	const get_tree_table_svc = (data: any): Promise<api_type.IPageResponse> => {
-		return axios.post(`${baseUrl}/tree`, data);
+		return createServiceInstance().post(`${baseUrl}/tree`, data);
 	};
 	const service = create_svc(baseUrl);
 	return { get_select_tree_svc, get_tree_table_svc, ...service };
@@ -162,13 +169,19 @@ export const create_association_svc = (baseUrl: string) => {
 		associationValue: number | string,
 		data: any
 	): Promise<api_type.IResponse> => {
-		return axios.post(`${baseUrl}/association/${associationValue}`, data);
+		return createServiceInstance().post(
+			`${baseUrl}/association/${associationValue}`,
+			data
+		);
 	};
 	const save_association_svc = (
 		associationValue: number | string,
 		data: api_type.IAssociation
 	): Promise<api_type.IResponse> => {
-		return axios.put(`${baseUrl}/association/${associationValue}`, data);
+		return createServiceInstance().put(
+			`${baseUrl}/association/${associationValue}`,
+			data
+		);
 	};
 	return { get_association_svc, save_association_svc };
 };

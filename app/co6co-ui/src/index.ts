@@ -8,5 +8,5 @@ export * from './hooks';
 
 export const install = installer.install;
 export const version = installer.version;
-export const PiniaInstance = installer.piniaInstance;
+export const piniaInstance = installer.piniaInstance;
 export default installer;

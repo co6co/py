@@ -26,7 +26,6 @@
           <el-button type="primary" @click="submitForm(login)">登录</el-button>
         </div>
         <p class="login-tips">Tips : {{ message }}</p>
-        <el-alert type="warning">123456</el-alert>
       </el-form>
     </div>
   </div>
@@ -80,18 +79,12 @@ const submitForm = (formEl: FormInstance | undefined) => {
             storeage.set(SessionKey, res.data.sessionId, res.data.expireSeconds)
             registerRoute(() => {
               window.location.href = '/audit'
-              /*
-								router.push('/'); 
-								ElMessage.success(message.value);
-								closeLoading();
-								*/
             })
           } else {
             ElMessage.error(message.value)
           }
         })
         .catch((err) => {
-          //todo debug  login.vue?t=1697628463669:82 Uncaught (in promise) TypeError: Cannot read properties of undefined (reading 'message')
           message.value = err.message || '请求出错'
           ElMessage.error(err.message)
         })

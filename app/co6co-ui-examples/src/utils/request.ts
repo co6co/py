@@ -1,21 +1,12 @@
-import axios, { type AxiosInstance, type InternalAxiosRequestConfig } from 'axios'
-import { createAxiosInstance, getToken } from 'co6co'
+import { type AxiosInstance } from 'axios'
+import { createServiceInstance, getStoreInstance } from 'co6co'
 /*
 const service: AxiosInstance = crateService({
   baseURL: import.meta.env.VITE_BASE_URL,
   timeout: 5000
 })*/
-const service: AxiosInstance = createAxiosInstance()
+const store = getStoreInstance()
+const baseUrl = import.meta.env.VITE_BASE_URL
+store.setBaseUrl(baseUrl)
+const service: AxiosInstance = createServiceInstance()
 export default service
-const Axios: AxiosInstance = axios.create({
-  baseURL: import.meta.env.VITE_BASE_URL,
-  timeout: 5000
-})
-//增加请求拦截器
-Axios.interceptors.request.use((config: InternalAxiosRequestConfig) => {
-  //发送请求之前
-  const token = getToken()
-  config.headers.Authorization = `Bearer ${token}`
-  return config
-})
-export { Axios }

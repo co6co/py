@@ -10,6 +10,7 @@ import {
 	IconSelect,
 	IntervalTime,
 	Associated,
+	ViewSelect,
 } from './components';
 //import { MenuTreeView } from './view';
 import type { Plugin } from 'vue';
@@ -24,6 +25,6 @@ const components = [
 	IconSelect,
 	IntervalTime,
 	Associated,
-	//MenuTreeView,
+	ViewSelect,
 ] as Plugin[];
 export default makeInstaller(components);

@@ -1,8 +1,7 @@
-import axios, { Axios } from '../utils/request'
+import axios from '../utils/request'
 import axios2, { type ResponseType, type Method } from 'axios'
 import { type AxiosInstance, type AxiosRequestConfig, type AxiosHeaderValue } from 'axios'
 import * as api_type from 'co6co'
-
 export const fetchData = () => {
   return axios({
     url: './table.json',

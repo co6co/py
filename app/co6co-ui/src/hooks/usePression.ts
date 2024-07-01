@@ -1,8 +1,8 @@
-import {  Pinia } from 'pinia';
+import { Pinia } from 'pinia';
 import { ConstObject } from '../constants';
 import createPermissDirective from '../directives/permiss';
 import type { App } from '@vue/runtime-core';
-import {PiniaInstance} from '../'
+import { piniaInstance } from '../';
 
 /**
  * 一个插件可以是一个拥有 install() 方法的对象，
@@ -18,14 +18,21 @@ export const installPermissDirective = (
 	option?: { instance: Pinia }
 ) => {
 	try {
+		/*
 		let pinia: Pinia;
 		if (option && option.instance) {
 			pinia = option.instance;
 		} else {
 			//pinia = createPinia();
-			app.use(PiniaInstance);
+			app.use(piniaInstance);
 		}
-		app.directive(ConstObject.getPermissValue(), createPermissDirective(PiniaInstance));
+			*/
+		console.info(option);
+		app.use(piniaInstance);
+		app.directive(
+			ConstObject.getPermissValue(),
+			createPermissDirective(piniaInstance)
+		);
 	} catch (e) {
 		console.error(`增加指令:${ConstObject.getPermissValue()}失败!,Error:${e}`);
 	}
