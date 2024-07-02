@@ -109,6 +109,5 @@ pdm config pypi.url https://pypi.tuna.tsinghua.edu.cn/simple
 #Poetry 通过以下命令设置默认镜像：
 poetry source add --priority=default mirrors https://pypi.tuna.tsinghua.edu.cn/simple/
 #通过以下命令设置次级镜像：
-poetry source add --priority=secondary mirrors https://pypi.tuna.tsinghua.edu.cn/simple/
->>>>>>> 9997866533f8b40891411edab976a6e4fc4c201b
+poetry source add --priority=secondary mirrors https://pypi.tuna.tsinghua.edu.cn/simple/ 
 ```
