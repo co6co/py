@@ -5,14 +5,14 @@
         <div class="handle-box" style="text-align: right">
           <el-button type="primary" :icon="Search" @click="onSearch">刷新</el-button>
           <el-button
-            v-permiss="getPermissKey(ViewFeature.add)"
+            v-permiss="getPermissKey(routeHook.ViewFeature.add)"
             type="primary"
             :icon="Plus"
             @click="onOpenDialog()"
             >新增</el-button
           >
           <el-button
-            v-permiss="getPermissKey(ViewFeature.effective)"
+            v-permiss="getPermissKey(routeHook.ViewFeature.effective)"
             type="warning"
             :disabled="!table_module.priorityChanged"
             :icon="Connection"
@@ -115,7 +115,7 @@
                   text
                   :icon="Edit"
                   @click="onOpenDialog(scope.row)"
-                  v-permiss="getPermissKey(ViewFeature.edit)"
+                  v-permiss="getPermissKey(routeHook.ViewFeature.edit)"
                 >
                   编辑
                 </el-button>
@@ -124,7 +124,7 @@
                   :icon="Delete"
                   class="red"
                   @click="onDelete(scope.$index, scope.row)"
-                  v-permiss="getPermissKey(ViewFeature.del)"
+                  v-permiss="getPermissKey(routeHook.ViewFeature.del)"
                 >
                   删除
                 </el-button>
@@ -184,8 +184,8 @@ import * as api_types from 'co6co'
 import EditRule, { type Item, type FromData } from '../components/biz/EditRule'
 import { getEleTagTypeByBoolean, type IPageParam } from 'co6co'
 import useNotifyAudit, { NotifyType } from '../hook/useNotifyAudit'
-import { usePermission, ViewFeature } from '../hook/sys/useRoute'
-const { getPermissKey } = usePermission()
+import { routeHook } from 'co6co-right'
+const { getPermissKey } = routeHook.usePermission()
 interface Query extends IPageParam {
   datetimes: Array<string>
   alarmType: String

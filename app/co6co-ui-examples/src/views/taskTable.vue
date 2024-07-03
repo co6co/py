@@ -58,14 +58,14 @@
             <el-table-column label="操作" width="316" align="center">
               <template #default="scope">
                 <v-download
-                  v-permiss="getPermissKey(ViewFeature.download)"
+                  v-permiss="getPermissKey(routeHook.ViewFeature.download)"
                   :url="getDownloadUrl(scope.$index, scope.row)"
                   :file-name="`${scope.row.name}.zip`"
                 ></v-download>
                 <!--v-permiss="16"-->
                 <el-button
                   text
-                  v-permiss="getPermissKey(ViewFeature.del)"
+                  v-permiss="getPermissKey(routeHook.ViewFeature.del)"
                   :icon="Delete"
                   class="red"
                   @click="onDelete(scope.$index, scope.row)"
@@ -98,13 +98,13 @@ import { ref, reactive } from 'vue'
 import { ElMessage, ElMessageBox, type FormRules, type FormInstance } from 'element-plus'
 import { Delete, Edit, Search, Compass, Plus, Download } from '@element-plus/icons-vue'
 import { queryList_svc, del_svc } from '../api/tasks'
-import { download_svc } from '../api'
+
 import { attach_data, type TaskAtachData } from '../store/tasks'
 
 import { download as vDownload } from '../components/download'
 import { showLoading, closeLoading } from 'co6co'
-import { usePermission, ViewFeature } from '../hook/sys/useRoute'
-const { getPermissKey } = usePermission()
+import { routeHook, download_svc } from 'co6co-right'
+const { getPermissKey } = routeHook.usePermission()
 let from_attach_data = reactive<TaskAtachData>(attach_data)
 interface TableItem {
   id: number

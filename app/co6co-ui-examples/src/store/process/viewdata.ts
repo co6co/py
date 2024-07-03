@@ -1,9 +1,9 @@
 import { get_status_svc } from '../../api/process'
-import user_api from '../../api/sys/user'
+import { userSvc as user_api } from 'co6co-right'
 import { type ISelect } from 'co6co'
 
 const res = await get_status_svc()
-const user_res = await user_api.get_select_svc()
+const user_res = await user_api.default.get_select_svc()
 const data: {
   allowAuditStatue: Array<number>
   flowStatues: Array<optionItem>
@@ -13,7 +13,7 @@ const labels: Array<any> = []
 labels.push({ key: '', value: '', label: '--处理状态--' })
 labels.push(...data.flowStatues)
 
-const rule = []
+const rule: Array<{}> = []
 rule.push({ key: '', value: '---违反规则---' })
 rule.push(...data.rule)
 

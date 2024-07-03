@@ -27,7 +27,8 @@ import imgStyle from '../../assets/css/images.module.less'
 import '../../assets/css/auditview.less'
 import useLabelSelect from '../../hook/useLabelSelect'
 import { download_one_svc } from '../../api/process'
-import { usePermission, ViewFeature } from '../../hook/sys/useRoute'
+import { routeHook } from 'co6co-right'
+// usePermission, ViewFeature
 export enum AuditType {
   error,
   succ,
@@ -58,8 +59,7 @@ export const getTagType = (audit: number) => {
   switch (auditType) {
     case AuditType.error:
       return 'danger'
-    case AuditType.succ:
-      return ''
+
     case AuditType.alarm:
       return 'success'
     case AuditType.ignore:
@@ -84,7 +84,7 @@ export default defineComponent({
     audited: (data: IAuditResult) => true
   },
   setup(props, context) {
-    const { getPermissKey } = usePermission()
+    const { getPermissKey } = routeHook.usePermission()
     const allowAudit = computed(() => {
       return props.record != undefined
     })
@@ -273,7 +273,7 @@ export default defineComponent({
                       <>
                         <ElButtonGroup class="auditButtonGroup">
                           <ElButton
-                            v-permiss={getPermissKey(ViewFeature.download)}
+                            v-permiss={getPermissKey(routeHook.ViewFeature.download)}
                             loading={downloading.value}
                             onClick={() => onDownload()}
                             disabled={!allowAudit.value}

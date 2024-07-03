@@ -30,7 +30,7 @@ import {
 } from 'element-plus/es/components/tree/src/tree.type'
 import { User } from '@element-plus/icons-vue'
 import * as api from '../../api/boat'
-import user_api from '../../api/sys/user'
+import { userSvc as user_api } from 'co6co-right'
 import * as group_api from '../../api/group'
 
 import {
@@ -126,7 +126,7 @@ export default defineComponent({
     type UserData = ISelect & { children: UserData[] }
     const userTreeData = ref<UserData[]>([])
     const getUserTree = async () => {
-      const res = await user_api.get_select_svc()
+      const res = await user_api.default.get_select_svc()
       if (res.code == 0) {
         userTreeData.value = res.data.map((m) => {
           return { id: m.id, name: m.name, children: [] }

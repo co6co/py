@@ -38,4 +38,3 @@ class WxUserPO(TimeStampedModelPO):
     privilege = Column("privilege", String(255), comment="特权")
     ownedAppid = Column("owned_app_id", String(
         64), comment="公众号appId", nullable=False)
-    accountPO = Relationship("AccountPO", back_populates="wxUserPO")

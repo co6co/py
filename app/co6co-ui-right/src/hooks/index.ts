@@ -1,7 +1,7 @@
-export * as useDelete from './useDelete';
-export * as useMenuSelect from './useMenuSelect';
-export * as useMethods from './useMethods';
-export * as useRoleSelect from './useRoleSelect';
-export * as useRoute from './useRoute';
-export * as useUserGroupSelect from './useUserGroupSelect';
-export * as useUserSelect from './useUserSelect';
+export * as deleteHook from './useDelete';
+export * as menuSelectHook from './useMenuSelect';
+export * as methodsHook from './useMethods';
+export * as roleSelectHook from './useRoleSelect';
+export * as routeHook from './useRoute';
+export * as userGroupSelectHook from './useUserGroupSelect';
+export * as userSelectHook from './useUserSelect';

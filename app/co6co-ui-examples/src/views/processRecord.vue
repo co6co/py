@@ -79,7 +79,7 @@
             <el-button type="primary" :icon="Search" @click="onSearch">搜索</el-button>
             <el-button
               type="danger"
-              v-permiss="getPermissKey(ViewFeature.downloads)"
+              v-permiss="getPermissKey(routeHook.ViewFeature.downloads)"
               :icon="Download"
               @click="onDownload"
               >查询下载</el-button
@@ -310,7 +310,9 @@
       style="position: fixed; z-index: 9"
     >
       <el-menu mode="vertical" @select="onSelectMenu">
-        <el-menu-item v-permiss="getPermissKey(ViewFeature.view)" index="1">查看日志</el-menu-item>
+        <el-menu-item v-permiss="getPermissKey(routeHook.ViewFeature.view)" index="1"
+          >查看日志</el-menu-item
+        >
       </el-menu>
     </div>
 
@@ -372,8 +374,8 @@ import { log } from '../components/log'
 import { form_attach_data as attach_data } from '../store/process/viewdata'
 import { createStateEndDatetime, showLoading, closeLoading } from 'co6co'
 
-import { usePermission, ViewFeature } from '../hook/sys/useRoute'
-const { getPermissKey } = usePermission()
+import { routeHook } from 'co6co-right'
+const { getPermissKey } = routeHook.usePermission()
 
 let form_attach_data = reactive<ItemAattachData>(attach_data)
 const elTreeInstance = ref<InstanceType<typeof ElTreeSelect>>()

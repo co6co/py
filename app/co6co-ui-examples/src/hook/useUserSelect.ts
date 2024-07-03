@@ -1,10 +1,10 @@
 import { ref, onMounted } from 'vue'
 import * as types from 'co6co'
-import user_api from '../api/sys/user'
+import { userSvc as user_api } from 'co6co-right'
 export default function () {
   const userSelect = ref<types.ISelect[]>([])
   const getUserSelect = async () => {
-    const res = await user_api.get_select_svc()
+    const res = await user_api.default.get_select_svc()
     if (res.code == 0) {
       userSelect.value = res.data
     }

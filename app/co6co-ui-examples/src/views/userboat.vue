@@ -13,14 +13,14 @@
           -->
           <el-button type="primary" :icon="Search" @click="onSearch">刷新</el-button>
           <el-button
-            v-permiss="getPermissKey(ViewFeature.associated)"
+            v-permiss="getPermissKey(routeHook.ViewFeature.associated)"
             type="primary"
             :icon="Setting"
             @click="onOpenDialog2()"
             >关联</el-button
           >
           <el-button
-            v-permiss="getPermissKey(ViewFeature.check)"
+            v-permiss="getPermissKey(routeHook.ViewFeature.check)"
             type="primary"
             :icon="View"
             @click="onOpenDialog3()"
@@ -135,8 +135,8 @@ import EditUserBoat, { type Item } from '../components/biz/EditUserBoat'
 import editUserBoats from '../components/biz/editUserBoats'
 import userBoatCheck from '../components/biz/UserBoatCheck'
 
-import { usePermission, ViewFeature } from '../hook/sys/useRoute'
-const { getPermissKey } = usePermission()
+import { routeHook } from 'co6co-right'
+const { getPermissKey } = routeHook.usePermission()
 
 interface Query extends IPageParam {
   datetimes: Array<string>

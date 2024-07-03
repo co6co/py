@@ -71,7 +71,7 @@ class WxView(wx_base_view):
 
     async def post(self, request: Request, appid: str):
         """
-         入口2,POST请求
+         POST请求, 各种消息入口
         """
         try:
             config: WechatConfig = self.get_wx_config(request, appid)
@@ -94,4 +94,3 @@ class WxView(wx_base_view):
             return WxView.reply_message(reply, crypto, nonce, timestamp)
         except Exception as e:
             log.warn(e)
-            raise

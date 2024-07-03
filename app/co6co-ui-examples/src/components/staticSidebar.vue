@@ -66,9 +66,9 @@
 import { computed } from 'vue'
 import { useSidebarStore } from '../store/sidebar'
 import { useRoute } from 'vue-router'
-import {  type sideBarItem } from '../hook/sys/userRoute'
+import { routeHook } from 'co6co-right'
 
-const items: Array<sideBarItem> = [
+const items: Array<routeHook.sideBarItem> = [
   {
     icon: 'Warning',
     index: '/usermgr',

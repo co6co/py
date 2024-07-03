@@ -6,8 +6,13 @@
 <script lang="ts" setup>
 import { reactive } from 'vue'
 import { Download } from '@element-plus/icons-vue'
-import { download_fragment_svc, download_blob_resource, download_header_svc } from '../../../api'
-import { type AxiosHeaderValue } from 'axios'
+import {
+  download_fragment_svc,
+  download_blob_resource,
+  download_header_svc,
+  type IDownloadConfig
+} from 'co6co-right'
+
 const props = defineProps({
   url: {
     type: String,
@@ -45,7 +50,7 @@ const onDownload = async () => {
   obj.downloading = true
   obj.totalSize = 0 //文件总大小
   obj.percentage = 0 //下载进度
- 
+
   download_header_svc(props.url)
     .then(async (res) => {
       const header = res.headers
@@ -57,8 +62,8 @@ const onDownload = async () => {
         await startDownload(contentType, props.fileName, props.chunkSize)
     })
     .catch((error) => {
-      console.warn("失败",error) 
-    }) 
+      console.warn('失败', error)
+    })
   /**
   //获取文件名称
   let fileName = ''
@@ -75,7 +80,7 @@ const download_fragment = async (start: number, end: number) => {
       Range: `bytes=${start}-${end}` //分段组合传参格式处理 0-1024 1025-2049
     }
   }
-  const res = await download_fragment_svc(props.url, config)
+  const res = await download_fragment_svc(props.url, config as IDownloadConfig)
   obj.fileBlob.push(res.data)
 }
 const megre_data = (type: string, fileName: string) => {

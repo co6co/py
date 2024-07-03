@@ -249,7 +249,3 @@
 		);
 	};
 </script>
-
-<style scoped lang="less">
-	@import 'co6co/css/tables.css';
-</style>

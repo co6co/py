@@ -264,6 +264,3 @@
 		onLoadData();
 	});
 </script>
-<style scoped>
-	@import 'co6co/css/tables.css';
-</style>

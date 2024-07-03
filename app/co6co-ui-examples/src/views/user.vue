@@ -81,7 +81,7 @@ import { reactive, ref } from 'vue'
 import { ElMessage, type FormRules, type FormInstance } from 'element-plus'
 import 'cropperjs/dist/cropper.css'
 import avatar from '@/assets/img/img.jpg'
-import { changePwd_svc, currentUser_svc } from '../api/sys/user'
+import { userSvc } from 'co6co-right'
 import { Storage, SessionKey } from 'co6co'
 const store = new Storage()
 const name = store.get('userName')
@@ -92,7 +92,7 @@ let changePwdFrom = reactive({
   remark: '不可能！我的代码怎么可能会有bug！'
 })
 const loadCurrentUserInfo = () => {
-  currentUser_svc().then((res) => {
+  userSvc.currentUser_svc().then((res) => {
     if (res.code == 0) {
       changePwdFrom.remark = res.data.remark
       imgSrc.value = res.data.avatar
@@ -117,7 +117,7 @@ const onSubmit = (formEl: FormInstance | undefined) => {
   if (!formEl) return
   formEl.validate((isValid) => {
     if (isValid) {
-      changePwd_svc(changePwdFrom).then((res) => {
+      userSvc.changePwd_svc(changePwdFrom).then((res) => {
         if (res.code == 0) ElMessage.success(`修改密码成功`), loadCurrentUserInfo()
         else {
           ElMessage.error(`修改密码失败:${res.message}`)

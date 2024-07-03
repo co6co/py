@@ -2,7 +2,7 @@
 import axios, { type AxiosResponse } from 'axios'
 import { type IPageResponse, type IResponse } from 'co6co'
 import request from '../../utils/request'
-import { download_svc } from '../'
+import { download_svc } from 'co6co-right'
 
 const BASE_URL = '/api/biz/process'
 export const get_status_svc = (): Promise<IPageResponse> => {

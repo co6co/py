@@ -1,5 +1,5 @@
 const base_URL = '/api/menu';
-import { create_tree_svc } from '../';
+import { create_tree_svc } from '../base';
 import { createServiceInstance, type IEnumSelect, type IResponse } from 'co6co';
 
 const services = create_tree_svc(base_URL);

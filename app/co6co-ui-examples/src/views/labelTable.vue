@@ -10,7 +10,7 @@
           <el-button type="primary" :icon="Search" @click="onSearch">搜索</el-button>
           <el-button
             type="primary"
-            v-permiss="getPermissKey(ViewFeature.add)"
+            v-permiss="getPermissKey(routeHook.ViewFeature.add)"
             :icon="Plus"
             @click="onOpenDialog(0)"
             >新增</el-button
@@ -67,14 +67,14 @@
               <template #default="scope">
                 <el-button
                   text
-                  v-permiss="getPermissKey(ViewFeature.edit)"
+                  v-permiss="getPermissKey(routeHook.ViewFeature.edit)"
                   :icon="Edit"
                   @click="onOpenDialog(1, scope.row)"
                 >
                   编辑
                 </el-button>
                 <el-button
-                  v-permiss="getPermissKey(ViewFeature.del)"
+                  v-permiss="getPermissKey(routeHook.ViewFeature.del)"
                   text
                   :icon="Delete"
                   class="red"
@@ -132,9 +132,9 @@ import { Delete, Edit, Search, Compass, Plus, Download } from '@element-plus/ico
 // eslint-disable-next-line camelcase
 import { get_list_svc, add_svc, edit_svc, del_svc, get_exist_svc } from '../api/label'
 import { showLoading, closeLoading } from 'co6co'
-import { usePermission, ViewFeature } from '../hook/sys/useRoute'
+import { routeHook } from 'co6co-right'
 
-const { getPermissKey } = usePermission()
+const { getPermissKey } = routeHook.usePermission()
 interface TableItem {
   id: number
   name: string

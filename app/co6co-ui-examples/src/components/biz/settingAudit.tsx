@@ -24,7 +24,7 @@ import * as api from '../../api/pd/auditconfig'
 import { showLoading, closeLoading, type ISelect } from 'co6co'
 
 import useUserSelect from '../../hook/useUserSelect'
-import { usePermission, ViewFeature, getCurrentRoute } from '../../hook/sys/useRoute'
+import { routeHook } from 'co6co-right'
 
 enum PriorityType {
   ai = 1,
@@ -48,7 +48,7 @@ export default defineComponent({
   name: 'settingAudit',
   setup(_, context) {
     const dialogForm = ref<FormInstance>()
-    const { getPermissKey } = usePermission()
+    const { getPermissKey } = routeHook.usePermission()
     const rules: FormRules = {
       user_id: [
         {
@@ -323,7 +323,7 @@ export default defineComponent({
               <ElFormItem>
                 <ElButton
                   type="primary"
-                  v-permiss={getPermissKey(ViewFeature.setting)}
+                  v-permiss={getPermissKey(routeHook.ViewFeature.setting)}
                   onClick={() => save(dialogForm.value)}
                 >
                   保存

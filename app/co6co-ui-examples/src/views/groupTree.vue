@@ -42,14 +42,14 @@
             <!-- <el-button type="primary" :icon="Sunny" @click="onResetQuery">重置</el-button>-->
             <el-button
               type="primary"
-              v-permiss="getPermissKey(ViewFeature.push)"
+              v-permiss="getPermissKey(routeHook.ViewFeature.push)"
               :icon="Top"
               @click="onOpenAssDiaglog"
               >自动推送</el-button
             >
             <el-button
               type="danger"
-              v-permiss="getPermissKey(ViewFeature.reset)"
+              v-permiss="getPermissKey(routeHook.ViewFeature.reset)"
               :icon="Setting"
               @click="onReset"
               >重置优先级</el-button
@@ -58,7 +58,7 @@
             <el-button
               type="warning"
               :icon="Connection"
-              v-permiss="getPermissKey(ViewFeature.effective)"
+              v-permiss="getPermissKey(routeHook.ViewFeature.effective)"
               :disabled="!priorityNotice.priorityChanged"
               @click="onPriorityChanged"
               >优先级立即生效</el-button
@@ -167,7 +167,7 @@
                   <template #default="scope">
                     <el-button
                       text
-                      v-permiss="getPermissKey(ViewFeature.settingNo)"
+                      v-permiss="getPermissKey(routeHook.ViewFeature.settingNo)"
                       :icon="Setting"
                       v-if="state_store.allowSetting(scope.row.groupType)"
                       @click="onOpenEditDialog(scope.$index, scope.row)"
@@ -177,7 +177,7 @@
 
                     <el-button
                       text
-                      v-permiss="getPermissKey(ViewFeature.settingPriority)"
+                      v-permiss="getPermissKey(routeHook.ViewFeature.settingPriority)"
                       :icon="Setting"
                       v-if="state_store.allowSetPriority(scope.row.groupType)"
                       @click="onOpenSetGroupPriorityDialog(scope.$index, scope.row)"
@@ -245,8 +245,8 @@ import { showLoading, closeLoading, Operation, type ITreeSelect, type IPageParam
 
 import useNotifyAudit, { NotifyType } from '../hook/useNotifyAudit'
 import { Associated as associatedDiaglog } from 'co6co'
-import { usePermission, ViewFeature } from '../hook/sys/useRoute'
-const { getPermissKey } = usePermission()
+import { routeHook } from 'co6co-right'
+const { getPermissKey } = routeHook.usePermission()
 
 const state_store = group_state_store()
 state_store.refesh().then((res) => {})

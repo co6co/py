@@ -128,7 +128,7 @@
               <template #default="scope">
                 <!--<router-link :to="{name:'userJobsDetail',query:{'id':scope.row.id}}">查看详情</router-link>-->
                 <router-link
-                  v-permiss="getPermissKey(ViewFeature.view)"
+                  v-permiss="getPermissKey(routeHook.ViewFeature.view)"
                   :to="{ path: '/userJobsDetail/' + scope.row.id }"
                   >查看详情</router-link
                 >
@@ -137,7 +137,7 @@
                   :icon="Delete"
                   class="red"
                   @click="onDelete(scope.$index, scope.row)"
-                  v-permiss="getPermissKey(ViewFeature.del)"
+                  v-permiss="getPermissKey(routeHook.ViewFeature.del)"
                 >
                   删除
                 </el-button>
@@ -203,8 +203,8 @@ import useJobState from '../hook/useJobState'
 
 //import router from '@/router'
 import { useRouter } from 'vue-router'
-import { usePermission, ViewFeature } from '../hook/sys/useRoute'
-const { getPermissKey } = usePermission()
+import { routeHook } from 'co6co-right'
+const { getPermissKey } = routeHook.usePermission()
 interface TableRow {
   id: number
   userId: number

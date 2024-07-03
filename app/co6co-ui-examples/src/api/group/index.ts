@@ -1,6 +1,6 @@
 import request from '../../utils/request'
 import { type IPageResponse, type IResponse, type ITreeSelect } from 'co6co'
-import { create_association_svc } from '../'
+import { create_association_svc } from 'co6co-right'
 const BASE_URL = '/api/biz/group'
 
 export interface GroupStatus {

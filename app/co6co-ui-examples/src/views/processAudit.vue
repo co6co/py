@@ -82,7 +82,7 @@ import { format, showLoading, closeLoading } from 'co6co'
 import * as api from '../api/pd'
 // eslint-disable-next-line camelcase
 import * as appApi from '../api/app'
-import heartBeat from '../components/intervalTime'
+import { IntervalTime as heartBeat } from 'co6co'
 
 import auditview, {
   AuditType,

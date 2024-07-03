@@ -64,7 +64,7 @@
             <el-table-column label="操作" width="316" align="center">
               <template #default="scope">
                 <el-button
-                  v-permiss="getPermissKey(ViewFeature.settingNo)"
+                  v-permiss="getPermissKey(routeHook.ViewFeature.settingNo)"
                   text
                   :icon="Setting"
                   v-if="state_store.allowSetting(scope.row.groupType)"
@@ -103,8 +103,8 @@ import { group_state_store } from '../store/group'
 import editGroup, { type Item } from '../components/biz/editGroup'
 import { showLoading, closeLoading, Operation } from 'co6co'
 
-import { usePermission, ViewFeature } from '../hook/sys/useRoute'
-const { getPermissKey } = usePermission()
+import { routeHook } from 'co6co-right'
+const { getPermissKey } = routeHook.usePermission()
 const state_store = group_state_store()
 state_store.refesh().then((res) => {})
 interface QueryType {

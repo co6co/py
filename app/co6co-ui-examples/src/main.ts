@@ -4,8 +4,12 @@ import App from './App.vue'
 import setupRouter from './router'
 //import { usePermiss } from 'co6co'
 
-import { installPermissDirective, piniaInstance } from 'co6co'
+import { installPermissDirective, piniaInstance, getStoreInstance } from 'co6co'
+
+import 'md-editor-v3/lib/style.css'
+import 'co6co/dist/index.css'
 import 'co6co-right/dist/index.css'
+import 'co6co-wx/dist/index.css'
 import 'element-plus/dist/index.css'
 import './assets/css/icon.css'
 
@@ -19,6 +23,10 @@ try {
   //install(app)
   //app.use(router);
   app.config.globalProperties.$baseUrl = import.meta.env.VITE_BASE_URL
+  const store = getStoreInstance()
+  const baseUrl = import.meta.env.VITE_BASE_URL
+  store.setBaseUrl(baseUrl)
+  console.info('baseURL', baseUrl)
   setupRouter(app)
   //console.info('version：', version)
   // 注册图标

@@ -1,183 +1,298 @@
 <template>
-	<div class="container">  
-    <el-row :gutter="24">  
-      <el-col :span="14"> 
-        <img-video :image-option="imageOption"   :video-options="playerOptions" ></img-video>
+  <div class="container">
+    <el-row :gutter="24">
+      <el-col :span="14">
+        <img-video :image-option="imageOption" :video-options="playerOptions"></img-video>
       </el-col>
-      <el-col :span="10"> 
-        <el-row> 
+      <el-col :span="10">
+        <el-row>
           <el-col :span="24">
             <el-card class="box-card">
               <template #header>
-                  <div class="card-header">
-                      <span>标签</span> 
-                  </div>
+                <div class="card-header">
+                  <span>标签</span>
+                </div>
               </template>
               <div>
-                <div class="container"  style="height: 80%; overflow: auto;margin: 5px;"> 
+                <div class="container" style="height: 80%; overflow: auto; margin: 5px">
                   <el-descriptions :column="2">
-                    <el-descriptions-item label="船名" >{{ options?.id }}</el-descriptions-item>
-                    <el-descriptions-item label="船名" >{{ options?.boatName }}</el-descriptions-item>
+                    <el-descriptions-item label="船名">{{ options?.id }}</el-descriptions-item>
+                    <el-descriptions-item label="船名">{{
+                      options?.boatName
+                    }}</el-descriptions-item>
                     <el-descriptions-item label="流程状态">
-                      <el-tag size="small">{{ options?.flowStatus }}-{{  metaData.getFlowStateName(options?.flowStatus==undefined?-1:options.flowStatus)?.label  }}</el-tag>
-                    </el-descriptions-item> 
+                      <el-tag size="small"
+                        >{{ options?.flowStatus }}-{{
+                          metaData.getFlowStateName(
+                            options?.flowStatus == undefined ? -1 : options.flowStatus
+                          )?.label
+                        }}</el-tag
+                      >
+                    </el-descriptions-item>
                   </el-descriptions>
-                  <el-descriptions  :column="1">
-                    <el-descriptions-item label="违规名称" >
+                  <el-descriptions :column="1">
+                    <el-descriptions-item label="违规名称">
                       <el-tooltip effect="dark" :content="options?.vioName" placement="top">
-                        <span class="ellipsis">  {{ options?.vioName }} </span>
+                        <span class="ellipsis"> {{ options?.vioName }} </span>
                       </el-tooltip>
                     </el-descriptions-item>
                   </el-descriptions>
 
-                <el-descriptions> 
-                <el-descriptions-item label="人工审核">
-                  <el-tag size="small" :type="metaData.statue2TagType(options?.manualAuditResult)">{{ options?.manualAuditResult }}-{{ metaData.getManualStateName(options?.manualAuditResult==undefined?-1:options.manualAuditResult)?.label}}</el-tag>
-                </el-descriptions-item>  
-                <el-descriptions-item label="程序审核">
-                  <el-tag size="small"  :type="metaData.statue2TagType(options?.programAuditResult)">{{ options?.programAuditResult }}-{{ metaData.getManualStateName(options?.programAuditResult==undefined?-1:options.programAuditResult)?.label }}</el-tag>
-                </el-descriptions-item> 
-                </el-descriptions> 
-                <el-checkbox-group  v-model="labelModel.appendIds" @change="onCheckGroupChange" > 
-                    <el-checkbox  v-for="(t,index) in tags" :key="index"  :label="t.id" :name="t.name"> 
+                  <el-descriptions>
+                    <el-descriptions-item label="人工审核">
+                      <el-tag
+                        size="small"
+                        :type="metaData.statue2TagType(options?.manualAuditResult)"
+                        >{{ options?.manualAuditResult }}-{{
+                          metaData.getManualStateName(
+                            options?.manualAuditResult == undefined ? -1 : options.manualAuditResult
+                          )?.label
+                        }}</el-tag
+                      >
+                    </el-descriptions-item>
+                    <el-descriptions-item label="程序审核">
+                      <el-tag
+                        size="small"
+                        :type="metaData.statue2TagType(options?.programAuditResult)"
+                        >{{ options?.programAuditResult }}-{{
+                          metaData.getManualStateName(
+                            options?.programAuditResult == undefined
+                              ? -1
+                              : options.programAuditResult
+                          )?.label
+                        }}</el-tag
+                      >
+                    </el-descriptions-item>
+                  </el-descriptions>
+                  <el-checkbox-group v-model="labelModel.appendIds" @change="onCheckGroupChange">
+                    <el-checkbox
+                      v-for="(t, index) in tags"
+                      :key="index"
+                      :label="t.id"
+                      :name="t.name"
+                    >
                       <el-tooltip :content="t.alias" placement="top" effect="light">
-                        {{ t.name }}  
+                        {{ t.name }}
                       </el-tooltip>
-                      </el-checkbox> 
-                    </el-checkbox-group> 
-                </div>   
-                <el-button :disabled="!saveLabelButState" type="danger" @click="onSaveLabel">保存</el-button>  
-              </div> 
-            </el-card>  
-          </el-col> 
-        </el-row>  
+                    </el-checkbox>
+                  </el-checkbox-group>
+                </div>
+                <el-button :disabled="!saveLabelButState" type="danger" @click="onSaveLabel"
+                  >保存</el-button
+                >
+              </div>
+            </el-card>
+          </el-col>
+        </el-row>
       </el-col>
-    </el-row> 
-	</div>
+    </el-row>
+  </div>
 </template>
-<script setup lang="ts">   
-import { watch, type PropType,reactive, ref , computed ,onMounted, onBeforeUnmount,nextTick} from 'vue';  
-import {ElImage, ElDescriptions,ElDescriptionsItem,ElTag,ElDivider,ElMessage } from 'element-plus';
-import {Check,  Delete, Edit,Message,Notebook,Star,Pointer,WarningFilled,UploadFilled,CaretRight} from '@element-plus/icons-vue'
-import { imgVideo ,types} from "../../imgvideo";  
+<script setup lang="ts">
+import {
+  watch,
+  type PropType,
+  reactive,
+  ref,
+  computed,
+  onMounted,
+  onBeforeUnmount,
+  nextTick
+} from 'vue'
+import {
+  ElImage,
+  ElDescriptions,
+  ElDescriptionsItem,
+  ElTag,
+  ElDivider,
+  ElMessage
+} from 'element-plus'
+import {
+  Check,
+  Delete,
+  Edit,
+  Message,
+  Notebook,
+  Star,
+  Pointer,
+  WarningFilled,
+  UploadFilled,
+  CaretRight
+} from '@element-plus/icons-vue'
+import { imgVideo, types } from '../../imgvideo'
 
-import { mark_list_svc,marked_list_svc,mark_label_svc } from '../../../api/label';
-import { request_resource_svc  } from '../../../api';    
-import * as r  from   '../../../api/resource';  
-import type{Item} from '../../../components/process'
+import { mark_list_svc, marked_list_svc, mark_label_svc } from '../../../api/label'
 
- 
+import * as r from '../../../api/resource'
+import type { Item } from '../../../components/process'
+
 const props = defineProps({
   options: {
-    type:  Object as PropType<Item>,
+    type: Object as PropType<Item>,
     required: false
   },
-  metaData:{ 
-    type:Object as PropType<ItemAattachData>,
+  metaData: {
+    type: Object as PropType<ItemAattachData>,
     required: true
-  },
-})
-const emit = defineEmits([ "refesh"])
- /**   图片视频显示 */ 
- const imageOption=ref<Array<types.imageOption> >([{url:"",thumbnail:""},{url:"",thumbnail:""}] )
-const playerOptions=ref<Array<types.videoOption> >([{url:"",poster:""},{url:"",poster:""}] )
-const updatePlayerOptions=(index:number,address?:string)=>{
-  if (address){ 
-        playerOptions.value[index].url=r.get_video_url(address)
-        playerOptions.value[index].poster=r.get_poster_url(address) 
-    }else {playerOptions.value[index].poster="" , playerOptions.value[index].url=""}
-}
-const updateImageOptions=(index:number,address?:string)=>{
-  if (address){ 
-    imageOption.value[index].url=r.get_img_url(address)
-    imageOption.value[index].thumbnail=r.get_thumbnail_url(address) 
-    }else {imageOption.value[index].thumbnail="" , imageOption.value[index].url=""}
-}
-watch(()=>props.options?.videoSavePath, (n?:string,o?:string)=>{updatePlayerOptions (0,n) })
-watch(()=>props.options?.annoVideoSavePath, (n?:string,o?:string)=>{  updatePlayerOptions(1,n) }) 
-
-watch(()=>props.options?.pic1SavePath, (n?:string,o?:string)=>{ updateImageOptions(0,n) })
-watch(()=>props.options?.annoPic1SavePath, (n?:string,o?:string)=>{  updateImageOptions(1,n) }) 
- /** end 图片视频显示 */ 
-
-const tags=ref<[ {id:number,name:string,alias:string,checked?:boolean}]>()
-const res=mark_list_svc().then(res=> {if (res.code==0){
-  tags.value=res.data 
-}})
-
- 
-const loadLabel=(n:number)=>{
-    //重置状态 
-    tags.value?.map(m=>m.checked=false)
-    marked_list_svc(n).then(res=>{
-      if(res.code==0){ 
-        let labelArray= res.data.map((m: { labelId: number; })=>m.labelId)  
-        labelModel.value.dbIds=Array.from(labelArray); 
-        tags.value?.filter(m=>labelArray.indexOf( m.id )>-1).map(m=>m.checked=true)
-        let checked=tags.value?.filter(m=>m.checked).map(m=>m.id)
-        if(checked) labelModel.value.appendIds=checked.concat()
-      }
-    })
-
-}
-const labelModel=ref<{dbIds:Array<number>, appendIds:Array<number> }>({dbIds:[],appendIds:[] })
-watch(()=>props.options?.id,(n?:number,o?:number)=>{
-  if(n){
-    loadLabel(n)
   }
 })
-if (props.options&& props.options.id)loadLabel(props.options.id)
-const array_eq=(arr:Array<any>,arr2:Array<any>)=>{ 
-  if (arr && !arr2||!arr&&arr2)return false
-  if (arr && arr2){ 
-    if (arr.length!=arr2.length)return false
-    for(let i=0;i<=arr.length;i++){
-      let a=arr[i]
-      let aEq=false;
-      for(let j=0;j<=arr2.length;j++){
-        console.info(a,"==",arr2[j],a==arr2[j])
-        if (a==arr2[j]) {aEq=true;break;}
-      }
-      if (!aEq)return false
+const emit = defineEmits(['refesh'])
+/**   图片视频显示 */
+const imageOption = ref<Array<types.imageOption>>([
+  { url: '', thumbnail: '' },
+  { url: '', thumbnail: '' }
+])
+const playerOptions = ref<Array<types.videoOption>>([
+  { url: '', poster: '' },
+  { url: '', poster: '' }
+])
+const updatePlayerOptions = (index: number, address?: string) => {
+  if (address) {
+    playerOptions.value[index].url = r.get_video_url(address)
+    playerOptions.value[index].poster = r.get_poster_url(address)
+  } else {
+    ;(playerOptions.value[index].poster = ''), (playerOptions.value[index].url = '')
+  }
+}
+const updateImageOptions = (index: number, address?: string) => {
+  if (address) {
+    imageOption.value[index].url = r.get_img_url(address)
+    imageOption.value[index].thumbnail = r.get_thumbnail_url(address)
+  } else {
+    ;(imageOption.value[index].thumbnail = ''), (imageOption.value[index].url = '')
+  }
+}
+watch(
+  () => props.options?.videoSavePath,
+  (n?: string, o?: string) => {
+    updatePlayerOptions(0, n)
+  }
+)
+watch(
+  () => props.options?.annoVideoSavePath,
+  (n?: string, o?: string) => {
+    updatePlayerOptions(1, n)
+  }
+)
+
+watch(
+  () => props.options?.pic1SavePath,
+  (n?: string, o?: string) => {
+    updateImageOptions(0, n)
+  }
+)
+watch(
+  () => props.options?.annoPic1SavePath,
+  (n?: string, o?: string) => {
+    updateImageOptions(1, n)
+  }
+)
+/** end 图片视频显示 */
+
+const tags = ref<[{ id: number; name: string; alias: string; checked?: boolean }]>()
+const res = mark_list_svc().then((res) => {
+  if (res.code == 0) {
+    tags.value = res.data
+  }
+})
+
+const loadLabel = (n: number) => {
+  //重置状态
+  tags.value?.map((m) => (m.checked = false))
+  marked_list_svc(n).then((res) => {
+    if (res.code == 0) {
+      let labelArray = res.data.map((m: { labelId: number }) => m.labelId)
+      labelModel.value.dbIds = Array.from(labelArray)
+      tags.value?.filter((m) => labelArray.indexOf(m.id) > -1).map((m) => (m.checked = true))
+      let checked = tags.value?.filter((m) => m.checked).map((m) => m.id)
+      if (checked) labelModel.value.appendIds = checked.concat()
     }
-    return true;
+  })
+}
+const labelModel = ref<{ dbIds: Array<number>; appendIds: Array<number> }>({
+  dbIds: [],
+  appendIds: []
+})
+watch(
+  () => props.options?.id,
+  (n?: number, o?: number) => {
+    if (n) {
+      loadLabel(n)
+    }
+  }
+)
+if (props.options && props.options.id) loadLabel(props.options.id)
+const array_eq = (arr: Array<any>, arr2: Array<any>) => {
+  if ((arr && !arr2) || (!arr && arr2)) return false
+  if (arr && arr2) {
+    if (arr.length != arr2.length) return false
+    for (let i = 0; i <= arr.length; i++) {
+      let a = arr[i]
+      let aEq = false
+      for (let j = 0; j <= arr2.length; j++) {
+        console.info(a, '==', arr2[j], a == arr2[j])
+        if (a == arr2[j]) {
+          aEq = true
+          break
+        }
+      }
+      if (!aEq) return false
+    }
+    return true
   }
   return false
 }
 
-const onCheckGroupChange=(result:Array<Number>)=>{ 
-  tags.value?.map(m=>m.checked=false) 
-  tags.value?.filter(m=>result.indexOf(m.id)>-1) .map(m=>m.checked=true) 
-  console.info(array_eq(labelModel.value.dbIds,result),labelModel.value.dbIds,result)
-  saveLabelButState.value=!array_eq(labelModel.value.dbIds,result)
+const onCheckGroupChange = (result: Array<Number>) => {
+  tags.value?.map((m) => (m.checked = false))
+  tags.value?.filter((m) => result.indexOf(m.id) > -1).map((m) => (m.checked = true))
+  console.info(array_eq(labelModel.value.dbIds, result), labelModel.value.dbIds, result)
+  saveLabelButState.value = !array_eq(labelModel.value.dbIds, result)
 }
-const saveLabelButState=ref(false) 
+const saveLabelButState = ref(false)
 //保存标记
-const onSaveLabel=()=>{
-  if (props.options&& props.options.id){
-    let appData=labelModel.value.appendIds.filter(m=>labelModel.value.dbIds.indexOf(m)==-1)
-    let removeData=labelModel.value.dbIds.filter(m=>labelModel.value.appendIds.indexOf(m)==-1)
-    mark_label_svc(props.options.id,{add:appData,remove:removeData}).then(res=>{
-      if (res.code==0){
-        ElMessage.success(res.message);
-        if (props.options&& props.options.id)loadLabel(props.options.id)
-      }
-      else ElMessage.error(res.message)
+const onSaveLabel = () => {
+  if (props.options && props.options.id) {
+    let appData = labelModel.value.appendIds.filter((m) => labelModel.value.dbIds.indexOf(m) == -1)
+    let removeData = labelModel.value.dbIds.filter(
+      (m) => labelModel.value.appendIds.indexOf(m) == -1
+    )
+    mark_label_svc(props.options.id, { add: appData, remove: removeData }).then((res) => {
+      if (res.code == 0) {
+        ElMessage.success(res.message)
+        if (props.options && props.options.id) loadLabel(props.options.id)
+      } else ElMessage.error(res.message)
     })
-  } 
+  }
 }
 </script>
 
 <style scoped lang="less">
-ul{
+ul {
   width: 833px;
-  li { cursor:pointer; border: 1px #ccc ;float: left; min-width: 100px; text-align: center; margin: 4px;
-       overflow: hidden;height: 100%;list-style: none;  
-       a {
-        .el-image{width: 200px;height: 106px;}
-        svg{position: absolute; left: 40%; top: 38%; width: 20%;}
-      } 
-    } 
+  li {
+    cursor: pointer;
+    border: 1px #ccc;
+    float: left;
+    min-width: 100px;
+    text-align: center;
+    margin: 4px;
+    overflow: hidden;
+    height: 100%;
+    list-style: none;
+    a {
+      .el-image {
+        width: 200px;
+        height: 106px;
+      }
+      svg {
+        position: absolute;
+        left: 40%;
+        top: 38%;
+        width: 20%;
+      }
+    }
+  }
 }
 
 .ellipsis {
@@ -185,5 +300,7 @@ ul{
   overflow: hidden;
   text-overflow: ellipsis;
 }
-.el-descriptions__body{width: 30%;}
+.el-descriptions__body {
+  width: 30%;
+}
 </style>

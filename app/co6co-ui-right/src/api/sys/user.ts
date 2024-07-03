@@ -1,5 +1,5 @@
 import { createServiceInstance, type IResponse, IEnumSelect } from 'co6co';
-import { create_svc, create_association_svc } from '../';
+import { create_svc, create_association_svc } from '../base';
 const base_URL = '/api/users';
 
 export default create_svc(base_URL);

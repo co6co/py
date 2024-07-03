@@ -85,7 +85,7 @@
             ></el-link>
             <el-button type="primary" :icon="Search" @click="onSearch">搜索</el-button>
             <el-button
-              v-permiss="getPermissKey(ViewFeature.download)"
+              v-permiss="getPermissKey(routeHook.ViewFeature.download)"
               type="danger"
               :icon="Download"
               @click="onDownload"
@@ -205,7 +205,7 @@
             <el-table-column label="操作" width="316" align="center">
               <template #default="scope">
                 <el-button
-                  v-permiss="getPermissKey(ViewFeature.associated)"
+                  v-permiss="getPermissKey(routeHook.ViewFeature.associated)"
                   text
                   :icon="Edit"
                   @click="onOpenDialog(scope.row)"
@@ -285,9 +285,9 @@ import { labelProcess } from '../components/labelprocess'
 // eslint-disable-next-line camelcase
 import { type table_module, type Item, types } from '../components/process'
 import { form_attach_data as attachData } from '../store/process/viewdata'
-import { ViewFeature, usePermission } from '../hook/sys/useRoute'
+import { routeHook } from 'co6co-right'
 
-const { getPermissKey } = usePermission()
+const { getPermissKey } = routeHook.usePermission()
 const formAttachData = reactive<ItemAattachData>(attachData)
 const elTreeInstance = ref<InstanceType<typeof ElTreeSelect>>()
 
