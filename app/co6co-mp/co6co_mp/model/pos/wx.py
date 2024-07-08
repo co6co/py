@@ -10,6 +10,23 @@ from sqlalchemy import MetaData
 from sqlalchemy.dialects.mysql import VARCHAR
 
 
+class WxConfigPO(UserTimeStampedModelPO):
+    """
+    公众号配置
+    """
+    __tablename__ = "wx_config"
+    id = Column("id", Integer, comment="主键",
+                autoincrement=True, primary_key=True)
+    name = Column("name", String(64),  comment="公众号名称")
+    appid = Column("appid", String(64), comment="公众号openid")
+    appSecret = Column("app_secret", String(64), comment="公众号appSecret")
+    token = Column("token", String(64), comment="公众号token")
+    encodingAESKey = Column("encodingAESKey", String(64),
+                            comment="公众号encodingAESKey")
+    encryptMode = Column("encrypt_mode", String(64),
+                         comment="公众号encrypt_mode")
+
+
 class WxMenuPO(UserTimeStampedModelPO):
     __tablename__ = "wx_menu"
     id = Column("id", Integer, comment="主键",
