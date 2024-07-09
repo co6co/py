@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia';
 import { piniaInstance } from '../index';
-type ConfigValue = string | number | boolean;
+type ConfigValue = string | number | boolean | any;
 interface Config {
 	[key: string]: ConfigValue;
 }
