@@ -51,7 +51,7 @@
     "element-plus": "^2.7.6",
     "js-cookie": "^3.0.5",
     "json-bigint": "^1.0.0",
-    "md-editor-v3": "^4.17.0",
+    "md-editor-v3": "^4.17.3",
     "pinia": "^2.1.7",
     "vue-router": "^4.4.0"
   }

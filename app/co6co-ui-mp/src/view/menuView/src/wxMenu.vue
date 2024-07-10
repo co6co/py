@@ -71,7 +71,11 @@
 							label="更新时间"
 							sortable
 							:show-overflow-tooltip="true"></el-table-column>
-						<el-table-column label="操作" width="388" align="left">
+						<el-table-column
+							label="操作"
+							width="400"
+							fixed="right"
+							align="left">
 							<template #default="scope">
 								<el-button
 									text
@@ -100,7 +104,7 @@
 									title="重置公众号菜单"
 									v-if="scope.row.openId"
 									@click="onReset(scope.$index, scope.row)">
-									重置菜单
+									重置
 								</el-button>
 								<el-button
 									text
@@ -127,7 +131,10 @@
 			</el-footer>
 		</el-container>
 		<!-- 弹出框 -->
-		<modifyDiaglog ref="modifyDiaglogRef" title="编辑" />
+		<modifyDiaglog
+			style="width: 80%; height: 80%"
+			ref="modifyDiaglogRef"
+			title="编辑" />
 	</div>
 </template>
 
@@ -309,3 +316,8 @@
 		getData();
 	});
 </script>
+<style scoped>
+	.cell .el-button {
+		padding: 8px 7px;
+	}
+</style>

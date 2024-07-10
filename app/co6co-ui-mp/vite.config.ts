@@ -34,9 +34,9 @@ export default defineConfig({
 				'vue',
 				'vue-router',
 				'element-plus',
+				'md-editor-v3',
 				'co6co',
 				'co6co-right',
-				'md-editor-v3',
 			],
 			output: {
 				// 在 UMD 构建模式下为这些外部化的依赖提供一个全局变量

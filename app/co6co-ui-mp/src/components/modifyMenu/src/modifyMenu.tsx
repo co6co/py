@@ -1,6 +1,6 @@
 import { defineComponent, ref, reactive, provide, computed } from 'vue';
 import type { InjectionKey } from 'vue';
-
+import 'md-editor-v3/lib/style.css';
 import {
 	showLoading,
 	closeLoading,
@@ -22,6 +22,7 @@ import {
 	ElFormItem,
 	ElInput,
 	ElMessage,
+	ElOption,
 	type FormRules,
 } from 'element-plus';
 import { MdEditor } from 'md-editor-v3';
@@ -61,6 +62,58 @@ export default defineComponent({
 			id: 0,
 			fromData: {},
 		});
+		const example = `
+		示例代码：
+		{
+			"button": [
+				{
+					"name": "一级菜单1",
+					"sub_button": [
+						{
+							"type": "view",
+							"name": "跳转到主页",
+							"url": "http://www.example.com"
+						},
+						{
+							"type": "click",
+							"name": "发送欢迎消息",
+							"key": "welcome_message"
+						}
+					]
+				},
+				{
+					"name": "一级菜单2",
+					"sub_button": [
+						{
+							"type": "view",
+							"name": "查看产品列表",
+							"url": "http://www.example.com/products"
+						},
+						{
+							"type": "view",
+							"name": "联系客服",
+							"url": "http://www.example.com/contact"
+						}
+					]
+				},
+				{
+					"name": "一级菜单3",
+					"sub_button": [
+						{
+							"type": "view",
+							"name": "最新资讯",
+							"url": "http://www.example.com/news"
+						},
+						{
+							"type": "view",
+							"name": "常见问题",
+							"url": "http://www.example.com/faq"
+						}
+					]
+				}
+			]
+		}
+		`;
 		//@ts-ignore
 		const key = Symbol('formData') as InjectionKey<FormItem>; //'formData'
 		provide('formData', DATA.fromData);
@@ -128,6 +181,12 @@ export default defineComponent({
 				<>
 					<ElButton
 						onClick={() => {
+							DATA.fromData.content = example;
+						}}>
+						复制示例
+					</ElButton>
+					<ElButton
+						onClick={() => {
 							diaglogForm.value?.validate(save);
 						}}>
 						保存
@@ -142,17 +201,27 @@ export default defineComponent({
 					</ElRow>
 					<ElRow>
 						<ElCol span={12}>
-							<ElFormItem label="请选择公众号" prop="openId">
+							<ElFormItem label="公众号" prop="openId">
 								<ElSelect
-									options={config.list}
+									style="width:60%"
+									clearable={true}
 									v-model={DATA.fromData.openId}
-									placeholder="菜单类别"
-								/>
+									placeholder="所属公众号">
+									{config.list.map((item, index: number) => {
+										return (
+											<ElOption
+												key={index}
+												label={item.name}
+												value={item.openId}></ElOption>
+										);
+									})}
+								</ElSelect>
 							</ElFormItem>
 						</ElCol>
 						<ElCol span={12}>
-							<ElFormItem label="菜单名称" prop="name">
+							<ElFormItem label="名称" prop="name">
 								<ElInput
+									style="width:60%"
 									v-model={DATA.fromData.name}
 									placeholder="菜单名称"></ElInput>
 							</ElFormItem>
@@ -163,6 +232,7 @@ export default defineComponent({
 							preview={false}
 							class="mgb20"
 							v-model={DATA.fromData.content}
+							placeholder={example}
 						/>
 					</ElFormItem>
 				</>
