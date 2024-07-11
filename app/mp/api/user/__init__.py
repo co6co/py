@@ -127,9 +127,9 @@ async def exist(request: Request, userName: str):
             isExist = await operation.exist(UserPO.userName == userName, UserPO.id != id, column=UserPO.id)
         await session.commit()
         if isExist:
-            return JSON_util.response(Result.success(message=f"用户'{userName}'已存在。"))
+            return JSON_util.response(Result.success(True, message=f"用户'{userName}'已存在。"))
         else:
-            return JSON_util.response(Result.fail(message=f"用户'{userName}'不已存在。"))
+            return JSON_util.response(Result.success(False, message=f"用户'{userName}'不已存在。"))
 
 
 @user_api.route("/add", methods=["POST",])
