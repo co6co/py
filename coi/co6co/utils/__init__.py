@@ -1,7 +1,8 @@
 #-*- coding:utf-8 -*-
 import re,random,string,time,datetime
 from types import FunctionType
-import inspect
+import inspect,os,sys
+
 def isBase64(content:str)->bool:
     _reg="^([A-Za-z0-9+/]{4})*([A-Za-z0-9+/]{4}|[A-Za-z0-9+/]{3}=|[A-Za-z0-9+/]{2}==)$"
     group=re.match(_reg,content)
@@ -33,5 +34,43 @@ def is_async(func):
     """
     return inspect.iscoroutinefunction(func) or inspect.isasyncgenfunction(func)
 
+def getWorkDirectory(): 
+    """
+    获取工作目录
+    """
+    current_directory = os.getcwd()
+    return current_directory
+
+def find_files(root, filterDirFunction,filterFileFunction,*ignoreDirs:str):
+    """
+    root: 根目录
+    filterDirFunction   返回bool的方法,参数 文件夹名
+    filterFileFunction  返回bool的方法,参数 文件名
+                       可以使用  lambda f:f.endswith(extension)
+    RETURN  root  fdirs, ffile
+
+    查找文件或文件夹
+    os.path.join(root, file)
+
+    """
+    for root, dirs, files in os.walk(root):  
+        for ignore in ignoreDirs: 
+            if ignore in dirs:
+                dirs.remove(ignore) 
+        fdirs=filter(filterDirFunction,dirs) if filterDirFunction!=None else dirs
+        ffile=filter(filterFileFunction,files)  if filterFileFunction!=None else files
+        yield root, fdirs, ffile 
+
+def getApplcationPath(__file__):
+    #print("如果脚本被编译成.pyc文件运行或者使用了一些打包工具（如PyInstaller），那么__file__可能不会返回源.py文件的路径，而是编译后的文件或临时文件的路径")
+    # 获取当前文件的完整路径
+    if getattr(sys, 'frozen', False):
+        # 如果应用程序是冻结的，获取可执行文件的路径
+        application_path = os.path.dirname(sys.executable)
+    else:
+        # 否则，获取原始脚本的路径
+        application_path = os.path.dirname(os.path.abspath(__file__))
+ 
+    return application_path
 
  
