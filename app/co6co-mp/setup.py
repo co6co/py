@@ -1,8 +1,8 @@
 from setuptools import setup, find_packages
 
 
-import co6co_permissions
-VERSION = co6co_permissions.__version__
+import co6co_mp
+VERSION = co6co_mp.__version__
 
 # read readmeFile contents
 from os import path

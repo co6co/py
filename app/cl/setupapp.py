@@ -2,14 +2,8 @@ import os,sys
 from exec_command import execute_command
 import argparse
 import shutil
-
-def getWorkDirectory(): 
-    """
-    获取工作目录
-    """
-    current_directory = os.getcwd()
-    print("Current working directory:", current_directory)
-    return current_directory
+from co6co.utils import find_files,getWorkDirectory
+ 
 def getApplicationDir(): 
     # 获取当前文件的完整路径
     script_path = __file__
@@ -31,14 +25,7 @@ def getApplicationDir():
     return application_path
 
  
-def find_files(directory, filterDirFunction,filterFileFunction,*ignoreDirs:str):
-    for root, dirs, files in os.walk(directory):  
-        for ignore in ignoreDirs: 
-            if ignore in dirs:
-                dirs.remove(ignore) 
-        fdirs=filter(filterDirFunction,dirs) if filterDirFunction!=None else dirs
-        ffile=filter(filterFileFunction,files)  if filterFileFunction!=None else files
-        yield root, fdirs, ffile 
+ 
 if __name__ =='__main__':
     parser=argparse.ArgumentParser(description="audit service.")
     parser.add_argument('-g','--gen',type=bool, action=argparse.BooleanOptionalAction,help="打包")
@@ -50,10 +37,11 @@ if __name__ =='__main__':
     if args.gen:
         fileName="setup.py"
         gen=find_files("E:/Tools/python/py",None,lambda x:x==fileName,'.git','node_modules','src') 
-        for root, dirs, files in gen: 
-            print(root,'0',fileName,"...." ,dirs)
+        for root, dirs, files in gen:  
+            #没有符合条件的文件
+            if len(files)==0: continue
             os.chdir(root)
-            getWorkDirectory() 
+            print("切换工作目录：",getWorkDirectory() )
             '''
             想读出版本信息和包名未成功
             if os.getcwd() not in sys.path:
@@ -87,6 +75,4 @@ if __name__ =='__main__':
             for file in files:
                 shutil.copy2(os.path.join(root, file),args.target) #不仅复制源文件的内容,尝试复制文件的元数据（如权限和时间戳）
                 print(os.path.join(root, file),"--copy2-->",args.target)
-
-                 
-
+ 

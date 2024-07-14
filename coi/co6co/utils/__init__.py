@@ -57,8 +57,8 @@ def find_files(root, filterDirFunction,filterFileFunction,*ignoreDirs:str):
         for ignore in ignoreDirs: 
             if ignore in dirs:
                 dirs.remove(ignore) 
-        fdirs=filter(filterDirFunction,dirs) if filterDirFunction!=None else dirs
-        ffile=filter(filterFileFunction,files)  if filterFileFunction!=None else files
+        fdirs=list( filter(filterDirFunction,dirs)) if filterDirFunction!=None else dirs
+        ffile=list(filter(filterFileFunction,files))  if filterFileFunction!=None else files
         yield root, fdirs, ffile 
 
 def getApplcationPath(__file__):
