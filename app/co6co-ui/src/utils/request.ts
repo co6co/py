@@ -9,6 +9,7 @@ import { type ElLoading, ElMessage } from 'element-plus';
 import JSONbig from 'json-bigint';
 import { getToken, removeToken } from './auth';
 import { getStoreInstance } from '@/hooks';
+
 /**
  * 获取 apiBaseURL
  * @returns string
@@ -18,7 +19,6 @@ export const getBaseUrl = () => {
 	const baseUrl = store.getBaseUrl();
 	return baseUrl;
 };
-
 const crateService = (config?: CreateAxiosDefaults<any> | undefined) => {
 	const service: AxiosInstance = axios.create(
 		config /* {

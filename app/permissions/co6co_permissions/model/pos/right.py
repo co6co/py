@@ -76,7 +76,7 @@ class AccountPO(UserTimeStampedModelPO):
     用户名  EMAIL,openID
     """
     __tablename__ = "sys_account"
-    uid = Column("uuid", String(36),  primary_key=True, default=uuid.uuid1())
+    uid = Column("uuid", String(36),  primary_key=True, default=uuid.uuid4())
     userId = Column("user_id", ForeignKey(f"{UserPO.__tablename__}.{
                     UserPO.id.name}", ondelete="CASCADE"), nullable=False, index=True, unique=True)
     accountName = Column("account_name", String(64), unique=True)

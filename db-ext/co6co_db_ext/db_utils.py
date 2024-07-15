@@ -150,6 +150,7 @@ class db_tools:
         return PO|None
         """
         exec: ChunkedIteratorResult = await session.execute(select, params)
+        #user: UserPO = result.scalar()
         data = exec.fetchone()
         # 返回的是元组
         one = None

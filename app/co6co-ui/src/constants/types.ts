@@ -93,3 +93,13 @@ export const tree_props = {
 	label: 'name',
 	children: 'children',
 };
+
+export interface IAuthonInfo {
+	token: string;
+	expireSeconds: number;
+	sessionId: string;
+	refreshToken: {
+		token: string;
+		expireSeconds: number;
+	};
+}

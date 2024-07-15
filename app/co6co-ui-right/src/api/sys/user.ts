@@ -25,6 +25,10 @@ export const currentUser_svc = (): Promise<IResponse> => {
 export const changePwd_svc = (data: any): Promise<IResponse> => {
 	return createServiceInstance().post(`${base_URL}/changePwd`, data);
 };
+export const ticket_svc = (code: string): Promise<IResponse> => {
+	return createServiceInstance().get(`${base_URL}/ticket/${code}`);
+};
+
 export interface UserType {
 	username: string;
 	password: string;
