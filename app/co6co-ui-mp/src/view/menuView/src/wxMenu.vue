@@ -55,10 +55,10 @@
 							sortable
 							:show-overflow-tooltip="true">
 							<template #default="scope">
-								<el-tag
-									>{{ config.getMenuStateItem(scope.row.state)?.label }}
-								</el-tag></template
-							>
+								<el-tag>
+									{{ config.getMenuStateItem(scope.row.state)?.label }}
+								</el-tag>
+							</template>
 						</el-table-column>
 
 						<el-table-column
@@ -142,7 +142,6 @@
 	import { ref, reactive, onMounted } from 'vue';
 	import {
 		ElMessage,
-		ElMessageBox,
 		ElInput,
 		ElButton,
 		ElHeader,
@@ -158,7 +157,7 @@
 	import { Delete, Edit, Search, Compass, Plus } from '@element-plus/icons-vue';
 	import * as mp_api from '@/api/mp';
 	import { wx_config_store } from '@/hooks/wx';
-	import { piniaInstance } from 'co6co';
+	import { piniaInstance, warningArgs, EleConfirm } from 'co6co';
 
 	import modifyDiaglog, {
 		type MenuItem as Item,
@@ -248,9 +247,7 @@
 	// 删除操作
 	const onDelete = (index: number, row: any) => {
 		// 二次确认删除
-		ElMessageBox.confirm(`确定要删除"${row.name}"菜单吗？`, '提示', {
-			type: 'warning',
-		})
+		EleConfirm(`确定要删除"${row.name}"菜单吗？`, { ...warningArgs })
 			.then(() => {
 				mp_api
 					.del_menu_svc(row.id)
@@ -265,10 +262,7 @@
 
 	//推送菜单
 	const onPush = (index: number, row: any) => {
-		//
-		ElMessageBox.confirm(`确定要推送"${row.name}"到微信公众号吗？`, '提示', {
-			type: 'warning',
-		})
+		EleConfirm(`确定要推送"${row.name}"到微信公众号吗？`, { ...warningArgs })
 			.then(() => {
 				mp_api
 					.push_menu_svc(row.id)
@@ -281,9 +275,7 @@
 			.catch(() => {});
 	};
 	const onPull = (index: number, row: any) => {
-		ElMessageBox.confirm(`确定要获取微信公众号菜单？`, '提示', {
-			type: 'warning',
-		})
+		EleConfirm(`确定要获取微信公众号菜单？`, { ...warningArgs })
 			.then(() => {
 				mp_api
 					.pull_menu_svc(row.id)
@@ -296,9 +288,7 @@
 			.catch(() => {});
 	};
 	const onReset = (index: number, row: any) => {
-		ElMessageBox.confirm(`确定要重置公众号菜单，重置后菜单降不存在！`, '提示', {
-			type: 'warning',
-		})
+		EleConfirm(`确定要重置公众号菜单，重置后菜单降不存在！`, { ...warningArgs })
 			.then(() => {
 				mp_api
 					.reset_menu_svc(row.id)
@@ -311,7 +301,6 @@
 			.catch(() => {});
 	};
 	//弹出框 add and edit
-
 	onMounted(() => {
 		getData();
 	});

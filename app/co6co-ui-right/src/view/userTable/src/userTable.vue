@@ -40,7 +40,9 @@
 						<el-table-column
 							prop="userName"
 							label="用户名"
-							align="center"></el-table-column>
+							align="center"
+							width="180"
+							:show-overflow-tooltip="true"></el-table-column>
 						<el-table-column label="所属用户组" prop="groupName">
 						</el-table-column>
 						<el-table-column label="状态" align="center">
@@ -54,7 +56,11 @@
 						<el-table-column
 							prop="createTime"
 							label="注册时间"></el-table-column>
-						<el-table-column label="操作" width="405" align="center">
+						<el-table-column
+							label="操作"
+							width="405"
+							align="center"
+							fixed="right">
 							<template #default="scope">
 								<el-button
 									text
@@ -102,8 +108,8 @@
 				</div>
 			</el-footer>
 		</el-container>
-		<!--编辑-->
 
+		<!--编辑-->
 		<modify-diaglog
 			:title="table_module.diaglogTitle"
 			ref="modifyDiaglogRef"
@@ -113,6 +119,8 @@
 		<reset-pwd-diaglog
 			ref="resetPwdDiaglogRef"
 			title="重置密码"></reset-pwd-diaglog>
+
+		<!--关联角色-->
 		<associated-diaglog
 			ref="associatedDiaglogRef"
 			style="width: 30%"
@@ -121,7 +129,7 @@
 </template>
 
 <script setup lang="ts" name="basetable">
-	import { ref, reactive, onMounted, onUnmounted } from 'vue';
+	import { ref, reactive, onMounted } from 'vue';
 	import {
 		ElTag,
 		ElMessage,

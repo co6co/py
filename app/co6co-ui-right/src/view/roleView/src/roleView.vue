@@ -76,7 +76,7 @@
 									label="更新时间"
 									sortable="custom"
 									:show-overflow-tooltip="true"></el-table-column>
-								<el-table-column label="操作" align="center">
+								<el-table-column label="操作" align="center" fixed="right">
 									<template #default="scope">
 										<el-button
 											v-permiss="getPermissKey(ViewFeature.edit)"
@@ -171,6 +171,8 @@
 		Associated as roleAssMenuDiaglog,
 		type IPageParam,
 		type Table_Module_Base,
+		EleConfirm,
+		warningArgs,
 	} from 'co6co';
 	import useUserGroupSelect from '@/hooks/useUserGroupSelect';
 	import api, { association_service as ass_api } from '@/api/sys/role';
@@ -258,10 +260,7 @@
 	};
 	// 删除操作
 	const onDelete = (index: number, row: Item) => {
-		// 二次确认删除
-		ElMessageBox.confirm(`确定要删除"${row.name}"吗？`, '提示', {
-			type: 'warning',
-		})
+		EleConfirm(`确定要删除"${row.name}"吗？`, { ...warningArgs })
 			.then(() => {
 				showLoading();
 				api

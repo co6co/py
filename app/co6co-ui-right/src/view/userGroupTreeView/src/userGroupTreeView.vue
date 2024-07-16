@@ -84,7 +84,11 @@
 									label="更新时间"
 									sortable="custom"
 									:show-overflow-tooltip="true"></el-table-column>
-								<el-table-column label="操作" width="315" align="center">
+								<el-table-column
+									label="操作"
+									width="315"
+									align="center"
+									fixed="right">
 									<template #default="scope">
 										<el-button
 											v-permiss="getPermissKey(ViewFeature.edit)"
@@ -173,6 +177,8 @@
 		type IPageParam,
 		type Table_Module_Base,
 		Associated as associatedDiaglog,
+		warningArgs,
+		EleConfirm,
 	} from 'co6co';
 
 	import modifyDiaglog, {
@@ -262,10 +268,7 @@
 	};
 	// 删除操作
 	const onDelete = (index: number, row: Item) => {
-		// 二次确认删除
-		ElMessageBox.confirm(`确定要删除"${row.name}"吗？`, '提示', {
-			type: 'warning',
-		})
+		EleConfirm(`确定要删除"${row.name}"吗？`, { ...warningArgs })
 			.then(() => {
 				showLoading();
 				api

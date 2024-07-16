@@ -1,26 +1,35 @@
 from co6co.enums import Base_Enum, Base_EC_Enum
 
 
+class dict_state(Base_EC_Enum):
+    """
+    字典和字典类型使用的状态
+    """
+    disabled = "disabled", "禁用", 0
+    enabled = "enabled", "启用", 1
+
+
 class menu_type(Base_EC_Enum):
     """
     菜单类型 
     """
-    group = "group","分组", 0  # 分组菜单
-    api = "api","API接口", 1   # api
-    view = "view", "页面视图",2  # a视图
-    subView = "subView", "页面子视图",3  # a视图
-    button = "button","视图功能", 10  # 视图中的按钮等。
-   
+    group = "group", "分组", 0  # 分组菜单
+    api = "api", "API接口", 1   # api
+    view = "view", "页面视图", 2  # a视图
+    subView = "subView", "页面子视图", 3  # a视图
+    button = "button", "视图功能", 10  # 视图中的按钮等。
+
 
 class menu_state(Base_EC_Enum):
     """
     菜单类型 
-    """ 
+    """
 
-    enabled = "enabled","启用", 0   
-    disabled = "disabled", "禁用",1 
+    enabled = "enabled", "启用", 0
+    disabled = "disabled", "禁用", 1
+
 
 class user_state(Base_EC_Enum):
-    enabled="enabled","启用",0
-    disabled="disabled","禁用",1
-    locked="locked","锁定",2 
+    enabled = "enabled", "启用", 0
+    disabled = "disabled", "禁用", 1
+    locked = "locked", "锁定", 2

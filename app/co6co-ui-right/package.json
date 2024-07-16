@@ -2,7 +2,7 @@
   "name": "co6co-right",
   "moduleName": "permission",
   "private": false,
-  "version": "0.0.3-dev.1",
+  "version": "0.0.3-dev.6",
   "type": "module",
   "files": [
     "dist"
@@ -45,7 +45,7 @@
   },
   "dependencies": {
     "axios": "^1.7.2",
-    "co6co": "http://127.0.0.1/packs/co6co-0.0.4-dev.1.tgz",
+    "co6co": "^0.0.4-dev.5",
     "dayjs": "^1.11.11",
     "element-plus": "^2.7.6",
     "js-cookie": "^3.0.5",

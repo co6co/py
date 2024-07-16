@@ -103,3 +103,8 @@ export interface IAuthonInfo {
 		expireSeconds: number;
 	};
 }
+
+export type Point = {
+	lng: number; // 经度
+	lat: number; // 纬度
+};

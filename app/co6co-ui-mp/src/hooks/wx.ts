@@ -1,23 +1,15 @@
-import { get_config_svc, get_menu_svc } from '@/api/mp';
+import { get_config_svc, get_menu_svc, type IMenuState } from '@/api/mp';
 import { defineStore } from 'pinia';
 
 interface ListItem {
 	name: string;
 	openId: string;
 }
-interface memu_state {
-	key: string;
-	label: string;
-	value: number;
-}
-interface memuConfig {
-	menuStates: memu_state[]; //Array<memu_state>
-}
 export const wx_config_store = defineStore('wx_config', {
 	state: () => {
 		return {
 			list: [] as ListItem[],
-			memuConfig: {} as memuConfig,
+			memuConfig: {} as IMenuState,
 		};
 	},
 	getters: {

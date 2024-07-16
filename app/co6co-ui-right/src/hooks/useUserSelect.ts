@@ -14,7 +14,8 @@ export const useState = () => {
 			return selectData.value.find((m) => m.value == value)?.label;
 		return '';
 	};
-	const getTagType = (value?: number): ElTagType => {
+
+	const getTagType = (value?: number) => {
 		if (value != undefined) {
 			switch (value) {
 				case 0:
