@@ -1,6 +1,7 @@
 from ..api.menu import menu_api
 from ..api.user import user_api
 from .aop.api_auth import authorized
+from .aop import exist
 from sanic.response import text
 from sanic import Request
 from co6co_sanic_ext.utils import JSON_util
@@ -36,10 +37,6 @@ async def getMenuCategory(request: Request):
     states = menu_type.to_dict_list()
     return JSON_util.response(Result.success(data=states))
 
-"""
-用户
-"""
-
 
 @user_api.route("/status", methods=["GET", "POST"])
 @authorized
@@ -58,10 +55,7 @@ async def userExist(request: Request, userName: str, pk: int = 0):
     用户名是否存在
     """
     result = await db_tools.exist(request.ctx.session, UserPO.userName == userName, UserPO.id != pk)
-    if result:
-        return JSON_util.response(Result.success(message=f"用户'{userName}'已存在。"))
-    else:
-        return JSON_util.response(Result.fail(message=f"用户'{userName}'不已存在。"))
+    return exist(result, "用户", userName)
 
 
 @user_api.route("/exist", methods=["POST"])
@@ -73,7 +67,4 @@ async def userExistPost(request: Request):
     id = request.json.get("id")
     userName = request.json.get("userName")
     result = await db_tools.exist(request.ctx.session, UserPO.userName == userName, UserPO.id != id)
-    if result:
-        return JSON_util.response(Result.success(message=f"用户'{userName}'已存在。"))
-    else:
-        return JSON_util.response(Result.fail(message=f"用户'{userName}'不已存在。"))
+    return exist(result, "用户", userName)

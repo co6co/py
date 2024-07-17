@@ -25,7 +25,7 @@ export const useStore = defineStore('co6co_store', {
 		},
 	},
 	actions: {
-		config(key: string, value: ConfigValue) {
+		setConfig(key: string, value: ConfigValue) {
 			this.Config[key] = value;
 		},
 		getConfig(key: string) {

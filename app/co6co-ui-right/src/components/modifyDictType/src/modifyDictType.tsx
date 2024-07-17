@@ -11,7 +11,8 @@ import {
 } from 'co6co';
 
 import * as api_type from 'co6co';
-import api from '@/api/sys/user';
+import { dictTypeSvc as svc } from '@/api/dict';
+import { Flag } from '@/constants';
 import { useTree } from '@/hooks/useUserGroupSelect';
 import { useState } from '@/hooks/useUserSelect';
 import {
@@ -27,13 +28,12 @@ import {
 
 export interface Item extends api_type.FormItemBase {
 	id: number;
-	userName?: string;
-	/**
-	 * 用户密码增加用户需要
-	 */
-	password?: string;
+	name?: string;
+	code?: string;
 	state: number;
-	userGroupId?: number;
+	sysFlag: Flag; //Y|N
+	desc?: string;
+	order: number;
 }
 //Omit、Pick、Partial、Required
 export type FormItem = Omit<
@@ -61,7 +61,7 @@ export default defineComponent({
 		const DATA = reactive<FormData<number, FormItem>>({
 			operation: FormOperation.add,
 			id: 0,
-			fromData: { userName: '', state: 0, userGroupId: 0 },
+			fromData: { state: 0, sysFlag: Flag.N, order: 0 },
 		});
 		//@ts-ignore
 		const key = Symbol('formData') as InjectionKey<FormItem>; //'formData'
@@ -72,17 +72,26 @@ export default defineComponent({
 			switch (oper) {
 				case FormOperation.add:
 					DATA.id = 0;
-					DATA.fromData.userName = '';
+					DATA.fromData.name = '';
 					DATA.fromData.state = 0;
-					DATA.fromData.password = '';
-					DATA.fromData.userGroupId = undefined;
+					DATA.fromData.name = '';
+					DATA.fromData.code = '';
+
+					DATA.fromData.sysFlag = Flag.N;
+					DATA.fromData.desc = '';
+					DATA.fromData.order = 0;
+
 					break;
 				case FormOperation.edit:
 					if (!item) return false;
 					DATA.id = item.id;
-					DATA.fromData.userName = item.userName;
+					DATA.fromData.name = item.name;
 					DATA.fromData.state = item.state;
-					DATA.fromData.userGroupId = item.userGroupId;
+					DATA.fromData.name = item.name;
+					DATA.fromData.code = item.code;
+					DATA.fromData.sysFlag = item.sysFlag;
+					DATA.fromData.desc = item.desc;
+					DATA.fromData.order = item.order;
 					//可以在这里写一些use 获取其他的数据
 					break;
 			}
@@ -97,7 +106,7 @@ export default defineComponent({
 				return (
 					(rule.message = '长度应该大于3'), callback(new Error(rule.message))
 				);
-			api.exist_svc(value, DATA.id).then((res) => {
+			svc.exist_svc(value, DATA.id).then((res) => {
 				if (res.data)
 					return (
 						(rule.message = res.message), callback(new Error(rule.message))
@@ -146,10 +155,10 @@ export default defineComponent({
 			let promist: Promise<api_type.IResponse>;
 			switch (DATA.operation) {
 				case FormOperation.add:
-					promist = api.add_svc(DATA.fromData);
+					promist = svc.add_svc(DATA.fromData);
 					break;
 				case FormOperation.edit:
-					promist = api.edit_svc(DATA.id, DATA.fromData);
+					promist = svc.edit_svc(DATA.id, DATA.fromData);
 					break;
 				default:
 					return;
@@ -183,9 +192,9 @@ export default defineComponent({
 			),
 			default: () => (
 				<>
-					<ElFormItem label="用户名" prop="userName">
+					<ElFormItem label="名称" prop="name">
 						<ElInput
-							v-model={DATA.fromData.userName}
+							v-model={DATA.fromData.name}
 							placeholder="用户名"></ElInput>
 					</ElFormItem>
 					<ElFormItem label="所属用户组" prop="userGroupId">

@@ -159,10 +159,10 @@ class ticketView(BaseMethodView):
         """
         userId = await decodeCode(getSecret(request), code)
         if userId == None:
-            return JSON_util.response(Result.fail(data=token, message="code 无效或已过期"))
+            return JSON_util.response(Result.fail(message="code 无效或已过期"))
         user: UserPO = await queryUer(self.get_db_session(request), userId)
         if user != None:
             token = await generatePageToken(getSecret(request), user)
             return JSON_util.response(Result.success(data=token, message="票据登录成功"))
         else:
-            return JSON_util.response(Result.fail(data=token, message="未找到所属用户"))
+            return JSON_util.response(Result.fail(message="未找到所属用户"))

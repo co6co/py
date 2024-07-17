@@ -18,16 +18,7 @@ export const installPermissDirective = (
 	option?: { instance: Pinia }
 ) => {
 	try {
-		/*
-		let pinia: Pinia;
-		if (option && option.instance) {
-			pinia = option.instance;
-		} else {
-			//pinia = createPinia();
-			app.use(piniaInstance);
-		}
-			*/
-		console.info(option);
+		console.info('installPermissDirective:', option);
 		app.use(piniaInstance);
 		app.directive(
 			ConstObject.getPermissValue(),

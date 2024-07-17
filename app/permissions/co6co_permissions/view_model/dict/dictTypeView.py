@@ -12,24 +12,35 @@ from co6co_web_db.model.params import associationParam
 
 from datetime import datetime
 from ..base_view import AuthMethodView
+from ..aop import exist
 from ...model.filters.dict_type_filter import Filter
 from ...model.filters.dict_filter import DictFilter
+
 from ...model.enum import dict_state
 from ...model.pos.other import sysDictTypePO, sysDictPO
+
+
+class DictTypeExistView(AuthMethodView):
+    routePath = "/exist/<code:str>/<pk:int>"
+
+    async def get(self, request: Request, code: str, pk: int = 0):
+        result = await db_tools.exist(request.ctx.session, sysDictTypePO.code == code, sysDictTypePO.id != pk)
+        return exist(result, "字典类型", code)
 
 
 class DictTypeViews(AuthMethodView):
     routePath = "/type"
 
-    async def get(self, request: Request, pk: int):
+    async def get(self, request: Request):
         """
-        字典、字典类型状态 
+        字典、字典类型状态
+        枚举类型 : dict_state
         """
         return JSON_util.response(Result.success(data=dict_state.to_dict_list()))
 
     async def post(self, request: Request):
         """
-        table数据 
+        table数据
         """
         param = Filter()
         return await self.query_page(request, param)
@@ -53,7 +64,7 @@ class DictTypeView(AuthMethodView):
 
     async def get(self, request: Request, pk: int):
         """
-        获取字典选择 
+        获取字典选择
         """
         select = (
             Select(sysDictPO.id, sysDictPO.name,

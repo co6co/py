@@ -2,7 +2,7 @@
   "name": "co6co-wx",
   "moduleName": "wx",
   "private": false,
-  "version": "0.0.1-dev.4",
+  "version": "0.0.1-dev.5",
   "type": "module",
   "files": [
     "dist"
@@ -45,8 +45,8 @@
   },
   "dependencies": {
     "axios": "^1.7.2",
-    "co6co": "^0.0.4-dev.5",
-    "co6co-right": "^0.0.3-dev.6",
+    "co6co": "^0.0.4-dev.6",
+    "co6co-right": "^0.0.3-dev.7",
     "dayjs": "^1.11.11",
     "element-plus": "^2.7.6",
     "js-cookie": "^3.0.5",

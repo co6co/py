@@ -10,8 +10,16 @@ export const create_svc = (baseUrl: string) => {
 	const get_table_svc = (data: any): Promise<api_type.IPageResponse> => {
 		return createServiceInstance().post(`${baseUrl}`, data);
 	};
+	/*
 	const exist_svc = (code: string): Promise<api_type.IResponse> => {
 		return createServiceInstance().post(`${baseUrl}/exist/${code}`);
+	};
+	*/
+	const exist_svc = (
+		code: string,
+		id: number = 0
+	): Promise<api_type.IResponse<boolean>> => {
+		return createServiceInstance().get(`${baseUrl}/exist/${code}/${id}`);
 	};
 	const add_svc = (data: any): Promise<api_type.IResponse> => {
 		return createServiceInstance().put(`${baseUrl}`, data);

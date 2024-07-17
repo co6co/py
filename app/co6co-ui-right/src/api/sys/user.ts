@@ -7,13 +7,10 @@ export default create_svc(base_URL);
 const association_service = create_association_svc(base_URL);
 export { association_service };
 
-export const exist_svc = (userName: string, id: number): Promise<IResponse> => {
-	return createServiceInstance().get(`${base_URL}/exist/${userName}/${id}`);
-};
-export const exist__svc = (data: {
+export const exist_post_svc = (data: {
 	userName: string;
 	id: number;
-}): Promise<IResponse> => {
+}): Promise<IResponse<boolean>> => {
 	return createServiceInstance().post(`${base_URL}/exist`, data);
 };
 export const retsetPwd_svc = (data: any): Promise<IResponse> => {

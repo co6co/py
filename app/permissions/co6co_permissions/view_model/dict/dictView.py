@@ -11,9 +11,18 @@ from co6co_db_ext.db_utils import db_tools, DbCallable
 from co6co_web_db.model.params import associationParam
 
 from datetime import datetime
+from ..aop import exist
 from ..base_view import AuthMethodView
 from ...model.filters.dict_filter import DictFilter
 from ...model.pos.other import sysDictPO
+
+
+class DictExistView(AuthMethodView):
+    routePath = "/exist/<code:str>/<pk:int>"
+
+    async def get(self, request: Request, code: str, pk: int = 0):
+        result = await db_tools.exist(request.ctx.session, sysDictPO.code == code, sysDictPO.id != pk)
+        return exist(result, "字典", code)
 
 
 class Views(AuthMethodView):

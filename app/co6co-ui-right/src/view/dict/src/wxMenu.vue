@@ -134,7 +134,6 @@
 		<modifyDiaglog
 			style="width: 80%; height: 80%"
 			ref="modifyDiaglogRef"
-			@saved="onSearch"
 			title="编辑" />
 	</div>
 </template>

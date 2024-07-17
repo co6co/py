@@ -5,7 +5,11 @@
 				<div class="handle-box">
 					<el-input
 						v-model="query.name"
-						placeholder="菜单名称"
+						placeholder="字典名称"
+						class="handle-input mr10"></el-input>
+					<el-input
+						v-model="query.name"
+						placeholder="字典编码"
 						class="handle-input mr10"></el-input>
 					<el-button type="primary" :icon="Search" @click="onSearch"
 						>搜索</el-button
@@ -35,7 +39,12 @@
 							align="center"></el-table-column>
 						<el-table-column
 							prop="name"
-							label="菜单名称"
+							label="名称"
+							sortable
+							:show-overflow-tooltip="true"></el-table-column>
+						<el-table-column
+							prop="name"
+							label="编码"
 							sortable
 							:show-overflow-tooltip="true"></el-table-column>
 						<el-table-column
@@ -134,7 +143,6 @@
 		<modifyDiaglog
 			style="width: 80%; height: 80%"
 			ref="modifyDiaglogRef"
-			@saved="onSearch"
 			title="编辑" />
 	</div>
 </template>
@@ -156,9 +164,8 @@
 		ElContainer,
 	} from 'element-plus';
 	import { Delete, Edit, Search, Compass, Plus } from '@element-plus/icons-vue';
-	import * as mp_api from '@/api/mp';
-	import { wx_config_store } from '@/hooks/wx';
-	import { piniaInstance, warningArgs, EleConfirm } from 'co6co';
+	import { dictSvc as svc } from '@/api/dict';
+	import { warningArgs, EleConfirm } from 'co6co';
 
 	import modifyDiaglog, {
 		type MenuItem as Item,
@@ -172,7 +179,6 @@
 		type IPageParam,
 		type Table_Module_Base,
 	} from 'co6co';
-	const config = wx_config_store(piniaInstance);
 	interface IQueryItem extends IPageParam {
 		name?: string;
 	}
@@ -204,9 +210,8 @@
 	// 获取表格数据
 	const getData = async () => {
 		showLoading();
-		config.refesh().then().catch();
-		mp_api
-			.list_menu_svc(query)
+		svc
+			.get_table_svc(query)
 			.then((res) => {
 				if (res.code == 0) {
 					table_module.data = res.data;
@@ -250,8 +255,8 @@
 		// 二次确认删除
 		EleConfirm(`确定要删除"${row.name}"菜单吗？`, { ...warningArgs })
 			.then(() => {
-				mp_api
-					.del_menu_svc(row.id)
+				svc
+					.del_svc(row.id)
 					.then((res) => {
 						if (res.code == 0) ElMessage.success('删除成功'), getData();
 						else ElMessage.error(`删除失败:${res.message}`);
@@ -261,47 +266,6 @@
 			.catch(() => {});
 	};
 
-	//推送菜单
-	const onPush = (index: number, row: any) => {
-		EleConfirm(`确定要推送"${row.name}"到微信公众号吗？`, { ...warningArgs })
-			.then(() => {
-				mp_api
-					.push_menu_svc(row.id)
-					.then((res) => {
-						if (res.code == 0) ElMessage.success('推送成功'), getData();
-						else ElMessage.error(`推送失败:${res.message}`);
-					})
-					.finally(() => {});
-			})
-			.catch(() => {});
-	};
-	const onPull = (index: number, row: any) => {
-		EleConfirm(`确定要获取微信公众号菜单？`, { ...warningArgs })
-			.then(() => {
-				mp_api
-					.pull_menu_svc(row.id)
-					.then((res) => {
-						if (res.code == 0) ElMessage.success('获取成功'), getData();
-						else ElMessage.error(`获取失败:${res.message}`);
-					})
-					.finally(() => {});
-			})
-			.catch(() => {});
-	};
-	const onReset = (index: number, row: any) => {
-		EleConfirm(`确定要重置公众号菜单，重置后菜单降不存在！`, { ...warningArgs })
-			.then(() => {
-				mp_api
-					.reset_menu_svc(row.id)
-					.then((res) => {
-						if (res.code == 0) ElMessage.success('重置成功'), getData();
-						else ElMessage.error(`重置失败:${res.message}!`);
-					})
-					.finally(() => {});
-			})
-			.catch(() => {});
-	};
-	//弹出框 add and edit
 	onMounted(() => {
 		getData();
 	});

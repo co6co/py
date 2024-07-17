@@ -7,3 +7,8 @@ export interface IDownloadConfig {
 		Range: string /* `bytes=${start}-${end}`*/;
 	};
 }
+
+export enum Flag {
+	Y = 'Y',
+	N = 'N',
+}
