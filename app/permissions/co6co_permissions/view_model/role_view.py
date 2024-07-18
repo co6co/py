@@ -12,10 +12,19 @@ from co6co_web_db.model.params import associationParam
 
 from datetime import datetime
 from .base_view import AuthMethodView
-from ..model.pos.right import RolePO, MenuRolePO, UserRolePO, UserGroupRolePO
+from .aop import exist, ObjectExistRoute
+from ..model.pos.right import RolePO, MenuRolePO, UserRolePO, UserGroupRolePO, menuPO
 from ..model.filters.role_filter import role_filter
-from ..model.pos.right import menuPO
 from .aop.api_auth import userRoleChanged
+
+
+class roles_ass_exist_view(AuthMethodView):
+    routePath = ObjectExistRoute
+
+    async def get(self, request: Request, code: str, pk: int = 0):
+        result = await self.exist(request, RolePO.code == code,
+                                  RolePO.id != pk, column=RolePO.id)
+        return exist(result, "角色编码", code)
 
 
 class roles_ass_view(AuthMethodView):

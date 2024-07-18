@@ -12,7 +12,7 @@ from ...view_model.aop.authonCache import AuthonCacheManage
 
 class Filter(absFilterItems):
     """
-    角色 filter
+    字典类型 filter
     """
     name: str = None
     code: str = None

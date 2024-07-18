@@ -15,6 +15,7 @@ from ..aop import exist
 from ..base_view import AuthMethodView
 from ...model.filters.dict_filter import DictFilter
 from ...model.pos.other import sysDictPO
+from ...model.enum import dict_state
 
 
 class DictExistView(AuthMethodView):
@@ -26,6 +27,13 @@ class DictExistView(AuthMethodView):
 
 
 class Views(AuthMethodView):
+    async def get(self, request: Request):
+        """
+        字典、字典类型状态
+        枚举类型 : dict_state
+        """
+        return JSON_util.response(Result.success(data=dict_state.to_dict_list()))
+
     async def post(self, request: Request):
         """
         table数据 

@@ -21,7 +21,7 @@ from ...model.pos.other import sysDictTypePO, sysDictPO
 
 
 class DictTypeExistView(AuthMethodView):
-    routePath = "/exist/<code:str>/<pk:int>"
+    routePath = "/type/exist/<code:str>/<pk:int>"
 
     async def get(self, request: Request, code: str, pk: int = 0):
         result = await db_tools.exist(request.ctx.session, sysDictTypePO.code == code, sysDictTypePO.id != pk)
@@ -33,10 +33,14 @@ class DictTypeViews(AuthMethodView):
 
     async def get(self, request: Request):
         """
-        字典、字典类型状态
-        枚举类型 : dict_state
+        字典类型 下拉 
         """
-        return JSON_util.response(Result.success(data=dict_state.to_dict_list()))
+        select = (
+            Select(sysDictTypePO.id, sysDictTypePO.name, sysDictTypePO.code)
+            .filter(sysDictTypePO.state.__eq__(dict_state.enabled.val))
+            .order_by(sysDictTypePO.order.asc())
+        )
+        return await self.query_list(request, select,  isPO=False)
 
     async def post(self, request: Request):
         """
@@ -52,7 +56,7 @@ class DictTypeViews(AuthMethodView):
         po = sysDictTypePO()
         userId = self.getUserId(request)
 
-        async def before(po: sysDictTypePO, session: AsyncSession):
+        async def before(po: sysDictTypePO, session: AsyncSession, request):
             exist = await db_tools.exist(session,  sysDictTypePO.code.__eq__(po.code), column=sysDictTypePO.id)
             if exist:
                 return JSON_util.response(Result.fail(message=f"'{po.code}'已存在！"))
@@ -68,7 +72,7 @@ class DictTypeView(AuthMethodView):
         """
         select = (
             Select(sysDictPO.id, sysDictPO.name,
-                   sysDictPO.code, sysDictPO.desc)
+                   sysDictPO.value, sysDictPO.desc)
             .filter(sysDictPO.dictTypeId.__eq__(pk), sysDictPO.state.__eq__(dict_state.enabled.val))
             .order_by(sysDictPO.order.asc())
         )

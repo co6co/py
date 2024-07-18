@@ -4,13 +4,21 @@
 			<el-header>
 				<div class="handle-box">
 					<el-input
-						v-model="query.name"
-						placeholder="菜单名称"
+						v-model="table_module.query.name"
+						placeholder="字典名称"
+						class="handle-input mr10"></el-input>
+					<el-input
+						v-model="table_module.query.code"
+						placeholder="字典编码"
 						class="handle-input mr10"></el-input>
 					<el-button type="primary" :icon="Search" @click="onSearch"
 						>搜索</el-button
 					>
-					<el-button type="primary" :icon="Plus" @click="onOpenDialog(0)"
+					<el-button
+						type="primary"
+						v-permiss="getPermissKey(ViewFeature.add)"
+						:icon="Plus"
+						@click="onOpenDialog(0)"
 						>新增</el-button
 					>
 				</div>
@@ -35,28 +43,23 @@
 							align="center"></el-table-column>
 						<el-table-column
 							prop="name"
-							label="菜单名称"
+							label="名称"
 							sortable
 							:show-overflow-tooltip="true"></el-table-column>
 						<el-table-column
-							label="公众号"
-							width="110"
+							prop="name"
+							label="编码"
 							sortable
-							prop="flowStatus">
-							<template #default="scope">
-								<el-tag
-									>{{ config.getItem(scope.row.openId)?.name }}
-								</el-tag></template
-							>
-						</el-table-column>
+							:show-overflow-tooltip="true"></el-table-column>
+
 						<el-table-column
 							prop="state"
 							label="状态"
 							sortable
 							:show-overflow-tooltip="true">
 							<template #default="scope">
-								<el-tag>
-									{{ config.getMenuStateItem(scope.row.state)?.label }}
+								<el-tag :type="getTagType(scope.row.state)">
+									{{ getName(scope.row.state) }}
 								</el-tag>
 							</template>
 						</el-table-column>
@@ -73,43 +76,22 @@
 							:show-overflow-tooltip="true"></el-table-column>
 						<el-table-column
 							label="操作"
-							width="400"
+							width="180"
 							fixed="right"
-							align="left">
+							align="center">
 							<template #default="scope">
 								<el-button
 									text
 									:icon="Edit"
+									v-permiss="getPermissKey(ViewFeature.edit)"
 									@click="onOpenDialog(1, scope.row)">
 									编辑
 								</el-button>
 								<el-button
 									text
-									:icon="Compass"
-									v-if="scope.row.openId"
-									@click="onPush(scope.$index, scope.row)">
-									推送
-								</el-button>
-								<el-button
-									text
-									:icon="Plus"
-									title="获取当前公众号配置的菜单"
-									v-if="scope.row.openId"
-									@click="onPull(scope.$index, scope.row)">
-									获取
-								</el-button>
-								<el-button
-									text
-									:icon="Plus"
-									title="重置公众号菜单"
-									v-if="scope.row.openId"
-									@click="onReset(scope.$index, scope.row)">
-									重置
-								</el-button>
-								<el-button
-									text
 									:icon="Delete"
 									class="red"
+									v-permiss="getPermissKey(ViewFeature.del)"
 									@click="onDelete(scope.$index, scope.row)">
 									删除
 								</el-button>
@@ -131,15 +113,13 @@
 			</el-footer>
 		</el-container>
 		<!-- 弹出框 -->
-		<modifyDiaglog
-			style="width: 80%; height: 80%"
-			ref="modifyDiaglogRef"
-			title="编辑" />
+		<modifyDiaglog @saved="onSearch" ref="modifyDiaglogRef" title="编辑" />
 	</div>
 </template>
 
 <script setup lang="ts" name="basetable">
 	import { ref, reactive, onMounted } from 'vue';
+	import { useRoute, useRouter } from 'vue-router';
 	import {
 		ElMessage,
 		ElInput,
@@ -155,14 +135,18 @@
 		ElContainer,
 	} from 'element-plus';
 	import { Delete, Edit, Search, Compass, Plus } from '@element-plus/icons-vue';
-	import * as mp_api from '@/api/mp';
-	import { wx_config_store } from '@/hooks/wx';
-	import { piniaInstance, warningArgs, EleConfirm } from 'co6co';
-
+	import { dictSvc as svc } from '@/api/dict';
+	import { warningArgs, EleConfirm } from 'co6co';
+	import { usePermission, ViewFeature } from '@/hooks/useRoute';
+	import { useState } from '@/hooks/useDictState';
+	const { getPermissKey } = usePermission();
+	const { getName, getTagType } = useState();
+	const route = useRoute();
+	const router = useRouter();
 	import modifyDiaglog, {
-		type MenuItem as Item,
-		type ModifyMenuInstance,
-	} from '@/components/modifyMenu';
+		type DictItem as Item,
+		type ModifyDictInstance,
+	} from '@/components/modifyDict';
 
 	import {
 		showLoading,
@@ -171,17 +155,12 @@
 		type IPageParam,
 		type Table_Module_Base,
 	} from 'co6co';
-	const config = wx_config_store(piniaInstance);
 	interface IQueryItem extends IPageParam {
+		dictTypeId: number;
 		name?: string;
+		code?: string;
 	}
 
-	const query = reactive<IQueryItem>({
-		name: '',
-		pageIndex: 1,
-		pageSize: 10,
-		order: 'asc',
-	});
 	interface Table_Module extends Table_Module_Base {
 		query: IQueryItem;
 		data: Item[];
@@ -190,6 +169,7 @@
 
 	const table_module = reactive<Table_Module>({
 		query: {
+			dictTypeId: 0,
 			name: '',
 			pageIndex: 1,
 			pageSize: 15,
@@ -203,9 +183,8 @@
 	// 获取表格数据
 	const getData = async () => {
 		showLoading();
-		config.refesh().then().catch();
-		mp_api
-			.list_menu_svc(query)
+		svc
+			.get_table_svc(table_module.query)
 			.then((res) => {
 				if (res.code == 0) {
 					table_module.data = res.data;
@@ -234,23 +213,28 @@
 		getData();
 	};
 
-	const modifyDiaglogRef = ref<ModifyMenuInstance>();
-
+	const modifyDiaglogRef = ref<ModifyDictInstance>();
 	//编辑角色
 	const onOpenDialog = (operation: FormOperation, row?: Item) => {
 		table_module.diaglogTitle =
-			operation == FormOperation.add ? '增加菜单' : `编辑[${row?.name}]菜单`;
+			operation == FormOperation.add
+				? '增加字典类型'
+				: `编辑[${row?.name}]菜单`;
 		table_module.currentItem = row;
-		modifyDiaglogRef.value?.openDialog(operation, row);
+		modifyDiaglogRef.value?.openDialog(
+			operation,
+			table_module.query.dictTypeId,
+			row
+		);
 	};
 
 	// 删除操作
 	const onDelete = (index: number, row: any) => {
 		// 二次确认删除
-		EleConfirm(`确定要删除"${row.name}"菜单吗？`, { ...warningArgs })
+		EleConfirm(`确定要删除"${row.name}"吗？`, { ...warningArgs })
 			.then(() => {
-				mp_api
-					.del_menu_svc(row.id)
+				svc
+					.del_svc(row.id)
 					.then((res) => {
 						if (res.code == 0) ElMessage.success('删除成功'), getData();
 						else ElMessage.error(`删除失败:${res.message}`);
@@ -260,49 +244,14 @@
 			.catch(() => {});
 	};
 
-	//推送菜单
-	const onPush = (index: number, row: any) => {
-		EleConfirm(`确定要推送"${row.name}"到微信公众号吗？`, { ...warningArgs })
-			.then(() => {
-				mp_api
-					.push_menu_svc(row.id)
-					.then((res) => {
-						if (res.code == 0) ElMessage.success('推送成功'), getData();
-						else ElMessage.error(`推送失败:${res.message}`);
-					})
-					.finally(() => {});
-			})
-			.catch(() => {});
-	};
-	const onPull = (index: number, row: any) => {
-		EleConfirm(`确定要获取微信公众号菜单？`, { ...warningArgs })
-			.then(() => {
-				mp_api
-					.pull_menu_svc(row.id)
-					.then((res) => {
-						if (res.code == 0) ElMessage.success('获取成功'), getData();
-						else ElMessage.error(`获取失败:${res.message}`);
-					})
-					.finally(() => {});
-			})
-			.catch(() => {});
-	};
-	const onReset = (index: number, row: any) => {
-		EleConfirm(`确定要重置公众号菜单，重置后菜单降不存在！`, { ...warningArgs })
-			.then(() => {
-				mp_api
-					.reset_menu_svc(row.id)
-					.then((res) => {
-						if (res.code == 0) ElMessage.success('重置成功'), getData();
-						else ElMessage.error(`重置失败:${res.message}!`);
-					})
-					.finally(() => {});
-			})
-			.catch(() => {});
-	};
-	//弹出框 add and edit
 	onMounted(() => {
-		getData();
+		let id = router.currentRoute.value.params.id || route.query.id;
+		if (id) {
+			table_module.query.dictTypeId = Number(id);
+			getData();
+		} else {
+			ElMessage.error('参数不正确！');
+		}
 	});
 </script>
 <style scoped>

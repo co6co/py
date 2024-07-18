@@ -12,3 +12,5 @@ export enum Flag {
 	Y = 'Y',
 	N = 'N',
 }
+
+export type validatorBack = (error?: string | Error | undefined) => void;

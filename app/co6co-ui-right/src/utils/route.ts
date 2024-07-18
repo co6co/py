@@ -13,6 +13,30 @@ import {
 	usePermissStore,
 } from 'co6co';
 import { Router } from 'vue-router';
+/**
+
+ * @param route  带冒号的路径: /abc/:id/:abc
+ * @param params 对象
+ * @returns 
+ * 
+ *  const route = "/abc/:id/:abc";
+    const params = { id: '1', abc: 'happy' }; 
+	输出: /abc/1/happy
+ */
+export function replaceRouteParams(
+	route: string,
+	params: Record<string, string>
+): string {
+	return route.replace(/:(\w+)/g, (_, paramName) => {
+		const paramValue = params[paramName];
+		if (paramValue === undefined) {
+			throw new Error(
+				`Parameter '${paramName}' is missing in the provided parameters.`
+			);
+		}
+		return paramValue;
+	});
+}
 
 export function registerRoute(ViewObjects, router: Router, bck?: () => void) {
 	const { queryRouteData } = useRouteData();

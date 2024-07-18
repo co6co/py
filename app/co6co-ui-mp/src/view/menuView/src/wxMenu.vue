@@ -4,13 +4,17 @@
 			<el-header>
 				<div class="handle-box">
 					<el-input
-						v-model="query.name"
+						v-model="table_module.query.name"
 						placeholder="菜单名称"
 						class="handle-input mr10"></el-input>
 					<el-button type="primary" :icon="Search" @click="onSearch"
 						>搜索</el-button
 					>
-					<el-button type="primary" :icon="Plus" @click="onOpenDialog(0)"
+					<el-button
+						type="primary"
+						:icon="Plus"
+						@click="onOpenDialog(0)"
+						v-permiss="getPermissKey(routeHook.ViewFeature.add)"
 						>新增</el-button
 					>
 				</div>
@@ -80,6 +84,7 @@
 								<el-button
 									text
 									:icon="Edit"
+									v-permiss="getPermissKey(routeHook.ViewFeature.edit)"
 									@click="onOpenDialog(1, scope.row)">
 									编辑
 								</el-button>
@@ -87,6 +92,7 @@
 									text
 									:icon="Compass"
 									v-if="scope.row.openId"
+									v-permiss="getPermissKey(routeHook.ViewFeature.push)"
 									@click="onPush(scope.$index, scope.row)">
 									推送
 								</el-button>
@@ -95,6 +101,7 @@
 									:icon="Plus"
 									title="获取当前公众号配置的菜单"
 									v-if="scope.row.openId"
+									v-permiss="getPermissKey(routeHook.ViewFeature.get)"
 									@click="onPull(scope.$index, scope.row)">
 									获取
 								</el-button>
@@ -103,6 +110,7 @@
 									:icon="Plus"
 									title="重置公众号菜单"
 									v-if="scope.row.openId"
+									v-permiss="getPermissKey(routeHook.ViewFeature.reset)"
 									@click="onReset(scope.$index, scope.row)">
 									重置
 								</el-button>
@@ -110,6 +118,7 @@
 									text
 									:icon="Delete"
 									class="red"
+									v-permiss="getPermissKey(routeHook.ViewFeature.del)"
 									@click="onDelete(scope.$index, scope.row)">
 									删除
 								</el-button>
@@ -159,6 +168,7 @@
 	import * as mp_api from '@/api/mp';
 	import { wx_config_store } from '@/hooks/wx';
 	import { piniaInstance, warningArgs, EleConfirm } from 'co6co';
+	import { routeHook } from 'co6co-right';
 
 	import modifyDiaglog, {
 		type MenuItem as Item,
@@ -172,17 +182,12 @@
 		type IPageParam,
 		type Table_Module_Base,
 	} from 'co6co';
+	const { getPermissKey } = routeHook.usePermission();
 	const config = wx_config_store(piniaInstance);
 	interface IQueryItem extends IPageParam {
 		name?: string;
 	}
 
-	const query = reactive<IQueryItem>({
-		name: '',
-		pageIndex: 1,
-		pageSize: 10,
-		order: 'asc',
-	});
 	interface Table_Module extends Table_Module_Base {
 		query: IQueryItem;
 		data: Item[];
@@ -206,7 +211,7 @@
 		showLoading();
 		config.refesh().then().catch();
 		mp_api
-			.list_menu_svc(query)
+			.list_menu_svc(table_module.query)
 			.then((res) => {
 				if (res.code == 0) {
 					table_module.data = res.data;

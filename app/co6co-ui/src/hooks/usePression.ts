@@ -20,10 +20,10 @@ export const installPermissDirective = (
 	try {
 		console.info('installPermissDirective:', option);
 		app.use(piniaInstance);
-		app.directive(
-			ConstObject.getPermissValue(),
-			createPermissDirective(piniaInstance)
-		);
+		const { permissDirective, nonPermissDirective } =
+			createPermissDirective(piniaInstance);
+		app.directive(ConstObject.getPermissValue(), permissDirective);
+		app.directive(ConstObject.getNonPermissValue(), nonPermissDirective);
 	} catch (e) {
 		console.error(`增加指令:${ConstObject.getPermissValue()}失败!,Error:${e}`);
 	}

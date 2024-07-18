@@ -3,7 +3,6 @@ import { view_route_svc } from '@/api/view';
 import { Storage, traverseTreeData, randomString } from 'co6co';
 
 import { useRouter } from 'vue-router';
-
 /**
  * VIEW 功能
  * 为控制页面按钮权限
@@ -12,6 +11,8 @@ import { useRouter } from 'vue-router';
 export enum ViewFeature {
 	//** 查看 */
 	view = 'view',
+	//** 查看 */
+	get = 'get',
 	//** 增加 */
 	add = 'add',
 	//** 编辑 */
@@ -64,17 +65,22 @@ const getViewFeature = (pageUrl: string) => {
 	if (data)
 		traverseTreeData(data, (d) => {
 			const item = d as IRouteData;
-			if (pageUrl && item.url == pageUrl)
-				if (item.url == pageUrl) {
-					curremtPageRouteData = item;
-					return true;
-				}
+			//当为 subView 时有参数 /:id
+			const index = item.url ? item.url.indexOf(':') : -1;
+			if (
+				pageUrl &&
+				(item.url == pageUrl ||
+					(index > -1 && pageUrl.indexOf(item.url.substring(0, index)) > -1))
+			) {
+				curremtPageRouteData = item;
+				return true;
+			}
 		});
 	return curremtPageRouteData.children;
 };
 /**
  * 获取按钮的权限字
- *
+ * 缓存中存有权限字
  * @param buttonType  user_add
  * @param pageUrl
  *
@@ -187,6 +193,25 @@ export const useRouteData = () => {
 		let result = storage.get<IRouteData[]>(Key);
 		return result;
 	};
+	/**
+	 * 查询存储的路由
+	 * @param filter 返回过滤
+	 * @returns 仅返回第一条
+	 */
+	const queryRouteItem = (filter: (d: IRouteData) => boolean) => {
+		const data = getRouteData();
+		let result: { object?: RouteItem } = {};
+		if (data) {
+			traverseTreeData(data, (i) => {
+				const d = i as IRouteData;
+				if (filter(d)) {
+					result.object = d;
+					return true;
+				}
+			});
+		}
+		return result.object;
+	};
 
-	return { queryRouteData, getRouteData };
+	return { queryRouteData, getRouteData, queryRouteItem };
 };

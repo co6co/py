@@ -10,19 +10,20 @@ from co6co_db_ext.db_utils import db_tools
 from co6co_web_db.model.params import associationParam
 
 from .base_view import AuthMethodView
-from .aop import exist
+from .aop import exist, ObjectExistRoute
 from ..model.pos.right import UserGroupPO, RolePO, UserGroupRolePO
 from ..model.filters.user_group_filter import user_group_filter
 from co6co.utils import log
 from .aop.api_auth import userRoleChanged
 
 
-class user_groupExistView(AuthMethodView):
-    routePath = "/exist/<code:str>/<pk:int>"
+class user_group_exist_view(AuthMethodView):
+    routePath = ObjectExistRoute
 
     async def get(self, request: Request, code: str, pk: int = 0):
-        result = await db_tools.exist(request.ctx.session, UserGroupPO.code == code, UserGroupPO.id != pk)
-        return exist(result, "用户组", code)
+        result = await self.exist(request, UserGroupPO.code == code,
+                                  UserGroupPO.id != pk, column=UserGroupPO.id)
+        return exist(result, "用户组编辑", code)
 
 
 class user_group_ass_view(AuthMethodView):

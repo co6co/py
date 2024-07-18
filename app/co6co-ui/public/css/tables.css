@@ -1,51 +1,71 @@
 /*table 页面*/
-.el-container{height: 82vh; overflow: hidden;}
-.el-container .el-container{height: 100%;}
-.el-main{padding-top: 0;padding-bottom: 0; height: 90%; overflow: hidden;}
-.el-header .container{ border: 1px solid #ddd;    border-radius: 5px;}
-.el-header{height: auto;}
-.el-scrollbar{background: #fff;}
+.el-container {
+	height: 82vh;
+	overflow: hidden;
+}
+.el-container .el-container {
+	height: 100%;
+}
+.el-main {
+	padding-top: 0;
+	padding-bottom: 0;
+	height: 90%;
+	overflow: hidden;
+}
+.el-header .container {
+	border: 1px solid #ddd;
+	border-radius: 5px;
+}
+.el-header {
+	height: auto;
+}
+.el-scrollbar {
+	background: #fff;
+}
 
 .handle-box {
-    margin: 3px 0;
+	margin: 3px 0;
 }
-
+.handle-box div + div,
+.handle-box div + .el-button {
+	margin-left: 10px;
+}
 .el-link {
-    margin-right: 8px;
+	margin-right: 8px;
 }
 .el-link .el-icon--right.el-icon {
-    vertical-align: text-bottom;
+	vertical-align: text-bottom;
 }
 .handle-select {
-    width: 120px;
+	width: 120px;
 }
 
 .handle-input {
-    width: 300px;
+	width: 300px;
 }
 .table {
-    width: 100%;
-    font-size: 14px;
+	width: 100%;
+	font-size: 14px;
 }
 .red {
-    color: #f56c6c;
+	color: #f56c6c;
 }
 .mr10 {
-    margin-right: 10px;
+	margin-right: 10px;
 }
 .table-td-thumb {
-    display: block;
-    margin: auto;
-    width: 40px;
-    height: 40px;
+	display: block;
+	margin: auto;
+	width: 40px;
+	height: 40px;
 }
 
 .formItem {
-    display: flex;
-    align-items: center; 
-    .label {
-      display: inline-block;
-      color: #aaa;
-      padding: 0 5px;
-    }
-  }
+	display: flex;
+	align-items: center;
+	.label {
+		display: inline-block;
+		color: #aaa;
+		padding: 0 5px;
+	}
+}

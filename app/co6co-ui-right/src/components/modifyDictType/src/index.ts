@@ -1,2 +1,2 @@
 import type modifyDictType from './modifyDictType';
-export type ModifyDictType = InstanceType<typeof modifyDictType>;
+export type ModifyDictTypeInstance = InstanceType<typeof modifyDictType>;

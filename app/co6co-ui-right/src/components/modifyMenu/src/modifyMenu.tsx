@@ -165,6 +165,12 @@ export default defineComponent({
 			},
 			...rules_b,
 		};
+		const rules_subView: FormRules = {
+			...{
+				methods: [{ required: true, message: '请选择方法名', trigger: 'blur' }],
+			},
+			...rules_view,
+		};
 		const rules_button: FormRules = {
 			...{
 				methods: [{ required: true, message: '请选择方法名', trigger: 'blur' }],
@@ -308,6 +314,21 @@ export default defineComponent({
 									</ElFormItem>
 								</ElCol>
 							</ElRow>
+							{DATA.fromData.category == MenuCateCategory.VIEW ? (
+								<></>
+							) : (
+								<ElRow>
+									<ElCol>
+										<ElFormItem label="操作类型" prop="methods">
+											<ElSelectV2
+												options={pageFeature.selectData.value}
+												v-model={DATA.fromData.methods}
+												placeholder="子视图操作类型一般用view,做了特殊出来可选其他"
+												onChange={onFeatueMethod}></ElSelectV2>
+										</ElFormItem>
+									</ElCol>
+								</ElRow>
+							)}
 							<ElRow>
 								<ElCol span={12}>
 									<ElFormItem label="组件地址" prop="component">
@@ -317,6 +338,7 @@ export default defineComponent({
 										/>
 									</ElFormItem>
 								</ElCol>
+
 								<ElCol span={12}>
 									<ElFormItem label="权限字" prop="permissionKey">
 										<ElInput
@@ -392,6 +414,8 @@ export default defineComponent({
 					return rules_api;
 				case MenuCateCategory.VIEW:
 					return rules_view;
+				case MenuCateCategory.SubVIEW:
+					return rules_subView;
 				case MenuCateCategory.Button:
 					return rules_button;
 			}

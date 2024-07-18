@@ -19,6 +19,9 @@ def getCtxData(user: UserPO):
     return user.to_jwt_dict()
 
 
+ObjectExistRoute = "/exist/<code:str>/<pk:int>"
+
+
 def exist(isExist: bool = True, tableName="用户", name: str = "xxx"):
     if isExist:
         return JSON_util.response(Result.success(data=True, message=f"{tableName}'{name}'已存在。"))

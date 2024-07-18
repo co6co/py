@@ -33,6 +33,12 @@ export const usePageFeature = () => {
 		},
 		{
 			uid: ++index,
+			key: ViewFeature.get,
+			label: '获取',
+			value: ViewFeature.get,
+		},
+		{
+			uid: ++index,
 			key: ViewFeature.downloads,
 			label: '下载多个',
 			value: ViewFeature.downloads,

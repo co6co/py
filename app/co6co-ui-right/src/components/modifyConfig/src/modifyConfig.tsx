@@ -11,9 +11,9 @@ import {
 } from 'co6co';
 
 import * as api_type from 'co6co';
-import { dictTypeSvc as svc } from '@/api/dict';
+import { configSvc as svc } from '@/api/config';
 import { Flag } from '@/constants';
-import { useState } from '@/hooks/useDictState';
+import { useDictTypeSelect, useDictSelect } from '@/hooks/useDictState';
 import { validatorBack } from '@/constants';
 import {
 	ElRow,
@@ -30,12 +30,13 @@ import {
 
 export interface Item extends api_type.FormItemBase {
 	id: number;
-	name?: string;
-	code?: string;
-	state?: number;
-	sysFlag: Flag; //Y|N
-	desc?: string;
-	order: number;
+	name: string;
+	code: string;
+	dictFlag: Flag; //Y|N
+	dictTypeId?: number;
+	value: string;
+	state: number;
+	remark?: string;
 }
 //Omit、Pick、Partial、Required
 export type FormItem = Omit<
@@ -57,12 +58,13 @@ export default defineComponent({
 		saved: (data: any) => true,
 	},
 	setup(prop, ctx) {
-		const { selectData } = useState();
+		const { selectData } = useDictTypeSelect();
+
 		const diaglogForm = ref<DialogFormInstance>();
 		const DATA = reactive<FormData<number, FormItem>>({
 			operation: FormOperation.add,
 			id: 0,
-			fromData: { sysFlag: Flag.N, order: 0 },
+			fromData: { name: '', code: '', state: 0, dictFlag: Flag.N, value: '' },
 		});
 		//@ts-ignore
 		const key = Symbol('formData') as InjectionKey<FormItem>; //'formData'
@@ -77,9 +79,9 @@ export default defineComponent({
 					DATA.fromData.state = 0;
 					DATA.fromData.name = '';
 					DATA.fromData.code = '';
-					DATA.fromData.sysFlag = Flag.N;
-					DATA.fromData.desc = '';
-					DATA.fromData.order = 0;
+					DATA.fromData.dictFlag = Flag.N;
+					DATA.fromData.value = '';
+					DATA.fromData.remark = '';
 
 					break;
 				case FormOperation.edit:
@@ -89,9 +91,9 @@ export default defineComponent({
 					DATA.fromData.state = item.state;
 					DATA.fromData.name = item.name;
 					DATA.fromData.code = item.code;
-					DATA.fromData.sysFlag = item.sysFlag;
-					DATA.fromData.desc = item.desc;
-					DATA.fromData.order = item.order;
+					DATA.fromData.dictFlag = item.dictFlag;
+					DATA.fromData.value = item.value;
+					DATA.fromData.remark = item.remark;
 					//可以在这里写一些use 获取其他的数据
 					break;
 			}
@@ -146,6 +148,16 @@ export default defineComponent({
 					closeLoading();
 				});
 		};
+		const dictSelectData = ref<api_type.ISelect[]>([]);
+		const onDictTypeChange = () => {
+			const { selectData, query } = useDictSelect();
+			if (DATA.fromData.dictTypeId) {
+				showLoading();
+				query(DATA.fromData.dictTypeId);
+				dictSelectData.value = selectData.value;
+				closeLoading();
+			}
+		};
 		const fromSlots = {
 			buttons: () => (
 				<>
@@ -168,8 +180,10 @@ export default defineComponent({
 							</ElFormItem>
 						</ElCol>
 						<ElCol span={12}>
-							<ElFormItem label="系统字典" prop="state">
-								<ElSelect v-model={DATA.fromData.sysFlag} placeholder="请选择">
+							<ElFormItem label="使用字典" prop="state">
+								<ElSelect
+									v-model={DATA.fromData.dictFlag}
+									placeholder="使用字典">
 									{Object.keys(Flag).map((d, index) => {
 										return (
 											<ElOption
@@ -184,44 +198,67 @@ export default defineComponent({
 					</ElRow>
 					<ElRow>
 						<ElCol>
-							<ElFormItem label="编码" prop="code">
+							<ElFormItem label="配置编码" prop="code">
 								<ElInput
 									v-model={DATA.fromData.code}
-									placeholder="编码"></ElInput>
+									placeholder="配置编码"></ElInput>
 							</ElFormItem>
 						</ElCol>
 					</ElRow>
 
-					<ElRow>
-						<ElCol span={12}>
-							<ElFormItem label="状态" prop="state">
-								<ElSelect v-model={DATA.fromData.state} placeholder="请选择">
-									{selectData.value.map((d, _) => {
-										return (
-											<ElOption
-												key={d.key}
-												label={d.label}
-												value={d.value}></ElOption>
-										);
-									})}
-								</ElSelect>
-							</ElFormItem>
-						</ElCol>
-						<ElCol span={12}>
-							<ElFormItem label="排序" prop="talkbackNo">
-								<ElInputNumber
-									v-model={DATA.fromData.order}
-									placeholder="排序"></ElInputNumber>
-							</ElFormItem>
-						</ElCol>
-					</ElRow>
+					{DATA.fromData.dictFlag == Flag.Y ? (
+						<ElRow>
+							<ElCol span={12}>
+								<ElFormItem label="选择字典" prop="dictTypeId">
+									<ElSelect
+										v-model={DATA.fromData.dictTypeId}
+										placeholder="字典"
+										onChange={onDictTypeChange}>
+										{selectData.value.map((d, index) => {
+											return (
+												<ElOption
+													key={index}
+													label={d.name}
+													value={d.id}></ElOption>
+											);
+										})}
+									</ElSelect>
+								</ElFormItem>
+							</ElCol>
+							<ElCol span={12}>
+								<ElFormItem label="配置值" prop="value">
+									<ElSelect v-model={DATA.fromData.value} placeholder="配置值">
+										{dictSelectData.value.map((d, index) => {
+											return (
+												<ElOption
+													key={index}
+													label={d.name}
+													value={d.id}></ElOption>
+											);
+										})}
+									</ElSelect>
+								</ElFormItem>
+							</ElCol>
+						</ElRow>
+					) : (
+						<ElRow>
+							<ElCol>
+								<ElFormItem label="配置值" prop="value">
+									<ElInput
+										type="textarea"
+										v-model={DATA.fromData.value}
+										placeholder="配置值"></ElInput>
+								</ElFormItem>
+							</ElCol>
+						</ElRow>
+					)}
 					<ElRow>
 						<ElCol>
-							<ElFormItem label="描述" prop="desc">
+							<ElFormItem label="备注" prop="desc">
 								<ElInput
-									v-model={DATA.fromData.desc}
+									v-model={DATA.fromData.remark}
 									type="textarea"
-									placeholder="描述"></ElInput>
+									placeholder="备注"></ElInput>
 							</ElFormItem>
 						</ElCol>
 					</ElRow>

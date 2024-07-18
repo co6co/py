@@ -1,4 +1,4 @@
-import { defineComponent, ref, reactive, computed, provide } from 'vue';
+import { defineComponent, ref, reactive, provide } from 'vue';
 import type { InjectionKey } from 'vue';
 import {
 	DialogForm,
@@ -11,10 +11,8 @@ import {
 } from 'co6co';
 
 import * as api_type from 'co6co';
-import { dictTypeSvc as svc } from '@/api/dict';
-import { Flag } from '@/constants';
+import { dictSvc as svc } from '@/api/dict';
 import { useState } from '@/hooks/useDictState';
-import { validatorBack } from '@/constants';
 import {
 	ElRow,
 	ElCol,
@@ -30,10 +28,10 @@ import {
 
 export interface Item extends api_type.FormItemBase {
 	id: number;
+	dictTypeId?: number;
 	name?: string;
-	code?: string;
+	value?: string;
 	state?: number;
-	sysFlag: Flag; //Y|N
 	desc?: string;
 	order: number;
 }
@@ -62,22 +60,26 @@ export default defineComponent({
 		const DATA = reactive<FormData<number, FormItem>>({
 			operation: FormOperation.add,
 			id: 0,
-			fromData: { sysFlag: Flag.N, order: 0 },
+			fromData: { order: 0 },
 		});
 		//@ts-ignore
 		const key = Symbol('formData') as InjectionKey<FormItem>; //'formData'
 		provide('formData', DATA.fromData);
 
-		const init_data = (oper: FormOperation, item?: Item) => {
+		const init_data = (
+			oper: FormOperation,
+			dictTypeId: number,
+			item?: Item
+		) => {
 			DATA.operation = oper;
 			switch (oper) {
 				case FormOperation.add:
 					DATA.id = 0;
+					DATA.fromData.dictTypeId = dictTypeId;
 					DATA.fromData.name = '';
 					DATA.fromData.state = 0;
 					DATA.fromData.name = '';
-					DATA.fromData.code = '';
-					DATA.fromData.sysFlag = Flag.N;
+					DATA.fromData.value = '';
 					DATA.fromData.desc = '';
 					DATA.fromData.order = 0;
 
@@ -85,11 +87,11 @@ export default defineComponent({
 				case FormOperation.edit:
 					if (!item) return false;
 					DATA.id = item.id;
+					DATA.fromData.dictTypeId = dictTypeId;
 					DATA.fromData.name = item.name;
 					DATA.fromData.state = item.state;
 					DATA.fromData.name = item.name;
-					DATA.fromData.code = item.code;
-					DATA.fromData.sysFlag = item.sysFlag;
+					DATA.fromData.value = item.value;
 					DATA.fromData.desc = item.desc;
 					DATA.fromData.order = item.order;
 					//可以在这里写一些use 获取其他的数据
@@ -97,24 +99,11 @@ export default defineComponent({
 			}
 			return true;
 		};
-		const validCode = (rule: any, value: any, callback: validatorBack) => {
-			svc.exist_svc(value, DATA.id).then((res) => {
-				if (res.data)
-					return (
-						(rule.message = res.message), callback(new Error(rule.message))
-					);
-				else return callback();
-			});
-		};
+
 		const rules: FormRules = {
 			name: [{ required: true, message: '请输入名称', trigger: 'blur' }],
-			code: [
-				{ required: true, message: '请输入编码', trigger: 'blur' },
-				{ min: 3, max: 10, message: '编码长度应3个字符', trigger: 'blur' },
-				{ validator: validCode, trigger: 'blur' },
-			],
+			value: [{ required: true, message: '请输入编码', trigger: 'blur' }],
 			state: [{ required: true, message: '请选择状态', trigger: 'blur' }],
-			sysFlag: [{ required: true, message: '请选择标识', trigger: 'blur' }],
 			order: [{ required: true, message: '排序不能为空', trigger: 'blur' }],
 		};
 
@@ -168,30 +157,13 @@ export default defineComponent({
 							</ElFormItem>
 						</ElCol>
 						<ElCol span={12}>
-							<ElFormItem label="系统字典" prop="state">
-								<ElSelect v-model={DATA.fromData.sysFlag} placeholder="请选择">
-									{Object.keys(Flag).map((d, index) => {
-										return (
-											<ElOption
-												key={index}
-												label={d == Flag.Y ? '是' : '否'}
-												value={d}></ElOption>
-										);
-									})}
-								</ElSelect>
-							</ElFormItem>
-						</ElCol>
-					</ElRow>
-					<ElRow>
-						<ElCol>
-							<ElFormItem label="编码" prop="code">
+							<ElFormItem label="值" prop="value">
 								<ElInput
-									v-model={DATA.fromData.code}
-									placeholder="编码"></ElInput>
+									v-model={DATA.fromData.value}
+									placeholder="值"></ElInput>
 							</ElFormItem>
 						</ElCol>
 					</ElRow>
-
 					<ElRow>
 						<ElCol span={12}>
 							<ElFormItem label="状态" prop="state">
@@ -241,8 +213,12 @@ export default defineComponent({
 				/>
 			);
 		};
-		const openDialog = (oper: FormOperation, item?: Item) => {
-			init_data(oper, item);
+		const openDialog = (
+			oper: FormOperation,
+			dictTypeId: number,
+			item?: Item
+		) => {
+			init_data(oper, dictTypeId, item);
 			diaglogForm.value?.openDialog();
 		};
 		ctx.expose({

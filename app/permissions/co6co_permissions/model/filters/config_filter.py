@@ -12,11 +12,11 @@ from ...view_model.aop.authonCache import AuthonCacheManage
 
 class Filter(absFilterItems):
     """
-    角色 filter
+    配置 filter
     """
     name: str = None
     code: str = None
-    desc: str = None
+    remark: str = None
 
     def __init__(self):
         super().__init__(sysConfigPO)
@@ -31,8 +31,8 @@ class Filter(absFilterItems):
             filters_arr.append(sysConfigPO.name.like(f"%{self.name}%"))
         if self.checkFieldValue(self.code):
             filters_arr.append(sysConfigPO.code.like(f"%{self.code}%"))
-        if self.checkFieldValue(self.desc):
-            filters_arr.append(sysConfigPO.desc.like(f"%{self.desc}%"))
+        if self.checkFieldValue(self.remark):
+            filters_arr.append(sysConfigPO.remark.like(f"%{self.desc}%"))
 
         return filters_arr
 
@@ -40,4 +40,4 @@ class Filter(absFilterItems):
         """
         默认排序
         """
-        return (sysConfigPO.order.asc(),)
+        return (sysConfigPO.createTime.desc(),)
