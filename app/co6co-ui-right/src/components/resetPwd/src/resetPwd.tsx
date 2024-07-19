@@ -88,14 +88,13 @@ export default defineComponent({
 			showLoading();
 			promist
 				.then((res) => {
-					if (res.code == 0) {
-						diaglogForm.value?.closeDialog();
-						ElMessage.success(`重置密码成功`);
-						refresh();
-						ctx.emit('saved', res.data);
-					} else {
-						ElMessage.error(`重置密码失败:${res.message}`);
-					}
+					diaglogForm.value?.closeDialog();
+					ElMessage.success(`重置密码成功`);
+					refresh();
+					ctx.emit('saved', res.data);
+				})
+				.catch((e) => {
+					if (e.message) ElMessage.error(`重置密码失败:${e.message}`);
 				})
 				.finally(() => {
 					closeLoading();

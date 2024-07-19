@@ -9,6 +9,7 @@ import { type ElLoading, ElMessage } from 'element-plus';
 import JSONbig from 'json-bigint';
 import { getToken, removeToken } from './auth';
 import { getStoreInstance } from '@/hooks';
+import { IResponse } from '@/constants';
 
 /**
  * 获取 apiBaseURL
@@ -18,6 +19,21 @@ export const getBaseUrl = () => {
 	const store = getStoreInstance();
 	const baseUrl = store.getBaseUrl();
 	return baseUrl;
+};
+const parseJson = (response: AxiosResponse) => {
+	try {
+		let result: IResponse;
+		if (typeof response.data == 'string') result = JSONbig.parse(response.data);
+		else result = response.data;
+		if (result.code == 0) {
+			return response.data;
+		} else {
+			ElMessage.error(`${result.message}`);
+			return Promise.reject(response.data);
+		}
+	} catch (e) {
+		return Promise.reject(e);
+	}
 };
 const crateService = (config?: CreateAxiosDefaults<any> | undefined) => {
 	const service: AxiosInstance = axios.create(
@@ -59,18 +75,9 @@ const crateService = (config?: CreateAxiosDefaults<any> | undefined) => {
 			//2xx 范围的都会触发该方法
 			//if (elLoading) elLoading.close();
 			if (response.status === 200) {
+				//JSON
 				if (response.headers['content-type'] == 'application/json') {
-					if (typeof response.data == 'string')
-						return JSONbig.parse(response.data);
-					/**
-          if (response.data.code==0){
-            return response.data
-          }else {  
-            ElMessage.error(`请求出错：${response.data.message}`)
-            return	Promise.reject(response.data.message||"请求出错！"); 
-          } 
-           */
-					return response.data;
+					return parseJson(response);
 				} else return response;
 			}
 			if (response.status === 206) return response;

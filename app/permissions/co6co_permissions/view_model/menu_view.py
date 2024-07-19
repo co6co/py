@@ -33,20 +33,22 @@ class menu_tree_view(AuthMethodView):
         """
         select = (
             Select(menuPO.id, menuPO.name, menuPO.code, menuPO.parentId)
-            .order_by(menuPO.parentId.asc())
+            .order_by(menuPO.order.asc())
         )
         return await self.query_tree(request, select, pid_field='parentId', id_field="id", isPO=False)
 
     async def post(self, request: Request):
         """
         树形 table数据
-        tree 形状 table
+        没有条件 返回   tree_data
+        有条件 返回     PAGED_list 
+
         """
         param = menu_filter()
         param.__dict__.update(request.json)
         if len(param.filter()) > 0:
             return await self.query_page(request, param)
-        return await self.query_tree(request, param.create_List_select(), rootValue=0, pid_field='parentId', id_field="id")
+        return await self.query_tree(request, param.create_List_select().order_by(menuPO.order.asc()), rootValue=0, pid_field='parentId', id_field="id")
 
 
 class menus_view(AuthMethodView):

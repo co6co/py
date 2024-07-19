@@ -180,12 +180,11 @@ export const useRouteData = () => {
 	const queryRouteData = (bck: (data: IRouteData[], msg?: string) => void) => {
 		view_route_svc()
 			.then((res) => {
-				if (res.code == 0)
-					storage.set<IRouteData[]>(Key, res.data), bck(res.data);
-				else bck([], res.message || '请求出错');
+				storage.set<IRouteData[]>(Key, res.data), bck(res.data);
 			})
 			.catch((e) => {
-				bck([], e);
+				if (e.message) bck([], e.message || '请求出错');
+				else bck([], e);
 			});
 	};
 

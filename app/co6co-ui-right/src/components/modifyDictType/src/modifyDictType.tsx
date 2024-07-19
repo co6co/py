@@ -1,4 +1,4 @@
-import { defineComponent, ref, reactive, computed, provide } from 'vue';
+import { defineComponent, ref, reactive, provide, computed } from 'vue';
 import type { InjectionKey } from 'vue';
 import {
 	DialogForm,
@@ -64,12 +64,16 @@ export default defineComponent({
 			id: 0,
 			fromData: { sysFlag: Flag.N, order: 0 },
 		});
+		const editData = reactive<{ sysFlag: Flag }>({
+			sysFlag: Flag.N,
+		});
 		//@ts-ignore
 		const key = Symbol('formData') as InjectionKey<FormItem>; //'formData'
 		provide('formData', DATA.fromData);
 
 		const init_data = (oper: FormOperation, item?: Item) => {
 			DATA.operation = oper;
+			editData.sysFlag = Flag.N;
 			switch (oper) {
 				case FormOperation.add:
 					DATA.id = 0;
@@ -93,6 +97,8 @@ export default defineComponent({
 					DATA.fromData.desc = item.desc;
 					DATA.fromData.order = item.order;
 					//可以在这里写一些use 获取其他的数据
+					//从后台获取的数据有系统标识，是有些数据就不允许更改
+					editData.sysFlag = item.sysFlag;
 					break;
 			}
 			return true;
@@ -117,6 +123,9 @@ export default defineComponent({
 			sysFlag: [{ required: true, message: '请选择标识', trigger: 'blur' }],
 			order: [{ required: true, message: '排序不能为空', trigger: 'blur' }],
 		};
+		const systemFlage = computed(() => {
+			return editData.sysFlag == Flag.Y;
+		});
 
 		const save = () => {
 			//提交数据
@@ -134,13 +143,9 @@ export default defineComponent({
 			showLoading();
 			promist
 				.then((res) => {
-					if (res.code == 0) {
-						diaglogForm.value?.closeDialog();
-						ElMessage.success(`操作成功`);
-						ctx.emit('saved', res.data);
-					} else {
-						ElMessage.error(`操作失败:${res.message}`);
-					}
+					diaglogForm.value?.closeDialog();
+					ElMessage.success(`操作成功`);
+					ctx.emit('saved', res.data);
 				})
 				.finally(() => {
 					closeLoading();
@@ -186,6 +191,7 @@ export default defineComponent({
 						<ElCol>
 							<ElFormItem label="编码" prop="code">
 								<ElInput
+									disabled={systemFlage.value}
 									v-model={DATA.fromData.code}
 									placeholder="编码"></ElInput>
 							</ElFormItem>
@@ -235,7 +241,7 @@ export default defineComponent({
 					title={prop.title}
 					labelWidth={prop.labelWidth}
 					style={ctx.attrs}
-					rules={rules.value}
+					rules={rules}
 					ref={diaglogForm}
 					v-slots={fromSlots}
 				/>

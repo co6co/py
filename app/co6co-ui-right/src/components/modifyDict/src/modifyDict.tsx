@@ -77,11 +77,10 @@ export default defineComponent({
 					DATA.id = 0;
 					DATA.fromData.dictTypeId = dictTypeId;
 					DATA.fromData.name = '';
-					DATA.fromData.state = 0;
-					DATA.fromData.name = '';
 					DATA.fromData.value = '';
+					DATA.fromData.state = undefined;
 					DATA.fromData.desc = '';
-					DATA.fromData.order = 0;
+					DATA.fromData.order = 1;
 
 					break;
 				case FormOperation.edit:
@@ -90,7 +89,6 @@ export default defineComponent({
 					DATA.fromData.dictTypeId = dictTypeId;
 					DATA.fromData.name = item.name;
 					DATA.fromData.state = item.state;
-					DATA.fromData.name = item.name;
 					DATA.fromData.value = item.value;
 					DATA.fromData.desc = item.desc;
 					DATA.fromData.order = item.order;
@@ -102,6 +100,7 @@ export default defineComponent({
 
 		const rules: FormRules = {
 			name: [{ required: true, message: '请输入名称', trigger: 'blur' }],
+
 			value: [{ required: true, message: '请输入编码', trigger: 'blur' }],
 			state: [{ required: true, message: '请选择状态', trigger: 'blur' }],
 			order: [{ required: true, message: '排序不能为空', trigger: 'blur' }],
@@ -123,13 +122,9 @@ export default defineComponent({
 			showLoading();
 			promist
 				.then((res) => {
-					if (res.code == 0) {
-						diaglogForm.value?.closeDialog();
-						ElMessage.success(`操作成功`);
-						ctx.emit('saved', res.data);
-					} else {
-						ElMessage.error(`操作失败:${res.message}`);
-					}
+					diaglogForm.value?.closeDialog();
+					ElMessage.success(`操作成功`);
+					ctx.emit('saved', res.data);
 				})
 				.finally(() => {
 					closeLoading();
@@ -180,7 +175,7 @@ export default defineComponent({
 							</ElFormItem>
 						</ElCol>
 						<ElCol span={12}>
-							<ElFormItem label="排序" prop="talkbackNo">
+							<ElFormItem label="排序" prop="order">
 								<ElInputNumber
 									v-model={DATA.fromData.order}
 									placeholder="排序"></ElInputNumber>
@@ -207,7 +202,7 @@ export default defineComponent({
 					title={prop.title}
 					labelWidth={prop.labelWidth}
 					style={ctx.attrs}
-					rules={rules.value}
+					rules={rules}
 					ref={diaglogForm}
 					v-slots={fromSlots}
 				/>

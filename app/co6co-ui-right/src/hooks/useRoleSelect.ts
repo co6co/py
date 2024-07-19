@@ -11,8 +11,8 @@ export const useMenuTreeByRole = () => {
 		treeSelectData.value = [];
 		showLoading();
 		const res = await ass_api.get_association_svc(roleId, {});
+		treeSelectData.value = res.data;
 		closeLoading();
-		if (res.code == 0) treeSelectData.value = res.data;
 	};
 	return { treeSelectData, refresh };
 };

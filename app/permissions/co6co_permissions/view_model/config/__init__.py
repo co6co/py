@@ -12,8 +12,17 @@ from co6co_web_db.model.params import associationParam
 
 from datetime import datetime
 from ..base_view import AuthMethodView
+from ..aop import exist, ObjectExistRoute
 from ...model.filters.config_filter import Filter
 from ...model.pos.other import sysConfigPO
+
+
+class ExistView(AuthMethodView):
+    routePath = ObjectExistRoute
+
+    async def get(self, request: Request, code: str, pk: int = 0):
+        result = await self.exist(request, sysConfigPO.code == code, sysConfigPO.id != pk)
+        return exist(result, "配置code", code)
 
 
 class Views(AuthMethodView):

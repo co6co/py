@@ -36,44 +36,34 @@
 						<el-table-column label="序号" width="55" align="center">
 							<template #default="scope"> {{ scope.$index }} </template>
 						</el-table-column>
-						<el-table-column
-							prop="id"
-							label="ID"
-							width="55"
-							align="center"></el-table-column>
+						<el-table-column prop="id" label="ID" width="55" align="center" />
 						<el-table-column
 							prop="name"
 							label="名称"
 							sortable
-							:show-overflow-tooltip="true"></el-table-column>
+							:show-overflow-tooltip="true" />
 						<el-table-column
-							prop="name"
+							prop="code"
 							label="编码"
 							sortable
-							:show-overflow-tooltip="true"></el-table-column>
+							:show-overflow-tooltip="true" />
 
 						<el-table-column
-							prop="state"
-							label="状态"
+							prop="value"
+							label="配置"
 							sortable
-							:show-overflow-tooltip="true">
-							<template #default="scope">
-								<el-tag :type="getTagType(scope.row.state)">
-									{{ getName(scope.row.state) }}
-								</el-tag>
-							</template>
-						</el-table-column>
+							:show-overflow-tooltip="true" />
 
 						<el-table-column
 							prop="createTime"
 							label="创建时间"
 							sortable
-							:show-overflow-tooltip="true"></el-table-column>
+							:show-overflow-tooltip="true" />
 						<el-table-column
 							prop="updateTime"
 							label="更新时间"
 							sortable
-							:show-overflow-tooltip="true"></el-table-column>
+							:show-overflow-tooltip="true" />
 						<el-table-column
 							label="操作"
 							width="180"
@@ -91,8 +81,9 @@
 									text
 									:icon="Delete"
 									class="red"
-									v-permiss="getPermissKey(ViewFeature.del)">
-									@click="onDelete(scope.$index, scope.row)"> 删除
+									v-permiss="getPermissKey(ViewFeature.del)"
+									@click="onDelete(scope.$index, scope.row)">
+									删除
 								</el-button>
 							</template>
 						</el-table-column>
@@ -124,7 +115,6 @@
 		ElButton,
 		ElHeader,
 		ElTableColumn,
-		ElTag,
 		ElTable,
 		ElScrollbar,
 		ElMain,
@@ -136,9 +126,7 @@
 	import { configSvc as svc } from '@/api/config';
 	import { warningArgs, EleConfirm } from 'co6co';
 	import { usePermission, ViewFeature } from '@/hooks/useRoute';
-	import { useState } from '@/hooks/useDictState';
 	const { getPermissKey } = usePermission();
-	const { getName, getTagType } = useState();
 	import modifyDiaglog, {
 		type ConfigItem as Item,
 		type MdifyConfigInstance,
@@ -179,12 +167,8 @@
 		svc
 			.get_table_svc(table_module.query)
 			.then((res) => {
-				if (res.code == 0) {
-					table_module.data = res.data;
-					table_module.pageTotal = res.total || -1;
-				} else {
-					ElMessage.error(res.message);
-				}
+				table_module.data = res.data;
+				table_module.pageTotal = res.total || -1;
 			})
 			.finally(() => {
 				closeLoading();
@@ -224,8 +208,7 @@
 				svc
 					.del_svc(row.id)
 					.then((res) => {
-						if (res.code == 0) ElMessage.success('删除成功'), getData();
-						else ElMessage.error(`删除失败:${res.message}`);
+						ElMessage.success(res.message || '删除成功'), getData();
 					})
 					.finally(() => {});
 			})

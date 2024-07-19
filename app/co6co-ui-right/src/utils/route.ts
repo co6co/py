@@ -96,12 +96,15 @@ export const validAuthenticate = (
 	do {
 		if (!token) {
 			if (ticket || refeshToken) {
-				userSvc.ticket_svc(ticket || refeshToken).then((res) => {
-					if (res.code == 0) {
+				userSvc
+					.ticket_svc(ticket || refeshToken)
+					.then((res) => {
 						storeAuthonInfo(res.data);
 						nextTick(() => success());
-					} else fail();
-				});
+					})
+					.catch((e) => {
+						fail();
+					});
 			} else {
 				fail();
 			}

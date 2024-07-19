@@ -47,6 +47,12 @@
 	width: 100%;
 	font-size: 14px;
 }
+.el-table .el-table__cell a {
+	color: #409eff;
+}
+.el-table .el-table__cell a:hover {
+	color: #2c649c;
+}
 .red {
 	color: #f56c6c;
 }

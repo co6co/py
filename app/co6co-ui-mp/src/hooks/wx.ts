@@ -1,3 +1,4 @@
+import { piniaInstance } from 'co6co';
 import { get_config_svc, get_menu_svc, type IMenuState } from '@/api/mp';
 import { defineStore } from 'pinia';
 
@@ -5,7 +6,7 @@ interface ListItem {
 	name: string;
 	openId: string;
 }
-export const wx_config_store = defineStore('wx_config', {
+const wx_config_store = defineStore('wx_config', {
 	state: () => {
 		return {
 			list: [] as ListItem[],
@@ -28,16 +29,13 @@ export const wx_config_store = defineStore('wx_config', {
 		async getConfig(refesh: boolean = false) {
 			if (this.list.length == 0 || refesh) {
 				const res = await get_config_svc();
-				if (res.code == 0) this.list = res.data;
+				this.list = res.data;
 			}
 		},
 		async getMemuConfig(refesh: boolean = false) {
 			if (!this.memuConfig.menuStates || refesh) {
 				const res2 = await get_menu_svc();
-				if (res2.code == 0) {
-					const data = await res2.data;
-					this.memuConfig = data;
-				}
+				this.memuConfig = await res2.data;
 			}
 		},
 		getItem(v: string) {
@@ -50,3 +48,8 @@ export const wx_config_store = defineStore('wx_config', {
 		},
 	},
 });
+
+export const get_store = () => {
+	const store = wx_config_store(piniaInstance);
+	return store;
+};

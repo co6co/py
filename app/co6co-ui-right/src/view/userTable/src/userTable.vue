@@ -132,7 +132,6 @@
 	import { ref, reactive, onMounted } from 'vue';
 	import {
 		ElTag,
-		ElMessage,
 		ElContainer,
 		ElButton,
 		ElInput,
@@ -152,7 +151,6 @@
 		Plus,
 		Setting,
 	} from '@element-plus/icons-vue';
-	import * as icons from '@element-plus/icons-vue';
 	import { useState } from '@/hooks/useUserSelect';
 	import api, { association_service as ass_api } from '@/api/sys/user';
 	import modifyDiaglog, {
@@ -202,12 +200,8 @@
 		api
 			.get_table_svc(table_module.query)
 			.then((res) => {
-				if (res.code == 0) {
-					table_module.data = res.data;
-					table_module.pageTotal = res.total || -1;
-				} else {
-					ElMessage.error(res.message);
-				}
+				table_module.data = res.data;
+				table_module.pageTotal = res.total || -1;
 			})
 			.finally(() => {
 				closeLoading();

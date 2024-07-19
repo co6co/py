@@ -6,7 +6,7 @@
 					<el-input
 						v-model="table_module.query.name"
 						placeholder="菜单名称"
-						class="handle-input mr10"></el-input>
+						class="handle-input"></el-input>
 					<el-button type="primary" :icon="Search" @click="onSearch"
 						>搜索</el-button
 					>
@@ -30,18 +30,16 @@
 						ref="multipleTable"
 						header-cell-class-name="table-header">
 						<el-table-column label="序号" width="55" align="center">
-							<template #default="scope"> {{ scope.$index }} </template>
+							<template #default="scope">
+								{{ getTableIndex(table_module.query, scope.$index) }}
+							</template>
 						</el-table-column>
-						<el-table-column
-							prop="id"
-							label="ID"
-							width="55"
-							align="center"></el-table-column>
+
 						<el-table-column
 							prop="name"
 							label="菜单名称"
 							sortable
-							:show-overflow-tooltip="true"></el-table-column>
+							:show-overflow-tooltip="true" />
 						<el-table-column
 							label="公众号"
 							width="110"
@@ -49,7 +47,7 @@
 							prop="flowStatus">
 							<template #default="scope">
 								<el-tag
-									>{{ config.getItem(scope.row.openId)?.name }}
+									>{{ store.getItem(scope.row.openId)?.name }}
 								</el-tag></template
 							>
 						</el-table-column>
@@ -60,7 +58,7 @@
 							:show-overflow-tooltip="true">
 							<template #default="scope">
 								<el-tag>
-									{{ config.getMenuStateItem(scope.row.state)?.label }}
+									{{ store.getMenuStateItem(scope.row.state)?.label }}
 								</el-tag>
 							</template>
 						</el-table-column>
@@ -69,12 +67,12 @@
 							prop="createTime"
 							label="创建时间"
 							sortable
-							:show-overflow-tooltip="true"></el-table-column>
+							:show-overflow-tooltip="true" />
 						<el-table-column
 							prop="updateTime"
 							label="更新时间"
 							sortable
-							:show-overflow-tooltip="true"></el-table-column>
+							:show-overflow-tooltip="true" />
 						<el-table-column
 							label="操作"
 							width="400"
@@ -150,6 +148,7 @@
 
 <script setup lang="ts" name="basetable">
 	import { ref, reactive, onMounted } from 'vue';
+
 	import {
 		ElMessage,
 		ElInput,
@@ -166,8 +165,8 @@
 	} from 'element-plus';
 	import { Delete, Edit, Search, Compass, Plus } from '@element-plus/icons-vue';
 	import * as mp_api from '@/api/mp';
-	import { wx_config_store } from '@/hooks/wx';
-	import { piniaInstance, warningArgs, EleConfirm } from 'co6co';
+	import { get_store } from '@/hooks/wx';
+	import { warningArgs, EleConfirm, getTableIndex } from 'co6co';
 	import { routeHook } from 'co6co-right';
 
 	import modifyDiaglog, {
@@ -183,7 +182,8 @@
 		type Table_Module_Base,
 	} from 'co6co';
 	const { getPermissKey } = routeHook.usePermission();
-	const config = wx_config_store(piniaInstance);
+	const store = get_store();
+
 	interface IQueryItem extends IPageParam {
 		name?: string;
 	}
@@ -209,16 +209,12 @@
 	// 获取表格数据
 	const getData = async () => {
 		showLoading();
-		config.refesh().then().catch();
-		mp_api
-			.list_menu_svc(table_module.query)
+		store
+			.refesh()
+			.then(() => mp_api.list_menu_svc(table_module.query))
 			.then((res) => {
-				if (res.code == 0) {
-					table_module.data = res.data;
-					table_module.pageTotal = res.total || -1;
-				} else {
-					ElMessage.error(res.message);
-				}
+				table_module.data = res.data;
+				table_module.pageTotal = res.total || -1;
 			})
 			.finally(() => {
 				closeLoading();
@@ -255,56 +251,48 @@
 		// 二次确认删除
 		EleConfirm(`确定要删除"${row.name}"菜单吗？`, { ...warningArgs })
 			.then(() => {
-				mp_api
-					.del_menu_svc(row.id)
-					.then((res) => {
-						if (res.code == 0) ElMessage.success('删除成功'), getData();
-						else ElMessage.error(`删除失败:${res.message}`);
-					})
-					.finally(() => {});
+				showLoading();
+				return mp_api.del_menu_svc(row.id);
 			})
-			.catch(() => {});
+			.then(() => {
+				closeLoading();
+				ElMessage.success('删除成功'), getData();
+			});
 	};
 
 	//推送菜单
 	const onPush = (index: number, row: any) => {
 		EleConfirm(`确定要推送"${row.name}"到微信公众号吗？`, { ...warningArgs })
 			.then(() => {
-				mp_api
-					.push_menu_svc(row.id)
-					.then((res) => {
-						if (res.code == 0) ElMessage.success('推送成功'), getData();
-						else ElMessage.error(`推送失败:${res.message}`);
-					})
-					.finally(() => {});
+				showLoading();
+				return mp_api.push_menu_svc(row.id);
 			})
-			.catch(() => {});
+			.then(() => {
+				closeLoading();
+				ElMessage.success('推送成功'), getData();
+			});
 	};
 	const onPull = (index: number, row: any) => {
 		EleConfirm(`确定要获取微信公众号菜单？`, { ...warningArgs })
 			.then(() => {
-				mp_api
-					.pull_menu_svc(row.id)
-					.then((res) => {
-						if (res.code == 0) ElMessage.success('获取成功'), getData();
-						else ElMessage.error(`获取失败:${res.message}`);
-					})
-					.finally(() => {});
+				showLoading();
+				return mp_api.pull_menu_svc(row.id);
 			})
-			.catch(() => {});
+			.then(() => {
+				closeLoading();
+				ElMessage.success('获取成功'), getData();
+			});
 	};
 	const onReset = (index: number, row: any) => {
 		EleConfirm(`确定要重置公众号菜单，重置后菜单降不存在！`, { ...warningArgs })
 			.then(() => {
-				mp_api
-					.reset_menu_svc(row.id)
-					.then((res) => {
-						if (res.code == 0) ElMessage.success('重置成功'), getData();
-						else ElMessage.error(`重置失败:${res.message}!`);
-					})
-					.finally(() => {});
+				showLoading();
+				return mp_api.reset_menu_svc(row.id);
 			})
-			.catch(() => {});
+			.then(() => {
+				closeLoading();
+				ElMessage.success('重置成功'), getData();
+			});
 	};
 	//弹出框 add and edit
 	onMounted(() => {

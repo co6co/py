@@ -1,6 +1,9 @@
 import { defineComponent, ref, reactive, provide, computed } from 'vue';
 import type { InjectionKey } from 'vue';
 import 'md-editor-v3/lib/style.css';
+import * as api from '@/api/mp';
+import { MdEditor } from 'md-editor-v3';
+import { get_store } from '@/hooks/wx';
 import {
 	showLoading,
 	closeLoading,
@@ -11,8 +14,6 @@ import {
 	FormOperation,
 	DialogForm,
 } from 'co6co';
-
-import * as api from '@/api/mp';
 
 import {
 	ElRow,
@@ -25,10 +26,6 @@ import {
 	ElOption,
 	type FormRules,
 } from 'element-plus';
-import { MdEditor } from 'md-editor-v3';
-
-import { wx_config_store } from '@/hooks/wx';
-import { piniaInstance } from 'co6co';
 
 export interface Item extends FormItemBase {
 	id: number;
@@ -118,7 +115,7 @@ export default defineComponent({
 		const key = Symbol('formData') as InjectionKey<FormItem>; //'formData'
 		provide('formData', DATA.fromData);
 
-		const config = wx_config_store(piniaInstance);
+		const config = get_store();
 		const init_data = (oper: FormOperation, item?: Item) => {
 			DATA.operation = oper;
 			switch (oper) {

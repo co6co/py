@@ -110,13 +110,9 @@ export default defineComponent({
 			showLoading();
 			promist
 				.then((res) => {
-					if (res.code == 0) {
-						diaglogForm.value?.closeDialog();
-						ElMessage.success(`操作成功`);
-						ctx.emit('saved', res.data);
-					} else {
-						ElMessage.error(`操作失败:${res.message}`);
-					}
+					diaglogForm.value?.closeDialog();
+					ElMessage.success(`操作成功`);
+					ctx.emit('saved', res.data);
 				})
 				.finally(() => {
 					closeLoading();
@@ -135,10 +131,6 @@ export default defineComponent({
 			),
 			default: () => (
 				<>
-					<ElRow>
-						<ElCol span={12}></ElCol>
-						<ElCol span={12}></ElCol>
-					</ElRow>
 					<ElRow>
 						<ElCol span={12}>
 							<ElFormItem label="名称" prop="name">

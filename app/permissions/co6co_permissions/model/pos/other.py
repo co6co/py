@@ -18,6 +18,7 @@ class sysConfigPO(UserTimeStampedModelPO):
     id = Column("id", Integer, autoincrement=True, primary_key=True)
     name = Column("name", String(64))
     code = Column("code", String(64),  unique=True)
+    sysFlag = Column("sys_flag", String(1),  comment="Y:系统,N:不是")
     dictFlag = Column("dict_flag", String(1),  comment="Y:使用字典做配置,N:手动配置")
     dictTypeId = Column("dict_type_id", Integer,  comment="字典类型ID")
     value = Column("value", String(1024),  comment="配置值")
@@ -27,6 +28,7 @@ class sysConfigPO(UserTimeStampedModelPO):
         self.name = po.name
         self.code = po.code
         self.dictFlag = po.dictFlag
+        self.sysFlag = po.sysFlag
         self.value = po.value
         self.remark = po.remark
 

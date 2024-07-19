@@ -1,5 +1,5 @@
 import { ref, onMounted } from 'vue';
-import { IEnumSelect, ElTagType } from 'co6co';
+import { IEnumSelect } from 'co6co';
 import { get_state_svc } from '@/api/sys/user';
 
 export const useState = () => {
@@ -7,7 +7,7 @@ export const useState = () => {
 	const refresh = async () => {
 		selectData.value = [];
 		const res = await get_state_svc();
-		if (res.code == 0) selectData.value = res.data;
+		selectData.value = res.data;
 	};
 	const getName = (value?: number) => {
 		if (value != undefined)

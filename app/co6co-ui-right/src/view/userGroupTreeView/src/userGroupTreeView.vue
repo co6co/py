@@ -148,7 +148,6 @@
 	import { ref, reactive, onMounted } from 'vue';
 	import {
 		ElMessage,
-		ElMessageBox,
 		ElContainer,
 		ElButton,
 		ElInput,
@@ -160,16 +159,7 @@
 		ElPagination,
 		ElFooter,
 	} from 'element-plus';
-	import {
-		Delete,
-		Sunny,
-		Edit,
-		Search,
-		Compass,
-		Plus,
-		Setting,
-		Connection,
-	} from '@element-plus/icons-vue';
+	import { Delete, Search, Plus, Setting } from '@element-plus/icons-vue';
 	import {
 		showLoading,
 		closeLoading,
@@ -210,19 +200,15 @@
 		pageTotal: -1,
 		diaglogTitle: '',
 	});
-	const { selectData, refresh, getName } = useUserGroupSelect();
+	const { refresh, getName } = useUserGroupSelect();
 	// 获取表格数据
 	const getData = () => {
 		showLoading();
 		api
 			.get_tree_table_svc(table_module.query)
 			.then((res) => {
-				if (res.code == 0) {
-					table_module.data = res.data;
-					table_module.pageTotal = res.total || -1;
-				} else {
-					ElMessage.error(res.message);
-				}
+				table_module.data = res.data;
+				table_module.pageTotal = res.total || -1;
 			})
 			.finally(() => {
 				closeLoading();
@@ -274,8 +260,7 @@
 				api
 					.del_svc(row.id)
 					.then((res) => {
-						if (res.code == 0) ElMessage.success('删除成功'), onLoadData();
-						else ElMessage.error(`删除失败:${res.message}`);
+						ElMessage.success(res.message || '删除成功'), onLoadData();
 					})
 					.finally(() => {
 						closeLoading();

@@ -201,14 +201,10 @@ export default defineComponent({
 			showLoading();
 			promist
 				.then((res) => {
-					if (res.code == 0) {
-						diaglogForm.value?.closeDialog();
-						ElMessage.success(`操作成功`);
-						refresh();
-						ctx.emit('saved', res.data);
-					} else {
-						ElMessage.error(`操作失败:${res.message}`);
-					}
+					diaglogForm.value?.closeDialog();
+					ElMessage.success(`操作成功`);
+					refresh();
+					ctx.emit('saved', res.data);
 				})
 				.finally(() => {
 					closeLoading();

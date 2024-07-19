@@ -1,4 +1,4 @@
-import { defineComponent, ref, reactive, computed, provide } from 'vue';
+import { defineComponent, ref, reactive, provide, computed } from 'vue';
 import type { InjectionKey } from 'vue';
 import {
 	DialogForm,
@@ -25,17 +25,16 @@ import {
 	type FormRules,
 	ElSelect,
 	ElOption,
-	ElInputNumber,
 } from 'element-plus';
 
 export interface Item extends api_type.FormItemBase {
 	id: number;
 	name: string;
 	code: string;
+	sysFlag: Flag; //Y|N
 	dictFlag: Flag; //Y|N
 	dictTypeId?: number;
 	value: string;
-	state: number;
 	remark?: string;
 }
 //Omit、Pick、Partial、Required
@@ -61,10 +60,22 @@ export default defineComponent({
 		const { selectData } = useDictTypeSelect();
 
 		const diaglogForm = ref<DialogFormInstance>();
+
 		const DATA = reactive<FormData<number, FormItem>>({
 			operation: FormOperation.add,
+
 			id: 0,
-			fromData: { name: '', code: '', state: 0, dictFlag: Flag.N, value: '' },
+			fromData: {
+				name: '',
+				code: '',
+				sysFlag: Flag.N,
+				dictFlag: Flag.N,
+				value: '',
+			},
+		});
+		const editData = reactive<{ sysFlag: Flag; dictFlag: Flag }>({
+			sysFlag: Flag.N,
+			dictFlag: Flag.N,
 		});
 		//@ts-ignore
 		const key = Symbol('formData') as InjectionKey<FormItem>; //'formData'
@@ -72,13 +83,15 @@ export default defineComponent({
 
 		const init_data = (oper: FormOperation, item?: Item) => {
 			DATA.operation = oper;
+			editData.sysFlag = Flag.N;
+			editData.dictFlag = Flag.N;
 			switch (oper) {
 				case FormOperation.add:
 					DATA.id = 0;
 					DATA.fromData.name = '';
-					DATA.fromData.state = 0;
 					DATA.fromData.name = '';
 					DATA.fromData.code = '';
+					DATA.fromData.sysFlag = Flag.N;
 					DATA.fromData.dictFlag = Flag.N;
 					DATA.fromData.value = '';
 					DATA.fromData.remark = '';
@@ -88,13 +101,21 @@ export default defineComponent({
 					if (!item) return false;
 					DATA.id = item.id;
 					DATA.fromData.name = item.name;
-					DATA.fromData.state = item.state;
 					DATA.fromData.name = item.name;
 					DATA.fromData.code = item.code;
+					DATA.fromData.dictTypeId = item.dictTypeId;
+
+					DATA.fromData.sysFlag = item.sysFlag;
 					DATA.fromData.dictFlag = item.dictFlag;
+
 					DATA.fromData.value = item.value;
 					DATA.fromData.remark = item.remark;
 					//可以在这里写一些use 获取其他的数据
+					//从后台获取的数据有系统标识，是有些数据就不允许更改
+					editData.sysFlag = item.sysFlag;
+					editData.dictFlag = item.dictFlag;
+					//加载字典
+					if (item.dictTypeId) onDictTypeChange();
 					break;
 			}
 			return true;
@@ -115,7 +136,7 @@ export default defineComponent({
 				{ min: 3, max: 10, message: '编码长度应3个字符', trigger: 'blur' },
 				{ validator: validCode, trigger: 'blur' },
 			],
-			state: [{ required: true, message: '请选择状态', trigger: 'blur' }],
+
 			sysFlag: [{ required: true, message: '请选择标识', trigger: 'blur' }],
 			order: [{ required: true, message: '排序不能为空', trigger: 'blur' }],
 		};
@@ -136,26 +157,31 @@ export default defineComponent({
 			showLoading();
 			promist
 				.then((res) => {
-					if (res.code == 0) {
-						diaglogForm.value?.closeDialog();
-						ElMessage.success(`操作成功`);
-						ctx.emit('saved', res.data);
-					} else {
-						ElMessage.error(`操作失败:${res.message}`);
-					}
+					diaglogForm.value?.closeDialog();
+					ElMessage.success(`操作成功`);
+					ctx.emit('saved', res.data);
 				})
 				.finally(() => {
 					closeLoading();
 				});
 		};
-		const dictSelectData = ref<api_type.ISelect[]>([]);
+		const systemFlage = computed(() => {
+			return editData.sysFlag == Flag.Y;
+		});
+		const dictFlage = computed(() => {
+			return editData.dictFlag == Flag.Y;
+		});
+
+		const dictSelect = useDictSelect();
 		const onDictTypeChange = () => {
-			const { selectData, query } = useDictSelect();
 			if (DATA.fromData.dictTypeId) {
 				showLoading();
-				query(DATA.fromData.dictTypeId);
-				dictSelectData.value = selectData.value;
-				closeLoading();
+				dictSelect
+					.query(DATA.fromData.dictTypeId)
+					.then(() => {})
+					.finally(() => {
+						closeLoading();
+					});
 			}
 		};
 		const fromSlots = {
@@ -180,10 +206,11 @@ export default defineComponent({
 							</ElFormItem>
 						</ElCol>
 						<ElCol span={12}>
-							<ElFormItem label="使用字典" prop="state">
+							<ElFormItem label="系统配置" prop="state">
 								<ElSelect
-									v-model={DATA.fromData.dictFlag}
-									placeholder="使用字典">
+									disabled={systemFlage.value}
+									v-model={DATA.fromData.sysFlag}
+									placeholder="系统配置">
 									{Object.keys(Flag).map((d, index) => {
 										return (
 											<ElOption
@@ -200,8 +227,28 @@ export default defineComponent({
 						<ElCol>
 							<ElFormItem label="配置编码" prop="code">
 								<ElInput
+									disabled={systemFlage.value}
 									v-model={DATA.fromData.code}
 									placeholder="配置编码"></ElInput>
+							</ElFormItem>
+						</ElCol>
+					</ElRow>
+					<ElRow>
+						<ElCol>
+							<ElFormItem label="使用字典" prop="dictFlag">
+								<ElSelect
+									disabled={systemFlage.value && dictFlage.value}
+									v-model={DATA.fromData.dictFlag}
+									placeholder="使用字典">
+									{Object.keys(Flag).map((d, index) => {
+										return (
+											<ElOption
+												key={index}
+												label={d == Flag.Y ? '是' : '否'}
+												value={d}></ElOption>
+										);
+									})}
+								</ElSelect>
 							</ElFormItem>
 						</ElCol>
 					</ElRow>
@@ -211,6 +258,7 @@ export default defineComponent({
 							<ElCol span={12}>
 								<ElFormItem label="选择字典" prop="dictTypeId">
 									<ElSelect
+										disabled={systemFlage.value}
 										v-model={DATA.fromData.dictTypeId}
 										placeholder="字典"
 										onChange={onDictTypeChange}>
@@ -228,12 +276,12 @@ export default defineComponent({
 							<ElCol span={12}>
 								<ElFormItem label="配置值" prop="value">
 									<ElSelect v-model={DATA.fromData.value} placeholder="配置值">
-										{dictSelectData.value.map((d, index) => {
+										{dictSelect.selectData.value.map((d, index) => {
 											return (
 												<ElOption
 													key={index}
 													label={d.name}
-													value={d.id}></ElOption>
+													value={d.value}></ElOption>
 											);
 										})}
 									</ElSelect>
@@ -272,7 +320,7 @@ export default defineComponent({
 					title={prop.title}
 					labelWidth={prop.labelWidth}
 					style={ctx.attrs}
-					rules={rules.value}
+					rules={rules}
 					ref={diaglogForm}
 					v-slots={fromSlots}
 				/>

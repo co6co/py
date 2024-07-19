@@ -14,7 +14,7 @@ export default function () {
 	const refresh = async () => {
 		selectData.value = [];
 		const res = await api.get_select_svc();
-		if (res.code == 0) selectData.value = res.data;
+		selectData.value = res.data;
 	};
 	const getName = (value?: number) => {
 		if (value) return selectData.value.find((m) => m.id == value)?.name;
@@ -31,7 +31,7 @@ export const useTree = () => {
 	const refresh = async () => {
 		treeSelectData.value = [];
 		const res = await api.get_select_tree_svc();
-		if (res.code == 0) treeSelectData.value = res.data;
+		treeSelectData.value = res.data;
 	};
 
 	onMounted(() => {
@@ -49,7 +49,7 @@ export const useMenuState = () => {
 	const refresh = async () => {
 		selectData.value = [];
 		const res = await get_state_svc();
-		if (res.code == 0) selectData.value = res.data;
+		selectData.value = res.data;
 	};
 	const getName = (value?: number) => {
 		if (value) return selectData.value.find((m) => m.value == value)?.label;
@@ -77,7 +77,7 @@ export const useMenuCategory = () => {
 	const refresh = async () => {
 		selectData.value = [];
 		const res = await get_category_svc();
-		if (res.code == 0) selectData.value = res.data;
+		selectData.value = res.data;
 	};
 	const getName = (value?: number) => {
 		if (value) return selectData.value.find((m) => m.value == value)?.label;

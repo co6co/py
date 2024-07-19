@@ -1,14 +1,18 @@
 import { ref, onMounted } from 'vue';
 import { IEnumSelect, ISelect } from 'co6co';
 import { get_dict_state_svc } from '@/api/dict/dict';
-import { get_select_svc, get_dict_select_svc } from '@/api/dict/dictType';
+import {
+	get_select_svc,
+	get_dict_select_svc,
+	type DictSelect,
+} from '@/api/dict/dictType';
 
 export const useState = () => {
 	const selectData = ref<IEnumSelect[]>([]);
 	const refresh = async () => {
 		selectData.value = [];
 		const res = await get_dict_state_svc();
-		if (res.code == 0) selectData.value = res.data;
+		selectData.value = res.data;
 	};
 	const getName = (value?: number) => {
 		if (value != undefined)
@@ -35,7 +39,7 @@ export const useDictTypeSelect = () => {
 	const refresh = async () => {
 		selectData.value = [];
 		const res = await get_select_svc();
-		if (res.code == 0) selectData.value = res.data;
+		selectData.value = res.data;
 	};
 	onMounted(() => {
 		refresh();
@@ -47,11 +51,11 @@ export const useDictTypeSelect = () => {
  * @returns
  */
 export const useDictSelect = () => {
-	const selectData = ref<ISelect[]>([]);
+	const selectData = ref<DictSelect[]>([]);
 	const query = async (dictTypeId: number) => {
 		selectData.value = [];
 		const res = await get_dict_select_svc(dictTypeId);
-		if (res.code == 0) selectData.value = res.data;
+		selectData.value = res.data;
 	};
 	return { selectData, query };
 };

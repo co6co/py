@@ -13,10 +13,8 @@ export default function (
 				showLoading();
 				del_svc(pk)
 					.then((res) => {
-						if (res.code == 0) {
-							ElMessage.success('删除成功');
-							if (bck) bck();
-						} else ElMessage.error(`删除失败:${res.message}`);
+						ElMessage.success(res.message || '删除成功');
+						if (bck) bck();
 					})
 					.finally(() => {
 						closeLoading();

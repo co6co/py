@@ -8,7 +8,7 @@ const { get_select_svc, add_svc, edit_svc, del_svc, get_table_svc, exist_svc } =
 
 export { get_select_svc, add_svc, edit_svc, del_svc, get_table_svc, exist_svc };
 
-export type DictSelect = ISelect & { code: string; desc: string };
+export type DictSelect = ISelect & { value: string; desc: string };
 /**
  * 获取字典的选择
  * @param dictTypeId

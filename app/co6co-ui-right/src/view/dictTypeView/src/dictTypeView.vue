@@ -144,7 +144,7 @@
 		ElFooter,
 		ElContainer,
 	} from 'element-plus';
-	import { Delete, Edit, Search, Compass, Plus } from '@element-plus/icons-vue';
+	import { Delete, Edit, Search, Plus } from '@element-plus/icons-vue';
 	import { dictTypeSvc as svc } from '@/api/dict';
 	import { warningArgs, EleConfirm } from 'co6co';
 	import { usePermission, ViewFeature, useRouteData } from '@/hooks/useRoute';
@@ -195,12 +195,8 @@
 		svc
 			.get_table_svc(table_module.query)
 			.then((res) => {
-				if (res.code == 0) {
-					table_module.data = res.data;
-					table_module.pageTotal = res.total || -1;
-				} else {
-					ElMessage.error(res.message);
-				}
+				table_module.data = res.data;
+				table_module.pageTotal = res.total || -1;
 			})
 			.finally(() => {
 				closeLoading();
@@ -242,8 +238,7 @@
 				svc
 					.del_svc(row.id)
 					.then((res) => {
-						if (res.code == 0) ElMessage.success('删除成功'), getData();
-						else ElMessage.error(`删除失败:${res.message}`);
+						ElMessage.success(res.message || '删除成功'), getData();
 					})
 					.finally(() => {});
 			})

@@ -132,7 +132,6 @@
 	import { ref, reactive, onMounted } from 'vue';
 	import {
 		ElMessage,
-		ElMessageBox,
 		ElContainer,
 		ElButton,
 		ElInput,
@@ -145,16 +144,7 @@
 		ElFooter,
 	} from 'element-plus';
 
-	import {
-		Delete,
-		Sunny,
-		Edit,
-		Search,
-		Compass,
-		Plus,
-		Setting,
-		Connection,
-	} from '@element-plus/icons-vue';
+	import { Delete, Search, Plus, Setting } from '@element-plus/icons-vue';
 
 	import api from '@/api/sys/menu';
 	import modifyDiaglog, {
@@ -169,10 +159,7 @@
 		EleConfirm,
 		warningArgs,
 	} from 'co6co';
-	import useSelect, {
-		useMenuCategory,
-		useMenuState,
-	} from '@/hooks/useMenuSelect';
+	import useSelect from '@/hooks/useMenuSelect';
 	import { usePermission, ViewFeature } from '@/hooks/useRoute';
 	const { getPermissKey } = usePermission();
 
@@ -198,9 +185,7 @@
 		pageTotal: -1,
 		diaglogTitle: '',
 	});
-	const { selectData, refresh, getName } = useSelect();
-	const menuStateData = useMenuState();
-	const menuCategoryData = useMenuCategory();
+	const { refresh, getName } = useSelect();
 
 	// 获取表格数据
 	const getData = () => {
@@ -208,12 +193,8 @@
 		api
 			.get_tree_table_svc(table_module.query)
 			.then((res) => {
-				if (res.code == 0) {
-					table_module.data = res.data;
-					table_module.pageTotal = res.total || -1;
-				} else {
-					ElMessage.error(res.message);
-				}
+				table_module.data = res.data;
+				table_module.pageTotal = res.total || -1;
 			})
 			.finally(() => {
 				closeLoading();
@@ -254,8 +235,7 @@
 				api
 					.del_svc(row.id)
 					.then((res) => {
-						if (res.code == 0) ElMessage.success('删除成功'), onLoadData();
-						else ElMessage.error(`删除失败:${res.message}`);
+						ElMessage.success(res.message || '删除成功'), onLoadData();
 					})
 					.finally(() => {
 						closeLoading();

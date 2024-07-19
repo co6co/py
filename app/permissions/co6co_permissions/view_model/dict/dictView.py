@@ -18,14 +18,6 @@ from ...model.pos.other import sysDictPO
 from ...model.enum import dict_state
 
 
-class DictExistView(AuthMethodView):
-    routePath = "/exist/<code:str>/<pk:int>"
-
-    async def get(self, request: Request, code: str, pk: int = 0):
-        result = await db_tools.exist(request.ctx.session, sysDictPO.code == code, sysDictPO.id != pk)
-        return exist(result, "字典", code)
-
-
 class Views(AuthMethodView):
     async def get(self, request: Request):
         """
@@ -49,9 +41,9 @@ class Views(AuthMethodView):
         userId = self.getUserId(request)
 
         async def before(po: sysDictPO, session: AsyncSession, request):
-            exist = await db_tools.exist(session,  sysDictPO.code.__eq__(po.code), column=sysDictPO.id)
+            exist = await db_tools.exist(session, sysDictPO.dictTypeId == po.dictTypeId, sysDictPO.value == po.value,   column=sysDictPO.id)
             if exist:
-                return JSON_util.response(Result.fail(message=f"'{po.code}'已存在！"))
+                return JSON_util.response(Result.fail(message=f"'{po.value}'在该字典中已存在！"))
         return await self.add(request, po, userId=userId, beforeFun=before)
 
 
@@ -63,9 +55,9 @@ class View(AuthMethodView):
         编辑
         """
         async def before(oldPo: sysDictPO, po: sysDictPO, session: AsyncSession, request):
-            exist = await db_tools.exist(session, sysDictPO.id != oldPo.id, sysDictPO.code.__eq__(po.code), column=sysDictPO.id)
+            exist = await db_tools.exist(session, sysDictPO.dictTypeId == po.dictTypeId, sysDictPO.value == po.value, sysDictPO.id != oldPo.id, column=sysDictPO.id)
             if exist:
-                return JSON_util.response(Result.fail(message=f"'{po.code}'已存在！"))
+                return JSON_util.response(Result.fail(message=f"'{po.value}'在该字典中已存在！"))
 
         return await self.edit(request, pk, sysDictPO, userId=self.getUserId(request), fun=before)
 
