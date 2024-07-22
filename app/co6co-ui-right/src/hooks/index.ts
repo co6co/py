@@ -5,4 +5,4 @@ export * as roleSelectHook from './useRoleSelect';
 export * as routeHook from './useRoute';
 export * as userGroupSelectHook from './useUserGroupSelect';
 export * as userSelectHook from './useUserSelect';
-export * as useDictState from './useDictState';
+export * as useDictHook from './useDictState';

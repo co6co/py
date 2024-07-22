@@ -109,7 +109,7 @@
 											text
 											:icon="Delete"
 											class="red"
-											@click="onDelete(scope.$index, scope.row)">
+											@click="onDelete(scope.$index, scope.row.id)">
 											删除
 										</el-button>
 									</template>
@@ -147,7 +147,6 @@
 <script setup lang="ts" name="basetable">
 	import { ref, reactive, onMounted } from 'vue';
 	import {
-		ElMessage,
 		ElContainer,
 		ElButton,
 		ElInput,
@@ -167,16 +166,15 @@
 		type IPageParam,
 		type Table_Module_Base,
 		Associated as associatedDiaglog,
-		warningArgs,
-		EleConfirm,
 	} from 'co6co';
 
 	import modifyDiaglog, {
 		type UserGroupItem as Item,
 	} from '@/components/modifyUserGroup';
 	import useUserGroupSelect from '@/hooks/useUserGroupSelect';
-	import api, { association_service as ass_api } from '@/api/sys/userGroup';
+	import svc, { association_service as ass_api } from '@/api/sys/userGroup';
 	import { usePermission, ViewFeature } from '@/hooks/useRoute';
+	import useDelete from '@/hooks/useDelete';
 	const { getPermissKey } = usePermission();
 	interface IQueryItem extends IPageParam {
 		name?: string;
@@ -204,7 +202,7 @@
 	// 获取表格数据
 	const getData = () => {
 		showLoading();
-		api
+		svc
 			.get_tree_table_svc(table_module.query)
 			.then((res) => {
 				table_module.data = res.data;
@@ -252,21 +250,9 @@
 		getData();
 		modifyDiaglogRef.value?.update();
 	};
-	// 删除操作
-	const onDelete = (index: number, row: Item) => {
-		EleConfirm(`确定要删除"${row.name}"吗？`, { ...warningArgs })
-			.then(() => {
-				showLoading();
-				api
-					.del_svc(row.id)
-					.then((res) => {
-						ElMessage.success(res.message || '删除成功'), onLoadData();
-					})
-					.finally(() => {
-						closeLoading();
-					});
-			})
-			.catch(() => {});
+	const { deleteSvc } = useDelete(svc.del_svc, getData);
+	const onDelete = (_: number, row: Item) => {
+		deleteSvc(row.id, row.name);
 	};
 	onMounted(() => {
 		onLoadData();

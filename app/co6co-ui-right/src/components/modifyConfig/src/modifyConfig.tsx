@@ -89,7 +89,6 @@ export default defineComponent({
 				case FormOperation.add:
 					DATA.id = 0;
 					DATA.fromData.name = '';
-					DATA.fromData.name = '';
 					DATA.fromData.code = '';
 					DATA.fromData.sysFlag = Flag.N;
 					DATA.fromData.dictFlag = Flag.N;
@@ -100,7 +99,6 @@ export default defineComponent({
 				case FormOperation.edit:
 					if (!item) return false;
 					DATA.id = item.id;
-					DATA.fromData.name = item.name;
 					DATA.fromData.name = item.name;
 					DATA.fromData.code = item.code;
 					DATA.fromData.dictTypeId = item.dictTypeId;
@@ -133,7 +131,7 @@ export default defineComponent({
 			name: [{ required: true, message: '请输入名称', trigger: 'blur' }],
 			code: [
 				{ required: true, message: '请输入编码', trigger: 'blur' },
-				{ min: 3, max: 10, message: '编码长度应3个字符', trigger: 'blur' },
+				{ min: 3, max: 64, message: '编码长度应3-64个字符', trigger: 'blur' },
 				{ validator: validCode, trigger: 'blur' },
 			],
 

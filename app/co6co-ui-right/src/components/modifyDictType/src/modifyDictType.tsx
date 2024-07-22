@@ -116,7 +116,7 @@ export default defineComponent({
 			name: [{ required: true, message: '请输入名称', trigger: 'blur' }],
 			code: [
 				{ required: true, message: '请输入编码', trigger: 'blur' },
-				{ min: 3, max: 10, message: '编码长度应3个字符', trigger: 'blur' },
+				{ min: 3, max: 64, message: '编码长度应3-64个字符', trigger: 'blur' },
 				{ validator: validCode, trigger: 'blur' },
 			],
 			state: [{ required: true, message: '请选择状态', trigger: 'blur' }],

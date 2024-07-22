@@ -1,6 +1,9 @@
 import { ref, onMounted } from 'vue';
 import { IEnumSelect, ISelect } from 'co6co';
-import { get_dict_state_svc } from '@/api/dict/dict';
+import {
+	get_dict_state_svc,
+	get_dict_select_svc as get_dict_select_by_code_svc,
+} from '@/api/dict/dict';
 import {
 	get_select_svc,
 	get_dict_select_svc,
@@ -57,5 +60,18 @@ export const useDictSelect = () => {
 		const res = await get_dict_select_svc(dictTypeId);
 		selectData.value = res.data;
 	};
-	return { selectData, query };
+	const queryByCode = async (dictTypeCode: string) => {
+		selectData.value = [];
+		const res = await get_dict_select_by_code_svc(dictTypeCode);
+		selectData.value = res.data;
+	};
+	const getName = (value: string) => {
+		//selectData.value.filter((m) => m.value == value);
+		return selectData.value.find((m) => m.value == value)?.name;
+	};
+	const getDesc = (value: string) => {
+		//selectData.value.filter((m) => m.value == value);
+		return selectData.value.find((m) => m.value == value)?.desc;
+	};
+	return { selectData, query, queryByCode, getName, getDesc };
 };

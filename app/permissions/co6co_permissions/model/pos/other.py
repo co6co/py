@@ -21,7 +21,7 @@ class sysConfigPO(UserTimeStampedModelPO):
     sysFlag = Column("sys_flag", String(1),  comment="Y:系统,N:不是")
     dictFlag = Column("dict_flag", String(1),  comment="Y:使用字典做配置,N:手动配置")
     dictTypeId = Column("dict_type_id", Integer,  comment="字典类型ID")
-    value = Column("value", String(1024),  comment="配置值")
+    value = Column("value", String(2048),  comment="配置值")
     remark = Column("remark", String(2048), comment="备注")
 
     def update(self, po: sysConfigPO):

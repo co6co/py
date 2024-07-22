@@ -17,6 +17,25 @@ from ...model.filters.config_filter import Filter
 from ...model.pos.other import sysConfigPO
 
 
+class ConfigView(AuthMethodView):
+    """
+    通过代码获取配置
+    """
+    routePath = "/<code:str>"
+
+    async def get(self, request: Request, code: str):
+        """ 
+        获取配置
+        code: 配置代码
+        """
+        select = (
+            Select(sysConfigPO.name, sysConfigPO.code,
+                   sysConfigPO.value, sysConfigPO.remark)
+            .filter(sysConfigPO.code.__eq__(code))
+        )
+        return await self.query_mapping(request, select, oneRecord=True)
+
+
 class ExistView(AuthMethodView):
     routePath = ObjectExistRoute
 

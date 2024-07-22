@@ -1,23 +1,21 @@
-from functools import wraps 
-from sanic.views import HTTPMethodView # 基于类的视图
-from sanic import  Request
-from co6co_db_ext.db_filter import absFilterItems
-from co6co_db_ext.db_operations import DbPagedOperations,DbOperations,InstrumentedAttribute
+from functools import wraps
+from sanic.views import HTTPMethodView  # 基于类的视图
+from sanic import Request
 from co6co_sanic_ext.model.res.result import Page_Result
-from co6co_sanic_ext.utils import  JSON_util    
+from co6co_sanic_ext.utils import JSON_util
 from typing import TypeVar, Dict, List, Any, Tuple
 from co6co_sanic_ext.model.res.result import Result, Page_Result
 import aiofiles
 import os
 import multipart
 from io import BytesIO
-from co6co_web_db.utils import DbJSONEncoder
 from sqlalchemy import Select
 from co6co_db_ext.po import BasePO, UserTimeStampedModelPO
 from datetime import datetime
-from co6co.utils.tool_util import list_to_tree,get_current_function_name
+from co6co.utils.tool_util import list_to_tree, get_current_function_name
 from co6co.utils import log, getDateFolder
- 
+
+
 class BaseView(HTTPMethodView):
     """
     视图基类： 约定 增删改查，其他未约定方法可根据实际情况具体使用
@@ -25,15 +23,22 @@ class BaseView(HTTPMethodView):
     views.PUT   :---> Add 
     view.PUT    :---> Edit
     view.DELETE :---> del
-    """  
+    """
     """
     类属性：
     路由使用路径
     """
-    routePath:str="/" 
-    
+    routePath: str = "/"
+
     def response_json(self, data: Result | Page_Result):
-        return DbJSONEncoder.json(data)
+        return JSON_util.response(data)
+
+    def is_integer(self, s: str | bytes | bytearray):
+        try:
+            int(s)
+            return True
+        except ValueError:
+            return False
 
     def usable_args(self, request: Request) -> dict:
         """

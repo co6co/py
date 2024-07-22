@@ -33,14 +33,14 @@
 						class="table"
 						ref="multipleTable"
 						header-cell-class-name="table-header">
-						<el-table-column label="序号" width="55" align="center">
-							<template #default="scope"> {{ scope.$index }} </template>
-						</el-table-column>
 						<el-table-column
-							prop="id"
-							label="ID"
+							label="序号"
 							width="55"
-							align="center"></el-table-column>
+							align="center"
+							:show-overflow-tooltip="true">
+							<template #default="scope"> {{ scope.$index + 1 }} </template>
+						</el-table-column>
+
 						<el-table-column
 							prop="name"
 							label="名称"
@@ -131,7 +131,6 @@
 <script setup lang="ts" name="basetable">
 	import { ref, reactive, onMounted } from 'vue';
 	import {
-		ElMessage,
 		ElInput,
 		ElButton,
 		ElHeader,
@@ -146,7 +145,6 @@
 	} from 'element-plus';
 	import { Delete, Edit, Search, Plus } from '@element-plus/icons-vue';
 	import { dictTypeSvc as svc } from '@/api/dict';
-	import { warningArgs, EleConfirm } from 'co6co';
 	import { usePermission, ViewFeature, useRouteData } from '@/hooks/useRoute';
 	import { useState } from '@/hooks/useDictState';
 
@@ -167,6 +165,8 @@
 		type Table_Module_Base,
 	} from 'co6co';
 	import { getViewPath } from '@/view';
+	import useDelete from '@/hooks/useDelete';
+
 	interface IQueryItem extends IPageParam {
 		name?: string;
 		code?: string;
@@ -230,19 +230,9 @@
 		modifyDiaglogRef.value?.openDialog(operation, row);
 	};
 
-	// 删除操作
-	const onDelete = (index: number, row: any) => {
-		// 二次确认删除
-		EleConfirm(`确定要删除"${row.name}"菜单吗？`, { ...warningArgs })
-			.then(() => {
-				svc
-					.del_svc(row.id)
-					.then((res) => {
-						ElMessage.success(res.message || '删除成功'), getData();
-					})
-					.finally(() => {});
-			})
-			.catch(() => {});
+	const { deleteSvc } = useDelete(svc.del_svc, getData);
+	const onDelete = (_: number, row: Item) => {
+		deleteSvc(row.id, row.name);
 	};
 	const subViewPath = ref('');
 	const getsubViewPath = (dictTypeId: number) => {

@@ -152,7 +152,7 @@
 		Setting,
 	} from '@element-plus/icons-vue';
 	import { useState } from '@/hooks/useUserSelect';
-	import api, { association_service as ass_api } from '@/api/sys/user';
+	import svc, { association_service as ass_api } from '@/api/sys/user';
 	import modifyDiaglog, {
 		type UserItem as Item,
 	} from '@/components/modifyUser';
@@ -197,7 +197,7 @@
 	// 获取表格数据
 	const getData = () => {
 		showLoading();
-		api
+		svc
 			.get_table_svc(table_module.query)
 			.then((res) => {
 				table_module.data = res.data;
@@ -235,7 +235,10 @@
 		resetPwdDiaglogRef.value?.openDialog(row);
 	};
 	//删除
-	const { onDelete } = useDelete(api.del_svc, getData);
+	const { deleteSvc } = useDelete(svc.del_svc, getData);
+	const onDelete = (_: number, row: Item) => {
+		deleteSvc(row.id, row.userName);
+	};
 	onMounted(() => {
 		getData();
 	});

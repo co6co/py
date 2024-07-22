@@ -14,8 +14,26 @@ from datetime import datetime
 from ..aop import exist
 from ..base_view import AuthMethodView
 from ...model.filters.dict_filter import DictFilter
-from ...model.pos.other import sysDictPO
+from ...model.pos.other import sysDictPO, sysDictTypePO
 from ...model.enum import dict_state
+
+
+class DictSelectView(AuthMethodView):
+    routePath = "/<dictTypeCode:str>"
+
+    async def get(self, request: Request, dictTypeCode: str):
+        """ 
+        获取字典选择
+        dictTypeCode: 字典类型代码
+        """
+        select = (
+            Select(sysDictPO.id, sysDictPO.name,
+                   sysDictPO.value, sysDictPO.desc)
+            .join(sysDictTypePO, onclause=sysDictPO.dictTypeId == sysDictTypePO.id)
+            .filter(sysDictTypePO.code.__eq__(dictTypeCode), sysDictPO.state.__eq__(dict_state.enabled.val))
+            .order_by(sysDictPO.order.asc())
+        )
+        return await self.query_list(request, select,  isPO=False)
 
 
 class Views(AuthMethodView):
