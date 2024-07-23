@@ -78,8 +78,8 @@ const submitForm = (formEl: FormInstance | undefined) => {
             setToken(res.data.token, res.data.expireSeconds)
             storeage.set('userName', param.username, res.data.expireSeconds)
             storeage.set(SessionKey, res.data.sessionId, res.data.expireSeconds)
-            registerRoute(() => {
-              window.location.href = '/audit'
+            registerRoute(() => { 
+              window.location.href =  '/audit'
             })
           } else {
             ElMessage.error(message.value)
