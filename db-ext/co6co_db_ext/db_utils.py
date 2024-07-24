@@ -203,6 +203,7 @@ class QueryOneCallable(DbCallable):
                     return None
             else:
                 data = exec.mappings().fetchone()
+                if data==None:return None
                 result = db_tools.one2Dict(data)
                 return result
         return await super().__call__(exec)

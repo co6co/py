@@ -70,7 +70,11 @@ class BaseMethodView(BaseView):
         return get_db_session(request)
 
     async def get_one(self, request: Request, select: Select, isPO: bool = True):
-        return await get_one(request, select, isPO)
+        result= await get_one(request, select, isPO)
+        if result==None:
+            return self.response_json(Result.fail(message="未查询到数据"))
+        else:
+            return self.response_json(Result.success(result))
 
     async def update_one(self, request: Request, select: Select, editFn: None):
         """
