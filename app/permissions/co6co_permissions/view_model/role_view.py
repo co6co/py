@@ -54,8 +54,7 @@ class roles_ass_view(AuthMethodView):
         userId = self.getUserId(request)
 
         sml = (
-            Delete(MenuRolePO).filter(MenuRolePO.roleId ==
-                                      roleId, MenuRolePO.menuId .in_(param.remove))
+            Delete(MenuRolePO).filter(MenuRolePO.roleId == roleId, MenuRolePO.menuId .in_(param.remove))
         )
 
         async def createPo(_, menuId: int):

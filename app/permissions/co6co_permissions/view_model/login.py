@@ -29,7 +29,7 @@ class login_view(BaseMethodView):
         where = UserPO()
         where.__dict__.update(request.json)
         select = Select(UserPO).filter(UserPO.userName.__eq__(where.userName))
-        user: UserPO = await self.get_one(request, select)
+        user: UserPO = await get_one(request, select)
         if user != None:
             if user.password == user.encrypt(where.password):
                 tokenData = await generatePageToken(getSecret(request), user, userOpenId=user.userGroupId)

@@ -67,14 +67,11 @@ class db_service:
 
     def __init__(self, config: dict, engineUrl: str = None) -> None:
         self.settings = self.default_settings.copy()
-
-        if engineUrl != None:
-            self._createEngine(engineUrl)
-        else:
+        if engineUrl == None:
             self.settings .update(config)
             engineUrl = f"mysql+aiomysql://{self.settings['DB_USER']}:{
                 self.settings['DB_PASSWORD']}@{self.settings['DB_HOST']}/{self.settings['DB_NAME']}"
-            self._createEngine(engineUrl)
+        self._createEngine(engineUrl)
         pass
 
     async def init_tables(self):
