@@ -1,7 +1,7 @@
 <template>
   <div class="login-wrap">
     <div class="ms-login">
-      <div class="ms-title">AI 数据审核系统</div>
+      <div class="ms-title">{{ systeminfo.name }}</div>
       <el-form :model="param" :rules="rules" ref="login" label-width="0px" class="ms-content">
         <el-form-item prop="username">
           <el-input v-model="param.username" placeholder="用户名">
@@ -32,8 +32,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref, reactive, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { Lock, User } from '@element-plus/icons-vue'
 
@@ -41,10 +40,13 @@ import { isDebug } from '../utils'
 import { useTagsStore } from '../store/tags'
 // eslint-disable-next-line camelcase
 import { userSvc } from 'co6co-right'
-import { setToken, Storage, SessionKey, showLoading, closeLoading } from 'co6co'
+import { storeAuthonInfo, showLoading, closeLoading } from 'co6co'
 
-import { registerRoute } from '../router/hooks'
+import { registerRoute, router, ViewObjects } from '../router'
 import type { FormInstance, FormRules } from 'element-plus'
+import useSystem from '../hooks/useSystem'
+import { getPublicURL } from '../utils'
+
 interface LoginInfo {
   username: string
   password: string
@@ -63,7 +65,8 @@ const rules: FormRules = {
   username: [{ required: true, message: '请输入用户名', trigger: 'blur' }],
   password: [{ required: true, message: '请输入密码', trigger: 'blur' }]
 }
-let storeage = new Storage()
+
+const { systeminfo } = useSystem()
 const login = ref<FormInstance>()
 const submitForm = (formEl: FormInstance | undefined) => {
   if (!formEl) return
@@ -74,20 +77,11 @@ const submitForm = (formEl: FormInstance | undefined) => {
         .login_svc({ userName: param.username, password: param.password })
         .then((res) => {
           message.value = res.message
-          if (res.code == 0) {
-            setToken(res.data.token, res.data.expireSeconds)
-            storeage.set('userName', param.username, res.data.expireSeconds)
-            storeage.set(SessionKey, res.data.sessionId, res.data.expireSeconds)
-            registerRoute(() => { 
-              window.location.href =  '/audit'
-            })
-          } else {
-            ElMessage.error(message.value)
-          }
-        })
-        .catch((err) => {
-          message.value = err.message || '请求出错'
-          ElMessage.error(err.message)
+
+          storeAuthonInfo(res.data, param.username)
+          registerRoute(ViewObjects, router, () => {
+            window.location.href = getPublicURL('/')
+          })
         })
         .finally(() => {
           closeLoading()

@@ -8,3 +8,5 @@
 +jwt_service.decodeToken
 0.0.6.1 :
 +exist
+0.0.6.2 :
+缓存管理

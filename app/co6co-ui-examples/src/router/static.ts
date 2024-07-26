@@ -30,7 +30,7 @@ export const basicRoutes: RouteRecordRaw[] = [
     path: '/404',
     name: '404',
     meta: { title: '未找到' },
-    component: page403
+    component: page404
   },
   {
     path: '/home',
