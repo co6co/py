@@ -21,8 +21,7 @@ class UserPO(UserTimeStampedModelPO):
     category = Column("category", Integer,)
     password = Column("user_pwd", String(256), comment="密码")
     salt = Column("user_salt", String(64), comment="pwd=盐")
-    userGroupId = Column("user_group_id", ForeignKey(
-        f"sys_user_group.id", ondelete="CASCADE"))
+    userGroupId = Column("user_group_id", ForeignKey("sys_user_group.id", ondelete="CASCADE"))
     state = Column("state", INTEGER, comment="用户状态:0启用,1锁定,2禁用",
                    server_default='0', default=0)
     avatar = Column("avatar", String(256), comment="图像URL")
@@ -77,8 +76,7 @@ class AccountPO(UserTimeStampedModelPO):
     """
     __tablename__ = "sys_account"
     uid = Column("uuid", String(36),  primary_key=True, default=uuid.uuid4())
-    userId = Column("user_id", ForeignKey(f"{UserPO.__tablename__}.{
-                    UserPO.id.name}", ondelete="CASCADE"), nullable=False, index=True, unique=True)
+    userId = Column("user_id", ForeignKey("{}.{}".format(UserPO.__tablename__,UserPO.id.name), ondelete="CASCADE"), nullable=False, index=True, unique=True)
     accountName = Column("account_name", String(64), unique=True)
     attachInfo = Column("attach_info", String(255),
                         comment="有些信息需要存下来，才能配合账号使用")
@@ -138,10 +136,8 @@ class UserRolePO(CreateUserStampedModelPO):
     """
     __tablename__ = "sys_user_role"
 
-    userId = Column("user_id", ForeignKey(f"{UserPO.__tablename__}.{
-                    UserPO.id.name}"),   comment="主键id", primary_key=True)
-    roleId = Column("role_id", ForeignKey(f"{RolePO.__tablename__}.{
-                    RolePO.id.name}"),   comment="主键id", primary_key=True)
+    userId = Column("user_id", ForeignKey("{}.{}".format(UserPO.__tablename__,UserPO.id.name)),   comment="主键id", primary_key=True)
+    roleId = Column("role_id", ForeignKey("{}.{}".format(RolePO.__tablename__,RolePO.id.name)),   comment="主键id", primary_key=True)
 
 
 class UserGroupRolePO(CreateUserStampedModelPO):
@@ -150,10 +146,8 @@ class UserGroupRolePO(CreateUserStampedModelPO):
     """
     __tablename__ = "sys_user_group_role"
 
-    userGroupId = Column("user_group_id", ForeignKey(f"{UserGroupPO.__tablename__}.{
-                         UserGroupPO.id.name}"),   comment="主键id", primary_key=True)
-    roleId = Column("role_id", ForeignKey(f"{RolePO.__tablename__}.{
-                    RolePO.id.name}"),   comment="主键id", primary_key=True)
+    userGroupId = Column("user_group_id", ForeignKey("{}.{}".format(UserGroupPO.__tablename__,UserGroupPO.id.name)),   comment="主键id", primary_key=True)
+    roleId = Column("role_id", ForeignKey("{}.{}".format(RolePO.__tablename__,RolePO.id.name)),   comment="主键id", primary_key=True)
 
 
 class menuPO(UserTimeStampedModelPO):
@@ -203,10 +197,8 @@ class MenuRolePO(CreateUserStampedModelPO):
     """
     __tablename__ = "sys_menu_role"
 
-    menuId = Column("menu_id", ForeignKey(f"{menuPO.__tablename__}.{
-                    menuPO.id.name}", ondelete="CASCADE"),   comment="主键id", primary_key=True)
-    roleId = Column("role_id", ForeignKey(f"{RolePO.__tablename__}.{
-                    RolePO.id.name}", ondelete="CASCADE"),   comment="主键id", primary_key=True)
+    menuId = Column("menu_id", ForeignKey("{}.{}".format(menuPO.__tablename__,menuPO.id.name), ondelete="CASCADE"),   comment="主键id", primary_key=True)
+    roleId = Column("role_id", ForeignKey("{}.{}".format(RolePO.__tablename__,RolePO.id.name), ondelete="CASCADE"),   comment="主键id", primary_key=True)
 
 
 class LoginLogPO(CreateUserStampedModelPO):

@@ -69,15 +69,15 @@ class db_service:
         self.settings = self.default_settings.copy()
         if engineUrl == None:
             self.settings .update(config)
-            engineUrl = f"mysql+aiomysql://{self.settings['DB_USER']}:{
-                self.settings['DB_PASSWORD']}@{self.settings['DB_HOST']}/{self.settings['DB_NAME']}"
+            engineUrl = "mysql+aiomysql://{}:{}@{}/{}".format(self.settings['DB_USER'],self.settings['DB_PASSWORD'],self.settings['DB_HOST'],self.settings['DB_NAME'])
+            
         self._createEngine(engineUrl)
         pass
 
     async def init_tables(self):
         if self.useAsync:
             async with self.engine.begin() as conn:
-                # await conn.run_sync(BasePO.metadata.drop_all)
+                # await conn.run_sync(BasePO.metadata.drop_a顶顶顶顶ll)
                 await conn.run_sync(BasePO.metadata.create_all)
                 await conn.commit()
             await self.engine.dispose()

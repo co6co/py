@@ -7,10 +7,14 @@ DbOperations 和 DbPagedOperations 以方便业务使用；
 
 # 历史记录
 
+```
 0.0.1 初始版本
 0.0.2 修复了部分 Bug
 0.0.3 封装 JOIN 查询
-0.0.6
+0.0.6 2024-07-26
+db_session.py  72 z
+0.0.7 字符串格式
+```
 
 - db_tools.execForPo
 
