@@ -9,6 +9,8 @@ from ...model.enum import menu_type
 from ...model.pos.right import UserPO, UserRolePO, UserGroupRolePO, menuPO, MenuRolePO
 from multiprocessing.managers import DictProxy
 from co6co_web_db .services.cacheManage import CacheManage
+from co6co.utils import log
+
 
 
 class AuthonCacheManage(CacheManage):
@@ -37,6 +39,8 @@ class AuthonCacheManage(CacheManage):
         当前用户角色
         """
         if self._currentRoleKey in self.cache and self.cache[self._currentRolevalieKey]:
+            if len(self.cache[self._currentRoleKey])==0:
+                log.warn(f"請查看用戶userId:{self.userId}是否已經關聯角色！！")
             return self.cache[self._currentRoleKey]
         else:
             await self.queryUserRoles()
