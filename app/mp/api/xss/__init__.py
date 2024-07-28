@@ -45,7 +45,7 @@ async def list(request:Request):
             #return await listForCache(request)
         if atv!=None: url=f"https://stream.jshwx.com.cn:8441/list?atv={atv}" 
         if url==None:return JSON_util.response(Result.fail(message="未知操作"))
-        res=requests.get(url,timeout=20) 
+        res=requests.get(url,timeout=20,verify=False) 
         return JSON_util.response(Result.success(json.loads(res.text)) )
     except Exception as e:
         return JSON_util.response(Result.fail(message=f"请求失败：{e}")) 
