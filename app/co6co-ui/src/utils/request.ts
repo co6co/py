@@ -35,14 +35,16 @@ const parseJson = (response: AxiosResponse) => {
 		return Promise.reject(e);
 	}
 };
-const crateService = (config?: CreateAxiosDefaults<any> | undefined) => {
+const createAxios= (config?: CreateAxiosDefaults<any> | undefined)=>{
 	const service: AxiosInstance = axios.create(
 		config /* {
     baseURL: import.meta.env.VITE_BASE_URL,
     timeout: 5000,
   }*/
 	);
-	let elLoading: ReturnType<typeof ElLoading.service>;
+	return service
+}
+const commonHandler=(service: AxiosInstance)=>{
 	service.defaults.transformResponse = [
 		(data: any) => {
 			return JSONbig.parse(data);
@@ -54,6 +56,12 @@ const crateService = (config?: CreateAxiosDefaults<any> | undefined) => {
 			return JSONbig.stringify(data);
 		},
 	];
+}
+const crateService = (config?: CreateAxiosDefaults<any> | undefined) => {
+
+	let elLoading: ReturnType<typeof ElLoading.service>;
+	const service=createAxios(config)
+	commonHandler(service)
 	//增加请求拦截器
 	service.interceptors.request.use(
 		(config: InternalAxiosRequestConfig) => {
@@ -111,17 +119,23 @@ const crateService = (config?: CreateAxiosDefaults<any> | undefined) => {
 };
 
 const crateService2 = (config?: CreateAxiosDefaults<any> | undefined) => {
-	const Axios: AxiosInstance = axios.create(config);
+	const service: AxiosInstance=createAxios(config);
+	commonHandler(service)
 	//增加请求拦截器
-	Axios.interceptors.request.use((config: InternalAxiosRequestConfig) => {
+	service.interceptors.request.use((config: InternalAxiosRequestConfig) => {
 		//发送请求之前
 		const token = getToken();
 		config.headers.Authorization = `Bearer ${token}`;
 		return config;
 	});
-	return Axios;
+	return service;
 };
 
+/**
+ * 带有响应处理
+ * @param timeout 超时
+ * @returns 
+ */
 export const createServiceInstance = (timeout: number = 5000) => {
 	const baseUrl = getBaseUrl();
 	const service: AxiosInstance = crateService({
@@ -130,7 +144,25 @@ export const createServiceInstance = (timeout: number = 5000) => {
 	});
 	return service;
 };
-export const createAxiosInstance = (timeout: number = 5000) => {
+/**
+ * 有 Authorization head
+ * @param timeout 超时 ms
+ * @returns 
+ */
+export const createAuthorAxiosInstance = (timeout: number = 5000) => {
+	const baseUrl = getBaseUrl();
+	const service: AxiosInstance = crateService2({
+		baseURL: baseUrl,
+		timeout: timeout,
+	});
+	return service;
+};
+/**
+ * 有 Base URl的实例
+ * @param timeout 超时 ms
+ * @returns 
+ */
+export const createBaseURlAxiosInstance = (timeout: number = 5000) => {
 	const baseUrl = getBaseUrl();
 	const service: AxiosInstance = crateService2({
 		baseURL: baseUrl,
