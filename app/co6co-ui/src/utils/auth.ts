@@ -10,12 +10,9 @@ const userName_key = `${SessionKey}_name`;
 
 export function setToken(token: any, secounds = 7200) {
 	storage.set(authonKey, token, secounds);
-	//localStorage.setItem(authonKey, token);
-	return Cookie.set(authonKey, token);
 }
 export function getToken() {
 	let token = storage.get(authonKey);
-	if (!token) token = getCookie(authonKey);
 	return token;
 }
 export function removeToken() {

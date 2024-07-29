@@ -42,10 +42,14 @@
 							label="用户名"
 							align="center"
 							width="180"
+							sortable="custom"
 							:show-overflow-tooltip="true"></el-table-column>
-						<el-table-column label="所属用户组" prop="groupName">
+						<el-table-column
+							label="所属用户组"
+							prop="groupName"
+							sortable="custom">
 						</el-table-column>
-						<el-table-column label="状态" align="center">
+						<el-table-column label="状态" align="center" sortable="custom">
 							<template #default="scope">
 								<el-tag :type="getTagType(scope.row.state)">
 									{{ getName(scope.row.state) }}
@@ -55,6 +59,7 @@
 
 						<el-table-column
 							prop="createTime"
+							sortable="custom"
 							label="注册时间"></el-table-column>
 						<el-table-column
 							label="操作"

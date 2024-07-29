@@ -20,31 +20,7 @@ export const getBaseUrl = () => {
 	const baseUrl = store.getBaseUrl();
 	return baseUrl;
 };
-const parseJson = (response: AxiosResponse) => {
-	try {
-		let result: IResponse;
-		if (typeof response.data == 'string') result = JSONbig.parse(response.data);
-		else result = response.data;
-		if (result.code == 0) {
-			return response.data;
-		} else {
-			ElMessage.error(`${result.message}`);
-			return Promise.reject(response.data);
-		}
-	} catch (e) {
-		return Promise.reject(e);
-	}
-};
-const createAxios= (config?: CreateAxiosDefaults<any> | undefined)=>{
-	const service: AxiosInstance = axios.create(
-		config /* {
-    baseURL: import.meta.env.VITE_BASE_URL,
-    timeout: 5000,
-  }*/
-	);
-	return service
-}
-const commonHandler=(service: AxiosInstance)=>{
+const commonHandler = (service: AxiosInstance) => {
 	service.defaults.transformResponse = [
 		(data: any) => {
 			return JSONbig.parse(data);
@@ -56,117 +32,106 @@ const commonHandler=(service: AxiosInstance)=>{
 			return JSONbig.stringify(data);
 		},
 	];
-}
-const crateService = (config?: CreateAxiosDefaults<any> | undefined) => {
-
-	let elLoading: ReturnType<typeof ElLoading.service>;
-	const service=createAxios(config)
-	commonHandler(service)
-	//增加请求拦截器
-	service.interceptors.request.use(
-		(config: InternalAxiosRequestConfig) => {
-			//发送请求之前
-			const token = getToken();
-			config.headers.Authorization = `Bearer ${token}`;
-			return config;
-		},
-		// eslint-disable-next-line @typescript-eslint/no-unused-vars
-		(_error: AxiosError) => {
-			//请求错误
-			if (elLoading) elLoading.close();
-			return Promise.reject();
-		}
+};
+export const createAxios = (config?: CreateAxiosDefaults<any> | undefined) => {
+	const service: AxiosInstance = axios.create(
+		config /* {  baseURL: import.meta.env.VITE_BASE_URL,  timeout: 5000, }*/
 	);
-	//增加响应拦截器
-	service.interceptors.response.use(
-		(response: AxiosResponse) => {
-			//2xx 范围的都会触发该方法
-			//if (elLoading) elLoading.close();
-			if (response.status === 200) {
-				//JSON
-				if (response.headers['content-type'] == 'application/json') {
-					return parseJson(response);
-				} else return response;
-			}
-			if (response.status === 206) return response;
-			else {
-				return Promise.reject(response.statusText);
-			}
-		},
-		(error: AxiosError) => {
-			//不是 2xx 的触发
-			//if (elLoading) elLoading.close();
-			if (error.response?.status === 403) {
-				removeToken();
-				ElMessage.error(`未认证、无权限或者认证信息已过期:${error.message}`);
-				//需要验证是否是微信端
-				///router.push('/login');
-			} else if (error.config && error.config.responseType == 'json') {
-				//ElMessage.error(`请求出现错误:${error.message}`);
-				ElMessage.error(`请求出现错误:${error.code}`);
-			} else if (
-				error.config &&
-				error.config.headers &&
-				error.config.headers['Content-Type'] == 'application/json'
-			) {
-				//ElMessage.error(`请求出现错误:${error.message}`);
-				ElMessage.error(`请求出现错误:${error.code}`);
-			}
-			return Promise.reject(error);
-		}
-	);
+	commonHandler(service);
 	return service;
 };
 
-const crateService2 = (config?: CreateAxiosDefaults<any> | undefined) => {
-	const service: AxiosInstance=createAxios(config);
-	commonHandler(service)
-	//增加请求拦截器
-	service.interceptors.request.use((config: InternalAxiosRequestConfig) => {
-		//发送请求之前
-		const token = getToken();
-		config.headers.Authorization = `Bearer ${token}`;
-		return config;
-	});
-	return service;
+export const useRequestToken = (config: InternalAxiosRequestConfig) => {
+	//发送请求之前
+	const token = getToken();
+	config.headers.Authorization = `Bearer ${token}`;
+	return config;
+};
+export const useText2Json = (response: AxiosResponse) => {
+	if (typeof response.data == 'string')
+		response.data = JSONbig.parse(response.data);
+	return response;
+};
+export const useResponseJson = (response: AxiosResponse) => {
+	if (response.status === 200) {
+		//JSON
+		if (response.headers['content-type'] == 'application/json') {
+			return useText2Json(response);
+		} else return response;
+	}
+	if (response.status === 206) return response;
+	else {
+		return Promise.reject(response.statusText);
+	}
+};
+export const useResponseValid = (response: AxiosResponse<IResponse>) => {
+	try {
+		let result: IResponse = response.data;
+		if (result.code == 0) {
+			return response.data as any;
+		} else {
+			ElMessage.error(`${result.message}`);
+			return Promise.reject(response.data);
+		}
+	} catch (e) {
+		return Promise.reject(e);
+	}
 };
 
 /**
- * 带有响应处理
+ * 带有JSON处理响应处理
  * @param timeout 超时
- * @returns 
+ * @returns
  */
 export const createServiceInstance = (timeout: number = 5000) => {
 	const baseUrl = getBaseUrl();
-	const service: AxiosInstance = crateService({
+	const config = {
 		baseURL: baseUrl,
 		timeout: timeout,
+	};
+
+	let elLoading: ReturnType<typeof ElLoading.service>;
+	const service = createAxios(config);
+	//增加请求拦截器
+	service.interceptors.request.use(useRequestToken, (error: AxiosError) => {
+		//请求错误
+		if (elLoading) elLoading.close();
+		return Promise.reject(error);
 	});
+	//增加响应拦截器
+	service.interceptors.response.use(useResponseJson, (error: AxiosError) => {
+		if (error.response?.status === 403) {
+			removeToken();
+			ElMessage.error(`未认证、无权限或者认证信息已过期:${error.message}`);
+		} else if (error.config && error.config.responseType == 'json') {
+			ElMessage.error(`请求出现错误:${error.code}`);
+		} else if (
+			error.config &&
+			error.config.headers &&
+			error.config.headers['Content-Type'] == 'application/json'
+		) {
+			ElMessage.error(`请求出现错误:${error.code}`);
+		}
+		return Promise.reject(error);
+	});
+	service.interceptors.response.use(useResponseValid);
+	return service;
 	return service;
 };
 /**
  * 有 Authorization head
  * @param timeout 超时 ms
- * @returns 
+ * @returns
  */
-export const createAuthorAxiosInstance = (timeout: number = 5000) => {
-	const baseUrl = getBaseUrl();
-	const service: AxiosInstance = crateService2({
+export const createAxiosInstance = (
+	baseUrl?: string,
+	timeout: number = 5000
+) => {
+	if (!baseUrl) baseUrl = getBaseUrl();
+	const config = {
 		baseURL: baseUrl,
 		timeout: timeout,
-	});
-	return service;
-};
-/**
- * 有 Base URl的实例
- * @param timeout 超时 ms
- * @returns 
- */
-export const createBaseURlAxiosInstance = (timeout: number = 5000) => {
-	const baseUrl = getBaseUrl();
-	const service: AxiosInstance = crateService2({
-		baseURL: baseUrl,
-		timeout: timeout,
-	});
+	};
+	const service: AxiosInstance = createAxios(config);
 	return service;
 };

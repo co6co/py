@@ -14,5 +14,9 @@
 0.0.5  正式1
 0.1.0
 0.1.1 经纬度
-0.1.2 增加这个 createBaseURlAxiosInstance 用于其他 ajax 请求 尚未发布
-``` 
+0.1.3
+    优化ajax
+    修复 viewSelect bug
+0.1.4
+    getToken error
+```

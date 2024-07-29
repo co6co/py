@@ -24,7 +24,7 @@ export default defineComponent({
 			context.emit('update:modelValue', DATA.value);
 		};
 		onMounted(() => {
-			console.info(DATA.value, prop.modelValue);
+			//console.info(DATA.value, prop.modelValue);
 		});
 		const vsolft = {
 			default: () => {

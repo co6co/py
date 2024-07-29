@@ -44,7 +44,7 @@
 						<el-table-column
 							prop="name"
 							label="名称"
-							sortable
+							sortable="custom"
 							:show-overflow-tooltip="true">
 							<template #default="scope">
 								<router-link
@@ -60,13 +60,13 @@
 						<el-table-column
 							prop="code"
 							label="编码"
-							sortable
+							sortable="custom"
 							:show-overflow-tooltip="true"></el-table-column>
 
 						<el-table-column
 							prop="state"
 							label="状态"
-							sortable
+							sortable="custom"
 							:show-overflow-tooltip="true">
 							<template #default="scope">
 								<el-tag :type="getTagType(scope.row.state)">
@@ -78,12 +78,12 @@
 						<el-table-column
 							prop="createTime"
 							label="创建时间"
-							sortable
+							sortable="custom"
 							:show-overflow-tooltip="true"></el-table-column>
 						<el-table-column
 							prop="updateTime"
 							label="更新时间"
-							sortable
+							sortable="custom"
 							:show-overflow-tooltip="true"></el-table-column>
 						<el-table-column
 							label="操作"

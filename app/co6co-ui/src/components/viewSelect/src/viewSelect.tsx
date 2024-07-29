@@ -19,12 +19,17 @@ export default defineComponent({
 		'update:modelValue': (v: any) => true,
 	},
 	setup(prop, context) {
-		const DATA = ref<undefined | string>(prop.modelValue);
+		//const DATA = ref<undefined | string>(prop.modelValue);
+		//console.info('1.view Setup...');
+		const DATA = ref(prop.modelValue);
 		const store = getStoreInstance();
-		const onChanged = () => {
+		const onChanged = (value: string) => {
+			DATA.value = value;
 			context.emit('update:modelValue', DATA.value);
 		};
-		onMounted(() => {});
+		onMounted(() => {
+			//console.info('3.onMounted...');
+		});
 		const vsolft = {
 			default: () => {
 				return (
@@ -53,6 +58,9 @@ export default defineComponent({
 		};
 		return () => {
 			//可以写某些代码
+			//console.info('2.rander...');
+			//console.info('prop changeed...');
+			DATA.value = prop.modelValue;
 			return (
 				<ElSelect
 					clearable
