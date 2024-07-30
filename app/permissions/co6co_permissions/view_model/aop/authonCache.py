@@ -12,10 +12,12 @@ from co6co_web_db .services.cacheManage import CacheManage
 from co6co.utils import log
 
 
-
 class AuthonCacheManage(CacheManage):
+    request: Request
+
     def __init__(self, request: Request) -> None:
-        super().__init__(request)
+        self.request = request
+        super().__init__(request.app)
         pass
 
     @property
@@ -24,6 +26,13 @@ class AuthonCacheManage(CacheManage):
         当前用户ID
         """
         return getCtxUserId(self.request)
+
+    @property
+    def session(self) -> None:
+        """
+        当前用户ID
+        """
+        return CacheManage.session(self.request)
 
     @property
     def _currentRoleKey(self):
@@ -39,7 +48,7 @@ class AuthonCacheManage(CacheManage):
         当前用户角色
         """
         if self._currentRoleKey in self.cache and self.cache[self._currentRolevalieKey]:
-            if len(self.cache[self._currentRoleKey])==0:
+            if len(self.cache[self._currentRoleKey]) == 0:
                 log.warn(f"請查看用戶userId:{self.userId}是否已經關聯角色！！")
             return self.cache[self._currentRoleKey]
         else:

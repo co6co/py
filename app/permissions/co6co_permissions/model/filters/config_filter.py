@@ -7,7 +7,6 @@ from co6co_db_ext.db_filter import absFilterItems
 from co6co.utils import log
 from sqlalchemy import func, or_, and_, Select
 from ..pos.other import sysConfigPO
-from ...view_model.aop.authonCache import AuthonCacheManage
 
 
 class Filter(absFilterItems):

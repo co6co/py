@@ -1,12 +1,21 @@
 from multiprocessing.managers import DictProxy
-from sanic import Request
+from sanic import Sanic, Request
 
 
 class CacheManage:
-    request: Request = None
+    app: Sanic = None
 
-    def __init__(self, request: Request) -> None:
-        self.request = request
+    @staticmethod
+    def getApp():
+        app = Sanic.get_app()
+        return app
+
+    @staticmethod
+    def session(request: Request):
+        return request.ctx.session
+
+    def __init__(self, app: Sanic) -> None:
+        self.app = app
         pass
 
     @property
@@ -14,11 +23,11 @@ class CacheManage:
         """
         缓存
         """
-        return self.request.app.shared_ctx.cache
+        return self.app.shared_ctx.cache
 
     @property
-    def session(self):
-        return self.request.ctx.session
+    def dbservice(self):
+        return self.app.ctx.service
 
     def setCache(self, key: str, value: any):
         """
