@@ -19,4 +19,5 @@
     修复 viewSelect bug
 0.1.4
     getToken error
+    计算经纬度之间的距离
 ```

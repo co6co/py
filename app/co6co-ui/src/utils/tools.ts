@@ -187,3 +187,59 @@ export const traverseTreeData = (
 		if (result) return;
 	});
 };
+
+export function _convert(
+	value: number,
+	fromUnit: string,
+	toUnit: string,
+	conversions: { [key: string]: number }
+): number {
+	if (!(fromUnit in conversions) || !(toUnit in conversions)) {
+		throw new Error('Invalid unit');
+	}
+	const fromFactor = conversions[fromUnit];
+	const toFactor = conversions[toUnit];
+	return value * (fromFactor / toFactor);
+}
+
+/**
+ *
+ * @param value
+ * @param fromUnit [b|kb|mb|gb]
+ * @param toUnit
+ * @returns
+ */
+export function convertByte(value: number, fromUnit: string, toUnit: string) {
+	const conversions: { [key: string]: number } = {
+		b: 1,
+		kb: 1024,
+		mb: 1024 ** 2,
+		gb: 1024 ** 3,
+	};
+	return _convert(value, fromUnit, toUnit, conversions);
+}
+/**
+ *
+ * @param value 值
+ * @param fromUnit 单位 [m|km|cm|mm|in|ft|yd|mi|nmi]
+ * @param toUnit 单位 [m|km|cm|mm|in|ft|yd|mi|nmi]
+ * @returns
+ */
+export function convertDistance(
+	value: number,
+	fromUnit: string,
+	toUnit: string
+): number {
+	const conversions: { [key: string]: number } = {
+		m: 1,
+		km: 1000,
+		cm: 0.01,
+		mm: 0.001,
+		in: 0.0254,
+		ft: 0.3048,
+		yd: 0.9144,
+		mi: 1609.34,
+		nmi: 1852,
+	};
+	return _convert(value, fromUnit, toUnit, conversions);
+}
