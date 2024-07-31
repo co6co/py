@@ -44,6 +44,10 @@ export interface SelectItem {
 }
 
 //树形选择
+export interface ITree {
+	children?: ITree[];
+}
+//树形选择
 export interface ITreeSelect {
 	id: number;
 	name: string;

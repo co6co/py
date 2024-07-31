@@ -1,6 +1,6 @@
 import JSONbig from 'json-bigint';
 import dayjs from 'dayjs';
-import type { ITreeSelect } from '../constants';
+import type { ITree } from '../constants';
 
 export const str2Obj = (str: string) => {
 	return JSONbig.parse(str);
@@ -178,8 +178,8 @@ export const onKeyDown = (e: KeyboardEvent) => {
  */
 
 export const traverseTreeData = (
-	tree: Array<ITreeSelect>,
-	func: (data: ITreeSelect) => void | boolean
+	tree: Array<ITree>,
+	func: (data: ITree) => void | boolean
 ) => {
 	tree.forEach((data) => {
 		data.children && traverseTreeData(data.children, func); // 遍历子树

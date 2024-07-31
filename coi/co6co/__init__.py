@@ -26,7 +26,8 @@ def getByteUnit(bytesLength: int):
     # 逆序
     # reversed_arr = kmb[::-1]
     for s in kmb:
-        if (s < 1024):return f"{s}{unit[f]}"
+        if (s < 1024):
+            return f"{s}{unit[f]}"
         f += 1
     return None
 
@@ -35,5 +36,5 @@ __all__ = ['utils']  # 针对模块公开接口的一种约定，以提供了”
 # 如果定义了__all__，
 # 使用from xxx import *导入该文件时，只会导入 __all__ 列出的成员，可以其他成员都被排除在外。
 
-__version_info = (0, 0, 6)
+__version_info = (0, 0, 7)
 __version__ = ".".join([str(x) for x in __version_info])

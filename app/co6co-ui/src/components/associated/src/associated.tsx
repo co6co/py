@@ -137,18 +137,18 @@ export default defineComponent({
 						DATA.id = associatedId;
 						DATA.treeSelectData = res.data;
 						traverseTreeData(res.data, (d) => {
-							if (DATA.filter)
-								DATA.allIds.push(...[d].filter(DATA.filter).map((m) => m.id));
-							else DATA.allIds.push(d.id);
-
 							//选中的值
 							const dt = d as AssociatedSelect;
+							if (DATA.filter)
+								DATA.allIds.push(...[dt].filter(DATA.filter).map((m) => m.id));
+							else DATA.allIds.push(dt.id);
+
 							if (dt.associatedValue) {
 								if (DATA.filter)
 									DATA.treeDefaultChecked.push(
-										...[d].filter(DATA.filter).map((m) => m.id)
+										...[dt].filter(DATA.filter).map((m) => m.id)
 									);
-								else DATA.treeDefaultChecked.push(d.id);
+								else DATA.treeDefaultChecked.push(dt.id);
 							}
 						});
 						//解决因第一项选中，后面加载的后仍被选中问题
@@ -231,7 +231,7 @@ export default defineComponent({
 				traverseTreeData(DATA.treeSelectData, (d) => {
 					//@ts-ignore
 					const dt = d as AssociatedSelect;
-					checked.push(d.id);
+					checked.push(dt.id);
 				});
 				elTreeRef.value?.setCheckedKeys(checked);
 			} else {

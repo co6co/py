@@ -12,7 +12,8 @@ const createPermissDirective = (pinia?: Pinia) => {
 		},
 	};
 	/**
-	 * 对 允许指令取反
+	 * 对 允许权限指令取反
+	 * 即 没有取消的操作
 	 */
 	const nonPermissDirective: ObjectDirective = {
 		mounted(el: HTMLElement, binding: DirectiveBinding) {

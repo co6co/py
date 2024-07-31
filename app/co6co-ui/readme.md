@@ -20,4 +20,8 @@
 0.1.4
     getToken error
     计算经纬度之间的距离
+0.1.5
+    installPermissDirective->usePermiss
+0.1.7
+    ITree
 ```

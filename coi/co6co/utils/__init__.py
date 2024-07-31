@@ -8,6 +8,7 @@ from types import FunctionType
 import inspect
 import os
 import sys
+from .log import warn
 
 
 def isBase64(content: str) -> bool:
@@ -16,6 +17,13 @@ def isBase64(content: str) -> bool:
     if group != None:
         return True
     return False
+
+
+def debug():
+    frameList = inspect.stack()
+    sss = ["{}.{}\t{}".format(i.filename, i.function, i.lineno) for i in frameList]
+    print(len(frameList))
+    warn('\n' + '\n'.join(sss))
 
 
 def getRandomStr(length: int, scope: str = string.ascii_letters+string.digits) -> str:
