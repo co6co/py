@@ -24,6 +24,7 @@ from co6co_db_ext.po import BasePO, TimeStampedModelPO, UserTimeStampedModelPO, 
 from datetime import datetime
 from co6co.utils.tool_util import list_to_tree, get_current_function_name
 from co6co_db_ext.db_utils import db_tools,  DbCallable, QueryOneCallable, UpdateOneCallable, QueryListCallable, QueryPagedByFilterCallable
+from typing import Callable
 
 
 from co6co.utils import log, getDateFolder
@@ -69,9 +70,18 @@ class BaseMethodView(BaseView):
     def get_db_session(self, request: Request) -> AsyncSession | scoped_session:
         return get_db_session(request)
 
-    async def get_one(self, request: Request, select: Select, isPO: bool = True):
-        result= await get_one(request, select, isPO)
-        if result==None:
+    async def get_one(self, request: Request, select: Select, isPO: bool = True, func=None):
+        """
+        从数据库中获取一个对象
+        func: 不为空是，返回值将作为最终的返回结果
+              使有机会改变从数据库中查询的结果              
+        """
+        result = await get_one(request, select, isPO)
+        if func != None:
+            bckResult = func(result)
+            if bckResult != None:
+                result = bckResult
+        if result == None:
             return self.response_json(Result.fail(message="未查询到数据"))
         else:
             return self.response_json(Result.success(result))

@@ -15,6 +15,8 @@
 0.0.8
     字符串格式化
     优化：CacheManage
-0.0.9 正式
+0.0.9
+0.0.10 正式
+    view_model  为get_one  增加一个func的方法
 
 ```
