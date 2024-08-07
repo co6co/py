@@ -1,6 +1,15 @@
 from co6co.enums import Base_Enum, Base_EC_Enum
 
 
+class resource_category(Base_Enum):
+    """
+    资源类型
+    """
+    image = "image", 0
+    video = "video", 1
+    file = "file", 2
+
+
 class dict_state(Base_EC_Enum):
     """
     字典和字典类型使用的状态

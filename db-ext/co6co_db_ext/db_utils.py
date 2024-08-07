@@ -114,17 +114,21 @@ class db_tools:
         else:
             return False
 
-    async def execForMappings(session: AsyncSession, select: Select, params: Dict | Tuple | List = None):
+    async def execForMappings(session: AsyncSession, select: Select, queryOne: bool = False, params: Dict | Tuple | List = None):
         """
         session: AsyncSession
         select:Select 
 
         return list
         """
-        exec = await session.execute(select, params)
-        data = exec.mappings().all()
-        result = db_tools.list2Dict(data)
-        return result
+
+        executer = await session.execute(select)
+        if queryOne:
+            result = executer.mappings().fetchone()
+            return db_tools.one2Dict(result)
+        else:
+            result = executer.mappings().all()
+            return db_tools.list2Dict(result)
 
     async def execForPos(session: AsyncSession, select: Select, remove_db_instance_state: bool = True, params: Dict | List | Tuple = None):
         """
@@ -150,7 +154,7 @@ class db_tools:
         return PO|None
         """
         exec: ChunkedIteratorResult = await session.execute(select, params)
-        #user: UserPO = result.scalar()
+        # user: UserPO = result.scalar()
         data = exec.fetchone()
         # 返回的是元组
         one = None
@@ -203,7 +207,8 @@ class QueryOneCallable(DbCallable):
                     return None
             else:
                 data = exec.mappings().fetchone()
-                if data==None:return None
+                if data == None:
+                    return None
                 result = db_tools.one2Dict(data)
                 return result
         return await super().__call__(exec)

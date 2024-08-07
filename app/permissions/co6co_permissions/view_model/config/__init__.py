@@ -15,6 +15,7 @@ from ..base_view import AuthMethodView
 from ..aop import exist, ObjectExistRoute
 from ...model.filters.config_filter import Filter
 from ...model.pos.other import sysConfigPO
+from ..aop.config_aop import ConfigEntry
 
 
 class ConfigView(AuthMethodView):
@@ -44,6 +45,11 @@ class ExistView(AuthMethodView):
         return exist(result, "配置code", code)
 
 
+@ConfigEntry
+def configValueChange(request: Request, code: str, value: str):
+    return value
+
+
 class Views(AuthMethodView):
     async def post(self, request: Request):
         """
@@ -63,7 +69,11 @@ class Views(AuthMethodView):
             exist = await db_tools.exist(session,  sysConfigPO.code.__eq__(po.code), column=sysConfigPO.id)
             if exist:
                 return JSON_util.response(Result.fail(message=f"'{po.code}'已存在！"))
-        return await self.add(request, po, userId=userId, beforeFun=before)
+
+        async def after(po: sysConfigPO, session, request):
+            configValueChange(request, po.code, po.value)
+
+        return await self.add(request, po, userId=userId, beforeFun=before, afterFun=after)
 
 
 class View(AuthMethodView):
@@ -77,6 +87,7 @@ class View(AuthMethodView):
             exist = await db_tools.exist(session, sysConfigPO.id != oldPo.id, sysConfigPO.code.__eq__(po.code), column=sysConfigPO.id)
             if exist:
                 return JSON_util.response(Result.fail(message=f"'{po.code}'已存在！"))
+            configValueChange(request, po.code, po.value)
 
         return await self.edit(request, pk, sysConfigPO, userId=self.getUserId(request), fun=before)
 

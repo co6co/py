@@ -80,16 +80,3 @@ class sysDictPO(UserTimeStampedModelPO):
 
         self.state = po.state
         self.order = po.order
-
-
-class bizResourcePO(TimeStampedModelPO):
-    """
-    资源
-    """
-    __tablename__ = "sys_resource"
-    id = Column("id", BigInteger, comment="主键",
-                autoincrement=True, primary_key=True)
-    uid = Column("uuid", String(36),  unique=True, default=uuid.uuid1())
-    category = Column("category", Integer, comment="资源类型:0:图片资源,1:视频资源")
-    subCategory = Column("sub_category", Integer, comment="子资源类型")
-    url = Column("url_path", String(255), comment="资源路径,针对根路径下的绝对路径")

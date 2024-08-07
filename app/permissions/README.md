@@ -11,8 +11,11 @@
 0.0.3.x cacheManage
 0.0.4 2024-07-26
 0.0.5
-字符格式化 right.po
+    字符格式化 right.po
 0.0.6
-cache
+    cache
 0.0.7 发布
+0.0.8
+    pillow-10.4.0
+    资源
 ```

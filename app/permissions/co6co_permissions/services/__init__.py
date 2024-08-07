@@ -14,7 +14,6 @@ from co6co.utils import log
 
 from co6co_web_db.view_model import get_one
 from ..model.pos.right import UserPO, RolePO, UserRolePO, AccountPO
-from ..view_model.aop import getCtxData
 from co6co.utils.tool_util import to_underscore
 import uuid
 
@@ -24,6 +23,19 @@ def getSecret(request: Result):
     获取加密密钥
     """
     return request.app.config.SECRET
+
+
+def getCurrentUserId(request: Request):
+    if "current_user" in request.ctx.__dict__.keys():
+        return request.ctx.current_user["id"]
+    return None
+
+
+def getCtxData(user: UserPO):
+    """
+    通过user获取 dict 保存在 request.ctx.current_user 中 
+    """
+    return user.to_jwt_dict()
 
 
 async def generatePageToken(SECRET: str, user: UserPO, expire_seconds: int = 86400, **kvarg):
