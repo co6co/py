@@ -46,7 +46,7 @@ class ExistView(AuthMethodView):
 
 
 @ConfigEntry
-def configValueChange(request: Request, code: str, value: str):
+async def configValueChange(request: Request, code: str, value: str):
     return value
 
 
@@ -71,7 +71,7 @@ class Views(AuthMethodView):
                 return JSON_util.response(Result.fail(message=f"'{po.code}'已存在！"))
 
         async def after(po: sysConfigPO, session, request):
-            configValueChange(request, po.code, po.value)
+            await configValueChange(request, po.code, po.value)
 
         return await self.add(request, po, userId=userId, beforeFun=before, afterFun=after)
 
@@ -87,7 +87,7 @@ class View(AuthMethodView):
             exist = await db_tools.exist(session, sysConfigPO.id != oldPo.id, sysConfigPO.code.__eq__(po.code), column=sysConfigPO.id)
             if exist:
                 return JSON_util.response(Result.fail(message=f"'{po.code}'已存在！"))
-            configValueChange(request, po.code, po.value)
+            await configValueChange(request, po.code, po.value)
 
         return await self.edit(request, pk, sysConfigPO, userId=self.getUserId(request), fun=before)
 

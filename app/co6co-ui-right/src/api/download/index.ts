@@ -1,6 +1,10 @@
-import { createServiceInstance, createAxiosInstance } from 'co6co';
+import { getToken, createAxiosInstance } from 'co6co';
 import { IDownloadConfig } from '@/constants';
-import { type ResponseType, type Method, type AxiosRequestConfig } from 'axios';
+import axios, {
+	type ResponseType,
+	type Method,
+	type AxiosRequestConfig,
+} from 'axios';
 
 //创建 Blob 资源
 export const create_URL_resource = (resource: { data: Blob }): string => {
@@ -26,11 +30,17 @@ export const request_resource_svc = async (
 		url: url, //请求地址  会加上 baseURL
 		timeout: 3 * 60 * 1000,
 	};
-	const res = await createServiceInstance()({
+	/**
+	const service = createAxiosInstance();
+	service.interceptors.request.use(useRequestToken);
+	const res = await service.get(url, { ...default_config, ...axios_config });
+	 */
+	const res = await axios({
 		...default_config,
 		...axios_config,
+		...{ headers: { Authorization: `Bearer ${getToken()}` } },
 	});
-	//const blob = new Blob([res.data]);//处理文档流
+	//const blob = new Blob([res.data]) //处理文档流
 	const result = create_URL_resource({ data: res.data });
 	return result;
 };

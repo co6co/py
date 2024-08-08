@@ -11,5 +11,12 @@
     route 相关的代码
 0.0.3-dev.2:
     依赖
-0.0.4 正式版
+0.0.4
+0.0.6  发布
+    resource
+0.0.7
+    request_resource_svc ,
+        需要调试： axios( {...{method: 'get', responseType: 'blob'},...config})
+                与 axios.create().get("url",{...{method: 'get', responseType: 'blob'},...config})
+                之间得区别
 ```

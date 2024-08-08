@@ -33,6 +33,14 @@ const commonHandler = (service: AxiosInstance) => {
 		},
 	];
 };
+export const useMultipartRequest = (service: AxiosInstance) => {
+	service.defaults.transformRequest = [
+		(data: any, headers) => {
+			headers['Content-Type'] = 'multipart/form-data';
+			return data;
+		},
+	];
+};
 export const createAxios = (config?: CreateAxiosDefaults<any> | undefined) => {
 	const service: AxiosInstance = axios.create(
 		config /* {  baseURL: import.meta.env.VITE_BASE_URL,  timeout: 5000, }*/

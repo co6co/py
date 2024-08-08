@@ -24,7 +24,10 @@ class resourcePO(TimeStampedModelPO):
     metaName = Column("meta_name", String(255), comment="名称")
     size = Column("size", BigInteger, comment="大小")
     # , passive_deletes=True ->当删除资源是 所有的用户资源已会被删除
-    userResourceList = Relationship("userResourcePO", back_populates="userResource")
+    # backref 表示，在 userResourcePO  类中动态创建 userResource 属性，指向当前类。
+    # 两个类中显式地使用 back_populates，更显繁琐
+    # 不包含外键  默认 uselist=True, 如果是1对1 需要不使用 collection
+    userResourceList = Relationship("userResourcePO", back_populates="userResource",  passive_deletes=True)
 
 
 class userResourcePO(TimeStampedModelPO):
@@ -36,4 +39,8 @@ class userResourcePO(TimeStampedModelPO):
     resourceId = Column("resource_id", ForeignKey("{}.{}".format(resourcePO.__tablename__, resourcePO.id.name)))
     ownUserId = Column("own_user_id", BigInteger, comment="所属用户")
     name = Column("name", String(255), comment="名称")
-    userResource = Relationship("resourcePO", back_populates="userResourceList")
+    # 那如果我们需要得知 child 的 parent 对象呢？能不能直接访问 child.parent？
+    # 为了实现这个功能，SQLAlchemy 提供了 backref 和 back_populates 两个参数。
+
+    # # 包含 ForeignKey 的类，此属性默认为 attribute，因此不需要 uselist=False
+    userResource = Relationship(resourcePO, back_populates="userResourceList")

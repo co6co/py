@@ -27,7 +27,7 @@ class Video_View(resource_baseView):
 
 
 class thumbnail_View(resource_baseView):
-    routePath = "/img/thumbnail"
+    routePath = "/img/thumbnail/<w:int>/<h:int>"
 
     async def get(self, request: Request, w: int = 208, h: int = 117):
         """
@@ -37,8 +37,8 @@ class thumbnail_View(resource_baseView):
         return await self.screenshot_image(fullPath, w, h)
 
 
-class Poster_View(Image_View):
-    routePath = "/video/poster"
+class Poster_View(resource_baseView):
+    routePath = "/video/poster/<w:int>/<h:int>"
 
     async def get(self, request: Request, w: int = 208, h: int = 117):
         """

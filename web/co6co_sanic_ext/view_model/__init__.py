@@ -1,5 +1,6 @@
 from functools import wraps
 from sanic.views import HTTPMethodView  # 基于类的视图
+from sanic.request.form import File  # 基于类的视图
 from sanic import Request
 from co6co_sanic_ext.model.res.result import Page_Result
 from co6co_sanic_ext.utils import JSON_util
@@ -91,11 +92,16 @@ class BaseView(HTTPMethodView):
         # log.info(data_result)
         return data_result, file
 
-    async def save_file(self, file, path: str):
+    async def save_file(self, file: File, path: str):
         """
         保存上传的文件
         file.name
         """
+        dir = os.path.dirname(path)
+        if not os.path.exists(dir):
+            os.makedirs(dir)
+        if os.path.exists(path):
+            raise Exception("{} Exists".format(path))
         async with aiofiles.open(path, 'wb') as f:
             await f.write(file.body)
 
