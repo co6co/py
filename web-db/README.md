@@ -18,5 +18,7 @@
 0.0.9
 0.0.10 正式
     view_model  为get_one  增加一个func的方法
+0.0.11
+    get_one 增加 remove_db_instance 参数
 
 ```

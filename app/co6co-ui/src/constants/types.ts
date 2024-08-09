@@ -32,6 +32,7 @@ export interface FormItemBase {
 	createUser: number;
 	updateUser: number;
 }
+export type FormItemBase2 = Pick<FormItemBase, 'createTime' | 'updateTime'>;
 
 /**
  * @deprecated 将于下个版本 0.0.3 被弃用
