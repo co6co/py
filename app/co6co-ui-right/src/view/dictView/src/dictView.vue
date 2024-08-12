@@ -27,7 +27,7 @@
 				<el-scrollbar>
 					<el-table
 						highlight-current-row
-						@sort-change="onColChange"
+						@sort-change="onColChange2"
 						:data="table_module.data"
 						border
 						class="table"
@@ -102,13 +102,11 @@
 			</el-main>
 			<el-footer>
 				<div class="pagination">
-					<el-pagination
-						background
-						layout="total, prev, pager, next"
-						:current-page="table_module.query.pageIndex"
-						:page-size="table_module.query.pageSize"
+					<Pagination
+						:option="table_module.query"
 						:total="table_module.pageTotal"
-						@current-change="onPageChange"></el-pagination>
+						@current-page-change="getData"
+						@size-chage="getData" />
 				</div>
 			</el-footer>
 		</el-container>
@@ -130,7 +128,6 @@
 		ElTable,
 		ElScrollbar,
 		ElMain,
-		ElPagination,
 		ElFooter,
 		ElContainer,
 	} from 'element-plus';
@@ -151,6 +148,8 @@
 		showLoading,
 		closeLoading,
 		FormOperation,
+		onColChange,
+		Pagination,
 		type IPageParam,
 		type Table_Module_Base,
 	} from 'co6co';
@@ -198,14 +197,8 @@
 		getData();
 	};
 
-	const onColChange = (column: any) => {
-		table_module.query.order = column.order === 'descending' ? 'desc' : 'asc';
-		table_module.query.orderBy = column.prop;
-		if (column) getData(); // 获取数据的方法
-	};
-	const onPageChange = (val: number) => {
-		table_module.query.pageIndex = val;
-		getData();
+	const onColChange2 = (column: any) => {
+		onColChange(column, table_module.query, getData);
 	};
 
 	const modifyDiaglogRef = ref<ModifyDictInstance>();

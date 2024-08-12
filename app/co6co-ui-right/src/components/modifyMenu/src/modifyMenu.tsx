@@ -142,7 +142,7 @@ export default defineComponent({
 			parentId: [{ required: true, message: '请选择父节点', trigger: 'blur' }],
 			code: [{ required: true, message: '请菜单编码', trigger: 'blur' }],
 			status: [
-				{ required: true, message: '请选择状态', trigger: 'blur,change' },
+				{ required: true, message: '请选择状态', trigger: ['blur', 'change'] },
 			],
 		};
 		const rules_api: FormRules = {
@@ -160,21 +160,35 @@ export default defineComponent({
 					{ required: true, message: '请输入视图地址', trigger: 'blur' },
 				],
 				permissionKey: [
-					{ required: false, message: '权限字', trigger: 'blur' },
+					{ required: false, message: '权限字', trigger: ['blur', 'change'] },
 				],
 			},
 			...rules_b,
 		};
 		const rules_subView: FormRules = {
 			...{
-				methods: [{ required: true, message: '请选择方法名', trigger: 'blur' }],
+				methods: [
+					{
+						required: true,
+						message: '请选择方法名',
+						trigger: ['blur', 'change'],
+					},
+				],
 			},
 			...rules_view,
 		};
 		const rules_button: FormRules = {
 			...{
-				methods: [{ required: true, message: '请选择方法名', trigger: 'blur' }],
-				permissionKey: [{ required: true, message: '权限字', trigger: 'blur' }],
+				methods: [
+					{
+						required: true,
+						message: '请选择方法名',
+						trigger: ['blur', 'change'],
+					},
+				],
+				permissionKey: [
+					{ required: true, message: '权限字', trigger: ['blur', 'change'] },
+				],
 			},
 			...rules_b,
 		};

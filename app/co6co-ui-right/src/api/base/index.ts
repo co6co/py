@@ -27,8 +27,13 @@ export const create_svc = (baseUrl: string) => {
 	const edit_svc = (id: number, data: any): Promise<api_type.IResponse> => {
 		return createServiceInstance().put(`${baseUrl}/${id}`, data);
 	};
-	const del_svc = (id: number): Promise<api_type.IResponse> => {
-		return createServiceInstance().delete(`${baseUrl}/${id}`, {});
+	const del_svc = (
+		id: number,
+		reason?: string
+	): Promise<api_type.IResponse> => {
+		let url = `${baseUrl}/${id}`;
+		if (reason) url = `${baseUrl}/${id}?reason=${reason}`;
+		return createServiceInstance().delete(url);
 	};
 	return {
 		get_select_svc,

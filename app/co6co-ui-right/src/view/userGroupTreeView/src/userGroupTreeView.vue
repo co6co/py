@@ -34,7 +34,7 @@
 						<el-scrollbar>
 							<el-table
 								:data="table_module.data"
-								@sort-change="onColChange"
+								@sort-change="onColChange2"
 								border
 								class="table"
 								header-cell-class-name="table-header"
@@ -119,13 +119,11 @@
 					</el-main>
 					<el-footer>
 						<div class="pagination">
-							<el-pagination
-								background
-								layout="total, prev, pager, next"
-								:current-page="table_module.query.pageIndex"
-								:page-size="table_module.query.pageSize"
+							<Pagination
+								:option="table_module.query"
 								:total="table_module.pageTotal"
-								@current-change="onPageChange"></el-pagination>
+								@current-page-change="getData"
+								@size-chage="getData" />
 						</div>
 					</el-footer>
 				</el-container>
@@ -155,7 +153,6 @@
 		ElTable,
 		ElTableColumn,
 		ElScrollbar,
-		ElPagination,
 		ElFooter,
 	} from 'element-plus';
 	import { Delete, Search, Plus, Setting } from '@element-plus/icons-vue';
@@ -163,6 +160,8 @@
 		showLoading,
 		closeLoading,
 		FormOperation,
+		onColChange,
+		Pagination,
 		type IPageParam,
 		type Table_Module_Base,
 		Associated as associatedDiaglog,
@@ -218,15 +217,10 @@
 		getData();
 	};
 
-	const onColChange = (column: any) => {
-		table_module.query.order = column.order === 'descending' ? 'desc' : 'asc';
-		table_module.query.orderBy = column.prop;
-		if (column) getData(); // 获取数据的方法
+	const onColChange2 = (column: any) => {
+		onColChange(column, table_module.query, getData);
 	};
-	const onPageChange = (val: number) => {
-		table_module.query.pageIndex = val;
-		getData();
-	};
+
 	const modifyDiaglogRef = ref<InstanceType<typeof modifyDiaglog>>();
 	const onOpenDialog = (operation: FormOperation, row?: Item) => {
 		table_module.diaglogTitle =

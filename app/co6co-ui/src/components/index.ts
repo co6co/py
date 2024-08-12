@@ -10,3 +10,4 @@ export * from './dialogForm';
 export * from './dialogDetail';
 export * from './associated';
 export * from './viewSelect';
+export * from './pagination';

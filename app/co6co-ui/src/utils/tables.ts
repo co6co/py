@@ -22,15 +22,3 @@ export const onColChange = (column: any, param: IPageParam, bck: any) => {
 	param.orderBy = column.prop;
 	if (column && bck) bck(); // 获取数据的方法
 };
-
-/**
- * 分页
- *
- * @param val 当前页
- * @param param 查询参数
- * @param bck 回调
- */
-export const onPageChange = (val: number, param: IPageParam, bck: any) => {
-	param.pageIndex = val;
-	bck();
-};

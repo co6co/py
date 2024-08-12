@@ -103,13 +103,11 @@
 			</el-main>
 			<el-footer>
 				<div class="pagination">
-					<el-pagination
-						background
-						layout="total, prev, pager, next"
-						:current-page="table_module.query.pageIndex"
-						:page-size="table_module.query.pageSize"
+					<Pagination
+						:option="table_module.query"
 						:total="table_module.pageTotal"
-						@current-change="handlePageChange"></el-pagination>
+						@current-page-change="getData"
+						@size-chage="getData" />
 				</div>
 			</el-footer>
 		</el-container>
@@ -145,7 +143,6 @@
 		ElTable,
 		ElTableColumn,
 		ElScrollbar,
-		ElPagination,
 		ElFooter,
 	} from 'element-plus';
 	import {
@@ -167,6 +164,7 @@
 		EnumSelect,
 		showLoading,
 		closeLoading,
+		Pagination,
 		type IPageParam,
 		type Table_Module_Base,
 		FormOperation,
@@ -218,11 +216,7 @@
 		table_module.query.pageIndex = 1;
 		getData();
 	};
-	// 分页导航
-	const handlePageChange = (val: number) => {
-		table_module.query.pageIndex = val;
-		getData();
-	};
+
 	//增加/修改
 	const modifyDiaglogRef = ref<InstanceType<typeof modifyDiaglog>>();
 	const onOpenDialog = (operation: FormOperation, row?: Item) => {
