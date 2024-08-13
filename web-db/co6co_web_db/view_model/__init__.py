@@ -321,7 +321,9 @@ class BaseMethodView(BaseView):
                 await session.delete(oldPo)
                 if afterFun != None:
                     result = await afterFun(oldPo, session, request)
-                    if result != None:
+                    if isinstance(result, Result):
+                        return JSON_util.response(result)
+                    elif result != None:
                         await session.rollback()
                         return result
                 return JSON_util.response(Result.success())

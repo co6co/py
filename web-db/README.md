@@ -20,5 +20,6 @@
     view_model  为get_one  增加一个func的方法
 0.0.11
     get_one 增加 remove_db_instance 参数
+    remove 增加 after 返回值判断
 
 ```
