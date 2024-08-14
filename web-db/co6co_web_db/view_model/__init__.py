@@ -8,11 +8,9 @@ from co6co_sanic_ext.model.res.result import Page_Result
 from co6co_sanic_ext.utils import JSON_util
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import scoped_session
-from typing import TypeVar, Dict, List, Any, Tuple
+from typing import TypeVar, Dict, List, Any, Tuple, Optional
 from co6co_sanic_ext.model.res.result import Result, Page_Result
-import aiofiles
-import os
-import multipart
+
 from io import BytesIO
 from co6co_web_db.utils import DbJSONEncoder
 from sqlalchemy.sql.elements import ColumnElement
@@ -70,6 +68,19 @@ class BaseMethodView(BaseView):
     def get_db_session(self, request: Request) -> AsyncSession | scoped_session:
         return get_db_session(request)
 
+    def response_error0(self, request: Request, e: Exception):
+        """
+        响应错误 message
+        """
+        errorLog(request, self.__class__, get_current_function_name())
+        return Result.fail(message=f"处理出错:{e}")
+
+    def response_error(self, request: Request, e: Exception):
+        """
+        响应错误 message
+        """
+        return self.response_json(self.response_error0(request, e))
+
     async def get_one(self, request: Request, select: Select, isPO: bool = True, remove_db_instance: bool = True, func=None):
         """
         从数据库中获取一个对象
@@ -104,8 +115,7 @@ class BaseMethodView(BaseView):
             else:
                 return JSON_util.response(Result.fail(message=f"更新失败"))
         except Exception as e:
-            errorLog(request, self.__class__, get_current_function_name())
-            return Result.fail(message=f"请求异常：{e}")
+            return self.response_error0(request, e)
 
     async def query_mapping(self, request: Request, select: Select, oneRecord: bool = False):
         """
@@ -123,8 +133,7 @@ class BaseMethodView(BaseView):
                     result = Result.success(db_tools.list2Dict(result))
                     return JSON_util.response(result)
         except Exception as e:
-            errorLog(request, self.__class__, get_current_function_name())
-            return Result.fail(message=f"请求失败：{e}")
+            return self.response_error0(request, e)
 
     async def _query(self, request: Request, select: Select, isPO: bool = True, remove_db_instance: bool = True, param: Dict | List | Tuple = None):
         """
@@ -137,7 +146,7 @@ class BaseMethodView(BaseView):
             result = db_tools.list2Dict(data)
             return result
         except Exception as e:
-            errorLog(request, self.__class__, get_current_function_name())
+            self.response_error0(request, e)
             return None
 
     async def exist(self, request: Request,  *filters: ColumnElement[bool], column: InstrumentedAttribute = "*"):
@@ -154,9 +163,7 @@ class BaseMethodView(BaseView):
             result = await self._query(request, select,   isPO, remove_db_instance, param)
             return JSON_util.response(Result.success(data=result))
         except Exception as e:
-            errorLog(request, self.__class__, get_current_function_name())
-            result = Result.fail(message=f"请求失败：{e}")
-            return JSON_util.response(Result.success(data=result))
+            return self.response_error(request, e)
 
     async def query_tree(self, request: Request, select: Select, rootValue: any = None, pid_field: str = "pid", id_field: str = "id", isPO: bool = True, remove_db_instance: bool = True, param: Dict | List | Tuple = None):
         """
@@ -172,9 +179,7 @@ class BaseMethodView(BaseView):
                 return JSON_util.response(Result.success(data=[]))
             return JSON_util.response(Result.success(data=treeList))
         except Exception as e:
-            errorLog(request, self.__class__, get_current_function_name())
-            result = Result.fail(message=f"请求失败：{e}")
-            return JSON_util.response(Result.success(data=result))
+            return self.response_error(request, e)
 
     async def query_page(self, request: Request, filter: absFilterItems, isPO: bool = True, remove_db_instance=True):
         """
@@ -187,9 +192,7 @@ class BaseMethodView(BaseView):
             pageList = Page_Result.success(result, total=total)
             return JSON_util.response(pageList)
         except Exception as e:
-            errorLog(request, self.__class__, get_current_function_name())
-            pageList = Page_Result.fail(message=f"请求失败：{e}")
-            return JSON_util.response(pageList)
+            return self.response_error(request, e)
 
     async def execSqls(self, request: Request, *sml: Update | Delete | Insert, callBck=None, smlParamList: List[Dict | Tuple | List] = None):
         callable = DbCallable(self.get_db_session(request))
@@ -210,8 +213,7 @@ class BaseMethodView(BaseView):
                     return await callBck(*result)
             except Exception as e:
                 await session.rollback()
-                errorLog(request, self.__class__, get_current_function_name())
-                return JSON_util.response(Result.fail(e))
+                return self.response_error(request, e)
 
         return await callable(exec)
 
@@ -252,10 +254,9 @@ class BaseMethodView(BaseView):
             callable = DbCallable(self.get_db_session(request))
             return await callable(exec)
         except Exception as e:
-            errorLog(request, self.__class__, get_current_function_name())
-            return JSON_util.response(Result.fail(message=e))
+            return self.response_error(request, e)
 
-    async def edit(self, request: Request, pk: any, poType: TypeVar, po: BasePO = None, userId=None, fun=None, json2Po: bool = True):
+    async def edit(self, request: Request, pkOrSelect:  int | str | Select, poType: TypeVar, po: Optional[BasePO] = None, userId=None, fun=None, json2Po: bool = True):
         """
         编辑
 
@@ -264,7 +265,7 @@ class BaseMethodView(BaseView):
         poType: TypeVar,  # 实体类型
         po:BasePO    ,    # None:根据传入的 poType创建,用 request.json赋值
         userId=None, # 用户ID
-        fun=None,    # 执行一些其他操作，返回值将直接返回客户端，回滚数据库操作
+        fun=None,    # 执行一些其他操作，返回值将直接返回客户端并且回滚数据库操作
         json2Po:bool # 根据 请求的json 转换的对象更新 实体对象，在 fun 之前执行
 
         return JSONResponse
@@ -273,8 +274,14 @@ class BaseMethodView(BaseView):
             if po == None:
                 po = poType()
                 po.__dict__.update(request.json)
-            async with self.get_db_session(request) as session, session.begin():
-                oldPo: poType = await session.get_one(poType, pk)
+            call = DbCallable(self.get_db_session(request))
+
+            async def exec(session: AsyncSession):
+                oldPo: Optional[poType] = None
+                if isinstance(pkOrSelect, Select):
+                    oldPo = await db_tools.execForPo(session, pkOrSelect, remove_db_instance_state=False)
+                else:
+                    oldPo: poType = await session.get_one(poType, pkOrSelect)
                 if oldPo == None:
                     return JSON_util.response(Result.fail(message=f"未查到‘{pk}’对应的信息!"))
                 if isinstance(oldPo, UserTimeStampedModelPO):
@@ -291,10 +298,9 @@ class BaseMethodView(BaseView):
                         await session.rollback()
                         return result
                 return JSON_util.response(Result.success())
+            return await call(exec)
         except Exception as e:
-            await session.rollback()
-            errorLog(request, self.__class__, get_current_function_name())
-            return JSON_util.response(Result.fail(message=e))
+            return self.response_error(request, e)
 
     async def remove(self, request: Request, pk: any, poType: TypeVar,  beforeFun=None, afterFun=None):
         """
@@ -329,8 +335,7 @@ class BaseMethodView(BaseView):
                 return JSON_util.response(Result.success())
         except Exception as e:
             await session.rollback()
-            errorLog(request, self.__class__, get_current_function_name())
-            return JSON_util.response(Result.fail(message=e))
+            return self.response_error(request, e)
 
     async def save_association(self, request: Request, currentUser: int, delSml: Delete, createPo: any, param: associationParam = None, delSmlParam: Dict | List | Tuple = None):
         """
@@ -370,7 +375,7 @@ class BaseMethodView(BaseView):
                     return JSON_util.response(Result.fail(message="未改变"))
             except Exception as e:
                 await session.rollback()
-                return JSON_util.response(Result.fail(message=f"出现错误：{e}"))
+                return self.response_error(request, e)
 
         return await callable(exec)
 

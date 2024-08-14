@@ -1,9 +1,9 @@
-import { AxiosRequestHeaders } from 'axios';
+import { RawAxiosRequestHeaders } from 'axios'; //AxiosRequestHeaders,
 export const INSTALLED_KEY = Symbol('co6co-right');
 
 export interface IDownloadConfig {
 	method?: string;
-	headers?: AxiosRequestHeaders & {
+	headers?: RawAxiosRequestHeaders & {
 		Range: string /* `bytes=${start}-${end}`*/;
 	};
 }

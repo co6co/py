@@ -21,5 +21,7 @@
 0.0.11
     get_one 增加 remove_db_instance 参数
     remove 增加 after 返回值判断
+    response_error
+    view.edit 增加 select处理
 
 ```

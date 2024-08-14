@@ -27,4 +27,6 @@
     useMultipartRequest
 0.1.8 发布
     pagination
+0.1.9
+    diaglogForm 增加 prop.model
 ```

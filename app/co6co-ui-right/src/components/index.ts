@@ -7,3 +7,5 @@ export * from './resetPwdcopy';
 export * from './modifyConfig';
 export * from './modifyDict';
 export * from './modifyDictType';
+export * from './download';
+export * from './dictSelect';

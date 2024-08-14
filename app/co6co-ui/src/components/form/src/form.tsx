@@ -22,7 +22,7 @@ export default defineComponent({
 			required: false,
 		},
 		model: {
-			type: Object, //as PropType<ObjectConstructor>,
+			type: Object as PropType<Record<string, any>>, //as PropType<ObjectConstructor>,
 			required: true,
 		},
 		labelWidth: {
@@ -30,6 +30,7 @@ export default defineComponent({
 			default: 150,
 		},
 	},
+
 	emits: {
 		//@ts-ignore
 		error: (msg: string) => true,
@@ -37,7 +38,6 @@ export default defineComponent({
 	},
 	setup(prop, { attrs, slots, emit, expose }) {
 		const formRef = ref<FormInstance>();
-
 		const _checkData = (
 			instance: FormInstance | undefined,
 			successBck?: () => void,
@@ -83,7 +83,6 @@ export default defineComponent({
 
 		render.formInstance = formRef;
 		render.validate = validate;
-
 		return render;
 	},
 });

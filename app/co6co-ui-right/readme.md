@@ -19,5 +19,5 @@
         需要调试： axios( {...{method: 'get', responseType: 'blob'},...config})
                 与 axios.create().get("url",{...{method: 'get', responseType: 'blob'},...config})
                 之间得区别
-    page
+    page,download,dictSelect
 ```

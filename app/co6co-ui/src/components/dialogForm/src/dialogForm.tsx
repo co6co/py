@@ -1,12 +1,12 @@
-import { defineComponent, inject, ref } from 'vue';
+import { defineComponent, inject, ref, VNode } from 'vue';
 import { ElButton, type FormRules } from 'element-plus';
-import { type ObjectType } from '@/constants';
 import { Form, Dialog } from '@/components';
 import type { DialogInstance, FormInstance } from '@/components';
 
 import type { PropType } from 'vue';
 
 //Omit、Pick、Partial、Required
+/*
 export interface Item {
 	id: number;
 	name: string;
@@ -15,15 +15,18 @@ export interface Item {
 	deviceDesc: string;
 	createTime: string;
 	updateTime: string;
-}
+}*/
 //Omit、Pick、Partial、Required
+//export type FormItem = Omit<Item, 'id' | 'createTime' | 'updateTime'>;
 
-export type FormItem = Omit<Item, 'id' | 'createTime' | 'updateTime'>;
 export default defineComponent({
 	name: 'EcdiaglogForm',
 	props: {
 		title: {
 			type: String,
+		},
+		model: {
+			type: Object as PropType<Record<string, any>>, //as PropType<ObjectConstructor>,
 		},
 		rules: {
 			type: Object as PropType<FormRules>,
@@ -34,6 +37,7 @@ export default defineComponent({
 		},
 	},
 	emits: {
+		error: (msg: string) => true,
 		submit: () => true,
 	},
 	setup(prop, ctx) {
@@ -54,7 +58,8 @@ export default defineComponent({
 			),
 		};
 		// const data: Object = inject('formData') || {}
-		const data = (inject('formData') || {}) as Record<string, any>;
+		const data =
+			prop.model || ((inject('formData') || {}) as Record<string, any>);
 		const openDialog = () => {
 			if (dialogRef.value) {
 				dialogRef.value.data.title = prop.title || '弹出框';
@@ -65,7 +70,7 @@ export default defineComponent({
 			setDiaglogVisible(false);
 		};
 
-		const rander = (): ObjectType => {
+		const rander = (): VNode => {
 			return (
 				<Dialog
 					title={prop.title}
@@ -79,12 +84,13 @@ export default defineComponent({
 						ref={formInstance}
 						rules={prop.rules}
 						model={data}
+						onSubmit={() => ctx.emit('submit')}
+						onError={(e) => ctx.emit('error', e)}
 					/>
 				</Dialog>
 			);
 		};
 		//暴露方法给父组件
-
 		const validate = (success: () => void, validateBefore?: () => void) => {
 			formInstance.value?.validate(success, validateBefore);
 		};

@@ -13,6 +13,7 @@ const allowedLayouts = [
 ] as const;
 type AllowedLayouts = (typeof allowedLayouts)[number];
 
+//定义属性
 const props = {
 	/**
 	 *属性串进去
@@ -36,6 +37,7 @@ const props = {
 	},
 } as const;
 
+//定义事件
 interface Emits {
 	(e: 'sizeChage', value: number): void;
 	(e: 'currentPageChange', value: number): void;
