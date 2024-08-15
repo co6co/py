@@ -43,11 +43,12 @@ export default defineComponent({
 			default: true,
 		},
 	},
-	setup(__props) {
+	setup(prop) {
 		const _loading = ElLoading.service({ fullscreen: true });
 		watchEffect(() => {
-			if (!__props.logining) _loading.close();
+			if (!prop.logining) _loading.close();
 			_loading.visible.value = true;
 		});
+		return () => <></>;
 	},
 });

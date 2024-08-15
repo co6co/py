@@ -31,6 +31,12 @@ def getCurrentUserId(request: Request):
     return None
 
 
+def getCurrentUserName(request: Request):
+    if "current_user" in request.ctx.__dict__.keys():
+        return request.ctx.current_user["userName"]
+    return None
+
+
 def getCtxData(user: UserPO):
     """
     通过user获取 dict 保存在 request.ctx.current_user 中 

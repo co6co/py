@@ -7,3 +7,4 @@ export * from './tools';
 export * from './storage';
 export * from './eleExtend';
 export * from './map';
+export * from './vueUtilts';

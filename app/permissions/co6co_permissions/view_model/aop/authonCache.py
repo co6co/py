@@ -4,12 +4,13 @@ from sanic.request import Request
 from sqlalchemy.sql import Select
 
 from co6co_db_ext.db_utils import db_tools, DbCallable
-from . import getCtxUserId
+
 from ...model.enum import menu_type
 from ...model.pos.right import UserPO, UserRolePO, UserGroupRolePO, menuPO, MenuRolePO
 from multiprocessing.managers import DictProxy
 from co6co_web_db .services.cacheManage import CacheManage
 from co6co.utils import log
+from ...services import getCurrentUserId
 
 
 class AuthonCacheManage(CacheManage):
@@ -25,7 +26,7 @@ class AuthonCacheManage(CacheManage):
         """
         当前用户ID
         """
-        return getCtxUserId(self.request)
+        return getCurrentUserId(self.request)
 
     @property
     def session(self) -> None:

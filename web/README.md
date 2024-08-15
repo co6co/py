@@ -1,24 +1,23 @@
-# 扩展sanic
- 
-
+# 扩展 sanic
 
 # (sanic Demo)[https://www.osgeo.cn/sanic/sanic/examples.html/]
+
 (task)[https://python.hotexamples.com/zh/examples/sanic/Sanic/add_task/python-sanic-add_task-method-examples.html]
 
-
 # 历史记录
+
 ```
-0.0.1 初始版本 
-0.0.2. 
+0.0.1 初始版本
+0.0.2.
 0.0.3 优化 baseView 2024-07-26
+0.0.4  发布
+    baseView: save_file
 ```
-
-
 
 # 类属性与对象属性
 
 ```
-class A: 
+class A:
     def __init__(self) -> None:
        self.a="12"
        pass
@@ -34,7 +33,7 @@ a=A()
 print(a.a)
 
 b=B()
-b.a="456" 
+b.a="456"
 print(b.a,B.a,"b.geA:", b.geA(),"B.geA:",B.geA())
 
 a=A()

@@ -37,7 +37,7 @@ export default defineComponent({
 			default: 5000,
 		},
 	},
-	setup(props, context) {
+	setup(props, ctx) {
 		const isRunning = ref(false);
 		let timer: any = null; //NodeJS.Timeout | null = null
 		const runinng = function <T>(
@@ -66,9 +66,16 @@ export default defineComponent({
 			if (timer) clearInterval(timer);
 		});
 
-		context.expose({
+		const reader = () => {
+			return <></>;
+		};
+		//代码编译后在源码[压缩文件中]
+		//不在申明文件中
+		ctx.expose({
 			runinng,
 		});
-		//return () => {}
+		//编译后即在申明文件中，也在源码[压缩文件中]
+		reader.runinng = runinng;
+		return reader;
 	},
 });

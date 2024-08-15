@@ -14,8 +14,13 @@
     字符格式化 right.po
 0.0.6
     cache
-0.0.7 发布
+0.0.7
 0.0.8
     pillow-10.4.0
     资源
+0.0.9 发布
+    delete->aop.getuserId
+0.0.10
+    token invalid
+
 ```

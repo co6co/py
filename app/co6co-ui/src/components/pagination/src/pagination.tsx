@@ -22,7 +22,10 @@ const props = {
 		type: Object as PropType<IPageParam>,
 		required: true,
 	},
-
+	pageSizes: {
+		type: Object as PropType<Array<number>>, // 使用类型断言指定类型
+		default: [10, 20, 30, 40, 50, 100],
+	},
 	total: {
 		type: Number,
 		required: true,
@@ -38,15 +41,21 @@ const props = {
 } as const;
 
 //定义事件
+//没什么用 方法编译出来的方法太泛
+/*
 interface Emits {
 	(e: 'sizeChage', value: number): void;
 	(e: 'currentPageChange', value: number): void;
-}
+}*/
 
 export default defineComponent({
 	props: props, //里面的值不能直接在本模块中修改
-	emits: ['sizeChage', 'currentPageChange'] as const, // 这里的 as const 是为了生成正确的类型定义
-	setup(prop, { emit }: { emit: Emits }) {
+	//emits: ['sizeChage', 'currentPageChange'] as const, // 这里的 as const 是为了生成正确的类型定义
+	emits: {
+		sizeChage: (value: number) => true,
+		currentPageChange: (value: number) => true,
+	},
+	setup(prop, { emit }) {
 		//:define
 
 		//:use
@@ -85,6 +94,7 @@ export default defineComponent({
 					<ElPagination
 						background={prop.background}
 						pageSize={DATA.query.pageSize}
+						pageSizes={prop.pageSizes}
 						total={prop.total}
 						currentPage={DATA.query.pageIndex}
 						onSizeChange={onSizeChage}

@@ -14,7 +14,6 @@ from co6co.utils import log
 
 from ...model.pos.right import UserPO, UserRolePO, UserGroupRolePO, menuPO, MenuRolePO
 from ...model.enum import menu_type
-from . import getCtxUserId
 from .api_check import apiPermissionCheck
 from .authonCache import AuthonCacheManage
 
@@ -38,6 +37,8 @@ def authorized(f):
         # run some method that checks the request
         # for the client's authorization status
         valid = await validToken(request, request.app.config.SECRET)
+        if not valid:
+            return JSON_util.response(Result.fail(message="token invalid or expire"), status=403)
         # //dodo debug
         valid = await checkApi(request)
         if valid:

@@ -16,9 +16,9 @@
     字符串格式化
     优化：CacheManage
 0.0.9
-0.0.10 正式
+0.0.10
     view_model  为get_one  增加一个func的方法
-0.0.11
+0.0.11 正式
     get_one 增加 remove_db_instance 参数
     remove 增加 after 返回值判断
     response_error

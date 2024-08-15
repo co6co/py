@@ -78,7 +78,8 @@ export const useResponseValid = (response: AxiosResponse<IResponse>) => {
 		if (result.code == 0) {
 			return response.data as any;
 		} else {
-			ElMessage.error(`${result.message}`);
+			//ElMessage.error(`${result.message}`);
+			ElMessage.error(result.message || '处理失败')
 			return Promise.reject(response.data);
 		}
 	} catch (e) {

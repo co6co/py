@@ -7,10 +7,6 @@ from co6co_sanic_ext.model.res.result import Result
 from ...services import getCurrentUserId
 
 
-def getCtxUserId(request: Request):
-    return getCurrentUserId(request)
-
-
 ObjectExistRoute = "/exist/<code:str>/<pk:int>"
 
 
