@@ -21,8 +21,8 @@ export const download_blob_resource = (resource: {
 	link.click();
 	window.URL.revokeObjectURL(link.href);
 };
-export const request_resource_svc = async (
-	url: string,
+const _loadResource = (
+	url,
 	axios_config: AxiosRequestConfig = { method: 'get', responseType: 'blob' }
 ) => {
 	const default_config: { method: Method; url: string; timeout: number } = {
@@ -35,14 +35,39 @@ export const request_resource_svc = async (
 	service.interceptors.request.use(useRequestToken);
 	const res = await service.get(url, { ...default_config, ...axios_config });
 	 */
-	const res = await axios({
+	return axios({
 		...default_config,
 		...axios_config,
 		...{ headers: { Authorization: `Bearer ${getToken()}` } },
 	});
-	//const blob = new Blob([res.data]) //处理文档流
-	const result = create_URL_resource({ data: res.data });
-	return result;
+};
+export const loadAsyncResource = async (
+	url: string,
+	axios_config: AxiosRequestConfig = { method: 'get', responseType: 'blob' }
+) => {
+	const res = await _loadResource(url, axios_config);
+	return create_URL_resource({ data: res.data });
+};
+
+export const loadResource = (
+	url,
+	success: (url: string) => void,
+	fail: (e: string) => void,
+	axios_config: AxiosRequestConfig = { method: 'get', responseType: 'blob' }
+) => {
+	_loadResource(url, axios_config)
+		.then((res) => {
+			if (res.status == 200) {
+				//const blob = new Blob([res.data]) //处理文档流
+				const result = create_URL_resource({ data: res.data });
+				success ? success(result) : console.info(result);
+			} else {
+				fail ? fail(res.data) : console.warn(`请求：${url}error`, res.data);
+			}
+		})
+		.catch((e) => {
+			fail ? fail(e) : console.warn(`请求：${url}error`, e);
+		});
 };
 
 //下载文件

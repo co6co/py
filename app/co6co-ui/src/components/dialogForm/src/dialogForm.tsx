@@ -50,11 +50,7 @@ export default defineComponent({
 		};
 		const slots = {
 			buttons: () => (
-				<>
-					<ElButton onClick={() => formInstance.value?.validate()}>
-						保存
-					</ElButton>
-				</>
+				<ElButton onClick={() => formInstance.value?.validate()}>保存</ElButton>
 			),
 		};
 		// const data: Object = inject('formData') || {}

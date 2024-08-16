@@ -14,10 +14,13 @@
 0.0.4
 0.0.6
     resource
-0.0.7 发布
+0.0.7
     request_resource_svc ,
         需要调试： axios( {...{method: 'get', responseType: 'blob'},...config})
                 与 axios.create().get("url",{...{method: 'get', responseType: 'blob'},...config})
                 之间得区别
     page,download,dictSelect
+0.0.8  发布
+    request_resource_svc 更名为 loadAsyncResource
+    resource:1. imageView|image/listView
 ```

@@ -1,0 +1,37 @@
+.Image {
+  height: 20rem; //rem 相对与 html 的 font-size计算
+  //em 相对与 父元素的  font-size计算
+  //1vh=  1/100浏览器高度
+  //1vw
+  :global(.el-image) {
+    width: 100px;
+  }
+}
+.imag_nav_container {
+  overflow: auto;
+  white-space: nowrap;
+  ul li {
+    width: 132px;
+    height: 74px;
+    text-align: center;
+    line-height: 74px;
+    cursor: pointer;
+    overflow: hidden;
+    z-index: calc(var(--el-index-normal) - 1);
+    display: inline-block; //块级元素 超出盒子会换行
+    transform: none;
+    border: 1px solid #ccc;
+    padding: 1px;
+    a {
+      .el-image {
+        width: 100%;
+      }
+      svg {
+        position: absolute;
+        left: 40%;
+        top: 35%;
+        width: 20%;
+      }
+    }
+  }
+}
