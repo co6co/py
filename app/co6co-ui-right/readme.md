@@ -23,4 +23,6 @@
 0.0.8  发布
     request_resource_svc 更名为 loadAsyncResource
     resource:1. imageView|image/listView
+0.0.9
+    1. htmlPlayer else bug
 ```

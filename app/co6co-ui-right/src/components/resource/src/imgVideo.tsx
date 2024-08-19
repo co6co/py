@@ -1,4 +1,11 @@
-import { ref, defineAsyncComponent, defineComponent, PropType } from 'vue';
+import {
+	ref,
+	defineAsyncComponent,
+	defineComponent,
+	PropType,
+	watch,
+	onMounted,
+} from 'vue';
 import { type resourceOption } from './type';
 import { ElImage, ElRow, ElCol, ElScrollbar } from 'element-plus';
 import style from '@/assets/css/imageVideo.module.less';
@@ -17,15 +24,14 @@ export default defineComponent({
 		const HtmlPlayer = defineAsyncComponent(() => import('./htmlPlayer'));
 
 		/**
-     * 
-     const components = reactive({
-      Image: markRaw(defineAsyncComponent(() => import('../../../components/player/src/Image.tsx'))),
-      htmlPlayer: markRaw(
-        defineAsyncComponent(() => import('../../../components/player/src/htmlPlayer.tsx'))
-      )
-    })
-     */
-
+     	* 
+			const components = reactive({
+			Image: markRaw(defineAsyncComponent(() => import('../../../components/player/src/Image.tsx'))),
+			htmlPlayer: markRaw(
+				defineAsyncComponent(() => import('../../../components/player/src/htmlPlayer.tsx'))
+			)
+			})
+     	*/
 		const currentName = ref<'Image' | 'htmlPlayer'>('Image');
 		let currentIndex = ref(0);
 		const DATA = ref<resourceOption>({
@@ -43,14 +49,28 @@ export default defineComponent({
 		};
 
 		const posterURlObject = ref<{ [key: number]: string }>({});
-		const onloadPosterUrl = (item: resourceOption, index: number) => {
-			if (item.authon)
-				loadAsyncResource(item.poster).then((r) => {
-					posterURlObject.value[index] = r;
-				});
-			else posterURlObject.value[index] = item.poster;
-			return index;
+
+		const loadImage = (items: resourceOption[]) => {
+			items.forEach((item, index) => {
+				posterURlObject.value[index] = '';
+				if (item.posterAuthon)
+					loadAsyncResource(item.poster).then((r) => {
+						posterURlObject.value[index] = r;
+					});
+				else posterURlObject.value[index] = item.poster;
+				if (index == currentIndex.value) onShow(item, index);
+			});
 		};
+
+		watch(
+			() => prop.viewOption,
+			(n) => {
+				loadImage(n);
+			}
+		);
+		onMounted(() => {
+			loadImage(prop.viewOption);
+		});
 		return () => {
 			//可以写某些代码
 			return (
@@ -74,12 +94,12 @@ export default defineComponent({
 												<li onClick={() => onShow(item, index)} key={index}>
 													<a href="#">
 														<ElImage
-															index={onloadPosterUrl(item, index)}
 															src={posterURlObject.value[index]}
 															title={item.name}
 															style={
 																item.type == 0 ? { position: 'relative' } : {}
-															}></ElImage>
+															}
+														/>
 													</a>
 												</li>
 											);

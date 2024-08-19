@@ -21,6 +21,7 @@ export default defineComponent({
 				if (n.authon) {
 					if (n.url) DATA.url = await loadAsyncResource(n.url);
 					else DATA.url = '';
+					//图标
 					if (n.poster) DATA.poster = await loadAsyncResource(n.poster);
 					else DATA.poster = '';
 				} else {
@@ -45,7 +46,7 @@ export default defineComponent({
 							title={prop.option.name}
 						/>
 					) : (
-						<ElEmpty v-else description="未加载数据" />
+						<ElEmpty description="未加载数据" />
 					)}
 				</>
 			);

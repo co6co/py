@@ -35,6 +35,7 @@ export default defineComponent({
 		watch(
 			() => prop.list,
 			async (n) => {
+				DATA.value = [];
 				if (n && n.length > 0) {
 					const promises = await prop.list.map(async (item) => {
 						return {

@@ -35,6 +35,7 @@ const _loadResource = (
 	service.interceptors.request.use(useRequestToken);
 	const res = await service.get(url, { ...default_config, ...axios_config });
 	 */
+	//console.info('Bearer', getToken());
 	return axios({
 		...default_config,
 		...axios_config,

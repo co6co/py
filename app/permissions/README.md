@@ -18,9 +18,11 @@
 0.0.8
     pillow-10.4.0
     资源
-0.0.9 
+0.0.9
     delete->aop.getuserId
 0.0.10 发布
     token invalid
+0.0.11
+    resource 增加 URL 处理
 
 ```

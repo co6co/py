@@ -7,6 +7,8 @@ import json
 import io
 import os
 from PIL import Image
+from io import BytesIO
+import requests
 from sanic import Request
 from sanic.response import text, raw, empty, file, file_stream, ResponseStream
 from ...model.pos.resource import resourcePO
@@ -28,9 +30,12 @@ class resource_baseView(AuthMethodView):
         return None
 
     async def getLocalPath(self, request: Request) -> str:
+        path = ""
         for k, v in request.query_args:
             if k == "path":
                 path = v
+        if path.startswith("http"):
+            return path
         return await self.getRersourcePath(request, path)
 
     async def screenshot(self, fullPath: str, w: int = 208, h: int = 117, isFile: bool = True):
@@ -38,19 +43,38 @@ class resource_baseView(AuthMethodView):
         视频截图
         视频第一帧作为 poster
         """
-        if os.path.exists(fullPath):
-            tempPath = await screenshot(fullPath, w, h, isFile=True, useBytes=True)
+        if fullPath.startswith('http') or os.path.exists(fullPath):
+            isFile = not fullPath.startswith('http')
+            tempPath = await screenshot(fullPath, w, h, isFile=isFile, useBytes=True)
             if tempPath == None:
                 return empty(status=404)
             return raw(tempPath,  status=200, headers=None,  content_type="image/jpeg")
         return empty(status=404)
 
+    async def readHttpImage(self, url):
+        data = requests.get(url)
+        if data.status_code == 200:
+            data = BytesIO(data.content)
+            im = Image.open(data)
+            return im
+        return None
+
+    async def readLocalImage(path):
+        if os.path.exists(path):
+            im = Image.open(path)
+            return im
+        return None
+
     async def screenshot_image(self, fullPath: str, w: int = 208, h: int = 117):
         """ 
         略缩图
         """
-        if os.path.exists(fullPath):
-            im = Image.open(fullPath)
+        im = None
+        if fullPath.startswith('http'):
+            im = await self.readHttpImage(fullPath)
+        elif os.path.exists(fullPath):
+            im = await self.readLocalImage(fullPath)
+        if im != None:
             bytes = io.BytesIO()
             im.thumbnail((w, h))
             im.save(bytes, "PNG")

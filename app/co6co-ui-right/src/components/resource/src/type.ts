@@ -9,6 +9,7 @@ export interface resourceOption {
 	name: string;
 	//是否需要认证
 	authon?: boolean;
+	posterAuthon?: boolean;
 }
 
 export type imageOption = Omit<resourceOption, 'type'>;

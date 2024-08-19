@@ -1,4 +1,4 @@
-import { ref, defineComponent, watch, PropType } from 'vue';
+import { ref, defineComponent, watch, PropType, onMounted } from 'vue';
 import { videoOption } from './type';
 import { loadAsyncResource } from '@/api/download';
 import { ElEmpty } from 'element-plus';
@@ -19,7 +19,6 @@ export default defineComponent({
 			name: '',
 		});
 		const videoRef = ref<HTMLMediaElement>();
-
 		const check = (promise: Promise<any>) => {
 			if (promise !== undefined) {
 				promise
@@ -98,7 +97,7 @@ export default defineComponent({
 			});
 		};
 
-		const update = () => {
+		const loadContents = () => {
 			const n = prop.option;
 			if (n && n.authon) {
 				if (n.url) {
@@ -125,7 +124,7 @@ export default defineComponent({
 			() => prop.option.url,
 			(u, o) => {
 				if (u) {
-					update();
+					loadContents();
 					if (!videoRef.value) return;
 					videoRef.value.load();
 					let promise: Promise<any> = videoRef.value.play();
@@ -148,13 +147,16 @@ export default defineComponent({
 				}
 			}
 		);
+		onMounted(() => {
+			loadContents();
+		});
 		return () => {
 			//可以写某些代码
 			return (
 				<>
 					{prop.option.url ? (
 						<video
-							style="width: 100%;height: 100%;object-fit: fill;"
+							style="width: 100%;height: 100%;object-fit:fill;"
 							ref={videoRef}
 							src={DATA.value.url}
 							controls={true}
@@ -163,7 +165,7 @@ export default defineComponent({
 							poster={DATA.value.poster}
 						/>
 					) : (
-						<ElEmpty v-else description="未加载数据" />
+						<ElEmpty description="未加载数据" />
 					)}
 				</>
 			);
