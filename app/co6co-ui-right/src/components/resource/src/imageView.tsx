@@ -1,50 +1,104 @@
-import { defineComponent, PropType, reactive, watch } from 'vue';
-import { imageOption } from './type';
-import { ElImage, ElEmpty } from 'element-plus';
+import {
+	defineComponent,
+	PropType,
+	reactive,
+	watch,
+	nextTick,
+	onMounted,
+} from 'vue';
+import { image2Option } from './type';
+import { ElImage, ElEmpty, ElIcon } from 'element-plus';
+import { Picture, Loading } from '@element-plus/icons-vue';
 import { loadAsyncResource } from '@/api/download';
+import imgStyle from '@/assets/css/images.module.less';
 
 const props = {
 	option: {
-		type: Object as PropType<imageOption>,
+		type: Object as PropType<image2Option>,
 		required: true,
 	},
 } as const;
 export default defineComponent({
 	name: 'ImageView',
 	props: props,
-	setup(prop, _) {
-		const DATA = reactive<imageOption>(prop.option);
+	setup(prop, ctx) {
+		const DATA = reactive<image2Option & { loading?: boolean }>(prop.option);
 		watch(
 			() => prop.option,
 			async (n) => {
-				DATA.name = n.name;
-				if (n.authon) {
-					if (n.url) DATA.url = await loadAsyncResource(n.url);
-					else DATA.url = '';
-					//图标
-					if (n.poster) DATA.poster = await loadAsyncResource(n.poster);
-					else DATA.poster = '';
-				} else {
-					DATA.url = n.url;
-					DATA.poster = n.poster;
-				}
+				await loadResource(n);
 			}
 		);
+		const loadResource = (option?: image2Option) => {
+			//DATA.name = n.name
+			DATA.loading = true;
+			DATA.url = '';
+			if (option && ((DATA.authon = option.authon), DATA.authon)) {
+				if (option.url)
+					nextTick(async () => {
+						loadAsyncResource(option.url)
+							.then((r) => {
+								DATA.url = r;
+							})
+							.finally(() => {
+								DATA.loading = false;
+							});
+					});
+			} else if (option) {
+				DATA.url = option.url;
+			}
+			console.info(DATA, option);
+		};
+		const onLoadError = () => {
+			if (!DATA.authon) DATA.loading = false;
+		};
+		onMounted(() => {
+			console.info('OnMounted', prop.option);
+			loadResource(prop.option);
+		});
+
 		return () => {
 			//可以写某些代码
 			return (
 				<>
-					{prop.option.url ? (
+					{prop.option && prop.option.url ? (
 						<ElImage
+							class={imgStyle.image}
 							src={DATA.url}
 							previewSrcList={[DATA.url]}
 							zoomRate={1.2}
 							maxScale={7}
 							minScale={0.2}
-							style="width: 100%; height: 100%"
-							fit="cover"
-							title={prop.option.name}
-						/>
+							onError={onLoadError}
+							style={{ height: '100%', width: '100%' }}
+							fit="cover">
+							{{
+								error: () => {
+									return (
+										<div class="image_slot">
+											{DATA.authon && DATA.loading ? (
+												<ElIcon style="font-size:200%" class="is-loading">
+													<Loading />
+												</ElIcon>
+											) : (
+												<ElIcon>
+													<Picture />
+												</ElIcon>
+											)}
+										</div>
+									);
+								},
+								placeholder: () => {
+									return (
+										<div class="image_slot">
+											<ElIcon style="font-size:200%" class="is-loading">
+												<Loading />
+											</ElIcon>
+										</div>
+									);
+								},
+							}}
+						</ElImage>
 					) : (
 						<ElEmpty description="未加载数据" />
 					)}
