@@ -9,10 +9,13 @@ import {
 import { type resourceOption } from './type';
 import { ElImage, ElRow, ElCol, ElScrollbar, ElIcon } from 'element-plus';
 
-import { Picture, Loading } from '@element-plus/icons-vue';
+import { Picture, Loading, CaretRight } from '@element-plus/icons-vue';
 import style from '@/assets/css/imageVideo.module.less';
 import { loadAsyncResource } from '@/api/download';
 import imgStyle from '@/assets/css/images.module.less';
+const Image = defineAsyncComponent(() => import('./imageView'));
+const HtmlPlayer = defineAsyncComponent(() => import('./htmlPlayer'));
+
 const props = {
 	viewOption: {
 		type: Object as PropType<Array<resourceOption>>,
@@ -20,12 +23,9 @@ const props = {
 	},
 } as const;
 export default defineComponent({
-	name: 'ImageView',
+	name: 'ImageListView',
 	props: props,
 	setup(prop, _) {
-		const Image = defineAsyncComponent(() => import('./imageView'));
-		const HtmlPlayer = defineAsyncComponent(() => import('./htmlPlayer'));
-
 		/**
      	* 
 			const components = reactive({
@@ -54,7 +54,12 @@ export default defineComponent({
 		 * 导航图数据
 		 */
 		const posterURlObject = ref<{
-			[key: number]: { url: string; authon?: boolean; loading?: boolean };
+			[key: number]: {
+				url: string;
+				authon?: boolean;
+				loading?: boolean;
+				succ?: boolean;
+			};
 		}>({});
 		const loadImage = (items: resourceOption[]) => {
 			items.forEach((item, index) => {
@@ -62,15 +67,22 @@ export default defineComponent({
 					posterURlObject.value[index] = { url: '' };
 				posterURlObject.value[index].url = '';
 				posterURlObject.value[index].authon = item.posterAuthon;
-				if (item.posterAuthon)
+				posterURlObject.value[index].succ = false;
+				if (item.posterAuthon) {
+					posterURlObject.value[index].loading = true;
 					loadAsyncResource(item.poster)
 						.then((r) => {
 							posterURlObject.value[index].url = r;
+							posterURlObject.value[index].succ = true;
 						})
 						.finally(() => {
 							posterURlObject.value[index].loading = false;
 						});
-				else posterURlObject.value[index].url = item.poster;
+				} else {
+					posterURlObject.value[index].url = item.poster;
+					posterURlObject.value[index].succ = true;
+				}
+				//载入当前选中的 内容
 				if (index == currentIndex.value) onShow(item, index);
 			});
 		};
@@ -85,9 +97,13 @@ export default defineComponent({
 			loadImage(prop.viewOption);
 		});
 		const onLoadError = (index: number) => {
-			if (!posterURlObject.value[index].authon)
+			//无需认证
+			if (!posterURlObject.value[index].authon) {
 				posterURlObject.value[index].loading = false;
+				posterURlObject.value[index].succ = false;
+			}
 		};
+
 		return () => {
 			//可以写某些代码
 			return (
@@ -108,7 +124,12 @@ export default defineComponent({
 									<ul>
 										{prop.viewOption.map((item, index) => {
 											return (
-												<li onClick={() => onShow(item, index)} key={index}>
+												<li
+													onClick={() => onShow(item, index)}
+													key={index}
+													style={
+														item.type == 0 ? { position: 'relative' } : {}
+													}>
 													<a href="#">
 														<ElImage
 															class={imgStyle.image}
@@ -116,23 +137,18 @@ export default defineComponent({
 															title={item.name}
 															onError={() => {
 																onLoadError(index);
-															}}
-															style={
-																item.type == 0 ? { position: 'relative' } : {}
-															}>
+															}}>
 															{{
 																error: () => {
 																	return (
 																		<div class="image_slot">
 																			{posterURlObject.value[index].authon &&
 																			posterURlObject.value[index].loading ? (
-																				<ElIcon
-																					style="font-size:150%"
-																					class="is-loading">
+																				<ElIcon class="is-loading">
 																					<Loading />
 																				</ElIcon>
 																			) : (
-																				<ElIcon style="font-size:150%">
+																				<ElIcon>
 																					<Picture />
 																				</ElIcon>
 																			)}
@@ -152,6 +168,13 @@ export default defineComponent({
 																},
 															}}
 														</ElImage>
+														{item.type == 0 &&
+														!posterURlObject.value[index].loading &&
+														posterURlObject.value[index].succ ? (
+															<CaretRight />
+														) : (
+															<></>
+														)}
 													</a>
 												</li>
 											);

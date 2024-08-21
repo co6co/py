@@ -25,4 +25,5 @@
     resource:1. imageView|image/listView
 0.0.9
     1. htmlPlayer else bug
+    2. downloadFile
 ```

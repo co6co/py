@@ -22,7 +22,9 @@ export default defineComponent({
 	name: 'ImageView',
 	props: props,
 	setup(prop, ctx) {
-		const DATA = reactive<image2Option & { loading?: boolean }>(prop.option);
+		const DATA = reactive<image2Option & { loading?: boolean }>({
+			url: '',
+		});
 		watch(
 			() => prop.option,
 			async (n) => {
@@ -34,7 +36,7 @@ export default defineComponent({
 			DATA.loading = true;
 			DATA.url = '';
 			if (option && ((DATA.authon = option.authon), DATA.authon)) {
-				if (option.url)
+				if (option.url) {
 					nextTick(async () => {
 						loadAsyncResource(option.url)
 							.then((r) => {
@@ -44,16 +46,15 @@ export default defineComponent({
 								DATA.loading = false;
 							});
 					});
+				}
 			} else if (option) {
 				DATA.url = option.url;
 			}
-			console.info(DATA, option);
 		};
 		const onLoadError = () => {
 			if (!DATA.authon) DATA.loading = false;
 		};
 		onMounted(() => {
-			console.info('OnMounted', prop.option);
 			loadResource(prop.option);
 		});
 

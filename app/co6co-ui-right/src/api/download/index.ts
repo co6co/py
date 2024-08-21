@@ -1,4 +1,4 @@
-import { getToken, createAxiosInstance } from 'co6co';
+import { getToken, useRequestToken, createAxiosInstance } from 'co6co';
 import { IDownloadConfig } from '@/constants';
 import axios, {
 	type ResponseType,
@@ -23,10 +23,17 @@ export const download_blob_resource = (resource: {
 };
 const _loadResource = (
 	url,
-	axios_config: AxiosRequestConfig = { method: 'get', responseType: 'blob' }
+	authon?: boolean,
+	axios_config?: AxiosRequestConfig
 ) => {
-	const default_config: { method: Method; url: string; timeout: number } = {
+	const default_config: {
+		method: Method;
+		url: string;
+		timeout: number;
+		responseType: 'blob';
+	} = {
 		method: 'get', //请求方式
+		responseType: 'blob',
 		url: url, //请求地址  会加上 baseURL
 		timeout: 3 * 60 * 1000,
 	};
@@ -36,17 +43,20 @@ const _loadResource = (
 	const res = await service.get(url, { ...default_config, ...axios_config });
 	 */
 	//console.info('Bearer', getToken());
+	const header = authon
+		? { headers: { Authorization: `Bearer ${getToken()}` } }
+		: { headers: {} };
 	return axios({
+		...header,
 		...default_config,
 		...axios_config,
-		...{ headers: { Authorization: `Bearer ${getToken()}` } },
 	});
 };
 export const loadAsyncResource = async (
 	url: string,
-	axios_config: AxiosRequestConfig = { method: 'get', responseType: 'blob' }
+	axios_config?: AxiosRequestConfig
 ) => {
-	const res = await _loadResource(url, axios_config);
+	const res = await _loadResource(url, true, axios_config);
 	return create_URL_resource({ data: res.data });
 };
 
@@ -54,9 +64,9 @@ export const loadResource = (
 	url,
 	success: (url: string) => void,
 	fail: (e: string) => void,
-	axios_config: AxiosRequestConfig = { method: 'get', responseType: 'blob' }
+	axios_config?: AxiosRequestConfig
 ) => {
-	_loadResource(url, axios_config)
+	_loadResource(url, true, axios_config)
 		.then((res) => {
 			if (res.status == 200) {
 				//const blob = new Blob([res.data]) //处理文档流
@@ -73,7 +83,7 @@ export const loadResource = (
 
 //下载文件
 //download_config 为默认时获取文件长度
-export const download_header_svc = (url: string) => {
+export const download_header_svc = (url: string, authon?: boolean) => {
 	const default_config: {
 		method: Method;
 		baseURL: string;
@@ -85,13 +95,14 @@ export const download_header_svc = (url: string) => {
 		method: 'HEAD', //请求方式
 		timeout: 30 * 1000,
 	};
-	return createAxiosInstance()({ ...default_config });
+	return _loadResource(url, authon, { ...default_config });
 };
 //下载文件
 //download_config 为默认时获取文件长度
 export const download_fragment_svc = (
 	url: string,
-	config: IDownloadConfig = { method: 'HEAD' }
+	config: IDownloadConfig = { method: 'HEAD' },
+	authon?: boolean
 ) => {
 	const default_config: {
 		method: Method;
@@ -107,21 +118,19 @@ export const download_fragment_svc = (
 		timeout: 30 * 1000,
 	};
 	//Object.assign({},default_config,config)
-	return createAxiosInstance()({ ...default_config, ...config });
+	return _loadResource(url, authon, { ...default_config, ...config });
+	//return createAxiosInstance()({ ...default_config, ...config });
 };
 //单独下载
 //需要认证的下载
 export const download_svc = (
 	url: string,
 	fileName: string,
-	bck?: () => void
+	authon?: boolean,
+	bck?: () => void,
+	timeout?: number
 ) => {
-	createAxiosInstance()
-		.get(url, {
-			method: 'get', //请求方式
-			responseType: 'blob', //文件流将会被转成blob
-			timeout: 60 * 1000,
-		})
+	_loadResource(url, authon, { timeout: timeout || 60 * 1000 })
 		.then((res) => {
 			try {
 				//console.info(res,res)
