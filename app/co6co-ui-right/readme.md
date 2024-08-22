@@ -20,10 +20,10 @@
                 与 axios.create().get("url",{...{method: 'get', responseType: 'blob'},...config})
                 之间得区别
     page,download,dictSelect
-0.0.8  发布
+0.0.8
     request_resource_svc 更名为 loadAsyncResource
     resource:1. imageView|image/listView
-0.0.9
+0.0.9 发布
     1. htmlPlayer else bug
     2. downloadFile
 ```
