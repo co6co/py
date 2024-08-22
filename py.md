@@ -6,7 +6,7 @@ https://docs.sqlalchemy.org/en/20/core/pooling.html
 
 # python 最新版本
 ```
-co6co==0.0.7
+co6co==0.0.8
 co6co.sanic-ext==0.0.4
 co6co.db-ext==0.0.8
 co6co.web-db==0.0.11

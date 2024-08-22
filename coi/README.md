@@ -8,8 +8,11 @@
 0.0.3.230817
 0.0.6
     增加两个方法 find_files getWorkDirectory
-0.0.7 正式
+0.0.7
     debug
+0.0.8  正式
+    新增 TaskManage,Executing
+
 ```
 
 # 安装
