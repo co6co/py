@@ -22,3 +22,17 @@ co6co-right==0.0.8
 ```
 
 
+
+
+## [Dlib](http://dlib.net/files/) 安装
+
+dlib GPU 版本安装：
+1、去官网 http://dlib.net/ 下载 dlib 压缩包，并解压；
+2、安装 cmake，使用 pip install cmake 或 conda install cmake 安装即可；
+3、去 dlip 解压目录下，执行 `python setup.py install`，等待完成安装。
+
+判断dlib是否可以使用GPU：
+```
+import dlib
+dlib.DLIB_USE_CUDA   # True 表示可以使用 GPU
+```
