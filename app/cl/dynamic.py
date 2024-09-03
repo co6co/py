@@ -6,7 +6,6 @@
 ## 1. eval(expression, globals=None, locals=None)->Any|None
 
 ## 只能是单个运算表达式 (注意eval不支持任意形式的赋值操作)，而不能是复杂的代码逻辑
-
 #globals : 变量作用域，全局命名空间，如果被提供，则必须是一个字典对象
 #locals  : 变量作用域，局部命名空间，如果被提供，可以是任何映射对象
 
@@ -53,7 +52,7 @@ for index in range(count):
 
 
 def print_str():
-    eval("print('hello world')") 
+    eval("print('hello world')")
 
 
 def add(x, y):
@@ -62,15 +61,18 @@ def add(x, y):
     """
     return eval("x+y")
 
+
 def exec_eval():
     """
     出错
     expr 只能是单个表达式 
     """
-    eval(expr)  
+    eval(expr)
+
 
 def exec_for():
     exec(expr)
+
 
 def eval_fun():
     """
@@ -86,6 +88,7 @@ def exec_fun():
     print(__name__)
     exec("print_str()")
 
+
 def exec_file(file_name, func_name):
     """
     file_name: 文件名
@@ -99,25 +102,23 @@ def exec_file(file_name, func_name):
     f = scope.get(func_name, None)
     f()
 
+
 if __name__ == "__main__":
     print_str()
-    print(add(12, 56)) 
-    exec_for()  
+    print(add(12, 56))
+    exec_for()
     print("调用文件方法:")
-    exec_file(__file__,"exec_fun")
+    exec_file(__file__, "exec_fun")
     print("------------------------------------------")
     exp = compile('select_max(a , b)', '', 'eval')
+
     def select_max(x, y):
         return x if x > y else y
-    c = eval('select_max(3 , 5)', {"__builtins__": {}}, {'select_max':select_max})
-    print("变量:",c)
-    
+    c = eval('select_max(3 , 5)', {"__builtins__": {}}, {'select_max': select_max})
+    print("变量:", c)
+
     for i in range(10):
         a = i
         b = i + 10
         c = eval(exp)
         print("c is {}".format(c))
-
-
-
-
