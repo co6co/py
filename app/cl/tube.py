@@ -1,56 +1,84 @@
-from pytubefix import YouTube
-from pytubefix.cli import on_progress
+from pytubefix import YouTube,Stream
+from pytubefix.cli import on_progress,display_progress_bar
 from pytubefix import Playlist
-
+from co6co import getByteUnit 
 url = input("输入要下载的URL:")
 url = "https://www.youtube.com/watch?v=lxOFGvHBsTY"
-proxys = {"http": "http://127.0.0.1:9667", "https": "http://127.0.0.1:9667"}
-# yt = YouTube(url, on_progress_callback=on_progress, proxies=proxys)
-yt = YouTube(url, use_oauth=True, allow_oauth_cache=True, on_progress_callback=on_progress)
-print("标题：", yt.title)
+proxys = {"http": "http://127.0.0.1:10809", "https": "http://127.0.0.1:10809"}
 
+
+def on_progress(stream: Stream,
+                chunk: bytes,
+                bytes_remaining: int
+                ) -> None:  # pylint: disable=W0613
+    if not hasattr(stream,"downByts")  : stream.downByts=len(chunk)
+    else :stream.downByts+=len(chunk)  
+    sum=stream.downByts+bytes_remaining
+    print( f'download {getByteUnit(len( chunk))}, downloading {round(stream.downByts/sum,4)*100}% {getByteUnit(stream.downByts)}/{getByteUnit(sum)}  remainng:{getByteUnit(bytes_remaining )} data to file .. ')
+    filesize = stream.filesize
+    bytes_received = filesize - bytes_remaining
+    display_progress_bar(bytes_received, filesize)
+yt = YouTube(url, on_progress_callback=on_progress, proxies=proxys)
+#yt = YouTube(url, use_oauth=True, allow_oauth_cache=True, on_progress_callback=on_progress, proxies=proxys)
+print("标题：", yt.title)
+streamList = yt.streams.all()
+
+def getInt(tip):
+    try:
+        c=input(tip)
+        return int(c)
+    except:
+        return -1
 
 def downloadVideo():
     """
     下载视频或音频
-    """
-    list = yt.streams.all()
-
+    """ 
     def checkItem():
         """
         选择要下载的序号
         """
-        for item in list:
+        for item in streamList:
             print(item)
-        itag = input("input itag:")
-        if itag == "q":
+        itag = getInt("input itag,-1->quit:")
+        if itag == -1:
             return None
-        return int(itag)
+        return itag
     while True:
         itag = checkItem()
         if itag == None:
             break
-        checkedList = [i for i in list if i.itag == itag]
+        checkedList = [i for i in streamList if i.itag == itag]
 
         for checked in checkedList:
-            checked.download()
+            checked.download() 
 
 
 def downCaption():
     caption = yt.captions.all()
-    print(*caption)
-    # caption = yt.captions.get_by_language_code('en')
-    # caption.save_captions("captions.txt")
+    while True:
+        caplist=[str(cap)for cap in caption]
+        print("\n".join( caplist) )
+        # caption = yt.captions.get_by_language_code('en')
+        code = input("caption code,q:quit:")
+        if code=='q':
+            break
+
+        checkedList = [i for i in caption if i.code == code]
+        for checked in checkedList:
+            file = input("保存路径:")
+            checked.download(title=yt.title,output_path=file)
+
+        # caption.save_captions("captions.txt")
 
 
 while True:
-    c = input("下载类型:1-> 音视频,2->字幕,9->退出")
-    c = int(c)
+    c = getInt("下载类型:1-> 音视频,2->字幕,9->退出:") 
     if c == 1:
         downloadVideo()
     elif c == 2:
         downCaption()
-    else:
+    elif c == 9:
         break
 
 
