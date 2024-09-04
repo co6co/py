@@ -15,6 +15,7 @@ co6co.permissions==0.0.10
 ```
 
 # ui 最新版本
+npm install --registry=http://registry.npm.taobao.org/ isomorphic-streams
 ```
 co6co-ui==0.1.10 
 co6co-right==0.0.8
