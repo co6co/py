@@ -21,7 +21,7 @@ def isBase64(content: str) -> bool:
 
 def debug():
     frameList = inspect.stack()
-    sss = ["{}.{}\t{}".format(i.filename, i.function, i.lineno) for i in frameList]
+    sss = ["{}:{} ->{}".format(i.filename, i.lineno, i.function) for i in frameList]
     print(len(frameList))
     warn('\n' + '\n'.join(sss))
 

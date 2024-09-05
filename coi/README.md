@@ -12,7 +12,8 @@
     debug
 0.0.8  正式
     新增 TaskManage,Executing
-
+0.0.9
+    调整debug 输出格式
 ```
 
 # 安装
