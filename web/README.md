@@ -14,6 +14,14 @@
     baseView: save_file
 ```
 
+webSocket 测试地址
+http://www.blue-zero.com/WebSocket/
+http://coolaf.com/tool/chattest
+
+这两个遇到个问题，sanic 一执行 websocket 地址 python 就报异常框（需 c++调试）的框
+后经过一个个模块删除后发现是：
+在文件夹中有 multidict-6.0.2 模块，`pip list` 显示确是 6.0.4，直接移除 multidict 发现正常
+
 # 类属性与对象属性
 
 ```
