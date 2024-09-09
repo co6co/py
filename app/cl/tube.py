@@ -3,7 +3,7 @@ from pytubefix.cli import on_progress,display_progress_bar
 from pytubefix import Playlist
 from co6co import getByteUnit 
 url = input("输入要下载的URL:")
-url = "https://www.youtube.com/watch?v=lxOFGvHBsTY"
+#url = "https://www.youtube.com/watch?v=lxOFGvHBsTY"
 proxys = {"http": "http://127.0.0.1:10809", "https": "http://127.0.0.1:10809"}
 
 
