@@ -87,6 +87,12 @@ class Executing:
     kvgs = None
 
     def __init__(self, threadName: str, func, *args, **kvgs):
+        '''
+        threadName: 线程名
+        func: 执行的方法 async 
+        args:  func 参数
+        kvgs: func 参数
+        '''
         self._loop = asyncio.new_event_loop()
         self._isCallClose = False
         self.threadName = threadName
@@ -101,11 +107,12 @@ class Executing:
             log.log("线程{}运行...".format(id(self.loop)))
             self.loop.run_until_complete(self.bck(*self.args, **self.kvgs))
             # await self.bck(*self.args,**self.kvgs)
-            log.log("线程{}结束.".format(id(self.loop)))
         except Exception as e:
             log.warn("执行：{},出错".format(self.threadName))
         finally:
+            log.log("线程{}结束.".format(id(self.loop)))
             self.loop.close()
+            
 
 
 class TaskManage:
