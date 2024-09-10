@@ -104,15 +104,14 @@ class Executing:
     def _start_background(self):
         try:
             asyncio.set_event_loop(self.loop)
-            log.log("线程{}运行...".format(id(self.loop)))
+            log.log("线程'{}->{}'运行...".format(self.threadName, id(self.loop)))
             self.loop.run_until_complete(self.bck(*self.args, **self.kvgs))
             # await self.bck(*self.args,**self.kvgs)
         except Exception as e:
-            log.warn("执行：{},出错".format(self.threadName))
+            log.warn("线程'{}->{}'执行出错:{}".format(self.threadName, id(self.loop),e))
         finally:
-            log.log("线程{}结束.".format(id(self.loop)))
+            log.log("线程'{}->{}'结束.".format(self.threadName, id(self.loop)))
             self.loop.close()
-            
 
 
 class TaskManage:
@@ -131,14 +130,15 @@ class TaskManage:
     def __init__(self, threadName: str = None):
         self._loop = asyncio.new_event_loop()
         self._isCallClose = False
+        self.threadName = threadName
         Thread(target=self._start_background, daemon=True, name=threadName) .start()
 
     def _start_background(self):
         asyncio.set_event_loop(self.loop)
-        log.log("线程{}运行...".format(id(self.loop)))
+        log.log("线程'{}->{}'运行...".format(self.threadName, id(self.loop)))
         self._starting = True
         self._loop.run_forever()
-        log.log("线程{}结束.".format(id(self.loop)))
+        log.log("线程'{}->{}'结束.".format(self.threadName, id(self.loop)))
         self._starting = False
 
     def runTask(self, tastFun, callBck, *args, **kwargs):

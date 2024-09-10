@@ -10,10 +10,12 @@
     增加两个方法 find_files getWorkDirectory
 0.0.7
     debug
-0.0.8  正式
+0.0.8
     新增 TaskManage,Executing
-0.0.9
+0.0.9   正式 2024-09-10 降薪30%
     调整debug 输出格式
+
+
 ```
 
 # 安装

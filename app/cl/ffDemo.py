@@ -57,7 +57,7 @@ async def generate_video_stream(width=640, height=480):
     while True:
         try:
             if (w_pipe.closed):
-                log.info("w closed.")
+                log.info("w pipe closed.,退出线程.")
                 break
 
             # 生成一个随机帧
@@ -140,8 +140,8 @@ def signal_handler(sig, frame):
             return
         interrupted = True
         w_pipe.close()
-        r_pipe.close()
         ffmpeg._process.terminate()
+        r_pipe.close()
     except Exception as e:
         print(e)
 
