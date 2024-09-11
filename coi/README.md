@@ -14,6 +14,8 @@
     新增 TaskManage,Executing
 0.0.9   正式 2024-09-10 降薪30%
     调整debug 输出格式
+0.0.10
+    增加 read_stream, write_stream
 
 
 ```

@@ -7,7 +7,9 @@ import datetime
 from types import FunctionType
 import inspect
 import os
+import io
 import sys
+from typing import IO, Iterable
 from .log import warn
 
 
@@ -110,3 +112,24 @@ def getApplcationPath(__file__):
         application_path = os.path.dirname(os.path.abspath(__file__))
 
     return application_path
+
+
+def read_stream(stream: IO[bytes], size: int = -1) -> Iterable[bytes]:
+    while True:
+        chunk = stream.read(size)
+        if not chunk:
+            break
+        yield chunk
+
+
+async def write_stream(input: IO[bytes], outputStream: IO[bytes]):
+    for chunk in read_stream(input, size=io.DEFAULT_BUFFER_SIZE):
+        try:
+            # print("**FF读数据", len(chunk))
+            outputStream.write(chunk)
+            outputStream.flush()
+            # print("**输出到stdin*****",len(chunk))
+        except Exception as e:
+            pass
+            # print("**FF异常", e, len(chunk))
+    outputStream.close()
