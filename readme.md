@@ -66,6 +66,7 @@ repository= https://pypi.org/legacy/
 username= __token__
 password= pypi-XXXXXXXXXXXXXXXXXXXXXXXXXXXx
 ```
+pypi Data:
 ```
 -----BEGIN PGP MESSAGE-----
 Version: GnuPG v1
@@ -86,6 +87,7 @@ Sazv2w==
 -----END PGP MESSAGE-----
 
 
+PyPI recovery codes:
 -----BEGIN PGP MESSAGE-----
 Version: GnuPG v1
 
