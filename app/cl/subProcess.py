@@ -53,6 +53,13 @@ async def quitCheck(process: subprocess.Popen):
         print(f"标准错误输出：{stderr}")
 
     print(f"标准输出：{stdout}")
+    
+    #poll() 返回退出状态码；否则返回 None
+    '''
+    while proc.poll() is None:
+        print("Process is still running...")
+    print(f"Process exited with return code: {proc.returncode}")
+    '''
 
 
 async def outPut(outIO: IO[bytes] = None):

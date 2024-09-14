@@ -41,3 +41,17 @@ class WinserviceDemo(Winservice):
 if __name__ == '__main__':
     WinserviceDemo.parse_command_line()
 ```
+
+
+# 注意事项 (`pywin32.pth` 目录不用`相对路径`使用`绝对路径`)
+a. 使用虚拟环境时,运行服务默认使用默认的python环境，需要修改 pywin32中的相关变量
+```
+//C:\Users\Administrator\Envs\win32\Lib\site-packages\pywin32.pth
+win32
+win32\lib
+Pythonwin
+//-->修改为当前虚拟环境目录-->
+C:\Users\Administrator\Envs\win32\Lib\site-packages\win32
+C:\Users\Administrator\Envs\win32\Lib\site-packages\win32\lib
+C:\Users\Administrator\Envs\win32\Lib\site-packages\Pythonwin
+```

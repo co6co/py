@@ -62,7 +62,8 @@ def __log(*msg:str,type: int = 0,foregroundColor:int=37, bg=40, e=None, hasPrefi
     err=e.__traceback__.tb_lineno if e !=None else ""
     prefix=f"['{time.strftime('%Y-%m-%d %H:%M:%S')}'] [{t.ident}|{t.name}]\t"
     if not hasPrefix:prefix="" 
-    print(f"{prefix}\033[{type};{foregroundColor};{bg}m{__getMessage(*msg)}{err}\033[0m")
+    print(f"{prefix}\033[{type};{foregroundColor};{bg}m{__getMessage(*msg).encode("utf-8")}{err}\033[0m")
+    
 
 def log(*msg:str):__log(*msg)
 
