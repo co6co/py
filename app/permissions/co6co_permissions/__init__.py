@@ -13,5 +13,5 @@ s = f"{month:02d}{day:02d}{hour:02d}{minute:02d}"
 
 __version_info = (0, 0, 3, int(s))
 '''
-__version_info = (0, 0, 11)
+__version_info = (0, 0, 12)
 __version__ = ".".join([str(x) for x in __version_info])

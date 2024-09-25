@@ -1,0 +1,30 @@
+html,
+body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+#app {
+  overflow: auto;
+}
+.van-loading {
+  text-align: center;
+}
+.co6co-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+.co6co-header {
+  text-align: center;
+}
+.co6co-main {
+  flex-grow: 1; /* 自适应剩余空间 */
+  overflow-y: auto; /* 添加垂直滚动条 */
+  /*background-color: #3498db;*/
+  padding: 20px 5px;
+  margin-bottom: 50px;
+}
+.van-cell__value {
+  text-align: left;
+}

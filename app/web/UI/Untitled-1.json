@@ -1,0 +1,22 @@
+    {
+        "button": [
+            {
+                "type": "view",
+                "name": "业务办理",
+                "url": "https://wx.co6co.top:8443/xd/home.html#/service",
+                "sub_button": []
+            },
+            {
+                "type": "view",
+                "name": "便民服务",
+                "url": "https://wx.co6co.top:8443/xd/home.html#/easyService",
+                "sub_button": []
+            },
+            {
+                "type": "view",
+                "name": "用户信息",
+                "url": "https://wx.co6co.top:8443/xd/home.html#/userInfo",
+                "sub_button": []
+            }
+        ]
+    }

@@ -22,7 +22,9 @@
     delete->aop.getuserId
 0.0.10 发布
     token invalid
-0.0.11
+0.0.11 发布
     resource 增加 URL 处理
+0.0.12
+    在view_model 引用api模块中的内容可能出现循环引用问题，移动了相关代码
 
 ```
