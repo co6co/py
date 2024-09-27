@@ -5,7 +5,9 @@
       <el-icon v-if="sidebar.collapse"><Expand /></el-icon>
       <el-icon v-else><Fold /></el-icon>
     </div>
-    <div class="logo">{{ systeminfo.name }}</div>
+    <div class="logo">
+      {{ systeminfo.name }} <span class="version"> {{ systeminfo.version }}</span>
+    </div>
     <div class="header-right">
       <div class="header-user-con">
         <!-- 消息中心 -->
@@ -104,6 +106,10 @@ const handleCommand = (command: string) => {
   float: left;
   width: 250px;
   line-height: 70px;
+}
+.header .version {
+  font-size: 60%;
+  color: #c0c0c0;
 }
 .header-right {
   float: right;

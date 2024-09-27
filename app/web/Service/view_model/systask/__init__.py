@@ -8,8 +8,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.sql import Select
 from co6co_db_ext.db_utils import db_tools
 from co6co_permissions.view_model.base_view import AuthMethodView
-from model.pos.business import WFCodePO
-from view_model._filters.wfCode import Filter
+from model.pos.tables import TaskPO
+from view_model._filters.sysTask import Filter
 from co6co_permissions.view_model.aop import exist, ObjectExistRoute
 
 
@@ -17,8 +17,8 @@ class ExistView(AuthMethodView):
     routePath = ObjectExistRoute
 
     async def get(self, request: Request, code: str, pk: int = 0):
-        result = await self.exist(request, WFCodePO.code == code, WFCodePO.id != pk)
-        return exist(result, "违法代码", code)
+        result = await self.exist(request, TaskPO.code == code, TaskPO.id != pk)
+        return exist(result, "任务编码", code)
 
 
 class Views(AuthMethodView):
@@ -28,8 +28,8 @@ class Views(AuthMethodView):
         selectTree :  el-Tree
         """
         select = (
-            Select(WFCodePO.id, WFCodePO.name, WFCodePO.code)
-            .order_by(WFCodePO.code.asc())
+            Select(TaskPO.id, TaskPO.name, TaskPO.code, TaskPO.state, TaskPO.execStatus)
+            .order_by(TaskPO.code.asc())
         )
         return await self.query_list(request, select,  isPO=False)
 
@@ -47,12 +47,12 @@ class Views(AuthMethodView):
         """
         增加
         """
-        po = WFCodePO()
+        po = TaskPO()
         userId = self.getUserId(request)
         po.__dict__.update(request.json)
 
-        async def before(po: WFCodePO, session: AsyncSession, request):
-            exist = await db_tools.exist(session,  WFCodePO.code.__eq__(po.code), column=WFCodePO.id)
+        async def before(po: TaskPO, session: AsyncSession, request):
+            exist = await db_tools.exist(session,  TaskPO.code.__eq__(po.code), column=TaskPO.id)
             if exist:
                 return JSON_util.response(Result.fail(message=f"'{po.code}'已存在！"))
 
@@ -66,14 +66,14 @@ class View(AuthMethodView):
         """
         编辑
         """
-        async def before(oldPo: WFCodePO, po: WFCodePO, session: AsyncSession, request):
-            exist = await db_tools.exist(session, WFCodePO.id != oldPo.id, WFCodePO.code.__eq__(po.code), column=WFCodePO.id)
+        async def before(oldPo: TaskPO, po: TaskPO, session: AsyncSession, request):
+            exist = await db_tools.exist(session, TaskPO.id != oldPo.id, TaskPO.code.__eq__(po.code), column=TaskPO.id)
             if exist:
                 return JSON_util.response(Result.fail(message=f"'{po.code}'已存在！"))
-        return await self.edit(request, pk, WFCodePO,  userId=self.getUserId(request), fun=before)
+        return await self.edit(request, pk, TaskPO,  userId=self.getUserId(request), fun=before)
 
     async def delete(self, request: Request, pk: int):
         """
         删除
         """
-        return await self.remove(request, pk, WFCodePO)
+        return await self.remove(request, pk, TaskPO)
