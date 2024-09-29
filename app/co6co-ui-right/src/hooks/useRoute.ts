@@ -184,7 +184,7 @@ export const useRouteData = () => {
 			})
 			.catch((e) => {
 				if (e.message) bck([], e.message || '请求出错');
-				else bck([], e);
+				else bck([], e.message || '请求出错');
 			});
 	};
 

@@ -4,6 +4,7 @@ const Login = () => import('../views/login.vue')
 const page403 = () => import('../views/403.vue')
 const page404 = () => import('../views/404.vue')
 const home = () => import('../views/home.vue')
+const markdown = () => import('../views/markdown.vue')
 import { UserTableView } from 'co6co-right'
 
 // 基础路由，不需要设置权限
@@ -34,6 +35,11 @@ export const basicRoutes: RouteRecordRaw[] = [
     path: '/home',
     name: 'home',
     component: home
+  },
+  {
+    path: '/markdown',
+    name: 'markdown',
+    component: markdown
   },
   {
     path: '/sysDemo',

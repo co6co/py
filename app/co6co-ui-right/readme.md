@@ -26,4 +26,6 @@
 0.0.9 发布
     1. htmlPlayer else bug
     2. downloadFile
+0.0.10
+    1. registerRoute 信息丢
 ```

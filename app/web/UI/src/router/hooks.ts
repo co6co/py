@@ -3,6 +3,7 @@ import { ViewObjects } from './index'
 
 import { usePermissStore } from 'co6co'
 import { registerRoute, validAuthenticate, routeHook } from 'co6co-right'
+import { ElMessage } from 'element-plus'
 
 function jump(next: (path?: string) => void, path?: string) {
   path ? next(path) : next()
@@ -14,7 +15,10 @@ export function setupRouterHooks(router: Router) {
   router.beforeEach((to, _, next) => {
     document.title = to.meta.title ? `${to.meta.title}` : import.meta.env.VITE_SYSTEM_NAME
     if (registerRefesh) {
-      registerRoute(ViewObjects, router, () => {
+      registerRoute(ViewObjects, router, (msg) => {
+        if (msg) {
+          ElMessage.error(msg)
+        }
         registerRefesh = false
         next({ ...to, replace: true })
       })

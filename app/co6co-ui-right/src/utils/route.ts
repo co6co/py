@@ -38,7 +38,11 @@ export function replaceRouteParams(
 	});
 }
 
-export function registerRoute(ViewObjects, router: Router, bck?: () => void) {
+export function registerRoute(
+	ViewObjects,
+	router: Router,
+	bck?: (msg?: string) => void
+) {
 	const { queryRouteData } = useRouteData();
 	//console.info("to:",to,"from:",from)
 	const permiss = usePermissStore();
@@ -53,7 +57,7 @@ export function registerRoute(ViewObjects, router: Router, bck?: () => void) {
 		} else {
 			console.warn('获取路由数据失败或者为空', e);
 		}
-		if (bck) bck();
+		if (bck) bck(e);
 	});
 }
 

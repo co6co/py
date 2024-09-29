@@ -53,8 +53,8 @@ interface LoginInfo {
 }
 let message = ref('')
 const param = reactive<LoginInfo>({
-  username: '', // "admin",
-  password: '' //"admin12345"
+  username: '',
+  password: ''
 })
 if (isDebug) {
   param.username = 'admin'
@@ -77,11 +77,13 @@ const submitForm = (formEl: FormInstance | undefined) => {
         .login_svc({ userName: param.username, password: param.password })
         .then((res) => {
           message.value = res.message
-
           storeAuthonInfo(res.data, param.username)
           registerRoute(ViewObjects, router, () => {
             window.location.href = getPublicURL('/')
           })
+        })
+        .catch((e) => {
+          ElMessage.error(`登录出错：${e.message}`)
         })
         .finally(() => {
           closeLoading()

@@ -17,6 +17,5 @@ console.info(getCurrentViewFeature())
 const { getRouteData } = routeHook.useRouteData()
 const data = getRouteData()
 console.info(data)
-
 const Data = ref({ lng: 102.927641, lat: 25.095627 })
 </script>
