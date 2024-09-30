@@ -18,10 +18,9 @@ export enum ConfigCodes {
 }
 export enum DictTypeCodes {
   //微信各类地点 字典code : 违法处理地点，车管所地点，考场地点
-  Address = 'WX_LOCATION_INFO_ADDRESS',
-  SubMenu = 'WX_SUB_MENU',
-  SuggestType = 'SUGGEST_TYPE',
-  SuggestState = 'SUGGEST_STATE'
+  TaskCategory = 'SYS_TASK_CATEGORY',
+  TaskState = 'SYS_TASK_STATE',
+  TaskStatus = 'SYS_TASK_STATUS'
 }
 
 export enum SubMenuTypeCodes {

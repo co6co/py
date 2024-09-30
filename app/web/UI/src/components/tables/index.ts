@@ -1,3 +1,2 @@
-
-import tablesPageFm from './src/tablesPageFm.vue' 
-export {tablesPageFm as tableView}  
+import tablePage from './src/tablePage'
+export { tablePage as tableView }
