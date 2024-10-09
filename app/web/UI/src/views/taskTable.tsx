@@ -52,7 +52,9 @@ export default defineComponent({
     }
 
     onMounted(async () => {
-      await store.refesh()
+      await useCategory.queryByCode(DictTypeCodes.TaskCategory)
+      await useState.queryByCode(DictTypeCodes.TaskState)
+      await useStatue.queryByCode(DictTypeCodes.TaskStatus)
       viewRef.value?.refesh()
     })
 
