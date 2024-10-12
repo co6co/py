@@ -108,7 +108,7 @@ class Executing:
             self.loop.run_until_complete(self.bck(*self.args, **self.kvgs))
             # await self.bck(*self.args,**self.kvgs)
         except Exception as e:
-            log.warn("线程'{}->{}'执行出错:{}".format(self.threadName, id(self.loop),e))
+            log.warn("线程'{}->{}'执行出错:{}".format(self.threadName, id(self.loop), e))
         finally:
             log.log("线程'{}->{}'结束.".format(self.threadName, id(self.loop)))
             self.loop.close()

@@ -17,7 +17,7 @@ if __name__ == "__main__":
     t = TaskManage("theard1")
 
     def stop(r):
-        print()
+        print("停止")
         t.stop()
 
     t.runTask(bck, stop)
@@ -26,6 +26,4 @@ if __name__ == "__main__":
         if not t.runing:
             t.close()
             break
-
-    print("123")
     print("等待关闭")

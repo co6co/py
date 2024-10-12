@@ -24,7 +24,8 @@
     token invalid
 0.0.11 发布
     resource 增加 URL 处理
-0.0.12
+0.0.12 发布
     在view_model 引用api模块中的内容可能出现循环引用问题，移动了相关代码
+    BUG 增加用户是未对密码加密BUG
 
 ```

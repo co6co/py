@@ -85,7 +85,7 @@
 									text
 									:icon="Delete"
 									class="red"
-									@click="onDelete(scope.row.id, scope.row.userName)"
+									@click="onDelete(scope.$index, scope.row)"
 									v-permiss="getPermissKey(ViewFeature.del)">
 									删除
 								</el-button>

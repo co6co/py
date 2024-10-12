@@ -89,6 +89,7 @@ class users_view(AuthMethodView):
                 return JSON_util.response(Result.fail(message=f"'{po.userName}'已存在！"))
             if po.salt == None:
                 po.salt = getRandomStr(6)
+            po.password = po.encrypt(po.password)
         return await self.add(request, po, userId=userId, beforeFun=before)
 
 
