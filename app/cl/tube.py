@@ -23,6 +23,7 @@ yt = YouTube(url, on_progress_callback=on_progress, proxies=proxys)
 print("标题：", yt.title)
 streamList = yt.streams.all()
 
+
 def getInt(tip):
     try:
         c=input(tip)
