@@ -6,10 +6,10 @@ from co6co import getByteUnit
 from typing import List
 from co6co.task.pools import limitThreadPoolExecutor
 from concurrent.futures import Future
-from co6co.utils.log import progress_bar
+from co6co.utils.log import progress_bar,err
 import signal
 # url = "https://www.youtube.com/watch?v=lxOFGvHBsTY"
-# proxys = {"http": "http://127.0.0.1:10809", "https": "http://127.0.0.1:10809"}
+#proxys = {"http": "http://127.0.0.1:10809", "https": "http://127.0.0.1:10809"}
 proxys = {"http": "http://127.0.0.1:9667", "https": "http://127.0.0.1:9667"}
 
  
@@ -107,8 +107,8 @@ class downPlaylist:
             if not self.quitFlag:
                 print("{}=>'{}',下载完成".format(f.url,   f.title))
         else:
-            # 如果获取不到异常说明破解成功
-            print("{}=>'{}',下载完成错误->{}".format(f.url, f.title, exception))
+            # 如果获取不到异常说明破解成功 
+            err("{}=>{}下载完成异常{}".format(f. index,f.url,exception))
         self.downingArr.remove(f)
 
     def __init__(self, url) -> None:
@@ -120,35 +120,47 @@ class downPlaylist:
         self.quitFlag = False
         self.downingArr = []
         pass
+    def downOne(self,index,video,pool:limitThreadPoolExecutor,itag:int=None):
+        """
+        返回Itag
+        """  
+        try: 
+            print(index, "=>", self.urlList[index])
+            down = DownLoad(title=video.title, streams=video.streams, captions=video.captions) 
+            if itag == None: 
+                down.print()
+                itag = getInt("下载itag,只有第一次会出现后面按第一次选择的下载:")
+            f = pool.submit(down.downloadVideo, itag)
+            f.pool = pool
+            f.title = video.title
+            f.url = self.urlList[index]
+            f.index = index
+            self.downingArr.append(f)
+            f.add_done_callback(self._result)  
+        except Exception as e:
+            err("下载{}=>{}异常L{}".format(index,self.urlList[index],e))
+        return itag
+
+
 
     def start(self, worker: int = None):
         c = None
         # Register the custom handler for SIGINT
         signal.signal(signal.SIGINT, self.custom_handler)
         pool = limitThreadPoolExecutor(max_workers=worker, thread_name_prefix="download")
-
+        itag=None
         for index, video in enumerate(self. playList.videos):
             if self.quitFlag:
                 print("用户主动退出下载，等待下载的任务..")
                 count = len(self.downingArr)
                 while len(self.downingArr) > 0:
                     time.sleep(1)
-                    progress_bar((count-len(self.downingArr))/count, "等待已创建的任务完成")
-
+                    progress_bar((count-len(self.downingArr))/count, "等待已创建的任务完成") 
                 break
-            print(index, "=>", self.urlList[index])
-            down = DownLoad(title=video.title, streams=video.streams, captions=video.captions)
-            if c == None:
-                down.print()
-                c = getInt("下载itag,只有第一次会出现后面按第一次选择的下载:")
-
-            f = pool.submit(down.downloadVideo, c)
-            f.pool = pool
-            f.title = video.title
-            f.url = self.urlList[index]
-            f.index = index
-            self.downingArr.append(f)
-            f.add_done_callback(self._result)
+            if itag==None:
+                itag=self.downOne(index,video,pool)
+            else :self.downOne(index,video,pool,itag)
+            
 
     def custom_handler(self, signum, frame):
         print("Caught signal:", signum)
