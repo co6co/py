@@ -10,3 +10,4 @@ export * from './modifyDictType';
 export * from './download';
 export * from './dictSelect';
 export * from './resource';
+export * from './demo';

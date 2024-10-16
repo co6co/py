@@ -29,4 +29,6 @@
 0.0.10
     1. registerRoute 信息丢
     2. 删除用户bug
+0.0.11
+    1. 增加dictSelect 组件
 ```

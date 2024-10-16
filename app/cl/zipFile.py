@@ -13,6 +13,9 @@ from co6co.utils.log import progress_bar, warn, __getMessage
 
 
 class zipEncode():
+    """
+    解压缩
+    """
     pwd_exe_total: int = 0
     start_time: datetime.datetime = None
     pwd_total: int = 0

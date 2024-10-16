@@ -1,64 +1,66 @@
-import { defineComponent, PropType, onMounted, VNode } from 'vue';
-
+import { defineComponent, ref, watch, PropType, onMounted, VNode } from 'vue';
 import { ElSelect, ElOption } from 'element-plus';
 import { useDictHook } from '@/hooks';
-type ValueType = String | Number | Boolean;
+type ModelValueType = string | number;
 export default defineComponent({
-	name: 'dictSelect',
 	props: {
-		dictType: {
-			type: String,
-			required: true,
-		},
-		modelValue: {
-			type: Object as PropType<ValueType>,
-		},
-
 		placeholder: {
 			type: String,
 			default: '请选择',
+		},
+		dictTypeCode: {
+			type: String as PropType<string>,
+			required: true,
+		},
+		modelValue: {
+			type: [String, Number] as PropType<ModelValueType>,
+			required: true,
 		},
 	},
 	emits: {
 		//@ts-ignore
 		'update:modelValue': (data: string | number) => true,
 	},
-	setup: (prop, { emit, expose }) => {
+	setup(prop, ctx) {
+		//存储本地值
+		const localValue = ref(prop.modelValue);
+		// 监听 modelValue 的变化 更新本地值
+		watch(
+			() => prop.modelValue,
+			(newValue) => {
+				localValue.value = newValue;
+			}
+		);
+		const onChange = (newValue: ModelValueType) => {
+			localValue.value = newValue;
+			ctx.emit('update:modelValue', newValue);
+		};
 		const stateHook = useDictHook.useDictSelect();
 		onMounted(async () => {
-			await stateHook.queryByCode(prop.dictType);
+			await stateHook.queryByCode(prop.dictTypeCode);
 		});
-		const onchange = (v) => {
-			emit('update:modelValue', v);
-		};
 		const getName = (v) => {
 			return stateHook.getName(v);
 		};
-		const render = (): VNode => {
+		const rander = (): VNode => {
 			return (
 				<ElSelect
-					v-model={prop.modelValue}
+					v-model={localValue.value}
 					placeholder={prop.placeholder}
-					onChange={(a) => {
-						onchange(a);
-					}}>
+					onChange={onChange}>
 					{stateHook.selectData.value.map((d, index) => {
-						return (
-							<ElOption
-								key={index}
-								label={d.name}
-								value={Number(d.value)}></ElOption>
-						);
+						return <ElOption key={index} label={d.name} value={d.value} />;
 					})}
 				</ElSelect>
 			);
 		};
-		expose({
+
+		ctx.expose({
 			stateHook,
 			getName,
 		});
-		render.stateHook = stateHook;
-		render.getName = getName;
-		return render;
+		rander.stateHook = stateHook;
+		rander.getName = getName;
+		return rander;
 	}, //end setup
 });
