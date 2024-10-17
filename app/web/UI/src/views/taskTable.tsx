@@ -1,67 +1,68 @@
 import { defineComponent, VNodeChild } from 'vue'
 import { ref, reactive, onMounted } from 'vue'
-import { ElTag, ElButton, ElInput, ElTable, ElTableColumn, ElSelect, ElOption } from 'element-plus'
-import { Search, Sugar, View } from '@element-plus/icons-vue'
+import {
+  ElTag,
+  ElButton,
+  ElInput,
+  ElTable,
+  ElTableColumn,
+  ElSelect,
+  ElOption,
+  ElMessage
+} from 'element-plus'
+import { Search, Plus, Sugar, View, Edit } from '@element-plus/icons-vue'
 
-import { type IPageParam, type Table_Module_Base, getTableIndex } from 'co6co'
-import { routeHook, useDictHook } from 'co6co-right'
+import { FormOperation, type Table_Module_Base } from 'co6co'
+import { routeHook, DictSelect, DictSelectInstance, tableScope } from 'co6co-right'
 
 import { DictTypeCodes } from '../api/app'
 import Diaglog, { type Item } from '../components/biz/modifyTask'
-import { tableView } from '../components/tables'
+//import { tablePage } from '../components/tables'
+import TablePage from '../components/tables/src/tablePage'
 import { task as api } from '../api/biz'
 
 export default defineComponent({
   setup(prop, ctx) {
     //:define
-    interface IQueryItem extends IPageParam {
-      appid?: string
-      title?: string
+    interface IQueryItem {
+      category?: number
+      state?: number
+      name?: string
     }
-    interface Table_Module extends Table_Module_Base {
-      query: IQueryItem
-      data: Item[]
-      currentItem?: Item
-    }
-    //:use
-    const { getPermissKey } = routeHook.usePermission()
-    const useCategory = useDictHook.useDictSelect()
-    const useStatue = useDictHook.useDictSelect()
-    const useState = useDictHook.useDictSelect()
-    //end use
-
-    //:page
-    const viewRef = ref<InstanceType<typeof tableView>>()
-    const diaglogRef = ref<InstanceType<typeof Diaglog>>()
-    const DATA = reactive<Table_Module>({
-      query: {
-        pageIndex: 1,
-        pageSize: 10,
-        order: 'asc',
-        orderBy: ''
-      },
-      data: [],
-      pageTotal: -1,
-      diaglogTitle: ''
+    const DATA = reactive<{ title?: string; query: IQueryItem; currentItem?: Item }>({
+      query: {}
     })
 
-    const onOpenDialog = (row: Item) => {
-      DATA.diaglogTitle = `查询[${row.title}]详情`
-      DATA.currentItem = row
-      diaglogRef.value?.openDialog(row.id)
-    }
+    //:use
+    const { getPermissKey } = routeHook.usePermission()
 
-    onMounted(async () => {
-      await useCategory.queryByCode(DictTypeCodes.TaskCategory)
-      await useState.queryByCode(DictTypeCodes.TaskState)
-      await useStatue.queryByCode(DictTypeCodes.TaskStatus)
+    //end use
+    //:page
+    const viewRef = ref<InstanceType<typeof TablePage>>()
+    const diaglogRef = ref<InstanceType<typeof Diaglog>>()
+    const categoryDictRef = ref<DictSelectInstance>()
+    const stateDictRef = ref<DictSelectInstance>()
+    const statusDictRef = ref<DictSelectInstance>()
+
+    const onOpenDialog = (row?: Item) => {
+      DATA.title = row ? `编辑[${row?.name}]` : '增加'
+      DATA.currentItem = row
+      diaglogRef.value?.openDialog(row ? FormOperation.edit : FormOperation.add, row)
+    }
+    const onSearch = () => {
+      viewRef.value?.search()
+    }
+    const onRefesh = () => {
       viewRef.value?.refesh()
+    }
+    onMounted(async () => {
+      onSearch()
     })
 
     //:page reader
     const rander = (): VNodeChild => {
       return (
-        <tableView dataApi={api.get_table_svc}>
+        <TablePage dataApi={api.get_table_svc} ref={viewRef} query={DATA.query}>
           {{
             header: () => (
               <>
@@ -69,31 +70,43 @@ export default defineComponent({
                   <ElInput
                     style="width: 160px"
                     clearable
-                    v-model={DATA.query.title}
+                    v-model={DATA.query.name}
                     placeholder="模板标题"
                     class="handle-input"
                   />
-                  <ElSelect
+                  <DictSelect
+                    ref={categoryDictRef}
                     style="width: 160px"
-                    v-model={DATA.query.appid}
-                    placeholder="所属公众号"
-                  >
-                    {store.list.map((item, index) => {
-                      return (
-                        <>
-                          <ElOption key={index} label={item.name} value={item.openId}></ElOption>
-                        </>
-                      )
-                    })}
-                  </ElSelect>
+                    dictTypeCode={DictTypeCodes.TaskCategory}
+                    v-model={DATA.query.category}
+                    placeholder="类别"
+                  />
+                  <DictSelect
+                    ref={stateDictRef}
+                    style="width: 160px"
+                    dictTypeCode={DictTypeCodes.TaskState}
+                    v-model={DATA.query.category}
+                    placeholder="任务状态"
+                  />
+                  <DictSelect
+                    ref={statusDictRef}
+                    style="width: 160px"
+                    dictTypeCode={DictTypeCodes.TaskStatus}
+                    v-model={DATA.query.category}
+                    placeholder="运行状态"
+                  />
+                  <ElButton type="primary" icon={Search} onClick={onSearch}>
+                    搜索
+                  </ElButton>
                   <ElButton
                     type="primary"
-                    icon={Search}
+                    icon={Plus}
+                    v-permiss={getPermissKey(routeHook.ViewFeature.add)}
                     onClick={() => {
-                      viewRef.value?.refesh()
+                      onOpenDialog()
                     }}
                   >
-                    搜索
+                    新增
                   </ElButton>
                 </div>
               </>
@@ -101,38 +114,69 @@ export default defineComponent({
             default: () => (
               <>
                 <ElTableColumn label="序号" width={55} align="center">
-                  {{ default: (scope: any) => <>{scope.$index + 1}</> }}
-                </ElTableColumn>
-                <ElTableColumn label="序号" width={55} align="center">
                   {{
-                    default: (scope: any) => <>{getTableIndex(DATA.query, scope.$index)}</>
+                    default: (scope: tableScope) => viewRef.value?.rowIndex(scope.$index)
                   }}
                 </ElTableColumn>
                 <ElTableColumn
                   label="编号"
-                  prop="templateId"
+                  prop="code"
                   align="center"
                   width={180}
                   sortable="custom"
                   showOverflowTooltip={true}
                 />
                 <ElTableColumn
-                  label="标题"
-                  prop="title"
+                  label="名称"
+                  prop="name"
                   align="center"
                   sortable="custom"
                   showOverflowTooltip={true}
                 />
                 <ElTableColumn
-                  label="所属公众号"
-                  prop="openId"
+                  label="类别"
+                  prop="category"
                   sortable="custom"
                   align="center"
                   showOverflowTooltip={true}
                 >
                   {{
-                    default: (scope: any) => (
-                      <ElTag>{store.getItem(scope.row.ownedAppid)?.name}</ElTag>
+                    default: (scope: tableScope<Item>) => (
+                      <>{categoryDictRef.value?.getName(scope.row.category)}</>
+                    )
+                  }}
+                </ElTableColumn>
+                <ElTableColumn
+                  label="cron[s]"
+                  width="160"
+                  prop="cron"
+                  align="center"
+                  sortable="custom"
+                  showOverflowTooltip={true}
+                />
+                <ElTableColumn
+                  label="状态"
+                  prop="state"
+                  sortable="custom"
+                  align="center"
+                  showOverflowTooltip={true}
+                >
+                  {{
+                    default: (scope: { row: Item }) => (
+                      <ElTag>{stateDictRef.value?.getName(scope.row.state)}</ElTag>
+                    )
+                  }}
+                </ElTableColumn>
+                <ElTableColumn
+                  label="运行状态"
+                  prop="execStatus"
+                  sortable="custom"
+                  align="center"
+                  showOverflowTooltip={true}
+                >
+                  {{
+                    default: (scope: { row: Item }) => (
+                      <ElTag>{statusDictRef.value?.getName(scope.row.execStatus)}</ElTag>
                     )
                   }}
                 </ElTableColumn>
@@ -152,15 +196,28 @@ export default defineComponent({
                 ></ElTableColumn>
                 <ElTableColumn label="操作" width={200} align="center" fixed="right">
                   {{
-                    default: (scope: any) => (
-                      <ElButton
-                        text={true}
-                        icon={View}
-                        onClick={() => onOpenDialog(scope.row)}
-                        v-permiss={getPermissKey(routeHook.ViewFeature.view)}
-                      >
-                        查看
-                      </ElButton>
+                    default: (scope: tableScope<Item>) => (
+                      <>
+                        <ElButton
+                          text={true}
+                          icon={Edit}
+                          onClick={() => onOpenDialog(scope.row)}
+                          v-permiss={getPermissKey(routeHook.ViewFeature.edit)}
+                        >
+                          编辑
+                        </ElButton>
+
+                        <ElButton
+                          text={true}
+                          onClick={() => {
+                            api.exe_once_svc(scope.row.id).then((r) => {
+                              ElMessage.success(r.message)
+                            })
+                          }}
+                        >
+                          调度
+                        </ElButton>
+                      </>
                     )
                   }}
                 </ElTableColumn>
@@ -168,11 +225,11 @@ export default defineComponent({
             ),
             footer: () => (
               <>
-                <Diaglog ref={diaglogRef} title={DATA.diaglogTitle}></Diaglog>
+                <Diaglog ref={diaglogRef} title={DATA.title} onSaved={onRefesh}></Diaglog>
               </>
             )
           }}
-        </tableView>
+        </TablePage>
       )
     }
     return rander

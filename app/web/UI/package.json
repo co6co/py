@@ -28,6 +28,7 @@
     "js-cookie": "^3.0.5",
     "json-bigint": "^1.0.0",
     "less": "^4.2.0",
+    "md-editor-v3": "^4.21.0",
     "mediasoup-client": "^3.7.16",
     "pinia": "^2.1.7",
     "vue": "^3.4.21",

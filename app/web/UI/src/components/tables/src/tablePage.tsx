@@ -1,4 +1,4 @@
-import { defineComponent, VNodeChild } from 'vue'
+import { defineComponent, PropType, VNodeChild } from 'vue'
 import { ref, reactive, onMounted } from 'vue'
 import { ElTable, ElContainer, ElMain, ElHeader, ElScrollbar, ElFooter } from 'element-plus'
 import {
@@ -8,13 +8,20 @@ import {
   onColChange,
   type Table_Module_Base,
   Pagination,
-  IPageResponse
+  IPageResponse,
+  getTableIndex
 } from 'co6co'
+type DataApi = (query: any) => Promise<IPageResponse>
 export default defineComponent({
+  name: 'tablePage',
   props: {
     dataApi: {
-      type: Promise<IPageResponse>,
+      type: Function as PropType<DataApi>,
       required: true
+    },
+    query: {
+      type: Object,
+      default: {}
     }
   },
   setup(prop, ctx) {
@@ -50,7 +57,8 @@ export default defineComponent({
     // 获取表格数据
     const queryData = () => {
       showLoading()
-      prop.dataApi
+      prop
+        .dataApi({ ...DATA.query, ...prop.query })
         .then((res) => {
           DATA.data = res.data
           DATA.pageTotal = res.total || -1
@@ -60,6 +68,9 @@ export default defineComponent({
         })
     }
     const refesh = () => {
+      queryData()
+    }
+    const search = () => {
       DATA.query.pageIndex = 1
       queryData()
     }
@@ -70,6 +81,9 @@ export default defineComponent({
     onMounted(async () => {
       queryData()
     })
+    const rowIndex = ($index: number) => {
+      return getTableIndex(DATA.query, $index)
+    }
     //:page reader
     const rander = (): VNodeChild => {
       return (
@@ -105,9 +119,13 @@ export default defineComponent({
     }
 
     ctx.expose({
-      refesh
+      refesh,
+      search,
+      rowIndex
     })
     rander.refesh = refesh
+    rander.search = search
+    rander.rowIndex = rowIndex
     return rander
   } //end setup
 })

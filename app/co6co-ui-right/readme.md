@@ -30,5 +30,5 @@
     1. registerRoute 信息丢
     2. 删除用户bug
 0.0.11
-    1. 增加dictSelect 组件
+    1. 优化dictSelect 组件
 ```

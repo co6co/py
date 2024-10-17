@@ -1,9 +1,12 @@
+
 from apscheduler.schedulers.background import BackgroundScheduler
-from apscheduler.schedulers.blocking import BlockingScheduler
+# from apscheduler.schedulers.blocking import BlockingScheduler
+# from apscheduler.schedulers.base import BaseScheduler
 from apscheduler.triggers.cron import CronTrigger
-import time
-import datetime
-from services.croniter import croniter
+
+
+from co6co.utils.source import get_source_fun
+from co6co.utils .singleton import Singleton
 
 '''
 BlockingScheduler :     当调度器是你应用中唯一要运行的东西时
@@ -17,6 +20,9 @@ QtScheduler :           如果你的应用是一个Qt应用的时候可以使用
 
 
 class CuntomCronTrigger(CronTrigger):
+    """
+    Cron 表达式解析器
+    """
     # def __init__(self, year=None, month=None, day=None, week=None, day_of_week=None, hour=None,
     #              minute=None, second=None, start_date=None, end_date=None, timezone=None,
     #              jitter=None):
@@ -55,12 +61,34 @@ class CuntomCronTrigger(CronTrigger):
                    day_of_week=values[5], year=values[6], timezone=timezone)
 
 
+class Scheduler(Singleton):
+    _scheduler: BackgroundScheduler = None
+
+    def __init__(self) -> None:
+        scheduler = BackgroundScheduler()
+        # //todo 编译器解释 self._scheduler 为 Any 对象 为什么不是 BackgroundScheduler
+        self._scheduler = scheduler
+        self._scheduler.start()
+
+        pass
+
+    def addTask(self, code: str, corn: str):
+        """
+        增加任务
+        """
+        trigger = CuntomCronTrigger.resolvecron(corn)
+        scheduler: BackgroundScheduler = self._scheduler
+        main = get_source_fun(code, 'main')
+        scheduler.add_job(main, trigger)
+
+
+"""
 def task(name):
     print('[{}]\t 执行时间:{}' . format(name, datetime.datetime.now()))
 
 
 def startTimeTask(runTime: datetime.datetime = datetime.datetime.now()+datetime.timedelta(seconds=10)):
-    """开始一个任务定时任务"""
+    #开始一个任务定时任务
     # scheduler调度器
     scheduler = BlockingScheduler()
     scheduler.add_job(task, 'date', run_date=runTime, args=['定时任务'], id='task')
@@ -70,9 +98,10 @@ def startTimeTask(runTime: datetime.datetime = datetime.datetime.now()+datetime.
 
 
 def startIntervalTask():
-    """时间间隔任务"""
+    #时间间隔任务
     scheduler = BlockingScheduler()
     scheduler.add_job(task, 'interval', seconds=10, args=["每隔10秒一次任"], id='task0')
+
     scheduler.add_job(task, 'cron', minute="*/2", args=["每隔2分钟一次任务"], id='task1')
     scheduler.start()
 
@@ -91,3 +120,4 @@ def cornTask2():
     cronStart = "15 * * * * mon-fri *"
     sc.add_job(task, CuntomCronTrigger.resolvecron(cronStart), args=["cron注解任务10s一次任务"])
     sc.start()
+"""

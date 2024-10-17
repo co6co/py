@@ -17,6 +17,8 @@
 0.0.10 发布
     增加  read_stream, write_stream
     增加  limitThreadPoolExecutor
+0.0.11
+    新增 source.py 模块, Singleton
 
 
 

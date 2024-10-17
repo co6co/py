@@ -4,31 +4,32 @@ from time import sleep, ctime
 from co6co.utils import log
 from functools import partial
 from types import FunctionType
+from typing import Callable
 from co6co.utils import isCallable
 
 
 class ThreadEvent:
     """
-    线程Event loop 
+    线程Event loop
     Run Event Loop in different thread.
 
-    ## 因某些原因写了该类 
+    ## 因某些原因写了该类
     ## 1. asyncio.run 在 没有正在运行的事件循环 的情况下运行协程的
-        ## wx_user_dict:list[dict]=asyncio.run(bll.get_subscribe_alarm_user(config.appid)) 
+        ## wx_user_dict:list[dict]=asyncio.run(bll.get_subscribe_alarm_user(config.appid))
         ## alarm= alarm_bll(app)
         ## po:bizAlarmTypePO=asyncio.run(alarm.get_alram_type_desc(po.alarmType))
         ## 2. 正在运行的事件循环
-        ## This event loop is already running   
-        ## import nest_asyncio 
+        ## This event loop is already running
+        ## import nest_asyncio
         ## loop = asyncio.get_event_loop()
-        ## wx_user_dict:list[dict]=loop.run_until_complete(bll.get_subscribe_alarm_user(config.appid)) 
+        ## wx_user_dict:list[dict]=loop.run_until_complete(bll.get_subscribe_alarm_user(config.appid))
 
         ## 3. 创建任务
         ## task=asyncio.create_task(bll.get_subscribe_alarm_user(config.appid))
-        ## wx_user_dict:list[dict]=asyncio.run(task) 
+        ## wx_user_dict:list[dict]=asyncio.run(task)
         ## 4.底层使用
         ## asyncio.ensure_future(coro())
-        ## 5. 
+        ## 5.
     """
     @property
     def loop(self):
@@ -86,10 +87,10 @@ class Executing:
     args = None
     kvgs = None
 
-    def __init__(self, threadName: str, func, *args, **kvgs):
+    def __init__(self, threadName: str, func,   *args, **kvgs):
         '''
         threadName: 线程名
-        func: 执行的方法 async 
+        func: 执行的方法 async   :Callable[[str], str]
         args:  func 参数
         kvgs: func 参数
         '''
@@ -101,27 +102,26 @@ class Executing:
         self.kvgs = kvgs
         Thread(target=self._start_background, daemon=True, name=threadName) .start()
 
-    def _start_background(self):
-        try:
-            asyncio.set_event_loop(self.loop)
-            log.log("线程'{}->{}'运行...".format(self.threadName, id(self.loop)))
-            self.loop.run_until_complete(self.bck(*self.args, **self.kvgs))
-            # await self.bck(*self.args,**self.kvgs)
-        except Exception as e:
-            log.warn("线程'{}->{}'执行出错:{}".format(self.threadName, id(self.loop), e))
-        finally:
-            log.log("线程'{}->{}'结束.".format(self.threadName, id(self.loop)))
-            self.loop.close()
+        def _start_background(self):
+            try:
+                asyncio.set_event_loop(self.loop)
+                log.log("线程'{}->{}'运行...".format(self.threadName, id(self.loop)))
+                self.loop.run_until_complete(self.bck(*self.args, **self.kvgs))
+                # await self.bck(*self.args,**self.kvgs)
+            except Exception as e:
+                log.warn("线程'{}->{}'执行出错:{}".format(self.threadName, id(self.loop), e))
+            finally:
+                log.log("线程'{}->{}'结束.".format(self.threadName, id(self.loop)))
+                self.loop.close()
 
+    class TaskManage:
+        _starting: bool = None
 
-class TaskManage:
-    _starting: bool = None
-
-    @property
+    @ property
     def loop(self):
         return self._loop
 
-    @property
+    @ property
     def runing(self):
         return self._starting
 

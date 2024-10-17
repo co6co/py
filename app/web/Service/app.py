@@ -13,7 +13,6 @@ import time
 
 def init(app: Sanic, customConfig):
     """
-    公众号12345
     初始化
     """
     attach_cors(app)

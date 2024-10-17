@@ -1,23 +1,19 @@
-import { defineComponent, ref, reactive, provide, computed, onMounted } from 'vue'
+import { defineComponent, ref, reactive, provide, onMounted } from 'vue'
 import type { InjectionKey } from 'vue'
 import {
   DialogForm,
   FormOperation,
   showLoading,
   closeLoading,
+  FormItemBase,
+  IResponse,
   type DialogFormInstance,
   type ObjectType,
   type FormData
 } from 'co6co'
 
-import { FormItemBase, IResponse } from 'co6co'
-import {
-  Flag,
-  dictSvc as dict_svc,
-  useDictHook,
-  validatorBack,
-  upload_image_svc
-} from 'co6co-right'
+import { DictSelect } from 'co6co-right'
+import { upload_image_svc } from 'co6co-right'
 import {
   ElRow,
   ElCol,
@@ -25,10 +21,7 @@ import {
   ElFormItem,
   ElInput,
   ElMessage,
-  type FormRules,
-  ElSelect,
-  ElOption,
-  ElInputNumber
+  type FormRules
 } from 'element-plus'
 
 import { DictTypeCodes } from '../../api/app'
@@ -49,6 +42,7 @@ export interface Item extends FormItemBase {
 //Omit、Pick、Partial、Required
 export type FormItem = Omit<Item, 'id' | 'createUser' | 'updateUser' | 'createTime' | 'updateTime'>
 export default defineComponent({
+  name: 'ModifyTask',
   props: {
     title: {
       type: String
@@ -140,23 +134,17 @@ export default defineComponent({
       promist
         .then((res) => {
           diaglogForm.value?.closeDialog()
-          ElMessage.success(`操作成功`)
-          ctx.emit('saved', res.data)
+          ElMessage.success(res.message || `操作成功`)
+          ctx.emit('saved', res)
         })
         .finally(() => {
           closeLoading()
         })
     }
-    const useCategory = useDictHook.useDictSelect()
-    const useStatue = useDictHook.useDictSelect()
-    const useState = useDictHook.useDictSelect()
-    const dictState = useDictHook.useState()
-    onMounted(async () => {
-      await useCategory.queryByCode(DictTypeCodes.TaskCategory)
-      await useState.queryByCode(DictTypeCodes.TaskState)
-      await useStatue.queryByCode(DictTypeCodes.TaskStatus)
-    })
+    onMounted(async () => {})
     const onImage = upload_image_svc
+    //富文本1
+
     const fromSlots = {
       buttons: () => (
         <>
@@ -179,65 +167,59 @@ export default defineComponent({
             </ElCol>
             <ElCol span={12}>
               <ElFormItem label="任务类别" prop="category">
-                <ElSelect v-model={DATA.fromData.category} placeholder="任务类别">
-                  {useCategory.selectData.value.map((d, index) => {
-                    return <ElOption key={index} label={d.name} value={Number(d.value)}></ElOption>
-                  })}
-                </ElSelect>
+                <DictSelect
+                  dictTypeCode={DictTypeCodes.TaskCategory}
+                  v-model={DATA.fromData.category}
+                  isNumber={true}
+                  placeholder="任务类别"
+                />
               </ElFormItem>
             </ElCol>
           </ElRow>
           <ElRow>
-            <ElCol span={12}>
-              <ElFormItem label="编码" prop="code">
-                <ElInputNumber v-model={DATA.fromData.code} placeholder="编码"></ElInputNumber>
-              </ElFormItem>
-            </ElCol>
             <ElCol span={12}>
               <ElFormItem label="cron表达式" prop="cron">
-                <ElInputNumber
-                  v-model={DATA.fromData.cron}
-                  placeholder="0 0 0 31 12 ? 2024"
-                ></ElInputNumber>
+                <ElInput v-model={DATA.fromData.cron} placeholder="0 0 0 31 12 ? 2024"></ElInput>
               </ElFormItem>
             </ElCol>
-          </ElRow>
-          <ElRow>
-            <ElCol span={24}>
-              <ElFormItem label="GPS">
-                <md-editor class="mgb20" v-model={DATA.fromData.sourceCode} onUploadImg={onImage} />
-              </ElFormItem>
-            </ElCol>
-          </ElRow>
-
-          <ElRow>
             <ElCol span={12}>
               <ElFormItem label="编码" prop="code">
-                <ElInputNumber v-model={DATA.fromData.code} placeholder="编码"></ElInputNumber>
+                <ElInput v-model={DATA.fromData.code} placeholder="编码"></ElInput>
               </ElFormItem>
             </ElCol>
+          </ElRow>
+          <ElRow>
+            <ElCol>
+              <ElFormItem label="执行代码" prop="sourceCode">
+                <MdEditor
+                  v-model={DATA.fromData.sourceCode}
+                  preview={false}
+                  onUploadImg={onImage}
+                />
+              </ElFormItem>
+            </ElCol>
+          </ElRow>
+
+          <ElRow>
             <ElCol span={12}>
               <ElFormItem label="状态" prop="state">
-                <ElSelect v-model={DATA.fromData.state} placeholder="请选择">
-                  {dictState.selectData.value.map((d, _) => {
-                    return <ElOption key={d.key} label={d.label} value={d.value}></ElOption>
-                  })}
-                </ElSelect>
-
-                <ElSelect v-model={DATA.fromData.category} placeholder="状态1">
-                  {useState.selectData.value.map((d, index) => {
-                    return <ElOption key={index} label={d.name} value={Number(d.value)}></ElOption>
-                  })}
-                </ElSelect>
+                <DictSelect
+                  dictTypeCode={DictTypeCodes.TaskState}
+                  v-model={DATA.fromData.state}
+                  isNumber={true}
+                  placeholder="任务状态"
+                />
               </ElFormItem>
             </ElCol>
             <ElCol span={12}>
-              <ElFormItem label="状态2" prop="state">
-                <ElSelect v-model={DATA.fromData.category} placeholder="状态1">
-                  {useStatue.selectData.value.map((d, index) => {
-                    return <ElOption key={index} label={d.name} value={Number(d.value)}></ElOption>
-                  })}
-                </ElSelect>
+              <ElFormItem label="运行状态" prop="execStatus">
+                <DictSelect
+                  disabled={true}
+                  dictTypeCode={DictTypeCodes.TaskStatus}
+                  v-model={DATA.fromData.execStatus}
+                  isNumber={true}
+                  placeholder="运行状态"
+                />
               </ElFormItem>
             </ElCol>
           </ElRow>
@@ -245,7 +227,7 @@ export default defineComponent({
             <ElCol>
               <ElFormItem label="说明" prop="description">
                 <ElInput
-                  v-model={DATA.fromData.sourceCode}
+                  v-model={DATA.fromData.name}
                   type="textarea"
                   autosize={{ minRows: 4, maxRows: 10 }}
                   placeholder="说明"
