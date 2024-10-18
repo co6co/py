@@ -7,7 +7,7 @@ from apscheduler.triggers.cron import CronTrigger
 
 from co6co.utils.source import get_source_fun
 from co6co.utils .singleton import Singleton
-
+from typing import Tuple, Callable
 '''
 BlockingScheduler :     当调度器是你应用中唯一要运行的东西时
 BackgroundScheduler :   当你没有运行任何其他框架并希望调度器在你应用的后台执行时使用（充电桩即使用此种方式）
@@ -53,10 +53,9 @@ class CuntomCronTrigger(CronTrigger):
         """
         values = expr.split()
         if len(values) == 6:
-            values = values.append("*")
+            values.append(None)
         if len(values) != 7:
             raise ValueError('Wrong number of fields; got {}, expected 7'.format(len(values)))
-
         return cls(second=values[0], minute=values[1], hour=values[2], day=values[3], month=values[4],
                    day_of_week=values[5], year=values[6], timezone=timezone)
 
@@ -72,14 +71,24 @@ class Scheduler(Singleton):
 
         pass
 
+    @staticmethod
+    def parseCode(code: str) -> Tuple[bool,  Callable[[], str] | Exception]:
+        try:
+            main = get_source_fun(code, 'main')
+            return True, main,
+        except Exception as e:
+            return False, e
+
     def addTask(self, code: str, corn: str):
         """
         增加任务
         """
         trigger = CuntomCronTrigger.resolvecron(corn)
         scheduler: BackgroundScheduler = self._scheduler
-        main = get_source_fun(code, 'main')
-        scheduler.add_job(main, trigger)
+        res, main = Scheduler.parseCode(code)
+        if res:
+            scheduler.add_job(main, trigger)
+        return res
 
 
 """

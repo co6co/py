@@ -194,7 +194,7 @@ export default defineComponent({
                   width={160}
                   show-overflow-tooltip={true}
                 ></ElTableColumn>
-                <ElTableColumn label="操作" width={200} align="center" fixed="right">
+                <ElTableColumn label="操作" width={260} align="center" fixed="right">
                   {{
                     default: (scope: tableScope<Item>) => (
                       <>
@@ -210,12 +210,24 @@ export default defineComponent({
                         <ElButton
                           text={true}
                           onClick={() => {
-                            api.exe_once_svc(scope.row.id).then((r) => {
+                            api.exe_sched_svc(scope.row.id).then((r) => {
                               ElMessage.success(r.message)
                             })
                           }}
                         >
                           调度
+                        </ElButton>
+                        <ElButton
+                          text={true}
+                          title="不要执行时间太长的程序"
+                          showOverflowTooltip
+                          onClick={() => {
+                            api.exe_once_svc(scope.row.id).then((r) => {
+                              ElMessage.success(r.message + r.data)
+                            })
+                          }}
+                        >
+                          执行
                         </ElButton>
                       </>
                     )

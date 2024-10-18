@@ -1,4 +1,4 @@
-import { defineComponent, ref, reactive, provide, onMounted, onBeforeUnmount } from 'vue'
+import { defineComponent, ref, reactive, provide, onMounted } from 'vue'
 import type { InjectionKey } from 'vue'
 import {
   DialogForm,
@@ -26,22 +26,8 @@ import {
 
 import { DictTypeCodes } from '../../api/app'
 import { task as api } from '../../api/biz'
-
-/**
- * npm install vue-codemirror codemirror
- * npm i @codemirror/lang-python
- */
-import CodeMirror from 'vue-codemirror6'
-import { basicSetup } from 'codemirror'
-import { python } from '@codemirror/lang-python'
-import { javascript } from '@codemirror/lang-javascript'
-import { oneDark } from '@codemirror/theme-one-dark'
-import { EditorView, keymap } from '@codemirror/view'
-import { tags } from '@lezer/highlight'
-import { HighlightStyle } from '@codemirror/language'
-import { syntaxHighlighting } from '@codemirror/language'
-import { indentWithTab } from '@codemirror/commands'
-
+import { MdEditor } from 'md-editor-v3'
+import 'md-editor-v3/lib/style.css'
 export interface Item extends FormItemBase {
   id: number
   name: string
@@ -90,45 +76,6 @@ export default defineComponent({
     //@ts-ignore
     const key = Symbol('formData') as InjectionKey<FormItem> //'formData'
     provide('formData', DATA.fromData)
-    // 编辑器选项
-    let myTheme = EditorView.theme(
-      {
-        '&': {
-          color: 'white',
-          backgroundColor: '#034'
-        },
-        '.cm-content': {
-          caretColor: '#0e9'
-        },
-        '&.cm-focused .cm-cursor': {
-          borderLeftColor: '#0e9'
-        },
-        '&.cm-focused .cm-selectionBackground, ::selection': {
-          backgroundColor: '#fff'
-        },
-        '.cm-gutters': {
-          backgroundColor: '#045',
-          color: '#ddd',
-          border: 'none'
-        }
-      },
-      { dark: true }
-    )
-    const myHighlightStyle = HighlightStyle.define([
-      { tag: tags.keyword, color: '#fc6' },
-      { tag: tags.comment, color: '#f5d', fontStyle: 'italic' }
-    ])
-    const cmOptions = {
-      theme: oneDark,
-      extensions: [
-        basicSetup,
-        python(),
-        javascript(),
-        //myTheme,
-        //syntaxHighlighting(myHighlightStyle),
-        keymap.of([indentWithTab])
-      ]
-    }
 
     const init_data = (oper: FormOperation, item?: Item) => {
       DATA.operation = oper
@@ -142,7 +89,6 @@ export default defineComponent({
           DATA.fromData.cron = ''
           DATA.fromData.state = 0
           DATA.fromData.sourceCode = ''
-
           DATA.fromData.execStatus = 0
           break
         case FormOperation.edit:
@@ -215,8 +161,7 @@ export default defineComponent({
           closeLoading()
         })
     }
-    onMounted(() => {})
-    onBeforeUnmount(() => {})
+    onMounted(async () => {})
     const onImage = upload_image_svc
     //富文本1
 
@@ -266,16 +211,10 @@ export default defineComponent({
           <ElRow>
             <ElCol>
               <ElFormItem label="执行代码" prop="sourceCode">
-                <CodeMirror
-                  style="width:100%"
+                <MdEditor
                   v-model={DATA.fromData.sourceCode}
-                  dark
-                  basic
-                  tab
-                  tabSize={4}
-                  lang={python()}
-                  gutter
-                  extensions={cmOptions.extensions}
+                  preview={false}
+                  onUploadImg={onImage}
                 />
               </ElFormItem>
             </ElCol>
@@ -301,6 +240,18 @@ export default defineComponent({
                   isNumber={true}
                   placeholder="运行状态"
                 />
+              </ElFormItem>
+            </ElCol>
+          </ElRow>
+          <ElRow>
+            <ElCol>
+              <ElFormItem label="说明" prop="description">
+                <ElInput
+                  v-model={DATA.fromData.name}
+                  type="textarea"
+                  autosize={{ minRows: 4, maxRows: 10 }}
+                  placeholder="说明"
+                ></ElInput>
               </ElFormItem>
             </ElCol>
           </ElRow>
