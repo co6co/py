@@ -8,17 +8,18 @@ from co6co.task.pools import limitThreadPoolExecutor
 from concurrent.futures import Future
 from co6co.utils.log import progress_bar,err,warn
 import signal
+from typing import Callable
 # url = "https://www.youtube.com/watch?v=lxOFGvHBsTY"
 #proxys = {"http": "http://127.0.0.1:10809", "https": "http://127.0.0.1:10809"}
 proxys = {"http": "http://127.0.0.1:9667", "https": "http://127.0.0.1:9667"}
 
  
-def getInt(tip):
+def getInt(tip,default=-1):
     try:
         c = input(tip)
         return int(c)
     except:
-        return -1
+        return default
 
 
 class DownLoad:
@@ -100,21 +101,23 @@ class downPlaylist:
     quitFlag: bool
     downingArr: List[Future]
     errorList:list[int]
+    
     def error( self,index:int,url:str,e:Exception):
-        self.errorList.append(index)
+        if index not in self.errorList :
+            self.errorList.append(index)
         err("{}=>{}下载完成异常{}".format(index,url,e))
 
-    def _result(self, f: Future):
+    def _result(self, f: Future ):
         exception = f.exception()
         if not exception:
             # 如果获取不到异常说明破解成功
             if not self.quitFlag:
-                print("{}=>{}=>'{}',下载完成".format(f.index,f.url,   f.title))
+                print("{}=>{}=>'{}',下载完成".format(f.index,f.url,   f.title)) 
             if f.errFlag:
                 self.errorList.remove(f.index) 
         else:
             # 如果获取不到异常说明破解成功 
-            self.error(f.index,f.url,exception)
+            self.error(f.index,f.url,exception) 
         self.downingArr.remove(f)
 
     def __init__(self, url) -> None:
@@ -125,6 +128,8 @@ class downPlaylist:
         self.playList = playList
         self.quitFlag = False
         self.downingArr = []
+        self.errorList=[]
+       
         pass
     def downOne(self,index,video,pool:limitThreadPoolExecutor,itag:int=None,errorDown:bool=None):
         """
@@ -153,8 +158,13 @@ class downPlaylist:
         # Register the custom handler for SIGINT
         signal.signal(signal.SIGINT, self.custom_handler)
         pool = limitThreadPoolExecutor(max_workers=worker, thread_name_prefix="download") 
+        if not errorDown:
+            s = getInt("indexStartValue:0-{}:<-".format(len(self.playList.videos)),0)
+            e = getInt("indexEndValue:{}:<-".format(len(self.playList.videos)),len(self.playList.videos))
+       
         for index, video in enumerate(self.playList.videos):
             if errorDown and index not in self.errorList:continue 
+            if not errorDown and (index<s or index >=e) :continue
             if self.quitFlag:
                 print("用户主动退出下载，等待下载的任务..")
                 count = len(self.downingArr)
@@ -165,8 +175,11 @@ class downPlaylist:
             if itag==None:
                 itag=self.downOne(index,video,pool)
             else :self.downOne(index,video,pool,itag)
-        if len(self.errorList)>0:
-            warn("开始下载有异常的数据")
+        while len(self.downingArr):
+            time.sleep(1)
+            print("等等下载线程结束",len(self.downingArr))
+        if not self.quitFlag and  len(self.errorList)>0:
+            warn("开始下载有异常的数据:len-->{}".format(len(self.errorList)))
             self.start(itag=itag,errorDown=True)
 
 
