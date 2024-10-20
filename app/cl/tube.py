@@ -177,7 +177,7 @@ class downPlaylist:
             else :self.downOne(index,video,pool,itag)
         while len(self.downingArr):
             time.sleep(1)
-            print("等等下载线程结束",len(self.downingArr))
+            print("loading ...",len(self.downingArr))
         if not self.quitFlag and  len(self.errorList)>0:
             warn("开始下载有异常的数据:len-->{}".format(len(self.errorList)))
             self.start(itag=itag,errorDown=True)
