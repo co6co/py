@@ -2,10 +2,9 @@ from functools import wraps
 from sanic.views import HTTPMethodView  # 基于类的视图
 from sanic.request.form import File  # 基于类的视图
 from sanic import Request
-from co6co_sanic_ext.model.res.result import Page_Result
+from co6co_sanic_ext.model.res.result import Result,Page_Result
 from co6co_sanic_ext.utils import JSON_util
-from typing import TypeVar, Dict, List, Any, Tuple
-from co6co_sanic_ext.model.res.result import Result, Page_Result
+from typing import TypeVar, Dict, List, Any, Tuple 
 import aiofiles
 import os
 import multipart

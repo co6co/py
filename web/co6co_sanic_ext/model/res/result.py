@@ -1,4 +1,5 @@
 # -*- encoding:utf-8 -*-
+# Result 在 db_ext 中已经存在，是否应删除，需要验证正式使用的是那个模块
 from __future__ import annotations 
 class Result:
     code:int

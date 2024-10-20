@@ -4,6 +4,7 @@ from typing import TypeVar, Tuple, List, Dict, Any, Union, Iterator
 from sqlalchemy.engine.row import Row, RowMapping
 from .po import BasePO
 from co6co.utils import log
+from typing import Callable
 
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import Select, Update, Insert, Delete
@@ -122,7 +123,7 @@ class db_tools:
         return list
         """
 
-        executer = await session.execute(select)
+        executer = await session.execute(select,params)
         if queryOne:
             result = executer.mappings().fetchone()
             return db_tools.one2Dict(result)
@@ -188,7 +189,7 @@ class DbCallable:
     def __init__(self, session: AsyncSession):
         self.session = session
 
-    async def __call__(self, func):
+    async def __call__(self, func:Callable[[AsyncSession],Any]):
         async with self.session, self.session.begin():
             if func != None:
                 return await func(self.session)
@@ -227,7 +228,12 @@ class InsertCallable(DbCallable):
 
 
 class UpdateOneCallable(DbCallable):
-    async def __call__(self, queryOneSelect: Select, editFn: None, param: Dict | List | Tuple = None):
+    async def __call__(self, queryOneSelect: Select, editFn: Callable[[AsyncSession,any],None|any]=None, param: Dict | List | Tuple = None):
+        """
+        queryOneSelect: 查询语句
+        editFn: (session,po)->Any|None   返回:None  ->回滚,
+                                            :Any   -> 函数返回值
+        """
         async def exec(session: AsyncSession):
             try:
                 exec = await session.execute(queryOneSelect, param)

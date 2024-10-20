@@ -15,6 +15,7 @@ DbOperations 和 DbPagedOperations 以方便业务使用；
 db_session.py  72 z
 0.0.7 字符串格式
 0.0.8 mapings(one)
+0.0.9 优化 未发布
 ```
 
 - db_tools.execForPo

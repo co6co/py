@@ -38,7 +38,7 @@ class DbOperations:
 		"""
 		if not  hasattr(poType,"query") or isinstance(poType.query,Query): 
 			query=self.db_session.query_property()  
-			poType.query:Query=query  
+			poType.query=query  
 		 
 	
 	async def _get_one(self, select:select, selectField:bool=True):
@@ -47,7 +47,6 @@ class DbOperations:
 		存在多,返回第一行
 		为None 返回None
 		存在多列：返回 Row
-
 		""" 
 		try: 
 			data=await self.db_session.execute(select)
