@@ -3,7 +3,7 @@
 本模块设计中应不引入除 model和utils 之外的模块
 """
 from sanic import Request
-from co6co_db_ext.res.result import Result
+from co6co_sanic_ext.model.res.result import Result
 from co6co_db_ext.db_utils import QueryOneCallable
 from model.enum import Account_category
 from co6co_permissions.model.pos.right import AccountPO

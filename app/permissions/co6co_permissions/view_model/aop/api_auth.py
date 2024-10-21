@@ -5,7 +5,7 @@ from sanic.response import json
 from sanic.request import Request
 
 from co6co_web_db.services.jwt_service import validToken
-from co6co_db_ext.res.result import Result
+from co6co_sanic_ext.model.res.result import Result
 from co6co_sanic_ext.utils import JSON_util
 from sqlalchemy.sql import Select
 from sqlalchemy.ext.asyncio import AsyncSession

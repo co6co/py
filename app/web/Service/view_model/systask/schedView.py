@@ -50,7 +50,23 @@ class cronViews(AuthMethodView):
         return await self._post(cron)
 
 
-class codeView(AuthMethodView):
+class _codeView:
+    def exec_py_code(self, pyCode: str):
+        """
+        运行PyCode
+        """
+        try:
+            res, _e = Scheduler.parseCode(pyCode)
+            if res:
+                res = _e()
+                return Result.success(data=res)
+            else:
+                return Result.success(message="解析出错", data="解析出错：{}".format(e))
+        except Exception as e:
+            return Result.success(message="执行出错", data="执行出错：{}".format(e))
+
+
+class codeView(_codeView, AuthMethodView):
     routePath = "/code/test"
 
     async def post(self, request: Request):
@@ -66,8 +82,19 @@ class codeView(AuthMethodView):
             return self.response_json(Result.success(data=True))
         return self.response_json(Result.success(data=False, message="解析代码出错:'{}'".format(_e)))
 
+    async def put(self, request: Request):
+        """
+        执行代码
+        {
+            code:'python 代码'
+        }
+        """
+        json: dict = request.json
+        code = json.get("code", None)
+        return self.response_json(self.exec_py_code(code))
 
-class schedView(AuthMethodView):
+
+class schedView(_codeView, AuthMethodView):
     routePath = "/sched/<pk:int>"
 
     async def post(self, request: Request, pk: int):
@@ -92,9 +119,4 @@ class schedView(AuthMethodView):
         """
         select = Select(TaskPO).filter(TaskPO.id.__eq__(pk))
         po: TaskPO = await get_one(request, select)
-        res, main_e = Scheduler.parseCode(po.sourceCode)
-        if res:
-            res = main_e()
-            return self.response_json(Result.success(data=res))
-        else:
-            return self.response_json(Result.fail(message=main_e))
+        return self.response_json(self.exec_py_code(po.sourceCode))

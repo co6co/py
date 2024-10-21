@@ -73,7 +73,9 @@ export default defineComponent({
   setup(prop, ctx) {
     const diaglogForm = ref<DialogFormInstance>()
 
-    const DATA = reactive<FormData<number, FormItem>>({
+    const DATA = reactive<
+      FormData<number, FormItem> & { testing: boolean; showResult: boolean; testResult: string }
+    >({
       operation: FormOperation.add,
       id: 0,
       fromData: {
@@ -84,7 +86,10 @@ export default defineComponent({
         state: 0,
         sourceCode: '',
         execStatus: 0
-      }
+      },
+      testing: false,
+      showResult: false,
+      testResult: ''
     })
 
     //@ts-ignore
@@ -132,6 +137,9 @@ export default defineComponent({
 
     const init_data = (oper: FormOperation, item?: Item) => {
       DATA.operation = oper
+      DATA.testResult = ''
+      DATA.showResult = false
+      DATA.testing = false
       switch (oper) {
         case FormOperation.add:
           DATA.id = 0
@@ -163,7 +171,6 @@ export default defineComponent({
     const valid = (promise: Promise<IResponse<boolean>>, rule: any, callback: validatorBack) => {
       promise.then((res) => {
         if (res.data) return callback()
-
         return (rule.message = res.message), callback(new Error(rule.message))
       })
     }
@@ -217,9 +224,22 @@ export default defineComponent({
     }
     onMounted(() => {})
     onBeforeUnmount(() => {})
+    const onRun = () => {
+      DATA.testing = true
+      DATA.showResult = false
+      api
+        .test_exe_code_svc(DATA.fromData.sourceCode)
+        .then((res) => {
+          DATA.testResult = res.data
+          DATA.showResult = true
+        })
+        .finally(() => {
+          DATA.testing = false
+        })
+    }
+
     const onImage = upload_image_svc
     //富文本1
-
     const fromSlots = {
       buttons: () => (
         <>
@@ -229,6 +249,14 @@ export default defineComponent({
             }}
           >
             保存
+          </ElButton>
+          <ElButton
+            disabled={DATA.testing}
+            onClick={() => {
+              onRun()
+            }}
+          >
+            运行
           </ElButton>
         </>
       ),
@@ -304,6 +332,26 @@ export default defineComponent({
               </ElFormItem>
             </ElCol>
           </ElRow>
+          {DATA.showResult ? (
+            <ElRow>
+              <ElCol>
+                <CodeMirror
+                  readonly
+                  style="width:100%"
+                  v-model={DATA.testResult}
+                  dark
+                  basic
+                  tab
+                  tabSize={4}
+                  lang={python()}
+                  gutter
+                  extensions={cmOptions.extensions}
+                />
+              </ElCol>
+            </ElRow>
+          ) : (
+            <></>
+          )}
         </>
       )
     }

@@ -29,3 +29,6 @@ export const test_cron2_svc = (cron: string): Promise<IResponse<boolean>> => {
 export const test_code_svc = (code: string): Promise<IResponse<boolean>> => {
   return request.post(`${base_code_URL}`, { code: code })
 }
+export const test_exe_code_svc = (code: string): Promise<IResponse<string>> => {
+  return request.put(`${base_code_URL}`, { code: code })
+}

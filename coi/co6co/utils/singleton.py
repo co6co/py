@@ -1,6 +1,9 @@
 
 from __future__ import annotations
 from datetime import datetime
+from typing import Type, TypeVar
+
+T = TypeVar('T')
 
 
 class Singleton:
@@ -8,7 +11,7 @@ class Singleton:
     单例模式
     //todo 子类继承后怎么返回资料对象
     """
-    _instance: Singleton = None
+    _instance: T = None
     createTime = None
 
     def __new__(cls, *args, **kwargs):

@@ -8,6 +8,8 @@ import numpy as np
 from typing import Type
 import datetime
 
+from co6co_sanic_ext.model.res.result import Page_Result, Result
+
 import subprocess
 app = Sanic(__name__)
 '''

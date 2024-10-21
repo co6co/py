@@ -31,6 +31,7 @@ class TaskPO(UserTimeStampedModelPO):
         self.name = po.name
         self.category = po.category
         self.cron = po.cron
+        self.code = po.code
         self.state = po.state
         self.sourceCode = po.sourceCode
         self.execStatus = po.execStatus
