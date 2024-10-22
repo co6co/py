@@ -31,6 +31,7 @@ export interface Item extends api_type.FormItemBase {
 	dictTypeId?: number;
 	name?: string;
 	value?: string;
+	flag?: string;
 	state?: number;
 	desc?: string;
 	order: number;
@@ -79,8 +80,8 @@ export default defineComponent({
 					DATA.fromData.name = '';
 					DATA.fromData.value = '';
 					DATA.fromData.state = undefined;
+					DATA.fromData.flag = undefined;
 					DATA.fromData.desc = '';
-					DATA.fromData.order = 1;
 
 					break;
 				case FormOperation.edit:
@@ -90,6 +91,7 @@ export default defineComponent({
 					DATA.fromData.name = item.name;
 					DATA.fromData.state = item.state;
 					DATA.fromData.value = item.value;
+					DATA.fromData.flag = item.flag;
 					DATA.fromData.desc = item.desc;
 					DATA.fromData.order = item.order;
 					//可以在这里写一些use 获取其他的数据
@@ -100,7 +102,6 @@ export default defineComponent({
 
 		const rules: FormRules = {
 			name: [{ required: true, message: '请输入名称', trigger: 'blur' }],
-
 			value: [{ required: true, message: '请输入编码', trigger: 'blur' }],
 			state: [{ required: true, message: '请选择状态', trigger: 'blur' }],
 			order: [{ required: true, message: '排序不能为空', trigger: 'blur' }],
@@ -146,39 +147,42 @@ export default defineComponent({
 					<ElRow>
 						<ElCol span={12}>
 							<ElFormItem label="名称" prop="name">
-								<ElInput
-									v-model={DATA.fromData.name}
-									placeholder="名称"></ElInput>
+								<ElInput v-model={DATA.fromData.name} placeholder="名称" />
 							</ElFormItem>
 						</ElCol>
 						<ElCol span={12}>
 							<ElFormItem label="值" prop="value">
-								<ElInput
-									v-model={DATA.fromData.value}
-									placeholder="值"></ElInput>
+								<ElInput v-model={DATA.fromData.value} placeholder="值" />
 							</ElFormItem>
 						</ElCol>
 					</ElRow>
 					<ElRow>
 						<ElCol span={12}>
-							<ElFormItem label="状态" prop="state">
-								<ElSelect v-model={DATA.fromData.state} placeholder="请选择">
-									{selectData.value.map((d, _) => {
-										return (
-											<ElOption
-												key={d.key}
-												label={d.label}
-												value={d.value}></ElOption>
-										);
-									})}
-								</ElSelect>
+							<ElFormItem label="标志" prop="flag">
+								<ElInput
+									v-model={DATA.fromData.flag}
+									placeholder="标志值,可空"></ElInput>
 							</ElFormItem>
 						</ElCol>
 						<ElCol span={12}>
 							<ElFormItem label="排序" prop="order">
 								<ElInputNumber
 									v-model={DATA.fromData.order}
-									placeholder="排序"></ElInputNumber>
+									placeholder="排序"
+								/>
+							</ElFormItem>
+						</ElCol>
+					</ElRow>
+					<ElRow>
+						<ElCol>
+							<ElFormItem label="状态" prop="state">
+								<ElSelect v-model={DATA.fromData.state} placeholder="请选择">
+									{selectData.value.map((d, _) => {
+										return (
+											<ElOption key={d.key} label={d.label} value={d.value} />
+										);
+									})}
+								</ElSelect>
 							</ElFormItem>
 						</ElCol>
 					</ElRow>
@@ -188,7 +192,8 @@ export default defineComponent({
 								<ElInput
 									v-model={DATA.fromData.desc}
 									type="textarea"
-									placeholder="描述"></ElInput>
+									placeholder="描述"
+								/>
 							</ElFormItem>
 						</ElCol>
 					</ElRow>

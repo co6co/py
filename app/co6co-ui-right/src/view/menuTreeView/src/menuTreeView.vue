@@ -25,6 +25,14 @@
 						@click="onOpenDialog(FormOperation.add)"
 						>新增</el-button
 					>
+					<el-button
+						v-if="allowBatch"
+						v-permiss="getPermissKey(ViewFeature.add)"
+						type="primary"
+						:icon="Plus"
+						@click="onOpenBatchDialog(FormOperation.add)"
+						>批量新增</el-button
+					>
 				</div>
 			</el-header>
 			<ElContainer>
@@ -36,10 +44,12 @@
 								@sort-change="onColChange2"
 								border
 								class="table"
+								highlight-current-row
 								header-cell-class-name="table-header"
+								@current-change="onCurrentChange"
 								row-key="id"
 								:tree-props="{ children: 'children' }">
-								<el-table-column label="序号" width="100" align="center">
+								<el-table-column fixed label="序号" width="100" align="center">
 									<template #default="scope"> {{ scope.$index + 1 }} </template>
 								</el-table-column>
 								<el-table-column
@@ -122,12 +132,16 @@
 		<modify-diaglog
 			:title="table_module.diaglogTitle"
 			ref="modifyDiaglogRef"
-			@saved="onLoadData"></modify-diaglog>
+			@saved="onLoadData" />
+		<BatchAddMenu
+			:title="table_module.diaglogTitle"
+			ref="batchAddMenuRef"
+			@saved="onLoadData" />
 	</div>
 </template>
 
 <script setup lang="ts" name="basetable">
-	import { ref, reactive, onMounted } from 'vue';
+	import { ref, reactive, onMounted, computed } from 'vue';
 	import {
 		ElContainer,
 		ElButton,
@@ -144,8 +158,10 @@
 
 	import svc from '@/api/sys/menu';
 	import modifyDiaglog, {
+		BatchAddMenu,
 		type MenuItem as Item,
 	} from '@/components/modifyMenu';
+
 	import {
 		showLoading,
 		closeLoading,
@@ -155,9 +171,10 @@
 		type IPageParam,
 		type Table_Module_Base,
 	} from 'co6co';
-	import useSelect from '@/hooks/useMenuSelect';
+	import useSelect, { MenuCateCategory } from '@/hooks/useMenuSelect';
 	import { usePermission, ViewFeature } from '@/hooks/useRoute';
 	import useDelete from '@/hooks/useDelete';
+
 	const { getPermissKey } = usePermission();
 
 	interface IQueryItem extends IPageParam {
@@ -207,11 +224,18 @@
 		onColChange(column, table_module.query, getData);
 	};
 	const modifyDiaglogRef = ref<InstanceType<typeof modifyDiaglog>>();
+
 	const onOpenDialog = (operation: FormOperation, row?: Item) => {
 		table_module.diaglogTitle =
 			operation == FormOperation.add ? '增加新菜单' : '编辑菜单';
-		table_module.currentItem = row;
-		modifyDiaglogRef.value?.openDialog(operation, row);
+		if (operation == FormOperation.edit) table_module.currentItem = row;
+		modifyDiaglogRef.value?.openDialog(operation, table_module.currentItem);
+	};
+	const batchAddMenuRef = ref<InstanceType<typeof BatchAddMenu>>();
+	const onOpenBatchDialog = (operation: FormOperation) => {
+		table_module.diaglogTitle = '批量增加';
+
+		batchAddMenuRef.value?.openDialog(table_module.currentItem!);
 	};
 	const onLoadData = () => {
 		refresh();
@@ -225,5 +249,16 @@
 	};
 	onMounted(() => {
 		onLoadData();
+	});
+
+	const onCurrentChange = (currentRow: Item, oldCurrentRow: Item) => {
+		table_module.currentItem = currentRow;
+	};
+	const allowBatch = computed(() => {
+		return (
+			table_module.currentItem &&
+			(table_module.currentItem.category == MenuCateCategory.SubVIEW ||
+				table_module.currentItem.category == MenuCateCategory.VIEW)
+		);
 	});
 </script>

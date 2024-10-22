@@ -10,3 +10,9 @@ export const get_category_svc = (): Promise<IResponse<IEnumSelect[]>> => {
 export const get_state_svc = (): Promise<IResponse<IEnumSelect[]>> => {
 	return createServiceInstance().post(`${base_URL}/status`);
 };
+
+export const batch_add_svc = (
+	data: Array<any>
+): Promise<IResponse<IResponse>> => {
+	return createServiceInstance().post(`${base_URL}/batch`, data);
+};

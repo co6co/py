@@ -23,5 +23,7 @@
     remove 增加 after 返回值判断
     response_error
     view.edit 增加 select处理
+0.0.12
+    batch_add,
 
 ```

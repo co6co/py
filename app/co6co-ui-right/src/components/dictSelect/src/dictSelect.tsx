@@ -1,13 +1,4 @@
-import {
-	defineComponent,
-	ref,
-	watch,
-	PropType,
-	onMounted,
-	VNode,
-	computed,
-} from 'vue';
-import { definePropType } from 'co6co';
+import { defineComponent, ref, watch, PropType, onMounted, VNode } from 'vue';
 import { ElSelect, ElOption } from 'element-plus';
 import { useDictHook } from '@/hooks';
 type ModelValueType = string | number | null | undefined;
@@ -69,7 +60,6 @@ export default defineComponent({
 		const getName = (v) => {
 			return stateHook.getName(String(v));
 		};
-
 		const rander = (): VNode => {
 			return (
 				<ElSelect

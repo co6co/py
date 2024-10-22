@@ -7,7 +7,7 @@ import {
 import {
 	get_select_svc,
 	get_dict_select_svc,
-	type DictSelect,
+	type DictSelectType,
 } from '@/api/dict/dictType';
 
 export const useState = () => {
@@ -54,7 +54,7 @@ export const useDictTypeSelect = () => {
  * @returns
  */
 export const useDictSelect = () => {
-	const selectData = ref<DictSelect[]>([]);
+	const selectData = ref<DictSelectType[]>([]);
 	const query = async (dictTypeId: number) => {
 		selectData.value = [];
 		const res = await get_dict_select_svc(dictTypeId);
@@ -69,9 +69,13 @@ export const useDictSelect = () => {
 		//selectData.value.filter((m) => m.value == value);
 		return selectData.value.find((m) => m.value == value)?.name;
 	};
+	const getFlag = (value: string) => {
+		//selectData.value.filter((m) => m.value == value);
+		return selectData.value.find((m) => m.value == value)?.flag;
+	};
 	const getDesc = (value: string) => {
 		//selectData.value.filter((m) => m.value == value);
 		return selectData.value.find((m) => m.value == value)?.desc;
 	};
-	return { selectData, query, queryByCode, getName, getDesc };
+	return { selectData, query, queryByCode, getName, getFlag, getDesc };
 };

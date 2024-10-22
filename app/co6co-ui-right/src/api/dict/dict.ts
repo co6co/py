@@ -1,7 +1,7 @@
 const base_URL = '/api/dict';
 
 import { create_svc } from '../base';
-import { DictSelect } from './dictType';
+import { DictSelectType } from './dictType';
 import { createServiceInstance, type IEnumSelect, type IResponse } from 'co6co';
 
 const { add_svc, edit_svc, del_svc, get_table_svc } = create_svc(base_URL);
@@ -18,6 +18,6 @@ export const get_dict_state_svc = (): Promise<IResponse<IEnumSelect[]>> => {
  */
 export const get_dict_select_svc = (
 	dictTypeCode: string
-): Promise<IResponse<DictSelect[]>> => {
+): Promise<IResponse<DictSelectType[]>> => {
 	return createServiceInstance().get(`${base_URL}/${dictTypeCode}`);
 };

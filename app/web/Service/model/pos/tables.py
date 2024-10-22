@@ -20,6 +20,7 @@ class TaskPO(UserTimeStampedModelPO):
     name = Column("name", String(64),  comment="任务名称")
     code = Column("code", String(64),  comment="任务编码")
     category = Column("category", Integer, comment="0:系统,10:用户")
+    sourceCategory = Column("source_category", Integer, comment="0:python")
     # 增加触发器涉及的逻辑较多，使用 cron 表达式 可以完全替代相关需求
     # trigger = Column("trigger", String(16), comment="date|interval|cron")
     cron = Column("cron", String(128), comment="cron表达式")
@@ -32,6 +33,8 @@ class TaskPO(UserTimeStampedModelPO):
         self.category = po.category
         self.cron = po.cron
         self.code = po.code
+
         self.state = po.state
         self.sourceCode = po.sourceCode
         self.execStatus = po.execStatus
+        self.sourceCategory = po.sourceCategory

@@ -65,6 +65,7 @@ class sysDictPO(UserTimeStampedModelPO):
     id = Column("id", Integer, autoincrement=True, primary_key=True)
     dictTypeId = Column("dict_type_id", Integer, comment="字典类型ID")
     name = Column("name", String(64))
+    flag = Column("flag", String(64))
     value = Column("value", String(1024))
     desc = Column("desc", String(1024))
     # py 层限制 取值范围为:(0-1)
@@ -75,6 +76,7 @@ class sysDictPO(UserTimeStampedModelPO):
     def update(self, po: sysDictPO):
         self.dictTypeId = po.dictTypeId
         self.name = po.name
+        self.flag = po.flag
         self.value = po.value
         self.desc = po.desc
 

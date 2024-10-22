@@ -8,7 +8,7 @@ from co6co_sanic_ext.model.res.result import Page_Result
 from co6co_sanic_ext.utils import JSON_util
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import scoped_session
-from typing import TypeVar, Dict, List, Any, Tuple, Optional
+from typing import TypeVar, Dict, List, Any, Tuple, Optional, Callable
 from co6co_sanic_ext.model.res.result import Result, Page_Result
 
 from io import BytesIO
@@ -22,7 +22,6 @@ from co6co_db_ext.po import BasePO, TimeStampedModelPO, UserTimeStampedModelPO, 
 from datetime import datetime
 from co6co.utils.tool_util import list_to_tree, get_current_function_name
 from co6co_db_ext.db_utils import db_tools,  DbCallable, QueryOneCallable, UpdateOneCallable, QueryListCallable, QueryPagedByFilterCallable
-from typing import Callable
 
 
 from co6co.utils import log, getDateFolder
@@ -217,7 +216,29 @@ class BaseMethodView(BaseView):
 
         return await callable(exec)
 
-    async def add(self, request: Request, po: BasePO, json2Po: bool = True, userId=None, beforeFun=None, afterFun=None):
+    async def batchAdd(self, request: Request, poList: List[BasePO],   userId=None, beforeFun: Callable[[BasePO, AsyncSession, Request], None | Any] = None, afterFun: Callable[[List[BasePO], AsyncSession, Request], None] = None):
+        try:
+
+            async def exec(session: AsyncSession):
+                for po in poList:
+                    po.add_assignment(userId)
+                    if beforeFun != None:
+                        result = await beforeFun(po, session, request)
+                        if result != None:
+                            await session.rollback()
+                            return result
+                session.add_all(poList)
+                if afterFun != None:
+                    session.flush()
+                    await afterFun(poList, session, request)
+                return JSON_util.response(Result.success())
+
+            callable = DbCallable(self.get_db_session(request))
+            return await callable(exec)
+        except Exception as e:
+            return self.response_error(request, e)
+
+    async def add(self, request: Request, po: BasePO, json2Po: bool = True, userId=None, beforeFun: Callable[[BasePO, AsyncSession, Request], None | Any] = None, afterFun: Callable[[BasePO, AsyncSession, Request], None] = None):
         """
         增加 
 
@@ -234,11 +255,7 @@ class BaseMethodView(BaseView):
                 po.__dict__.update(request.json)
 
             async def exec(session: AsyncSession):
-                if isinstance(po, UserTimeStampedModelPO):
-                    po.createTime = datetime.now()
-                    po.createUser = userId
-                elif isinstance(po, TimeStampedModelPO):
-                    po.createTime = datetime.now()
+                po.add_assignment(userId)
 
                 if beforeFun != None:
                     result = await beforeFun(po, session, request)
@@ -277,19 +294,14 @@ class BaseMethodView(BaseView):
             call = DbCallable(self.get_db_session(request))
 
             async def exec(session: AsyncSession):
-                oldPo: Optional[poType] = None
+                oldPo: BasePO = None
                 if isinstance(pkOrSelect, Select):
                     oldPo = await db_tools.execForPo(session, pkOrSelect, remove_db_instance_state=False)
                 else:
-                    oldPo: poType = await session.get_one(poType, pkOrSelect)
+                    oldPo: BasePO = await session.get_one(poType, pkOrSelect)
                 if oldPo == None:
                     return JSON_util.response(Result.fail(message=f"未查到‘{pk}’对应的信息!"))
-                if isinstance(oldPo, UserTimeStampedModelPO):
-                    oldPo.updateTime = datetime.now()
-                    oldPo.updateUser = userId
-                elif isinstance(oldPo, TimeStampedModelPO):
-                    oldPo.updateTime = datetime.now()
-
+                oldPo.edit_assignment(userId)
                 if json2Po:
                     oldPo.update(po)
                 if fun != None:
@@ -316,7 +328,7 @@ class BaseMethodView(BaseView):
         """
         try:
             async with self.get_db_session(request) as session, session.begin():
-                oldPo: poType = await session.get_one(poType, pk)
+                oldPo: BasePO = await session.get_one(poType, pk)
                 if oldPo == None:
                     return JSON_util.response(Result.fail(message=f"未找到‘{pk}’对应的信息!"))
                 if beforeFun != None:

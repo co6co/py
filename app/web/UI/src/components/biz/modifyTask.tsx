@@ -1,5 +1,5 @@
-import { defineComponent, ref, reactive, provide, onMounted, onBeforeUnmount } from 'vue'
-import type { InjectionKey } from 'vue'
+import { defineComponent, ref, reactive, computed, provide, onMounted, onBeforeUnmount } from 'vue'
+import type { InjectionKey, InputTypeHTMLAttribute } from 'vue'
 import {
   DialogForm,
   FormOperation,
@@ -12,7 +12,8 @@ import {
   type FormData
 } from 'co6co'
 
-import { DictSelect } from 'co6co-right'
+import { DictSelect, DictSelectInstance } from 'co6co-right'
+//import { DictSelect } from 'co6co-right/dist/api/dict/dictType'
 import { upload_image_svc, validatorBack } from 'co6co-right'
 import {
   ElRow,
@@ -49,6 +50,7 @@ export interface Item extends FormItemBase {
   category: number
   cron: string
   state: number
+  sourceCategory: number
   sourceCode: string
   execStatus: number
 }
@@ -84,6 +86,7 @@ export default defineComponent({
         category: 0,
         cron: '',
         state: 0,
+        sourceCategory: 0,
         sourceCode: '',
         execStatus: 0
       },
@@ -130,7 +133,7 @@ export default defineComponent({
         python(),
         javascript(),
         //myTheme,
-        //syntaxHighlighting(myHighlightStyle),
+        syntaxHighlighting(myHighlightStyle),
         keymap.of([indentWithTab])
       ]
     }
@@ -167,35 +170,6 @@ export default defineComponent({
           break
       }
       return true
-    }
-    const valid = (promise: Promise<IResponse<boolean>>, rule: any, callback: validatorBack) => {
-      promise.then((res) => {
-        if (res.data) return callback()
-        return (rule.message = res.message), callback(new Error(rule.message))
-      })
-    }
-    const validCron = (rule: any, value: any, callback: validatorBack) => {
-      valid(api.test_cron2_svc(value), rule, callback)
-    }
-    const validSourceCode = (rule: any, value: any, callback: validatorBack) => {
-      valid(api.test_code_svc(value), rule, callback)
-    }
-    const rules: FormRules = {
-      name: [{ required: true, message: '请输入名称', trigger: ['blur', 'change'] }],
-      code: [{ required: true, message: '请输入编码', trigger: ['blur', 'change'] }],
-      category: [{ required: true, message: '请选择类型', trigger: ['blur', 'change'] }],
-      cron: [
-        {
-          required: true,
-          validator: validCron,
-          message: 'Cron表达式不正确',
-          trigger: ['blur']
-        }
-      ],
-      state: [{ required: true, message: '状态能为空', trigger: ['blur', 'change'] }],
-      sourceCode: [
-        { required: true, validator: validSourceCode, message: '源代码', trigger: ['blur'] }
-      ]
     }
 
     const save = () => {
@@ -237,8 +211,59 @@ export default defineComponent({
           DATA.testing = false
         })
     }
+    const taskCategoryRef = ref<DictSelectInstance>()
 
+    const allowCorn = computed(() => {
+      const desc =
+        taskCategoryRef.value &&
+        taskCategoryRef.value.stateHook.getFlag(String(DATA.fromData.category))
+      if (desc == 'enabled') return true
+      return false
+    })
     const onImage = upload_image_svc
+
+    const valid = (promise: Promise<IResponse<boolean>>, rule: any, callback: validatorBack) => {
+      promise.then((res) => {
+        if (res.data) return callback()
+        return (rule.message = res.message), callback(new Error(rule.message))
+      })
+    }
+    const validCron = (rule: any, value: any, callback: validatorBack) => {
+      valid(api.test_cron2_svc(value), rule, callback)
+    }
+    const validSourceCode = (rule: any, value: any, callback: validatorBack) => {
+      valid(api.test_code_svc(value), rule, callback)
+    }
+    const rules_base: FormRules = {
+      name: [{ required: true, message: '请输入名称', trigger: ['blur', 'change'] }],
+      code: [{ required: true, message: '请输入编码', trigger: ['blur', 'change'] }],
+      category: [{ required: true, message: '请选择类型', trigger: ['blur', 'change'] }],
+
+      state: [{ required: true, message: '状态能为空', trigger: ['blur', 'change'] }],
+      sourceCode: [
+        { required: true, validator: validSourceCode, message: '源代码', trigger: ['blur'] }
+      ]
+    }
+    const cron_rules: FormRules = {
+      ...{
+        cron: [
+          {
+            required: true,
+            validator: validCron,
+            message: 'Cron表达式不正确',
+            trigger: ['blur']
+          }
+        ]
+      },
+      ...rules_base
+    }
+    const rules = computed(() => {
+      if (allowCorn.value) {
+        return cron_rules
+      }
+      return rules_base
+    })
+
     //富文本1
     const fromSlots = {
       buttons: () => (
@@ -271,6 +296,7 @@ export default defineComponent({
             <ElCol span={12}>
               <ElFormItem label="任务类别" prop="category">
                 <DictSelect
+                  ref={taskCategoryRef}
                   dictTypeCode={DictTypeCodes.TaskCategory}
                   v-model={DATA.fromData.category}
                   isNumber={true}
@@ -281,8 +307,13 @@ export default defineComponent({
           </ElRow>
           <ElRow>
             <ElCol span={12}>
-              <ElFormItem label="cron表达式" prop="cron">
-                <ElInput v-model={DATA.fromData.cron} placeholder="0 0 0 31 12 ? 2024"></ElInput>
+              <ElFormItem label="源码类型" prop="sourceCategory">
+                <DictSelect
+                  dictTypeCode={DictTypeCodes.TaskCodeCategory}
+                  v-model={DATA.fromData.sourceCategory}
+                  isNumber={true}
+                  placeholder="源码类型"
+                />
               </ElFormItem>
             </ElCol>
             <ElCol span={12}>
@@ -291,6 +322,17 @@ export default defineComponent({
               </ElFormItem>
             </ElCol>
           </ElRow>
+          {allowCorn.value ? (
+            <ElRow>
+              <ElCol>
+                <ElFormItem label="cron表达式" prop="cron">
+                  <ElInput v-model={DATA.fromData.cron} placeholder="0 0 0 31 12 ? 2024"></ElInput>
+                </ElFormItem>
+              </ElCol>
+            </ElRow>
+          ) : (
+            <></>
+          )}
           <ElRow>
             <ElCol>
               <ElFormItem label="执行代码" prop="sourceCode">

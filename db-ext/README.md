@@ -18,6 +18,9 @@ db_session.py  72 z
 0.0.9 优化
 0.0.10
     Callable 中的类型 不能用 any需要用 Any
+0.0.11
+    BasePO 增加 assignment 方法
+
 ```
 
 - db_tools.execForPo

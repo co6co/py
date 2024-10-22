@@ -8,7 +8,11 @@ const { get_select_svc, add_svc, edit_svc, del_svc, get_table_svc, exist_svc } =
 
 export { get_select_svc, add_svc, edit_svc, del_svc, get_table_svc, exist_svc };
 
-export type DictSelect = ISelect & { value: string; desc: string };
+export type DictSelectType = ISelect & {
+	value: string;
+	flag: string;
+	desc: string;
+};
 /**
  * 获取字典的选择
  * @param dictTypeId
@@ -16,7 +20,7 @@ export type DictSelect = ISelect & { value: string; desc: string };
  */
 export const get_dict_select_svc = (
 	dictTypeId: number
-): Promise<IResponse<DictSelect[]>> => {
+): Promise<IResponse<DictSelectType[]>> => {
 	return createServiceInstance().get(`${base_URL}/${dictTypeId}`);
 };
 

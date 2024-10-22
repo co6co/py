@@ -19,8 +19,9 @@
     增加  limitThreadPoolExecutor
 0.0.11
     新增 source.py 模块, Singleton
-0.0.12 未发布
+0.0.12
     win 模块
+    gps dsm
 
 
 

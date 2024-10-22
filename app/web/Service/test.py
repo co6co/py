@@ -1,6 +1,11 @@
+
+
 from services.tasks import CuntomCronTrigger, Scheduler
 from datetime import datetime
 import time
+from co6co.utils import log
+
+
 # startTimeTask()
 # startIntervalTask()
 x = CuntomCronTrigger.resolvecron("0 0 12 5/2 * *")
@@ -19,4 +24,4 @@ if res:
     s = Scheduler()
     s.addTask(code, "1/15 * * * * *")
 
-time.sleep(30)
+time.sleep(1)

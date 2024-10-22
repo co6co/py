@@ -27,7 +27,7 @@ class DictSelectView(AuthMethodView):
         dictTypeCode: 字典类型代码
         """
         select = (
-            Select(sysDictPO.id, sysDictPO.name,
+            Select(sysDictPO.id, sysDictPO.name, sysDictPO.flag,
                    sysDictPO.value, sysDictPO.desc)
             .join(sysDictTypePO, onclause=sysDictPO.dictTypeId == sysDictTypePO.id)
             .filter(sysDictTypePO.code.__eq__(dictTypeCode), sysDictPO.state.__eq__(dict_state.enabled.val))

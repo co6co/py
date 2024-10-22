@@ -17,9 +17,21 @@ export enum ConfigCodes {
   GaoDeMapAK = 'MAP_GAODE_KEY_VALUE'
 }
 export enum DictTypeCodes {
-  //微信各类地点 字典code : 违法处理地点，车管所地点，考场地点
+  /**
+   * 任务类型
+   */
   TaskCategory = 'SYS_TASK_CATEGORY',
+  /**
+   * 源码类型
+   */
+  TaskCodeCategory = 'SYS_TASK_CODE_CATEGORY',
+  /**
+   * 任务状态
+   */
   TaskState = 'SYS_TASK_STATE',
+  /**
+   * 任务运行状态
+   */
   TaskStatus = 'SYS_TASK_STATUS'
 }
 

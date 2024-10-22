@@ -91,7 +91,7 @@ export default defineComponent({
 					DATA.id = -1;
 					DATA.fromData.name = '';
 					DATA.fromData.code = '';
-					DATA.fromData.parentId = 0;
+					DATA.fromData.parentId = item ? item.id : 0;
 					DATA.fromData.category = 0;
 					DATA.fromData.icon = undefined;
 					DATA.fromData.url = undefined;
@@ -247,7 +247,7 @@ export default defineComponent({
 							<ElFormItem label="名称" prop="name">
 								<ElInput
 									v-model={DATA.fromData.name}
-									placeholder="用户组名称"></ElInput>
+									placeholder="菜单名称"></ElInput>
 							</ElFormItem>
 						</ElCol>
 						<ElCol span={12}>

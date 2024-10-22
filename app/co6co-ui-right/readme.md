@@ -31,4 +31,9 @@
     2. 删除用户bug
 0.0.11
     1. 优化dictSelect 组件
+0.0.12
+    1. 增加 flag 字段
+    2. 修改 DictSelect 类型为 DictSelectType
+    3. 增加 baseAddMenu 组件
+
 ```

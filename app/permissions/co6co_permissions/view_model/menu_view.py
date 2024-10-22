@@ -126,3 +126,28 @@ class menu_view(AuthMethodView):
             if count > 0:
                 return JSON_util.response(Result.fail(message=f"该'{po.name}'节点下有‘{count}’节点，不能删除！"))
         return await self.remove(request, pk, menuPO, beforeFun=before)
+
+
+class menu_batch_view(AuthMethodView):
+    routePath = "/batch"
+
+    @menuChanged
+    async def post(self, request: Request):
+        """
+        批量增加
+        """
+        data = request.json
+
+        async def before(po: menuPO, session: AsyncSession, request):
+            exist = await db_tools.exist(session,  menuPO.code.__eq__(po.code), column=menuPO.id)
+            if exist:
+                return JSON_util.response(Result.fail(message=f"'{po.code}'已存在！"))
+        if isinstance(data, list):
+            polist = []
+            userId = self.getUserId(request)
+            for js in data:
+                po = menuPO()
+                po.__dict__.update(js)
+                polist.append(po)
+            return await self.batchAdd(request, polist,   userId=userId, beforeFun=before)
+        return self.response_json(Result.fail(message="json 数据不是列表"))
