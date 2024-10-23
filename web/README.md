@@ -13,7 +13,9 @@
 0.0.4
     baseView: save_file
 0.0.5
-    result
+    优化 result 模块
+0.0.6 未发布
+    增加 sanics.App 类
 ```
 
 webSocket 测试地址

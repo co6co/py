@@ -33,6 +33,7 @@ class cronViews(AuthMethodView):
 
     async def get(self, request: Request):
         """
+        cron 表达式 合法性检测        
         ?cron=0 0 0 12 12 *
         """
         data = self.usable_args(request)
@@ -41,9 +42,8 @@ class cronViews(AuthMethodView):
 
     async def post(self, request: Request):
         """
-        {
-            cron:'0 0 0 12 12 *'
-        }
+        cron 表达式 合法性检测 
+        json:{cron:'0 0 0 12 12 *'}
         """
         json: dict = request.json
         cron = json.get("cron", None)
@@ -61,9 +61,9 @@ class _codeView:
                 res = _e()
                 return Result.success(data=res)
             else:
-                return Result.success(message="解析出错", data="解析出错：{}".format(e))
+                return Result.fail(message="解析出错：{}".format(e))
         except Exception as e:
-            return Result.success(message="执行出错", data="执行出错：{}".format(e))
+            return Result.fail(message="执行出错：{}".format(e))
 
 
 class codeView(_codeView, AuthMethodView):
@@ -71,9 +71,10 @@ class codeView(_codeView, AuthMethodView):
 
     async def post(self, request: Request):
         """
-        {
-            code:'python 代码'
-        }
+        检查代码 python 代码
+
+        params: {code:'python 代码'}
+        return {data:False|True,...}
         """
         json: dict = request.json
         code = json.get("code", None)
@@ -85,9 +86,8 @@ class codeView(_codeView, AuthMethodView):
     async def put(self, request: Request):
         """
         执行代码
-        {
-            code:'python 代码'
-        }
+        params: {code:'python 代码'}
+        return {data:False|True,...}
         """
         json: dict = request.json
         code = json.get("code", None)
@@ -99,10 +99,8 @@ class schedView(_codeView, AuthMethodView):
 
     async def post(self, request: Request, pk: int):
         """
-        调度
-        """
-        """
-        执行一次
+        调度 
+        周期性执行的可以执行完成的代码
         """
         select = Select(TaskPO).filter(TaskPO.id.__eq__(pk))
         po: TaskPO = await get_one(request, select)
