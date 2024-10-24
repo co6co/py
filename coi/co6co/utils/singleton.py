@@ -6,10 +6,27 @@ from typing import Type, TypeVar
 T = TypeVar('T')
 
 
+def singleton(cls):
+    """
+    单例模式装饰器
+
+    使用方法：
+    @singleton
+    class MyClass:
+        pass
+    """
+    instances = {}
+
+    def get_instance(*args, **kwargs):
+        if cls not in instances:
+            instances[cls] = cls(*args, **kwargs)
+        return instances[cls]
+    return get_instance
+
+
 class Singleton:
     """
-    单例模式
-    //todo 子类继承后怎么返回资料对象
+    单例模式 子类继承
     """
     _instance: T = None
     createTime = None

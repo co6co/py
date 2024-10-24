@@ -1,13 +1,18 @@
-from sanic import Sanic, utils
-from typing import Optional, Callable, Any
+from __future__ import annotations
+from sanic import Sanic, utils, Blueprint
+from sanic.blueprint_group import BlueprintGroup
+from typing import Optional, Callable, Any, Dict, List
 from pathlib import Path
 from co6co.utils import log, File
 
 from sanic.worker.loader import AppLoader
 from functools import partial
+from co6co.utils.singleton import Singleton
+from co6co_sanic_ext.view_model import BaseView
+from co6co_sanic_ext.api import add_routes
 
 
-def _create_App(name: str = "__mp_main__", config: str = None, apiMount: Optional[Callable[[Sanic, Any], None]] = None):
+def _create_App(name: str = "__mp_main__", config: str = None, apiMount: Optional[Callable[[Sanic, Dict],  None]] = None):
     try:
         app = Sanic(name)
         if config == None:
@@ -24,6 +29,7 @@ def _create_App(name: str = "__mp_main__", config: str = None, apiMount: Optiona
             # log.succ(f"app 配置信息：\n{app.config}")
             if apiMount != None:
                 apiMount(app, customConfig)
+
         return app
     except Exception as e:
         log.err(f"创建应用失败：\n{e}{repr(e)}\n 配置信息：{app.config}")
@@ -42,6 +48,32 @@ def startApp(configFile: str, apiInit: Optional[Callable[[Sanic, Any], None]]):
         Sanic.serve(primary=app, app_loader=loader)
         # app.run(host=setting.get("host"), port=setting.get("port"),debug=True, access_log=True)
     return app
+
+
+class ViewManage(Singleton):
+    """
+    目标： 动态增加HTTPMethodView动态 api
+    遇到的问题：取消以前增加的蓝图
+    处理步骤：
+        1. 应用初始化时从数据库中读出所有带增加的功能
+        2. 将所有功能放在一个蓝图中， 统一一起增加
+        3. 在平台中修改某个功能时需要，删除改功能并重新挂在到蓝图中
+        4. 在平台中增加某想功能，需要在蓝图中增加
+
+
+    """
+    viewDict: Dict[str, BaseView] = None
+    app:  App = None
+
+    def __init__(self,  app: Sanic) -> None:
+        super().__init__()
+        self.viewDict = {}
+        self.app = App(app)
+
+    def add(self, url_prefix: str, version: int | str | float | None = 1, *views: BaseView):
+        api = Blueprint("sysTask_API", url_prefix=url_prefix, version=version)
+        add_routes(api, *views)
+        self.app.app.blueprint(api)
 
 
 class App:
