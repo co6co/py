@@ -27,8 +27,15 @@ def get_source_fun(source_code, func_name) -> Callable[[], None]:
     source_code: 代码
     func_name: 代码中的方法
     """
-    exec_code = compile(source_code, '<string>', "exec")
     scope = {}
-    exec(exec_code, scope)
+    compile_source(source_code, scope)
     f = scope.get(func_name, None)
     return f
+
+
+def compile_source(source_code, global_vars: dict = None, local_vars: dict = None):
+    """
+    source_code: 代码 
+    """
+    exec_code = compile(source_code, '<string>', "exec")
+    exec(exec_code, global_vars, local_vars)

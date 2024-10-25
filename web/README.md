@@ -15,7 +15,7 @@
 0.0.5
     优化 result 模块
 0.0.6 未发布
-    增加 sanics.App 类
+    增加 sanics.App 类 及 ViewManage
 ```
 
 webSocket 测试地址

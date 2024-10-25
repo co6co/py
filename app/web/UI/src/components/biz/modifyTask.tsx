@@ -132,7 +132,7 @@ export default defineComponent({
         basicSetup,
         python(),
         javascript(),
-        //myTheme,
+        myTheme,
         syntaxHighlighting(myHighlightStyle),
         keymap.of([indentWithTab])
       ]

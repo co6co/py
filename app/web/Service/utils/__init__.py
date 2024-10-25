@@ -4,7 +4,6 @@ from co6co.utils import log
 from wechatpy import WeChatClient
 from sanic.request import Request
 from sanic.response import redirect, raw
-from model import WechatConfig
 from wechatpy import messages, events
 
 from wechatpy.oauth import WeChatOAuth

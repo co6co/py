@@ -9,6 +9,20 @@ from co6co_web_db.services.db_service import injectDbSessionFactory
 import argparse
 from cacheout import Cache
 import time
+from co6co.utils.source import compile_source
+from co6co_sanic_ext.sanics import App
+from services.bll.task import TaskBll
+from typing import List
+import asyncio
+
+
+def appendRoute(app: Sanic):
+    try:
+        bll = TaskBll()
+        source = asyncio.run(bll.getSourceList())
+        App.appendView(app, *source, blueName="user_append_View")
+    except Exception as e:
+        log.err("动态模块失败", e)
 
 
 def init(app: Sanic, customConfig):
@@ -21,6 +35,7 @@ def init(app: Sanic, customConfig):
     app.blueprint(api)
     cache = Cache(maxsize=256, ttl=30, timer=time.time, default=None)
     app.ctx.Cache = cache
+    appendRoute(app)
 
 
 def main():
