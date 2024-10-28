@@ -2,30 +2,27 @@ from __future__ import annotations
 
 from sanic import Sanic
 from co6co.utils import log
-
+from sanic.config import Config
 from co6co_sanic_ext.utils.cors_utils import attach_cors
 from co6co_sanic_ext import sanics
 from co6co_web_db.services.db_service import injectDbSessionFactory
 import argparse
 from cacheout import Cache
 import time
-from co6co.utils.source import compile_source
-from co6co_sanic_ext.sanics import App
-from services.bll.task import TaskBll
-from typing import List
-import asyncio
+from services.taskService import TaskBll
 
 
 def appendRoute(app: Sanic):
     try:
-        bll = TaskBll()
-        source = asyncio.run(bll.getSourceList())
-        App.appendView(app, *source, blueName="user_append_View")
+        bll = TaskBll(app.config.db_settings)
+        source = bll.getSourceList()
+        sanics .App.appendView(app, *source, blueName="user_append_View")
+        pass
     except Exception as e:
         log.err("动态模块失败", e)
 
 
-def init(app: Sanic, customConfig):
+def init(app: Sanic, _: dict):
     """
     初始化
     """
@@ -39,7 +36,7 @@ def init(app: Sanic, customConfig):
 
 
 def main():
-    parser = argparse.ArgumentParser(description="audit service.")
+    parser = argparse.ArgumentParser(description="System Service.")
     parser.add_argument("-c", "--config", default="app_config.json")
     args = parser.parse_args()
     sanics.startApp(args.config, init)

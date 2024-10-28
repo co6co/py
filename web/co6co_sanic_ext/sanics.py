@@ -15,7 +15,7 @@ from datetime import datetime
 from co6co.utils.source import compile_source
 
 
-def _create_App(name: str = "__mp_main__", config: str = None, apiMount: Optional[Callable[[Sanic, Dict],  None]] = None):
+def _create_App(name: str = "__mp_main__", config: str = None, apiMount: Callable[[Sanic, Dict],  None] = None):
     try:
         app = Sanic(name)
         if config == None:
@@ -39,7 +39,7 @@ def _create_App(name: str = "__mp_main__", config: str = None, apiMount: Optiona
         raise
 
 
-def startApp(configFile: str, apiInit: Optional[Callable[[Sanic, Any], None]]):
+def startApp(configFile: str, apiInit: Callable[[Sanic, Dict], None]):
     loader = AppLoader(factory=partial(_create_App, config=configFile, apiMount=apiInit))
     app = loader.load()
     if app != None and app.config != None:

@@ -19,7 +19,10 @@ db_session.py  72 z
 0.0.10
     Callable 中的类型 不能用 any需要用 Any
 0.0.11
-    BasePO 增加 assignment 方法
+    BasePO 增加 assignment
+0.0.12
+    增加数据其他线程的数据库操作 -->session.BaseBll
+
 
 ```
 

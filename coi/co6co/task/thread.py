@@ -69,6 +69,35 @@ class ThreadEvent:
         # print("closed.", self._loop.is_closed())   #True
 
 
+class EventLoop:
+    """
+    数据库操作
+    定义异步方法
+    运行 result=run(异步方法,arg)
+
+    """
+    _eventLoop: ThreadEvent
+    _closed: bool = None
+
+    def __init__(self) -> None:
+        self._eventLoop = ThreadEvent()
+        self._closed = False
+
+    def run(self, task, *args, **argkv):
+        if self._closed:
+            raise RuntimeError('ThreadEvent is closed')
+        data = self._eventLoop.runTask(task, *args, **argkv)
+        return data
+
+    def close(self):
+        self._eventLoop.close()
+        self._closed = True
+
+    def __del__(self) -> None:
+        if not self._closed:
+            self._eventLoop.close()
+
+
 class Executing:
     """
     线程 自己执行自己退出

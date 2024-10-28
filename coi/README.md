@@ -22,9 +22,10 @@
 0.0.12
     win 模块
     gps dsm
-0.0.13 未发布
+0.0.13
     单例模式 装饰器
     增加  compile_source 方法
+    增加类 EventLoop
 
 
 

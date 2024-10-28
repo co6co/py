@@ -34,7 +34,13 @@ class db_service:
     }
     settings = {}
     session: scoped_session  # 同步连接
+
     async_session_factory: sessionmaker  # 异步连接
+    """
+    AsyncSession 工厂函数
+    sessionmaker 是个生成器类
+
+    """
     useAsync: bool
     poolSize: int = None
     poolSize: int = None
@@ -69,8 +75,8 @@ class db_service:
         self.settings = self.default_settings.copy()
         if engineUrl == None:
             self.settings .update(config)
-            engineUrl = "mysql+aiomysql://{}:{}@{}/{}".format(self.settings['DB_USER'],self.settings['DB_PASSWORD'],self.settings['DB_HOST'],self.settings['DB_NAME'])
-            
+            engineUrl = "mysql+aiomysql://{}:{}@{}/{}".format(self.settings['DB_USER'], self.settings['DB_PASSWORD'], self.settings['DB_HOST'], self.settings['DB_NAME'])
+
         self._createEngine(engineUrl)
         pass
 
