@@ -1,2 +1,3 @@
 import * as task from './task'
-export { task }
+import * as component from './component'
+export { task, component }

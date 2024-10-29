@@ -9,7 +9,7 @@ from co6co_db_ext.db_utils import QueryListCallable
 class TaskBll(BaseBll):
     async def _getSourceList(self):
         """
-        获取需订阅告警用户
+        获取源码
         """
         try:
             call = QueryListCallable(self.session)

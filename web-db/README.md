@@ -18,12 +18,14 @@
 0.0.9
 0.0.10
     view_model  为get_one  增加一个func的方法
-0.0.11 正式
+0.0.11
     get_one 增加 remove_db_instance 参数
     remove 增加 after 返回值判断
     response_error
     view.edit 增加 select处理
-0.0.12
-    batch_add,
+0.0.12  正式
+    batch_add
+0.0.13 未发布
+    tip
 
 ```

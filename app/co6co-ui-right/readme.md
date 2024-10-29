@@ -23,7 +23,7 @@
 0.0.8
     request_resource_svc 更名为 loadAsyncResource
     resource:1. imageView|image/listView
-0.0.9 发布
+0.0.9
     1. htmlPlayer else bug
     2. downloadFile
 0.0.10
@@ -31,9 +31,8 @@
     2. 删除用户bug
 0.0.11
     1. 优化dictSelect 组件
-0.0.12
-    1. 增加 flag 字段
-    2. 修改 DictSelect 类型为 DictSelectType
-    3. 增加 baseAddMenu 组件
+    2. 增加 flag 字段
+    3. 修改 DictSelect 类型为 DictSelectType
+    4. 增加 baseAddMenu 组件
 
 ```

@@ -22,6 +22,9 @@ db_session.py  72 z
     BasePO 增加 assignment
 0.0.12
     增加数据其他线程的数据库操作 -->session.BaseBll
+0.0.13
+    session.BaseBll 修复 connect 报错异常
+
 
 
 ```

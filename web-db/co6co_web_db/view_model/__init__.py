@@ -80,17 +80,17 @@ class BaseMethodView(BaseView):
         """
         return self.response_json(self.response_error0(request, e))
 
-    async def get_one(self, request: Request, select: Select, isPO: bool = True, remove_db_instance: bool = True, func=None):
+    async def get_one(self, request: Request, select: Select, isPO: bool = True, remove_db_instance: bool = True, resultHanlder: Callable[[Any], Any] = None):
         """
         从数据库中获取一个对象
-        func: 不为空是，返回值将作为最终的返回结果
+        resultHanlder: 不为空是，返回值将作为最终的返回结果
               使有机会改变从数据库中查询的结果              
         """
         result = await get_one(request, select, isPO)
         if isPO and remove_db_instance:
             result = db_tools.remove_db_instance_state(result)
-        if func != None:
-            bckResult = func(result)
+        if resultHanlder != None:
+            bckResult = resultHanlder(result)
             if bckResult != None:
                 result = bckResult
         if result == None:

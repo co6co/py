@@ -1,6 +1,8 @@
+// 未导出
 import { defineComponent, ref, watch, PropType, onMounted, VNode } from 'vue';
 import { ElSelect, ElOption } from 'element-plus';
-import { useDictHook } from '@/hooks';
+
+import { useState } from '@/hooks/useDictState';
 type ModelValueType = string | number | null | undefined;
 export default defineComponent({
 	props: {
@@ -8,20 +10,13 @@ export default defineComponent({
 			type: String,
 			default: '请选择',
 		},
-		dictTypeCode: {
-			type: String as PropType<string>,
-			required: true,
-		},
 		modelValue: {
 			type: [String, Number, Object] as PropType<ModelValueType>, // 和下面没有任何区别
 			//type: Object as PropType<ModelValueType>,
 			//required: true,
 			default: '',
 		},
-		isNumber: {
-			type: Boolean as PropType<Boolean>,
-			default: false,
-		},
+
 		disabled: {
 			type: Boolean as PropType<Boolean>,
 			default: false,
@@ -49,20 +44,13 @@ export default defineComponent({
 				localValue.value = newValue;
 			}
 		);
+		const { selectData, getName, getTagType } = useState();
 		const onChange = (newValue: ModelValueType) => {
 			localValue.value = newValue;
 			ctx.emit('update:modelValue', newValue);
 		};
-		const stateHook = useDictHook.useDictSelect();
-		onMounted(async () => {
-			await stateHook.queryByCode(prop.dictTypeCode);
-		});
-		const getName = (v) => {
-			return stateHook.getName(String(v));
-		};
-		const flagIs = (value: string, flag: string) => {
-			return stateHook.getFlag(value) == flag;
-		};
+		onMounted(async () => {});
+
 		const rander = (): VNode => {
 			return (
 				<ElSelect
@@ -72,13 +60,9 @@ export default defineComponent({
 					v-model={localValue.value}
 					placeholder={prop.placeholder}
 					onChange={onChange}>
-					{stateHook.selectData.value.map((d, index) => {
+					{selectData.value.map((d, index) => {
 						return (
-							<ElOption
-								key={index}
-								label={d.name}
-								value={prop.isNumber ? Number(d.value) : d.value}
-							/>
+							<ElOption key={index} label={d.label} value={Number(d.value)} />
 						);
 					})}
 				</ElSelect>
@@ -86,14 +70,12 @@ export default defineComponent({
 		};
 		//真是方法
 		ctx.expose({
-			stateHook,
 			getName,
-			flagIs,
+			getTagType,
 		});
 		//.d.ts 中的定义
-		rander.stateHook = stateHook;
 		rander.getName = getName;
-		rander.flagIs = flagIs;
+		rander.getTagType = getTagType;
 		return rander;
 	}, //end setup
 });

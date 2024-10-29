@@ -14,7 +14,7 @@ import {
 
 import { DictSelect, DictSelectInstance } from 'co6co-right'
 //import { DictSelect } from 'co6co-right/dist/api/dict/dictType'
-import { upload_image_svc, validatorBack } from 'co6co-right'
+import { upload_image_svc, validatorBack, useDictHook } from 'co6co-right'
 import {
   ElRow,
   ElCol,
@@ -35,7 +35,7 @@ import { task as api } from '../../api/biz'
 import CodeMirror from 'vue-codemirror6'
 import { basicSetup } from 'codemirror'
 import { python } from '@codemirror/lang-python'
-import { javascript } from '@codemirror/lang-javascript'
+import { javascript, javascriptLanguage } from '@codemirror/lang-javascript'
 import { oneDark } from '@codemirror/theme-one-dark'
 import { EditorView, keymap } from '@codemirror/view'
 import { tags } from '@lezer/highlight'
@@ -47,9 +47,11 @@ export interface Item extends FormItemBase {
   id: number
   name: string
   code: string
+  /** 任务类型 */
   category: number
   cron: string
   state: number
+  /** 源码类型 */
   sourceCategory: number
   sourceCode: string
   execStatus: number
@@ -137,6 +139,10 @@ export default defineComponent({
         keymap.of([indentWithTab])
       ]
     }
+    const language = computed(() => {
+      if (isPythonCode.value) return python()
+      else return javascript()
+    })
 
     const init_data = (oper: FormOperation, item?: Item) => {
       DATA.operation = oper
@@ -150,6 +156,7 @@ export default defineComponent({
 
           DATA.fromData.code = ''
           DATA.fromData.category = 0
+          DATA.fromData.sourceCategory = 0
           DATA.fromData.cron = ''
           DATA.fromData.state = 0
           DATA.fromData.sourceCode = ''
@@ -162,6 +169,7 @@ export default defineComponent({
           DATA.fromData.name = item.name
           DATA.fromData.code = item.code
           DATA.fromData.category = item.category
+          DATA.fromData.sourceCategory = item.sourceCategory
           DATA.fromData.cron = item.cron
           DATA.fromData.state = item.state
           DATA.fromData.sourceCode = item.sourceCode
@@ -204,7 +212,10 @@ export default defineComponent({
       api
         .test_exe_code_svc(DATA.fromData.sourceCode)
         .then((res) => {
-          DATA.testResult = res.data
+          // CodeMirror 控件对类型敏感如果不是字符串报错卡住整个页面
+          if (typeof res.data == 'string') DATA.testResult = res.data
+          if (typeof res.data == 'object') DATA.testResult = JSON.stringify(res.data)
+          else DATA.testResult = String(res.data)
           DATA.showResult = true
         })
         .finally(() => {
@@ -212,13 +223,13 @@ export default defineComponent({
         })
     }
     const taskCategoryRef = ref<DictSelectInstance>()
+    const codeCategoryRef = ref<DictSelectInstance>()
 
     const allowCorn = computed(() => {
-      const desc =
-        taskCategoryRef.value &&
-        taskCategoryRef.value.stateHook.getFlag(String(DATA.fromData.category))
-      if (desc == 'enabled') return true
-      return false
+      return taskCategoryRef.value?.flagIs(String(DATA.fromData.category), 'enabled')
+    })
+    const isPythonCode = computed(() => {
+      return codeCategoryRef.value?.flagIs(String(DATA.fromData.sourceCategory), 'python')
     })
     const onImage = upload_image_svc
 
@@ -232,7 +243,8 @@ export default defineComponent({
       valid(api.test_cron2_svc(value), rule, callback)
     }
     const validSourceCode = (rule: any, value: any, callback: validatorBack) => {
-      valid(api.test_code_svc(value), rule, callback)
+      if (isPythonCode.value) valid(api.test_code_svc(value), rule, callback)
+      else callback()
     }
     const rules_base: FormRules = {
       name: [{ required: true, message: '请输入名称', trigger: ['blur', 'change'] }],
@@ -275,14 +287,18 @@ export default defineComponent({
           >
             保存
           </ElButton>
-          <ElButton
-            disabled={DATA.testing}
-            onClick={() => {
-              onRun()
-            }}
-          >
-            运行
-          </ElButton>
+          {isPythonCode.value ? (
+            <ElButton
+              disabled={DATA.testing}
+              onClick={() => {
+                onRun()
+              }}
+            >
+              运行
+            </ElButton>
+          ) : (
+            <></>
+          )}
         </>
       ),
       default: () => (
@@ -309,6 +325,7 @@ export default defineComponent({
             <ElCol span={12}>
               <ElFormItem label="源码类型" prop="sourceCategory">
                 <DictSelect
+                  ref={codeCategoryRef}
                   dictTypeCode={DictTypeCodes.TaskCodeCategory}
                   v-model={DATA.fromData.sourceCategory}
                   isNumber={true}
@@ -337,13 +354,13 @@ export default defineComponent({
             <ElCol>
               <ElFormItem label="执行代码" prop="sourceCode">
                 <CodeMirror
-                  style="width:100%"
+                  style="width:100%;min-height:100px"
                   v-model={DATA.fromData.sourceCode}
                   dark
                   basic
                   tab
                   tabSize={4}
-                  lang={python()}
+                  lang={language.value}
                   gutter
                   extensions={cmOptions.extensions}
                 />
@@ -385,7 +402,6 @@ export default defineComponent({
                   basic
                   tab
                   tabSize={4}
-                  lang={python()}
                   gutter
                   extensions={cmOptions.extensions}
                 />

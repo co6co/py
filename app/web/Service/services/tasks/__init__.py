@@ -72,7 +72,7 @@ class Scheduler(Singleton):
         pass
 
     @staticmethod
-    def parseCode(code: str) -> Tuple[bool,  Callable[[], str] | Exception]:
+    def parseCode(code: str) -> Tuple[bool,  Callable[[], any] | Exception]:
         try:
             main = get_source_fun(code, 'main')
             return True, main,
