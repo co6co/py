@@ -1,4 +1,4 @@
-import { ref, defineComponent, resolveComponent, h, onMounted } from 'vue';
+import { ref, defineComponent, resolveComponent, h } from 'vue';
 import { ElSelect, ElOption, ElIcon, ElEmpty } from 'element-plus';
 import * as icon from '@element-plus/icons-vue';
 import iconStyle from '@/assets/css/eciconselect.module.less';
@@ -16,16 +16,15 @@ export default defineComponent({
 	},
 	emits: {
 		//@ts-ignore
-		'update:modelValue': (v: any) => true,
+		'update:modelValue': (v: string | undefined) => true,
 	},
 	setup(prop, context) {
 		const DATA = ref<undefined | string>(prop.modelValue);
-		const onChanged = () => {
-			context.emit('update:modelValue', DATA.value);
+		const onChanged = (newValue: undefined | string) => {
+			DATA.value = newValue;
+			context.emit('update:modelValue', newValue);
 		};
-		onMounted(() => {
-			//console.info(DATA.value, prop.modelValue);
-		});
+
 		const vsolft = {
 			default: () => {
 				return (

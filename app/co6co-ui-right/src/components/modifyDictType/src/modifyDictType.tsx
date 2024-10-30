@@ -13,7 +13,6 @@ import {
 import * as api_type from 'co6co';
 import { dictTypeSvc as svc } from '@/api/dict';
 import { Flag } from '@/constants';
-import { useState } from '@/hooks/useDictState';
 import { validatorBack } from '@/constants';
 import {
 	ElRow,
@@ -27,7 +26,7 @@ import {
 	ElOption,
 	ElInputNumber,
 } from 'element-plus';
-
+import { StateSelect } from '@/components/dictSelect';
 export interface Item extends api_type.FormItemBase {
 	id: number;
 	name?: string;
@@ -57,7 +56,6 @@ export default defineComponent({
 		saved: (data: any) => true,
 	},
 	setup(prop, ctx) {
-		const { selectData } = useState();
 		const diaglogForm = ref<DialogFormInstance>();
 		const DATA = reactive<FormData<number, FormItem>>({
 			operation: FormOperation.add,
@@ -201,16 +199,10 @@ export default defineComponent({
 					<ElRow>
 						<ElCol span={12}>
 							<ElFormItem label="状态" prop="state">
-								<ElSelect v-model={DATA.fromData.state} placeholder="请选择">
-									{selectData.value.map((d, _) => {
-										return (
-											<ElOption
-												key={d.key}
-												label={d.label}
-												value={d.value}></ElOption>
-										);
-									})}
-								</ElSelect>
+								<StateSelect
+									v-model={DATA.fromData.state}
+									placeholder="请选择"
+								/>
 							</ElFormItem>
 						</ElCol>
 						<ElCol span={12}>

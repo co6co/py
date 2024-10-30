@@ -137,30 +137,46 @@ export default defineComponent({
 			}
 			return true;
 		};
+		const triggers = ['blur', 'change'];
+		const trigger = 'blur';
 		const rules_b: FormRules = {
-			name: [{ required: true, message: '请输入菜单称', trigger: 'blur' }],
-			parentId: [{ required: true, message: '请选择父节点', trigger: 'blur' }],
-			code: [{ required: true, message: '请菜单编码', trigger: 'blur' }],
-			status: [
-				{ required: true, message: '请选择状态', trigger: ['blur', 'change'] },
-			],
+			name: [{ required: true, message: '请输入菜单称', trigger: trigger }],
+			parentId: [{ required: true, message: '请选择父节点', trigger: trigger }],
+			code: [{ required: true, message: '请菜单编码', trigger: trigger }],
+			status: [{ required: true, message: '请选择状态', trigger: triggers }],
+		};
+		const rules_group: FormRules = {
+			...{
+				permissionKey: [
+					{ required: true, message: '权限字', trigger: trigger },
+				],
+			},
+			...rules_b,
 		};
 		const rules_api: FormRules = {
 			...{
-				methods: [{ required: true, message: '请选择方法名', trigger: 'blur' }],
-				url: [{ required: true, message: '请输入链接地址', trigger: 'blur' }],
+				methods: [
+					{ required: true, message: '请选择方法名', trigger: trigger },
+				],
+				url: [{ required: true, message: '请输入链接地址', trigger: trigger }],
 			},
 			...rules_b,
 		};
 		const rules_view: FormRules = {
 			...{
-				icon: [{ required: true, message: '请选择视图ICON', trigger: 'blur' }],
-				url: [{ required: true, message: '请输入视图地址', trigger: 'blur' }],
+				icon: [
+					{
+						required: true,
+						message: '请选择视图ICON',
+						trigger: triggers,
+					},
+				],
+				url: [{ required: true, message: '请输入视图地址', trigger: trigger }],
 				component: [
-					{ required: true, message: '请输入视图地址', trigger: 'blur' },
+					{ required: true, message: '请输入视图地址', trigger: triggers },
 				],
 				permissionKey: [
-					{ required: false, message: '权限字', trigger: ['blur', 'change'] },
+					{ required: true, message: '权限字', trigger: trigger },
 				],
 			},
 			...rules_b,
@@ -171,7 +187,7 @@ export default defineComponent({
 					{
 						required: true,
 						message: '请选择方法名',
-						trigger: ['blur', 'change'],
+						trigger: triggers,
 					},
 				],
 			},
@@ -183,11 +199,11 @@ export default defineComponent({
 					{
 						required: true,
 						message: '请选择方法名',
-						trigger: ['blur', 'change'],
+						trigger: triggers,
 					},
 				],
 				permissionKey: [
-					{ required: true, message: '权限字', trigger: ['blur', 'change'] },
+					{ required: true, message: '权限字', trigger: triggers },
 				],
 			},
 			...rules_b,
@@ -405,7 +421,8 @@ export default defineComponent({
 							multiple={false}
 							options={menuStateData.selectData.value}
 							v-model={DATA.fromData.status}
-							placeholder="状态"></ElSelectV2>
+							placeholder="状态"
+						/>
 					</ElFormItem>
 					<ElFormItem label="备注" prop="remark">
 						<ElInput
@@ -428,8 +445,9 @@ export default defineComponent({
 					return rules_subView;
 				case MenuCateCategory.Button:
 					return rules_button;
+				default:
+					return rules_group;
 			}
-			return rules_b;
 		});
 		const rander = (): ObjectType => {
 			return (

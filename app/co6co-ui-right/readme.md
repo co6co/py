@@ -34,5 +34,8 @@
     2. 增加 flag 字段
     3. 修改 DictSelect 类型为 DictSelectType
     4. 增加 baseAddMenu 组件
+0.0.12
+    1. 增加 stateSelect 组件
+    2. 优化代码.
 
 ```

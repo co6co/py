@@ -29,7 +29,9 @@
     pagination
 0.1.9
     diaglogForm 增加 prop.model
-0.1.10 发布
+0.1.10
     vueUtilts,
     intervalTime| logining Bug
+0.1.11
+    修复 viewSelect iconSelect bug
 ```

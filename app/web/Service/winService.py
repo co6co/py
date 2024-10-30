@@ -25,8 +25,8 @@ def kill_process_tree(pid, including_parent=True):
 
 
 class AppWinService(Winservice):
-    _svc_name_ = "xdWebService"
-    _svc_display_name_ = "python xd webservice"
+    _svc_name_ = "sysWebService"
+    _svc_display_name_ = "python sys webservice"
     _svc_description_ = "webservice"
     # _exe_name_ = "C:\\Users\\Administrator\\envs\\win32\\pythonservice.exe"
 
@@ -55,9 +55,13 @@ class AppWinService(Winservice):
         """
         执行自己的代码
         """
-
-        with open("D:\\services\\logs\\info.log", 'wb') as out_file, open("d:\\services\\logs\\error.log", 'wb') as err_file:
-            self.process = subprocess.Popen("python.exe D:\\services\\xd\\app.py", stdout=out_file, stderr=err_file)
+        env = os.environ.copy()
+        env['PYTHONIOENCODING'] = 'utf-8'
+        # 激活虚拟环境
+        venv_path = 'C:\\Users\\Administrator\\Envs\\wechat\\Scripts\\activate'
+        python_path = 'C:\\Users\\Administrator\\Envs\\wechat\\Scripts\\python.exe'
+        with open("D:\\services\\logs\\sys_web_info.log", 'wb') as out_file, open("d:\\services\\logs\\sys_web_error.log", 'wb') as err_file:
+            self.process = subprocess.Popen("{}&{} D:\\services\\sys\\app.py".format(venv_path, python_path), env=env, stdout=out_file, stderr=err_file)
             self.process.wait()  # 等待子进程结束
 
         '''

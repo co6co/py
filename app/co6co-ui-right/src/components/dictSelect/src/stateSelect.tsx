@@ -1,5 +1,4 @@
-// 未导出
-import { defineComponent, ref, watch, PropType, onMounted, VNode } from 'vue';
+import { defineComponent, ref, watch, PropType, VNode } from 'vue';
 import { ElSelect, ElOption } from 'element-plus';
 
 import { useState } from '@/hooks/useDictState';
@@ -49,8 +48,6 @@ export default defineComponent({
 			localValue.value = newValue;
 			ctx.emit('update:modelValue', newValue);
 		};
-		onMounted(async () => {});
-
 		const rander = (): VNode => {
 			return (
 				<ElSelect
@@ -61,9 +58,7 @@ export default defineComponent({
 					placeholder={prop.placeholder}
 					onChange={onChange}>
 					{selectData.value.map((d, index) => {
-						return (
-							<ElOption key={index} label={d.label} value={Number(d.value)} />
-						);
+						return <ElOption key={index} label={d.label} value={d.value} />;
 					})}
 				</ElSelect>
 			);

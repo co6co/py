@@ -16,6 +16,6 @@ declare module 'vue3-video-play'
 declare module 'wangeditor'
 declare module 'json-bigint'
 //declare module 'md-editor-v3'
-declare module 'vue-schart'
+//declare module 'vue-schart'
 
 declare module 'wx'

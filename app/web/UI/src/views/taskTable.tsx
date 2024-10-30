@@ -1,24 +1,21 @@
 import { defineComponent, VNodeChild } from 'vue'
 import { ref, reactive, onMounted } from 'vue'
-import {
-  ElTag,
-  ElButton,
-  ElInput,
-  ElTable,
-  ElTableColumn,
-  ElSelect,
-  ElOption,
-  ElMessage
-} from 'element-plus'
+import { ElTag, ElButton, ElInput, ElTableColumn, ElMessage } from 'element-plus'
 import { Search, Plus, Sugar, View, Edit } from '@element-plus/icons-vue'
 
 import { FormOperation, type Table_Module_Base } from 'co6co'
-import { routeHook, DictSelect, DictSelectInstance, tableScope } from 'co6co-right'
+import {
+  routeHook,
+  DictSelect,
+  DictSelectInstance,
+  tableScope,
+  TableView,
+  TableViewInstance
+} from 'co6co-right'
 
 import { DictTypeCodes } from '../api/app'
 import Diaglog, { type Item } from '../components/biz/modifyTask'
-//import { tablePage } from '../components/tables'
-import TablePage from '../components/tables/src/tablePage'
+
 import { task as api } from '../api/biz'
 
 export default defineComponent({
@@ -38,7 +35,7 @@ export default defineComponent({
 
     //end use
     //:page
-    const viewRef = ref<InstanceType<typeof TablePage>>()
+    const viewRef = ref<TableViewInstance>()
     const diaglogRef = ref<InstanceType<typeof Diaglog>>()
     const categoryDictRef = ref<DictSelectInstance>()
     const stateDictRef = ref<DictSelectInstance>()
@@ -62,7 +59,7 @@ export default defineComponent({
     //:page reader
     const rander = (): VNodeChild => {
       return (
-        <TablePage dataApi={api.get_table_svc} ref={viewRef} query={DATA.query}>
+        <TableView dataApi={api.get_table_svc} ref={viewRef} query={DATA.query}>
           {{
             header: () => (
               <>
@@ -241,7 +238,7 @@ export default defineComponent({
               </>
             )
           }}
-        </TablePage>
+        </TableView>
       )
     }
     return rander

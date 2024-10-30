@@ -206,12 +206,7 @@ export default defineComponent({
 					<ElFormItem label="状态" prop="state">
 						<ElSelect v-model={DATA.fromData.state} placeholder="请选择">
 							{selectData.value.map((d, index) => {
-								return (
-									<ElOption
-										key={d.key}
-										label={d.label}
-										value={d.value}></ElOption>
-								);
+								return <ElOption key={index} label={d.label} value={d.value} />;
 							})}
 						</ElSelect>
 					</ElFormItem>

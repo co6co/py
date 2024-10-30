@@ -9,7 +9,10 @@ import {
 	get_dict_select_svc,
 	type DictSelectType,
 } from '@/api/dict/dictType';
-
+/**
+ * 状态 api
+ * @returns 状态[]
+ */
 export const useState = () => {
 	const selectData = ref<IEnumSelect[]>([]);
 	const refresh = async () => {
@@ -36,6 +39,10 @@ export const useState = () => {
 	});
 	return { selectData, refresh, getName, getTagType };
 };
+/**
+ * 字典类型API
+ * @returns 字典类型 Select[]
+ */
 
 export const useDictTypeSelect = () => {
 	const selectData = ref<ISelect[]>([]);
@@ -51,7 +58,7 @@ export const useDictTypeSelect = () => {
 };
 /**
  * 使用需要先查询
- * @returns
+ * @returns 字典Select[]
  */
 export const useDictSelect = () => {
 	const selectData = ref<DictSelectType[]>([]);

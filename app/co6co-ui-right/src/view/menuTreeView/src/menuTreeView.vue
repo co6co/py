@@ -200,7 +200,6 @@
 		diaglogTitle: '',
 	});
 	const { refresh, getName } = useSelect();
-
 	// 获取表格数据
 	const getData = () => {
 		showLoading();
@@ -208,7 +207,7 @@
 			.get_tree_table_svc(table_module.query)
 			.then((res) => {
 				table_module.data = res.data;
-				table_module.pageTotal = res.total || -1;
+				table_module.pageTotal = res.total || (res.data ? res.data.length : 0);
 			})
 			.finally(() => {
 				closeLoading();
