@@ -11,6 +11,7 @@ from co6co.utils import read_stream, log
 from co6co.task.thread import Executing
 import signal
 import psutil
+import win32serviceutil
 
 
 def kill_process_tree(pid, including_parent=True):
@@ -27,12 +28,14 @@ def kill_process_tree(pid, including_parent=True):
 class AppWinService(Winservice):
     _svc_name_ = "sysWebService"
     _svc_display_name_ = "python sys webservice"
-    _svc_description_ = "webservice"
-    # _exe_name_ = "C:\\Users\\Administrator\\envs\\win32\\pythonservice.exe"
-
+    _svc_description_ = "webservice" 
+    #_exe_name_ = str(PYTHON_PATH.joinpath("pythonservice.exe"))
+    # _exe_args_ = '-u -E "' + os.path.abspath(__file__) + '"'
+    isrunning: bool = None 
     def __init__(self, args):
         super().__init__(args)
         self.process = None
+        self.isrunning = False
         if not os.path.exists("./logs"):
             os.makedirs("./logs")
 
@@ -60,8 +63,10 @@ class AppWinService(Winservice):
         # 激活虚拟环境
         venv_path = 'C:\\Users\\Administrator\\Envs\\wechat\\Scripts\\activate'
         python_path = 'C:\\Users\\Administrator\\Envs\\wechat\\Scripts\\python.exe'
+        env['PATH'] = 'C:\\Users\\Administrator\\Envs\\wechat\\Scripts;' + os.environ['PATH']
+
         with open("D:\\services\\logs\\sys_web_info.log", 'wb') as out_file, open("d:\\services\\logs\\sys_web_error.log", 'wb') as err_file:
-            self.process = subprocess.Popen("{}&{} D:\\services\\sys\\app.py".format(venv_path, python_path), env=env, stdout=out_file, stderr=err_file)
+            self.process = subprocess.Popen("{} D:\\services\\sys\\app.py".format(python_path), env=env, stdout=out_file, stderr=err_file)
             self.process.wait()  # 等待子进程结束
 
         '''
@@ -75,4 +80,9 @@ class AppWinService(Winservice):
 
 
 if __name__ == '__main__':
-    AppWinService.parse_command_line()
+    # 虚拟环境中
+
+    win32serviceutil.HandleCommandLine(AppWinService)
+    # 系统中的 python 环境 
+    #AppWinService.parse_command_line()
+    

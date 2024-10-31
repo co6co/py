@@ -5,8 +5,11 @@ import sys
 import threading
 import os
 # from loguru import logger
+import logging
+import logging.handlers
 import traceback
-
+from pathlib import Path
+from typing import List
 '''
 loguru 日志配置
 '''
@@ -22,18 +25,22 @@ WARNING         30  warning()
 ERROR           40  error()
 CRITICAL        50  critical()
 '''
-
-LEVEL_LIST = ["TRACE", "DEBUG", "INFO", "SUCCESS", "WARNING", "ERROR", "CRITICAL"]
-folder = "."
-if os.name == "nt":
-    folder = r"c:\log\python"
-elif os.name == "posix":
-    folder = "./log"
-
-for level in LEVEL_LIST:
-    fileNamePart = f"{level}.log"
-    p = os.path.join(folder, "loguru_{time:YY-MM}_"+fileNamePart)
-    # logger.add(p, rotation="5 MB", level=level, encoding="utf-8", retention='7 days', format="{time:YY-MM-DD HH:mm:ss}\t{level}\t{file}\t{line}\t{message}")
+ 
+def create_logger(filename: str,folder:str=".",showLevel:int=logging.DEBUG, format:str="%(asctime)s %(levelname)5.5s: %(message)s") -> logging.Logger:
+    logger = logging.getLogger(__name__)
+    logger.setLevel(showLevel)
+    #folder=Path(__file__).parent.joinpath("logs")
+    if not os.path.exists(folder):
+        os.makedirs(folder)
+    formatter = logging.Formatter(format)
+    handlers:List[logging.Handler] = [
+        logging.handlers.RotatingFileHandler( Path(folder).joinpath(  filename), maxBytes=1024*1024, backupCount=0,encoding='utf-8'),
+        logging.StreamHandler()
+    ]
+    for handler in handlers:
+        handler.setFormatter(formatter)
+        logger.addHandler(handler)
+    return logger
 
 '''
 控制台日志 日志配置
