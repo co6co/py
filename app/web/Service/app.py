@@ -9,6 +9,7 @@ from co6co_web_db.services.db_service import injectDbSessionFactory
 import argparse
 from cacheout import Cache
 import time
+import os
 from services.taskService import TaskBll
 
 
@@ -36,11 +37,22 @@ def init(app: Sanic, _: dict):
 
 
 def main():
+    dir = os.path.dirname(__file__)
+    defaultConfig = "{}/app_config.json".format(dir)
+    configPath = os.path.abspath(defaultConfig)
     parser = argparse.ArgumentParser(description="System Service.")
-    parser.add_argument("-c", "--config", default="app_config.json")
+    parser.add_argument("-c", "--config", default=configPath, help="default:{}".format(configPath))
     args = parser.parse_args()
     sanics.startApp(args.config, init)
 
 
 if __name__ == "__main__":
+    # print("__file__", __file__)
+    # current_file_path = os.path.abspath(__file__)
+    # print("basename", os.path.basename(__file__))
+    # print("dirname", os.path.dirname(__file__))
+    # print("__file__ dir:", current_file_path)
+    # current_directory = os.getcwd()
+    # print("当前工作目录：", current_directory)
+    # print("当前dir：", os.path.curdir)
     main()

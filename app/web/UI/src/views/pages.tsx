@@ -39,8 +39,8 @@ const useNameic = () => {
   showLoading()
   const resource_code = ref(
     `
-    import { defineComponent, onMounted, ref, VNode, compile } from 'vue'
-    import { component as api } from '../api/biz'
+    //import { defineComponent, onMounted, ref, VNode, compile } from 'vue'
+    //import { component as api } from '../api/biz'
     export default defineComponent({
       setup(prop, ctx) { 
         const rander = (): VNode => {
