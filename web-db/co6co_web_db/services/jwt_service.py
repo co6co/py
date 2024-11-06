@@ -16,8 +16,8 @@ class JWT_service:
         加密数据： 
         """
         dic = {
-            'exp': datetime.datetime.utcnow()+datetime.timedelta(seconds=expire_seconds),  # 过期时间
-            'iat': datetime.datetime.utcnow(),  # 开始时间
+            'exp': datetime.datetime.now(datetime.timezone.utc)+datetime.timedelta(seconds=expire_seconds),  # 过期时间
+            'iat': datetime.datetime.now(datetime.timezone.utc),  # 开始时间
             'iss': self._issuer,  # 签名
             'data': data  # 内容一般放用户ID 和开始时间
         }

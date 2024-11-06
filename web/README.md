@@ -14,7 +14,7 @@
     baseView: save_file
 0.0.5
     优化 result 模块
-0.0.6 未发布
+0.0.6
     增加 sanics.App 类 及 ViewManage
 ```
 

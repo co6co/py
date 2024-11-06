@@ -30,7 +30,7 @@ async def checkApi(request: Request):
 def authorized(f):
     """
     认证
-    认证不通过 返回 403,不在执行 原始的 f 函数
+    认证不通过 返回 403,不在执行f 函数
     """
     @wraps(f)
     async def decorated_function(request: Request, *args, **kwargs):
