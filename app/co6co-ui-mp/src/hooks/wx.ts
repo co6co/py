@@ -1,5 +1,5 @@
 import { piniaInstance } from 'co6co';
-import { get_config_svc, get_menu_svc, type IMenuState } from '@/api/mp';
+import { get_config_svc, get_menu_svc, type IMenuState } from '@/api/mp/menu';
 import { defineStore } from 'pinia';
 
 interface ListItem {

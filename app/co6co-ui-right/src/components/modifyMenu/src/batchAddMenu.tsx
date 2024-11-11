@@ -1,27 +1,19 @@
-import { defineComponent, ref, reactive, provide, computed } from 'vue';
+import { defineComponent, ref, reactive, provide } from 'vue';
 import type { InjectionKey } from 'vue';
 import {
 	DialogForm,
-	IconSelect,
 	showLoading,
 	closeLoading,
 	DialogFormInstance,
-	ViewSelect,
 	type ObjectType,
 	type FormData,
 	FormOperation,
 	type IResponse,
-	type FormItemBase,
 } from 'co6co';
 
-import api, { batch_add_svc } from '@/api/sys/menu';
-import {
-	useTree,
-	useMenuCategory,
-	useMenuState,
-	MenuCateCategory,
-} from '@/hooks/useMenuSelect';
-import useHttpMethods, { usePageFeature } from '@/hooks/useMethods';
+import { batch_add_svc } from '@/api/sys/menu';
+import { useTree, useMenuState, MenuCateCategory } from '@/hooks/useMenuSelect';
+import { usePageFeature } from '@/hooks/useMethods';
 import {
 	ElRow,
 	ElCol,
@@ -33,7 +25,6 @@ import {
 	ElTreeSelect,
 	ElSelectV2,
 	ElInputNumber,
-	ElSelect,
 } from 'element-plus';
 
 interface Item {

@@ -72,17 +72,24 @@ export const useDictSelect = () => {
 		const res = await get_dict_select_by_code_svc(dictTypeCode);
 		selectData.value = res.data;
 	};
+	const _checkSelectDataValid = () => {
+		return selectData.value && selectData.value.length > 0;
+	};
 	const getName = (value: string) => {
 		//selectData.value.filter((m) => m.value == value);
-		return selectData.value.find((m) => m.value == value)?.name;
+		//console.info('dictType', selectData.value);
+		if (_checkSelectDataValid())
+			return selectData.value.find((m) => m.value == value)?.name;
 	};
 	const getFlag = (value: string) => {
 		//selectData.value.filter((m) => m.value == value);
-		return selectData.value.find((m) => m.value == value)?.flag;
+		if (_checkSelectDataValid())
+			return selectData.value.find((m) => m.value == value)?.flag;
 	};
 	const getDesc = (value: string) => {
 		//selectData.value.filter((m) => m.value == value);
-		return selectData.value.find((m) => m.value == value)?.desc;
+		if (_checkSelectDataValid())
+			return selectData.value.find((m) => m.value == value)?.desc;
 	};
 	return { selectData, query, queryByCode, getName, getFlag, getDesc };
 };

@@ -16,6 +16,7 @@ from dateutil.tz import tzutc
 import calendar
 import binascii
 import random
+from co6co.utils.hash import str_hash
 
 # as pytz is optional in thirdparty libs but we need it for good support under
 # python2, just test that it's well installed

@@ -1,4 +1,4 @@
-import { getToken, useRequestToken, createAxiosInstance } from 'co6co';
+import { getToken } from 'co6co'; //, useRequestToken, createAxiosInstance
 import { IDownloadConfig } from '@/constants';
 import axios, {
 	type ResponseType,

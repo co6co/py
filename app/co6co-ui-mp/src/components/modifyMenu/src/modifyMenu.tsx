@@ -1,7 +1,7 @@
 import { defineComponent, ref, reactive, provide, computed } from 'vue';
 import type { InjectionKey } from 'vue';
-import 'md-editor-v3/lib/style.css';
-import * as api from '@/api/mp';
+import 'md-editor-v3/lib/style.css'; 
+import {menu as api} from '@/api';
 import { MdEditor } from 'md-editor-v3';
 import { get_store } from '@/hooks/wx';
 import {
@@ -247,7 +247,7 @@ export default defineComponent({
 					style={ctx.attrs}
 					rules={rules.value}
 					ref={diaglogForm}
-					v-slots={fromSlots}></DialogForm>
+					v-slots={fromSlots}/> 
 			);
 		};
 		const openDialog = (oper: FormOperation, item?: Item) => {

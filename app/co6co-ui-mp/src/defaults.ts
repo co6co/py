@@ -1,9 +1,11 @@
 import { makeInstaller } from './make-installer';
-
-import { ModifyMenu } from './components';
-
-import { WxMenuView } from './view';
+import { views } from '@/views';
+//import { ModifyMenu } from './components';
 
 import type { Plugin } from 'vue';
-const components = [ModifyMenu, WxMenuView] as Plugin[];
+const _view: Array<any> = [];
+Object.keys(views).forEach((key) => {
+	_view.push(views[key]);
+});
+const components = _view as Plugin[];
 export default makeInstaller(components);

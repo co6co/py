@@ -7,7 +7,7 @@ export * from './hooks';
 export * from './view';
 export * from './api';
 
-export * as views from './views';
+export * from './views';
 export const install = installer.install;
 export const version = installer.version;
 export default installer;

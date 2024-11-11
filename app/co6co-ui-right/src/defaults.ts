@@ -1,5 +1,7 @@
 import { makeInstaller } from './make-installer';
-
+import { views } from '@/views';
+/*
+//只在本模块中使用的组件makeInstaller
 import {
 	ModifyMenu,
 	ModifyRole,
@@ -8,15 +10,14 @@ import {
 	ResetPwd,
 	ResetPwdcopy,
 } from './components';
-
-import {
-	MenuTreeView,
-	RoleView,
-	UserGroupTreeView,
-	UserTableView,
-} from './view';
+*/
 
 import type { Plugin } from 'vue';
+const _view: Array<any> = [];
+Object.keys(views).forEach((key) => {
+	_view.push(views[key]);
+});
+/**
 const components = [
 	ModifyMenu,
 	ModifyRole,
@@ -24,10 +25,6 @@ const components = [
 	ModifyUserGroup,
 	ResetPwd,
 	ResetPwdcopy,
-
-	MenuTreeView,
-	RoleView,
-	UserGroupTreeView,
-	UserTableView,
-] as Plugin[];
-export default makeInstaller(components);
+];
+ */
+export default makeInstaller(_view as Plugin[]);

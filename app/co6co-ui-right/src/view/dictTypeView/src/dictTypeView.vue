@@ -163,7 +163,7 @@
 		type IPageParam,
 		type Table_Module_Base,
 	} from 'co6co';
-	import { getViewPath } from '@/view';
+	import { getViewPath } from '@/views';
 	import useDelete from '@/hooks/useDelete';
 
 	interface IQueryItem extends IPageParam {

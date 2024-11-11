@@ -55,7 +55,8 @@
 							prop="state"
 							label="状态"
 							sortable
-							:show-overflow-tooltip="true">
+							show-overflow-tooltip
+							:show-after="2000">
 							<template #default="scope">
 								<el-tag>
 									{{ store.getMenuStateItem(scope.row.state)?.label }}
@@ -164,7 +165,7 @@
 		ElContainer,
 	} from 'element-plus';
 	import { Delete, Edit, Search, Compass, Plus } from '@element-plus/icons-vue';
-	import * as mp_api from '@/api/mp';
+	import { menu as mp_api } from '@/api';
 	import { get_store } from '@/hooks/wx';
 	import { warningArgs, EleConfirm, getTableIndex } from 'co6co';
 	import { routeHook } from 'co6co-right';

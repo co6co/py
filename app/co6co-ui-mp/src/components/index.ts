@@ -1,1 +1,1 @@
-export * from './modifyMenu';
+ export {}

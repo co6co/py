@@ -21,7 +21,8 @@ co6co.permissions==0.0.15
 npm install --registry=http://registry.npm.taobao.org/ isomorphic-streams
 ```
 co6co-ui==0.1.11 
-co6co-right==0.0.12
+co6co-right==0.0.14
+co6co-wx==0.0.2
 
 ```
 

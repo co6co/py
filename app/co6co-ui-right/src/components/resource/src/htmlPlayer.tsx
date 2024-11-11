@@ -36,6 +36,7 @@ export default defineComponent({
 			}
 		};
 		const fetchVideoAndPlay = () => {
+			console.info(typeof onPlay, typeof check);
 			fetch(prop.option.url)
 				.then((response) => {
 					return response.blob();
@@ -68,6 +69,7 @@ export default defineComponent({
 		};
 
 		const onPlay = () => {
+			console.info(typeof fetchVideoAndPlay);
 			//fetchVideoAndPlay();
 			if (!videoRef.value) return;
 			videoRef.value.oncanplay = () => {
