@@ -1,16 +1,16 @@
 import { makeInstaller } from './make-installer';
 import { views } from '@/views';
-/*
+
 //只在本模块中使用的组件makeInstaller
+/*
 import {
 	ModifyMenu,
 	ModifyRole,
 	ModifyUser,
 	ModifyUserGroup,
 	ResetPwd,
-	ResetPwdcopy,
 } from './components';
-*/
+ */
 
 import type { Plugin } from 'vue';
 const _view: Array<any> = [];

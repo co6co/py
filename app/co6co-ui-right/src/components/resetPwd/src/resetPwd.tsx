@@ -79,9 +79,7 @@ export default defineComponent({
 			],
 		};
 
-		const rules = computed(() => {
-			return rules_base;
-		});
+		const rules = computed(() => rules_base);
 		const save = () => {
 			//提交数据
 			let promist: Promise<api_type.IResponse> = retsetPwd_svc(DATA.fromData);
@@ -120,7 +118,8 @@ export default defineComponent({
 						<ElInput
 							type="password"
 							v-model={DATA.fromData.password}
-							show-password></ElInput>
+							show-password
+						/>
 					</ElFormItem>
 				</>
 			),
@@ -134,7 +133,8 @@ export default defineComponent({
 					style={ctx.attrs}
 					rules={rules.value}
 					ref={diaglogForm}
-					v-slots={fromSlots}></DialogForm>
+					v-slots={fromSlots}
+				/>
 			);
 		};
 		const openDialog = (item?: Item) => {

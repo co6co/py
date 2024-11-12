@@ -72,27 +72,48 @@ export const useResponseJson = (response: AxiosResponse) => {
 		return Promise.reject(response.statusText);
 	}
 };
-export const useResponseValid = (response: AxiosResponse<IResponse>) => {
+const customResponseValid = (
+	response: AxiosResponse<IResponse>,
+	invalidTip: boolean = false
+) => {
 	try {
 		let result: IResponse = response.data;
 		if (result.code == 0) {
 			return response.data as any;
 		} else {
-			//ElMessage.error(`${result.message}`);
-			ElMessage.error(result.message || '处理失败')
+			if (invalidTip) ElMessage.error(result.message || '处理失败');
 			return Promise.reject(response.data);
 		}
 	} catch (e) {
 		return Promise.reject(e);
 	}
 };
-
+/**
+ * 错误提示
+ * @param response
+ * @returns
+ */
+export const useResponseValid = (response: AxiosResponse<IResponse>) => {
+	return customResponseValid(response, true);
+};
+/**
+ * 错误没有提示
+ * @param response
+ * @returns
+ */
+const useResponseValidWithTip = (response: AxiosResponse<IResponse>) => {
+	return customResponseValid(response, false);
+};
 /**
  * 带有JSON处理响应处理
  * @param timeout 超时
+ * @param tip 	  错误提示
  * @returns
  */
-export const createServiceInstance = (timeout: number = 5000) => {
+export const createServiceInstance = (
+	timeout: number = 5000,
+	tip: boolean = true
+) => {
 	const baseUrl = getBaseUrl();
 	const config = {
 		baseURL: baseUrl,
@@ -123,8 +144,8 @@ export const createServiceInstance = (timeout: number = 5000) => {
 		}
 		return Promise.reject(error);
 	});
-	service.interceptors.response.use(useResponseValid);
-	return service;
+	if (tip) service.interceptors.response.use(useResponseValid);
+	else service.interceptors.response.use(useResponseValidWithTip);
 	return service;
 };
 /**

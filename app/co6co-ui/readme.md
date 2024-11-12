@@ -1,6 +1,7 @@
 "private": false, //只能为共有资源
 
 # history:
+
 ```
 0.0.3 ：基本可用
 0.0.4 :
@@ -33,4 +34,6 @@
     intervalTime| logining Bug
 0.1.11
     修复 viewSelect iconSelect bug
+0.1.12
+    createServiceInstance()
 ```

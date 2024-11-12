@@ -14,7 +14,7 @@ export const exist_post_svc = (data: {
 	return createServiceInstance().post(`${base_URL}/exist`, data);
 };
 export const retsetPwd_svc = (data: any): Promise<IResponse> => {
-	return createServiceInstance().post(`${base_URL}/reset`, data);
+	return createServiceInstance(5000, false).post(`${base_URL}/reset`, data);
 };
 export const currentUser_svc = (): Promise<IResponse> => {
 	return createServiceInstance().get(`${base_URL}/currentUser`);
@@ -23,7 +23,7 @@ export const changePwd_svc = (data: any): Promise<IResponse> => {
 	return createServiceInstance().post(`${base_URL}/changePwd`, data);
 };
 export const ticket_svc = (code: string): Promise<IResponse> => {
-	return createServiceInstance().get(`${base_URL}/ticket/${code}`);
+	return createServiceInstance(5000, false).get(`${base_URL}/ticket/${code}`);
 };
 
 export interface UserType {

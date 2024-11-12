@@ -142,6 +142,8 @@ class sys_users_view(AuthMethodView):
 
         async def edit(_, one: UserPO):
             if one != None:
+                if one.salt == None:
+                    return JSON_util.response(Result.fail(message=f"用户[{userName}],通过关联创建的用户，完善信息才能重置密码"))
                 one.password = one.encrypt(password)
                 return JSON_util.response(Result.success())
             else:
