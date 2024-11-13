@@ -9,7 +9,7 @@ import inspect
 import os
 import io
 import sys
-from typing import IO, Iterable
+from typing import IO, Iterable, Callable, Tuple, Generator
 from .log import warn
 
 
@@ -67,14 +67,13 @@ def getWorkDirectory():
     return current_directory
 
 
-def find_files(root, filterDirFunction, filterFileFunction, *ignoreDirs: str):
+def find_files(root, *ignoreDirs: str, filterDirFunction: Callable[[str], bool] = None, filterFileFunction: Callable[[str], bool] = None) -> Generator[Tuple[str, list, list], str]:
     """
     root: 根目录
-    filterDirFunction   返回bool的方法,参数 文件夹名
-    filterFileFunction  返回bool的方法,参数 文件名
+    filterDirFunction  (folderName:str)->bool 
+    filterFileFunction (fileName:str)->bool
                        可以使用  lambda f:f.endswith(extension)
-    RETURN  root  fdirs, ffile
-
+    RETURN  root  fdirs, ffile 
     查找文件或文件夹
     os.path.join(root, file)
 
@@ -83,10 +82,8 @@ def find_files(root, filterDirFunction, filterFileFunction, *ignoreDirs: str):
         for ignore in ignoreDirs:
             if ignore in dirs:
                 dirs.remove(ignore)
-        fdirs = list(filter(filterDirFunction, dirs)
-                     ) if filterDirFunction != None else dirs
-        ffile = list(filter(filterFileFunction, files)
-                     ) if filterFileFunction != None else files
+        fdirs = list(filter(filterDirFunction, dirs)) if filterDirFunction != None else dirs
+        ffile = list(filter(filterFileFunction, files)) if filterFileFunction != None else files
         yield root, fdirs, ffile
 
 
