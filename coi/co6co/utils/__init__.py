@@ -9,7 +9,7 @@ import inspect
 import os
 import io
 import sys
-from typing import IO, Iterable, Callable, Tuple, Generator
+from typing import IO, Iterable, Callable, Tuple, Generator,List
 from .log import warn
 
 
@@ -67,7 +67,7 @@ def getWorkDirectory():
     return current_directory
 
 
-def find_files(root, *ignoreDirs: str, filterDirFunction: Callable[[str], bool] = None, filterFileFunction: Callable[[str], bool] = None) -> Generator[Tuple[str, list, list], str]:
+def find_files(root, *ignoreDirs: str, filterDirFunction: Callable[[str], bool] = None, filterFileFunction: Callable[[str], bool] = None) -> Generator[Tuple[str, List, List], str,None]:
     """
     root: 根目录
     filterDirFunction  (folderName:str)->bool 
