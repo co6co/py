@@ -38,9 +38,14 @@ export interface UserLogin {
 	userName: string;
 	password: string;
 }
-export const login_svc = (data: UserLogin): Promise<IResponse> => {
-	return createServiceInstance().post(`${base_URL}/login`, data);
+export const login_svc = (
+	data: UserLogin,
+	timeout: number = 5000,
+	tip: boolean = false
+): Promise<IResponse> => {
+	return createServiceInstance(timeout, tip).post(`${base_URL}/login`, data);
 };
+
 export const get_state_svc = (): Promise<IResponse<IEnumSelect[]>> => {
 	return createServiceInstance().post(`${base_URL}/status`);
 };

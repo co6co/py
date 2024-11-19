@@ -9,7 +9,7 @@ pip install -i https://pypi.tuna.tsinghua.edu.cn/simple some-package
 pip install -i https://pypi.org/simple/ some-package
 # python 最新版本
 ```
-co6co==0.0.14
+co6co==0.0.15
 co6co.sanic-ext==0.0.6
 co6co.db-ext==0.0.13
 co6co.web-db==0.0.13
@@ -20,8 +20,8 @@ co6co.permissions==0.0.15
 # ui 最新版本
 npm install --registry=http://registry.npm.taobao.org/ isomorphic-streams
 ```
-co6co-ui==0.1.12 
-co6co-right==0.0.14
+co6co-ui==0.1.14 
+co6co-right==0.0.15
 co6co-wx==0.0.2
 
 ```

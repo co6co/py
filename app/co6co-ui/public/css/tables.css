@@ -1,74 +1,93 @@
 /*table 页面*/
-.el-container {
+.el-container,
+.c-container {
 	height: 82vh;
 	overflow: hidden;
 }
 .el-container .el-container {
 	height: 100%;
 }
-.el-main {
+.el-main,
+.c-container .el-main {
 	padding-top: 0;
 	padding-bottom: 0;
 	height: 90%;
 	overflow: hidden;
 }
-.el-header .container {
+.el-header .container,
+.c-container .el-header .container {
 	border: 1px solid #ddd;
 	border-radius: 5px;
 }
-.el-header {
+.el-header,
+.c-container .el-header {
 	height: auto;
 }
-.el-scrollbar {
+.el-scrollbar,
+.c-container .el-scrollbar {
 	background: #fff;
 }
 
-.handle-box {
+.handle-box,
+.c-container .handle-box {
 	margin: 3px 0;
 }
 .handle-box div + div,
-.handle-box div + .el-button {
+.handle-box div + .el-button,
+.c-container .handle-box div + div,
+.c-container .handle-box div + .el-button {
 	margin-left: 10px;
 }
-.el-link {
+.el-link,
+.c-container .el-link {
 	margin-right: 8px;
 }
-.el-link .el-icon--right.el-icon {
+.el-link .el-icon--right.el-icon,
+.c-container .el-link .el-icon--right.el-icon {
 	vertical-align: text-bottom;
 }
-.handle-select {
+.handle-select,
+.c-container .handle-select {
 	width: 120px;
 }
 
-.handle-input {
+.handle-input,
+.c-container .handle-input {
 	width: 300px;
 }
-.table {
+.table,
+.c-container .table {
 	width: 100%;
 	font-size: 14px;
 }
-.el-table .el-table__cell a {
+.el-table .el-table__cell a,
+.c-container .el-table .el-table__cell a {
 	color: #409eff;
 }
-.el-table .el-table__cell a:hover {
+.el-table .el-table__cell a:hover,
+.c-container .el-table .el-table__cell a:hover {
 	color: #2c649c;
 }
 .red {
 	color: #f56c6c;
 }
-.mr10 {
+.mr10,
+.c-container .mr10 {
 	margin-right: 10px;
 }
-.table-td-thumb {
+.table-td-thumb,
+.c-container .table-td-thumb {
 	display: block;
 	margin: auto;
 	width: 40px;
 	height: 40px;
 }
-.el-form{
-	padding-right:25px
+.el-form,
+.c-container .el-form {
+	padding-right: 25px;
 }
-.formItem {
+.formItem,
+.c-container .formItem {
 	display: flex;
 	align-items: center;
 	.label {

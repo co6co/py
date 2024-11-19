@@ -1,5 +1,5 @@
 <template>
-  <div class="container-layout">
+  <div class="container-layout c-container">
     <el-container>
       <el-main>
         <div id="container"></div>

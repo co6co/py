@@ -6,4 +6,3 @@ export * from './userGroupTreeView';
 export * from './configView';
 export * from './dictTypeView';
 export * from './dictView';
-

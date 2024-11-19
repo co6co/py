@@ -48,6 +48,12 @@ export const storeAuthonInfo = (data: IAuthonInfo, userName?: string) => {
 			data.refreshToken.expireSeconds
 		);
 };
+export const removeAuthonInfo = () => {
+	removeToken();
+	storage.remove(userName_key);
+	storage.remove(SessionKey);
+	storage.remove(refreshToken_key);
+};
 /**
  * 获取用户名
  * @returns 返回用户名

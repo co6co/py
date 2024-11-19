@@ -94,7 +94,7 @@ export default defineComponent({
 		//:page reader
 		const rander = (): VNodeChild => {
 			return (
-				<div class="container-layout">
+				<div class="container-layout c-container">
 					<ElContainer>
 						<ElHeader>{ctx.slots.header?.()}</ElHeader>
 						<ElMain>

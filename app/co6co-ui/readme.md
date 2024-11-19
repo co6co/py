@@ -36,4 +36,8 @@
     修复 viewSelect iconSelect bug
 0.1.12
     createServiceInstance()
+0.1.13
+    removeAuthonInfo
+0.1.14
+    table.css 增加类
 ```

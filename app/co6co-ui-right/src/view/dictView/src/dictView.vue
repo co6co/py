@@ -1,5 +1,5 @@
 <template>
-	<div class="container-layout">
+	<div class="container-layout c-container">
 		<el-container>
 			<el-header>
 				<div class="handle-box">
