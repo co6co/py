@@ -30,6 +30,9 @@
     log 增加方法 create_logger
 0.0.15
     util.__init__.py 优化
+    安装时出现bug，使用下面版本
+0.0.16
+    修复安装Bug
 
 ```
 

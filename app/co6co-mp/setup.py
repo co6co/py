@@ -11,7 +11,7 @@ with open(path.join(currentDir, 'README.md'), encoding='utf-8') as f: long_descr
 
 
 setup(
-    name="co6co.permissions",
+    name="co6co.mp",
     version=VERSION,
     description="web permissionsAPI",
     packages=find_packages(),

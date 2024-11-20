@@ -118,6 +118,30 @@ def read_stream(stream: IO[bytes], size: int = -1) -> Iterable[bytes]:
             break
         yield chunk
 
+def compare_versions(v1:str, v2:str):
+    """
+    比较版本号
+    return v1>v2=1,v1<v2=-1,v1<v2=0
+    """
+    # 将版本号按点号分割成列表，并将每个元素转换为整数
+    v1_parts = list(map(int, v1.split('.')))
+    v2_parts = list(map(int, v2.split('.')))
+
+    # 使用zip函数对两个列表进行比较
+    for part1, part2 in zip(v1_parts, v2_parts):
+        if part1 > part2:
+            return 1
+        elif part1 < part2:
+            return -1
+    
+    # 如果长度不同，且前面的部分都相同，则更长的那个版本号更大
+    if len(v1_parts) > len(v2_parts):
+        return 1
+    elif len(v1_parts) < len(v2_parts):
+        return -1
+    else:
+        return 0
+
 
 async def write_stream(input: IO[bytes], outputStream: IO[bytes]):
     for chunk in read_stream(input, size=io.DEFAULT_BUFFER_SIZE):
