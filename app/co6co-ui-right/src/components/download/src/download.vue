@@ -15,10 +15,10 @@
 	import { Download } from '@element-plus/icons-vue';
 	import {
 		download_fragment_svc,
-		download_blob_resource,
 		download_header_svc,
-		IDownloadConfig,
-	} from 'co6co-right';
+		download_blob_resource,
+	} from '@/api/download';
+	import { IDownloadConfig } from '@/constants';
 
 	const props = defineProps({
 		url: {

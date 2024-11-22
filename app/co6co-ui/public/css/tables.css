@@ -31,6 +31,10 @@
 .handle-box,
 .c-container .handle-box {
 	margin: 3px 0;
+	display:flex
+}
+.handle-box.r{
+	justify-content: end
 }
 .handle-box div + div,
 .handle-box div + .el-button,

@@ -1,3 +1,4 @@
+/*
 export * from './modifyMenu';
 export * from './modifyRole';
 export * from './modifyUser';
@@ -6,8 +7,10 @@ export * from './resetPwd';
 export * from './modifyConfig';
 export * from './modifyDict';
 export * from './modifyDictType';
-export * from './download';
-export * from './dictSelect';
-export * from './resource';
 export * from './demo';
+*/
+export * from './resource';
+export * from './dictSelect';
+export * from './download';
 export * from './table';
+export * from './txtView';

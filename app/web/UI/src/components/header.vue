@@ -34,26 +34,29 @@
           <template #dropdown>
             <el-dropdown-menu>
               <!--
-							<a href="https://github.com/lin-xin/vue-manage-system" target="_blank">
-								<el-dropdown-item>项目仓库</el-dropdown-item>
-							</a>
-							-->
+              <a href="https://github.com/co6co" target="_blank">
+                <el-dropdown-item>项目仓库</el-dropdown-item>
+              </a>
+              -->
               <el-dropdown-item command="user">个人中心</el-dropdown-item>
+              <el-dropdown-item command="log">更新日志</el-dropdown-item>
               <el-dropdown-item divided command="loginout">退出登录</el-dropdown-item>
             </el-dropdown-menu>
           </template>
         </el-dropdown>
       </div>
+      <history-dialog ref="dialogRef" />
     </div>
   </div>
 </template>
 <script setup lang="ts">
-import { onMounted } from 'vue'
+import { onMounted, ref } from 'vue'
 import { useSidebarStore } from '../store/sidebar'
 import { useRouter } from 'vue-router'
 import imgurl from '../assets/img/img.jpg'
-import { Storage, removeToken } from 'co6co'
+import { Storage, removeAuthonInfo } from 'co6co'
 import useSystem from '../hooks/useSystem'
+import historyDialog from './log'
 const username: string | null = localStorage.getItem('ms_username')
 const message: number = 2
 const storage = new Storage()
@@ -70,17 +73,23 @@ onMounted(() => {
     collapseChage()
   }
 })
-
+const dialogRef = ref<InstanceType<typeof historyDialog>>()
 // 用户名下拉菜单选择事件
 const router = useRouter()
 const handleCommand = (command: string) => {
-  if (command == 'loginout') {
-    localStorage.removeItem('ms_username')
-    removeToken()
-    storage.remove('useRouteData')
-    router.push('/login')
-  } else if (command == 'user') {
-    router.push('/user')
+  switch (command) {
+    case 'loginout':
+      removeAuthonInfo()
+      localStorage.removeItem('ms_username')
+      storage.remove('useRouteData')
+      router.push('/login')
+      break
+    case 'user':
+      router.push('/user')
+      break
+    case 'log':
+      console.info(dialogRef)
+      dialogRef.value?.openDialog()
   }
 }
 </script>

@@ -1,4 +1,4 @@
-import { defineComponent, ref, reactive, computed, provide } from 'vue';
+import { defineComponent, ref, reactive, computed, provide, VNode } from 'vue';
 import type { InjectionKey } from 'vue';
 import {
 	DialogForm,
@@ -6,7 +6,7 @@ import {
 	showLoading,
 	closeLoading,
 } from 'co6co';
-import { type ObjectType, type FormData, FormOperation } from 'co6co';
+import { type FormData, FormOperation } from 'co6co';
 import * as api_type from 'co6co';
 import { retsetPwd_svc } from '@/api/sys/user';
 import { useTree } from '@/hooks/useUserGroupSelect';
@@ -125,7 +125,7 @@ export default defineComponent({
 			),
 		};
 
-		const rander = (): ObjectType => {
+		const rander = (): VNode => {
 			return (
 				<DialogForm
 					title={prop.title}

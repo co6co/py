@@ -40,4 +40,7 @@
     removeAuthonInfo
 0.1.14
     table.css 增加类
+0.1.15
+    request 优化
+
 ```

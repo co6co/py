@@ -5,6 +5,7 @@ import {
 	provide,
 	computed,
 	nextTick,
+	VNode,
 } from 'vue';
 import type { InjectionKey } from 'vue';
 
@@ -36,7 +37,6 @@ import {
 
 import {
 	tree_props,
-	type ObjectType,
 	type FormData,
 	FormOperation,
 	type ITreeSelect,
@@ -309,7 +309,7 @@ export default defineComponent({
 		const rules = computed(() => {
 			return rules_b;
 		});
-		const rander = (): ObjectType => {
+		const rander = (): VNode => {
 			return (
 				<DialogForm
 					title={prop.title}

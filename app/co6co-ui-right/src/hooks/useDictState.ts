@@ -65,7 +65,8 @@ export const useDictSelect = () => {
 	const query = async (dictTypeId: number) => {
 		selectData.value = [];
 		const res = await get_dict_select_svc(dictTypeId);
-		selectData.value = res.data;
+		if (res.data) selectData.value = res.data;
+		else selectData.value = [];
 	};
 	const queryByCode = async (dictTypeCode: string) => {
 		selectData.value = [];

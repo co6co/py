@@ -1,4 +1,5 @@
 import installer from './defaults';
+//export * from "..." 不会导出默认值
 export * from './components';
 export * from './constants';
 export * from './directives';

@@ -1,5 +1,4 @@
-import { type PropType, defineComponent, ref } from 'vue';
-import { type ObjectType } from '@/constants';
+import { type PropType, defineComponent, ref, VNode } from 'vue';
 import { Detail, IDetails, Dialog } from '@/components';
 import type { DialogInstance } from '@/components';
 
@@ -32,7 +31,7 @@ export default defineComponent({
 		ctx.expose({
 			openDiaLog,
 		});
-		const rander = (): ObjectType => {
+		const rander = (): VNode => {
 			return (
 				<Dialog
 					title={prop.title}

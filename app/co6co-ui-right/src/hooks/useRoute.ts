@@ -1,4 +1,4 @@
-import { ITreeSelect } from 'co6co';
+import { ITreeSelect, removeAuthonInfo } from 'co6co';
 import { view_route_svc } from '@/api/view';
 import { Storage, traverseTreeData, randomString } from 'co6co';
 
@@ -183,8 +183,10 @@ export const useRouteData = () => {
 				storage.set<IRouteData[]>(Key, res.data), bck(res.data);
 			})
 			.catch((e) => {
+				//是否有 message
+				removeAuthonInfo();
 				if (e.message) bck([], e.message || '请求出错');
-				else bck([], e.message || '请求出错');
+				else console.error(e), bck([], '请求出错');
 			});
 	};
 

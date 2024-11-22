@@ -1,6 +1,5 @@
-import { type SlotsType, defineComponent, reactive } from 'vue';
+import { type SlotsType, defineComponent, reactive, VNode } from 'vue';
 import { ElButton, ElDialog, ElScrollbar } from 'element-plus';
-import { type ObjectType } from '@/constants';
 
 export interface IDialogDataType {
 	visible: boolean;
@@ -63,7 +62,7 @@ export default defineComponent({
 				);
 			},
 		};
-		const rander = (): ObjectType => {
+		const rander = (): VNode => {
 			/**
 			 * 还能在该位置写一些计算每次状态改变都能被渲染
 			 */

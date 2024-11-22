@@ -1,4 +1,4 @@
-import { defineComponent, ref, reactive, computed, provide } from 'vue';
+import { defineComponent, ref, reactive, computed, provide, VNode } from 'vue';
 import type { InjectionKey } from 'vue';
 import {
 	DialogForm,
@@ -6,7 +6,6 @@ import {
 	showLoading,
 	closeLoading,
 	type DialogFormInstance,
-	type ObjectType,
 	type FormData,
 } from 'co6co';
 
@@ -214,7 +213,7 @@ export default defineComponent({
 			),
 		};
 
-		const rander = (): ObjectType => {
+		const rander = (): VNode => {
 			return (
 				<DialogForm
 					title={prop.title}

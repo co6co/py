@@ -41,4 +41,10 @@
     1. 调整了 getViewPath() 结构
 0.0.14
     1. 优化
+0.0.15
+    1. 有BUG
+0.0.16
+    1. 修复0.0.15 循环引用导致文件肿大
+    2. 增加 txtView 组件
+removeAuthonInfo
 ```

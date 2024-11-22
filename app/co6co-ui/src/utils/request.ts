@@ -20,12 +20,15 @@ export const getBaseUrl = () => {
 	const baseUrl = store.getBaseUrl();
 	return baseUrl;
 };
-const commonHandler = (service: AxiosInstance) => {
+const useDefaultResponseBigNumber = (service: AxiosInstance) => {
 	service.defaults.transformResponse = [
 		(data: any) => {
 			return JSONbig.parse(data);
 		},
 	];
+};
+
+export const useDefaultRequestJson = (service: AxiosInstance) => {
 	service.defaults.transformRequest = [
 		(data: any, headers: any) => {
 			headers['Content-Type'] = 'application/json;charset=utf-8';
@@ -40,13 +43,6 @@ export const useMultipartRequest = (service: AxiosInstance) => {
 			return data;
 		},
 	];
-};
-export const createAxios = (config?: CreateAxiosDefaults<any> | undefined) => {
-	const service: AxiosInstance = axios.create(
-		config /* {  baseURL: import.meta.env.VITE_BASE_URL,  timeout: 5000, }*/
-	);
-	commonHandler(service);
-	return service;
 };
 
 export const useRequestToken = (config: InternalAxiosRequestConfig) => {
@@ -104,6 +100,12 @@ export const useResponseValid = (response: AxiosResponse<IResponse>) => {
 const useResponseValidWithTip = (response: AxiosResponse<IResponse>) => {
 	return customResponseValid(response, false);
 };
+export const createAxios = (config?: CreateAxiosDefaults<any> | undefined) => {
+	/* {  baseURL: import.meta.env.VITE_BASE_URL,  timeout: 5000, }*/
+	const service: AxiosInstance = axios.create(config);
+	return service;
+};
+
 /**
  * 带有JSON处理响应处理
  * @param timeout 超时
@@ -122,6 +124,8 @@ export const createServiceInstance = (
 
 	let elLoading: ReturnType<typeof ElLoading.service>;
 	const service = createAxios(config);
+	useDefaultRequestJson(service);
+	useDefaultResponseBigNumber(service);
 	//增加请求拦截器
 	service.interceptors.request.use(useRequestToken, (error: AxiosError) => {
 		//请求错误
@@ -150,6 +154,7 @@ export const createServiceInstance = (
 };
 /**
  * 有 Authorization head
+ * @param baseUrl
  * @param timeout 超时 ms
  * @returns
  */
@@ -163,5 +168,7 @@ export const createAxiosInstance = (
 		timeout: timeout,
 	};
 	const service: AxiosInstance = createAxios(config);
+	useDefaultRequestJson(service);
+	useDefaultResponseBigNumber(service);
 	return service;
 };

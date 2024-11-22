@@ -4,7 +4,9 @@ import { ElButton, ElInput, ElTableColumn } from 'element-plus';
 import { Search, Plus, Delete, Edit } from '@element-plus/icons-vue';
 
 import { FormOperation } from 'co6co';
-import { routeHook, tableScope } from 'co6co-right';
+import { routeHook } from '@/hooks';
+import { tableScope } from '@/constants';
+
 import { TableView, type TableViewInstance } from '@/components/table';
 import { configSvc as svc } from '@/api/config';
 import useDelete from '@/hooks/useDelete';
