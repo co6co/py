@@ -183,7 +183,6 @@ export const useRouteData = () => {
 				storage.set<IRouteData[]>(Key, res.data), bck(res.data);
 			})
 			.catch((e) => {
-				//是否有 message
 				removeAuthonInfo();
 				if (e.message) bck([], e.message || '请求出错');
 				else console.error(e), bck([], '请求出错');
@@ -193,6 +192,9 @@ export const useRouteData = () => {
 	const getRouteData = () => {
 		let result = storage.get<IRouteData[]>(Key);
 		return result;
+	};
+	const clearRouteData = () => {
+		storage.remove(Key);
 	};
 	/**
 	 * 查询存储的路由
@@ -214,5 +216,5 @@ export const useRouteData = () => {
 		return result.object;
 	};
 
-	return { queryRouteData, getRouteData, queryRouteItem };
+	return { queryRouteData, getRouteData, queryRouteItem, clearRouteData };
 };

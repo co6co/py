@@ -82,9 +82,8 @@ import { ElMessage, type FormRules, type FormInstance } from 'element-plus'
 import 'cropperjs/dist/cropper.css'
 import avatar from '@/assets/img/img.jpg'
 import { userSvc } from 'co6co-right'
-import { Storage } from 'co6co'
-const store = new Storage()
-const name = store.get('userName')
+import { getUserName } from 'co6co'
+const name = getUserName()
 
 let changePwdFrom = reactive({
   newPassword: '',

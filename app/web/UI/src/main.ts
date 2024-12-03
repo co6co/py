@@ -23,5 +23,4 @@ try {
 } catch (e) {
   console.error('main:', e)
 }
-
 app.mount('#app')

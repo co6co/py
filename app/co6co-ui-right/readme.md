@@ -46,5 +46,8 @@
 0.0.16
     1. 修复0.0.15 循环引用导致文件肿大
     2. 增加 txtView 组件
-removeAuthonInfo
+0.0.17
+    1.removeAuthonInfo
+    2. 优化部分逻辑
+
 ```

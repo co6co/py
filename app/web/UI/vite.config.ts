@@ -59,7 +59,8 @@ export default (option: { mode: string }) => {
     ],
     resolve: {
       alias: {
-        '@': resolve(__dirname, 'src')
+        '@': resolve(__dirname, 'src'),
+        vue: 'vue/dist/vue.esm-bundler.js'
       } //npm install --save-dev @types/node
     }
   })

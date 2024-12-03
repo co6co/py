@@ -1,7 +1,6 @@
 import { createRouter, createWebHistory, Router } from 'vue-router'
 import { basicRoutes } from './static'
 import { setupRouterHooks } from './hooks'
-import { registerRoute } from 'co6co-right'
 import { getStoreInstance } from 'co6co'
 let gRouter2: Router
 
@@ -15,7 +14,7 @@ export default function useRouter(): Router {
   gRouter2 = router
   return router
 }
-export { gRouter2 as router, registerRoute }
+export { gRouter2 as router }
 // vue3 + vite中的动态引入组件的方法
 let viewObjects = import.meta.glob(['../views/**/*.vue', '../views/**/*.tsx'])
 import { views, getViewPath } from 'co6co-right'

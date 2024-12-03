@@ -46,11 +46,13 @@ export const create_svc = (baseUrl: string) => {
 };
 export const create_tree_svc = (baseUrl: string) => {
 	const get_select_tree_svc = (
-		key?: number | string
+		key?: number | string,
+		timeout: number = 5000,
+		tip: boolean = true
 	): Promise<api_type.IPageResponse> => {
 		if (key != undefined)
-			return createServiceInstance().get(`${baseUrl}/tree/${key}`);
-		else return createServiceInstance().get(`${baseUrl}/tree`);
+			return createServiceInstance(timeout, tip).get(`${baseUrl}/tree/${key}`);
+		else return createServiceInstance(timeout, tip).get(`${baseUrl}/tree`);
 	};
 	const get_tree_table_svc = (data: any): Promise<api_type.IPageResponse> => {
 		return createServiceInstance().post(`${baseUrl}/tree`, data);

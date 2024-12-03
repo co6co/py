@@ -1,7 +1,7 @@
 import request from '../../utils/request'
 import { type IResponse } from 'co6co'
-export * from './vue'
-const BASE_URL = '/api/app' 
+export * from './ui'
+const BASE_URL = '/api/app'
 export interface ClientConfig {
   batchAudit: boolean //批量审核提交
 }

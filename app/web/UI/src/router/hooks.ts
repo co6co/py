@@ -1,8 +1,8 @@
 import { Router } from 'vue-router'
 import { ViewObjects } from './index'
 
-import { usePermissStore } from 'co6co'
-import { registerRoute, validAuthenticate, routeHook } from 'co6co-right'
+import { usePermissStore, getToken } from 'co6co'
+import { registerRoute, validAuthenticate } from 'co6co-right'
 import { ElMessage } from 'element-plus'
 
 function jump(next: (path?: string) => void, path?: string) {
@@ -16,7 +16,7 @@ export function setupRouterHooks(router: Router) {
     document.title = to.meta.title ? `${to.meta.title}` : import.meta.env.VITE_SYSTEM_NAME
     if (registerRefesh) {
       registerRoute(ViewObjects, router, (msg) => {
-        if (msg) {
+        if (msg && getToken()) {
           ElMessage.error(msg)
         }
         registerRefesh = false

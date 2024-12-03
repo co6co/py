@@ -10,7 +10,7 @@ export default defineComponent({
     const data = ref<{ theme: string; locale: any; size: '' | 'default' | 'small' | 'large' }>({
       theme: 'dark',
       size: '',
-      locale: enUs
+      locale: zhCn
     })
     const changeLang = (locale: 'en' | 'zh') => {
       if (locale === 'en') {

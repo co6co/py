@@ -32,17 +32,16 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive } from 'vue'
 import { ElMessage } from 'element-plus'
 import { Lock, User } from '@element-plus/icons-vue'
 
 import { isDebug } from '../utils'
 import { useTagsStore } from '../store/tags'
-// eslint-disable-next-line camelcase
-import { userSvc } from 'co6co-right'
+import { userSvc, registerRoute } from 'co6co-right'
 import { storeAuthonInfo, showLoading, closeLoading } from 'co6co'
 
-import { registerRoute, router, ViewObjects } from '../router'
+import { router, ViewObjects } from '../router'
 import type { FormInstance, FormRules } from 'element-plus'
 import useSystem from '../hooks/useSystem'
 import { getPublicURL } from '../utils'
@@ -74,7 +73,7 @@ const submitForm = (formEl: FormInstance | undefined) => {
     if (valid) {
       showLoading()
       userSvc
-        .login_svc({ userName: param.username, password: param.password })
+        .login_svc({ userName: param.username, password: param.password }, 5000, false)
         .then((res) => {
           message.value = res.message
           storeAuthonInfo(res.data, param.username)
