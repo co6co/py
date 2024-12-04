@@ -46,7 +46,7 @@ class ui_tree_view(CtxMethodView):
         )
         # roleList=await self._query(request,queryRoleSml,isPO=False,param={"userId":1})
         roleList = await self._query(request, userRolesSelect.union(userGroupRolesSelect), isPO=False)
-        log.warn(roleList)
+        #log.warn(roleList)
         roleList = [d.get("role_id") for d in roleList]
         select = (
             Select(menuPO.id, menuPO.category, menuPO.parentId, menuPO.name, menuPO.code, menuPO.icon,  menuPO.url, menuPO.component, menuPO.permissionKey, menuPO.methods)
