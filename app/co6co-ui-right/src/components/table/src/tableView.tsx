@@ -19,6 +19,7 @@ import {
 	getTableIndex,
 } from 'co6co';
 type DataApi = (query: any) => Promise<IPageResponse>;
+type filter = (data: any) => Array<Object>;
 export default defineComponent({
 	name: 'tableView',
 	props: {
@@ -29,6 +30,14 @@ export default defineComponent({
 		query: {
 			type: Object,
 			default: {},
+		},
+		resultFilter: {
+			type: Function as PropType<filter>,
+			default: undefined,
+		},
+		showPaged: {
+			type: Boolean,
+			default: true,
 		},
 	},
 	setup(prop, ctx) {
@@ -65,9 +74,12 @@ export default defineComponent({
 		const queryData = () => {
 			showLoading();
 			prop
-				.dataApi({ ...DATA.query, ...prop.query })
+				.dataApi(
+					prop.showPaged ? { ...DATA.query, ...prop.query } : { ...prop.query }
+				)
 				.then((res) => {
-					DATA.data = res.data;
+					if (prop.resultFilter) DATA.data = prop.resultFilter(res.data);
+					else DATA.data = res.data;
 					DATA.pageTotal = res.total || -1;
 				})
 				.finally(() => {
@@ -110,13 +122,17 @@ export default defineComponent({
 								</ElTable>
 							</ElScrollbar>
 						</ElMain>
-						<ElFooter>
-							<Pagination
-								option={DATA.query}
-								total={DATA.pageTotal}
-								onCurrentPageChange={queryData}
-								onSizeChage={queryData}></Pagination>
-						</ElFooter>
+						{prop.showPaged ? (
+							<ElFooter>
+								<Pagination
+									option={DATA.query}
+									total={DATA.pageTotal}
+									onCurrentPageChange={queryData}
+									onSizeChage={queryData}></Pagination>
+							</ElFooter>
+						) : (
+							<></>
+						)}
 					</ElContainer>
 					{ctx.slots.footer?.()}
 				</div>

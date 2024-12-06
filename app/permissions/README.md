@@ -35,6 +35,7 @@
 0.0.15
     字典增加 flag 字典,
     menu_view batch_add
-
+0.0.16
+    文件管理
 
 ```

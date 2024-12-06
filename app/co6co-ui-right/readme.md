@@ -49,5 +49,6 @@
 0.0.17
     1.removeAuthonInfo
     2. 优化部分逻辑
-
+0.0.18
+    1. 优化tableView组件
 ```

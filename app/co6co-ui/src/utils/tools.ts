@@ -202,22 +202,46 @@ export function _convert(
 	return value * (fromFactor / toFactor);
 }
 
+const byteData: { [key: string]: number } = {
+	b: 1,
+	kb: 1024,
+	mb: 1024 ** 2,
+	gb: 1024 ** 3,
+};
 /**
  *
  * @param value
  * @param fromUnit [b|kb|mb|gb]
- * @param toUnit
+ * @param toUnit [b|kb|mb|gb]
+ * @returns 小数
+ */
+function convertByte(value: number, fromUnit: string, toUnit: string): number {
+	const num = _convert(value, fromUnit, toUnit, byteData);
+	return num;
+}
+/**
+ *
+ * @param value
+ * @param fromUnit [b|kb|mb|gb]
+ * @param fixed	保留小数位数 四舍五入
  * @returns
  */
-export function convertByte(value: number, fromUnit: string, toUnit: string) {
-	const conversions: { [key: string]: number } = {
-		b: 1,
-		kb: 1024,
-		mb: 1024 ** 2,
-		gb: 1024 ** 3,
-	};
-	return _convert(value, fromUnit, toUnit, conversions);
+function byte2Unit(value: number, fromUnit: string, fixed: number) {
+	let num = 0;
+	let unit = '';
+	let result = 0;
+	Object.keys(byteData).forEach((key) => {
+		num = convertByte(value, fromUnit, key);
+		if (num > 1) {
+			unit = key;
+			result = num;
+		} else return false;
+	});
+	num = result;
+	//// "123.46" (四舍五入)
+	return num.toFixed(fixed) + unit.toUpperCase();
 }
+export { convertByte, byte2Unit };
 /**
  *
  * @param value 值
