@@ -242,7 +242,7 @@ export default defineComponent({
             ),
             footer: () => (
               <>
-                <Diaglog ref={diaglogRef} title={DATA.query.root} onSaved={onRefesh}></Diaglog>
+                <Diaglog ref={diaglogRef} title={DATA.query.root} onSaved={onRefesh} />
               </>
             )
           }}
