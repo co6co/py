@@ -1,3 +1,4 @@
+import copy
 arr_10_7_6 = [
     [1, 2, 3, 5, 6, 9, 10],
     [3, 5, 6, 7, 8, 9, 10],
@@ -43,3 +44,29 @@ arr_10_1_7_6 = [
     [3, 5, 6, 7, 8, 9, "10*"],
     [2, 4, 5, 6, 7, 8, "10*"]
 ]
+
+
+def padding(lst: list, arr: list, *dan: int):
+    tmpArr = copy.deepcopy(arr)
+    for ar in tmpArr:
+        flag = 0
+        for index, a in enumerate(ar):
+            if "*" in str(a):
+                ar[index] = dan[flag]
+                flag += 1
+                continue
+            for index2, val in enumerate(lst):
+                if a == (index2+1):
+                    ar[index] = val
+                    break
+    return tmpArr
+
+
+'''
+测试
+
+result = padding([11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25], arr_15_7_5, 30)
+print("源数组", arr_15_7_5)
+print("目标数组", result)
+
+'''

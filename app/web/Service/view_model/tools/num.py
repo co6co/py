@@ -40,6 +40,15 @@ class View(AuthMethodView):
     routePath = "/<category:int>"
 
     async def get(self, request: Request, category: int):
+        json: dict = request.json
+        lst = json.get("list")
+        danList: list = json.get("dans")
+        rest = []
         if category == 0:
-            arr = data.arr_10_7_6
-        return arr
+            rest = data.padding(lst, data.arr_10_7_6)
+        elif category == 1:
+            rest = data.padding(lst, data.arr_15_7_5)
+        elif category == 2:
+            rest = data.padding(lst, data.arr_10_1_7_6, *danList)
+
+        return self.response_json(Result.success(rest))
