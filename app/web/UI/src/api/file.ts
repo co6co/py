@@ -1,6 +1,7 @@
 import request from '@/utils/request'
 
-import type { IResponse } from 'co6co'
+import { getBaseUrl, type IResponse } from 'co6co'
+import { download_svc } from 'co6co-right'
 const base_URL = '/api/files'
 export interface list_param {
   name?: string
@@ -18,4 +19,11 @@ export const list_svc = (
   data: list_param
 ): Promise<IResponse<{ res: list_res[]; root: string }>> => {
   return request.post(`${base_URL}`, data)
+}
+export const getResourceUrl = (filePath: string) => {
+  //return 'http://127.0.0.1/co6co-0.0.1.tgz'
+  return `${getBaseUrl()}${base_URL}?path=${encodeURIComponent(filePath)}`
+}
+export const downFile_svc = (filePath: string, fileName: string) => {
+  download_svc(`${getBaseUrl()}${base_URL}?path=${encodeURIComponent(filePath)}`, fileName, true)
 }

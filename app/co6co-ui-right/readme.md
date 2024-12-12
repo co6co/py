@@ -49,6 +49,7 @@
 0.0.17
     1.removeAuthonInfo
     2. 优化部分逻辑
-0.0.18
+0.0.18 未发布
     1. 优化tableView组件
+    2. 优化Download相关
 ```

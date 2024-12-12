@@ -6,21 +6,22 @@ import axios, {
 	type AxiosRequestConfig,
 } from 'axios';
 
-//创建 Blob 资源
+/**
+ * 创建 Blob URL 资源
+ * @param resource 资源
+ * @returns
+ */
 export const create_URL_resource = (resource: { data: Blob }): string => {
 	return URL.createObjectURL(resource.data);
 };
-//下载  blob 资源
-export const download_blob_resource = (resource: {
-	data: Blob;
-	fileName: string;
-}) => {
-	const link = document.createElement('a');
-	link.href = create_URL_resource({ data: resource.data });
-	link.download = resource.fileName;
-	link.click();
-	window.URL.revokeObjectURL(link.href);
-};
+
+/**
+ * 加载资源
+ * @param url 资源地址
+ * @param authon 是否需要认证
+ * @param axios_config 配置
+ * @returns
+ */
 const _loadResource = (
 	url,
 	authon?: boolean,
@@ -46,12 +47,19 @@ const _loadResource = (
 	const header = authon
 		? { headers: { Authorization: `Bearer ${getToken()}` } }
 		: { headers: {} };
+	const headers = { ...header.headers, ...axios_config?.headers };
 	return axios({
-		...header,
 		...default_config,
 		...axios_config,
+		headers: { ...headers },
 	});
 };
+/**
+ * 异步资源载入
+ * @param url 资源
+ * @param axios_config 配置
+ * @returns
+ */
 export const loadAsyncResource = async (
 	url: string,
 	axios_config?: AxiosRequestConfig
@@ -59,7 +67,13 @@ export const loadAsyncResource = async (
 	const res = await _loadResource(url, true, axios_config);
 	return create_URL_resource({ data: res.data });
 };
-
+/**
+ *
+ * @param url 资源URL
+ * @param success 成功回调
+ * @param fail 失败回调
+ * @param axios_config 配置
+ */
 export const loadResource = (
 	url,
 	success: (url: string) => void,
@@ -81,8 +95,12 @@ export const loadResource = (
 		});
 };
 
-//下载文件
-//download_config 为默认时获取文件长度
+/**
+ *  获取文件长度
+ * @param url 资源URL
+ * @param authon 认证
+ * @returns
+ */
 export const download_header_svc = (url: string, authon?: boolean) => {
 	const default_config: {
 		method: Method;
@@ -97,8 +115,13 @@ export const download_header_svc = (url: string, authon?: boolean) => {
 	};
 	return _loadResource(url, authon, { ...default_config });
 };
-//下载文件
-//download_config 为默认时获取文件长度
+/**
+ * 下载文件
+ * @param url 资源URL
+ * @param config 下载配置  默认时获取文件长度 //{ Range: `bytes=${start}-${end}` },
+ * @param authon 是否需要认证
+ * @returns
+ */
 export const download_fragment_svc = (
 	url: string,
 	config: IDownloadConfig = { method: 'HEAD' },
@@ -121,13 +144,34 @@ export const download_fragment_svc = (
 	return _loadResource(url, authon, { ...default_config, ...config });
 	//return createAxiosInstance()({ ...default_config, ...config });
 };
-//单独下载
-//需要认证的下载
+/**
+ * 下载 Blob资源
+ * @param resource Blob资源
+ */
+export const download_blob_resource = (resource: {
+	data: Blob;
+	fileName: string;
+}) => {
+	const link = document.createElement('a');
+	link.href = create_URL_resource({ data: resource.data });
+	link.download = resource.fileName;
+	link.click();
+	window.URL.revokeObjectURL(link.href);
+};
+
+/**
+ * 下载资源
+ * @param url	资源URL
+ * @param fileName 下载文件名
+ * @param authon true  增加 token
+ * @param finishBck 下载完成回调
+ * @param timeout 超时时间
+ */
 export const download_svc = (
 	url: string,
 	fileName: string,
 	authon?: boolean,
-	bck?: () => void,
+	finishBck?: () => void,
 	timeout?: number
 ) => {
 	_loadResource(url, authon, { timeout: timeout || 60 * 1000 })
@@ -151,6 +195,6 @@ export const download_svc = (
 			console.error('e:', e);
 		})
 		.finally(() => {
-			if (bck) bck();
+			if (finishBck) finishBck();
 		});
 };

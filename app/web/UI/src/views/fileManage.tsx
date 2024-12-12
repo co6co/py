@@ -9,9 +9,18 @@ import {
   ElRow,
   ElCol,
   ElLink,
-  ElTooltip
+  ElTooltip,
+  ElIcon
 } from 'element-plus'
-import { Search, Plus, Edit, ArrowLeftBold, Refresh, Download } from '@element-plus/icons-vue'
+import {
+  Search,
+  Plus,
+  Edit,
+  ArrowLeftBold,
+  Refresh,
+  Download as DownloadIcon,
+  Loading
+} from '@element-plus/icons-vue'
 import style from '@/assets/css/file.module.less'
 import { FormOperation, byte2Unit } from 'co6co'
 
@@ -20,12 +29,14 @@ import {
   DictSelectInstance,
   tableScope,
   TableView,
-  TableViewInstance
+  TableViewInstance,
+  Download,
+  download_header_svc
 } from 'co6co-right'
 
 import Diaglog from '../components/biz/modifyTask'
 
-import { list_svc, list_param, list_res as Item } from '@/api/file'
+import { list_svc, getResourceUrl, list_param, list_res as Item } from '@/api/file'
 
 export default defineComponent({
   setup(prop, ctx) {
@@ -33,7 +44,6 @@ export default defineComponent({
       query: { root: 'I:' },
       split: /[/\\]/
     })
-
     //:use
     const { getPermissKey } = routeHook.usePermission()
 
@@ -41,8 +51,6 @@ export default defineComponent({
     //:page
     const viewRef = ref<TableViewInstance>()
     const diaglogRef = ref<InstanceType<typeof Diaglog>>()
-    const stateDictRef = ref<DictSelectInstance>()
-    const statusDictRef = ref<DictSelectInstance>()
 
     const onOpenDialog = (row?: Item) => {
       DATA.currentItem = row
@@ -90,9 +98,17 @@ export default defineComponent({
       else DATA.query.root = DATA.query.root + '/' + sub
       onSearch()
     }
-    const onDownload = (filePath: string) => {
-      alert(filePath)
+    const onClickClcFolder = (row: Item & { loading?: boolean }) => {
+      row.loading = true
+      download_header_svc(getResourceUrl(row.path), true)
+        .then((res) => {
+          row.size = Number(res.headers['content-length'])
+        })
+        .finally(() => {
+          row.loading = false
+        })
     }
+
     //:page reader
     const rander = (): VNodeChild => {
       return (
@@ -114,6 +130,7 @@ export default defineComponent({
                       value={isEditing.value ? DATA.query.root : previewRoot.value}
                       onFocus={handleFocus}
                       onBlur={handleBlur}
+                      onChange={onSearch}
                     >
                       {{
                         prepend: () => (
@@ -168,39 +185,16 @@ export default defineComponent({
                 </ElTableColumn>
                 <ElTableColumn label="大小" prop="name" align="center" width={180}>
                   {{
-                    default: (scope: { row: Item }) =>
+                    default: (scope: { row: Item & { loading?: boolean } }) =>
                       scope.row.isFile ? (
                         byte2Unit(scope.row.size, 'b', 2)
                       ) : (
-                        <ElLink onClick={() => onClickSubFolder(scope.row.name)}>计算</ElLink>
+                        <ElLink onClick={() => onClickClcFolder(scope.row)}>
+                          <ElButton text loading={scope.row.loading}>
+                            {scope.row.size ? byte2Unit(scope.row.size, 'b', 2) : '计算'}
+                          </ElButton>
+                        </ElLink>
                       )
-                  }}
-                </ElTableColumn>
-
-                <ElTableColumn
-                  label="cron[s]"
-                  width="160"
-                  prop="cron"
-                  align="center"
-                  showOverflowTooltip={true}
-                />
-                <ElTableColumn label="状态" prop="state" align="center" showOverflowTooltip={true}>
-                  {{
-                    default: (scope: { row: Item }) => (
-                      <ElTag>{stateDictRef.value?.getName(scope.row.state)}</ElTag>
-                    )
-                  }}
-                </ElTableColumn>
-                <ElTableColumn
-                  label="运行状态"
-                  prop="execStatus"
-                  align="center"
-                  showOverflowTooltip={true}
-                >
-                  {{
-                    default: (scope: { row: Item }) => (
-                      <ElTag>{statusDictRef.value?.getName(scope.row.execStatus)}</ElTag>
-                    )
                   }}
                 </ElTableColumn>
 
@@ -222,18 +216,14 @@ export default defineComponent({
                         >
                           编辑
                         </ElButton>
-                        {scope.row.isFile ? (
-                          <ElButton
-                            text={true}
-                            icon={Download}
-                            onClick={() => onDownload(scope.row.path)}
-                            v-permiss={getPermissKey(routeHook.ViewFeature.download)}
-                          >
-                            下载
-                          </ElButton>
-                        ) : (
-                          <></>
-                        )}
+
+                        <Download
+                          authon
+                          showPercentage
+                          url={getResourceUrl(scope.row.path)}
+                          fileName={scope.row.name}
+                          v-permiss={getPermissKey(routeHook.ViewFeature.download)}
+                        />
                       </>
                     )
                   }}

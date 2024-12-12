@@ -21,6 +21,12 @@ const props = {
 		type: String,
 		required: true,
 	},
+	//资源是否需要认证
+	//需要认证将自动增加本地token
+	authon: {
+		type: Boolean,
+		default: false,
+	},
 	chunkSize: {
 		type: Number,
 		default: 5 * 1024 * 1024,
@@ -67,7 +73,7 @@ export default defineComponent({
 			DATA.totalSize = 0; //文件总大小
 			DATA.percentage = 0; //下载进度
 
-			download_header_svc(prop.url)
+			download_header_svc(prop.url, prop.authon)
 				.then(async (res) => {
 					const header = res.headers;
 					//console.info('contentType:', header)
@@ -85,8 +91,7 @@ export default defineComponent({
 			const config: IDownloadConfig = {
 				headers: { Range: `bytes=${start}-${end}` },
 			};
-
-			const res = await download_fragment_svc(prop.url, config);
+			const res = await download_fragment_svc(prop.url, config, prop.authon);
 			DATA.fileBlob.push(res.data);
 		};
 		const megre_data = (type: string, fileName: string) => {
