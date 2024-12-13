@@ -93,9 +93,8 @@ export default defineComponent({
       DATA.query.root = data.root
       return data.res
     }
-    const onClickSubFolder = (sub: string) => {
-      if (DATA.query.root == '/') DATA.query.root = '/' + sub
-      else DATA.query.root = DATA.query.root + '/' + sub
+    const onClickSubFolder = (path: string) => {
+      DATA.query.root = path
       onSearch()
     }
     const onClickClcFolder = (row: Item & { loading?: boolean }) => {
@@ -175,7 +174,7 @@ export default defineComponent({
                         {scope.row.isFile ? (
                           scope.row.name
                         ) : (
-                          <ElLink onClick={() => onClickSubFolder(scope.row.name)}>
+                          <ElLink onClick={() => onClickSubFolder(scope.row.path)}>
                             {scope.row.name}
                           </ElLink>
                         )}
