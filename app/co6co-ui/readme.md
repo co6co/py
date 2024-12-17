@@ -42,7 +42,9 @@
     table.css 增加类
 0.1.15
     request 优化
-0.1.15 未发布
+0.1.16
 	byte2unit
+0.1.17
+    dialog 优化
 
 ```

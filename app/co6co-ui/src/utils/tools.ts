@@ -228,7 +228,7 @@ function convertByte(value: number, fromUnit: string, toUnit: string): number {
  */
 function byte2Unit(value: number, fromUnit: string, fixed: number) {
 	let num = 0;
-	let unit = '';
+	let unit = 'b';
 	let result = 0;
 	Object.keys(byteData).forEach((key) => {
 		num = convertByte(value, fromUnit, key);

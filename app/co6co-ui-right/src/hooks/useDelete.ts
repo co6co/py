@@ -1,7 +1,7 @@
 import { showLoading, closeLoading, type IResponse } from 'co6co';
 import { ElMessageBox, ElMessage, MessageBoxData } from 'element-plus';
 export default function (
-	del_svc: (id: number, reson?: string) => Promise<IResponse>,
+	del_svc: (pk: any, reson?: string) => Promise<IResponse>,
 	bck?: () => void
 ) {
 	const deleteSvc = (

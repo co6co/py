@@ -31,9 +31,9 @@ export default (option: { mode: string }) => {
       rollupOptions: {
         external: ['vue-schart'],
         input: {
-          index: path.resolve(__dirname, 'index.html'),
+          index: path.resolve(__dirname, 'index.html')
           //home: path.resolve(__dirname, 'home0.html'),
-          home: path.resolve(__dirname, 'home.html')
+          //home: path.resolve(__dirname, 'home.html')
         }
         /*
         input: {

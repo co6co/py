@@ -17,6 +17,10 @@ export default defineComponent({
 			type: String,
 			default: '弹出框',
 		},
+		closeTxt: {
+			type: String,
+			default: '关闭',
+		},
 	},
 
 	//定义事件类型
@@ -54,9 +58,9 @@ export default defineComponent({
 							onClick={() => {
 								diaglogData.visible = false;
 								ctx.emit('close');
-							}}>
-							关闭
-						</ElButton>
+							}}
+							v-slots={{ default: prop.closeTxt }}
+						/>
 						{ctx.slots.buttons ? ctx.slots.buttons() : null}
 					</span>
 				);

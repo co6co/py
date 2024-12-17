@@ -1,38 +1,18 @@
 
-from sanic.response import text 
+from sanic.response import text
 from sanic import Request
-from sanic.response import file, file_stream, json,raw
+from sanic.response import file, file_stream, json, raw
 from co6co_sanic_ext.utils import JSON_util
 from co6co_sanic_ext.model.res.result import Result
-from ..base_view import AuthMethodView 
+from ..base_view import AuthMethodView
 from ...model.filters.file_param import FileParam
-import os 
+import os
 import datetime
-from pathlib import Path 
 from co6co.utils import log
-from urllib.parse import quote
 import tempfile
-from cacheout import Cache
-import uuid
+import shutil
 
-class Range:
-    def __init__(self,s,e,size,total):
-        self.start=s
-        self.end=e
-        self.size=size
-        self.total=total
-        pass
-    def start(self) -> int:
-        return self.start
 
-    def end(self) -> int:
-        return self.end
-
-    def size(self) -> int:
-        return self.size
-
-    def total(self) -> int:
-        return self.total
 class File:
     isFile: bool
     name: str
@@ -69,73 +49,45 @@ class FolderView(AuthMethodView):
         """
         文件夹打包
         """
-        args = self.usable_args(request)
-        filePath = args.get("path")
-        if os.path.isfile(filePath):
-            raise Exception("该方法不支持文件") 
-        timeStr = datetime.datetime.now().strftime("%Y-%m-%d_%H%M%S")
-        fileName = "{}_{}.zip".format(os.path.basename(filePath), timeStr)
-        # cache:Cache= request.app.ctx.Cache
-        # uid=uuid.uuid4()
-        # cache.add(uid,fileName)
-        zipFilePath = os.path.join('.', fileName)   
-        id=request.headers.get("session")
-        log.warn(id, request.app.ctx)
-        request.app.ctx.data={id:{filePath:zipFilePath}}
-        await self.zip_directory(filePath, zipFilePath) 
-        return await self.response_size(filePath=zipFilePath) 
+        try:
+            args = self.usable_args(request)
+            filePath = args.get("path")
+            if os.path.isfile(filePath):
+                raise Exception("该方法不支持文件")
+            timeStr = datetime.datetime.now().strftime("%Y-%m-%d_%H%M%S")
+            fileName = "{}_{}.zip".format(os.path.basename(filePath), timeStr)
+            # cache:Cache= request.app.ctx.Cache
+            # uid=uuid.uuid4()
+            # cache.add(uid,fileName)
+            zipFilePath = os.path.join('.', fileName)
+            await self.zip_directory(filePath, zipFilePath)
+            id = request.headers.get("session")
+            request.app.ctx.data = {id: {filePath: zipFilePath}}
+            return await self.response_size(zipFilePath)
+        except Exception as e:
+            return self.response_json(Result.fail("压缩文件出错:{}".format(e)))
 
     async def get(self, request: Request):
         try:
-            zipFilePath = None
-            temp_file = None
             args = self.usable_args(request)
-            filePath = args.get("path") 
-            id=request.headers.get("session")
-            log.warn(id)
-            filePath=request.app.ctx.data[id].get(filePath)
-            log.warn(filePath)  
-            if os.path.isfile(filePath):
-                fileName = os.path.basename(filePath)
-            headers = self.createContentDisposition(fileName)  
-            file_size = os.path.getsize(filePath)
-            headers.update({'Content-Length': str(file_size),'Accept-Ranges': 'bytes',})
-            #return await file(filePath, headers=headers)  # 使用 file 适用于较小的文件 传送完整文件
-            # return await file(filePath,filename= fileName)  # 使用 file 适用于较小的文件 中文名乱码
-            range_header = request.headers.get('Range')
-            log.warn(range_header)
-            if range_header:
-                unit, ranges = range_header.split('=')
-                if unit != 'bytes':
-                    return text('Only byte ranges are supported', status=416)
-
-                start, end = map(lambda x: int(x) if x else None, ranges.split('-'))
-                if start is None:
-                    start = file_size - end
-                    end = file_size - 1
-                elif end is None or end >= file_size:
-                    end = file_size - 1
-            log.warn(file_size,start,end)
-            #return await file_stream(filePath,status=206, headers=headers )  # 未执行完 finally 就开始执行
-            # 返回二进制数据
-            # 读取文件内容为二进制数据
-            
-            binary_data:bytes=None
-            with open(filePath, 'rb') as f:
-                log.warn(start,end-start)
-                f.seek(start)
-                binary_data = f.read(end-start+1)
-            return  raw(
-                binary_data,status=206, headers=headers 
-            )
+            key = args.get("path")
+            sessionId = request.headers.get("session")
+            filePath = request.app.ctx.data[sessionId].get(key)
+            _, end, file_size = self.parseRange(request, filePath=filePath)
+            return await self.get_file_partial(request, filePath)
         finally:
-            if zipFilePath != None and os.path.exists(zipFilePath):
-                # os.remove(zipFilePath)
+            if filePath != None and os.path.exists(filePath) and file_size-1 == end:
+                # log.warn("删除文件.", filePath)
+                os.remove(filePath)
                 # os.unlink(zipFilePath)
-                pass
-            if temp_file != None:
-                temp_file.close()
-                os.unlink(temp_file.name)
+                cache: dict = request.app.ctx.data[sessionId]
+                log.warn(cache, key, cache.keys)
+                if key in cache:
+                    cache.pop(key)
+                if {} == cache:
+                    cache: dict = request.app.ctx.data
+                    if sessionId in cache:
+                        cache.pop(sessionId)
 
 
 class FileViews(AuthMethodView):
@@ -144,7 +96,9 @@ class FileViews(AuthMethodView):
         """
         文件或目录大小
         """
-        return await self.response_size(request=request)
+        args = self.usable_args(request)
+        filePath = args.get("path")
+        return await self.response_size(filePath)
 
     async def get(self, request: Request):
         """
@@ -152,14 +106,9 @@ class FileViews(AuthMethodView):
         """
         args = self.usable_args(request)
         filePath = args.get("path")
-        if os.path.isfile(filePath):
-            pass
-        else:
-            raise Exception("该方法不支持文件夹下载")
-        #headers = self.createContentDisposition(fileName)
-        # return await file(filePath,headers=headers )  # 使用 file 适用于较小的文件
-        # return await file(filePath,filename= fileName)  # 使用 file 适用于较小的文件 中文名乱码
-        return await file_stream(filePath )  # 未执行完 finally 就开始执行
+        if os.path.isdir(filePath):
+            raise ValueError("该方法不支持文件夹下载")
+        return await self.get_file_partial(request, filePath)
 
     async def post(self, request: Request):
         """
@@ -180,6 +129,18 @@ class FileViews(AuthMethodView):
                 folder = File(param.root, s)
                 result.append(folder)
         return self.response_json(Result.success({"root": param.root, "res": result}))
+
+    async def delete(self, request: Request):
+        args = self.usable_args(request)
+        filePath = args.get("path")
+        if not os.path.exists(filePath):
+            return self.response_json(Result.success(message=f"路径：{filePath},不存在！"))
+        if os.path.isfile(filePath):
+            os.unlink(filePath)
+        elif os.path.isdir(filePath):
+            # os.rmdir(filePath) 删除空文件夹
+            shutil.rmtree(filePath)
+        return self.response_json(Result.success(message=f"删除'{filePath}'完成！"))
 
     async def put(self, request: Request):
         # 创建一个临时文件用于保存上传的数据

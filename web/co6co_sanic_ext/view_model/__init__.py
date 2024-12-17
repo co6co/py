@@ -2,7 +2,7 @@ from functools import wraps
 from sanic.views import HTTPMethodView  # 基于类的视图
 from sanic.request.form import File  # 基于类的视图
 from sanic import Request
-from sanic.response import json
+from sanic.response import json, raw
 from co6co_sanic_ext.model.res.result import Result, Page_Result
 from co6co_sanic_ext.utils import JSON_util
 from typing import TypeVar, Dict, List, Any, Tuple
@@ -82,25 +82,69 @@ class BaseView(HTTPMethodView):
         size = os.path.getsize(filePath) if os.path.isfile(filePath) else self.get_folder_size(filePath)
         return size
 
-    async def response_size(self, *, request: Request, pathField: str = "path", filePath: str = None):
+    async def response_size(self,   fullPath: str):
         """
         文件或目录大小
         如果是文件包括文件名
         """
-        if filePath == None:
-            args = self.usable_args(request)
-            filePath = args.get(pathField)
-        # return await file(filePath, filename=fileName)  # 使用 file 适用于较小的文件
         response = json({})
-        size = os.path.getsize(filePath) if os.path.isfile(filePath) else self.get_folder_size(filePath)
+        size = os.path.getsize(fullPath) if os.path.isfile(fullPath) else self.get_folder_size(fullPath)
         headers = None
-        if os.path.isfile(filePath):
-            fileName = os.path.basename(filePath)
+        if os.path.isfile(fullPath):
+            fileName = os.path.basename(fullPath)
             headers = self.createContentDisposition(fileName)
         response.headers.update({"Accept-Ranges": "bytes", "Content-Length": size, "Content-Type": "application/octet-stream"})
         if headers != None:
             response.headers.update(headers)
         return response
+
+    def parseRange(self, request: Request, *, filePath: str = None, fileSize: int = None):
+        """
+        解析 HTTP.HEADER.Range 参数
+        @param request 请求参数
+        @param filePath 文件路径
+        @param fileSize 文件大小
+        return (start, end, fileSize)
+
+        """
+        params = [param for param in (filePath, fileSize) if param is not None]
+        if len(params) > 1:
+            raise ValueError("Exactly one of filePath or fileSize must be provided.")
+
+        if fileSize == None:
+            fileSize = os.path.getsize(filePath)
+        range_header = request.headers.get('Range')
+        if range_header:
+            unit, ranges = range_header.split('=')
+            if unit != 'bytes':
+                raise Exception("Only byte ranges are supported")
+
+            start, end = map(lambda x: int(x) if x else None, ranges.split('-'))
+            if start is None:
+                start = fileSize - end
+                end = fileSize - 1
+            elif end is None or end >= fileSize:
+                end = fileSize - 1
+        return start, end, fileSize
+
+    async def get_file_partial(self, request: Request, filePath: str):
+        if os.path.isfile(filePath):
+            fileName = os.path.basename(filePath)
+        headers = self.createContentDisposition(fileName)
+        file_size = os.path.getsize(filePath)
+        headers.update({'Content-Length': str(file_size), 'Accept-Ranges': 'bytes', })
+        start, end, _ = self.parseRange(request, fileSize=file_size)
+        # return await file_stream(filePath,status=206, headers=headers )  # 未执行完 finally 就开始执行
+        # return await file(filePath, headers=headers)  # 使用 file 适用于较小的文件 传送完整文件
+        # return await file(filePath,filename= fileName)  # 使用 file 适用于较小的文件 中文名乱码
+        # 返回二进制数据
+        # 读取文件内容为二进制数据
+        data: bytes = None
+        with open(filePath, 'rb') as f:
+            f.seek(start)
+            size = end-start+1
+            data = f.read(size)
+        return raw(data, status=206, headers=headers)
 
     def usable_args(self, request: Request) -> dict:
         """

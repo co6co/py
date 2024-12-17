@@ -28,3 +28,16 @@ export const getResourceUrl = (filePath: string, isFile: boolean) => {
 export const downFile_svc = (filePath: string, fileName: string) => {
   download_svc(`${getBaseUrl()}${base_URL}?path=${encodeURIComponent(filePath)}`, fileName, true)
 }
+export const del_svc = (path: string): Promise<IResponse> => {
+  return request.delete(`${base_URL}?path=${path}`)
+}
+
+//断点续传
+export const upload_svc = (path: string, data: FormData): Promise<IResponse> => {
+  return request.put(`${base_URL}/upload?path=${encodeURIComponent(path)}`, data)
+}
+export const get_upload_chunks_svc = (
+  path: string
+): Promise<IResponse<{ uploadedChunks: Array<number> }>> => {
+  return request.get(`${base_URL}/upload?path=${encodeURIComponent(path)}`)
+}

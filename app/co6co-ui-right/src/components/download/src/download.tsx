@@ -89,9 +89,8 @@ export default defineComponent({
 					DATA.totalSize = Number(header['content-length']);
 					const contentType = header['content-type'];
 					//console.info('contentType:', contentType)
-					if (!DATA.fileName) {
+					if (!prop.fileName)
 						DATA.fileName = getFileName(res.headers['content-disposition']);
-					}
 					if (typeof contentType == 'string')
 						await startDownload(contentType, prop.chunkSize);
 				})

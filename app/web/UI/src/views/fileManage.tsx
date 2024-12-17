@@ -1,43 +1,22 @@
 import { computed, defineComponent, VNodeChild } from 'vue'
 import { ref, reactive, onMounted } from 'vue'
-import {
-  ElTag,
-  ElButton,
-  ElInput,
-  ElTableColumn,
-  ElMessage,
-  ElRow,
-  ElCol,
-  ElLink,
-  ElTooltip,
-  ElIcon
-} from 'element-plus'
-import {
-  Search,
-  Plus,
-  Edit,
-  ArrowLeftBold,
-  Refresh,
-  Download as DownloadIcon,
-  Loading
-} from '@element-plus/icons-vue'
+import { ElButton, ElInput, ElTableColumn, ElRow, ElCol, ElLink, ElTooltip } from 'element-plus'
+import { Search, Edit, ArrowLeftBold, Refresh, Delete, UploadFilled } from '@element-plus/icons-vue'
 import style from '@/assets/css/file.module.less'
-import { FormOperation, byte2Unit } from 'co6co'
-import axios from 'axios'
+import { byte2Unit } from 'co6co'
 import {
   routeHook,
-  DictSelectInstance,
   tableScope,
   TableView,
   TableViewInstance,
   Download,
   download_header_svc,
-  getFileName
+  deleteHook
 } from 'co6co-right'
 
-import Diaglog from '../components/biz/modifyTask'
+import Diaglog from '@/components/dragDropUploader'
 
-import { list_svc, getResourceUrl, list_param, list_res as Item } from '@/api/file'
+import { list_svc, getResourceUrl, del_svc, list_param, list_res as Item } from '@/api/file'
 
 export default defineComponent({
   setup(prop, ctx) {
@@ -53,9 +32,8 @@ export default defineComponent({
     const viewRef = ref<TableViewInstance>()
     const diaglogRef = ref<InstanceType<typeof Diaglog>>()
 
-    const onOpenDialog = (row?: Item) => {
-      DATA.currentItem = row
-      diaglogRef.value?.openDialog(row ? FormOperation.edit : FormOperation.add, row)
+    const onOpenDialog = (path: string) => {
+      diaglogRef.value?.openDialog(path)
     }
     const onSearch = () => {
       viewRef.value?.search()
@@ -108,6 +86,10 @@ export default defineComponent({
           row.loading = false
         })
     }
+    const { deleteSvc } = deleteHook.default(del_svc, onRefesh)
+    const onDelete = (_: number, row: Item) => {
+      deleteSvc(row.path, row.name)
+    }
     //:page reader
     const rander = (): VNodeChild => {
       return (
@@ -135,7 +117,22 @@ export default defineComponent({
                         prepend: () => (
                           <ElButton title="上级目录" icon={ArrowLeftBold} onClick={onRootUp} />
                         ),
-                        append: () => <ElButton title="刷新" icon={Refresh} onClick={onSearch} />
+                        append: () => (
+                          <>
+                            <ElButton
+                              title="刷新"
+                              type="primary"
+                              icon={Refresh}
+                              onClick={onSearch}
+                            />
+                            <ElButton
+                              icon={UploadFilled}
+                              v-permiss={getPermissKey(routeHook.ViewFeature.push)}
+                              onClick={() => onOpenDialog(DATA.query.root)}
+                              v-slots={{ default: '上传' }}
+                            />
+                          </>
+                        )
                       }}
                     </ElInput>
                   </ElCol>
@@ -190,7 +187,9 @@ export default defineComponent({
                       ) : (
                         <ElLink onClick={() => onClickClcFolder(scope.row)}>
                           <ElButton text loading={scope.row.loading}>
-                            {scope.row.size ? byte2Unit(scope.row.size, 'b', 2) : '计算'}
+                            {typeof scope.row.size == 'number'
+                              ? byte2Unit(scope.row.size, 'b', 2)
+                              : '计算'}
                           </ElButton>
                         </ElLink>
                       )
@@ -207,14 +206,6 @@ export default defineComponent({
                   {{
                     default: (scope: tableScope<Item>) => (
                       <>
-                        <ElButton
-                          text={true}
-                          icon={Edit}
-                          onClick={() => onOpenDialog(scope.row)}
-                          v-permiss={getPermissKey(routeHook.ViewFeature.edit)}
-                        >
-                          编辑
-                        </ElButton>
                         <Download
                           authon
                           showPercentage
@@ -222,6 +213,14 @@ export default defineComponent({
                           url={getResourceUrl(scope.row.path, scope.row.isFile)}
                           v-permiss={getPermissKey(routeHook.ViewFeature.download)}
                         />
+                        <ElButton
+                          text={true}
+                          icon={Delete}
+                          onClick={() => onDelete(scope.$index, scope.row)}
+                          v-permiss={getPermissKey(routeHook.ViewFeature.del)}
+                        >
+                          删除
+                        </ElButton>
                       </>
                     )
                   }}
@@ -230,7 +229,12 @@ export default defineComponent({
             ),
             footer: () => (
               <>
-                <Diaglog ref={diaglogRef} title={DATA.query.root} onSaved={onRefesh} />
+                <Diaglog
+                  style="width:50%;height:50%"
+                  ref={diaglogRef}
+                  title={DATA.query.root}
+                  onSaved={onRefesh}
+                />
               </>
             )
           }}

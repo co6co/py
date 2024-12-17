@@ -18,6 +18,8 @@
     增加 sanics.App 类 及 ViewManage
 0.0.7
     BaseView : Content-Disposition，zip，head
+    get_file_partial 方法
+
 ```
 
 webSocket 测试地址
