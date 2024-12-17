@@ -23,7 +23,7 @@ import {
 } from '@element-plus/icons-vue'
 import style from '@/assets/css/file.module.less'
 import { FormOperation, byte2Unit } from 'co6co'
-
+import axios from 'axios'
 import {
   routeHook,
   DictSelectInstance,
@@ -31,7 +31,8 @@ import {
   TableView,
   TableViewInstance,
   Download,
-  download_header_svc
+  download_header_svc,
+  getFileName
 } from 'co6co-right'
 
 import Diaglog from '../components/biz/modifyTask'
@@ -99,7 +100,7 @@ export default defineComponent({
     }
     const onClickClcFolder = (row: Item & { loading?: boolean }) => {
       row.loading = true
-      download_header_svc(getResourceUrl(row.path), true)
+      download_header_svc(getResourceUrl(row.path, true), true)
         .then((res) => {
           row.size = Number(res.headers['content-length'])
         })
@@ -107,7 +108,6 @@ export default defineComponent({
           row.loading = false
         })
     }
-
     //:page reader
     const rander = (): VNodeChild => {
       return (
@@ -215,12 +215,11 @@ export default defineComponent({
                         >
                           编辑
                         </ElButton>
-
                         <Download
                           authon
                           showPercentage
-                          url={getResourceUrl(scope.row.path)}
-                          fileName={scope.row.name}
+                          chunkSize={2 * 1024 * 1024}
+                          url={getResourceUrl(scope.row.path, scope.row.isFile)}
                           v-permiss={getPermissKey(routeHook.ViewFeature.download)}
                         />
                       </>

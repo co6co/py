@@ -16,6 +16,8 @@
     优化 result 模块
 0.0.6
     增加 sanics.App 类 及 ViewManage
+0.0.7
+    BaseView : Content-Disposition，zip，head
 ```
 
 webSocket 测试地址

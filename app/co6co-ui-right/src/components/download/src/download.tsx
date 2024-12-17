@@ -13,6 +13,7 @@ import {
 	download_fragment_svc,
 	download_blob_resource,
 	download_header_svc,
+	getFileName,
 } from '@/api/index';
 import { IDownloadConfig } from '@/constants';
 //定义属性
@@ -31,9 +32,13 @@ const props = {
 		type: Number,
 		default: 5 * 1024 * 1024,
 	},
+	timeout: {
+		type: Number,
+	},
 	fileName: {
 		type: String,
-		required: true,
+		required: false,
+		default: null,
 	},
 	//是否展示进度条
 	showPercentage: {
@@ -60,11 +65,15 @@ export default defineComponent({
 			totalSize: number;
 			fileBlob: Array<any>;
 			percentage: number;
+			fileName: string;
+			timeout?: number;
 		}>({
 			downloading: false,
 			totalSize: 0,
 			fileBlob: [],
 			percentage: 0,
+			timeout: prop.timeout,
+			fileName: prop.fileName,
 		});
 
 		const onDownload = async () => {
@@ -73,40 +82,41 @@ export default defineComponent({
 			DATA.totalSize = 0; //文件总大小
 			DATA.percentage = 0; //下载进度
 
-			download_header_svc(prop.url, prop.authon)
+			download_header_svc(prop.url, prop.authon, DATA.timeout)
 				.then(async (res) => {
 					const header = res.headers;
 					//console.info('contentType:', header)
 					DATA.totalSize = Number(header['content-length']);
 					const contentType = header['content-type'];
 					//console.info('contentType:', contentType)
+					if (!DATA.fileName) {
+						DATA.fileName = getFileName(res.headers['content-disposition']);
+					}
 					if (typeof contentType == 'string')
-						await startDownload(contentType, prop.fileName, prop.chunkSize);
+						await startDownload(contentType, prop.chunkSize);
 				})
 				.catch((error) => {
 					console.warn('失败', error);
 				});
 		};
+
 		const download_fragment = async (start: number, end: number) => {
 			const config: IDownloadConfig = {
+				timeout: DATA.timeout,
 				headers: { Range: `bytes=${start}-${end}` },
 			};
 			const res = await download_fragment_svc(prop.url, config, prop.authon);
 			DATA.fileBlob.push(res.data);
 		};
-		const megre_data = (type: string, fileName: string) => {
+		const megre_data = (type: string) => {
 			//合并
 			const blob = new Blob(DATA.fileBlob, {
 				type: type, //DATA.fileBlob[0].type,
 			});
 			DATA.downloading = false;
-			download_blob_resource({ data: blob, fileName: fileName });
+			download_blob_resource({ data: blob, fileName: DATA.fileName });
 		};
-		const startDownload = async (
-			blobType: string,
-			fileName: string,
-			chunkSize: number
-		) => {
+		const startDownload = async (blobType: string, chunkSize: number) => {
 			let times = Math.ceil(DATA.totalSize / chunkSize);
 			//分段下载
 			for (let index = 0; index < times; index++) {
@@ -119,7 +129,7 @@ export default defineComponent({
 				emit('downloadpercent', DATA.percentage);
 				//存储每一片文件流
 			}
-			megre_data(blobType, fileName);
+			megre_data(blobType);
 		};
 		const defaultText = computed(() => {
 			return DATA.downloading

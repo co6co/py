@@ -2,9 +2,10 @@ from functools import wraps
 from sanic.views import HTTPMethodView  # 基于类的视图
 from sanic.request.form import File  # 基于类的视图
 from sanic import Request
-from co6co_sanic_ext.model.res.result import Result,Page_Result
+from sanic.response import json
+from co6co_sanic_ext.model.res.result import Result, Page_Result
 from co6co_sanic_ext.utils import JSON_util
-from typing import TypeVar, Dict, List, Any, Tuple 
+from typing import TypeVar, Dict, List, Any, Tuple
 import aiofiles
 import os
 import multipart
@@ -14,6 +15,9 @@ from co6co_db_ext.po import BasePO, UserTimeStampedModelPO
 from datetime import datetime
 from co6co.utils.tool_util import list_to_tree, get_current_function_name
 from co6co.utils import log, getDateFolder
+from urllib.parse import quote
+import zipfile
+from pathlib import Path
 
 
 class BaseView(HTTPMethodView):
@@ -39,6 +43,64 @@ class BaseView(HTTPMethodView):
             return True
         except ValueError:
             return False
+
+    def createContentDisposition(self, fileName):
+        """
+        创建内容描述header
+        Content-Disposition:"attachment;filename*=UTF-8....."
+        """
+        encoded_filename = quote(fileName, encoding='utf-8')
+        content_disposition = f'attachment;filename*=UTF-8\'\'{encoded_filename}'
+        headers = {'Content-Disposition': content_disposition, "Access-Control-Expose-Headers": "Content-Disposition"}
+        return headers
+
+    async def zip_directory(self, folder_path, output_zip):
+        """
+        将给定的文件夹压缩成ZIP文件。
+
+        :param folder_path: 要压缩的文件夹路径
+        :param output_zip: 输出的ZIP文件路径
+        """
+        with zipfile.ZipFile(output_zip, 'w', zipfile.ZIP_DEFLATED) as zipf:
+            for root, dirs, files in os.walk(folder_path):
+                for file in files:
+                    # 计算文件的完整路径
+                    file_path = os.path.join(root, file)
+                    # 在ZIP文件中保持原来的目录结构
+                    arcname = os.path.relpath(file_path, folder_path)
+                    zipf.write(file_path, arcname)
+
+    def get_folder_size(self, folder_path):
+        """Return the total size of a folder in bytes using pathlib."""
+        total_size = 0
+        for path in Path(folder_path).rglob('*'):
+            if path.is_file():
+                total_size += path.stat().st_size
+        return total_size
+
+    async def getSize(self,  filePath: str):
+        size = os.path.getsize(filePath) if os.path.isfile(filePath) else self.get_folder_size(filePath)
+        return size
+
+    async def response_size(self, *, request: Request, pathField: str = "path", filePath: str = None):
+        """
+        文件或目录大小
+        如果是文件包括文件名
+        """
+        if filePath == None:
+            args = self.usable_args(request)
+            filePath = args.get(pathField)
+        # return await file(filePath, filename=fileName)  # 使用 file 适用于较小的文件
+        response = json({})
+        size = os.path.getsize(filePath) if os.path.isfile(filePath) else self.get_folder_size(filePath)
+        headers = None
+        if os.path.isfile(filePath):
+            fileName = os.path.basename(filePath)
+            headers = self.createContentDisposition(fileName)
+        response.headers.update({"Accept-Ranges": "bytes", "Content-Length": size, "Content-Type": "application/octet-stream"})
+        if headers != None:
+            response.headers.update(headers)
+        return response
 
     def usable_args(self, request: Request) -> dict:
         """

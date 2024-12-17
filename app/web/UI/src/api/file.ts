@@ -20,9 +20,10 @@ export const list_svc = (
 ): Promise<IResponse<{ res: list_res[]; root: string }>> => {
   return request.post(`${base_URL}`, data)
 }
-export const getResourceUrl = (filePath: string) => {
+export const getResourceUrl = (filePath: string, isFile: boolean) => {
   //return 'http://127.0.0.1/co6co-0.0.1.tgz'
-  return `${getBaseUrl()}${base_URL}?path=${encodeURIComponent(filePath)}`
+  if (isFile) return `${getBaseUrl()}${base_URL}?path=${encodeURIComponent(filePath)}`
+  else return `${getBaseUrl()}${base_URL}/zip?path=${encodeURIComponent(filePath)}`
 }
 export const downFile_svc = (filePath: string, fileName: string) => {
   download_svc(`${getBaseUrl()}${base_URL}?path=${encodeURIComponent(filePath)}`, fileName, true)

@@ -3,6 +3,7 @@ export const INSTALLED_KEY = Symbol('co6co-right');
 
 export interface IDownloadConfig {
 	method?: string;
+	timeout?: number;
 	headers?: RawAxiosRequestHeaders & {
 		Range: string /* `bytes=${start}-${end}`*/;
 	};

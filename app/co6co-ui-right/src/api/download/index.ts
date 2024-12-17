@@ -1,4 +1,4 @@
-import { getToken } from 'co6co'; //, useRequestToken, createAxiosInstance
+import { getToken, SessionKey, Storage } from 'co6co'; //, useRequestToken, createAxiosInstance
 import { IDownloadConfig } from '@/constants';
 import axios, {
 	type ResponseType,
@@ -30,13 +30,13 @@ const _loadResource = (
 	const default_config: {
 		method: Method;
 		url: string;
-		timeout: number;
+		timeout?: number;
 		responseType: 'blob';
 	} = {
 		method: 'get', //请求方式
 		responseType: 'blob',
 		url: url, //请求地址  会加上 baseURL
-		timeout: 3 * 60 * 1000,
+		//timeout: 3 * 60 * 1000,
 	};
 	/**
 	const service = createAxiosInstance();
@@ -44,8 +44,14 @@ const _loadResource = (
 	const res = await service.get(url, { ...default_config, ...axios_config });
 	 */
 	//console.info('Bearer', getToken());
+	const store = new Storage();
 	const header = authon
-		? { headers: { Authorization: `Bearer ${getToken()}` } }
+		? {
+				headers: {
+					Authorization: `Bearer ${getToken()}`,
+					Session: store.get(SessionKey),
+				},
+		  }
 		: { headers: {} };
 	const headers = { ...header.headers, ...axios_config?.headers };
 	return axios({
@@ -101,19 +107,40 @@ export const loadResource = (
  * @param authon 认证
  * @returns
  */
-export const download_header_svc = (url: string, authon?: boolean) => {
+export const download_header_svc = (
+	url: string,
+	authon?: boolean,
+	timeout?: number
+) => {
 	const default_config: {
 		method: Method;
 		baseURL: string;
 		url: string;
-		timeout: number;
+		timeout?: number;
 	} = {
 		baseURL: '',
 		url: url, //请求地址  会加上 baseURL
 		method: 'HEAD', //请求方式
-		timeout: 30 * 1000,
+		timeout: timeout,
 	};
 	return _loadResource(url, authon, { ...default_config });
+};
+export const getFileName = (contentDisposition: string) => {
+	if (contentDisposition) {
+		// Split the Content-Disposition header into parts.
+		const parts = contentDisposition.split(';').map((part) => part.trim());
+		// Look for the 'filename=' or 'filename*=' part.
+		for (let part of parts) {
+			if (part.toLowerCase().startsWith('filename=')) {
+				// Decode the filename using URL decode, and remove quotes.
+				return decodeURIComponent(part.split('=')[1].replace(/"/g, ''));
+			} else if (part.toLowerCase().startsWith("filename*=utf-8''")) {
+				// Decode the filename using URL decode, and remove the 'UTF-8'' prefix.
+				return decodeURIComponent(part.substring("filename*=UTF-8''".length));
+			}
+		}
+	}
+	return '未命名';
 };
 /**
  * 下载文件
@@ -132,13 +159,13 @@ export const download_fragment_svc = (
 		baseURL: string;
 		url: string;
 		responseType: ResponseType;
-		timeout: number;
+		timeout?: number;
 	} = {
 		method: 'get', //请求方式
 		url: url, //请求地址  会加上 baseURL
 		responseType: 'blob', //文件流将会被转成blob
 		baseURL: '',
-		timeout: 30 * 1000,
+		//timeout: 30 * 1000,
 	};
 	//Object.assign({},default_config,config)
 	return _loadResource(url, authon, { ...default_config, ...config });
