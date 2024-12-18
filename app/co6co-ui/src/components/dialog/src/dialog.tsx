@@ -59,7 +59,7 @@ export default defineComponent({
 								diaglogData.visible = false;
 								ctx.emit('close');
 							}}
-							v-slots={{ default: prop.closeTxt }}
+							v-slots={{ default: () => prop.closeTxt }}
 						/>
 						{ctx.slots.buttons ? ctx.slots.buttons() : null}
 					</span>

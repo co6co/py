@@ -113,3 +113,11 @@ export type Point = {
 	lng: number; // 经度
 	lat: number; // 纬度
 };
+
+export enum requestContentType {
+	json = 'application/json;charset=utf-8',
+	multipart = 'multipart/form-data',
+	form = 'x-www-form-urlencoded;charset=UTF-8',
+	text = 'text/plain',
+	xml = 'application/xml',
+}

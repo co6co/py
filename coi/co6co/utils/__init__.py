@@ -9,7 +9,8 @@ import inspect
 import os
 import io
 import sys
-from typing import IO, Iterable, Callable, Tuple, Generator,List
+import asyncio
+from typing import IO, Iterable, Callable, Tuple, Generator, List
 from .log import warn
 
 
@@ -52,6 +53,15 @@ def isCallable(func):
     return hasattr(func, "__call__")
 
 
+async def async_iterator(sync_iter: Iterable):
+    """
+    同步迭代器 转异步迭代器
+    @param sync_iter 同步迭代器
+    """
+    for item in sync_iter:
+        yield await asyncio.to_thread(lambda: item)
+
+
 def is_async(func):
     """
     方法是否是异步的
@@ -67,7 +77,7 @@ def getWorkDirectory():
     return current_directory
 
 
-def find_files(root, *ignoreDirs: str, filterDirFunction: Callable[[str], bool] = None, filterFileFunction: Callable[[str], bool] = None) -> Generator[Tuple[str, List, List], str,None]:
+def find_files(root, *ignoreDirs: str, filterDirFunction: Callable[[str], bool] = None, filterFileFunction: Callable[[str], bool] = None) -> Generator[Tuple[str, List, List], str, None]:
     """
     root: 根目录
     filterDirFunction  (folderName:str)->bool 
@@ -118,7 +128,8 @@ def read_stream(stream: IO[bytes], size: int = -1) -> Iterable[bytes]:
             break
         yield chunk
 
-def compare_versions(v1:str, v2:str):
+
+def compare_versions(v1: str, v2: str):
     """
     比较版本号
     return v1>v2=1,v1<v2=-1,v1<v2=0
@@ -133,7 +144,7 @@ def compare_versions(v1:str, v2:str):
             return 1
         elif part1 < part2:
             return -1
-    
+
     # 如果长度不同，且前面的部分都相同，则更长的那个版本号更大
     if len(v1_parts) > len(v2_parts):
         return 1

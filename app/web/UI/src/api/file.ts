@@ -1,4 +1,4 @@
-import request from '@/utils/request'
+import request, { serviceMultipart } from '@/utils/request'
 
 import { getBaseUrl, type IResponse } from 'co6co'
 import { download_svc } from 'co6co-right'
@@ -33,11 +33,13 @@ export const del_svc = (path: string): Promise<IResponse> => {
 }
 
 //断点续传
-export const upload_svc = (path: string, data: FormData): Promise<IResponse> => {
-  return request.put(`${base_URL}/upload?path=${encodeURIComponent(path)}`, data)
+export const upload_svc = (data: FormData): Promise<IResponse> => {
+  return serviceMultipart.put(`${base_URL}/upload`, data)
 }
-export const get_upload_chunks_svc = (
-  path: string
-): Promise<IResponse<{ uploadedChunks: Array<number> }>> => {
-  return request.get(`${base_URL}/upload?path=${encodeURIComponent(path)}`)
+export const get_upload_chunks_svc = (data: {
+  fileName: string
+  totalChunks: number
+  uploadPath: string
+}): Promise<IResponse<{ uploadedChunks: Array<number> }>> => {
+  return request.post(`${base_URL}/upload/query`, data)
 }

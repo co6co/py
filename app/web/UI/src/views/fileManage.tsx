@@ -129,7 +129,7 @@ export default defineComponent({
                               icon={UploadFilled}
                               v-permiss={getPermissKey(routeHook.ViewFeature.push)}
                               onClick={() => onOpenDialog(DATA.query.root)}
-                              v-slots={{ default: '上传' }}
+                              v-slots={{ default: () => '上传' }}
                             />
                           </>
                         )

@@ -9,7 +9,7 @@ import { type ElLoading, ElMessage } from 'element-plus';
 import JSONbig from 'json-bigint';
 import { getToken, removeToken } from './auth';
 import { getStoreInstance } from '@/hooks';
-import { IResponse } from '@/constants';
+import { IResponse, requestContentType } from '@/constants';
 
 /**
  * 获取 apiBaseURL
@@ -28,23 +28,24 @@ const useDefaultResponseBigNumber = (service: AxiosInstance) => {
 	];
 };
 
-export const useDefaultRequestJson = (service: AxiosInstance) => {
+/**
+ *
+ */
+export const useRequesContentType = (
+	service: AxiosInstance,
+	type: string = 'application/json;charset=utf-8'
+) => {
 	service.defaults.transformRequest = [
 		(data: any, headers: any) => {
-			headers['Content-Type'] = 'application/json;charset=utf-8';
-			return JSONbig.stringify(data);
+			headers['Content-Type'] = type;
+			if (type.includes('json')) return JSONbig.stringify(data);
+			else return data;
 		},
 	];
 };
 export const useMultipartRequest = (service: AxiosInstance) => {
-	service.defaults.transformRequest = [
-		(data: any, headers) => {
-			headers['Content-Type'] = 'multipart/form-data';
-			return data;
-		},
-	];
+	useRequesContentType(service, requestContentType.multipart);
 };
-
 export const useRequestToken = (config: InternalAxiosRequestConfig) => {
 	//发送请求之前
 	const token = getToken();
@@ -114,7 +115,8 @@ export const createAxios = (config?: CreateAxiosDefaults<any> | undefined) => {
  */
 export const createServiceInstance = (
 	timeout: number = 5000,
-	tip: boolean = true
+	tip: boolean = true,
+	contentType: requestContentType = requestContentType.json
 ) => {
 	const baseUrl = getBaseUrl();
 	const config = {
@@ -124,7 +126,7 @@ export const createServiceInstance = (
 
 	let elLoading: ReturnType<typeof ElLoading.service>;
 	const service = createAxios(config);
-	useDefaultRequestJson(service);
+	useRequesContentType(service, contentType);
 	useDefaultResponseBigNumber(service);
 	//增加请求拦截器
 	service.interceptors.request.use(useRequestToken, (error: AxiosError) => {
@@ -160,7 +162,8 @@ export const createServiceInstance = (
  */
 export const createAxiosInstance = (
 	baseUrl?: string,
-	timeout: number = 5000
+	timeout: number = 5000,
+	contentType: requestContentType = requestContentType.json
 ) => {
 	if (!baseUrl) baseUrl = getBaseUrl();
 	const config = {
@@ -168,7 +171,7 @@ export const createAxiosInstance = (
 		timeout: timeout,
 	};
 	const service: AxiosInstance = createAxios(config);
-	useDefaultRequestJson(service);
+	useRequesContentType(service, contentType);
 	useDefaultResponseBigNumber(service);
 	return service;
 };
