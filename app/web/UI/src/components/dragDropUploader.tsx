@@ -132,7 +132,7 @@ export default defineComponent({
       return root
     }
     const uploadFileChunks = async (
-      chunks: [{ index: number; value: Blob }],
+      chunks: Array<{ index: number; value: Blob }>,
       subPath: string,
       fileName: string,
       totalChunks: number,
