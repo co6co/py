@@ -11,6 +11,7 @@ from model.pos.tables import TaskPO
 from view_model._filters.sysTask import Filter
 from co6co_permissions.view_model.aop import exist, ObjectExistRoute
 from view_model.tools import data
+from model.enum import User_category
 
 
 class Views(AuthMethodView):
@@ -39,7 +40,7 @@ class Views(AuthMethodView):
 class View(AuthMethodView):
     routePath = "/<category:int>"
 
-    async def get(self, request: Request, category: int):
+    async def post(self, request: Request, category: int):
         json: dict = request.json
         lst = json.get("list")
         danList: list = json.get("dans")

@@ -1,4 +1,4 @@
-import { computed, defineComponent, VNodeChild } from 'vue'
+import { computed, defineComponent, nextTick, VNodeChild } from 'vue'
 import { ref, reactive, onMounted } from 'vue'
 import { ElButton, ElInput, ElTableColumn, ElRow, ElCol, ElLink, ElTooltip } from 'element-plus'
 import { Search, Edit, ArrowLeftBold, Refresh, Delete, UploadFilled } from '@element-plus/icons-vue'
@@ -15,14 +15,19 @@ import {
 } from 'co6co-right'
 
 import Diaglog from '@/components/dragDropUploader'
-
 import { list_svc, getResourceUrl, del_svc, list_param, list_res as Item } from '@/api/file'
 
 export default defineComponent({
   setup(prop, ctx) {
-    const DATA = reactive<{ query: list_param; currentItem?: Item; split: RegExp }>({
+    const DATA = reactive<{
+      query: list_param
+      currentItem?: Item
+      split: RegExp
+      isMask: boolean
+    }>({
       query: { root: 'I:' },
-      split: /[/\\]/
+      split: /[/\\]/,
+      isMask: false
     })
     //:use
     const { getPermissKey } = routeHook.usePermission()
@@ -32,8 +37,9 @@ export default defineComponent({
     const viewRef = ref<TableViewInstance>()
     const diaglogRef = ref<InstanceType<typeof Diaglog>>()
 
-    const onOpenDialog = (path: string) => {
-      diaglogRef.value?.openDialog(path)
+    const onOpenDialog = (clearFile: boolean = true) => {
+      if (clearFile) diaglogRef.value?.clearFile()
+      diaglogRef.value?.openDialog(DATA.query.root)
     }
     const onSearch = () => {
       viewRef.value?.search()
@@ -90,155 +96,172 @@ export default defineComponent({
     const onDelete = (_: number, row: Item) => {
       deleteSvc(row.path, row.name)
     }
+    const onDrop = (event) => {
+      diaglogRef.value?.clearFile()
+      diaglogRef.value?.onDrop(event)
+
+      DATA.isMask = false
+      if (diaglogRef.value?.hasFile()) {
+        onOpenDialog(false)
+      }
+    }
+
+    const onDragOver = (event) => {
+      DATA.isMask = true
+      diaglogRef.value?.onDragOver(event)
+    }
     //:page reader
     const rander = (): VNodeChild => {
       return (
-        <TableView
-          dataApi={list_svc}
-          ref={viewRef}
-          query={DATA.query}
-          showPaged={false}
-          resultFilter={ontresultFileter}
-        >
-          {{
-            header: () => (
-              <>
-                <ElRow>
-                  <ElCol span={12}>
-                    <ElInput
-                      v-model={DATA.query.root}
-                      class={isEditing.value ? style.editor : style.show}
-                      value={isEditing.value ? DATA.query.root : previewRoot.value}
-                      onFocus={handleFocus}
-                      onBlur={handleBlur}
-                      onChange={onSearch}
-                    >
-                      {{
-                        prepend: () => (
-                          <ElButton title="上级目录" icon={ArrowLeftBold} onClick={onRootUp} />
-                        ),
-                        append: () => (
-                          <>
-                            <ElButton
-                              title="刷新"
-                              type="primary"
-                              icon={Refresh}
-                              onClick={onSearch}
-                            />
-                            <ElButton
-                              icon={UploadFilled}
-                              v-permiss={getPermissKey(routeHook.ViewFeature.push)}
-                              onClick={() => onOpenDialog(DATA.query.root)}
-                              v-slots={{ default: () => '上传' }}
-                            />
-                          </>
-                        )
-                      }}
-                    </ElInput>
-                  </ElCol>
-                  <ElCol span={6} offset={6}>
-                    <ElInput
-                      style="width: 160px"
-                      clearable
-                      v-model={DATA.query.name}
-                      placeholder="搜索文件/目录"
-                      class="handle-input"
-                    />
-                    <ElButton type="primary" icon={Search} onClick={onSearch}>
-                      搜索
-                    </ElButton>
-                  </ElCol>
-                </ElRow>
-              </>
-            ),
-            default: () => (
-              <>
-                <ElTableColumn label="序号" width={55} align="center">
-                  {{
-                    default: (scope: tableScope) => viewRef.value?.rowIndex(scope.$index)
-                  }}
-                </ElTableColumn>
-                <ElTableColumn
-                  label="名称"
-                  prop="name"
-                  align="center"
-                  width={180}
-                  showOverflowTooltip={true}
-                >
-                  {{
-                    default: (scope: { row: Item }) => (
-                      <ElTooltip effect="dark" content={scope.row.path} showAfter={1500}>
-                        {scope.row.isFile ? (
-                          scope.row.name
-                        ) : (
-                          <ElLink onClick={() => onClickSubFolder(scope.row.path)}>
-                            {scope.row.name}
-                          </ElLink>
-                        )}
-                      </ElTooltip>
-                    )
-                  }}
-                </ElTableColumn>
-                <ElTableColumn label="大小" prop="name" align="center" width={180}>
-                  {{
-                    default: (scope: { row: Item & { loading?: boolean } }) =>
-                      scope.row.isFile ? (
-                        byte2Unit(scope.row.size, 'b', 2)
-                      ) : (
-                        <ElLink onClick={() => onClickClcFolder(scope.row)}>
-                          <ElButton text loading={scope.row.loading}>
-                            {typeof scope.row.size == 'number'
-                              ? byte2Unit(scope.row.size, 'b', 2)
-                              : '计算'}
-                          </ElButton>
-                        </ElLink>
+        <div onDrop={onDrop} onDragover={onDragOver}>
+          {DATA.isMask ? (
+            <div class={[style['upload-box'], 'el-overlay']}>
+              <span>上传文件或文件夹到当前文夹</span>
+            </div>
+          ) : (
+            <></>
+          )}
+          <TableView
+            dataApi={list_svc}
+            ref={viewRef}
+            query={DATA.query}
+            showPaged={false}
+            resultFilter={ontresultFileter}
+          >
+            {{
+              header: () => (
+                <>
+                  <ElRow>
+                    <ElCol span={12}>
+                      <ElInput
+                        v-model={DATA.query.root}
+                        class={isEditing.value ? style.editor : style.show}
+                        value={isEditing.value ? DATA.query.root : previewRoot.value}
+                        onFocus={handleFocus}
+                        onBlur={handleBlur}
+                        onChange={onSearch}
+                      >
+                        {{
+                          prepend: () => (
+                            <ElButton title="上级目录" icon={ArrowLeftBold} onClick={onRootUp} />
+                          ),
+                          append: () => (
+                            <>
+                              <ElButton
+                                title="刷新"
+                                type="primary"
+                                icon={Refresh}
+                                onClick={onSearch}
+                              />
+                              <ElButton
+                                icon={UploadFilled}
+                                v-permiss={getPermissKey(routeHook.ViewFeature.push)}
+                                onClick={() => onOpenDialog()}
+                                v-slots={{ default: () => '上传' }}
+                              />
+                            </>
+                          )
+                        }}
+                      </ElInput>
+                    </ElCol>
+                    <ElCol span={6} offset={6}>
+                      <ElInput
+                        style="width: 160px"
+                        clearable
+                        v-model={DATA.query.name}
+                        placeholder="搜索文件/目录"
+                        class="handle-input"
+                      />
+                      <ElButton type="primary" icon={Search} onClick={onSearch}>
+                        搜索
+                      </ElButton>
+                    </ElCol>
+                  </ElRow>
+                </>
+              ),
+              default: () => (
+                <>
+                  <ElTableColumn label="序号" width={55} align="center">
+                    {{
+                      default: (scope: tableScope) => viewRef.value?.rowIndex(scope.$index)
+                    }}
+                  </ElTableColumn>
+                  <ElTableColumn
+                    label="名称"
+                    prop="name"
+                    align="center"
+                    width={180}
+                    showOverflowTooltip={true}
+                  >
+                    {{
+                      default: (scope: { row: Item }) => (
+                        <ElTooltip effect="dark" content={scope.row.path} showAfter={1500}>
+                          {scope.row.isFile ? (
+                            scope.row.name
+                          ) : (
+                            <ElLink onClick={() => onClickSubFolder(scope.row.path)}>
+                              {scope.row.name}
+                            </ElLink>
+                          )}
+                        </ElTooltip>
                       )
-                  }}
-                </ElTableColumn>
+                    }}
+                  </ElTableColumn>
+                  <ElTableColumn label="大小" prop="name" align="center" width={180}>
+                    {{
+                      default: (scope: { row: Item & { loading?: boolean } }) =>
+                        scope.row.isFile ? (
+                          byte2Unit(scope.row.size, 'b', 2)
+                        ) : (
+                          <ElLink onClick={() => onClickClcFolder(scope.row)}>
+                            <ElButton text loading={scope.row.loading}>
+                              {typeof scope.row.size == 'number'
+                                ? byte2Unit(scope.row.size, 'b', 2)
+                                : '计算'}
+                            </ElButton>
+                          </ElLink>
+                        )
+                    }}
+                  </ElTableColumn>
 
-                <ElTableColumn
-                  prop="updateTime"
-                  label="修改时间"
-                  width={160}
-                  show-overflow-tooltip={true}
-                />
-                <ElTableColumn label="操作" width={260} align="center" fixed="right">
-                  {{
-                    default: (scope: tableScope<Item>) => (
-                      <>
-                        <Download
-                          authon
-                          showPercentage
-                          chunkSize={2 * 1024 * 1024}
-                          url={getResourceUrl(scope.row.path, scope.row.isFile)}
-                          v-permiss={getPermissKey(routeHook.ViewFeature.download)}
-                        />
-                        <ElButton
-                          text={true}
-                          icon={Delete}
-                          onClick={() => onDelete(scope.$index, scope.row)}
-                          v-permiss={getPermissKey(routeHook.ViewFeature.del)}
-                        >
-                          删除
-                        </ElButton>
-                      </>
-                    )
-                  }}
-                </ElTableColumn>
-              </>
-            ),
-            footer: () => (
-              <>
-                <Diaglog
-                  style="width:50%;height:50%"
-                  ref={diaglogRef}
-                  title={DATA.query.root}
-                  onSaved={onRefesh}
-                />
-              </>
-            )
-          }}
-        </TableView>
+                  <ElTableColumn
+                    prop="updateTime"
+                    label="修改时间"
+                    width={160}
+                    show-overflow-tooltip={true}
+                  />
+                  <ElTableColumn label="操作" width={260} align="center" fixed="right">
+                    {{
+                      default: (scope: tableScope<Item>) => (
+                        <>
+                          <Download
+                            authon
+                            showPercentage
+                            chunkSize={2 * 1024 * 1024}
+                            url={getResourceUrl(scope.row.path, scope.row.isFile)}
+                            v-permiss={getPermissKey(routeHook.ViewFeature.download)}
+                          />
+                          <ElButton
+                            text={true}
+                            icon={Delete}
+                            onClick={() => onDelete(scope.$index, scope.row)}
+                            v-permiss={getPermissKey(routeHook.ViewFeature.del)}
+                            v-slots={{ default: () => '删除' }}
+                          />
+                        </>
+                      )
+                    }}
+                  </ElTableColumn>
+                </>
+              ),
+              footer: () => (
+                <>
+                  <Diaglog style="width:50%;height:70%;" ref={diaglogRef} onSaved={onRefesh} />
+                </>
+              )
+            }}
+          </TableView>
+        </div>
       )
     }
     return rander

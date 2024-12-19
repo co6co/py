@@ -8,7 +8,7 @@ import {
 } from 'vue';
 
 import { Download } from '@element-plus/icons-vue';
-import { ElButton } from 'element-plus';
+import { ElButton, ElMessageBox } from 'element-plus';
 import {
 	download_fragment_svc,
 	download_blob_resource,
@@ -75,7 +75,16 @@ export default defineComponent({
 			timeout: prop.timeout,
 			fileName: prop.fileName,
 		});
-
+		const onDownLoad2 = () => {
+			const confirm = ElMessageBox.confirm(`确定下载？`, '提示', {
+				type: 'warning',
+			});
+			confirm
+				.then(async (res) => {
+					await onDownload();
+				})
+				.finally(() => {});
+		};
 		const onDownload = async () => {
 			DATA.fileBlob = [];
 			DATA.downloading = true;
@@ -141,7 +150,7 @@ export default defineComponent({
 					text={true}
 					icon={Download}
 					loading={DATA.downloading}
-					onClick={onDownload}>
+					onClick={onDownLoad2}>
 					{slots.default ? slots.default : defaultText.value}
 				</ElButton>
 			);

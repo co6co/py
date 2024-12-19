@@ -1,0 +1,26 @@
+.diaglog-box {
+	display: flex;
+	flex-direction: column;
+	:global {
+		.el-dialog__header,
+		.el-dialog__footer {
+			flex: 0 0 auto; /* 确保 header 和 footer 不会被拉伸 */
+		}
+
+		.el-dialog__body {
+			flex: 1 1 auto; /* body 占据剩余空间 */
+			overflow-y: hidden;
+			/*overflow-y: auto;*/ /* 如果内容超出则显示滚动条 */
+		}
+		.el-scrollbar {
+			display: flex;
+			.el-scrollbar__wrap {
+				flex: 1 1 auto;
+				display: flex;
+				.el-scrollbar__view {
+					flex: 1 1 auto;
+				}
+			}
+		}
+	}
+}

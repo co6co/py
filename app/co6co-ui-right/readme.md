@@ -52,4 +52,6 @@
 0.0.18
     1. 优化tableView组件
     2. 优化Download相关
+0.0.19
+    file管理 准备
 ```

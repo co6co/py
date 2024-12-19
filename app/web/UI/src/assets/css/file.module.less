@@ -6,3 +6,63 @@
   background: #eee;
   margin: -1px -11px;
 }
+
+.upload-box {
+  border: 4px dashed var(--el-color-primary);
+  display: flex;
+  flex-direction: column;
+  span {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    font-size: 40px;
+    color: rgb(155, 155, 155);
+    margin: -50px 0 0 -200px;
+  }
+}
+
+.drop-Box {
+  border: none;
+  display: flex;
+  flex-direction: column;
+  height: 100%; /* 根据需要调整对话框的高度 */
+  &:global(.hasFile) {
+    :global {
+      .el-card__body {
+        border: 1px solid var(--el-color-primary);
+      }
+    }
+  }
+  &:global(.canelUpload) {
+    :global {
+      .el-card__body {
+        border-color: red;
+      }
+    }
+  }
+  :global {
+    .el-card__header {
+      padding: 5px;
+      border: none;
+      flex: 0 0 auto;
+      .tl {
+        text-align: left;
+      }
+      .tr {
+        text-align: right;
+      }
+    }
+    span.small {
+      color: rgb(155, 155, 155);
+    }
+    .el-scrollbar__wrap {
+      flex: 1 1 auto;
+    }
+    .el-card__body {
+      flex: 1 1 auto;
+      overflow: hidden;
+      padding: 2px;
+      border: 2px dashed var(--el-color-primary);
+    }
+  }
+}

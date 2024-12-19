@@ -1,6 +1,7 @@
 import { type SlotsType, defineComponent, reactive, VNode } from 'vue';
 import { ElButton, ElDialog, ElScrollbar } from 'element-plus';
 
+import style from '@/assets/css/dialog.module.less';
 export interface IDialogDataType {
 	visible: boolean;
 	title?: string;
@@ -72,13 +73,12 @@ export default defineComponent({
 			 */
 			return (
 				<ElDialog
+					class={style['diaglog-box']}
 					title={prop.title}
 					v-model={diaglogData.visible}
 					v-slots={dialogSlots}>
 					<ElScrollbar>
-						<div style="max-height:55vh">
-							{ctx.slots.default ? ctx.slots.default() : null}
-						</div>
+						<>{ctx.slots.default ? ctx.slots.default() : null}</>
 					</ElScrollbar>
 				</ElDialog>
 			);

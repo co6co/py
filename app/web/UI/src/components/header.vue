@@ -45,7 +45,7 @@
           </template>
         </el-dropdown>
       </div>
-      <history-dialog ref="dialogRef" />
+      <history-dialog ref="dialogRef" style="width: 50%; height: 60%" />
     </div>
   </div>
 </template>
