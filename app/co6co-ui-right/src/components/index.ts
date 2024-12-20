@@ -14,3 +14,4 @@ export * from './dictSelect';
 export * from './download';
 export * from './table';
 export * from './txtView';
+export * from './dragUploader';

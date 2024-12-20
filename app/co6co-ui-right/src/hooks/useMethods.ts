@@ -51,6 +51,12 @@ export const usePageFeature = () => {
 		},
 		{
 			uid: ++index,
+			key: ViewFeature.upload,
+			label: '上传',
+			value: ViewFeature.upload,
+		},
+		{
+			uid: ++index,
 			key: ViewFeature.add,
 			label: '增加',
 			value: ViewFeature.add,

@@ -7,7 +7,11 @@ import {
 	ConfigView,
 	DictTypeView,
 	DictView,
+	FileManageView,
 } from './view';
+/**
+ * 应用通过该对象获取所有的页面视图
+ */
 export const views = {
 	UserTableView,
 	RoleView,
@@ -16,6 +20,7 @@ export const views = {
 	ConfigView,
 	DictTypeView,
 	DictView,
+	FileManageView,
 };
 
 // 定义多个函数签名

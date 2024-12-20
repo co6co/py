@@ -1,0 +1,23 @@
+#view {
+  --uncheck-color: rgb(199, 28, 28);
+  --checked-color: red;
+  :global {
+    .el-checkbox-button {
+      margin: 0 2px;
+    }
+    .el-checkbox-button.is-circle {
+      .el-checkbox-button__inner {
+        border-radius: 50%;
+        padding: 8px;
+        width: 32px;
+        border-color: var(--uncheck-color);
+      }
+    }
+    .el-checkbox-button.is-checked {
+      .el-checkbox-button__inner {
+        background-color: var(--checked-color);
+        border-color: yellow;
+      }
+    }
+  }
+}

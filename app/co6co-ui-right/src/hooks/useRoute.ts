@@ -6,6 +6,8 @@ import { useRouter } from 'vue-router';
 /**
  * VIEW 功能
  * 为控制页面按钮权限
+ *
+ * 需要调整 还需调整 useMethods
  * @returns
  */
 export enum ViewFeature {
@@ -27,6 +29,7 @@ export enum ViewFeature {
 	downloads = 'downloads',
 	//** 下载 */
 	download = 'download',
+	upload = 'upload',
 	//** 关联 */
 	associated = 'associated',
 	//** 重置 */
@@ -118,11 +121,15 @@ export const usePermission = () => {
 	const getCurrentViewFeature = () => {
 		return getViewFeature(currentRoute.path);
 	};
+	/**
+	 * 根据URLpath去找当前页面存储的权限字
+	 * @param feature
+	 * @returns
+	 */
 	const getPermissKey = (feature: ViewFeature) => {
 		let result = getPermissionKey(feature, currentRoute.path);
 		return result;
 	};
-
 	return { getPermissKey, getCurrentViewFeature };
 };
 

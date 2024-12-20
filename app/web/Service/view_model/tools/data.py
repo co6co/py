@@ -1,4 +1,39 @@
 import copy
+from co6co.enums import Base_Enum, Base_EC_Enum
+
+
+class categoryDesc:
+    select: int = None
+    dan: int = None
+    z: int = None
+    b: int = None
+
+    def __init__(self):
+        self.select = 0
+        self.dan = 0
+        self.z = 0
+        self.b = 0
+
+
+class category(Base_EC_Enum):
+    """
+    用户类别
+    """
+    zx_10_0_7_6 = "zx_10_0_7_6",  "矩阵_10_0_7_6", 0
+    zx_15_0_7_5 = "zx_15_0_7_5", "矩阵_15_0_7_5", 1
+    zx_10_1_7_6 = "zx_10_1_7_6", "矩阵_10_1_7_6", 2
+
+    def toDesc(self):
+        key: str = self.getKey()
+        arr = key.split("_")
+        result = categoryDesc()
+        result.select = arr[1]
+        result.dan = arr[2]
+        result.z = arr[3]
+        result.b = arr[4]
+        return result
+
+
 arr_10_7_6 = [
     [1, 2, 3, 5, 6, 9, 10],
     [3, 5, 6, 7, 8, 9, 10],

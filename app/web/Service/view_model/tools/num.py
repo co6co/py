@@ -12,6 +12,7 @@ from view_model._filters.sysTask import Filter
 from co6co_permissions.view_model.aop import exist, ObjectExistRoute
 from view_model.tools import data
 from model.enum import User_category
+from co6co.utils import log
 
 
 class Views(AuthMethodView):
@@ -39,6 +40,21 @@ class Views(AuthMethodView):
 
 class View(AuthMethodView):
     routePath = "/<category:int>"
+    allCategoryList = [0, 1, 2]
+
+    async def get(self, request: Request, category: int):
+        if category == -1:
+            return self.response_json(Result.success(data.category.to_dict_list()))
+        if category not in self.allCategoryList:
+            return self.response_json(Result.fail(self.allCategoryList, "所给类别不在一直类别中"))
+
+        category: data.category = data.category.val2enum(category)
+
+        log.warn("key->", category.getKey())
+        log.warn("value->", category.getValue())
+        log.warn("k->", category.key)
+        log.warn("v->", category.val)
+        return self.response_json(Result.success(category.toDesc()))
 
     async def post(self, request: Request, category: int):
         json: dict = request.json
