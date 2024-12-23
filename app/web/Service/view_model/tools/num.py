@@ -46,26 +46,15 @@ class View(AuthMethodView):
         if category == -1:
             return self.response_json(Result.success(data.category.to_dict_list()))
         if category not in self.allCategoryList:
-            return self.response_json(Result.fail(self.allCategoryList, "所给类别不在一直类别中"))
+            return self.response_json(Result.fail(self.allCategoryList, "所给类别不在预置类别中"))
 
         category: data.category = data.category.val2enum(category)
-
-        log.warn("key->", category.getKey())
-        log.warn("value->", category.getValue())
-        log.warn("k->", category.key)
-        log.warn("v->", category.val)
         return self.response_json(Result.success(category.toDesc()))
 
     async def post(self, request: Request, category: int):
         json: dict = request.json
         lst = json.get("list")
-        danList: list = json.get("dans")
-        rest = []
-        if category == 0:
-            rest = data.padding(lst, data.arr_10_7_6)
-        elif category == 1:
-            rest = data.padding(lst, data.arr_15_7_5)
-        elif category == 2:
-            rest = data.padding(lst, data.arr_10_1_7_6, *danList)
-
+        danList: list = json.get("dans", [])
+        category: data.category = data.category.val2enum(category)
+        rest = category.padding(lst,  *danList)
         return self.response_json(Result.success(rest))

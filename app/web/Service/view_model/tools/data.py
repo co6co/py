@@ -1,5 +1,6 @@
 import copy
-from co6co.enums import Base_Enum, Base_EC_Enum
+from co6co.enums import Base_EC_Enum
+from co6co.utils.modules import module
 
 
 class categoryDesc:
@@ -24,7 +25,7 @@ class category(Base_EC_Enum):
     zx_10_1_7_6 = "zx_10_1_7_6", "矩阵_10_1_7_6", 2
 
     def toDesc(self):
-        key: str = self.getKey()
+        key: str = self.key
         arr = key.split("_")
         result = categoryDesc()
         result.select = arr[1]
@@ -33,8 +34,31 @@ class category(Base_EC_Enum):
         result.b = arr[4]
         return result
 
+    @staticmethod
+    def _padding(lst: list, arr: list, *dan: int):
+        tmpArr = copy.deepcopy(arr)
+        for ar in tmpArr:
+            flag = 0
+            for index, a in enumerate(ar):
+                if "*" in str(a):
+                    ar[index] = dan[flag]
+                    flag += 1
+                    continue
+                for index2, val in enumerate(lst):
+                    if a == (index2+1):
+                        ar[index] = val
+                        break
+        return tmpArr
 
-arr_10_7_6 = [
+    def padding(self, lst: list,   *dan: int):
+        mod = module(__name__)
+        listAll = mod.filter_object(lambda x: isinstance(x, list))
+        for key, val in listAll:
+            if key == self.name:
+                return category._padding(lst, val, *dan)
+
+
+zx_10_0_7_6 = [
     [1, 2, 3, 5, 6, 9, 10],
     [3, 5, 6, 7, 8, 9, 10],
     [2, 3, 4, 5, 6, 9, 10],
@@ -44,7 +68,7 @@ arr_10_7_6 = [
     [1, 2, 4, 7, 8, 9, 10],
     [1, 2, 3, 4, 6, 7, 8]
 ]
-arr_15_7_5 = [
+zx_15_0_7_5 = [
     [1, 5, 7, 8, 10, 11, 12],
     [2, 4, 7, 8, 9, 10, 12],
     [2, 3, 5, 10, 12, 13, 14],
@@ -70,7 +94,7 @@ arr_15_7_5 = [
     [1, 2, 4, 5, 6, 7, 13],
     [2, 3, 4, 5, 6, 9, 15]
 ]
-arr_10_1_7_6 = [
+zx_10_1_7_6 = [
     [1, 2, 3, 4, 8, 9, "10*"],
     [1, 5, 6, 7, 8, 9, "10*"],
     [1, 2, 3, 4, 5, 6, "10*"],
@@ -79,23 +103,6 @@ arr_10_1_7_6 = [
     [3, 5, 6, 7, 8, 9, "10*"],
     [2, 4, 5, 6, 7, 8, "10*"]
 ]
-
-
-def padding(lst: list, arr: list, *dan: int):
-    tmpArr = copy.deepcopy(arr)
-    for ar in tmpArr:
-        flag = 0
-        for index, a in enumerate(ar):
-            if "*" in str(a):
-                ar[index] = dan[flag]
-                flag += 1
-                continue
-            for index2, val in enumerate(lst):
-                if a == (index2+1):
-                    ar[index] = val
-                    break
-    return tmpArr
-
 
 '''
 测试

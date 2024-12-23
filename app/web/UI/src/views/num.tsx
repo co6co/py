@@ -2,11 +2,13 @@ import { computed, defineComponent, nextTick, VNodeChild, watch } from 'vue'
 import { ref, reactive, onMounted } from 'vue'
 import {
   ElButton,
-  ElInput,
   ElContainer,
   ElMain,
+  ElForm,
   ElSelect,
+  ElInput,
   ElOption,
+  ElFormItem,
   ElInputNumber,
   ElCheckboxGroup,
   ElCheckboxButton
@@ -101,21 +103,51 @@ export default defineComponent({
       return (
         <ElContainer id={style.view}>
           <ElMain>
-            <ElInputNumber v-model={DATA._selectCount} onChange={onSelectCountChanged} />
+            <ElForm labelWidth={100}>
+              <ElFormItem label="数量">
+                <ElInputNumber
+                  v-model={DATA._selectCount}
+                  placeholder="数量"
+                  onChange={onSelectCountChanged}
+                />
+              </ElFormItem>
 
-            <EnumSelect
-              v-model={DATA.category}
-              data={DATA._cateselectData}
-              onChange={onCategoryChange}
-            />
-            {DATA._category_desc && DATA._category_desc.dan > 0 ? (
-              <>
-                <ElCheckboxGroup v-model={DATA.dans} onChange={onDanChanged}>
+              <ElFormItem label="类型">
+                <EnumSelect
+                  v-model={DATA.category}
+                  placeholder="数量"
+                  data={DATA._cateselectData}
+                  onChange={onCategoryChange}
+                />
+              </ElFormItem>
+              {DATA._category_desc && DATA._category_desc.dan > 0 ? (
+                <>
+                  <ElFormItem label="胆值">
+                    <ElCheckboxGroup v-model={DATA.dans} onChange={onDanChanged}>
+                      {DATA.selectList.map((val) => (
+                        <>
+                          <ElCheckboxButton
+                            disabled={!onAllowDanSelect(val)}
+                            value={val}
+                            class="is-circle buttons-success"
+                          >
+                            {val}
+                          </ElCheckboxButton>
+                        </>
+                      ))}
+                    </ElCheckboxGroup>
+                  </ElFormItem>
+                </>
+              ) : (
+                <></>
+              )}
+              <ElFormItem label="旋转值">
+                <ElCheckboxGroup v-model={DATA.list}>
                   {DATA.selectList.map((val) => (
                     <>
                       <ElCheckboxButton
-                        disabled={!onAllowDanSelect(val)}
                         value={val}
+                        disabled={!onAllowSelect(val)}
                         class="is-circle buttons-success"
                       >
                         {val}
@@ -123,26 +155,13 @@ export default defineComponent({
                     </>
                   ))}
                 </ElCheckboxGroup>
-              </>
-            ) : (
-              <></>
-            )}
-            <ElCheckboxGroup v-model={DATA.list}>
-              {DATA.selectList.map((val) => (
-                <>
-                  <ElCheckboxButton
-                    value={val}
-                    disabled={!onAllowSelect(val)}
-                    class="is-circle buttons-success"
-                  >
-                    {val}
-                  </ElCheckboxButton>
-                </>
-              ))}
-            </ElCheckboxGroup>
-            <pre>{DATA.result.map((r) => r)}</pre>
-            <ElButton onClick={onCalc}>计算</ElButton>
-            <ElButton onClick={onClear}>清空</ElButton>
+              </ElFormItem>
+              <ElFormItem label="结果">
+                <pre>{DATA.result.map((r) => r)}</pre>
+              </ElFormItem>
+              <ElButton onClick={onCalc}>计算</ElButton>
+              <ElButton onClick={onClear}>清空</ElButton>
+            </ElForm>
           </ElMain>
         </ElContainer>
       )

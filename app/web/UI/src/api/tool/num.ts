@@ -14,7 +14,7 @@ export interface category_desc {
   dan: number
 }
 export const clc_svc = (
-  category: number,
+  category: number | string,
   data: param
 ): Promise<IResponse<Array<Array<number>>>> => {
   return request.post(`${base_URL}/${category}`, data)
