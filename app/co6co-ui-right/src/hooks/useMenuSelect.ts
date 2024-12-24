@@ -1,4 +1,4 @@
-import { ref, onMounted } from 'vue';
+import { ref } from 'vue';
 import { ISelect, ITreeSelect, IEnumSelect } from 'co6co';
 import {
 	default as api,
@@ -20,10 +20,9 @@ export default function () {
 		if (value) return selectData.value.find((m) => m.id == value)?.name;
 		return '';
 	};
-	onMounted(() => {
-		refresh();
-	});
-	return { selectData, refresh, getName };
+
+	const loadData = refresh;
+	return { loadData, selectData, refresh, getName };
 }
 
 export const useTree = () => {
@@ -34,10 +33,8 @@ export const useTree = () => {
 		treeSelectData.value = res.data;
 	};
 
-	onMounted(() => {
-		refresh();
-	});
-	return { treeSelectData, refresh };
+	const loadData = refresh;
+	return { loadData, treeSelectData, refresh };
 };
 
 /**
@@ -55,10 +52,8 @@ export const useMenuState = () => {
 		if (value) return selectData.value.find((m) => m.value == value)?.label;
 		return '';
 	};
-	onMounted(() => {
-		refresh();
-	});
-	return { selectData, refresh, getName };
+	const loadData = refresh;
+	return { loadData, selectData, refresh, getName };
 };
 
 /**
@@ -83,8 +78,6 @@ export const useMenuCategory = () => {
 		if (value) return selectData.value.find((m) => m.value == value)?.label;
 		return '';
 	};
-	onMounted(() => {
-		refresh();
-	});
-	return { selectData, refresh, getName };
+	const loadData = refresh;
+	return { loadData, selectData, refresh, getName };
 };

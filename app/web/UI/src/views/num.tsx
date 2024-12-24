@@ -8,6 +8,7 @@ import {
   ElSelect,
   ElInput,
   ElOption,
+  ElScrollbar,
   ElFormItem,
   ElInputNumber,
   ElCheckboxGroup,
@@ -54,9 +55,6 @@ export default defineComponent({
       viewRef.value?.search()
     }
 
-    onMounted(async () => {
-      onSearch()
-    })
     const onSelectCountChanged = (n) => {
       DATA.selectList = []
       for (let i = 1; i <= n; i++) DATA.selectList.push(i)
@@ -76,7 +74,13 @@ export default defineComponent({
           (DATA._category_desc && DATA.dans && DATA.dans.length < DATA._category_desc.dan)
         )
     }
-
+    const allowSubmit = computed(() => {
+      if (!DATA.dans) DATA.dans = []
+      return (
+        DATA.list.length == DATA._category_desc?.select &&
+        DATA.dans?.length == DATA._category_desc.dan
+      )
+    })
     const onCalc = () => {
       clc_svc(DATA.category, { list: DATA.list, dans: DATA.dans }).then((res) => {
         DATA.result = res.data.map((m) => m.join() + '\r\n')
@@ -96,7 +100,9 @@ export default defineComponent({
     onMounted(async () => {
       const res = await get_category_svc()
       DATA._cateselectData = res.data
+      await onCategoryChange(DATA._cateselectData[0].value)
       onSelectCountChanged(DATA._selectCount)
+      onSearch()
     })
     //:page reader
     const rander = (): VNodeChild => {
@@ -157,9 +163,13 @@ export default defineComponent({
                 </ElCheckboxGroup>
               </ElFormItem>
               <ElFormItem label="结果">
-                <pre>{DATA.result.map((r) => r)}</pre>
+                <ElScrollbar>
+                  <pre style="height:200px">{DATA.result.map((r) => r)}</pre>
+                </ElScrollbar>
               </ElFormItem>
-              <ElButton onClick={onCalc}>计算</ElButton>
+              <ElButton onClick={onCalc} disabled={!allowSubmit.value}>
+                计算
+              </ElButton>
               <ElButton onClick={onClear}>清空</ElButton>
             </ElForm>
           </ElMain>

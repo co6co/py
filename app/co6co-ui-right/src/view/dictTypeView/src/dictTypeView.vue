@@ -148,7 +148,7 @@
 	import { replaceRouteParams } from '@/utils';
 
 	const { getPermissKey } = usePermission();
-	const { getName, getTagType } = useState();
+	const { loadData, getName, getTagType } = useState();
 	import modifyDiaglog, {
 		type DictTypeItem as Item,
 		type ModifyDictTypeInstance,
@@ -232,7 +232,8 @@
 		return replaceRouteParams(subViewPath.value, { id: dictTypeId.toString() });
 	};
 
-	onMounted(() => {
+	onMounted(async () => {
+		await loadData();
 		const { queryRouteItem } = useRouteData();
 		const componentName = getViewPath('DictView');
 		const routeItem = queryRouteItem((d) => {

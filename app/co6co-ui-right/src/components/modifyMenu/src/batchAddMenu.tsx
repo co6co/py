@@ -1,4 +1,4 @@
-import { defineComponent, ref, reactive, provide, VNode } from 'vue';
+import { defineComponent, ref, reactive, provide, VNode, onMounted } from 'vue';
 import type { InjectionKey } from 'vue';
 import {
 	DialogForm,
@@ -54,8 +54,9 @@ export default defineComponent({
 		saved: (data: any) => true,
 	},
 	setup(prop, ctx) {
-		const { treeSelectData, refresh } = useTree();
+		const { loadData, treeSelectData, refresh } = useTree();
 		const menuStateData = useMenuState();
+
 		const pageFeature = usePageFeature();
 		const diaglogForm = ref<DialogFormInstance>();
 		const DATA = reactive<
@@ -71,7 +72,10 @@ export default defineComponent({
 		//@ts-ignore
 		const key = Symbol('formData') as InjectionKey<FormItem>; //'formData'
 		provide('formData', DATA.base);
-
+		onMounted(async () => {
+			await menuStateData.loadData();
+			await loadData();
+		});
 		const init_data = (item: Item) => {
 			DATA.id = -1;
 			DATA.base.name = item.name;

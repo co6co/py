@@ -33,6 +33,9 @@ import {
 	list_res as Item,
 } from '@/api/file';
 
+import { ConfigCodes } from '@/constants/config';
+import { useConfig } from '@/hooks/useConfig';
+import { useKeyUp } from '@/hooks/useKey';
 export default defineComponent({
 	setup(prop, ctx) {
 		const DATA = reactive<{
@@ -63,7 +66,10 @@ export default defineComponent({
 		const onRefesh = () => {
 			viewRef.value?.refesh();
 		};
+		const configHooks = useConfig(ConfigCodes.FILE_MGR_CODE);
 		onMounted(async () => {
+			await configHooks.loadData();
+			DATA.query.root = configHooks.getValue(true);
 			onSearch();
 		});
 		const isEditing = ref(false);
@@ -130,13 +136,18 @@ export default defineComponent({
 				diaglogRef.value?.onDragOver(event);
 			}
 		};
+		useKeyUp((event) => {
+			if (event.key === 'Escape') {
+				DATA.isMask = false;
+			}
+		});
 		//:page reader
 		const rander = (): VNodeChild => {
 			return (
 				<div onDrop={onDrop} onDragover={onDragOver}>
 					{DATA.isMask ? (
 						<div class={[style['upload-box'], 'el-overlay']}>
-							<span>上传文件或文件夹到当前文夹</span>
+							<span>上传文件或文件夹到当前目录</span>
 						</div>
 					) : (
 						<></>
@@ -144,66 +155,65 @@ export default defineComponent({
 					<TableView
 						dataApi={list_svc}
 						ref={viewRef}
+						autoLoadData={false}
 						query={DATA.query}
 						showPaged={false}
 						resultFilter={ontresultFileter}>
 						{{
 							header: () => (
-								<>
-									<ElRow>
-										<ElCol span={12}>
-											<ElInput
-												v-model={DATA.query.root}
-												class={isEditing.value ? style.editor : style.show}
-												value={
-													isEditing.value ? DATA.query.root : previewRoot.value
-												}
-												onFocus={handleFocus}
-												onBlur={handleBlur}
-												onChange={onSearch}>
-												{{
-													prepend: () => (
+								<ElRow>
+									<ElCol span={12}>
+										<ElInput
+											v-model={DATA.query.root}
+											class={isEditing.value ? style.editor : style.show}
+											value={
+												isEditing.value ? DATA.query.root : previewRoot.value
+											}
+											onFocus={handleFocus}
+											onBlur={handleBlur}
+											onChange={onSearch}>
+											{{
+												prepend: () => (
+													<ElButton
+														title="上级目录"
+														icon={ArrowLeftBold}
+														onClick={onRootUp}
+													/>
+												),
+												append: () => (
+													<>
 														<ElButton
-															title="上级目录"
-															icon={ArrowLeftBold}
-															onClick={onRootUp}
+															title="刷新"
+															type="primary"
+															icon={Refresh}
+															onClick={onSearch}
 														/>
-													),
-													append: () => (
-														<>
-															<ElButton
-																title="刷新"
-																type="primary"
-																icon={Refresh}
-																onClick={onSearch}
-															/>
-															<ElButton
-																icon={UploadFilled}
-																v-permiss={getPermissKey(
-																	routeHook.ViewFeature.upload
-																)}
-																onClick={() => onOpenDialog()}
-																v-slots={{ default: () => '上传' }}
-															/>
-														</>
-													),
-												}}
-											</ElInput>
-										</ElCol>
-										<ElCol span={6} offset={6}>
-											<ElInput
-												style="width: 160px"
-												clearable
-												v-model={DATA.query.name}
-												placeholder="搜索文件/目录"
-												class="handle-input"
-											/>
-											<ElButton type="primary" icon={Search} onClick={onSearch}>
-												搜索
-											</ElButton>
-										</ElCol>
-									</ElRow>
-								</>
+														<ElButton
+															icon={UploadFilled}
+															v-permiss={getPermissKey(
+																routeHook.ViewFeature.upload
+															)}
+															onClick={() => onOpenDialog()}
+															v-slots={{ default: () => '上传' }}
+														/>
+													</>
+												),
+											}}
+										</ElInput>
+									</ElCol>
+									<ElCol span={6} offset={6}>
+										<ElInput
+											style="width: 160px"
+											clearable
+											v-model={DATA.query.name}
+											placeholder="搜索文件/目录"
+											class="handle-input"
+										/>
+										<ElButton type="primary" icon={Search} onClick={onSearch}>
+											搜索
+										</ElButton>
+									</ElCol>
+								</ElRow>
 							),
 							default: () => (
 								<>

@@ -240,7 +240,7 @@
 	};
 
 	const onLoadData = () => {
-		refresh();
+		refresh().then(() => {});
 		getData();
 		modifyDiaglogRef.value?.update();
 	};

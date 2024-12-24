@@ -6,3 +6,6 @@ export * as routeHook from './useRoute';
 export * as userGroupSelectHook from './useUserGroupSelect';
 export * as userSelectHook from './useUserSelect';
 export * as useDictHook from './useDictState';
+export * from './useConfig';
+
+export * from './useKey';

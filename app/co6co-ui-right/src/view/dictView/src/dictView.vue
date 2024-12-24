@@ -136,7 +136,7 @@
 	import { usePermission, ViewFeature } from '@/hooks/useRoute';
 	import { useState } from '@/hooks/useDictState';
 	const { getPermissKey } = usePermission();
-	const { getName, getTagType } = useState();
+	const { loadData, getName, getTagType } = useState();
 	const route = useRoute();
 	const router = useRouter();
 	import modifyDiaglog, {
@@ -221,7 +221,8 @@
 		deleteSvc(row.id, row.name);
 	};
 
-	onMounted(() => {
+	onMounted(async () => {
+		await loadData();
 		let id = router.currentRoute.value.params.id || route.query.id;
 		if (id) {
 			table_module.query.dictTypeId = Number(id);

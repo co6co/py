@@ -19,6 +19,7 @@ import {
 	ArrowDown,
 	Files as FilesIcon,
 	Folder as FolderIcon,
+	Delete as DeleteIcon,
 } from '@element-plus/icons-vue';
 import { upload_svc, get_upload_chunks_svc } from '@/api/file';
 import style from '@/assets/css/file.module.less';
@@ -102,20 +103,23 @@ export default defineComponent({
 				if (DATA.canelFlag) return false;
 				if (opt.finished) continue;
 				const file = opt.file;
-				const chunks = createFileChunks(file);
+				let chunks = createFileChunks(file);
+				//上传大小为0
+				if (chunks.length == 0) {
+					chunks = [new Blob()];
+				}
 				const uploadedChunks = await getUploadedChunks(
 					opt.subPath as string,
 					file.name,
 					chunks.length
 				);
-
 				// 过滤掉已经上传的块
 				const remainingChunks = chunks
 					.map((v, index) => ({ index: index + 1, value: v }))
 					.filter((v) => !uploadedChunks.includes(v.index));
 				if (remainingChunks.length === 0) {
 					//console.log('所有块已上传完毕')
-					opt.percentage = 100;
+					opt.percentage = 1;
 					continue;
 				}
 				opt.finished = await uploadFileChunks(
@@ -213,7 +217,6 @@ export default defineComponent({
 			return true;
 		};
 		const tableRef = ref<InstanceType<typeof ElTable>>();
-
 		const onPercentage = (row, column, cellValue: number) => {
 			return cellValue ? (cellValue * 100).toFixed(2) + '%' : '';
 		};
@@ -249,6 +252,10 @@ export default defineComponent({
 					folderInputRef.value.click();
 					break;
 			}
+		};
+		const onDelete = (index, _: IFileOption) => {
+			//删除从index 的一个元素
+			DATA.files.splice(index, 1);
 		};
 		/** end 分片上传 */
 		const fromSlots = {
@@ -374,6 +381,26 @@ export default defineComponent({
 											align="center"
 											width={120}
 										/>
+										<ElTableColumn
+											label="操作"
+											width={260}
+											align="center"
+											fixed="right">
+											{{
+												default: (scope: {
+													row: IFileOption;
+													$index: number;
+												}) => (
+													<ElButton
+														disabled={DATA.uploading}
+														text={true}
+														icon={DeleteIcon}
+														onClick={() => onDelete(scope.$index, scope.row)}
+														v-slots={{ default: () => '删除' }}
+													/>
+												),
+											}}
+										</ElTableColumn>
 									</ElTable>
 								</>
 							)}

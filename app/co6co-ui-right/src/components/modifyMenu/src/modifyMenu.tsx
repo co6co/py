@@ -1,4 +1,12 @@
-import { defineComponent, ref, reactive, provide, computed, VNode } from 'vue';
+import {
+	defineComponent,
+	ref,
+	reactive,
+	provide,
+	computed,
+	VNode,
+	onMounted,
+} from 'vue';
 import type { InjectionKey } from 'vue';
 import {
 	DialogForm,
@@ -68,7 +76,7 @@ export default defineComponent({
 		saved: (data: any) => true,
 	},
 	setup(prop, ctx) {
-		const { treeSelectData, refresh } = useTree();
+		const { loadData, treeSelectData, refresh } = useTree();
 		const menuStateData = useMenuState();
 		const menuCategoryData = useMenuCategory();
 		const httpMethods = useHttpMethods();
@@ -136,6 +144,11 @@ export default defineComponent({
 			}
 			return true;
 		};
+		onMounted(async () => {
+			await loadData();
+			await menuStateData.loadData();
+			await menuCategoryData.loadData();
+		});
 		const triggers = ['blur', 'change'];
 		const trigger = 'blur';
 		const rules_b: FormRules = {

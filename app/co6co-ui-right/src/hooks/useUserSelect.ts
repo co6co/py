@@ -1,4 +1,4 @@
-import { ref, onMounted } from 'vue';
+import { ref } from 'vue';
 import { IEnumSelect } from 'co6co';
 import { get_state_svc } from '@/api/sys/user';
 
@@ -28,8 +28,7 @@ export const useState = () => {
 		}
 		return 'info';
 	};
-	onMounted(() => {
-		refresh();
-	});
-	return { selectData, refresh, getName, getTagType };
+
+	const loadData = refresh;
+	return { loadData, selectData, refresh, getName, getTagType };
 };

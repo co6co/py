@@ -39,6 +39,10 @@ export default defineComponent({
 			type: Boolean,
 			default: true,
 		},
+		autoLoadData: {
+			type: Boolean,
+			default: true,
+		},
 	},
 	setup(prop, ctx) {
 		//:define
@@ -98,7 +102,7 @@ export default defineComponent({
 		};
 		//end page
 		onMounted(async () => {
-			queryData();
+			if (prop.autoLoadData) queryData();
 		});
 		const rowIndex = ($index: number) => {
 			return getTableIndex(DATA.query, $index);

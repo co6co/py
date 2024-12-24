@@ -1,4 +1,4 @@
-import { ref, onMounted } from 'vue';
+import { ref } from 'vue';
 import { IEnumSelect, ISelect } from 'co6co';
 import {
 	get_dict_state_svc,
@@ -20,6 +20,7 @@ export const useState = () => {
 		const res = await get_dict_state_svc();
 		selectData.value = res.data;
 	};
+
 	const getName = (value?: number) => {
 		if (value != undefined)
 			return selectData.value.find((m) => m.value == value)?.label;
@@ -34,10 +35,8 @@ export const useState = () => {
 				return 'success';
 		}
 	};
-	onMounted(() => {
-		refresh();
-	});
-	return { selectData, refresh, getName, getTagType };
+	const loadData = refresh;
+	return { loadData, selectData, refresh, getName, getTagType };
 };
 /**
  * 字典类型API
@@ -51,10 +50,9 @@ export const useDictTypeSelect = () => {
 		const res = await get_select_svc();
 		selectData.value = res.data;
 	};
-	onMounted(() => {
-		refresh();
-	});
-	return { selectData, refresh };
+
+	const loadData = refresh;
+	return { loadData, selectData, refresh };
 };
 /**
  * 使用需要先查询

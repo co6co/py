@@ -1,4 +1,4 @@
-import { ref, onMounted } from 'vue';
+import { ref } from 'vue';
 import { ISelect, ITreeSelect } from 'co6co';
 import api from '@/api/sys/userGroup';
 export default function () {
@@ -12,10 +12,8 @@ export default function () {
 		if (value) return selectData.value.find((m) => m.id == value)?.name;
 		return '';
 	};
-	onMounted(() => {
-		refresh();
-	});
-	return { selectData, refresh, getName };
+	const loadData = refresh;
+	return { loadData, selectData, refresh, getName };
 }
 
 export const useTree = (root?: number) => {
@@ -25,8 +23,6 @@ export const useTree = (root?: number) => {
 		const res = await api.get_select_tree_svc(root);
 		treeSelectData.value = res.data;
 	};
-	onMounted(() => {
-		refresh();
-	});
-	return { treeSelectData, refresh };
+	const loadData = refresh;
+	return { loadData, treeSelectData, refresh };
 };

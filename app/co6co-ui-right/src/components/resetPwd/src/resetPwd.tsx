@@ -1,4 +1,12 @@
-import { defineComponent, ref, reactive, computed, provide, VNode } from 'vue';
+import {
+	defineComponent,
+	ref,
+	reactive,
+	computed,
+	provide,
+	VNode,
+	onMounted,
+} from 'vue';
 import type { InjectionKey } from 'vue';
 import {
 	DialogForm,
@@ -44,9 +52,9 @@ export default defineComponent({
 	},
 	setup(prop, ctx) {
 		//@ts-ignore
-		const { treeSelectData, refresh } = useTree(0);
+		const hookTree = useTree(0);
 		//@ts-ignore
-		const { selectData } = useState();
+		const { loadData, selectData } = useState();
 		const diaglogForm = ref<DialogFormInstance>();
 		const DATA = reactive<FormData<number, FormItem>>({
 			operation: FormOperation.add,
@@ -56,7 +64,10 @@ export default defineComponent({
 		//@ts-ignore
 		const key = Symbol('formData') as InjectionKey<FormItem>; //'formData'
 		provide('formData', DATA.fromData);
-
+		onMounted(async () => {
+			await hookTree.loadData();
+			await loadData();
+		});
 		const init_data = (item?: Item) => {
 			DATA.operation = api_type.FormOperation.edit;
 			if (!item) return false;
@@ -88,7 +99,7 @@ export default defineComponent({
 				.then((res) => {
 					diaglogForm.value?.closeDialog();
 					ElMessage.success(`重置密码成功`);
-					refresh();
+					update();
 					ctx.emit('saved', res.data);
 				})
 				.catch((e) => {
@@ -142,7 +153,7 @@ export default defineComponent({
 			diaglogForm.value?.openDialog();
 		};
 		const update = () => {
-			refresh();
+			hookTree.refresh().then();
 		};
 		ctx.expose({
 			openDialog,

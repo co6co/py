@@ -1,4 +1,12 @@
-import { defineComponent, ref, reactive, computed, provide, VNode } from 'vue';
+import {
+	defineComponent,
+	ref,
+	reactive,
+	computed,
+	provide,
+	VNode,
+	onMounted,
+} from 'vue';
 import type { InjectionKey } from 'vue';
 import {
 	DialogForm,
@@ -54,8 +62,8 @@ export default defineComponent({
 		saved: (data: any) => true,
 	},
 	setup(prop, ctx) {
-		const { treeSelectData, refresh } = useTree(0);
-		const { selectData } = useState();
+		const hookTree = useTree(0);
+		const { loadData, selectData } = useState();
 		const diaglogForm = ref<DialogFormInstance>();
 		const DATA = reactive<FormData<number, FormItem>>({
 			operation: FormOperation.add,
@@ -65,7 +73,10 @@ export default defineComponent({
 		//@ts-ignore
 		const key = Symbol('formData') as InjectionKey<FormItem>; //'formData'
 		provide('formData', DATA.fromData);
-
+		onMounted(async () => {
+			await hookTree.loadData();
+			await loadData();
+		});
 		const init_data = (oper: FormOperation, item?: Item) => {
 			DATA.operation = oper;
 			switch (oper) {
@@ -155,10 +166,10 @@ export default defineComponent({
 			}
 			showLoading();
 			promist
-				.then((res) => {
+				.then(async (res) => {
 					diaglogForm.value?.closeDialog();
 					ElMessage.success(`操作成功`);
-					refresh();
+					await hookTree.refresh();
 					ctx.emit('saved', res.data);
 				})
 				.finally(() => {
@@ -167,14 +178,12 @@ export default defineComponent({
 		};
 		const fromSlots = {
 			buttons: () => (
-				<>
-					<ElButton
-						onClick={() => {
-							diaglogForm.value?.validate(save);
-						}}>
-						保存
-					</ElButton>
-				</>
+				<ElButton
+					onClick={() => {
+						diaglogForm.value?.validate(save);
+					}}>
+					保存
+				</ElButton>
 			),
 			default: () => (
 				<>
@@ -189,7 +198,7 @@ export default defineComponent({
 							multiple={false}
 							check-strictly
 							props={{ children: 'children', label: 'name', value: 'id' }}
-							data={treeSelectData.value}></ElTreeSelect>
+							data={hookTree.treeSelectData.value}></ElTreeSelect>
 					</ElFormItem>
 					{DATA.operation == FormOperation.add ? (
 						<ElFormItem label="密码" prop="password">
@@ -230,7 +239,7 @@ export default defineComponent({
 			diaglogForm.value?.openDialog();
 		};
 		const update = () => {
-			refresh();
+			hookTree.refresh().then(() => {});
 		};
 		ctx.expose({
 			openDialog,

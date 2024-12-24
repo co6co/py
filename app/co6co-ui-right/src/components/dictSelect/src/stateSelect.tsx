@@ -1,4 +1,4 @@
-import { defineComponent, ref, watch, PropType, VNode } from 'vue';
+import { defineComponent, onMounted, ref, watch, PropType, VNode } from 'vue';
 import { ElSelect, ElOption } from 'element-plus';
 
 import { useState } from '@/hooks/useDictState';
@@ -43,7 +43,10 @@ export default defineComponent({
 				localValue.value = newValue;
 			}
 		);
-		const { selectData, getName, getTagType } = useState();
+		const { loadData, selectData, getName, getTagType } = useState();
+		onMounted(async () => {
+			await loadData();
+		});
 		const onChange = (newValue: ModelValueType) => {
 			localValue.value = newValue;
 			ctx.emit('update:modelValue', newValue);

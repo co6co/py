@@ -1,4 +1,12 @@
-import { defineComponent, ref, reactive, provide, computed, VNode } from 'vue';
+import {
+	defineComponent,
+	ref,
+	reactive,
+	provide,
+	computed,
+	VNode,
+	onMounted,
+} from 'vue';
 import type { InjectionKey } from 'vue';
 import {
 	DialogForm,
@@ -56,7 +64,7 @@ export default defineComponent({
 		saved: (data: any) => true,
 	},
 	setup(prop, ctx) {
-		const { selectData } = useDictTypeSelect();
+		const { loadData, selectData } = useDictTypeSelect();
 
 		const diaglogForm = ref<DialogFormInstance>();
 
@@ -168,7 +176,9 @@ export default defineComponent({
 		const dictFlage = computed(() => {
 			return editData.dictFlag == Flag.Y;
 		});
-
+		onMounted(async () => {
+			await loadData();
+		});
 		const dictSelect = useDictSelect();
 		const onDictTypeChange = () => {
 			if (DATA.fromData.dictTypeId) {

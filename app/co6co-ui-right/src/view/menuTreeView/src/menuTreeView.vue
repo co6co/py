@@ -236,8 +236,8 @@
 
 		batchAddMenuRef.value?.openDialog(table_module.currentItem!);
 	};
-	const onLoadData = () => {
-		refresh();
+	const onLoadData = async () => {
+		await refresh();
 		getData();
 		modifyDiaglogRef.value?.update();
 	};

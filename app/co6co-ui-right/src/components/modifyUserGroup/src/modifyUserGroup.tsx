@@ -1,4 +1,4 @@
-import { defineComponent, ref, reactive, provide, VNode } from 'vue';
+import { defineComponent, ref, reactive, provide, VNode, onMounted } from 'vue';
 import type { InjectionKey } from 'vue';
 import {
 	DialogForm,
@@ -48,7 +48,7 @@ export default defineComponent({
 		saved: (data: any) => true,
 	},
 	setup(prop, ctx) {
-		const { treeSelectData, refresh } = useTree();
+		const { loadData, treeSelectData, refresh } = useTree();
 		const diaglogForm = ref<InstanceType<typeof DialogForm>>();
 		const DATA = reactive<FormData<number, FormItem>>({
 			operation: FormOperation.add,
@@ -58,7 +58,9 @@ export default defineComponent({
 		//@ts-ignore
 		const key = Symbol('formData') as InjectionKey<FormItem>; //'formData'
 		provide('formData', DATA.fromData);
-
+		onMounted(async () => {
+			await loadData();
+		});
 		const init_data = (oper: FormOperation, item?: Item) => {
 			DATA.operation = oper;
 			switch (oper) {

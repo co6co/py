@@ -1,1 +1,1 @@
-export * as configSvc from './config';
+export * as configSvc from './svcs';
