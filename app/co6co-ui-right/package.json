@@ -2,7 +2,7 @@
   "name": "co6co-right",
   "moduleName": "permission",
   "private": false,
-  "version": "0.0.22",
+  "version": "0.0.23",
   "type": "module",
   "files": [
     "dist"
@@ -50,6 +50,7 @@
     "element-plus": "^2.7.6",
     "js-cookie": "^3.0.5",
     "json-bigint": "^1.0.0",
+    "p-limit": "^6.2.0",
     "pinia": "^2.1.7",
     "vue-router": "^4.4.0"
   }

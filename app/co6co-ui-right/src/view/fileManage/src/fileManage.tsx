@@ -217,7 +217,7 @@ export default defineComponent({
 							),
 							default: () => (
 								<>
-									<ElTableColumn label="序号" width={55} align="center">
+									<ElTableColumn label="序号" width={112} align="center">
 										{{
 											default: (scope: tableScope) =>
 												viewRef.value?.rowIndex(scope.$index),

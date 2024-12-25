@@ -5,8 +5,8 @@
         "host": "0.0.0.0",
         "backlog": 2048,
         "debug": "False",
-        "access_log": "False",
-        "dev": "False"
+        "access_log": false,
+        "dev": false
     },
     "db_settings": {
         "DB_HOST": "localhost",

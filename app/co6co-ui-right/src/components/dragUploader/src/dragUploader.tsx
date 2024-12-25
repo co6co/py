@@ -1,6 +1,7 @@
-import { defineComponent, ref, reactive, VNode } from 'vue';
+import { defineComponent, ref, reactive, VNode, nextTick } from 'vue';
 import { Dialog, DialogInstance, byte2Unit } from 'co6co';
 import { tableScope } from '@/constants';
+
 import {
 	ElButton,
 	ElMessageBox,
@@ -14,6 +15,7 @@ import {
 	ElDropdownMenu,
 	ElDropdownItem,
 	ElIcon,
+	ElInputNumber,
 } from 'element-plus';
 import {
 	ArrowDown,
@@ -24,6 +26,7 @@ import {
 import { upload_svc, get_upload_chunks_svc } from '@/api/file';
 import style from '@/assets/css/file.module.less';
 import { IFileOption } from './index';
+import pLimit from 'p-limit';
 export default defineComponent({
 	name: 'FileUpload',
 	props: {},
@@ -40,12 +43,14 @@ export default defineComponent({
 			filePreloadCount: number;
 			canelFlag: boolean;
 			uploading: boolean;
+			limitNum: number;
 		}>({
 			files: [],
 			uploadFolder: '/',
 			filePreloadCount: 0,
 			canelFlag: false,
 			uploading: false,
+			limitNum: 3,
 		});
 		const readFileOrDirectory = (entry) => {
 			//entry: FileEntry | DirectoryEntry
@@ -97,41 +102,61 @@ export default defineComponent({
 			}
 			//console.info('onDrop finished.', DATA.files.length)
 		};
-		const upload = async () => {
+		const uploadOneFile = async (opt: IFileOption) => {
+			if (opt.finished) return true;
+			const file = opt.file;
+			let chunks = createFileChunks(file);
+			//上传大小为0
+			if (chunks.length == 0) {
+				chunks = [new Blob()];
+			}
+			const uploadedChunks = await getUploadedChunks(
+				opt.subPath as string,
+				file.name,
+				chunks.length
+			);
+			// 过滤掉已经上传的块
+			const remainingChunks = chunks
+				.map((v, index) => ({ index: index + 1, value: v }))
+				.filter((v) => !uploadedChunks.includes(v.index));
+			if (remainingChunks.length === 0) {
+				//console.log('所有块已上传完毕')
+				opt.percentage = 1;
+				return true;
+			}
+			opt.finished = await uploadFileChunks(
+				remainingChunks,
+				opt.subPath as string,
+				file.name,
+				chunks.length,
+				(p: number) => {
+					opt.percentage = p;
+				}
+			);
+			return opt.finished;
+		};
+		/**
+		 * 开始上传
+		 * @returns
+		 */
+		const uploadAllFile = async () => {
+			/*
 			for (let i = 0; i < DATA.files.length; i++) {
 				const opt = DATA.files[i];
 				if (DATA.canelFlag) return false;
-				if (opt.finished) continue;
-				const file = opt.file;
-				let chunks = createFileChunks(file);
-				//上传大小为0
-				if (chunks.length == 0) {
-					chunks = [new Blob()];
-				}
-				const uploadedChunks = await getUploadedChunks(
-					opt.subPath as string,
-					file.name,
-					chunks.length
-				);
-				// 过滤掉已经上传的块
-				const remainingChunks = chunks
-					.map((v, index) => ({ index: index + 1, value: v }))
-					.filter((v) => !uploadedChunks.includes(v.index));
-				if (remainingChunks.length === 0) {
-					//console.log('所有块已上传完毕')
-					opt.percentage = 1;
-					continue;
-				}
-				opt.finished = await uploadFileChunks(
-					remainingChunks,
-					opt.subPath as string,
-					file.name,
-					chunks.length,
-					(p: number) => {
-						opt.percentage = p;
-					}
-				);
-			}
+				await uploadOne(opt);
+			}*/
+			const limit = pLimit(DATA.limitNum);
+			await Promise.all(
+				DATA.files.map((opt, index) =>
+					limit(() => {
+						if (DATA.canelFlag) return false;
+						const res = uploadOneFile(opt);
+						scrollToRow(index);
+						return res;
+					})
+				)
+			);
 			const unfinshed = DATA.files.filter((o) => !o.finished);
 			if (unfinshed.length > 0) return false;
 			return true;
@@ -143,7 +168,7 @@ export default defineComponent({
 					ElMessageBox.alert('请选择要上传的文件或文件夹！');
 				}
 				DATA.canelFlag = false;
-				const result = await upload();
+				const result = await uploadAllFile();
 				if (result) {
 					ElMessageBox.alert('所有数据已上传完毕!');
 					ctx.emit('saved');
@@ -217,6 +242,7 @@ export default defineComponent({
 			return true;
 		};
 		const tableRef = ref<InstanceType<typeof ElTable>>();
+		const scrollbarRef = ref<InstanceType<typeof ElScrollbar>>();
 		const onPercentage = (row, column, cellValue: number) => {
 			return cellValue ? (cellValue * 100).toFixed(2) + '%' : '';
 		};
@@ -234,7 +260,6 @@ export default defineComponent({
 		//文件夹
 		const folderInputRef = ref();
 		const onFolderSelect = (event) => {
-			console.info(event);
 			const files: File[] = Array.from(event.target.files);
 			const newData = files.map((file) => {
 				const subPath = file.webkitRelativePath.replace(`/${file.name}`, '');
@@ -252,10 +277,33 @@ export default defineComponent({
 					folderInputRef.value.click();
 					break;
 			}
+			console.info(tableRef.value);
 		};
 		const onDelete = (index, _: IFileOption) => {
 			//删除从index 的一个元素
 			DATA.files.splice(index, 1);
+		};
+		const onLimitNumChange = (n) => {
+			if (n <= 0) DATA.limitNum = 3;
+		};
+
+		// 滚动到底部
+		const scrollToRow = (index: number) => {
+			nextTick(() => {
+				if (scrollbarRef.value && tableRef.value) {
+					// 获取目标行的 DOM 元素
+					//tableRef?.bodyWrapper.querySelector
+					const targetRow = tableRef.value.$el.querySelector(
+						`tbody tr:nth-child(${index + 1})`
+					);
+					if (targetRow) {
+						// 计算目标行相对于 el-scrollbar.wrap 的位置
+						const targetOffsetTop = targetRow.offsetTop;
+						// 设置滚动条的位置
+						scrollbarRef.value.setScrollTop(targetOffsetTop);
+					}
+				}
+			});
 		};
 		/** end 分片上传 */
 		const fromSlots = {
@@ -290,7 +338,7 @@ export default defineComponent({
 							header: () => (
 								<>
 									<ElRow>
-										<ElCol span={6} class="tl">
+										<ElCol span={8} class="tl">
 											<ElDropdown trigger="click" onCommand={onCommand}>
 												{{
 													default: () => (
@@ -331,18 +379,31 @@ export default defineComponent({
 												}}
 											</ElDropdown>
 										</ElCol>
-										<ElCol push={12} span={6} class="tr">
+										<ElCol push={1} span={7}>
+											<ElInputNumber
+												disabled={DATA.uploading}
+												v-model={DATA.limitNum}
+												placeholder="线程数"
+												onChange={onLimitNumChange}
+											/>
+										</ElCol>
+										<ElCol push={1} span={7} class="tr">
 											<ElButton
 												type="danger"
 												onClick={clearFile}
-												v-slots={{ default: () => '清空列表' }}
+												v-slots={{
+													default: () => `清空列表[${DATA.files.length}]`,
+												}}
 											/>
 										</ElCol>
 									</ElRow>
 								</>
 							),
 						}}>
-						<ElScrollbar onDrop={onDrop} onDragover={onDragOver}>
+						<ElScrollbar
+							ref={scrollbarRef}
+							onDrop={onDrop}
+							onDragover={onDragOver}>
 							{DATA.files.length == 0 ? (
 								<div>
 									<span class="small">上传文件或文件夹到当前文夹</span>

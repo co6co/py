@@ -147,10 +147,13 @@ export default defineComponent({
 			refesh,
 			search,
 			rowIndex,
+			tableRef,
 		});
 		rander.refesh = refesh;
 		rander.search = search;
 		rander.rowIndex = rowIndex;
+		rander.tableRef = tableRef;
+
 		return rander;
 	}, //end setup
 });

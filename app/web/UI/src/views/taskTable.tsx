@@ -1,4 +1,4 @@
-import { defineComponent, VNodeChild } from 'vue'
+import { defineComponent, nextTick, VNodeChild } from 'vue'
 import { ref, reactive, onMounted } from 'vue'
 import { ElTag, ElButton, ElInput, ElTableColumn, ElMessage } from 'element-plus'
 import { Search, Plus, Sugar, View, Edit } from '@element-plus/icons-vue'
@@ -47,7 +47,24 @@ export default defineComponent({
       diaglogRef.value?.openDialog(row ? FormOperation.edit : FormOperation.add, row)
     }
     const onSearch = () => {
+      //const targetRow = tableRef.value.bodyWrapper.querySelector(`tbody tr:nth-child(${index + 1})`)
+      //console.info('123', viewRef.value?.tableRef?.$el)
+
       viewRef.value?.search()
+
+      nextTick(() => {
+        const index = 10
+        // 获取目标行的 DOM 元素
+        const targetRow = viewRef.value?.tableRef?.$el.querySelector(
+          `tbody tr:nth-child(${index + 1})`
+        )
+
+        if (targetRow) {
+          // 计算目标行相对于 el-scrollbar.wrap 的位置
+          const targetOffsetTop = targetRow.offsetTop
+          console.info(targetOffsetTop)
+        }
+      })
     }
     const onRefesh = () => {
       viewRef.value?.refesh()
