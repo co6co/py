@@ -35,3 +35,14 @@ export interface tableScope<T = object> {
 	expanded: boolean;
 	row: T;
 }
+
+/**
+ * 客户端选择文件
+ * 使用
+ */
+export interface IFileOption {
+	file: File;
+	percentage?: number;
+	subPath?: String;
+	finished?: boolean;
+}

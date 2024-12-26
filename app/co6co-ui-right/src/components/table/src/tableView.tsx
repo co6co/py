@@ -1,4 +1,4 @@
-import { defineComponent, PropType, VNodeChild } from 'vue';
+import { defineComponent, PropType, VNodeChild, SlotsType } from 'vue';
 import { ref, reactive, onMounted } from 'vue';
 import {
 	ElTable,
@@ -22,6 +22,7 @@ type DataApi = (query: any) => Promise<IPageResponse>;
 type filter = (data: any) => Array<Object>;
 export default defineComponent({
 	name: 'tableView',
+	inheritAttrs: false,
 	props: {
 		dataApi: {
 			type: Function as PropType<DataApi>,
@@ -44,6 +45,11 @@ export default defineComponent({
 			default: true,
 		},
 	},
+	slots: Object as SlotsType<{
+		header: () => any;
+		default: () => any;
+		footer: () => any;
+	}>,
 	setup(prop, ctx) {
 		//:define
 		interface IQueryItem extends IPageParam {
@@ -60,7 +66,6 @@ export default defineComponent({
 		//const dictHook = useDictHook.useDictSelect()
 		//const store = get_store()
 		//end use
-
 		//:page
 		const tableRef = ref<InstanceType<typeof ElTable>>();
 		const DATA = reactive<Table_Module>({
@@ -116,6 +121,7 @@ export default defineComponent({
 						<ElMain>
 							<ElScrollbar>
 								<ElTable
+									{...ctx.attrs}
 									data={DATA.data}
 									border={true}
 									class="table"

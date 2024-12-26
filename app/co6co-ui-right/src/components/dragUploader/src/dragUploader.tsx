@@ -11,22 +11,19 @@ import {
 	ElCol,
 	ElTable,
 	ElTableColumn,
-	ElDropdown,
-	ElDropdownMenu,
-	ElDropdownItem,
-	ElIcon,
 	ElInputNumber,
 } from 'element-plus';
+import { Delete as DeleteIcon } from '@element-plus/icons-vue';
 import {
-	ArrowDown,
-	Files as FilesIcon,
-	Folder as FolderIcon,
-	Delete as DeleteIcon,
-} from '@element-plus/icons-vue';
-import { upload_svc, get_upload_chunks_svc } from '@/api/file';
+	upload_svc,
+	createFileChunks,
+	get_upload_chunks_svc,
+} from '@/api/file';
 import style from '@/assets/css/file.module.less';
-import { IFileOption } from './index';
+import { IFileOption } from '@/constants';
+import FileDropdown from '@/components/fileDropdown';
 import pLimit from 'p-limit';
+
 export default defineComponent({
 	name: 'FileUpload',
 	props: {},
@@ -44,6 +41,7 @@ export default defineComponent({
 			canelFlag: boolean;
 			uploading: boolean;
 			limitNum: number;
+			scrollIndex: number;
 		}>({
 			files: [],
 			uploadFolder: '/',
@@ -51,6 +49,7 @@ export default defineComponent({
 			canelFlag: false,
 			uploading: false,
 			limitNum: 3,
+			scrollIndex: 0,
 		});
 		const readFileOrDirectory = (entry) => {
 			//entry: FileEntry | DirectoryEntry
@@ -69,6 +68,7 @@ export default defineComponent({
 		};
 		const onDragOver = (event) => {
 			// 阻止默认行为，以允许文件被放置到目标区域
+			console.info('查看event类型', event);
 			event.preventDefault();
 		};
 		const onDrop = (event: DragEvent) => {
@@ -100,9 +100,9 @@ export default defineComponent({
 					});
 				}
 			}
-			//console.info('onDrop finished.', DATA.files.length)
 		};
-		const uploadOneFile = async (opt: IFileOption) => {
+
+		const uploadOneFile = async (opt: IFileOption, index: number) => {
 			if (opt.finished) return true;
 			const file = opt.file;
 			let chunks = createFileChunks(file);
@@ -115,13 +115,19 @@ export default defineComponent({
 				file.name,
 				chunks.length
 			);
+			const uploaloadBck = (percentage: number) => {
+				opt.percentage = percentage;
+				//限制位置为最大
+				if (DATA.scrollIndex < index)
+					(DATA.scrollIndex = index), scrollToRow(index);
+			};
 			// 过滤掉已经上传的块
 			const remainingChunks = chunks
 				.map((v, index) => ({ index: index + 1, value: v }))
 				.filter((v) => !uploadedChunks.includes(v.index));
 			if (remainingChunks.length === 0) {
 				//console.log('所有块已上传完毕')
-				opt.percentage = 1;
+				uploaloadBck(1);
 				return true;
 			}
 			opt.finished = await uploadFileChunks(
@@ -129,9 +135,7 @@ export default defineComponent({
 				opt.subPath as string,
 				file.name,
 				chunks.length,
-				(p: number) => {
-					opt.percentage = p;
-				}
+				uploaloadBck
 			);
 			return opt.finished;
 		};
@@ -151,9 +155,7 @@ export default defineComponent({
 				DATA.files.map((opt, index) =>
 					limit(() => {
 						if (DATA.canelFlag) return false;
-						const res = uploadOneFile(opt);
-						scrollToRow(index);
-						return res;
+						return uploadOneFile(opt, index);
 					})
 				)
 			);
@@ -176,18 +178,6 @@ export default defineComponent({
 			} finally {
 				DATA.uploading = false;
 			}
-		};
-		/** 分片上传 */
-		const createFileChunks = (file: File, chunkSize = 1 * 1024 * 1024) => {
-			const chunks: Array<Blob> = [];
-			let start = 0;
-			while (start < file.size) {
-				const end = Math.min(file.size, start + chunkSize);
-				const chunk = file.slice(start, end);
-				chunks.push(chunk);
-				start = end;
-			}
-			return chunks;
 		};
 
 		const getUploadPath = (root: string, subPath: string) => {
@@ -247,38 +237,11 @@ export default defineComponent({
 			return cellValue ? (cellValue * 100).toFixed(2) + '%' : '';
 		};
 		/**选择上传 */
-		const fileInputRef = ref();
-		const onFileSelect = (event) => {
-			const files: File[] = Array.from(event.target.files);
-			const newData = files.map((file) => {
-				const o = { file: file, finished: false };
-				return o;
-			});
-			console.info(newData);
-			DATA.files.push(...newData);
+		//选择文件或文件夹
+		const onfileDropdown = (data: IFileOption[]) => {
+			DATA.files.push(...data);
 		};
-		//文件夹
-		const folderInputRef = ref();
-		const onFolderSelect = (event) => {
-			const files: File[] = Array.from(event.target.files);
-			const newData = files.map((file) => {
-				const subPath = file.webkitRelativePath.replace(`/${file.name}`, '');
-				const o = { file: file, finished: false, subPath: subPath };
-				return o;
-			});
-			DATA.files.push(...newData);
-		};
-		const onCommand = (command: string) => {
-			switch (command) {
-				case 'file':
-					fileInputRef.value.click();
-					break;
-				case 'folder':
-					folderInputRef.value.click();
-					break;
-			}
-			console.info(tableRef.value);
-		};
+
 		const onDelete = (index, _: IFileOption) => {
 			//删除从index 的一个元素
 			DATA.files.splice(index, 1);
@@ -288,13 +251,13 @@ export default defineComponent({
 		};
 
 		// 滚动到底部
-		const scrollToRow = (index: number) => {
+		const scrollToRow = (rowIndex: number) => {
 			nextTick(() => {
 				if (scrollbarRef.value && tableRef.value) {
 					// 获取目标行的 DOM 元素
 					//tableRef?.bodyWrapper.querySelector
 					const targetRow = tableRef.value.$el.querySelector(
-						`tbody tr:nth-child(${index + 1})`
+						`tbody tr:nth-child(${rowIndex + 1})`
 					);
 					if (targetRow) {
 						// 计算目标行相对于 el-scrollbar.wrap 的位置
@@ -339,45 +302,7 @@ export default defineComponent({
 								<>
 									<ElRow>
 										<ElCol span={8} class="tl">
-											<ElDropdown trigger="click" onCommand={onCommand}>
-												{{
-													default: () => (
-														<ElButton type="primary">
-															上传文件或目录
-															<ElIcon>
-																<ArrowDown />
-															</ElIcon>
-														</ElButton>
-													),
-													dropdown: () => (
-														<ElDropdownMenu>
-															<ElDropdownItem icon={FilesIcon} command="file">
-																上传文件
-																<input
-																	type="file"
-																	multiple
-																	ref={fileInputRef}
-																	style="display: none"
-																	onChange={onFileSelect}
-																/>
-															</ElDropdownItem>
-															<ElDropdownItem
-																icon={FolderIcon}
-																command="folder">
-																上传文件夹
-																<input
-																	type="file"
-																	multiple
-																	ref={folderInputRef}
-																	webkitdirectory
-																	style="display: none"
-																	onChange={onFolderSelect}
-																/>
-															</ElDropdownItem>
-														</ElDropdownMenu>
-													),
-												}}
-											</ElDropdown>
+											<FileDropdown onSelected={onfileDropdown} />
 										</ElCol>
 										<ElCol push={1} span={7}>
 											<ElInputNumber

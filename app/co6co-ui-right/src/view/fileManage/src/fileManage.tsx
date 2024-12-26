@@ -1,5 +1,11 @@
-import { computed, defineComponent, VNodeChild } from 'vue';
-import { ref, reactive, onMounted } from 'vue';
+import {
+	ref,
+	reactive,
+	onMounted,
+	computed,
+	defineComponent,
+	VNodeChild,
+} from 'vue';
 import {
 	ElButton,
 	ElInput,
@@ -30,12 +36,14 @@ import {
 	getResourceUrl,
 	del_svc,
 	list_param,
+	batch_del_svc,
 	list_res as Item,
 } from '@/api/file';
 
 import { ConfigCodes } from '@/constants/config';
 import { useConfig } from '@/hooks/useConfig';
 import { useKeyUp } from '@/hooks/useKey';
+
 export default defineComponent({
 	setup(prop, ctx) {
 		const DATA = reactive<{
@@ -71,6 +79,14 @@ export default defineComponent({
 			await configHooks.loadData();
 			DATA.query.root = configHooks.getValue(true);
 			onSearch();
+			/** 不支持$on .$off 
+			viewRef.value?.tableRef!.$on('selection-change', onSelectionChange);
+
+			// 清理事件监听器
+			onBeforeUnmount(() => {
+				viewRef.value?.tableRef!.$off('selection-change', onSelectionChange);
+			});
+			 */
 		});
 		const isEditing = ref(false);
 		const handleFocus = () => {
@@ -114,15 +130,11 @@ export default defineComponent({
 					row.loading = false;
 				});
 		};
-		const { deleteSvc } = deleteHook.default(del_svc, onRefesh);
-		const onDelete = (_: number, row: Item) => {
-			deleteSvc(row.path, row.name);
-		};
+
 		const onDrop = (event) => {
 			if (getPermissKey(routeHook.ViewFeature.upload)) {
 				diaglogRef.value?.clearFile();
 				diaglogRef.value?.onDrop(event);
-
 				DATA.isMask = false;
 				if (diaglogRef.value?.hasFile()) {
 					onOpenDialog(false);
@@ -137,10 +149,33 @@ export default defineComponent({
 			}
 		};
 		useKeyUp((event) => {
-			if (event.key === 'Escape') {
-				DATA.isMask = false;
-			}
+			if (event.key === 'Escape') DATA.isMask = false;
 		});
+		const multipleSelection = ref<Item[]>([]);
+		const onSelectionChange = (val: Item[]) => {
+			multipleSelection.value = val;
+		};
+		const tableSelected = computed(() => {
+			return multipleSelection.value.length > 0;
+		});
+		//删除
+		const { deleteSvc } = deleteHook.default(del_svc, onRefesh);
+		const onDelete = (_: number, row: Item) => {
+			deleteSvc(row.path, row.name);
+		};
+		const batchDelTip = deleteHook.default(batch_del_svc, onRefesh);
+		const onBatchDel = () => {
+			const selectPath = multipleSelection.value.map((m) => m.path);
+			batchDelTip.deleteSvc2(
+				selectPath,
+				batchDelTip.createConfirmBox(
+					`确定要删除[${selectPath.length}]条数据`,
+					'删除文件或文件夹警告',
+					'warning'
+				)
+			);
+		};
+
 		//:page reader
 		const rander = (): VNodeChild => {
 			return (
@@ -158,48 +193,62 @@ export default defineComponent({
 						autoLoadData={false}
 						query={DATA.query}
 						showPaged={false}
+						onSelection-change={onSelectionChange}
 						resultFilter={ontresultFileter}>
 						{{
 							header: () => (
 								<ElRow>
 									<ElCol span={12}>
-										<ElInput
-											v-model={DATA.query.root}
-											class={isEditing.value ? style.editor : style.show}
-											value={
-												isEditing.value ? DATA.query.root : previewRoot.value
-											}
-											onFocus={handleFocus}
-											onBlur={handleBlur}
-											onChange={onSearch}>
-											{{
-												prepend: () => (
-													<ElButton
-														title="上级目录"
-														icon={ArrowLeftBold}
-														onClick={onRootUp}
-													/>
-												),
-												append: () => (
-													<>
+										<div class="handle-box">
+											<ElInput
+												style="flex:0 0 70%"
+												v-model={DATA.query.root}
+												class={isEditing.value ? style.editor : style.show}
+												value={
+													isEditing.value ? DATA.query.root : previewRoot.value
+												}
+												onFocus={handleFocus}
+												onBlur={handleBlur}
+												onChange={onSearch}>
+												{{
+													prepend: () => (
 														<ElButton
-															title="刷新"
-															type="primary"
-															icon={Refresh}
-															onClick={onSearch}
+															title="上级目录"
+															icon={ArrowLeftBold}
+															onClick={onRootUp}
 														/>
-														<ElButton
-															icon={UploadFilled}
-															v-permiss={getPermissKey(
-																routeHook.ViewFeature.upload
-															)}
-															onClick={() => onOpenDialog()}
-															v-slots={{ default: () => '上传' }}
-														/>
-													</>
-												),
-											}}
-										</ElInput>
+													),
+													append: () => (
+														<>
+															<ElButton
+																title="刷新"
+																type="primary"
+																icon={Refresh}
+																onClick={onSearch}
+															/>
+														</>
+													),
+												}}
+											</ElInput>
+											<ElButton
+												style="flex:0 0"
+												icon={UploadFilled}
+												v-permiss={getPermissKey(routeHook.ViewFeature.upload)}
+												onClick={() => onOpenDialog()}
+												v-slots={{ default: () => '上传' }}
+											/>
+											{tableSelected.value ? (
+												<ElButton
+													type="danger"
+													icon={Delete}
+													v-permiss={getPermissKey(routeHook.ViewFeature.del)}
+													onClick={onBatchDel}>
+													删除选中
+												</ElButton>
+											) : (
+												<></>
+											)}
+										</div>
 									</ElCol>
 									<ElCol span={6} offset={6}>
 										<ElInput
@@ -217,6 +266,7 @@ export default defineComponent({
 							),
 							default: () => (
 								<>
+									<ElTableColumn type="selection" width={55} />
 									<ElTableColumn label="序号" width={112} align="center">
 										{{
 											default: (scope: tableScope) =>

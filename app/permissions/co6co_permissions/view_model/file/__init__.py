@@ -6,6 +6,7 @@ from co6co_sanic_ext.utils import JSON_util
 from co6co_sanic_ext.model.res.result import Result
 from ..base_view import AuthMethodView
 from ...model.filters.file_param import FileParam
+from ...services import fileService
 import os
 import datetime
 from co6co.utils import log
@@ -135,11 +136,7 @@ class FileViews(AuthMethodView):
         filePath = args.get("path")
         if not os.path.exists(filePath):
             return self.response_json(Result.success(message=f"路径：{filePath},不存在！"))
-        if os.path.isfile(filePath):
-            os.unlink(filePath)
-        elif os.path.isdir(filePath):
-            # os.rmdir(filePath) 删除空文件夹
-            shutil.rmtree(filePath)
+        fileService.delFileOrFolder(filePath)
         return self.response_json(Result.success(message=f"删除'{filePath}'完成！"))
 
     async def put(self, request: Request):

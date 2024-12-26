@@ -87,3 +87,30 @@ export const get_upload_chunks_svc = (data: {
 }): Promise<IResponse<{ uploadedChunks: Array<number> }>> => {
 	return createServiceInstance().post(`${base_URL}/upload/query`, data);
 };
+
+/** 分片上传 */
+export const createFileChunks = (
+	file: File,
+	chunkSize: number = 1 * 1024 * 1024
+) => {
+	const chunks: Array<Blob> = [];
+	let start = 0;
+	while (start < file.size) {
+		const end = Math.min(file.size, start + chunkSize);
+		const chunk = file.slice(start, end);
+		chunks.push(chunk);
+		start = end;
+	}
+	return chunks;
+};
+
+/**
+ * 删除文件
+ * @param path 路径路径
+ * @returns
+ */
+export const batch_del_svc = (paths: string[]): Promise<IResponse> => {
+	return createServiceInstance().post(`${base_URL}/batch/del`, {
+		paths: paths,
+	});
+};

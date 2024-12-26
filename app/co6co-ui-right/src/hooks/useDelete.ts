@@ -4,6 +4,19 @@ export default function (
 	del_svc: (pk: any, reson?: string) => Promise<IResponse>,
 	bck?: () => void
 ) {
+	const createConfirmBox = (
+		message: string,
+		tip: string,
+		type?: '' | 'success' | 'warning' | 'info' | 'error'
+	) => {
+		const messageBoxPromise = ElMessageBox.confirm(message, tip, {
+			type: type,
+		});
+		return messageBoxPromise;
+	};
+	const deleteSvc2 = (pk: any, messageBoxPromise: Promise<MessageBoxData>) => {
+		deleteSvc(pk, undefined, undefined, messageBoxPromise);
+	};
 	const deleteSvc = (
 		pk: any,
 		name?: string,
@@ -44,5 +57,5 @@ export default function (
 				closeLoading();
 			});
 	};
-	return { deleteSvc };
+	return { deleteSvc, deleteSvc2, createConfirmBox };
 }
