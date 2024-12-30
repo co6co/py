@@ -1,4 +1,4 @@
-import { defineComponent, ref, reactive, VNode, nextTick } from 'vue';
+import { defineComponent, ref, reactive, VNode, nextTick, computed } from 'vue';
 import { Dialog, DialogInstance, byte2Unit } from 'co6co';
 import { tableScope } from '@/constants';
 
@@ -66,14 +66,15 @@ export default defineComponent({
 				});
 			}
 		};
-		const onDragOver = (event) => {
+		const onDragOver = (event: DragEvent) => {
 			// 阻止默认行为，以允许文件被放置到目标区域
-			console.info('查看event类型', event);
 			event.preventDefault();
+			event.stopPropagation(); //阻止冒泡
 		};
 		const onDrop = (event: DragEvent) => {
 			// 阻止默认行为，以防止浏览器打开文件
 			event.preventDefault();
+			event.stopPropagation(); //阻止冒泡
 			//console.info('onDrop start...')
 
 			const items = event.dataTransfer?.items;
@@ -268,6 +269,9 @@ export default defineComponent({
 				}
 			});
 		};
+		const finshedCount = computed(() => {
+			return DATA.files.filter((m) => m.finished).length;
+		});
 		/** end 分片上传 */
 		const fromSlots = {
 			buttons: () => (
@@ -317,7 +321,8 @@ export default defineComponent({
 												type="danger"
 												onClick={clearFile}
 												v-slots={{
-													default: () => `清空列表[${DATA.files.length}]`,
+													default: () =>
+														`清空列表[${finshedCount.value}/${DATA.files.length}]`,
 												}}
 											/>
 										</ElCol>
@@ -397,7 +402,14 @@ export default defineComponent({
 		};
 
 		const rander = (): VNode => {
-			return <Dialog title={DATA.title} ref={diaglogRef} v-slots={fromSlots} />;
+			return (
+				<Dialog
+					draggable
+					title={DATA.title}
+					ref={diaglogRef}
+					v-slots={fromSlots}
+				/>
+			);
 		};
 		const hasFile = () => {
 			// DATA.files.length 磁盘原因等 延迟很大 需要很久才能出结果

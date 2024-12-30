@@ -106,7 +106,7 @@ export default defineComponent({
 			if (DATA.query.root) {
 				const arr = DATA.query.root.split(DATA.split);
 				const result = arr.slice(0, arr.length - 1);
-				console.info(arr, result);
+				//console.info(arr, result);
 				if (result.length == 1 && result[0] == '') DATA.query.root = '/';
 				else DATA.query.root = result.join('/');
 				onSearch();

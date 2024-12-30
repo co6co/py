@@ -122,13 +122,13 @@
 		<modify-diaglog
 			:title="table_module.diaglogTitle"
 			ref="modifyDiaglogRef"
-			@saved="onLoadData"></modify-diaglog>
+			@saved="onLoadData" />
 
 		<role-ass-menu-diaglog
 			:check-strictly="true"
 			style="width: 30%"
 			title="权限设置"
-			ref="roleAssMenuDiaglogRef"></role-ass-menu-diaglog>
+			ref="roleAssMenuDiaglogRef" />
 	</div>
 </template>
 

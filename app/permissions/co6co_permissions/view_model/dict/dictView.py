@@ -19,16 +19,27 @@ from ...model.enum import dict_state
 
 
 class DictSelectView(AuthMethodView):
-    routePath = "/<dictTypeCode:str>"
+    routePath = "/<dictTypeCode:str>/<category:int>"
 
-    async def get(self, request: Request, dictTypeCode: str):
+    async def get(self, request: Request, dictTypeCode: str, category: int):
         """ 
         获取字典选择
         dictTypeCode: 字典类型代码
         """
+        # NameValueFlag = 0,
+        # NameValue = 1,
+        # NameFlag = 2,
+        # All = 999,
+        fields = [sysDictPO.id, sysDictPO.name, sysDictPO.flag,  sysDictPO.value]
+        if category == 1:
+            fields = [sysDictPO.id, sysDictPO.name,  sysDictPO.value]
+        if category == 2:
+            fields = [sysDictPO.id, sysDictPO.name,  sysDictPO.flag]
+        if category == 999:
+            fields = [sysDictPO.id, sysDictPO.name, sysDictPO.flag, sysDictPO.value, sysDictPO.desc]
+
         select = (
-            Select(sysDictPO.id, sysDictPO.name, sysDictPO.flag,
-                   sysDictPO.value, sysDictPO.desc)
+            Select(*fields)
             .join(sysDictTypePO, onclause=sysDictPO.dictTypeId == sysDictTypePO.id)
             .filter(sysDictTypePO.code.__eq__(dictTypeCode), sysDictPO.state.__eq__(dict_state.enabled.val))
             .order_by(sysDictPO.order.asc())

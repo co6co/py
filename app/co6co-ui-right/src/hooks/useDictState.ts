@@ -1,5 +1,6 @@
 import { ref } from 'vue';
 import { IEnumSelect, ISelect } from 'co6co';
+import { DictShowCategory } from '@/constants';
 import {
 	get_dict_state_svc,
 	get_dict_select_svc as get_dict_select_by_code_svc,
@@ -66,9 +67,12 @@ export const useDictSelect = () => {
 		if (res.data) selectData.value = res.data;
 		else selectData.value = [];
 	};
-	const queryByCode = async (dictTypeCode: string) => {
+	const queryByCode = async (
+		dictTypeCode: string,
+		showCategory: DictShowCategory
+	) => {
 		selectData.value = [];
-		const res = await get_dict_select_by_code_svc(dictTypeCode);
+		const res = await get_dict_select_by_code_svc(dictTypeCode, showCategory);
 		selectData.value = res.data;
 	};
 	const _checkSelectDataValid = () => {

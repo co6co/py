@@ -74,11 +74,12 @@ export default defineComponent({
 				case FormOperation.add:
 					DATA.id = 0;
 					DATA.fromData.dictTypeId = dictTypeId;
-					DATA.fromData.name = '';
-					DATA.fromData.value = '';
-					DATA.fromData.state = undefined;
-					DATA.fromData.flag = undefined;
-					DATA.fromData.desc = '';
+					DATA.fromData.name = item?.name;
+					DATA.fromData.state = item?.state;
+					DATA.fromData.value = item?.value;
+					DATA.fromData.flag = item?.flag;
+					DATA.fromData.desc = item?.desc;
+					DATA.fromData.order = item?.order ? item.order : 0;
 
 					break;
 				case FormOperation.edit:

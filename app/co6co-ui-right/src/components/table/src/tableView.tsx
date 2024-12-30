@@ -105,6 +105,9 @@ export default defineComponent({
 		const onColChange2 = (column: any) => {
 			onColChange(column, DATA.query, queryData);
 		};
+		const onRowChanged = (row) => {
+			DATA.currentItem = row;
+		};
 		//end page
 		onMounted(async () => {
 			if (prop.autoLoadData) queryData();
@@ -127,6 +130,7 @@ export default defineComponent({
 									class="table"
 									ref={tableRef}
 									headerCellClassName="table-header"
+									onRow-click={onRowChanged}
 									onSort-change={onColChange2}>
 									{ctx.slots.default?.()}
 								</ElTable>

@@ -46,3 +46,9 @@ export interface IFileOption {
 	subPath?: String;
 	finished?: boolean;
 }
+export enum DictShowCategory {
+	NameValueFlag = 0, //默认
+	NameValue = 1,
+	NameFlag = 2,
+	All = 999,
+}

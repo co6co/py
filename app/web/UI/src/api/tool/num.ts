@@ -16,11 +16,8 @@ export interface category_desc {
 export const clc_svc = (
   category: number | string,
   data: param
-): Promise<IResponse<Array<Array<number>>>> => {
+): Promise<IResponse<{ list: Array<Array<number>>; count: number }>> => {
   return request.post(`${base_URL}/${category}`, data)
-}
-export const get_category_svc = (): Promise<IResponse<IEnumSelect[]>> => {
-  return request.get(`${base_URL}/-1`)
 }
 export const get_category_desc_svc = (category: number): Promise<IResponse<category_desc>> => {
   return request.get(`${base_URL}/${category}`)

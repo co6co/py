@@ -195,7 +195,7 @@
 		pageTotal: -1,
 		diaglogTitle: '',
 	});
-	const { selectData, getName, getTagType } = useState();
+	const { loadData, selectData, getName, getTagType } = useState();
 	const { getPermissKey } = usePermission();
 	// 获取表格数据
 	const getData = () => {
@@ -238,7 +238,8 @@
 	const onDelete = (_: number, row: Item) => {
 		deleteSvc(row.id, row.userName);
 	};
-	onMounted(() => {
+	onMounted(async () => {
+		await loadData();
 		getData();
 	});
 

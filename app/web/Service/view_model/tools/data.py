@@ -16,11 +16,45 @@ class categoryDesc:
         self.b = 0
 
 
+def Padding(inputData: list, templateList: list, *dan: int):
+    tmpArr = copy.deepcopy(templateList)
+    for ar in tmpArr:
+        flag = 0
+        for index, a in enumerate(ar):
+            if "*" in str(a):
+                ar[index] = dan[flag]
+                flag += 1
+                continue
+            a = int(a)
+            for index2, val in enumerate(inputData):
+                print(a, a == (index2+1))
+                if a == (index2+1):
+                    ar[index] = val
+                    break
+    return tmpArr
+
+
+def toDesc(value: str):
+    key: str = value
+    arr = key.split("_")
+    result = categoryDesc()
+    result.dan = int(arr[2])
+    result.select = int(arr[1])-result.dan
+    result.z = arr[3]
+    result.b = arr[4]
+    return result
+
+
+''''
+后面的应该删除不在使用
+'''
+
+
 class category(Base_EC_Enum):
     """
     用户类别
     """
-    zx_10_0_7_6 = "zx_10_0_7_6",  "矩阵_10_0_7_6", 0
+    zx_10_0_7_6 = "zx_10_0_7_6", "矩阵_10_0_7_6", 0
     zx_15_0_7_5 = "zx_15_0_7_5", "矩阵_15_0_7_5", 1
     zx_10_1_7_6 = "zx_10_1_7_6", "矩阵_10_1_7_6", 2
 
@@ -34,28 +68,12 @@ class category(Base_EC_Enum):
         result.b = arr[4]
         return result
 
-    @staticmethod
-    def _padding(lst: list, arr: list, *dan: int):
-        tmpArr = copy.deepcopy(arr)
-        for ar in tmpArr:
-            flag = 0
-            for index, a in enumerate(ar):
-                if "*" in str(a):
-                    ar[index] = dan[flag]
-                    flag += 1
-                    continue
-                for index2, val in enumerate(lst):
-                    if a == (index2+1):
-                        ar[index] = val
-                        break
-        return tmpArr
-
     def padding(self, lst: list,   *dan: int):
         mod = module(__name__)
         listAll = mod.filter_object(lambda x: isinstance(x, list))
         for key, val in listAll:
             if key == self.name:
-                return category._padding(lst, val, *dan)
+                return Padding(lst, val, *dan)
 
 
 zx_10_0_7_6 = [

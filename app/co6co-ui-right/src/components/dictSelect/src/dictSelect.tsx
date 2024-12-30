@@ -2,6 +2,10 @@ import { defineComponent, ref, watch, PropType, onMounted, VNode } from 'vue';
 import { ElSelect, ElOption } from 'element-plus';
 import { useDictHook } from '@/hooks';
 type ModelValueType = string | number | null | undefined;
+type ValueUseField = 'id' | 'name' | 'flag' | 'value' | 'desc';
+import { type DictSelectType } from '@/api/dict/dictType';
+
+import { DictShowCategory } from '@/constants';
 export default defineComponent({
 	props: {
 		placeholder: {
@@ -17,6 +21,10 @@ export default defineComponent({
 			//type: Object as PropType<ModelValueType>,
 			//required: true,
 			default: '',
+		},
+		valueUseFiled: {
+			type: String as PropType<ValueUseField>,
+			default: 'value',
 		},
 		isNumber: {
 			type: Boolean as PropType<Boolean>,
@@ -34,10 +42,15 @@ export default defineComponent({
 			type: Boolean as PropType<Boolean>,
 			default: true,
 		},
+		queryCategory: {
+			type: Number as PropType<DictShowCategory>,
+			default: DictShowCategory.NameValueFlag,
+		},
 	},
 	emits: {
 		//@ts-ignore
 		'update:modelValue': (data: ModelValueType) => true,
+		//change: (data: ModelValueType) => true,
 	},
 	setup(prop, ctx) {
 		//存储本地值
@@ -51,17 +64,40 @@ export default defineComponent({
 		);
 		const onChange = (newValue: ModelValueType) => {
 			localValue.value = newValue;
+			//ctx.emit('change', newValue);
 			ctx.emit('update:modelValue', newValue);
 		};
 		const stateHook = useDictHook.useDictSelect();
 		onMounted(async () => {
-			await stateHook.queryByCode(prop.dictTypeCode);
+			await stateHook.queryByCode(prop.dictTypeCode, prop.queryCategory);
 		});
 		const getName = (v) => {
 			return stateHook.getName(String(v));
 		};
 		const flagIs = (value: string, flag: string) => {
 			return stateHook.getFlag(value) == flag;
+		};
+		const valueUse = (d: DictSelectType) => {
+			let value: number | string | bigint = '';
+			switch (prop.valueUseFiled) {
+				case 'id':
+					value = d.id;
+					break;
+				case 'name':
+					value = d.name;
+					break;
+				case 'flag':
+					value = d.flag;
+					break;
+				case 'value':
+					value = d.value;
+					break;
+				case 'desc':
+					value = d.desc;
+					break;
+				default:
+			}
+			return prop.isNumber ? Number(value) : value;
 		};
 		const rander = (): VNode => {
 			return (
@@ -73,13 +109,7 @@ export default defineComponent({
 					placeholder={prop.placeholder}
 					onChange={onChange}>
 					{stateHook.selectData.value.map((d, index) => {
-						return (
-							<ElOption
-								key={index}
-								label={d.name}
-								value={prop.isNumber ? Number(d.value) : d.value}
-							/>
-						);
+						return <ElOption key={index} label={d.name} value={valueUse(d)} />;
 					})}
 				</ElSelect>
 			);

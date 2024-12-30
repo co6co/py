@@ -122,7 +122,10 @@
 			</el-footer>
 		</el-container>
 		<!-- 弹出框 -->
-		<modifyDiaglog @saved="onSearch" ref="modifyDiaglogRef" title="编辑" />
+		<modifyDiaglog
+			@saved="onSearch"
+			ref="modifyDiaglogRef"
+			:title="table_module.diaglogTitle" />
 	</div>
 </template>
 

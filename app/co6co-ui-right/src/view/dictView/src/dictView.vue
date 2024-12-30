@@ -18,7 +18,7 @@
 						type="primary"
 						v-permiss="getPermissKey(ViewFeature.add)"
 						:icon="Plus"
-						@click="onOpenDialog(0)"
+						@click="onOpenDialog(FormOperation.add)"
 						>新增</el-button
 					>
 				</div>
@@ -29,6 +29,7 @@
 						highlight-current-row
 						@sort-change="onColChange2"
 						:data="table_module.data"
+						@row-click="onRowChanged"
 						border
 						class="table"
 						ref="multipleTable"
@@ -45,12 +46,12 @@
 							prop="name"
 							label="名称"
 							sortable="custom"
-							:show-overflow-tooltip="true"></el-table-column>
+							:show-overflow-tooltip="true" />
 						<el-table-column
 							prop="value"
 							label="值"
 							sortable="custom"
-							:show-overflow-tooltip="true"></el-table-column>
+							:show-overflow-tooltip="true" />
 
 						<el-table-column
 							prop="state"
@@ -68,12 +69,12 @@
 							prop="createTime"
 							label="创建时间"
 							sortable="custom"
-							:show-overflow-tooltip="true"></el-table-column>
+							:show-overflow-tooltip="true" />
 						<el-table-column
 							prop="updateTime"
 							label="更新时间"
 							sortable="custom"
-							:show-overflow-tooltip="true"></el-table-column>
+							:show-overflow-tooltip="true" />
 						<el-table-column
 							label="操作"
 							width="180"
@@ -84,7 +85,7 @@
 									text
 									:icon="Edit"
 									v-permiss="getPermissKey(ViewFeature.edit)"
-									@click="onOpenDialog(1, scope.row)">
+									@click="onOpenDialog(FormOperation.edit, scope.row)">
 									编辑
 								</el-button>
 								<el-button
@@ -111,7 +112,10 @@
 			</el-footer>
 		</el-container>
 		<!-- 弹出框 -->
-		<modifyDiaglog @saved="onSearch" ref="modifyDiaglogRef" title="编辑" />
+		<modifyDiaglog
+			@saved="onSearch"
+			ref="modifyDiaglogRef"
+			:title="table_module.diaglogTitle" />
 	</div>
 </template>
 
@@ -201,18 +205,19 @@
 		onColChange(column, table_module.query, getData);
 	};
 
+	const onRowChanged = (row: Item) => {
+		table_module.currentItem = row;
+	};
 	const modifyDiaglogRef = ref<ModifyDictInstance>();
-	//编辑角色
+	//打开框
 	const onOpenDialog = (operation: FormOperation, row?: Item) => {
 		table_module.diaglogTitle =
-			operation == FormOperation.add
-				? '增加字典类型'
-				: `编辑[${row?.name}]菜单`;
-		table_module.currentItem = row;
+			operation == FormOperation.add ? '增加字典' : `编辑[${row?.name}]菜单`;
+		if (row) table_module.currentItem = row;
 		modifyDiaglogRef.value?.openDialog(
 			operation,
 			table_module.query.dictTypeId,
-			row
+			row ? row : table_module.currentItem
 		);
 	};
 	//删除

@@ -5,25 +5,18 @@ import {
   ElContainer,
   ElMain,
   ElForm,
-  ElSelect,
-  ElInput,
-  ElOption,
   ElScrollbar,
   ElFormItem,
   ElInputNumber,
   ElCheckboxGroup,
-  ElCheckboxButton
+  ElCheckboxButton,
+  ElRow,
+  ElCol
 } from 'element-plus'
 import { Search, Edit, ArrowLeftBold, Refresh, Delete, UploadFilled } from '@element-plus/icons-vue'
-import { TableViewInstance } from 'co6co-right'
-import { EnumSelect, EnumSelectInstance, IEnumSelect, minus } from 'co6co'
-import {
-  get_category_svc,
-  get_category_desc_svc,
-  clc_svc,
-  param,
-  category_desc
-} from '@/api/tool/num'
+import { TableViewInstance, DictSelect } from 'co6co-right'
+import { EnumSelect, IEnumSelect, minus } from 'co6co'
+import { get_category_desc_svc, clc_svc, category_desc } from '@/api/tool/num'
 import style from '@/assets/css/num.module.less'
 export default defineComponent({
   setup(prop, ctx) {
@@ -37,13 +30,15 @@ export default defineComponent({
       dans?: Array<number>
 
       result: Array<String>
+      count: number
     }>({
       _selectCount: 30,
       _cateselectData: [],
       selectList: [1, 2, 3, 4],
       category: 0,
       list: [],
-      result: []
+      result: [],
+      count: 0
     })
     //:use
 
@@ -83,24 +78,29 @@ export default defineComponent({
     })
     const onCalc = () => {
       clc_svc(DATA.category, { list: DATA.list, dans: DATA.dans }).then((res) => {
-        DATA.result = res.data.map((m) => m.join() + '\r\n')
+        DATA.result = res.data.list.map((m) => m.join() + '\r\n')
+        DATA.count = res.data.count
       })
     }
     const onClear = () => {
       DATA.selectList = []
       DATA.dans = []
     }
-    const onCategoryChange = async (n) => {
-      const res = await get_category_desc_svc(n)
-      DATA._category_desc = res.data
+    const onCategoryChange = async (n: number) => {
+      try {
+        const res = await get_category_desc_svc(n)
+        DATA._category_desc = res.data
+      } catch (e) {
+        console.error(e)
+      }
     }
     const onDanChanged = (dans: Array<number>) => {
       if (dans.length > 0) DATA.list = minus(DATA.list, dans) as number[]
     }
     onMounted(async () => {
-      const res = await get_category_svc()
-      DATA._cateselectData = res.data
-      await onCategoryChange(DATA._cateselectData[0].value)
+      //const res = await get_category_svc()
+      //DATA._cateselectData = res.data
+      //await onCategoryChange(DATA._cateselectData[0].value)
       onSelectCountChanged(DATA._selectCount)
       onSearch()
     })
@@ -110,22 +110,28 @@ export default defineComponent({
         <ElContainer id={style.view}>
           <ElMain>
             <ElForm labelWidth={100}>
-              <ElFormItem label="数量">
-                <ElInputNumber
-                  v-model={DATA._selectCount}
-                  placeholder="数量"
-                  onChange={onSelectCountChanged}
-                />
-              </ElFormItem>
-
-              <ElFormItem label="类型">
-                <EnumSelect
-                  v-model={DATA.category}
-                  placeholder="数量"
-                  data={DATA._cateselectData}
-                  onChange={onCategoryChange}
-                />
-              </ElFormItem>
+              <ElRow>
+                <ElCol span={12}>
+                  <ElFormItem label="数量">
+                    <ElInputNumber
+                      v-model={DATA._selectCount}
+                      placeholder="数量"
+                      onChange={onSelectCountChanged}
+                    />
+                  </ElFormItem>
+                </ElCol>
+                <ElCol span={12}>
+                  <ElFormItem label="类型">
+                    <DictSelect
+                      dictTypeCode="USER_NUM"
+                      onChange={onCategoryChange}
+                      v-model={DATA.category}
+                      valueUseFiled="id"
+                      placeholder="类别"
+                    />
+                  </ElFormItem>
+                </ElCol>
+              </ElRow>
               {DATA._category_desc && DATA._category_desc.dan > 0 ? (
                 <>
                   <ElFormItem label="胆值">
@@ -162,7 +168,7 @@ export default defineComponent({
                   ))}
                 </ElCheckboxGroup>
               </ElFormItem>
-              <ElFormItem label="结果">
+              <ElFormItem label={`结果[${DATA.count}]`}>
                 <ElScrollbar>
                   <pre style="height:200px">{DATA.result.map((r) => r)}</pre>
                 </ElScrollbar>

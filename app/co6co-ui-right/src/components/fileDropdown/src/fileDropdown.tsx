@@ -52,7 +52,6 @@ export default defineComponent({
 		const fileInputRef = ref();
 		const onFileSelect = (event) => {
 			const files: File[] = Array.from(event.target.files);
-
 			const newData = files.map((file) => {
 				const o = { file: file, finished: false };
 				return o;
