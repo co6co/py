@@ -163,6 +163,9 @@ export default defineComponent({
 		const onDelete = (_: number, row: Item) => {
 			deleteSvc(row.path, row.name);
 		};
+		const onPreview = (_: number, row: Item) => {
+			console.warn('为实现！');
+		};
 		const batchDelTip = deleteHook.default(batch_del_svc, onRefesh);
 		const onBatchDel = () => {
 			const selectPath = multipleSelection.value.map((m) => m.path);
@@ -277,7 +280,6 @@ export default defineComponent({
 										label="名称"
 										prop="name"
 										align="center"
-										width={180}
 										showOverflowTooltip={true}>
 										{{
 											default: (scope: { row: Item }) => (
@@ -343,6 +345,15 @@ export default defineComponent({
 														v-permiss={getPermissKey(
 															routeHook.ViewFeature.download
 														)}
+													/>
+													<ElButton
+														text={true}
+														icon={Delete}
+														onClick={() => onPreview(scope.$index, scope.row)}
+														v-permiss={getPermissKey(
+															routeHook.ViewFeature.view
+														)}
+														v-slots={{ default: () => '预览' }}
 													/>
 													<ElButton
 														text={true}

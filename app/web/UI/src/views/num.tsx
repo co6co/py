@@ -13,9 +13,8 @@ import {
   ElRow,
   ElCol
 } from 'element-plus'
-import { Search, Edit, ArrowLeftBold, Refresh, Delete, UploadFilled } from '@element-plus/icons-vue'
 import { TableViewInstance, DictSelect } from 'co6co-right'
-import { EnumSelect, IEnumSelect, minus } from 'co6co'
+import { IEnumSelect, minus } from 'co6co'
 import { get_category_desc_svc, clc_svc, category_desc } from '@/api/tool/num'
 import style from '@/assets/css/num.module.less'
 export default defineComponent({
@@ -25,7 +24,8 @@ export default defineComponent({
       _cateselectData: IEnumSelect[]
       _category_desc?: category_desc
       category: number
-      selectList: Array<number>
+      _selectList: Array<number>
+      //选中的值
       list: Array<number>
       dans?: Array<number>
 
@@ -34,7 +34,7 @@ export default defineComponent({
     }>({
       _selectCount: 30,
       _cateselectData: [],
-      selectList: [1, 2, 3, 4],
+      _selectList: [1, 2, 3, 4],
       category: 0,
       list: [],
       result: [],
@@ -51,8 +51,8 @@ export default defineComponent({
     }
 
     const onSelectCountChanged = (n) => {
-      DATA.selectList = []
-      for (let i = 1; i <= n; i++) DATA.selectList.push(i)
+      DATA._selectList = []
+      for (let i = 1; i <= n; i++) DATA._selectList.push(i)
     }
 
     const onAllowSelect = (val: number) => {
@@ -83,8 +83,10 @@ export default defineComponent({
       })
     }
     const onClear = () => {
-      DATA.selectList = []
+      DATA.list = []
       DATA.dans = []
+      DATA.result = []
+      DATA.count = 0
     }
     const onCategoryChange = async (n: number) => {
       try {
@@ -133,29 +135,27 @@ export default defineComponent({
                 </ElCol>
               </ElRow>
               {DATA._category_desc && DATA._category_desc.dan > 0 ? (
-                <>
-                  <ElFormItem label="胆值">
-                    <ElCheckboxGroup v-model={DATA.dans} onChange={onDanChanged}>
-                      {DATA.selectList.map((val) => (
-                        <>
-                          <ElCheckboxButton
-                            disabled={!onAllowDanSelect(val)}
-                            value={val}
-                            class="is-circle buttons-success"
-                          >
-                            {val}
-                          </ElCheckboxButton>
-                        </>
-                      ))}
-                    </ElCheckboxGroup>
-                  </ElFormItem>
-                </>
+                <ElFormItem label="胆值">
+                  <ElCheckboxGroup v-model={DATA.dans} onChange={onDanChanged}>
+                    {DATA._selectList.map((val) => (
+                      <>
+                        <ElCheckboxButton
+                          disabled={!onAllowDanSelect(val)}
+                          value={val}
+                          class="is-circle buttons-success"
+                        >
+                          {val}
+                        </ElCheckboxButton>
+                      </>
+                    ))}
+                  </ElCheckboxGroup>
+                </ElFormItem>
               ) : (
                 <></>
               )}
               <ElFormItem label="旋转值">
                 <ElCheckboxGroup v-model={DATA.list}>
-                  {DATA.selectList.map((val) => (
+                  {DATA._selectList.map((val) => (
                     <>
                       <ElCheckboxButton
                         value={val}

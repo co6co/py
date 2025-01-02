@@ -1,6 +1,6 @@
 import request from '@/utils/request'
 
-import { type IResponse, IEnumSelect } from 'co6co'
+import { type IResponse } from 'co6co'
 const base_URL = '/api/tools/num'
 
 export interface param {

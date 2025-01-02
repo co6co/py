@@ -46,5 +46,7 @@
 	byte2unit
 0.1.17
     dialog 优化
+0.1.18
+    dialog 修复部分BUG
 
 ```

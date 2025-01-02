@@ -1,4 +1,4 @@
-import { defineComponent, ref, reactive, VNode, nextTick, computed } from 'vue';
+import { defineComponent, ref, reactive, VNode, computed } from 'vue';
 import { Dialog, DialogInstance, byte2Unit } from 'co6co';
 import { tableScope } from '@/constants';
 
@@ -23,7 +23,8 @@ import style from '@/assets/css/file.module.less';
 import { IFileOption } from '@/constants';
 import FileDropdown from '@/components/fileDropdown';
 import pLimit from 'p-limit';
-
+import { scrollTableToRow } from '@/utils';
+import { useFileDrag } from '@/hooks/useDrag';
 export default defineComponent({
 	name: 'FileUpload',
 	props: {},
@@ -35,74 +36,25 @@ export default defineComponent({
 		const diaglogRef = ref<DialogInstance>();
 		const DATA = reactive<{
 			title?: string;
-			files: Array<IFileOption>;
 			uploadFolder: String;
-			filePreloadCount: number;
 			canelFlag: boolean;
 			uploading: boolean;
 			limitNum: number;
 			scrollIndex: number;
 		}>({
-			files: [],
 			uploadFolder: '/',
-			filePreloadCount: 0,
 			canelFlag: false,
 			uploading: false,
 			limitNum: 3,
 			scrollIndex: 0,
 		});
-		const readFileOrDirectory = (entry) => {
-			//entry: FileEntry | DirectoryEntry
-			if (entry.isFile) {
-				entry.file((file: File) => {
-					let subPath = (entry.fullPath as string).replace('/' + file.name, '');
-					if (subPath) subPath = subPath.substring(1);
-					DATA.files.push({ file: file, subPath: subPath });
-				});
-			} else if (entry.isDirectory) {
-				const dirReader = entry.createReader();
-				dirReader.readEntries((entries) => {
-					entries.forEach((entry) => readFileOrDirectory(entry));
-				});
-			}
-		};
-		const onDragOver = (event: DragEvent) => {
-			// 阻止默认行为，以允许文件被放置到目标区域
-			event.preventDefault();
-			event.stopPropagation(); //阻止冒泡
-		};
-		const onDrop = (event: DragEvent) => {
-			// 阻止默认行为，以防止浏览器打开文件
-			event.preventDefault();
-			event.stopPropagation(); //阻止冒泡
-			//console.info('onDrop start...')
 
-			const items = event.dataTransfer?.items;
-			if (items && items.length > 0) {
-				DATA.filePreloadCount = items.length;
-				for (let i = 0; i < items.length; i++) {
-					//webkitGetAsEntry 是一个非标准的方法
-					const item = items[i].webkitGetAsEntry();
-					if (item) {
-						readFileOrDirectory(item);
-					} else {
-						// 如果不是文件系统条目（可能是普通文件）
-						const file = event.dataTransfer?.files[i];
-						if (file) DATA.files.push({ file: file });
-					}
-				}
-			} else {
-				// 如果 dataTransfer.items 为空，尝试从 dataTransfer.files 获取文件
-				const files = event.dataTransfer?.files;
-				if (files && files.length > 0) {
-					DATA.filePreloadCount = files.length;
-					DATA.files = Array.from(files).map((f) => {
-						return { file: f };
-					});
-				}
-			}
+		const { FileData, onDragOver, onDrop } = useFileDrag();
+		const reset = () => {
+			DATA.scrollIndex = 0;
+			FileData.value.files = [];
+			FileData.value.filePreloadCount = 0;
 		};
-
 		const uploadOneFile = async (opt: IFileOption, index: number) => {
 			if (opt.finished) return true;
 			const file = opt.file;
@@ -120,7 +72,8 @@ export default defineComponent({
 				opt.percentage = percentage;
 				//限制位置为最大
 				if (DATA.scrollIndex < index)
-					(DATA.scrollIndex = index), scrollToRow(index);
+					(DATA.scrollIndex = index),
+						scrollTableToRow(index, tableRef.value!, scrollbarRef.value!);
 			};
 			// 过滤掉已经上传的块
 			const remainingChunks = chunks
@@ -153,21 +106,21 @@ export default defineComponent({
 			}*/
 			const limit = pLimit(DATA.limitNum);
 			await Promise.all(
-				DATA.files.map((opt, index) =>
+				FileData.value.files.map((opt, index) =>
 					limit(() => {
 						if (DATA.canelFlag) return false;
 						return uploadOneFile(opt, index);
 					})
 				)
 			);
-			const unfinshed = DATA.files.filter((o) => !o.finished);
+			const unfinshed = FileData.value.files.filter((o) => !o.finished);
 			if (unfinshed.length > 0) return false;
 			return true;
 		};
 		const onUpload = async () => {
 			try {
 				DATA.uploading = true;
-				if (!DATA.files || DATA.files.length == 0) {
+				if (!FileData.value.files || FileData.value.files.length == 0) {
 					ElMessageBox.alert('请选择要上传的文件或文件夹！');
 				}
 				DATA.canelFlag = false;
@@ -240,37 +193,18 @@ export default defineComponent({
 		/**选择上传 */
 		//选择文件或文件夹
 		const onfileDropdown = (data: IFileOption[]) => {
-			DATA.files.push(...data);
+			FileData.value.files.push(...data);
 		};
 
 		const onDelete = (index, _: IFileOption) => {
 			//删除从index 的一个元素
-			DATA.files.splice(index, 1);
+			FileData.value.files.splice(index, 1);
 		};
 		const onLimitNumChange = (n) => {
 			if (n <= 0) DATA.limitNum = 3;
 		};
-
-		// 滚动到底部
-		const scrollToRow = (rowIndex: number) => {
-			nextTick(() => {
-				if (scrollbarRef.value && tableRef.value) {
-					// 获取目标行的 DOM 元素
-					//tableRef?.bodyWrapper.querySelector
-					const targetRow = tableRef.value.$el.querySelector(
-						`tbody tr:nth-child(${rowIndex + 1})`
-					);
-					if (targetRow) {
-						// 计算目标行相对于 el-scrollbar.wrap 的位置
-						const targetOffsetTop = targetRow.offsetTop;
-						// 设置滚动条的位置
-						scrollbarRef.value.setScrollTop(targetOffsetTop);
-					}
-				}
-			});
-		};
 		const finshedCount = computed(() => {
-			return DATA.files.filter((m) => m.finished).length;
+			return FileData.value.files.filter((m) => m.finished).length;
 		});
 		/** end 分片上传 */
 		const fromSlots = {
@@ -298,7 +232,7 @@ export default defineComponent({
 					<ElCard
 						class={[
 							style['drop-Box'],
-							DATA.files.length > 0 ? 'hasFile' : 'box',
+							FileData.value.files.length > 0 ? 'hasFile' : 'box',
 							DATA.canelFlag ? 'canelUpload' : '',
 						]}
 						v-slots={{
@@ -322,7 +256,7 @@ export default defineComponent({
 												onClick={clearFile}
 												v-slots={{
 													default: () =>
-														`清空列表[${finshedCount.value}/${DATA.files.length}]`,
+														`清空列表[${finshedCount.value}/${FileData.value.files.length}]`,
 												}}
 											/>
 										</ElCol>
@@ -334,14 +268,17 @@ export default defineComponent({
 							ref={scrollbarRef}
 							onDrop={onDrop}
 							onDragover={onDragOver}>
-							{DATA.files.length == 0 ? (
+							{FileData.value.files.length == 0 ? (
 								<div>
 									<span class="small">上传文件或文件夹到当前文夹</span>
 								</div>
 							) : (
 								<>
-									<ElTable data={DATA.files} ref={tableRef} border={true}>
-										<ElTableColumn label="序号" width={55} align="center">
+									<ElTable
+										data={FileData.value.files}
+										ref={tableRef}
+										border={true}>
+										<ElTableColumn label="序号" width={112} align="center">
 											{{
 												default: (scope: tableScope) => scope.$index,
 											}}
@@ -404,6 +341,7 @@ export default defineComponent({
 		const rander = (): VNode => {
 			return (
 				<Dialog
+					closeOnClickModal={false}
 					draggable
 					title={DATA.title}
 					ref={diaglogRef}
@@ -413,7 +351,7 @@ export default defineComponent({
 		};
 		const hasFile = () => {
 			// DATA.files.length 磁盘原因等 延迟很大 需要很久才能出结果
-			if (DATA.filePreloadCount > 0) return true;
+			if (FileData.value.filePreloadCount > 0) return true;
 			return false;
 		};
 		const openDialog = (folder: string) => {
@@ -422,8 +360,7 @@ export default defineComponent({
 			diaglogRef.value?.openDialog();
 		};
 		const clearFile = () => {
-			DATA.files = [];
-			DATA.filePreloadCount = 0;
+			reset();
 		};
 		ctx.expose({
 			openDialog,
