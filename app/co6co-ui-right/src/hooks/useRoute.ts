@@ -38,6 +38,7 @@ export enum ViewFeature {
 	push = 'push',
 	//** 使生效 **/
 	effective = 'effective',
+	settingName = 'settingName',
 	//** 设备编号 */
 	settingNo = 'settingNo',
 	//** 设置优先级 */

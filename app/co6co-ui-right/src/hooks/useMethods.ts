@@ -111,6 +111,12 @@ export const usePageFeature = () => {
 		},
 		{
 			uid: ++index,
+			key: ViewFeature.settingName,
+			label: '设置名称',
+			value: ViewFeature.settingName,
+		},
+		{
+			uid: ++index,
 			key: ViewFeature.settingNo,
 			label: '设置编号',
 			value: ViewFeature.settingNo,

@@ -1,5 +1,5 @@
 import type { TableInstance } from 'element-plus'
-import { ElTable, ElTableColumn, ElButton } from 'element-plus'
+import { ElTable, ElTableColumn, ElButton, ElMessageBox, ElMessage } from 'element-plus'
 
 import { ref, defineComponent, VNodeChild } from 'vue'
 import { TableView } from 'co6co-right'
@@ -67,10 +67,24 @@ export default defineComponent({
         address: 'No. 189, Grove St, Los Angeles'
       }
     ]
+    const onClick = () => {
+      ElMessageBox.prompt('请输入', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        inputValue: '123'
+      })
+        .then(({ value }) => {
+          ElMessage.success(`你输入的内容：${value}`)
+        })
+        .catch((re) => {
+          ElMessage.info('取消' + re)
+        })
+    }
     //:page reader
     const rander = (): VNodeChild => {
       return (
         <div>
+          <ElButton onClick={onClick}>测试</ElButton>
           <ElTable
             ref="multipleTableRef"
             data={tableData}

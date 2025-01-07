@@ -14,6 +14,8 @@ import {
 	ElCol,
 	ElLink,
 	ElTooltip,
+	ElMessage,
+	ElMessageBox,
 } from 'element-plus';
 import {
 	Search,
@@ -21,9 +23,11 @@ import {
 	Refresh,
 	Delete,
 	UploadFilled,
+	Document,
+	CirclePlus,
 } from '@element-plus/icons-vue';
 import style from '@/assets/css/file.module.less';
-import { byte2Unit } from 'co6co';
+import { byte2Unit, showLoading, closeLoading } from 'co6co';
 import { routeHook, deleteHook } from '@/hooks';
 import { tableScope } from '@/constants';
 import { download_header_svc } from '@/api';
@@ -37,6 +41,9 @@ import {
 	del_svc,
 	list_param,
 	batch_del_svc,
+	rename_svc,
+	newFolder_svc,
+	file_content_svc,
 	list_res as Item,
 } from '@/api/file';
 
@@ -158,14 +165,14 @@ export default defineComponent({
 		const tableSelected = computed(() => {
 			return multipleSelection.value.length > 0;
 		});
-		//删除
+		//row 功能区
+		//1. 删除
 		const { deleteSvc } = deleteHook.default(del_svc, onRefesh);
 		const onDelete = (_: number, row: Item) => {
 			deleteSvc(row.path, row.name);
 		};
-		const onPreview = (_: number, row: Item) => {
-			console.warn('为实现！');
-		};
+
+		//批量删除
 		const batchDelTip = deleteHook.default(batch_del_svc, onRefesh);
 		const onBatchDel = () => {
 			const selectPath = multipleSelection.value.map((m) => m.path);
@@ -178,6 +185,51 @@ export default defineComponent({
 				)
 			);
 		};
+
+		//2. 预览
+		const onPreview = (_: number, row: Item) => {
+			file_content_svc(row.path).then((res) => {
+				ElMessage.success(res.data);
+			});
+		};
+		//3. 重命名
+		const onRename = (_: number, row: Item) => {
+			ElMessageBox.prompt('请输入新的名称', '重命名', {
+				confirmButtonText: '确定',
+				cancelButtonText: '取消',
+				inputValue: row.name,
+			}).then(({ value }) => {
+				showLoading();
+				rename_svc(row.path, value)
+					.then((res) => {
+						ElMessage.success(res.message);
+						onRefesh();
+						close;
+					})
+					.finally(() => {
+						closeLoading();
+					});
+			});
+		};
+		//4 新建
+		const onNewFolder = () => {
+			ElMessageBox.prompt('请输入文件夹名', '新建文件夹', {
+				confirmButtonText: '确定',
+				cancelButtonText: '取消',
+				inputValue: '新建文件夹',
+			}).then(({ value }) => {
+				showLoading();
+				newFolder_svc(DATA.query.root, value)
+					.then((res) => {
+						ElMessage.success(res.message);
+						onRefesh();
+					})
+					.finally(() => {
+						closeLoading();
+					});
+			});
+		};
+		//end row 功能区
 
 		//:page reader
 		const rander = (): VNodeChild => {
@@ -240,6 +292,13 @@ export default defineComponent({
 												onClick={() => onOpenDialog()}
 												v-slots={{ default: () => '上传' }}
 											/>
+											<ElButton
+												style="flex:0 0"
+												icon={CirclePlus}
+												v-permiss={getPermissKey(routeHook.ViewFeature.add)}
+												onClick={() => onNewFolder()}
+												v-slots={{ default: () => '新建文件夹' }}
+											/>
 											{tableSelected.value ? (
 												<ElButton
 													type="danger"
@@ -279,6 +338,7 @@ export default defineComponent({
 									<ElTableColumn
 										label="名称"
 										prop="name"
+										width={200}
 										align="center"
 										showOverflowTooltip={true}>
 										{{
@@ -326,11 +386,7 @@ export default defineComponent({
 										width={160}
 										show-overflow-tooltip={true}
 									/>
-									<ElTableColumn
-										label="操作"
-										width={260}
-										align="center"
-										fixed="right">
+									<ElTableColumn label="操作" align="center" fixed="right">
 										{{
 											default: (scope: tableScope<Item>) => (
 												<>
@@ -354,6 +410,15 @@ export default defineComponent({
 															routeHook.ViewFeature.view
 														)}
 														v-slots={{ default: () => '预览' }}
+													/>
+													<ElButton
+														text={true}
+														icon={Document}
+														onClick={() => onRename(scope.$index, scope.row)}
+														v-permiss={getPermissKey(
+															routeHook.ViewFeature.settingName
+														)}
+														v-slots={{ default: () => '重命名' }}
 													/>
 													<ElButton
 														text={true}

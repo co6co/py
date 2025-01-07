@@ -356,7 +356,7 @@ export default defineComponent({
 		};
 		const openDialog = (folder: string) => {
 			DATA.uploadFolder = folder;
-			DATA.title = `上传文件或目录至"${folder}"`;
+			DATA.title = `上传文件至"${folder}"`;
 			diaglogRef.value?.openDialog();
 		};
 		const clearFile = () => {

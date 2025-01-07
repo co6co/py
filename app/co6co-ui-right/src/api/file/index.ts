@@ -114,3 +114,37 @@ export const batch_del_svc = (paths: string[]): Promise<IResponse> => {
 		paths: paths,
 	});
 };
+
+export const rename_svc = (path: string, name: string): Promise<IResponse> => {
+	return createServiceInstance().post(`${base_URL}/rename`, {
+		path: path,
+		name: name,
+	});
+};
+
+/**
+ * 新建文件夹名称名称
+ * @param path 当前文件路径
+ * @param name 新建文件夹名
+ * @returns
+ */
+export const newFolder_svc = (
+	path: string,
+	name: string
+): Promise<IResponse> => {
+	return createServiceInstance().post(`${base_URL}/new`, {
+		path: path,
+		name: name,
+	});
+};
+/**
+ *
+ * @param path 文件路径
+ * @returns 文件内容
+ */
+export const file_content_svc = (path: string) => {
+	return createServiceInstance(5000, false, requestContentType.text).post(
+		`${base_URL}/file`,
+		{ path: path }
+	);
+};
