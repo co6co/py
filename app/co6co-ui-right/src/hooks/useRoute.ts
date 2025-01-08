@@ -1,7 +1,8 @@
 import { ITreeSelect, removeAuthonInfo } from 'co6co';
 import { view_route_svc } from '@/api/view';
 import { Storage, traverseTreeData, randomString } from 'co6co';
-
+//确保你在 Vue 组件的 <script setup> 或 setup() 函数中使用 useRouter。
+// 如果你需要在其他地方访问路由器，考虑通过参数传递路由器实例，或者在应用初始化时保存对它的引用。
 import { useRouter } from 'vue-router';
 /**
  * VIEW 功能
@@ -134,7 +135,7 @@ export const usePermission = () => {
 	return { getPermissKey, getCurrentViewFeature };
 };
 
-interface RouteItem {
+export interface RouteItem {
 	id: number;
 	category: number;
 	parentId: number;

@@ -1,8 +1,10 @@
 import {
 	createServiceInstance,
+	createAxiosInstance,
+	useRequestToken,
 	getBaseUrl,
 	type IResponse,
-	requestContentType,
+	HttpContentType,
 } from 'co6co';
 
 import { download_svc } from '@/api/download';
@@ -20,11 +22,7 @@ export interface list_res {
 	size: number;
 }
 const createMultipartService = () => {
-	return createServiceInstance(
-		15 * 60 * 1000,
-		true,
-		requestContentType.multipart
-	);
+	return createServiceInstance(15 * 60 * 1000, true, HttpContentType.multipart);
 };
 /**
  * 文件列表
@@ -143,8 +141,16 @@ export const newFolder_svc = (
  * @returns 文件内容
  */
 export const file_content_svc = (path: string) => {
-	return createServiceInstance(5000, false, requestContentType.text).post(
+	const service = createAxiosInstance(
+		getBaseUrl(),
+		30 * 1000,
+		HttpContentType.json,
+		HttpContentType.text
+	);
+	service.interceptors.request.use(useRequestToken);
+	return service.post(
 		`${base_URL}/file`,
-		{ path: path }
+		{ path: path },
+		{ responseType: 'blob' }
 	);
 };

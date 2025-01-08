@@ -3,7 +3,8 @@ from co6co_sanic_ext.model.res.result import Result
 from ..base_view import AuthMethodView
 import os
 from sanic.response import file_stream, json
-
+from co6co.utils import log 
+import mimetypes
 
 class RenameView(AuthMethodView):
     routePath = "/rename"
@@ -51,13 +52,15 @@ class FileContentView(AuthMethodView):
         获取文件内容
         @param {path:D:\\abcc\\xxx.xx }
         """
-        path_param = request.json.get("path", None)
-        if path_param is None:
-            return self.response_json(Result.fail(message="path参数是必须的"))
-        try:
+        try: 
+            path_param=None
+            log.warn(request.json)
+            path_param = request.json.get("path", None)
+            if path_param is None:
+                return self.response_json(Result.fail(message="path参数是必须的"))
             if os.path.exists(path_param) and os.path.isfile(path_param):
-                return file_stream(path_param)
+                return await file_stream(path_param,mime_type=mimetypes.guess_type(path_param)[0] or 'application/octet-stream')
             else:
-                return json(None, 404)
-        except Exception as e:
+                return json({}, 404)
+        except Exception as e: 
             return self.response_json(Result.fail(message="获取文件内容'{}'失败:{}".format(path_param, e)))

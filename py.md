@@ -10,7 +10,7 @@ pip install -i https://pypi.org/simple/ some-package
 # python 最新版本
 ```
 co6co==0.0.19
-co6co.sanic-ext==0.0.7
+co6co.sanic-ext==0.0.8
 co6co.db-ext==0.0.13
 co6co.web-db==0.0.13
 co6co.permissions==0.0.20
@@ -20,7 +20,7 @@ co6co.permissions==0.0.20
 # ui 最新版本
 npm install --registry=http://registry.npm.taobao.org/ isomorphic-streams
 ```
-co6co-ui==0.1.17 
+co6co-ui==0.1.19
 co6co-right==0.0.26
 co6co-wx==0.0.2
 

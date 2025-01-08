@@ -4,6 +4,8 @@ import { ElTable, ElTableColumn, ElButton, ElMessageBox, ElMessage } from 'eleme
 import { ref, defineComponent, VNodeChild } from 'vue'
 import { TableView } from 'co6co-right'
 import { get_table_svc } from '@/api/biz/task'
+import { file_content_svc } from '@/api/file'
+import { useRouter } from 'vue-router'
 export default defineComponent({
   setup(prop, ctx) {
     interface User {
@@ -13,6 +15,22 @@ export default defineComponent({
       address: string
     }
 
+    const onClick2 = () => {
+      file_content_svc('I:\\document\\abc.md').then((res) => {
+        console.info(res)
+        ElMessage.success(res.data)
+      })
+    }
+    const router = useRouter()
+    const onGotoFileView = () => {
+      const param = {
+        name: 'sys_file_view',
+        state: {
+          params: { path: 'I:\\56BDF36964CD' }
+        }
+      }
+      router.push(param)
+    }
     const multipleTableRef = ref<TableInstance>()
     const multipleSelection = ref<User[]>([])
 
@@ -85,6 +103,8 @@ export default defineComponent({
       return (
         <div>
           <ElButton onClick={onClick}>测试</ElButton>
+          <ElButton onClick={onClick2}>获取内容</ElButton>
+          <ElButton onClick={onGotoFileView}>跳转</ElButton>
           <ElTable
             ref="multipleTableRef"
             data={tableData}

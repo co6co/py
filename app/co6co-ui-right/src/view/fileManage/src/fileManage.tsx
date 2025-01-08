@@ -25,6 +25,7 @@ import {
 	UploadFilled,
 	Document,
 	CirclePlus,
+	View as ViewIcon,
 } from '@element-plus/icons-vue';
 import style from '@/assets/css/file.module.less';
 import { byte2Unit, showLoading, closeLoading } from 'co6co';
@@ -43,15 +44,16 @@ import {
 	batch_del_svc,
 	rename_svc,
 	newFolder_svc,
-	file_content_svc,
 	list_res as Item,
 } from '@/api/file';
 
 import { ConfigCodes } from '@/constants/config';
 import { useConfig } from '@/hooks/useConfig';
 import { useKeyUp } from '@/hooks/useKey';
-
+import { useViewData, goToNameRoute } from '@/hooks/useView';
+import { useRouter } from 'vue-router';
 export default defineComponent({
+	name: 'FileManageView',
 	setup(prop, ctx) {
 		const DATA = reactive<{
 			query: list_param;
@@ -187,11 +189,19 @@ export default defineComponent({
 		};
 
 		//2. 预览
+		const { viewDataRef } = useViewData('PreviewView');
+		const router = useRouter();
 		const onPreview = (_: number, row: Item) => {
-			file_content_svc(row.path).then((res) => {
-				ElMessage.success(res.data);
-			});
+			try {
+				goToNameRoute(router, {
+					name: viewDataRef.value?.code!,
+					state: { params: { path: row.path } },
+				});
+			} catch (e) {
+				console.warn(e);
+			}
 		};
+
 		//3. 重命名
 		const onRename = (_: number, row: Item) => {
 			ElMessageBox.prompt('请输入新的名称', '重命名', {
@@ -386,7 +396,7 @@ export default defineComponent({
 										width={160}
 										show-overflow-tooltip={true}
 									/>
-									<ElTableColumn label="操作" align="center" fixed="right">
+									<ElTableColumn label="操作" align="left" fixed="right">
 										{{
 											default: (scope: tableScope<Item>) => (
 												<>
@@ -402,15 +412,7 @@ export default defineComponent({
 															routeHook.ViewFeature.download
 														)}
 													/>
-													<ElButton
-														text={true}
-														icon={Delete}
-														onClick={() => onPreview(scope.$index, scope.row)}
-														v-permiss={getPermissKey(
-															routeHook.ViewFeature.view
-														)}
-														v-slots={{ default: () => '预览' }}
-													/>
+
 													<ElButton
 														text={true}
 														icon={Document}
@@ -427,6 +429,20 @@ export default defineComponent({
 														v-permiss={getPermissKey(routeHook.ViewFeature.del)}
 														v-slots={{ default: () => '删除' }}
 													/>
+													{scope.row.isFile &&
+													scope.row.size < 5 * 1024 * 1024 ? (
+														<ElButton
+															text={true}
+															icon={ViewIcon}
+															onClick={() => onPreview(scope.$index, scope.row)}
+															v-permiss={getPermissKey(
+																routeHook.ViewFeature.view
+															)}
+															v-slots={{ default: () => '预览' }}
+														/>
+													) : (
+														<></>
+													)}
 												</>
 											),
 										}}

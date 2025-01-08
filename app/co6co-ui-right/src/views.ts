@@ -8,6 +8,7 @@ import {
 	DictTypeView,
 	DictView,
 	FileManageView,
+	PreviewView,
 } from './view';
 /**
  * 应用通过该对象获取所有的页面视图
@@ -21,6 +22,7 @@ export const views = {
 	DictTypeView,
 	DictView,
 	FileManageView,
+	PreviewView,
 };
 
 // 定义多个函数签名

@@ -72,6 +72,7 @@ export default defineComponent({
 							minScale={0.2}
 							onError={onLoadError}
 							style={{ height: '100%', width: '100%' }}
+							{...ctx.attrs}
 							fit="cover">
 							{{
 								error: () => {

@@ -114,10 +114,25 @@ export type Point = {
 	lat: number; // 纬度
 };
 
-export enum requestContentType {
+export enum HttpContentType {
 	json = 'application/json;charset=utf-8',
 	multipart = 'multipart/form-data',
 	form = 'x-www-form-urlencoded;charset=UTF-8',
 	text = 'text/plain',
+	html = 'text/html',
+	image = 'image/jpeg', //image/jpeg, image/png, image/gif
 	xml = 'application/xml',
+	stream = 'application/octet-stream',
+	/**
+	 *  video/mp4：MP4 格式的视频文件。
+		video/quicktime：QuickTime 格式的视频文件（.mov）。
+		video/mpeg：MPEG 视频文件。
+		video/x-msvideo 或 video/avi：AVI 视频文件。
+		video/x-flv：FLV (Flash Video) 文件。
+		video/webm：WebM 视频文件，一种开放的多媒体容器格式。
+		video/3gpp 或 video/3gp：用于移动设备的 3GPP 格式视频文件。
+		video/x-matroska 或 video/x-mkv：MKV (Matroska) 视频文件。
+		application/vnd.ms-asf 或 video/x-ms-wmv：WMV (Windows Media Video) 文件
+	 */
+	video = 'video/mp4',
 }

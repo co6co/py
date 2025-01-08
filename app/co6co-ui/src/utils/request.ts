@@ -5,11 +5,11 @@ import axios, {
 	type CreateAxiosDefaults,
 	type InternalAxiosRequestConfig,
 } from 'axios';
-import { type ElLoading, ElMessage } from 'element-plus';
+import { ElMessage } from 'element-plus'; //type ElLoading,
 import JSONbig from 'json-bigint';
 import { getToken, removeToken } from './auth';
 import { getStoreInstance } from '@/hooks';
-import { IResponse, requestContentType } from '@/constants';
+import { IResponse, HttpContentType } from '@/constants';
 
 /**
  * 获取 apiBaseURL
@@ -44,7 +44,7 @@ export const useRequesContentType = (
 	];
 };
 export const useMultipartRequest = (service: AxiosInstance) => {
-	useRequesContentType(service, requestContentType.multipart);
+	useRequesContentType(service, HttpContentType.multipart);
 };
 export const useRequestToken = (config: InternalAxiosRequestConfig) => {
 	//发送请求之前
@@ -116,7 +116,7 @@ export const createAxios = (config?: CreateAxiosDefaults<any> | undefined) => {
 export const createServiceInstance = (
 	timeout: number = 5000,
 	tip: boolean = true,
-	contentType: requestContentType = requestContentType.json
+	contentType: HttpContentType = HttpContentType.json
 ) => {
 	const baseUrl = getBaseUrl();
 	const config = {
@@ -124,14 +124,14 @@ export const createServiceInstance = (
 		timeout: timeout,
 	};
 
-	let elLoading: ReturnType<typeof ElLoading.service>;
+	//let elLoading: ReturnType<typeof ElLoading.service>;
 	const service = createAxios(config);
 	useRequesContentType(service, contentType);
 	useDefaultResponseBigNumber(service);
 	//增加请求拦截器
 	service.interceptors.request.use(useRequestToken, (error: AxiosError) => {
 		//请求错误
-		if (elLoading) elLoading.close();
+		//if (elLoading) elLoading.close();
 		return Promise.reject(error);
 	});
 	//增加响应拦截器
@@ -155,15 +155,19 @@ export const createServiceInstance = (
 	return service;
 };
 /**
- * 有 Authorization head
+ * 没有 有 Authorization head
+ * 如需要验证 service.interceptors.request.use(useRequestToken)
  * @param baseUrl
  * @param timeout 超时 ms
- * @returns
+ * @param requestContentType
+ * @param responseContentType
+ * @returns service
  */
 export const createAxiosInstance = (
 	baseUrl?: string,
 	timeout: number = 5000,
-	contentType: requestContentType = requestContentType.json
+	requestContentType: HttpContentType = HttpContentType.json,
+	responseContentType: HttpContentType = HttpContentType.json
 ) => {
 	if (!baseUrl) baseUrl = getBaseUrl();
 	const config = {
@@ -171,7 +175,8 @@ export const createAxiosInstance = (
 		timeout: timeout,
 	};
 	const service: AxiosInstance = createAxios(config);
-	useRequesContentType(service, contentType);
-	useDefaultResponseBigNumber(service);
+	useRequesContentType(service, requestContentType);
+	if (responseContentType == HttpContentType.json)
+		useDefaultResponseBigNumber(service);
 	return service;
 };

@@ -145,8 +145,9 @@
 	} from 'element-plus';
 	import { Delete, Edit, Search, Plus } from '@element-plus/icons-vue';
 	import { dictTypeSvc as svc } from '@/api/dict';
-	import { usePermission, ViewFeature, useRouteData } from '@/hooks/useRoute';
+	import { usePermission, ViewFeature } from '@/hooks/useRoute';
 	import { useState } from '@/hooks/useDictState';
+	import { useViewData } from '@/hooks/useView';
 
 	import { replaceRouteParams } from '@/utils';
 
@@ -166,7 +167,6 @@
 		type IPageParam,
 		type Table_Module_Base,
 	} from 'co6co';
-	import { getViewPath } from '@/views';
 	import useDelete from '@/hooks/useDelete';
 
 	interface IQueryItem extends IPageParam {
@@ -230,23 +230,14 @@
 	const onDelete = (_: number, row: Item) => {
 		deleteSvc(row.id, row.name);
 	};
-	const subViewPath = ref('');
+	const { subViewPath } = useViewData('DictView');
 	const getsubViewPath = (dictTypeId: number) => {
 		return replaceRouteParams(subViewPath.value, { id: dictTypeId.toString() });
 	};
 
 	onMounted(async () => {
 		await loadData();
-		const { queryRouteItem } = useRouteData();
-		const componentName = getViewPath('DictView');
-		const routeItem = queryRouteItem((d) => {
-			return d.component == componentName;
-		});
-		if (routeItem) {
-			subViewPath.value = routeItem.url;
-		}
 		getData();
-
 		console.warn('子视图KEY', getPermissKey(ViewFeature.view));
 	});
 </script>

@@ -35,7 +35,7 @@ class BaseView(HTTPMethodView):
     routePath: str = "/"
 
     def response_json(self, data: Result | Page_Result):
-        return JSON_util.response(data)
+        return JSON_util.response(data, ensure_ascii=False)
 
     def is_integer(self, s: str | bytes | bytearray):
         try:
