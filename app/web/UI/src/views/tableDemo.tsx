@@ -4,7 +4,6 @@ import { ElTable, ElTableColumn, ElButton, ElMessageBox, ElMessage } from 'eleme
 import { ref, defineComponent, VNodeChild } from 'vue'
 import { TableView } from 'co6co-right'
 import { get_table_svc } from '@/api/biz/task'
-import { file_content_svc } from '@/api/file'
 import { useRouter } from 'vue-router'
 export default defineComponent({
   setup(prop, ctx) {
@@ -30,13 +29,7 @@ export default defineComponent({
       }
       reader.readAsText(blob) // 默认编码是 UTF-8
     }
-    const onGetFileContents = () => {
-      file_content_svc('I:\\document\\abc.md').then((res) => {
-        console.info(res)
-        ElMessage.success(res.data)
-        blobToText(res.data)
-      })
-    }
+
     const router = useRouter()
     const onGotoFileView = () => {
       const param = {
@@ -119,7 +112,6 @@ export default defineComponent({
       return (
         <div>
           <ElButton onClick={onClick}>测试</ElButton>
-          <ElButton onClick={onGetFileContents}>获取内容</ElButton>
           <ElButton onClick={onGotoFileView}>跳转</ElButton>
           <ElTable
             ref="multipleTableRef"
