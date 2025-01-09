@@ -15,10 +15,26 @@ export default defineComponent({
       address: string
     }
 
-    const onClick2 = () => {
+    function blobToText(blob: Blob) {
+      /*
+			return new Promise((resolve, reject) => {
+				const reader = new FileReader();
+				reader.onload = () => resolve(reader.result);
+				reader.onerror = reject;
+				reader.readAsText(blob); // 默认编码是 UTF-8
+			});
+			*/
+      const reader = new FileReader()
+      reader.onload = (event) => {
+        ElMessage.success(event.target!.result as string)
+      }
+      reader.readAsText(blob) // 默认编码是 UTF-8
+    }
+    const onGetFileContents = () => {
       file_content_svc('I:\\document\\abc.md').then((res) => {
         console.info(res)
         ElMessage.success(res.data)
+        blobToText(res.data)
       })
     }
     const router = useRouter()
@@ -103,7 +119,7 @@ export default defineComponent({
       return (
         <div>
           <ElButton onClick={onClick}>测试</ElButton>
-          <ElButton onClick={onClick2}>获取内容</ElButton>
+          <ElButton onClick={onGetFileContents}>获取内容</ElButton>
           <ElButton onClick={onGotoFileView}>跳转</ElButton>
           <ElTable
             ref="multipleTableRef"

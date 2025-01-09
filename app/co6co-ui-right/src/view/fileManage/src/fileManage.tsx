@@ -5,6 +5,7 @@ import {
 	computed,
 	defineComponent,
 	VNodeChild,
+	watch,
 } from 'vue';
 import {
 	ElButton,
@@ -28,7 +29,7 @@ import {
 	View as ViewIcon,
 } from '@element-plus/icons-vue';
 import style from '@/assets/css/file.module.less';
-import { byte2Unit, showLoading, closeLoading } from 'co6co';
+import { byte2Unit, showLoading, closeLoading, getStoreInstance } from 'co6co';
 import { routeHook, deleteHook } from '@/hooks';
 import { tableScope } from '@/constants';
 import { download_header_svc } from '@/api';
@@ -72,7 +73,6 @@ export default defineComponent({
 		//:page
 		const viewRef = ref<TableViewInstance>();
 		const diaglogRef = ref<InstanceType<typeof Diaglog>>();
-
 		const onOpenDialog = (clearFile: boolean = true) => {
 			if (clearFile) diaglogRef.value?.clearFile();
 			diaglogRef.value?.openDialog(DATA.query.root);
@@ -84,9 +84,20 @@ export default defineComponent({
 			viewRef.value?.refesh();
 		};
 		const configHooks = useConfig(ConfigCodes.FILE_MGR_CODE);
+		const store = getStoreInstance();
+		watch(
+			() => DATA.query.root,
+			(val) => {
+				store.setConfig(ConfigCodes.FILE_MGR_CODE, val);
+			}
+		);
 		onMounted(async () => {
-			await configHooks.loadData();
-			DATA.query.root = configHooks.getValue(true);
+			DATA.query.root = store.getConfig(ConfigCodes.FILE_MGR_CODE);
+			if (!DATA.query.root) {
+				await configHooks.loadData();
+				DATA.query.root = configHooks.getValue(true);
+			}
+
 			onSearch();
 			/** 不支持$on .$off 
 			viewRef.value?.tableRef!.$on('selection-change', onSelectionChange);
@@ -118,9 +129,11 @@ export default defineComponent({
 				//console.info(arr, result);
 				if (result.length == 1 && result[0] == '') DATA.query.root = '/';
 				else DATA.query.root = result.join('/');
+
 				onSearch();
 			}
 		};
+
 		const ontresultFileter = (data: { res: any[]; root: string }) => {
 			DATA.query.root = data.root;
 			return data.res;
@@ -193,10 +206,27 @@ export default defineComponent({
 		const router = useRouter();
 		const onPreview = (_: number, row: Item) => {
 			try {
-				goToNameRoute(router, {
-					name: viewDataRef.value?.code!,
-					state: { params: { path: row.path } },
-				});
+				const preview = () => {
+					goToNameRoute(router, {
+						name: viewDataRef.value?.code!,
+						state: { params: { path: row.path } },
+					});
+				};
+				if (row.size > 5 * 1024 * 1024) {
+					ElMessageBox.confirm(
+						`文件过大:${byte2Unit(row.size, 'b', 2)}，是否继续预览`,
+						'提示',
+						{
+							confirmButtonText: '确定',
+							cancelButtonText: '取消',
+							type: 'warning',
+						}
+					).then(() => {
+						preview();
+					});
+				} else {
+					preview();
+				}
 			} catch (e) {
 				console.warn(e);
 			}
@@ -429,8 +459,7 @@ export default defineComponent({
 														v-permiss={getPermissKey(routeHook.ViewFeature.del)}
 														v-slots={{ default: () => '删除' }}
 													/>
-													{scope.row.isFile &&
-													scope.row.size < 5 * 1024 * 1024 ? (
+													{scope.row.isFile ? (
 														<ElButton
 															text={true}
 															icon={ViewIcon}
