@@ -116,7 +116,6 @@ export default defineComponent({
           <ElTable
             ref="multipleTableRef"
             data={tableData}
-            style="width: 100%"
             onSelection-change={handleSelectionChange}
           >
             <ElTableColumn type="selection" selectable={selectable} width={55} />

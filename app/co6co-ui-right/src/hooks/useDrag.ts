@@ -5,6 +5,30 @@ export const useFileDrag = () => {
 		files: [],
 		filePreloadCount: 0,
 	});
+	/*
+	 * 读取目录下的所有文件
+	 * 超过只能读取100个文件
+	 * @param dirReader 目录读取器 entry.createReader()
+	 * @param callback 回调函数 (entries: Array< FileEntry|DirectoryEntry>) => void
+	 */
+	function _readAllEntries(dirReader, callback: (entries: Array<any>) => void) {
+		//FileEntry|DirectoryEntry
+		var entries: Array<any> = [];
+		const readFiles = () => {
+			dirReader.readEntries(
+				(results) => {
+					if (results.length > 0) {
+						entries.push(...results);
+						readFiles();
+					} else callback(entries);
+				},
+				(error) => {
+					console.error('Error reading directory entries:', error);
+				}
+			);
+		};
+		readFiles();
+	}
 	const readFileOrDirectory = (entry) => {
 		//entry: FileEntry | DirectoryEntry
 		if (entry.isFile) {
@@ -15,7 +39,7 @@ export const useFileDrag = () => {
 			});
 		} else if (entry.isDirectory) {
 			const dirReader = entry.createReader();
-			dirReader.readEntries((entries) => {
+			_readAllEntries(dirReader, (entries) => {
 				entries.forEach((entry) => readFileOrDirectory(entry));
 			});
 		}
@@ -30,7 +54,6 @@ export const useFileDrag = () => {
 		event.preventDefault();
 		event.stopPropagation(); //阻止冒泡
 		//console.info('onDrop start...')
-
 		const items = event.dataTransfer?.items;
 		if (items && items.length > 0) {
 			FileData.value.filePreloadCount = items.length;
@@ -47,6 +70,7 @@ export const useFileDrag = () => {
 			}
 		} else {
 			// 如果 dataTransfer.items 为空，尝试从 dataTransfer.files 获取文件
+			/*无法区分文件夹还是目录
 			const files = event.dataTransfer?.files;
 			if (files && files.length > 0) {
 				FileData.value.filePreloadCount = files.length;
@@ -54,6 +78,7 @@ export const useFileDrag = () => {
 					return { file: f };
 				});
 			}
+			*/
 		}
 	};
 	return { FileData, onDragOver, onDrop };
