@@ -1,5 +1,8 @@
 from PIL import Image
 import argparse
+import numpy as np
+
+np.arange(1, 10).reshape(3, 3)
 
 
 def convert_image_to_icon(image_path, icon_path, sizes=[(256, 256)]):
