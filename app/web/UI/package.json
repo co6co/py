@@ -24,7 +24,7 @@
     "@vue/compiler-sfc": "^3.4.33",
     "@vue/runtime-core": "^3.4.33",
     "axios": "^1.6.7",
-    "co6co": "^0.1.20",
+    "co6co": "^0.1.22",
     "co6co-right": "^0.0.27",
     "codemirror": "^6.0.1",
     "element-plus": "^2.5.3",

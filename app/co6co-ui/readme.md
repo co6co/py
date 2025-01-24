@@ -53,5 +53,7 @@
     增加 httpcontenttype类型判断
 0.1.20
     优化
+0.1.22
+    增加 loadScript 和 unLoadScript 方法
 
 ```

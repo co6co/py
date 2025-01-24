@@ -1,5 +1,6 @@
 export * from './vue';
 export * from './auth';
+export * from './browser';
 export * from './date';
 export * from './request';
 export * from './tables';

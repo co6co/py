@@ -1,7 +1,7 @@
 {
   "name": "co6co",
   "private": false,
-  "version": "0.1.20",
+  "version": "0.1.22",
   "type": "module",
   "files": [
     "dist"
