@@ -7,6 +7,7 @@ from pyzbar.pyzbar import decode
 
 def readQRCode(imgPath: str):
     # 读取图像
+    print(imgPath)
     image = cv2.imread(imgPath)
     # 图像预处理（根据需要进行预处理）
     # 这里只是简单的示例，实际预处理可能需要更多步骤和参数调整
@@ -34,6 +35,9 @@ if __name__ == '__main__':
     args = parser.parse_args()
     if args.imgPath:
         result = readQRCode(args.imgPath)
-        print(*result if type(result) == list else result)
+        if type(result) == list:
+            print(*result)
+        else:
+            print(result)
     else:
         parser.print_help()
