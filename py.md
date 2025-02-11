@@ -17,14 +17,27 @@ co6co.permissions==0.0.20
 
 ```
 
+```
+pip install wechatpy==1.8.18
+pip install cryptography
+```
 # ui 最新版本
 npm install --registry=http://registry.npm.taobao.org/ isomorphic-streams
 npm install --registry=https://registry.npmjs.org/ co6co
+
 ```
 co6co-ui==0.1.22
 co6co-right==0.0.28
 co6co-wx==0.0.2
 
+
+
+# 更新到满足 package.json 中定义的版本范围内的最新版本
+npm update <package-name>
+# 安装最新的版本（即使它超出了当前定义的版本范围）
+npm install <package-name>@latest
+# 升级指定斑斑
+npm install <package-name>@<version>
 ```
 
 

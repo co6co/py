@@ -4,17 +4,27 @@ from ollama import AsyncClient
 from ollama import Client
 import ollama
 import time
+import os
 
-host = "http://ps.co6co.top:65098"
+host = os.getenv('OLLAMA_HOST')
 
 
 def queryModule():
-    moduleList = Client(host).list()
+    """
+    查询Ollama服务上可用的模型列表。
+    该函数通过创建一个Ollama客户端实例，并调用其`list`方法来获取所有可用的模型。
+    返回值:
+        list: 一个包含所有可用模型信息的列表。
+    """
+    # 创建一个Ollama客户端实例，连接到指定的主机
+    client = Client(host)
+    # 调用客户端的`list`方法，获取所有可用的模型列表
+    moduleList = client.list()
+    # 返回模型列表
     return moduleList
 
 
 def query(message):
-
     response = ollama.chat(model='llama3.1', messages=[
         {
             'role': 'user',
