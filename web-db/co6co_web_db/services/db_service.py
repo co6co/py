@@ -6,7 +6,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import sessionmaker
 
 # from model.pos.DbModelPo import User, Process
-
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 from sanic.response import json
@@ -22,12 +21,18 @@ from typing import TypeVar
 from co6co_db_ext.db_session import db_service
 import multiprocessing
 
+from sanic_session import Session, InMemorySessionInterface
+
 
 def injectDbSessionFactory(app: Sanic, settings: dict = {}, engineUrl: str = None, sessionApi: list = ["/api"]):
     """
     挂在 DBSession_factory
     """
     service: db_service = None
+
+    service: db_service = None
+    session_interface = InMemorySessionInterface(session_name="mem_session", cookie_name=app.name, prefix=app.name)
+    Session(app, interface=session_interface)
     if settings != None or engineUrl != None:
         service = db_service(settings, engineUrl)
         app.ctx.service = service
@@ -35,6 +40,7 @@ def injectDbSessionFactory(app: Sanic, settings: dict = {}, engineUrl: str = Non
 
     @app.main_process_start
     async def inject_session_factory(app: Sanic):
+
         app.shared_ctx.cache = multiprocessing.Manager().dict()
         # app.shared_ctx.cache["db_session_factory"]=_async_session_factory
 
@@ -46,7 +52,7 @@ def injectDbSessionFactory(app: Sanic, settings: dict = {}, engineUrl: str = Non
 
     @app.middleware("request")
     async def inject_session(request: Request):
-
+        # await session_interface.open(request)
         if checkApi(request):
             # logger.info("mount DbSession 。。。")
             if service != None and service.useAsync:
@@ -58,6 +64,7 @@ def injectDbSessionFactory(app: Sanic, settings: dict = {}, engineUrl: str = Non
 
     @app.middleware("response")
     async def close_session(request: Request, response):
+        # await session_interface.save(request, response)
         if hasattr(request.ctx, "session_ctx_token"):
             try:
                 if service != None and service.useAsync:

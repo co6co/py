@@ -22,6 +22,9 @@ from co6co_db_ext.po import BasePO, TimeStampedModelPO, UserTimeStampedModelPO, 
 from datetime import datetime
 from co6co.utils.tool_util import list_to_tree, get_current_function_name
 from co6co_db_ext.db_utils import db_tools,  DbCallable, QueryOneCallable, UpdateOneCallable, QueryListCallable, QueryPagedByFilterCallable
+from sanic_session import Session
+from sanic_session.base import SessionDict
+from multiprocessing.managers import DictProxy
 
 
 from co6co.utils import log, getDateFolder
@@ -54,6 +57,13 @@ def errorLog(request: Request, module: str, method: str):
     log.err(f"执行[{request.method}]{request.path} 所属模块:{module}.{method} Error")
 
 
+def peraseRequest(request: Request) -> Tuple[AsyncSession, SessionDict, DictProxy]:
+    session: AsyncSession = request.ctx.session
+    memSession: SessionDict = request.ctx.mem_session
+    cache: DictProxy = request.app.shared_ctx.cache
+    return session, memSession, cache
+
+
 class BaseMethodView(BaseView):
     """
     视图基类： 约定 增删改查，其他未约定方法可根据实际情况具体使用
@@ -66,6 +76,17 @@ class BaseMethodView(BaseView):
 
     def get_db_session(self, request: Request) -> AsyncSession | scoped_session:
         return get_db_session(request)
+
+    def get_Session(self, request: Request) -> SessionDict:
+        """
+        获取 mem_session
+        可在py 应用中共享值
+        """
+        session = request.ctx.mem_session
+        return session
+
+    def get_shared_Cache(self, request: Request) -> DictProxy:
+        return request.app.shared_ctx.cache
 
     def response_error0(self, request: Request, e: Exception):
         """
