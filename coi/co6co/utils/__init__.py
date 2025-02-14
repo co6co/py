@@ -154,6 +154,67 @@ def compare_versions(v1: str, v2: str):
         return 0
 
 
+def convert_size(size_bytes):
+    """将字节大小转换为易读的格式(KB、MB、GB)"""
+    if size_bytes == 0:
+        return "0B"
+
+    # 定义单位
+    units = ['B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB']
+    index = 0
+
+    # 不断除以 1024，直到找到合适的单位
+    while size_bytes >= 1024 and index < len(units) - 1:
+        size_bytes /= 1024.0
+        index += 1
+
+    return f"{size_bytes:.2f} {units[index]}"  # 保留两位小数
+
+
+def split_value_unit(size_str):
+    # 定义正则表达式，匹配数值和单位
+    pattern = r"^\s*(\d+(\.\d+)?)\s*([A-Za-z]+)\s*$"
+    match = re.match(pattern, size_str)
+
+    if match:
+        value = float(match.group(1))  # 数值部分
+        unit = match.group(3)         # 单位部分
+        return value, unit
+    else:
+        raise ValueError(f"无效的输入格式: {size_str}")
+
+
+def convert_to_bytes(size: int, unit: str):
+    """
+    将指定大小和单位转换为字节数。
+    convert_to_bytes(*split_value_unit("5 GB"))
+    convert_to_bytes(*split_value_unit("5GB"))
+    参数:
+    - size: 数值 (float 或 int)
+    - unit: 单位 ('B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB')
+
+    返回:
+    - 对应的字节数 (int)
+    """
+    # 定义单位与字节数的关系
+    units = {
+        'B': 1,
+        'KB': 1024,
+        'MB': 1024**2,
+        'GB': 1024**3,
+        'TB': 1024**4,
+        'PB': 1024**5,
+        'EB': 1024**6
+    }
+    unit = unit.upper()
+    # 检查单位是否合法
+    if unit not in units:
+        raise ValueError(f"无效的单位: {unit}. 支持的单位有: {list(units.keys())}")
+
+    # 计算字节数
+    return int(size * units[unit])
+
+
 async def write_stream(input: IO[bytes], outputStream: IO[bytes]):
     for chunk in read_stream(input, size=io.DEFAULT_BUFFER_SIZE):
         try:
