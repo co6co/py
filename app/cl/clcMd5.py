@@ -1,5 +1,4 @@
 import os
-import hashlib
 from co6co.utils import hash, log
 from co6co.utils import find_files, convert_size,  convert_to_bytes, split_value_unit
 import sqlite3 as db3
@@ -44,7 +43,7 @@ def _computeMd5(current_dir: str, conn: db3.Connection, cursor: db3.Cursor):
                 elif os.path.isfile(item):
                     md5_hash = hash.file_md5(item)
                     fileSize = os.path.getsize(item)
-                    log.info(f"计算：{item}的MD5,{md5_hash}")
+                    log.info(f"{md5_hash}-->{item}")
                     cursor.execute(f"INSERT INTO md5_data (file_name, md5_hash,file_size) VALUES (?, ?,?)", (item, md5_hash, fileSize))
             except Exception as e:
                 log.warn("error->", item,  e)
@@ -61,13 +60,13 @@ def compute_md5_values(current_dir):
 
 
 def show(md5: str, size: str, queryAll: bool = False):
-    where = """ and md5_hash in (
+    where = '' if queryAll else """ and md5_hash in (
         select md5_hash  from md5_data
         group by md5_hash
         HAVING count(*)>1
         )
-        """ if queryAll else ''
-    where = f"and md5_hash like '%{md5}%'" if md5 else ''
+    """
+    where += f"and md5_hash like '%{md5}%'" if md5 else ''
     where += f" and file_size > {convert_to_bytes(*split_value_unit(size))}" if size else ''
 
     sql = f'''
