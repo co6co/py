@@ -5,6 +5,7 @@ export const useFileDrag = () => {
 		files: [],
 		filePreloadCount: 0,
 	});
+
 	/*
 	 * 读取目录下的所有文件
 	 * 超过只能读取100个文件
@@ -29,6 +30,7 @@ export const useFileDrag = () => {
 		};
 		readFiles();
 	}
+
 	const readFileOrDirectory = (entry) => {
 		//entry: FileEntry | DirectoryEntry
 		if (entry.isFile) {

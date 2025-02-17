@@ -54,7 +54,7 @@
         :zoom="cropImage"
         :cropmove="cropImage"
         style="width: 100%; height: 400px"
-      ></vue-cropper>
+      />
 
       <template #footer>
         <span class="dialog-footer">
