@@ -28,7 +28,7 @@ npm install --registry=https://registry.npmjs.org/ co6co
 
 ```
 co6co-ui==0.1.22
-co6co-right==0.0.28
+co6co-right==0.0.29
 co6co-wx==0.0.2
 
 

@@ -158,12 +158,19 @@ export default defineComponent({
 				diaglogRef.value?.clearFile();
 				diaglogRef.value?.onDrop(event);
 				DATA.isMask = false;
-				if (diaglogRef.value?.hasFile()) {
+				if (diaglogRef.value?.hasFile) {
 					onOpenDialog(false);
 				}
 			}
 		};
-
+		watch(
+			() => diaglogRef.value?.hasFile,
+			(val) => {
+				if (val) {
+					onOpenDialog(false);
+				}
+			}
+		);
 		const onDragOver = (event) => {
 			if (getPermissKey(routeHook.ViewFeature.upload)) {
 				DATA.isMask = true;

@@ -41,19 +41,31 @@ export default defineComponent({
 			uploading: boolean;
 			limitNum: number;
 			scrollIndex: number;
+			fileData: IFileOption[];
+			hasFile: boolean;
 		}>({
 			uploadFolder: '/',
 			canelFlag: false,
 			uploading: false,
 			limitNum: 3,
 			scrollIndex: 0,
+			fileData: [],
+			hasFile: false,
 		});
 
-		const { FileData, onDragOver, onDrop } = useFileDrag();
+		const onFileHander = (file: IFileOption) => {
+			DATA.fileData.push(file);
+			DATA.hasFile = true;
+		};
+		const { onDragOver, onDrop } = useFileDrag(onFileHander);
+
+		const hasFile = computed(() => {
+			return DATA.hasFile;
+		});
 		const reset = () => {
 			DATA.scrollIndex = 0;
-			FileData.value.files = [];
-			FileData.value.filePreloadCount = 0;
+			DATA.hasFile = false;
+			DATA.fileData = [];
 		};
 		const uploadOneFile = async (opt: IFileOption, index: number) => {
 			if (opt.finished) return true;
@@ -106,21 +118,21 @@ export default defineComponent({
 			}*/
 			const limit = pLimit(DATA.limitNum);
 			await Promise.all(
-				FileData.value.files.map((opt, index) =>
+				DATA.fileData.map((opt, index) =>
 					limit(() => {
 						if (DATA.canelFlag) return false;
 						return uploadOneFile(opt, index);
 					})
 				)
 			);
-			const unfinshed = FileData.value.files.filter((o) => !o.finished);
+			const unfinshed = DATA.fileData.filter((o) => !o.finished);
 			if (unfinshed.length > 0) return false;
 			return true;
 		};
 		const onUpload = async () => {
 			try {
 				DATA.uploading = true;
-				if (!FileData.value.files || FileData.value.files.length == 0) {
+				if (!DATA.fileData || DATA.fileData.length == 0) {
 					ElMessageBox.alert('请选择要上传的文件或文件夹！');
 				}
 				DATA.canelFlag = false;
@@ -193,18 +205,18 @@ export default defineComponent({
 		/**选择上传 */
 		//选择文件或文件夹
 		const onfileDropdown = (data: IFileOption[]) => {
-			FileData.value.files.push(...data);
+			DATA.fileData.push(...data);
 		};
 
 		const onDelete = (index, _: IFileOption) => {
 			//删除从index 的一个元素
-			FileData.value.files.splice(index, 1);
+			DATA.fileData.splice(index, 1);
 		};
 		const onLimitNumChange = (n) => {
 			if (n <= 0) DATA.limitNum = 3;
 		};
 		const finshedCount = computed(() => {
-			return FileData.value.files.filter((m) => m.finished).length;
+			return DATA.fileData.filter((m) => m.finished).length;
 		});
 		/** end 分片上传 */
 		const fromSlots = {
@@ -232,7 +244,7 @@ export default defineComponent({
 					<ElCard
 						class={[
 							style['drop-Box'],
-							FileData.value.files.length > 0 ? 'hasFile' : 'box',
+							DATA.fileData.length > 0 ? 'hasFile' : 'box',
 							DATA.canelFlag ? 'canelUpload' : '',
 						]}
 						v-slots={{
@@ -256,7 +268,7 @@ export default defineComponent({
 												onClick={clearFile}
 												v-slots={{
 													default: () =>
-														`清空列表[${finshedCount.value}/${FileData.value.files.length}]`,
+														`清空列表[${finshedCount.value}/${DATA.fileData.length}]`,
 												}}
 											/>
 										</ElCol>
@@ -268,16 +280,13 @@ export default defineComponent({
 							ref={scrollbarRef}
 							onDrop={onDrop}
 							onDragover={onDragOver}>
-							{FileData.value.files.length == 0 ? (
+							{DATA.fileData.length == 0 ? (
 								<div>
 									<span class="small">上传文件或文件夹到当前文夹</span>
 								</div>
 							) : (
 								<>
-									<ElTable
-										data={FileData.value.files}
-										ref={tableRef}
-										border={true}>
+									<ElTable data={DATA.fileData} ref={tableRef} border={true}>
 										<ElTableColumn label="序号" width={112} align="center">
 											{{
 												default: (scope: tableScope) => scope.$index,
@@ -349,11 +358,7 @@ export default defineComponent({
 				/>
 			);
 		};
-		const hasFile = () => {
-			// DATA.files.length 磁盘原因等 延迟很大 需要很久才能出结果
-			if (FileData.value.filePreloadCount > 0) return true;
-			return false;
-		};
+
 		const openDialog = (folder: string) => {
 			DATA.uploadFolder = folder;
 			DATA.title = `上传文件至"${folder}"`;

@@ -1,25 +1,29 @@
-import { ref } from 'vue';
 import { IFileOption } from '@/constants';
-export const useFileDrag = () => {
-	const FileData = ref<{ files: IFileOption[]; filePreloadCount: number }>({
-		files: [],
-		filePreloadCount: 0,
-	});
 
+type FileOption = Pick<IFileOption, 'file' | 'subPath'>;
+export const useFileDrag = (fileHander: (fileOption: FileOption) => void) => {
+	const onFindFile = (file: File, subPath?: string) => {
+		const fileOption = { file: file, subPath: subPath };
+		fileHander(fileOption);
+	};
 	/*
 	 * 读取目录下的所有文件
 	 * 超过只能读取100个文件
 	 * @param dirReader 目录读取器 entry.createReader()
 	 * @param callback 回调函数 (entries: Array< FileEntry|DirectoryEntry>) => void
 	 */
-	function _readAllEntries(dirReader, callback: (entries: Array<any>) => void) {
-		//FileEntry|DirectoryEntry
-		var entries: Array<any> = [];
+	const _readAllEntries = (
+		dirReader: DirectoryReader,
+		callback: (entries: Array<FileSystemEntry>) => void
+	) => {
+		var entries: Array<FileSystemEntry> = [];
 		const readFiles = () => {
 			dirReader.readEntries(
 				(results) => {
+					//console.log('results.length: ' + results.length);
 					if (results.length > 0) {
 						entries.push(...results);
+						//console.log('继续读取...');
 						readFiles();
 					} else callback(entries);
 				},
@@ -29,21 +33,23 @@ export const useFileDrag = () => {
 			);
 		};
 		readFiles();
-	}
+	};
 
-	const readFileOrDirectory = (entry) => {
+	const readFileOrDirectory = (entry: FileSystemEntry) => {
 		//entry: FileEntry | DirectoryEntry
 		if (entry.isFile) {
-			entry.file((file: File) => {
+			(entry as FileEntry).file((file: File) => {
+				// 处理文件 比较慢
+				//console.info('处理文件', file.name);
 				let subPath = (entry.fullPath as string).replace('/' + file.name, '');
 				if (subPath) subPath = subPath.substring(1);
-				FileData.value.files.push({ file: file, subPath: subPath });
+				onFindFile(file, subPath);
 			});
 		} else if (entry.isDirectory) {
-			const dirReader = entry.createReader();
-			_readAllEntries(dirReader, (entries) => {
-				entries.forEach((entry) => readFileOrDirectory(entry));
-			});
+			const dirReader = (entry as DirectoryEntry).createReader();
+			_readAllEntries(dirReader, (entries) =>
+				entries.forEach((entry) => readFileOrDirectory(entry))
+			);
 		}
 	};
 	const onDragOver = (event: DragEvent) => {
@@ -51,6 +57,7 @@ export const useFileDrag = () => {
 		event.preventDefault();
 		event.stopPropagation(); //阻止冒泡
 	};
+
 	const onDrop = (event: DragEvent) => {
 		// 阻止默认行为，以防止浏览器打开文件
 		event.preventDefault();
@@ -58,7 +65,6 @@ export const useFileDrag = () => {
 		//console.info('onDrop start...')
 		const items = event.dataTransfer?.items;
 		if (items && items.length > 0) {
-			FileData.value.filePreloadCount = items.length;
 			for (let i = 0; i < items.length; i++) {
 				//webkitGetAsEntry 是一个非标准的方法
 				const item = items[i].webkitGetAsEntry();
@@ -67,7 +73,7 @@ export const useFileDrag = () => {
 				} else {
 					// 如果不是文件系统条目（可能是普通文件）
 					const file = event.dataTransfer?.files[i];
-					if (file) FileData.value.files.push({ file: file });
+					if (file) onFindFile(file);
 				}
 			}
 		} else {
@@ -83,5 +89,5 @@ export const useFileDrag = () => {
 			*/
 		}
 	};
-	return { FileData, onDragOver, onDrop };
+	return { onDragOver, onDrop };
 };
