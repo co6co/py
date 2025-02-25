@@ -41,10 +41,19 @@ def init(conn: db3.Connection, cursor: db3.Cursor):
     cursor.execute(create_table_sql)
 
 
+def filterFile(fileName: str):
+    ignore = ['.vmdk']  # 该文件比较大一般不会重复
+    # 可能返回 ''
+    _, ext = os.path.splitext(fileName)
+    if ext in ignore:
+        return False
+    return True
+
+
 @exector
 def computeMd5(conn: db3.Connection, cursor: db3.Cursor, *, current_dir: str, ):
     log.warn("current_dir:", current_dir)
-    generFiles = find_files(current_dir, ['node_modules'])
+    generFiles = find_files(current_dir, ['node_modules'], filterFileFunction=filterFile)
     flag = 0
     for r, _, flist in generFiles:
         # 遍历当前目录下的所有文件和子目录
