@@ -143,14 +143,15 @@ class Executing:
                 log.log("线程'{}->{}'结束.".format(self.threadName, id(self.loop)))
                 self.loop.close()
 
-    class TaskManage:
-        _starting: bool = None
 
-    @ property
+class TaskManage:
+    _starting: bool = None
+
+    @property
     def loop(self):
         return self._loop
 
-    @ property
+    @property
     def runing(self):
         return self._starting
 
