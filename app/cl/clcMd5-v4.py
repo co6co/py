@@ -191,7 +191,7 @@ if __name__ == '__main__':
     wGroup = parser.add_argument_group("写入数据")
     wGroup.add_argument("-d", "--dir",  type=str, help="目录路径")
     wGroup.add_argument("-t", "--threads",  type=int, default=4, help="线程数")
-    wGroup.add_argument("-i", "--ignore",  type=str, default=None, help="忽略的目录名称，多个用逗号分隔")
+    wGroup.add_argument("-i", "--ignore",  type=str, default=None, help="忽略的目录名称，多个用逗号分隔 eg:node_modules,\"pnpm store\" 或者 'node_modules,pnpm store'")
 
     rGroup = parser.add_argument_group("md5")
     rGroup.add_argument("-m", "--md5", default=None, help="查询/删除 md5值对应的记录,默认为空")
@@ -209,4 +209,6 @@ if __name__ == '__main__':
     elif args.category == 'd' and args.md5 != None:
         delete(md5=args.md5, folder=args.folder)
     else:
+        print("参数错误：", *(args._get_kwargs()))
+        print("参照下面帮助：")
         parser.print_help()
