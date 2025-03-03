@@ -16,3 +16,4 @@ export * from './table';
 export * from './txtView';
 export * from './fileDropdown';
 export * from './dragUploader';
+export * from './dragVerify';

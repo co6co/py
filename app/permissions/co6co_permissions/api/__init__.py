@@ -8,6 +8,7 @@ from .dict import dict_api
 from .config import config_api
 from .resource import res_api
 from .file import file_api
+from .verify import verify_api
 
 permissions_api = Blueprint.group(
-    view_api, menu_api, userGroup_api, role_api, user_api, dict_api, config_api, res_api, file_api)
+    view_api, menu_api, userGroup_api, role_api, user_api, dict_api, config_api, res_api, file_api, verify_api)

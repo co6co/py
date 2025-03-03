@@ -22,6 +22,9 @@
             </template>
           </el-input>
         </el-form-item>
+        <el-form-item prop="verify">
+          <DragVerify :height="30" v-model="param.verify" :onVerifySuccess="onVerifySuccess" />
+        </el-form-item>
         <div class="login-btn">
           <el-button type="primary" @click="submitForm(login)">登录</el-button>
         </div>
@@ -45,24 +48,48 @@ import { router, ViewObjects } from '../router'
 import type { FormInstance, FormRules } from 'element-plus'
 import useSystem from '../hooks/useSystem'
 import { getPublicURL } from '../utils'
+//import DragVerify from '@/components/DragVerify'
+import { DragVerify } from 'co6co-right'
 
 interface LoginInfo {
   username: string
   password: string
+  verify: string
 }
 let message = ref('')
 const param = reactive<LoginInfo>({
   username: '',
-  password: ''
+  password: '',
+  verify: ''
 })
 if (isDebug) {
   param.username = 'admin'
   param.password = 'admin12345'
 }
-
+const verify = ref<Boolean>(false)
+const onVerifySuccess = (dd) => {
+  console.info(dd)
+  verify.value = true
+  login?.value?.validateField('verify')
+}
 const rules: FormRules = {
   username: [{ required: true, message: '请输入用户名', trigger: 'blur' }],
-  password: [{ required: true, message: '请输入密码', trigger: 'blur' }]
+  password: [{ required: true, message: '请输入密码', trigger: 'blur' }],
+  verify: [
+    {
+      required: true,
+      message: '请拖动滑块验证',
+      trigger: 'blur',
+      validator(rule, value, callback, source, options) {
+        if (verify.value) {
+          callback()
+        } else {
+          const msg = rule.message
+          callback(new Error(typeof msg == 'function' ? msg() : msg))
+        }
+      }
+    }
+  ]
 }
 
 const { systeminfo } = useSystem()
@@ -82,6 +109,7 @@ const submitForm = (formEl: FormInstance | undefined) => {
           })
         })
         .catch((e) => {
+          param.verify = ''
           ElMessage.error(`登录出错：${e.message}`)
         })
         .finally(() => {

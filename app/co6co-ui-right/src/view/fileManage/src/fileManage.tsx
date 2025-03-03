@@ -129,7 +129,6 @@ export default defineComponent({
 				//console.info(arr, result);
 				if (result.length == 1 && result[0] == '') DATA.query.root = '/';
 				else DATA.query.root = result.join('/');
-
 				onSearch();
 			}
 		};
