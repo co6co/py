@@ -37,6 +37,7 @@ export interface UserType {
 export interface UserLogin {
 	userName: string;
 	password: string;
+	verifyCode: string;
 }
 export const login_svc = (
 	data: UserLogin,

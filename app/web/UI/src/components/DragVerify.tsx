@@ -1,6 +1,6 @@
 // DragVerify.tsx
 import { ElButton } from 'element-plus'
-import { defineComponent, ref, reactive, onMounted, onUnmounted, watch, nextTick } from 'vue'
+import { defineComponent, ref, reactive, onMounted, onUnmounted, watch } from 'vue'
 import style from '@/assets/css/dragVerify.module.less'
 import { IDragVerifyData, dragVerify_Svc } from '@/api/verify'
 const DragVerify = defineComponent({
@@ -39,9 +39,8 @@ const DragVerify = defineComponent({
     const isDragging = ref(false)
     const offsetX = ref(0)
     const currentX = ref(0)
-    const uiVerifySuccess = ref(false)
-    const apiVerifying = ref(false)
     const verifySuccess = ref(false)
+
     const DATA = reactive<IDragVerifyData>({
       start: 0,
       end: 0
@@ -67,14 +66,14 @@ const DragVerify = defineComponent({
     }
 
     const handleMouseDown = (e: MouseEvent) => {
-      if (uiVerifySuccess.value) return
+      if (verifySuccess.value) return
       isDragging.value = true
       offsetX.value = e.clientX
       DATA.start = new Date().getTime()
     }
-
     const handleMouseMove = (e: MouseEvent) => {
-      if (!isDragging.value || uiVerifySuccess.value) return
+      // 取消上一次的requestAnimationFrame请求
+      if (!isDragging.value || verifySuccess.value) return
       const diffX = e.clientX - offsetX.value
       currentX.value = Math.min(
         Math.max(0, diffX),
@@ -82,26 +81,28 @@ const DragVerify = defineComponent({
       )
       if (currentX.value >= bgWidth.value - (sliderRef.value?.$el.offsetWidth || 0)) {
         DATA.end = new Date().getTime()
-        uiVerifySuccess.value = true
-        if (apiVerifying.value) return
-        apiVerifying.value = true
+        verifySuccess.value = true
+        //停止
+        handleMouseUp(e)
         dragVerify_Svc(DATA)
           .then((res) => {
             onChange(res.data)
             props.onVerifySuccess(res.data)
           })
           .catch((err) => {
-            uiVerifySuccess.value = false
+            verifySuccess.value = false
             currentX.value = 0
+            //不是预期的错误打印日志
+            if (!err.code) console.log(err)
           })
+          .finally(() => {})
       }
     }
 
     const handleMouseUp = (e: MouseEvent) => {
       if (!isDragging.value) return
       isDragging.value = false
-
-      if (!uiVerifySuccess.value) {
+      if (!verifySuccess.value) {
         currentX.value = 0
       }
     }
@@ -119,7 +120,6 @@ const DragVerify = defineComponent({
 
     return () => (
       <>
-        <span>{uiVerifySuccess.value.toString()}</span>
         <div
           ref={BgRef}
           class={style.dragVerify}
@@ -148,8 +148,8 @@ const DragVerify = defineComponent({
           </ElButton>
 
           {/* 提示信息 */}
-          <div class={{ tip: true, success: uiVerifySuccess.value }}>
-            {uiVerifySuccess.value ? props.successText : props.text}
+          <div class={{ tip: true, success: verifySuccess.value }}>
+            {verifySuccess.value ? props.successText : props.text}
           </div>
         </div>
       </>

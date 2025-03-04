@@ -30,6 +30,9 @@ class login_view(BaseMethodView):
         where.__dict__.update(request.json)
         select = Select(UserPO).filter(UserPO.userName.__eq__(where.userName))
         user: UserPO = await get_one(request, select)
+        verifyCode = request.json.get("verifyCode", "")
+        if verifyCode == "":
+            return JSON_util.response(Result.fail(message="验证码不能为空!"))
         if user != None:
             if user.password == user.encrypt(where.password):
                 tokenData = await generatePageToken(getSecret(request), user, userOpenId=user.userGroupId)

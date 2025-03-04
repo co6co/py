@@ -46,6 +46,8 @@
     增加 ThreadTask 类
 0.0.22
     增加 计时器类
+0.0.23
+    增加 ExpiringDict
 ```
 
 # 安装

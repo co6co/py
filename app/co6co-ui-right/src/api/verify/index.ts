@@ -8,5 +8,5 @@ export interface IDragVerifyData {
 export const dragVerify_Svc = (
 	data: IDragVerifyData
 ): Promise<IResponse<string>> => {
-	return createServiceInstance().post(`${base_URL}`, data);
+	return createServiceInstance(3000, false).post(`${base_URL}`, data);
 };

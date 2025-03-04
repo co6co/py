@@ -2,9 +2,9 @@
   <div class="login-wrap">
     <div class="ms-login">
       <div class="ms-title">{{ systeminfo.name }}</div>
-      <el-form :model="param" :rules="rules" ref="login" label-width="0px" class="ms-content">
+      <el-form :model="DATA" :rules="rules" ref="login" label-width="0px" class="ms-content">
         <el-form-item prop="username">
-          <el-input v-model="param.username" placeholder="用户名">
+          <el-input v-model="DATA.username" placeholder="用户名">
             <template #prepend>
               <el-icon><User /></el-icon>
             </template>
@@ -14,7 +14,7 @@
           <el-input
             type="password"
             placeholder="密 码"
-            v-model="param.password"
+            v-model="DATA.password"
             @keyup.enter="submitForm(login)"
           >
             <template #prepend>
@@ -23,7 +23,7 @@
           </el-input>
         </el-form-item>
         <el-form-item prop="verify">
-          <DragVerify :height="30" v-model="param.verify" :onVerifySuccess="onVerifySuccess" />
+          <DragVerify :height="30" v-model="DATA.verify" :onVerifySuccess="onVerifySuccess" />
         </el-form-item>
         <div class="login-btn">
           <el-button type="primary" @click="submitForm(login)">登录</el-button>
@@ -48,7 +48,7 @@ import { router, ViewObjects } from '../router'
 import type { FormInstance, FormRules } from 'element-plus'
 import useSystem from '../hooks/useSystem'
 import { getPublicURL } from '../utils'
-//import DragVerify from '@/components/DragVerify'
+//import DragVerify from '@/components/dragVerify'
 import { DragVerify } from 'co6co-right'
 
 interface LoginInfo {
@@ -57,19 +57,16 @@ interface LoginInfo {
   verify: string
 }
 let message = ref('')
-const param = reactive<LoginInfo>({
+const DATA = reactive<LoginInfo>({
   username: '',
   password: '',
   verify: ''
 })
 if (isDebug) {
-  param.username = 'admin'
-  param.password = 'admin12345'
+  DATA.username = 'admin'
+  DATA.password = 'admin12345'
 }
-const verify = ref<Boolean>(false)
-const onVerifySuccess = (dd) => {
-  console.info(dd)
-  verify.value = true
+const onVerifySuccess = (_) => {
   login?.value?.validateField('verify')
 }
 const rules: FormRules = {
@@ -81,7 +78,7 @@ const rules: FormRules = {
       message: '请拖动滑块验证',
       trigger: 'blur',
       validator(rule, value, callback, source, options) {
-        if (verify.value) {
+        if (DATA.verify) {
           callback()
         } else {
           const msg = rule.message
@@ -100,16 +97,20 @@ const submitForm = (formEl: FormInstance | undefined) => {
     if (valid) {
       showLoading()
       userSvc
-        .login_svc({ userName: param.username, password: param.password }, 5000, false)
+        .login_svc(
+          { userName: DATA.username, password: DATA.password, verifyCode: DATA.verify },
+          5000,
+          false
+        )
         .then((res) => {
           message.value = res.message
-          storeAuthonInfo(res.data, param.username)
+          storeAuthonInfo(res.data, DATA.username)
           registerRoute(ViewObjects, router, () => {
             window.location.href = getPublicURL('/')
           })
         })
         .catch((e) => {
-          param.verify = ''
+          DATA.verify = ''
           ElMessage.error(`登录出错：${e.message}`)
         })
         .finally(() => {
