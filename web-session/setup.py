@@ -9,12 +9,12 @@ VERSION = versions.__version__
 currentDir = path.abspath(path.dirname(__file__))
 with open(path.join(currentDir, 'README.md'), encoding='utf-8') as f:
     long_description = f.read()
-
+packages=find_packages()
 setup(
-    name="co6co.web-session",
+    name=packages[0],
     version=VERSION,
     description="web session 扩展",
-    packages=find_packages(),
+    packages=packages,
     long_description=long_description,
     long_description_content_type='text/markdown',
     classifiers=["Programming Language :: Python :: 3", "Programming Language :: Python :: 3.6"],
