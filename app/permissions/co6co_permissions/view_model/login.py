@@ -31,7 +31,10 @@ class login_view(BaseMethodView):
         select = Select(UserPO).filter(UserPO.userName.__eq__(where.userName))
         user: UserPO = await get_one(request, select)
         verifyCode = request.json.get("verifyCode", "")
-        if verifyCode == "":
+        _, sessionDict = self.get_Session(request)
+        memCode = sessionDict.pop("verifyCode")
+        # // todo 为什么 应用 重启后 session 还在
+        if verifyCode == "" or memCode != verifyCode:
             return JSON_util.response(Result.fail(message="验证码不能为空!"))
         if user != None:
             if user.password == user.encrypt(where.password):

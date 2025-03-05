@@ -33,11 +33,11 @@ class IBaseSession(metaclass=abc.ABCMeta):
 
     def __init__(
         # 会话的过期时间，单位为秒
-        self, expiry,
+        self, expiry: int,
         # 存储会话数据时使用的键前缀
-        prefix,
+        prefix: str,
         # 头部名称，可能用于自定义请求头或响应头
-        head_name,
+        head_name: str,
         # 用于设置 Cookie 的 SameSite 属性
         samesite,
         # 会话对象在请求容器中的名称
@@ -81,6 +81,10 @@ class IBaseSession(metaclass=abc.ABCMeta):
         """Set value for datastore"""
         raise NotImplementedError
 
+    def getSid(self, request):
+        sid = request.headers.get(self.head_name)
+        return sid
+
     async def open(self, request) -> SessionDict:
         """
         Opens a session onto the request. Restores the client's session
@@ -96,7 +100,7 @@ class IBaseSession(metaclass=abc.ABCMeta):
                 attached as well to `request.session`.
         """
 
-        sid = request.headers.get(self.head_name)
+        sid = self. getSid(request)
         if not sid:
             sid = uuid.uuid4().hex
             session_dict = SessionDict(sid=sid)

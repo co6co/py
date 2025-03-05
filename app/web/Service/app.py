@@ -5,6 +5,7 @@ from co6co.utils import log
 from sanic.config import Config
 from co6co_sanic_ext.utils.cors_utils import attach_cors
 from co6co_sanic_ext import sanics
+from co6co_sanic_ext import session
 from co6co_web_db.services.db_service import injectDbSessionFactory
 import argparse
 from cacheout import Cache
@@ -34,6 +35,7 @@ def init(app: Sanic, _: dict):
     cache = Cache(maxsize=256, ttl=30, timer=time.time, default=None)
     app.ctx.Cache = cache
     appendRoute(app)
+    session.init(app)
 
 
 def main():

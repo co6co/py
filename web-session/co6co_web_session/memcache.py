@@ -8,7 +8,7 @@ except ImportError:  # pragma: no cover
     aiomcache = None
 
 
-class MemcacheSessionInterface(IBaseSession):
+class MemcacheSessionImp(IBaseSession):
     def __init__(
         self,
         memcache_connection,
@@ -19,7 +19,7 @@ class MemcacheSessionInterface(IBaseSession):
         prefix: str = "session:",
         sessioncookie: bool = False,
         samesite: str = None,
-        session_name: str = "session",
+        session_name: str = "Session",
         secure: bool = False,
     ):
         """Initializes the interface for storing client sessions in memcache.

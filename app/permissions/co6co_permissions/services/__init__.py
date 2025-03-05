@@ -48,7 +48,7 @@ async def generatePageToken(SECRET: str, user: UserPO, expire_seconds: int = 864
     """
     生成登录token和刷新token
     """
-    tokenData = await generateUserToken(SECRET, uuid.uuid4(), getCtxData(user), expire_seconds=expire_seconds, **kvarg)
+    tokenData = await generateUserToken(SECRET, getCtxData(user), expire_seconds=expire_seconds, **kvarg)
     refreshToken = await generateRefreshToken(SECRET, user.id)
     tokenData.update({"refreshToken": refreshToken})
     return tokenData
@@ -60,17 +60,16 @@ async def queryUer(session: AsyncSession, userId: int):
     return user
 
 
-async def generateUserToken(SECRET: str, sessionId: str, data: dict, userOpenId: str = None, expire_seconds: int = 86400):
+async def generateUserToken(SECRET: str,   data: dict, userOpenId: str = None, expire_seconds: int = 86400):
     """
-    SECRET:密钥
-    sessionId: 原样输出
+    SECRET:密钥 
     data:   放置token所需数据 
     userOpenId: role 放置
     expire_seconds: 过期时间,前端使用
     """
     if data != None:
         token = await createToken(SECRET, data, expire_seconds)
-        return {"token": token, "expireSeconds": expire_seconds, "sessionId": str(sessionId), "role": userOpenId}
+        return {"token": token, "expireSeconds": expire_seconds,   "role": userOpenId}
     else:
         raise Exception("data can't is NUll! ")
 

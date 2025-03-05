@@ -18,6 +18,9 @@ from co6co.utils import log, getDateFolder
 from urllib.parse import quote
 import zipfile
 from pathlib import Path
+from co6co_web_session import Session
+from co6co_web_session.base import SessionDict
+from typing import Tuple
 
 
 class BaseView(HTTPMethodView):
@@ -43,6 +46,14 @@ class BaseView(HTTPMethodView):
             return True
         except ValueError:
             return False
+
+    def get_Session(self, request: Request) -> Tuple[Session, SessionDict]:
+        """
+        获取 mem_session 
+        """
+        sDict = request.ctx.Session
+        session = request.app.ctx.extensions['Session']
+        return session, sDict
 
     def createContentDisposition(self, fileName):
         """

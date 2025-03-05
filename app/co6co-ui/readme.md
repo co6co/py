@@ -55,5 +55,8 @@
     优化
 0.1.22
     增加 loadScript 和 unLoadScript 方法
-
+0.1.23
+    SessionId
+0.1.24
+    优化
 ```

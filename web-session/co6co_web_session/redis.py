@@ -7,7 +7,7 @@ except ImportError:
     asyncio_redis = None
 
 
-class RedisSessionInterface(IBaseSession):
+class RedisSessionImp(IBaseSession):
     def __init__(
         self,
         redis_getter: Callable,
@@ -18,7 +18,7 @@ class RedisSessionInterface(IBaseSession):
         prefix: str = "session:",
         sessioncookie: bool = False,
         samesite: str = None,
-        session_name: str = "session",
+        session_name: str = "Session",
         secure: bool = False,
     ):
         """Initializes a session interface backed by Redis.

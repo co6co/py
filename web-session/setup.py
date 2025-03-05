@@ -2,17 +2,32 @@ from os import path
 from setuptools import setup, find_packages
 
 
-from co6co_web_session import versions
-VERSION = versions.__version__
+packages = find_packages()
+packageName = packages[0]
+
+
+def get_version():
+    package_dir = path.abspath(path.dirname(__file__))
+    version_file = path.join(package_dir, packageName, 'versions.py')
+    with open(version_file, "rb") as f:
+        source_code = f.read()
+    exec_code = compile(source_code, version_file, "exec")
+    scope = {}
+    exec(exec_code, scope)
+    version = scope.get("__version__", None)
+    if version:
+        return version
+    raise RuntimeError("Unable to find version string.")
+
 
 # read readmeFile contents
 currentDir = path.abspath(path.dirname(__file__))
 with open(path.join(currentDir, 'README.md'), encoding='utf-8') as f:
     long_description = f.read()
-packages=find_packages()
+
 setup(
-    name=packages[0],
-    version=VERSION,
+    name=packageName.replace('_', '.', 1),
+    version=get_version(),
     description="web session 扩展",
     packages=packages,
     long_description=long_description,

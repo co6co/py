@@ -24,7 +24,7 @@ except ImportError:  # pragma: no cover
     _SessionModel = None
 
 
-class MongoDBSessionInterface(IBaseSession):
+class MongoDBSessionImp(IBaseSession):
     def __init__(
         self,
         app,
@@ -35,7 +35,7 @@ class MongoDBSessionInterface(IBaseSession):
         hand_name: str = "session",
         sessioncookie: bool = False,
         samesite: str = None,
-        session_name: str = "session",
+        session_name: str = "Session",
         secure: bool = False,
     ):
         """Initializes the interface for storing client sessions in MongoDB.

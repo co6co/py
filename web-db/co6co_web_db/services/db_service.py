@@ -21,8 +21,6 @@ from typing import TypeVar
 from co6co_db_ext.db_session import db_service
 import multiprocessing
 
-from sanic_session import Session, InMemorySessionInterface
-
 
 def injectDbSessionFactory(app: Sanic, settings: dict = {}, engineUrl: str = None, sessionApi: list = ["/api"]):
     """
@@ -30,9 +28,9 @@ def injectDbSessionFactory(app: Sanic, settings: dict = {}, engineUrl: str = Non
     """
     service: db_service = None
 
-    service: db_service = None
-    session_interface = InMemorySessionInterface(session_name="mem_session", cookie_name=app.name, prefix=app.name)
-    Session(app, interface=session_interface)
+    # sanic_session 包使用了 cockie 未能满足使用需求 已修改其他方式的 session 实现
+    # session_interface = InMemorySessionInterface(session_name="mem_session", cookie_name=app.name, prefix=app.name)
+    # Session(app, interface=session_interface)
     if settings != None or engineUrl != None:
         service = db_service(settings, engineUrl)
         app.ctx.service = service

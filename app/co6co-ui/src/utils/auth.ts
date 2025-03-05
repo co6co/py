@@ -8,6 +8,17 @@ const storage = new Storage();
 const refreshToken_key = `${SessionKey}_1`;
 const userName_key = `${SessionKey}_name`;
 
+export const setSession = (val: any, secounds = 7200) => {
+	storage.set(SessionKey, val, secounds);
+};
+export function getSession() {
+	let value = storage.get(SessionKey);
+	return value;
+}
+export function removeSession() {
+	storage.remove(SessionKey);
+}
+
 export function setToken(token: any, secounds = 7200) {
 	storage.set(authonKey, token, secounds);
 }
@@ -40,7 +51,6 @@ export const storeAuthonInfo = (data: IAuthonInfo, userName?: string) => {
 	//设置token
 	setToken(data.token, data.expireSeconds);
 	if (userName) storage.set(userName_key, userName, data.expireSeconds);
-	storage.set(SessionKey, data.sessionId, data.expireSeconds);
 	if (data.refreshToken)
 		storage.set(
 			refreshToken_key,

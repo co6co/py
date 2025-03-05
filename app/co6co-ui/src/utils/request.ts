@@ -7,7 +7,7 @@ import axios, {
 } from 'axios';
 import { ElMessage } from 'element-plus'; //type ElLoading,
 import JSONbig from 'json-bigint';
-import { getToken, removeToken } from './auth';
+import { getToken, removeToken, getSession } from './auth';
 import { getStoreInstance } from '@/hooks';
 import { IResponse, HttpContentType } from '@/constants';
 
@@ -50,6 +50,13 @@ export const useRequestToken = (config: InternalAxiosRequestConfig) => {
 	//发送请求之前
 	const token = getToken();
 	config.headers.Authorization = `Bearer ${token}`;
+	useSession(config);
+	return config;
+};
+export const useSession = (config: InternalAxiosRequestConfig) => {
+	//发送请求之前
+	const session = getSession();
+	config.headers.Session = `${session}`;
 	return config;
 };
 export const useText2Json = (response: AxiosResponse) => {

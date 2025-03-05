@@ -27,7 +27,7 @@
     batch_add
 0.0.13 正式
     tip,时间 datetime.datetime.utcnow() 过时
-0.0.14 未发布
-    sanic_session,内存Session
+0.0.14
+    优化
 
 ```

@@ -102,7 +102,6 @@ export const tree_props = {
 export interface IAuthonInfo {
 	token: string;
 	expireSeconds: number;
-	sessionId: string;
 	refreshToken: {
 		token: string;
 		expireSeconds: number;

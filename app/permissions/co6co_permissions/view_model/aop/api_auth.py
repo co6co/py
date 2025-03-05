@@ -4,7 +4,7 @@ from sanic import Blueprint, Sanic
 from sanic.response import json
 from sanic.request import Request
 
-from co6co_web_db.services.jwt_service import validToken
+from co6co_web_db.services.jwt_service import validToken, JWT_service
 from co6co_sanic_ext.model.res.result import Result
 from co6co_sanic_ext.utils import JSON_util
 from sqlalchemy.sql import Select
@@ -34,9 +34,15 @@ def authorized(f):
     """
     @wraps(f)
     async def decorated_function(request: Request, *args, **kwargs):
+        secret = request.app.config.SECRET
+        # 解密 session
+        # if request.headers.get("Session"):
+        #    jsw = JWT_service(secret)
+        #    session = jsw.decode(request.headers.get("Session"))
+        #    request.headers["Session"] = session
         # run some method that checks the request
         # for the client's authorization status
-        valid = await validToken(request, request.app.config.SECRET)
+        valid = await validToken(request, secret)
         if not valid:
             return JSON_util.response(Result.fail(message="token invalid or expire"), status=403)
         # //dodo debug

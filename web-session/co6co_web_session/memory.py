@@ -2,14 +2,14 @@ from .base import IBaseSession
 from co6co.storage.Dict import ExpiringDict
 
 
-class InMemorySessionInterface(IBaseSession):
+class MemorySessionImp(IBaseSession):
     def __init__(
         self,
         expiry: int = 2592000,
         head_name: str = "session",
         prefix: str = "session:",
         samesite: str = None,
-        session_name="session",
+        session_name="Session",
         secure: bool = False,
     ):
 

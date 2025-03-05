@@ -1,5 +1,5 @@
-import { ITreeSelect, removeAuthonInfo } from 'co6co';
-import { view_route_svc } from '@/api/view';
+import { ITreeSelect, removeAuthonInfo, getSession, setSession } from 'co6co';
+import { view_route_svc, get_session_svc } from '@/api/view';
 import { Storage, traverseTreeData, randomString } from 'co6co';
 //确保你在 Vue 组件的 <script setup> 或 setup() 函数中使用 useRouter。
 // 如果你需要在其他地方访问路由器，考虑通过参数传递路由器实例，或者在应用初始化时保存对它的引用。
@@ -187,6 +187,14 @@ export const useRouteData = () => {
 	const Key = 'useRouteData';
 	const storage = new Storage();
 	const queryRouteData = (bck: (data: IRouteData[], msg?: string) => void) => {
+		// 先获取session
+		let session = getSession();
+		if (!session) {
+			get_session_svc().then((res) => {
+				setSession(res.data.data, res.data.expiry);
+			});
+		}
+		//看功能
 		view_route_svc()
 			.then((res) => {
 				storage.set<IRouteData[]>(Key, res.data), bck(res.data);

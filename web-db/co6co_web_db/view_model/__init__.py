@@ -22,8 +22,8 @@ from co6co_db_ext.po import BasePO, TimeStampedModelPO, UserTimeStampedModelPO, 
 from datetime import datetime
 from co6co.utils.tool_util import list_to_tree, get_current_function_name
 from co6co_db_ext.db_utils import db_tools,  DbCallable, QueryOneCallable, UpdateOneCallable, QueryListCallable, QueryPagedByFilterCallable
-from sanic_session import Session
-from sanic_session.base import SessionDict
+
+from co6co_web_session.base import SessionDict
 from multiprocessing.managers import DictProxy
 
 
@@ -59,7 +59,7 @@ def errorLog(request: Request, module: str, method: str):
 
 def peraseRequest(request: Request) -> Tuple[AsyncSession, SessionDict, DictProxy]:
     session: AsyncSession = request.ctx.session
-    memSession: SessionDict = request.ctx.mem_session
+    memSession: SessionDict = request.ctx.Session
     cache: DictProxy = request.app.shared_ctx.cache
     return session, memSession, cache
 
@@ -76,14 +76,6 @@ class BaseMethodView(BaseView):
 
     def get_db_session(self, request: Request) -> AsyncSession | scoped_session:
         return get_db_session(request)
-
-    def get_Session(self, request: Request) -> SessionDict:
-        """
-        获取 mem_session
-        可在py 应用中共享值
-        """
-        session = request.ctx.mem_session
-        return session
 
     def get_shared_Cache(self, request: Request) -> DictProxy:
         return request.app.shared_ctx.cache

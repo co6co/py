@@ -21,6 +21,8 @@
     get_file_partial 方法
 0.0.8 2025-01-08
     修复json中文bug
+0.0.9 2025-03-05
+    依赖  co6co.web-session
 
 ```
 

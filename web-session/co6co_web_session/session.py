@@ -1,15 +1,24 @@
 
-from .memory import InMemorySessionInterface
+from .memory import MemorySessionImp
+from .base import IBaseSession
 
 
 class Session:
-    def __init__(self, app=None, interface=None):
+
+    def __init__(self, app=None, interface: IBaseSession = None):
         self.interface = None
         if app:
             self.init_app(app, interface)
 
-    def init_app(self, app, interface):
-        self.interface = interface or InMemorySessionInterface()
+    @property
+    def expiry(self):
+        """
+        session 过期时间
+        """
+        return self.interface.expiry if self.interface else None
+
+    def init_app(self, app, interface: IBaseSession):
+        self.interface = interface or MemorySessionImp()
         if not hasattr(app.ctx, "extensions"):
             app.ctx.extensions = {}
 

@@ -6,7 +6,7 @@ except ImportError:
     aioredis = None
 
 
-class AIORedisSessionInterface(IBaseSession):
+class AIORedisSessionImp(IBaseSession):
     def __init__(
         self,
         redis,
@@ -14,7 +14,7 @@ class AIORedisSessionInterface(IBaseSession):
         head_name: str = "session",
         prefix: str = "session:",
         samesite: str = None,
-        session_name: str = "session",
+        session_name: str = "Session",
         secure: bool = False,
     ):
         """Initializes a session interface backed by Redis.
