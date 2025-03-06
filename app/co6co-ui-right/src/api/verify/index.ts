@@ -3,6 +3,7 @@ const base_URL = '/api/verify';
 
 export interface IDragVerifyData {
 	start: number;
+	data: Array<{ t: number; x: number; y: number }>;
 	end: number;
 }
 export const dragVerify_Svc = (

@@ -48,7 +48,6 @@ import { router, ViewObjects } from '../router'
 import type { FormInstance, FormRules } from 'element-plus'
 import useSystem from '../hooks/useSystem'
 import { getPublicURL } from '../utils'
-//import DragVerify from '@/components/dragVerify'
 import { DragVerify } from 'co6co-right'
 
 interface LoginInfo {

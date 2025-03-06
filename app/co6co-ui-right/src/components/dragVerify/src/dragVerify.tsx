@@ -10,6 +10,7 @@ import {
 } from 'vue';
 import style from '@/assets/css/dragVerify.module.less';
 import { IDragVerifyData, dragVerify_Svc } from '@/api/verify';
+import { ArrowRight } from '@element-plus/icons-vue';
 const DragVerify = defineComponent({
 	props: {
 		width: {
@@ -22,7 +23,7 @@ const DragVerify = defineComponent({
 		},
 		successText: {
 			type: String,
-			default: '验证成功',
+			default: undefined,
 		},
 		text: {
 			type: String,
@@ -47,9 +48,11 @@ const DragVerify = defineComponent({
 		const offsetX = ref(0);
 		const currentX = ref(0);
 		const verifySuccess = ref(false);
+		const message = ref('');
 
 		const DATA = reactive<IDragVerifyData>({
 			start: 0,
+			data: [],
 			end: 0,
 		});
 		//存储本地值
@@ -82,6 +85,11 @@ const DragVerify = defineComponent({
 			// 取消上一次的requestAnimationFrame请求
 			if (!isDragging.value || verifySuccess.value) return;
 			const diffX = e.clientX - offsetX.value;
+			DATA.data.push({
+				t: new Date().getTime(),
+				x: e.clientX,
+				y: e.clientY,
+			});
 			currentX.value = Math.min(
 				Math.max(0, diffX),
 				props.width - (sliderRef.value?.$el.offsetWidth || 0)
@@ -97,7 +105,8 @@ const DragVerify = defineComponent({
 				dragVerify_Svc(DATA)
 					.then((res) => {
 						onChange(res.data);
-						props.onVerifySuccess(res.data);
+						message.value = res.message;
+						props.onVerifySuccess(res.data, DATA.start, DATA.end);
 					})
 					.catch((err) => {
 						verifySuccess.value = false;
@@ -105,7 +114,9 @@ const DragVerify = defineComponent({
 						//不是预期的错误打印日志
 						if (!err.code) console.log(err);
 					})
-					.finally(() => {});
+					.finally(() => {
+						DATA.data = [];
+					});
 			}
 		};
 
@@ -148,16 +159,18 @@ const DragVerify = defineComponent({
 					<ElButton
 						ref={sliderRef}
 						class="slider"
+						icon={ArrowRight}
 						style={{
 							left: `${currentX.value}px`,
 						}}
-						onMousedown={handleMouseDown}>
-						→
-					</ElButton>
+						onMousedown={handleMouseDown}
+					/>
 
 					{/* 提示信息 */}
 					<div class={{ tip: true, success: verifySuccess.value }}>
-						{verifySuccess.value ? props.successText : props.text}
+						{verifySuccess.value
+							? props.successText || message.value
+							: props.text}
 					</div>
 				</div>
 			</>
