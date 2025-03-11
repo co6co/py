@@ -15,7 +15,7 @@ co6co.web_session=0.0.1
 co6co.sanic-ext==0.0.9
 co6co.db-ext==0.0.13
 co6co.web-db==0.0.14
-co6co.permissions==0.0.22
+co6co.permissions==0.0.24
 
 ```
 
@@ -29,7 +29,7 @@ npm install --registry=https://registry.npmjs.org/ co6co
 
 ```
 co6co-ui==0.1.24
-co6co-right==0.0.30
+co6co-right==0.0.31
 co6co-wx==0.0.2
 
 
