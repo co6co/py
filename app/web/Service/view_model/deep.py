@@ -13,22 +13,19 @@ from co6co_db_ext.db_utils import QueryOneCallable
 from urllib.parse import unquote
 import json as sysJson
 from co6co.enums import Base_Enum
+from co6co_sanic_ext.utils import JSON_util
+import threading
+import time
+import asyncio
+import copy
+from co6co_permissions.services.bllConfig import config_bll
+from co6co.task.thread import ThreadEvent
 
 
 class _dbView(BaseMethodView):
     async def query_config_value(self, request: Request, key: str, parseDict: bool = False) -> str | dict:
-        select = (
-            Select(sysConfigPO.value)
-            .filter(sysConfigPO.code.__eq__(key))
-        )
-
-        db = self.get_db_session(request)
-        call = QueryOneCallable(db)
-        result = await call(select, isPO=False)
-        result: str = result.get("value")
-        if parseDict:
-            result = sysJson.loads(result)
-        return result
+        config = config_bll()
+        return config.run(config.query_config_value, key, parseDict)
 
 
 class DeepseekView(_dbView):
@@ -36,12 +33,11 @@ class DeepseekView(_dbView):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.sessionKey = "CHAT_DATA"
 
     async def init(self, request: Request, message: str):
-
         result: str = await self.query_config_value(request, "DEEPSEEK_KEY")
         result = result.replace("$$MESSAGE", message.replace("\"", "\\\""))
-        log.warn(result)
         result = sysJson.loads(result)
         self.api_key = result.get("api_key", None)
         self.api_url = result.get("api_url", None)
@@ -50,6 +46,48 @@ class DeepseekView(_dbView):
         self.ext_header = result.get("ext_header", None)
         self.data = result.get("data", None)
         self.proxys = result.get("proxys", None)
+
+    def querySession(self, request: Request) -> Result | None:
+        _, sessionDict = self.get_Session(request)
+        if self.sessionKey in sessionDict:
+            result: str = sessionDict.pop(self.sessionKey)
+            s = Result.success()
+            data = sysJson.loads(result)
+            s.__dict__.update(data)
+            return s
+
+        return None
+
+    def threadQuery(self, request: Request, execution_time: float = 5):
+
+        # 启动一个线程来执行任务
+        sess, sessionDict = self.get_Session(request)
+
+        def run_async_loop():
+            t = ThreadEvent("bkc_query")
+            try:
+                data = t.runTask(self.query, request)
+                sessionDict = t.runTask(sess.interface.open, request)
+                sessionDict.setdefault(self.sessionKey,  JSON_util(ensure_ascii=False).encode(data))
+                t.runTask(sess.interface.save, request, {})
+            finally:
+                # loop.close()
+                # t.close()
+                log.err("线程退出。")
+                pass
+        thread = threading.Thread(target=run_async_loop)
+        thread.start()
+        # 等待一段时间，检查任务是否完成
+        start_time = time.time()
+
+        while time.time() - start_time < execution_time:
+            if self.sessionKey in sessionDict:
+                result: Result = self.querySession(request)
+                # log.err("主函数推出.2")
+                return result
+            time.sleep(0.1)
+        # log.err("主函数推出.")
+        return None
 
     async def query(self, request: Request):
         """
@@ -78,23 +116,33 @@ class DeepseekView(_dbView):
             }'
             '''
             data = self.data
-            # 发送请求到 DeepSeek API
             response = requests.post(self.api_url, headers=headers, json=data, proxies=self.proxys)
             if response.status_code == 200:
                 result = response.json()
-                log.info(result)
-                return Result.success(data=result["choices"][0]["message"]["content"])
+                request = copy.copy(request)
+                message = result["choices"][0]["message"]["content"]
+                Data = Result.success(data=message)
+                return Data
             else:
                 return Result(data=f"API request failed: {response.text}", code=response.status_code)
         except Exception as e:
-            log.err(e, e)
+            log.err("调用deepseekError", e)
             return Result(data=str(e), code=500)
+
+    async def get(self, request: Request):
+        data = self.querySession(request)
+        return self.response_json(data if data else Result.success(message="没有数据，稍后重试！"))
 
     async def post(self, request: Request):
         """
         对  话
         """
-        return self.response_json(await self.query(request))
+        # return self.response_json(await self.query(request))
+        log.err("int Id", id(request))
+        data = self.threadQuery(request, 8)
+        if not data:
+            data = Result.success("数据复制在Session中.")
+        return self.response_json(data)
 
 
 class SgView(_dbView):
@@ -187,7 +235,7 @@ class TM_RESPONSE_CODE(Base_Enum):
     REPLY_ERROR = "REPLY_ERROR", 3  # ：代表回复结果生成出错
 
 
-class TmView(BaseMethodView):
+class TmView(_dbView):
     routePath = "/tm"
 
     def __init__(self, *args, **kwargs):
@@ -230,7 +278,6 @@ class TmView(BaseMethodView):
             return await self.responseTm(result.message, TM_RESPONSE_CODE.REPLY_ERROR)
 
     async def responseTm(self, text, status: TM_RESPONSE_CODE):
-        executeCode = "SUCCESS" if status == 0 else "REPLY_ERROR"
         # 普通文本
         data = {
             "returnCode": str(status.val),
@@ -299,29 +346,55 @@ class TmView(BaseMethodView):
     async def post(self, request: Request):
         """
         天猫精灵接口
+        执行时间不能超过 2s 包括2s,否则超时
         """
         '''
         {"sessionId":"2a4e3f67-9ebc-4970-b17e-80fd3b40f006","utterance":"打开筱筱","requestData":{},"botId":158095,"domainId":87154,"skillId":110255,"skillName":"智能助手","intentId":186450,"intentName":"chat","slotEntities":[],"requestId":"20250311143452004-1277958919","device":{},"skillSession":{"skillSessionId":"9dc47fb2-14c4-42c8-ad56-c2e0327776da","newSession":true},"context":{"system":{"apiAccessToken":""}}}
         '''
         log.warn("天猫接口：参数", request.json)
         log.warn("天猫接口header:参数", request.headers)
-        name = request.json.get("intentName")
-        if name == "chat":
-            value = self.getStandardValue(request)
-            request.json.update({"message": value})
-            result = await self.deepseek.query(request)
-            log.warn("执行结果：", result)
-            if result.code == 0:
-                return await self.responseTm(result.data, TM_RESPONSE_CODE.SUCCESS)
-            else:
-                return await self.responseTm(result.data, TM_RESPONSE_CODE.REPLY_ERROR)
+        _, sDist = self.get_Session(request)
 
-        elif name == "custom_close":
-            return await self.exec(request, 0)
-        elif name == "custom_open":
-            return await self.exec(request, 1)
-        elif name == "custom_query":
-            deviceName = self.getStandardValue(request)
-            result = await self.sg.queryStatue(request, deviceName)
-            return await self.responseTm(result.message, TM_RESPONSE_CODE.SUCCESS)
-        return await self.responseTm("未知指令", TM_RESPONSE_CODE.PARAMS_ERROR)
+        sid = request.json.get("sessionId")
+        log.warn("sid", sid)
+        result: str = await self.query_config_value(request, "TM_ENTRY_KEY")
+        auth_header = request.headers.get('Authorization')
+        token = None
+        if auth_header and auth_header.startswith('Bearer '):
+            token: str = auth_header.split(' ', 1)[1]
+        if result.strip() != token.strip():
+            return await self.responseTm("未授权", TM_RESPONSE_CODE.PARAMS_ERROR)
+        name = request.json.get("intentName")
+        try:
+            from co6co.task.utils import Timer
+            value = self.getStandardValue(request)
+            tim = Timer(value)
+            tim.start()
+            if name == "chat":
+                value = self.getStandardValue(request)
+                request.json.update({"message": value})
+                if value == "答案" or value == "上一个问题的答案":
+                    res = self.deepseek.querySession(request)
+                    res = Result.success("还没有结果，请稍后超时，长时间没有结果请重新提问") if not res else res
+                else:
+                    # result = await self.deepseek.query(request)
+                    res = self.deepseek.threadQuery(request, 1.5)  # 不能超过2s
+                    if not res:
+                        res = Result.success("执行时间过长，请稍后来查找答案")
+                log.warn(res)
+                if res.code == 0:
+                    return await self.responseTm(res.data, TM_RESPONSE_CODE.SUCCESS)
+                else:
+                    return await self.responseTm(res.data, TM_RESPONSE_CODE.REPLY_ERROR)
+
+            elif name == "custom_close":
+                return await self.exec(request, 0)
+            elif name == "custom_open":
+                return await self.exec(request, 1)
+            elif name == "custom_query":
+                deviceName = self.getStandardValue(request)
+                result = await self.sg.queryStatue(request, deviceName)
+                return await self.responseTm(result.message, TM_RESPONSE_CODE.SUCCESS)
+            return await self.responseTm("未知指令", TM_RESPONSE_CODE.PARAMS_ERROR)
+        finally:
+            tim.stop()

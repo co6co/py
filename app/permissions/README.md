@@ -53,4 +53,6 @@
     拖动验证,SessionId,登录api
 0.0.23
     优化
+0.0.24
+    BLL 增加 CONFIGBLL
 ```
