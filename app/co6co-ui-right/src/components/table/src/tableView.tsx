@@ -20,6 +20,8 @@ import {
 } from 'co6co';
 type DataApi = (query: any) => Promise<IPageResponse>;
 type filter = (data: any) => Array<Object>;
+type beforeApi = (queryData: any) => any;
+type afterApi = () => void;
 export default defineComponent({
 	name: 'tableView',
 	inheritAttrs: false,
@@ -27,6 +29,14 @@ export default defineComponent({
 		dataApi: {
 			type: Function as PropType<DataApi>,
 			required: true,
+		},
+		beforeApi: {
+			type: Function as PropType<beforeApi>,
+			required: false,
+		},
+		afterApi: {
+			type: Function as PropType<afterApi>,
+			required: false,
 		},
 		query: {
 			type: Object,
@@ -82,10 +92,12 @@ export default defineComponent({
 		// 获取表格数据
 		const queryData = () => {
 			showLoading();
+			let data = prop.showPaged
+				? { ...DATA.query, ...prop.query }
+				: { ...prop.query };
+			if (prop.beforeApi) data = prop.beforeApi(data);
 			prop
-				.dataApi(
-					prop.showPaged ? { ...DATA.query, ...prop.query } : { ...prop.query }
-				)
+				.dataApi(data)
 				.then((res) => {
 					if (prop.resultFilter) DATA.data = prop.resultFilter(res.data);
 					else DATA.data = res.data;
@@ -93,6 +105,7 @@ export default defineComponent({
 				})
 				.finally(() => {
 					closeLoading();
+					if (prop.afterApi) prop.afterApi();
 				});
 		};
 		const refesh = () => {
