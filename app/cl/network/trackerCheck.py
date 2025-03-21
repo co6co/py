@@ -169,7 +169,6 @@ def check_http_tracker(tracker_url, *, clientCategory: int = 0):
     except requests.RequestException as e:
         # log.err(f"解析：{tracker_url}error", e)
         log.warn(f"{tracker_url}->error:{e}")
-    finally:
         return False
 
 
