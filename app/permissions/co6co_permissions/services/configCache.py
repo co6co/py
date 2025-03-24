@@ -40,25 +40,29 @@ class ConfigCache(BaseCache):
         """
         return "{}_{}".format(self.configKeyPrefix, code)
 
-    async def queryConfig(self, code: str):
+    async def queryConfig(self, code: str) -> str | None:
         """
         查询当前用户的所拥有的角色
         结果放置在cache中
         """
         callable = DbCallable(ConfigCache.session(self.request))
 
-        async def exe(session):
+        async def exe(session) -> str | None:
             select = (
                 Select(sysConfigPO.name, sysConfigPO.code,
                        sysConfigPO.value, sysConfigPO.remark)
                 .filter(sysConfigPO.code.__eq__(code))
             )
             data: dict | None = await db_tools.execForMappings(session, select, queryOne=True)
+            result = None
             if data == None:
                 log.warn("query {} config is NULL".format(code))
             else:
-                self.setConfig(code, data.get("value"))
-        await callable(exe)
+                result = data.get("value")
+                self.setConfig(code, result)
+            return result
+
+        return await callable(exe)
 
     def setConfig(self, code: str, value: str):
         if code != None:

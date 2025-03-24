@@ -21,6 +21,7 @@ from pathlib import Path
 from co6co_web_session import Session
 from co6co_web_session.base import SessionDict
 from typing import Tuple
+from co6co.utils import tool_util as utils
 
 
 class BaseView(HTTPMethodView):
@@ -54,6 +55,16 @@ class BaseView(HTTPMethodView):
         sDict = request.ctx.Session
         session = request.app.ctx.extensions['Session']
         return session, sDict
+
+    def choose(self, request: Request, kyes: list | tuple, valueNone: bool = False):
+        """
+        选择dict 中 指定的key
+        @param request 请求参数
+        @param kyes 指定的key
+        @param valueNone 当request.json key不存在时,返回{ ... ,key:None,...}
+        """
+        data = request.json
+        return utils.choose(data, kyes, valueNone)
 
     def createContentDisposition(self, fileName):
         """
