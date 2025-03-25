@@ -1,5 +1,6 @@
 from co6co.enums import Base_Enum, Base_EC_Enum
- 
+
+
 class User_category(Base_Enum):
     """
     用户类别
@@ -13,6 +14,3 @@ class Account_category(Base_Enum):
     账号类别
     """
     wx = "wx", 1  # 微信账号
-
-
- 

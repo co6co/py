@@ -11,12 +11,13 @@ import argparse
 from cacheout import Cache
 import time
 import os
-from services.taskService import TaskBll
+from services.taskService import dynamicRouter
+from services.tasks.main import TasksMgr
 
 
 def appendRoute(app: Sanic):
     try:
-        bll = TaskBll(app.config.db_settings)
+        bll = dynamicRouter(app.config.db_settings)
         source = bll.getSourceList()
         sanics .App.appendView(app, *source, blueName="user_append_View")
         pass
@@ -24,10 +25,31 @@ def appendRoute(app: Sanic):
         log.err("动态模块失败", e)
 
 
+def processStart(app: Sanic):
+    """
+    启动前
+    """
+    task = TasksMgr(app)
+    task.startTimeTask()
+    print("执行次数"*5)
+
+
 def init(app: Sanic, _: dict):
     """
     初始化
     """
+    task = TasksMgr(app)
+
+    @app.main_process_start
+    async def _(app: Sanic, _: Config):
+        task.startTimeTask()
+        pass
+
+    @app.main_process_stop
+    async def _(app: Sanic, _: Config):
+        task.stop()
+        pass
+
     attach_cors(app)
     from api import api
     injectDbSessionFactory(app, app.config.db_settings)
@@ -36,6 +58,7 @@ def init(app: Sanic, _: dict):
     app.ctx.Cache = cache
     appendRoute(app)
     session.init(app)
+    TasksMgr.check(app)
 
 
 def main():

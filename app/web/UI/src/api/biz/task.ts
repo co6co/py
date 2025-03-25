@@ -18,7 +18,9 @@ export const exe_once_svc = (id: number): Promise<IResponse<string>> => {
 export const exe_sched_svc = (id: number): Promise<IResponse> => {
   return request.post(`${base_s_URL}/${id}`)
 }
-
+export const stop_sched_svc = (id: number): Promise<IResponse> => {
+  return request.delete(`${base_s_URL}/${id}`)
+}
 export const test_cron_svc = (cron: string): Promise<IResponse<boolean>> => {
   return request.get(`${base_cron_URL}?cron=${cron}`)
 }

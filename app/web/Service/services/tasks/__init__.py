@@ -8,6 +8,7 @@ from apscheduler.triggers.cron import CronTrigger
 from co6co.utils.source import get_source_fun
 from co6co.utils .singleton import Singleton
 from typing import Tuple, Callable
+from co6co.utils import log
 '''
 BlockingScheduler :     当调度器是你应用中唯一要运行的东西时
 BackgroundScheduler :   当你没有运行任何其他框架并希望调度器在你应用的后台执行时使用（充电桩即使用此种方式）
@@ -68,8 +69,16 @@ class Scheduler(Singleton):
         # //todo 编译器解释 self._scheduler 为 Any 对象 为什么不是 BackgroundScheduler
         self._scheduler = scheduler
         self._scheduler.start()
-
+        self._tasks = {}  # {key:str,jobid:str}
         pass
+
+    @property
+    def task_total(self) -> int:
+        return len(self._tasks)
+
+    @property
+    def scheduler(self) -> BackgroundScheduler:
+        return self._scheduler
 
     @staticmethod
     def parseCode(code: str) -> Tuple[bool,  Callable[[], any] | Exception]:
@@ -79,16 +88,77 @@ class Scheduler(Singleton):
         except Exception as e:
             return False, e
 
-    def addTask(self, code: str, corn: str):
+    def exist(self, key: str) -> bool:
+        """
+        判断任务是否存在
+        """
+        return key in self._tasks
+
+    def removeTask(self, key: str):
+        """
+        移除任务
+        """
+        if key in self._tasks:
+            jobid = self._tasks[key]
+            self.scheduler.remove_job(jobid)
+            del self._tasks[key]
+            return True
+        else:
+            log.info("任务{}不存在!!".format(key))
+            return False
+
+    def modifyTask(self, key: str, code: str, corn: str):
+        """
+        修改任务
+        """
+        if key in self._tasks:
+            jobid = self._tasks[key]
+            self.scheduler.remove_job(jobid)
+            del self._tasks[key]
+            self.addTask(key, code, corn)
+            return True
+        else:
+            log.info("任务{}不存在!!".format(key))
+            return False
+
+    def checkCode(self,  code: str, corn: str):
+        """
+        检查代码
+        """
+        try:
+            res, _ = Scheduler.parseCode(code)
+            if res:
+                CuntomCronTrigger.resolvecron(corn)
+                return True
+            else:
+                log.warn("解析代码失败：", code)
+                return False
+        except Exception as e:
+            log.warn(f"解析corn:{code}失败")
+            return False
+
+    def addTask(self, key: str, code: str, corn: str):
         """
         增加任务
         """
-        trigger = CuntomCronTrigger.resolvecron(corn)
-        scheduler: BackgroundScheduler = self._scheduler
-        res, main = Scheduler.parseCode(code)
-        if res:
-            scheduler.add_job(main, trigger)
-        return res
+        if key in self._tasks:
+            log.warn("任务{}已存在!!".format(key))
+            return False
+        try:
+            trigger = CuntomCronTrigger.resolvecron(corn)
+            scheduler: BackgroundScheduler = self._scheduler
+            res, main = Scheduler.parseCode(code)
+            if res:
+                jobid = scheduler.add_job(main, trigger)
+                self._tasks[key] = jobid.id
+                return True
+            else:
+                log.warn("任务{}解析失败!!".format(key))
+
+            return False
+        except Exception as e:
+            log.err("任务{}解析失败!!".format(key))
+            return False
 
 
 """

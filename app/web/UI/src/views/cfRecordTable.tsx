@@ -1,7 +1,7 @@
 import { defineComponent, nextTick, VNodeChild } from 'vue'
 import { ref, reactive, onMounted } from 'vue'
 import { ElButton, ElInput, ElTableColumn, ElMessage } from 'element-plus'
-import { Search, Plus, Edit } from '@element-plus/icons-vue'
+import { Search, Plus, Edit, Delete } from '@element-plus/icons-vue'
 
 import { FormOperation } from 'co6co'
 import {
@@ -63,7 +63,7 @@ export default defineComponent({
       onRefesh()
     })
     const onDelete = (row: Item) => {
-      deleteSvc(row.id)
+      deleteSvc(row.id, row.name)
     }
 
     //:page reader
@@ -120,60 +120,56 @@ export default defineComponent({
                 <ElTableColumn
                   label="名称"
                   prop="name"
-                  align="center"
-                  sortable="custom"
+                  align="left"
+                  width={180}
                   showOverflowTooltip={true}
                 />
                 <ElTableColumn
                   label="类型"
                   prop="type"
-                  sortable="custom"
+                  width={80}
                   align="center"
                   showOverflowTooltip={true}
                 />
                 <ElTableColumn
                   label="记录值"
                   prop="content"
-                  sortable="custom"
-                  align="center"
+                  width={200}
+                  align="left"
                   showOverflowTooltip={true}
                 />
                 <ElTableColumn
-                  label="proxiable"
-                  width="160"
+                  label="可代理"
                   prop="proxiable"
                   align="center"
-                  sortable="custom"
+                  width={80}
                   showOverflowTooltip={true}
                 />
                 <ElTableColumn
                   label="代理"
-                  width="160"
                   prop="proxied"
                   align="center"
-                  sortable="custom"
+                  width={80}
                   showOverflowTooltip={true}
                 />
                 <ElTableColumn
                   label="ttl"
-                  width="160"
                   prop="ttl"
                   align="center"
                   sortable="custom"
+                  width={80}
                   showOverflowTooltip={true}
                 />
 
                 <ElTableColumn
                   prop="created_on"
                   label="创建时间"
-                  sortable="custom"
                   width={160}
                   show-overflow-tooltip={true}
                 />
                 <ElTableColumn
                   prop="modified_on"
                   label="更新时间"
-                  sortable="custom"
                   width={160}
                   show-overflow-tooltip={true}
                 />
@@ -191,7 +187,7 @@ export default defineComponent({
                         </ElButton>
                         <ElButton
                           text={true}
-                          icon={Edit}
+                          icon={Delete}
                           onClick={() => onDelete(scope.row)}
                           v-permiss={getPermissKey(routeHook.ViewFeature.del)}
                         >

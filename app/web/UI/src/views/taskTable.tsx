@@ -208,7 +208,7 @@ export default defineComponent({
                   width={160}
                   show-overflow-tooltip={true}
                 ></ElTableColumn>
-                <ElTableColumn label="操作" width={260} align="center" fixed="right">
+                <ElTableColumn label="操作" width={320} align="center" fixed="right">
                   {{
                     default: (scope: tableScope<Item>) => (
                       <>
@@ -230,6 +230,16 @@ export default defineComponent({
                           }}
                         >
                           调度
+                        </ElButton>
+                        <ElButton
+                          text={true}
+                          onClick={() => {
+                            api.stop_sched_svc(scope.row.id).then((r) => {
+                              ElMessage.success(r.message)
+                            })
+                          }}
+                        >
+                          停止
                         </ElButton>
                         <ElButton
                           text={true}

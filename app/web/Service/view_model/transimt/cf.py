@@ -32,8 +32,11 @@ class ListView(AuthMethodView):
         self.service = CfService(api_token, zone_id)
 
     def isSucc(self, data: dict):
-        errors = data.get("errors", [{}])[0]
-        return data.get("success", False), f"{errors.get("code", None)}-{errors.get("message", "")}" if errors else None
+        log.warn(data)
+        errors: list = data.get("errors", [])
+        error = errors[0] if errors and len(errors) else None
+        errMsg = f"{error.get("code", None)}- {error.get("message", "")}" if error else None
+        return data.get("success", False), errMsg
 
     def res(self, data: dict):
         succ, msg = self.isSucc(data)
@@ -50,7 +53,6 @@ class ListView(AuthMethodView):
             return self.res(data)
         except Exception as e:
             log.err(e)
-
             return self.response_json(Result.fail(message=str(e)))
 
     async def put(self, request: Request):
@@ -61,11 +63,12 @@ class ListView(AuthMethodView):
             "name": "www", # 子域名
             "content": "1.1.1.1",
             "ttl": 1,
-            "proxied": true
+            "proxied": true,
+            "comment": str = None,
         } 
         """
         await self.init(request)
-        keys = ['type', 'name', 'content', 'ttl', 'proxied']
+        keys = ['type', 'name', 'content', 'ttl', 'proxied', "comment"]
         parme = self.choose(request, keys, True)
         data = self.service.create_dns_record(**parme)
         return self.res(data)
@@ -79,14 +82,14 @@ class ListView(AuthMethodView):
             name: str,
             content: str,
             ttl: int = 1,
-            proxied: bool = False
+            proxied: bool = False,
+            comment: str = None,
         }
         """
         await self.init(request)
-        keys = ["record_id", 'type', 'name', 'content', 'ttl', 'proxied']
+        keys = ["record_id", 'type', 'name', 'content', 'ttl', 'proxied', "comment"]
         parme = self.choose(request, keys, True)
         data = self.service.update_dns_record(**parme)
-        log.warn(data)
         return self.res(data)
 
 

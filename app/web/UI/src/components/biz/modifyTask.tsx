@@ -351,7 +351,10 @@ export default defineComponent({
             <ElRow>
               <ElCol>
                 <ElFormItem label="cron表达式" prop="cron">
-                  <ElInput v-model={DATA.fromData.cron} placeholder="0 0 0 31 12 ? 2024"></ElInput>
+                  <ElInput
+                    v-model={DATA.fromData.cron}
+                    placeholder="59[秒] 59[分] 23[时] 31[日] 12[月] ?[星期] 2024[年]"
+                  ></ElInput>
                 </ElFormItem>
               </ElCol>
             </ElRow>

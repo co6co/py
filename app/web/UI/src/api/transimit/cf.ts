@@ -9,13 +9,18 @@ export interface IParam {
   content: string //: "1.1.1.1",
   ttl: number //: 1,
   proxied: boolean //: true
+  comment?: string
 }
 
 export enum RecordType {
   A = 'A',
   AAAA = 'AAAA',
   CNAME = 'CNAME',
-  NS = 'NS'
+  NS = 'NS',
+  TXT = 'TXT',
+  SRV = 'SRV',
+  LOC = 'LOC',
+  MX = 'MX'
 }
 export interface IListItem {
   id: string

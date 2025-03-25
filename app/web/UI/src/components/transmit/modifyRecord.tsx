@@ -32,7 +32,8 @@ import {
   ElInput,
   ElMessage,
   type FormRules,
-  ElSwitch
+  ElSwitch,
+  ElInputNumber
 } from 'element-plus'
 
 import * as api from '@/api/transimit/cf'
@@ -58,16 +59,16 @@ export default defineComponent({
   },
   setup(prop, ctx) {
     const diaglogForm = ref<DialogFormInstance>()
-
-    const DATA = reactive<FormData<number, FormItem>>({
+    const DATA = reactive<FormData<number, FormItem> & { proxiable: boolean }>({
       operation: FormOperation.add,
       id: 0,
+      proxiable: true,
       fromData: {
         name: '',
         record_id: '',
         type: 'A',
         content: '',
-        ttl: 0,
+        ttl: 3600,
         proxied: false
       }
     })
@@ -147,16 +148,29 @@ export default defineComponent({
                 <ElInput v-model={DATA.fromData.name} placeholder="子域名: www" />
               </ElFormItem>
             </ElCol>
-          </ElRow>
-          <ElRow>
-            <ElCol span={12}>
+            <ElCol>
               <ElFormItem label="记录值" prop="content">
                 <ElInput v-model={DATA.fromData.content} placeholder="记录值" />
               </ElFormItem>
             </ElCol>
             <ElCol span={12}>
-              <ElFormItem label="代理" prop="proxied">
-                <ElSwitch v-model={DATA.fromData.proxied}></ElSwitch>
+              <ElFormItem label="TTl" prop="ttl">
+                <ElInputNumber v-model={DATA.fromData.ttl} placeholder="ttl" />
+              </ElFormItem>
+            </ElCol>
+            {DATA.proxiable ? (
+              <ElCol span={12}>
+                <ElFormItem label="代理" prop="proxied">
+                  <ElSwitch v-model={DATA.fromData.proxied}></ElSwitch>
+                </ElFormItem>
+              </ElCol>
+            ) : (
+              <></>
+            )}
+
+            <ElCol>
+              <ElFormItem label="备注" prop="comment">
+                <ElInput v-model={DATA.fromData.comment} type="textarea" placeholder="备注" />
               </ElFormItem>
             </ElCol>
           </ElRow>
@@ -181,11 +195,13 @@ export default defineComponent({
     const openDialog = (oper: FormOperation, item?: api.IListItem) => {
       const data = api.item2param(item)
       DATA.operation = oper
+      DATA.proxiable = item?.proxiable ?? true
       DATA.fromData.record_id = data.record_id
       DATA.fromData.name = data.name
       DATA.fromData.type = data.type
       DATA.fromData.content = data.content
       DATA.fromData.ttl = data.ttl
+
       diaglogForm.value?.openDialog()
     }
     ctx.expose({

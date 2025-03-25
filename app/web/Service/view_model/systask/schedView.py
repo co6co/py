@@ -6,7 +6,7 @@ from co6co_sanic_ext.utils import JSON_util
 from co6co_sanic_ext.model.res.result import Result
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from sqlalchemy.sql import Select
+from sqlalchemy.sql import Select, Update
 from co6co_db_ext.db_utils import db_tools
 from co6co_permissions.view_model.base_view import AuthMethodView
 from co6co_web_db.view_model import get_one
@@ -14,6 +14,7 @@ from model.pos.tables import TaskPO
 from services.tasks import Scheduler
 from services.tasks import CuntomCronTrigger
 from datetime import datetime
+from co6co_permissions.model.enum import dict_state
 
 
 class cronViews(AuthMethodView):
@@ -97,6 +98,10 @@ class codeView(_codeView, AuthMethodView):
 class schedView(_codeView, AuthMethodView):
     routePath = "/sched/<pk:int>"
 
+    def getScheduler(self, request: Request) -> Scheduler:
+
+        return request.app.ctx.scheduler
+
     async def post(self, request: Request, pk: int):
         """
         调度 
@@ -104,12 +109,34 @@ class schedView(_codeView, AuthMethodView):
         """
         select = Select(TaskPO).filter(TaskPO.id.__eq__(pk))
         po: TaskPO = await get_one(request, select)
-        scheduler: Scheduler = Scheduler()
-        res = scheduler.addTask(po.sourceCode, po.cron)
+        scheduler = self.getScheduler(request)
+        exist = scheduler.exist(po.code)
+        if exist:
+            res = scheduler.addTask(po.code, po.sourceCode, po.cron)
+        else:
+            res = scheduler.modifyTask(po.code, po.sourceCode, po.cron)
+
         if res:
             return self.response_json(Result.success())
         else:
             return self.response_json(Result.fail())
+
+    async def delete(self, request: Request, pk: int):
+        """
+        停止调度
+        """
+        select = Select(TaskPO).filter(TaskPO.id.__eq__(pk))
+        po: TaskPO = await get_one(request, select)
+        scheduler = self.getScheduler(request)
+        result = scheduler.removeTask(po.code)
+
+        if result:
+            po.execStatus = 0
+            session = self.get_db_session(request)
+            await session.commit()
+            return self.response_json(Result.success(message="停止成功"))
+        else:
+            return self.response_json(Result.fail(message="停止失败"))
 
     async def put(self, request: Request, pk: int):
         """
