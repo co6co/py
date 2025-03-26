@@ -24,7 +24,8 @@
 0.0.9 2025-03-05
     依赖  co6co.web-session
 0.0.10 2025-03-24 未发布
-    choose
+    1. 新增　choose
+    2.　优化： startApp 方法
 
 ```
 

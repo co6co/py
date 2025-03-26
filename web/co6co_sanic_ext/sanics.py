@@ -2,7 +2,7 @@ from __future__ import annotations
 from sanic import Sanic, utils, Blueprint
 from sanic.blueprint_group import BlueprintGroup
 from sanic_routing import Route
-from typing import Optional, Callable, Any, Dict, List
+from typing import Optional, Callable, Tuple, Dict, List
 from pathlib import Path
 from co6co.utils import log, File
 
@@ -13,26 +13,60 @@ from co6co_sanic_ext.view_model import BaseView
 from co6co_sanic_ext.api import add_routes
 from datetime import datetime
 from co6co.utils.source import compile_source
+import inspect
+"""
+工作进程的生命周期
+
+"""
 
 
-def _create_App(name: str = "__mp_main__", config: str = None, apiMount: Callable[[Sanic, Dict],  None] = None):
+def _create_App(name: str = "__mp_main__", configFile: str = None, apiInit: Callable[[Sanic, Dict, Sanic | None],  None] = None):
+    """
+    创建应用
+    将 config 中的配置信息加载到app.config中
+    :param name: 应用名称
+    :param config: 配置文件路径[json,py]
+    :param apiMount: 挂载api
+
+    return: app
+    app.config.web_setting --> 配置信息
+    """
     try:
         app = Sanic(name)
-        if config == None:
+        data = locals()
+        # primary = data.get("app", None)
+        # app.ctx.mainApp = primary
+        if configFile == None:
             raise PermissionError("config")
         if app.config != None:
-            app.config.update({"web_setting": {'port': 8084, 'host': '0.0.0.0', 'debug': False, 'access_log': True,  'dev': False}})
+            app.config.update({"web_setting": {'port': 8084, "backlog": 1024, 'host': '0.0.0.0', 'debug': False, 'access_log': True,  'dev': False}})
             customConfig = None
-            if '.json' in config:
-                customConfig = File.File.readJsonFile(config)
+            if '.json' in configFile:
+                customConfig = File.File.readJsonFile(configFile)
             else:
-                customConfig = utils.load_module_from_file_location(Path(config)).configs
+                customConfig = utils.load_module_from_file_location(Path(configFile)).configs
+            # print(customConfig)
             if customConfig != None:
                 app.config.update(customConfig)
             # log.succ(f"app 配置信息：\n{app.config}")
-            if apiMount != None:
-                apiMount(app, customConfig)
-
+            setting: dict = app.config.web_setting
+            app.prepare(**setting)
+            if apiInit != None:
+                sig = inspect.signature(apiInit)
+                params = sig.parameters
+                all_param = [app, customConfig, data]
+                # all_param = {"app":app,"customConfig": customConfig,"primary": primary}
+                # arg_values = {}
+                # for param_name, param in params.items():
+                #    #如果参数没有默认值
+                #    if param.default != inspect.Parameter.empty:
+                #        arg_values[param_name] = param.default
+                #    else:
+                #        arg_values[param_name] = None
+                par_len = len(params.items())
+                apiInit(*all_param[:par_len])
+        else:
+            raise PermissionError("app config")
         return app
     except Exception as e:
         log.err(f"创建应用失败：\n{e}{repr(e)}\n 配置信息：{app.config}")
@@ -40,17 +74,10 @@ def _create_App(name: str = "__mp_main__", config: str = None, apiMount: Callabl
 
 
 def startApp(configFile: str, apiInit: Callable[[Sanic, Dict], None]):
-    loader = AppLoader(factory=partial(_create_App, config=configFile, apiMount=apiInit))
-    app = loader.load()
-    if app != None and app.config != None:
-        setting = app.config.web_setting
-        backlog = 1024
-        if "backlog" in setting:
-            backlog = setting.get("backlog")
-        app.prepare(host=setting.get("host"), backlog=backlog, port=setting.get("port"), debug=setting.get("debug"), access_log=setting.get("access_log"), dev=setting.get("dev"))
-        Sanic.serve(primary=app, app_loader=loader)
-        # app.run(host=setting.get("host"), port=setting.get("port"),debug=True, access_log=True)
-    return app
+    # all_param = {**locals()}
+    loader = AppLoader(factory=partial(_create_App, configFile=configFile, apiInit=apiInit))
+    # 没有 primary serve 调用loader创建一个个
+    Sanic.serve(app_loader=loader)
 
 
 @singleton
@@ -62,7 +89,7 @@ class ViewManage:
         1. 应用初始化时从数据库中读出所有带增加的功能
         2. 将所有功能放在一个蓝图中， 统一一起增加
         3. 在平台中修改某个功能时需要，删除改功能并重新挂在到蓝图中
-        4. 在平台中增加某想功能，需要在蓝图中增加 
+        4. 在平台中增加某想功能，需要在蓝图中增加
     """
     viewDict: Dict[str, BaseView] = None
     app:  App = None
@@ -160,7 +187,7 @@ class App:
         增加视图
         前置条件: 1. 视图名不能重名
                  2. api地址不能重复
-                 3. 
+                 3.
         """
         try:
             viewMage = ViewManage(app)

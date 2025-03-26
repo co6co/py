@@ -25,40 +25,47 @@ def appendRoute(app: Sanic):
         log.err("动态模块失败", e)
 
 
-def processStart(app: Sanic):
-    """
-    启动前
-    """
-    task = TasksMgr(app)
-    task.startTimeTask()
-    print("执行次数"*5)
-
-
 def init(app: Sanic, _: dict):
     """
     初始化
     """
-    task = TasksMgr(app)
+    attach_cors(app)
+    from api import api
+    injectDbSessionFactory(app, app.config.db_settings)
 
     @app.main_process_start
     async def _(app: Sanic, _: Config):
-        task.startTimeTask()
+        task = TasksMgr(app)
+        for k in app._app_registry:
+            log.warn("main_process_start", k, app._app_registry[k], id(app._app_registry[k]))
+            app._app_registry[k].ctx.taskMgr = task
+            log.warn("setting", app._app_registry[k].ctx.taskMgr)
+
+        log.succ("main_process_start", id(app._state.app), id(id), dir(app._state))
+        app.ctx.taskMgr = task
+        # task.startTimeTask()
+        pass
+
+    @app.before_server_start
+    async def _(app: Sanic, _: Config):
+        cache = Cache(maxsize=256, ttl=30, timer=time.time, default=None)
+        app.ctx.Cache = cache
+
+        # app.ctx.taskMgr = mainApp.ctx.taskMgr
+        # log.warn("before_server_start:", type(_),  mainApp)
+
+        log.succ("before_server_start:", type(_), id(app), app.ctx)
+        log.warn("read", app.ctx.taskMgr)
         pass
 
     @app.main_process_stop
     async def _(app: Sanic, _: Config):
+        task: TasksMgr = app.ctx.taskMgr
         task.stop()
         pass
-
-    attach_cors(app)
-    from api import api
-    injectDbSessionFactory(app, app.config.db_settings)
     app.blueprint(api)
-    cache = Cache(maxsize=256, ttl=30, timer=time.time, default=None)
-    app.ctx.Cache = cache
     appendRoute(app)
     session.init(app)
-    TasksMgr.check(app)
 
 
 def main():

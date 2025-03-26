@@ -32,7 +32,7 @@ def choose(data: dict, keys: list | tuple, valueNone: bool = False) -> dict:
     """
     if valueNone:
         new_dict = {k: None for k in keys}
-        data = {**data, **new_dict}
+        data = {**new_dict,**data}
 
     new_dict = {key: data[key] for key in data if key in keys}
     return new_dict

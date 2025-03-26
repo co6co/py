@@ -15,6 +15,7 @@ from services.tasks import Scheduler
 from services.tasks import CuntomCronTrigger
 from datetime import datetime
 from co6co_permissions.model.enum import dict_state
+from co6co.utils import log
 
 
 class cronViews(AuthMethodView):
@@ -99,8 +100,9 @@ class schedView(_codeView, AuthMethodView):
     routePath = "/sched/<pk:int>"
 
     def getScheduler(self, request: Request) -> Scheduler:
-
-        return request.app.ctx.scheduler
+        log.warn("request.app.ctx:",  request.app.ctx)
+        log.warn("getScheduler:",  request.app.ctx.extensions.scheduler)
+        return request.app.ctx.extensions.scheduler
 
     async def post(self, request: Request, pk: int):
         """
@@ -115,7 +117,6 @@ class schedView(_codeView, AuthMethodView):
             res = scheduler.addTask(po.code, po.sourceCode, po.cron)
         else:
             res = scheduler.modifyTask(po.code, po.sourceCode, po.cron)
-
         if res:
             return self.response_json(Result.success())
         else:

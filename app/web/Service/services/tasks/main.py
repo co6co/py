@@ -11,20 +11,20 @@ from co6co_permissions.model.enum import dict_state
 
 
 class TasksMgr(BaseBll):
-    scheduler: Scheduler = None
 
     def __init__(self, app: Sanic):
         super().__init__()
         self.app = app
+        self.scheduler = Scheduler()
 
-    @classmethod
-    def check(cls, app: Sanic):
+    def extend(self, app: Sanic, extendName=None, extendObj=None):
         """
-        附加 scheduler
-        有的 app中没有
+        扩展sanic
         """
-        if not app.ctx.__dict__.get("scheduler", None):
-            app.ctx.scheduler = cls.scheduler
+        if not hasattr(app.ctx, "extensions"):
+            app.ctx.extensions = {}
+        if extendName and extendObj:
+            app.ctx.extensions[extendName] = extendObj
 
     async def getData(self):
         """
@@ -67,9 +67,6 @@ class TasksMgr(BaseBll):
         """
         运行在数据库中的代码任务
         """
-        scheduler: Scheduler = Scheduler()
-        TasksMgr.scheduler = scheduler
-        self.app.ctx.scheduler = scheduler
         data = self.run(self.getData)
         # data = asyncio.run(self.getData())
         # result = asyncio.run(self.check_session_closed())
@@ -81,14 +78,14 @@ class TasksMgr(BaseBll):
             sourceCode = po.get("sourceCode")
             cron = po.get("cron")
             log.info("加载任务:{}...".format(code))
-            if scheduler.checkCode(sourceCode, cron):
-                scheduler.addTask(code, sourceCode, cron)
+            if self. scheduler.checkCode(sourceCode, cron):
+                self. scheduler.addTask(code, sourceCode, cron)
                 success.append(code)
                 pass
             else:
                 faile.append(code)
                 log.warn("检查代码失败：{}".format(code))
-        log.warn("加载任务完成,预加载：{}共加载{}个任务".format(len(data), scheduler.task_total))
+        log.warn("加载任务完成,预加载：{}共加载{}个任务".format(len(data), self.scheduler.task_total))
         succ_result = self.run(self.update_status, success, 1)
         fall_result = self.run(self.update_status, faile, 0)
         log.warn("状态更新,成功->{},失败->{}".format(succ_result, fall_result))
