@@ -8,14 +8,53 @@ from co6co_db_ext.db_utils import db_tools, QueryListCallable
 from typing import List
 from co6co.utils import log
 from co6co_permissions.model.enum import dict_state
+from co6co.utils.singleton import singleton, Singleton
+from multiprocessing.connection import PipeConnection
+
+import threading
+import asyncio
+import select as EventSelect
 
 
-class TasksMgr(BaseBll):
+def recv_with_timeout(conn: PipeConnection, timeout: int):
+    if EventSelect.select([conn], [], [], timeout)[0]:
+        return conn.recv()
+    else:
+        raise TimeoutError("Recv timed out")
 
+
+@singleton
+class TasksMgr(BaseBll, Singleton):
     def __init__(self, app: Sanic):
-        super().__init__()
+        BaseBll.__init__(self, app=app)
+        app.ctx.taskMgr = self
         self.app = app
+        Singleton.__init__(self)
         self.scheduler = Scheduler()
+        log.succ("TasksMgr create", id(self), self.createTime)
+        p = threading.Thread(target=self.worker, name="worker", args=(app.ctx.parent_conn,))
+        # p = Process(target=self.worker, args=(app.ctx.parent_conn,))
+        log.warn("线程开始...")
+        p.start()
+        log.warn("线程开始.")
+
+    def worker(self, conn: PipeConnection):
+        event: asyncio.Event = self.app.ctx. quit_event
+        log.warn("worker start", event, id(event), type(event))
+        while True:
+            log.warn("worker wait")
+            try:
+                # quit = asyncio.run(asyncio.wait_for(event.wait(), 1))  # 等待事件
+                # log.warn("worker quit is:", quit)
+                # if (quit):
+                #    break
+                data = recv_with_timeout(conn, 5)   # 接收数据
+            except TimeoutError:
+                log.warn("worker timeout")
+                continue
+            conn.send("ok")  # 发送数据
+            # self.scheduler.removeTask(data)
+            log.warn("worker recv", data)
 
     def extend(self, app: Sanic, extendName=None, extendObj=None):
         """
@@ -70,7 +109,7 @@ class TasksMgr(BaseBll):
         data = self.run(self.getData)
         # data = asyncio.run(self.getData())
         # result = asyncio.run(self.check_session_closed())
-        log.warn(data)
+        # log.warn(data)
         success = []
         faile = []
         for po in data:

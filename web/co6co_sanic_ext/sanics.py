@@ -2,7 +2,7 @@ from __future__ import annotations
 from sanic import Sanic, utils, Blueprint
 from sanic.blueprint_group import BlueprintGroup
 from sanic_routing import Route
-from typing import Optional, Callable, Tuple, Dict, List
+from typing import Optional, Callable, Any, Dict, List
 from pathlib import Path
 from co6co.utils import log, File
 
@@ -14,13 +14,43 @@ from co6co_sanic_ext.api import add_routes
 from datetime import datetime
 from co6co.utils.source import compile_source
 import inspect
+from multiprocessing import Pipe
+from multiprocessing.connection import PipeConnection
+import asyncio
 """
 工作进程的生命周期
 
 """
 
 
-def _create_App(name: str = "__mp_main__", configFile: str = None, apiInit: Callable[[Sanic, Dict, Sanic | None],  None] = None):
+def appendData(app: Sanic, **kwargs):
+    """
+    追加数据到app.ctx中
+    """
+    for key, value in kwargs.items():
+        setattr(app.ctx, key, value)
+
+
+def parserConfig(configFile: str):
+    """
+    一般 会有
+    {  
+      db_settings = {     }
+      web_setting={}
+    }
+    """
+    default: dict = {"web_setting": {'port': 8084, "backlog": 1024, 'host': '0.0.0.0', 'debug': False, 'access_log': True,  'dev': False}}
+    customConfig = None
+    if '.json' in configFile:
+        customConfig = File.File.readJsonFile(configFile)
+    else:
+        customConfig = utils.load_module_from_file_location(Path(configFile)).configs
+    if customConfig != None:
+        default.update(customConfig)
+    return default
+
+
+def _create_App(name: str = "__mp_main__", configFile: str | Dict = None, apiInit: Callable[[Sanic, Dict, Sanic | None],  None] = None,  **kwargs):
     """
     创建应用
     将 config 中的配置信息加载到app.config中
@@ -34,23 +64,21 @@ def _create_App(name: str = "__mp_main__", configFile: str = None, apiInit: Call
     try:
         app = Sanic(name)
         data = locals()
+        appendData(app, **kwargs)
+
         # primary = data.get("app", None)
         # app.ctx.mainApp = primary
         if configFile == None:
             raise PermissionError("config")
         if app.config != None:
-            app.config.update({"web_setting": {'port': 8084, "backlog": 1024, 'host': '0.0.0.0', 'debug': False, 'access_log': True,  'dev': False}})
-            customConfig = None
-            if '.json' in configFile:
-                customConfig = File.File.readJsonFile(configFile)
+            if type(configFile) == dict:
+                customConfig = configFile
             else:
-                customConfig = utils.load_module_from_file_location(Path(configFile)).configs
-            # print(customConfig)
+                customConfig = parserConfig(configFile)
             if customConfig != None:
                 app.config.update(customConfig)
             # log.succ(f"app 配置信息：\n{app.config}")
-            setting: dict = app.config.web_setting
-            app.prepare(**setting)
+
             if apiInit != None:
                 sig = inspect.signature(apiInit)
                 params = sig.parameters
@@ -73,11 +101,22 @@ def _create_App(name: str = "__mp_main__", configFile: str = None, apiInit: Call
         raise
 
 
-def startApp(configFile: str, apiInit: Callable[[Sanic, Dict], None]):
+def startApp(configFile: str | Dict, apiInit: Callable[[Sanic, Dict], None]):
+    """
+    __main__     --> primary
+    __mp_main__  --> multiprocessing
+    """
     # all_param = {**locals()}
-    loader = AppLoader(factory=partial(_create_App, configFile=configFile, apiInit=apiInit))
+    event = asyncio.Event()
+    parent_conn, child_conn = Pipe()
+    args = {"parent_conn": parent_conn, "child_conn": child_conn, "quit_event": event}
+    loader = AppLoader(factory=partial(_create_App, configFile=configFile, apiInit=apiInit, **args))
+    app = loader.load()
+    setting: dict = app.config.web_setting
+    app.prepare(**setting)
     # 没有 primary serve 调用loader创建一个个
-    Sanic.serve(app_loader=loader)
+    Sanic.serve(primary=app, app_loader=loader)
+    event.set()  # 设置事件，通知其他协程
 
 
 @singleton

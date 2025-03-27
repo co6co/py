@@ -33,8 +33,11 @@ class Singleton:
     createTime = None
 
     def __new__(cls, *args, **kwargs):
+        """
+        需要弄得 __new__ 怎么调用 __init__ 的
+        """
         if not cls._instance:
-            cls._instance = super(Singleton, cls).__new__(cls, *args, **kwargs)
+            cls._instance = super(Singleton, cls).__new__(cls)
         return cls._instance
 
     def __init__(self) -> None:

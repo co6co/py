@@ -34,34 +34,23 @@ def init(app: Sanic, _: dict):
     injectDbSessionFactory(app, app.config.db_settings)
 
     @app.main_process_start
-    async def _(app: Sanic, _: Config):
+    async def setup(app: Sanic, _: Config):
+        # mainApp = app.ctx.mainApp  # 主进程
         task = TasksMgr(app)
-        for k in app._app_registry:
-            log.warn("main_process_start", k, app._app_registry[k], id(app._app_registry[k]))
-            app._app_registry[k].ctx.taskMgr = task
-            log.warn("setting", app._app_registry[k].ctx.taskMgr)
-
-        log.succ("main_process_start", id(app._state.app), id(id), dir(app._state))
-        app.ctx.taskMgr = task
-        # task.startTimeTask()
-        pass
+        task.startTimeTask()
+        # log.warn("setup:", type(_), id(app), app.ctx)
 
     @app.before_server_start
     async def _(app: Sanic, _: Config):
         cache = Cache(maxsize=256, ttl=30, timer=time.time, default=None)
         app.ctx.Cache = cache
-
-        # app.ctx.taskMgr = mainApp.ctx.taskMgr
-        # log.warn("before_server_start:", type(_),  mainApp)
-
-        log.succ("before_server_start:", type(_), id(app), app.ctx)
-        log.warn("read", app.ctx.taskMgr)
         pass
 
     @app.main_process_stop
     async def _(app: Sanic, _: Config):
-        task: TasksMgr = app.ctx.taskMgr
-        task.stop()
+        if hasattr(app.ctx, "taskMgr"):
+            task: TasksMgr = app.ctx.taskMgr
+            task.stop()
         pass
     app.blueprint(api)
     appendRoute(app)
@@ -75,7 +64,8 @@ def main():
     parser = argparse.ArgumentParser(description="System Service.")
     parser.add_argument("-c", "--config", default=configPath, help="default:{}".format(configPath))
     args = parser.parse_args()
-    sanics.startApp(args.config, init)
+    config = sanics.parserConfig(args.config)
+    sanics.startApp(config, init)
 
 
 if __name__ == "__main__":

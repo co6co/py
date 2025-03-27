@@ -17,6 +17,8 @@ from datetime import datetime
 from co6co_permissions.model.enum import dict_state
 from co6co.utils import log
 
+from multiprocessing.connection import PipeConnection
+
 
 class cronViews(AuthMethodView):
     routePath = "/cron/test"
@@ -99,10 +101,9 @@ class codeView(_codeView, AuthMethodView):
 class schedView(_codeView, AuthMethodView):
     routePath = "/sched/<pk:int>"
 
-    def getScheduler(self, request: Request) -> Scheduler:
-        log.warn("request.app.ctx:",  request.app.ctx)
-        log.warn("getScheduler:",  request.app.ctx.extensions.scheduler)
-        return request.app.ctx.extensions.scheduler
+    def getScheduler(self, request: Request) -> PipeConnection:
+
+        return request.app.ctx.child_conn
 
     async def post(self, request: Request, pk: int):
         """
@@ -128,8 +129,10 @@ class schedView(_codeView, AuthMethodView):
         """
         select = Select(TaskPO).filter(TaskPO.id.__eq__(pk))
         po: TaskPO = await get_one(request, select)
-        scheduler = self.getScheduler(request)
-        result = scheduler.removeTask(po.code)
+        conn = self.getScheduler(request)
+        conn.send("停止：", po.code)
+        result = conn.recv()
+        # result = scheduler.removeTask(po.code)
 
         if result:
             po.execStatus = 0

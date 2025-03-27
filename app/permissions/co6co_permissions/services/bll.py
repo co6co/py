@@ -32,18 +32,24 @@ class baseBll:
 class BaseBll(baseBll):
     t: ThreadEvent
 
-    def __init__(self) -> None:
-        self.t = ThreadEvent()
-        app = Sanic.get_app()
-        # log.warn(app.config.db_settings)
-        super().__init__(app.config.db_settings)
+    def __init__(self,*,  db_settings: dict={},app:Sanic=None) -> None:  
+        self.t = ThreadEvent() 
+        if not db_settings:
+            app =app or Sanic.get_app()
+            db_settings=app.config.db_settings 
+        super().__init__(db_settings)
 
     def run(self, task, *args, **argkv):
-        data = self. t.runTask(task, *args, **argkv)
+        data = self.t.runTask(task, *args, **argkv)
         return data
 
     def __del__(self) -> None:
-        # log.info(f"{self}...关闭session")
-        if self.session:
-            self. t.runTask(self.session.close)
-        # if self.session: await self.session.close()
+        try:
+            log.info(f"{self}...关闭session") 
+            if self.session:
+                self. t.runTask(self.session.close)
+            # if self.session: await self.session.close()
+        except Exception as e:
+            log.warn("__del___ error",e)
+            pass
+
