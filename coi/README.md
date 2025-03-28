@@ -48,8 +48,9 @@
     增加 计时器类
 0.0.23
     增加 ExpiringDict
-0.0.24 未发布
+0.0.24
     增加 choose 方法
+    tryExcept 装饰器
 ```
 
 # 安装

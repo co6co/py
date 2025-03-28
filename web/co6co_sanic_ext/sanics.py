@@ -1,10 +1,13 @@
 from __future__ import annotations
-from sanic import Sanic, utils, Blueprint
 from sanic.blueprint_group import BlueprintGroup
+from sanic import Sanic, utils, Blueprint
+from sanic import Sanic, utils, Blueprint
 from sanic_routing import Route
-from typing import Optional, Callable, Any, Dict, List
+from typing import Optional, Callable, Any, Dict, List, overload
 from pathlib import Path
-from co6co.utils import log, File
+from co6co.utils import log, File, try_except
+from abc import ABC, abstractmethod
+
 
 from sanic.worker.loader import AppLoader
 from functools import partial
@@ -17,10 +20,75 @@ import inspect
 from multiprocessing import Pipe
 from multiprocessing.connection import PipeConnection
 import asyncio
-"""
-工作进程的生命周期
+import threading
 
-"""
+
+class Worker(ABC):
+    """
+    在主进程中增加一个工作进程，处理某些任务
+    主进程与自进程进行通信
+    child_conn.send()
+
+    工作进程
+    """
+
+    def __init__(self, envent: asyncio.Event, parent_conn: PipeConnection):
+        self.conn = parent_conn
+        self.envent = envent
+
+        self.isQuit = False
+        self.thread = threading.Thread(target=self.worker, name="worker")  # , args=(conn,)
+
+    # @property
+    # def quit(self):
+    #    """
+    #    检查是否退出
+    #    """
+    #    return self.envent.is_set()
+
+    @abstractmethod
+    def handler(self, data: str, conn: PipeConnection):
+        """
+        处理数据
+        抽象方法
+        """
+        print("收到数据：", data)
+        # conn.send("ok")
+        pass
+
+    def stop(self):
+        """
+        退出
+        """
+        self.isQuit = True
+
+    def start(self):
+        self.thread.start()
+        pass
+
+    def worker(self):
+        while True:
+            try:
+                if self.isQuit:
+                    log.warn("worker thread quit by quit_event")
+                    break
+                data = self.conn.recv()   # 接收数据
+                if self.handler:
+                    self.handler(data, self.conn)
+
+                    # log.warn("worker recv", data)
+                    # self.conn.send("ok")  # 发送数据
+                # self.scheduler.removeTask(data)
+            except EOFError:
+                log.warn("task worker quit by EOFError")
+                break
+            except IOError:
+                log.warn("worker thread quit by IOError")
+                break
+            except Exception as e:
+                log.warn("worker thread quit by Error", type(e), e)
+                break
+        log.warn("线程退出！")
 
 
 def appendData(app: Sanic, **kwargs):
@@ -101,7 +169,7 @@ def _create_App(name: str = "__mp_main__", configFile: str | Dict = None, apiIni
         raise
 
 
-def startApp(configFile: str | Dict, apiInit: Callable[[Sanic, Dict], None]):
+def startApp(configFile: str | Dict, apiInit: Callable[[Sanic, Dict], None], worker_loader: Callable[[Sanic, asyncio.Event, PipeConnection], Worker] = None):
     """
     __main__     --> primary
     __mp_main__  --> multiprocessing
@@ -109,14 +177,34 @@ def startApp(configFile: str | Dict, apiInit: Callable[[Sanic, Dict], None]):
     # all_param = {**locals()}
     event = asyncio.Event()
     parent_conn, child_conn = Pipe()
-    args = {"parent_conn": parent_conn, "child_conn": child_conn, "quit_event": event}
+    args = {"parent_conn": parent_conn, "child_conn": child_conn}
     loader = AppLoader(factory=partial(_create_App, configFile=configFile, apiInit=apiInit, **args))
     app = loader.load()
     setting: dict = app.config.web_setting
     app.prepare(**setting)
+    appendData(app, quit_event=event)
+    worker = None
+    if worker_loader:
+        worker = worker_loader(app, event, parent_conn)
+
+    @try_except
+    @app.main_process_start
+    def start_app(app, loop):
+        log.info("start_app...")
+        if worker:
+            worker.start()
+
+    @try_except
+    @app.main_process_stop
+    def stop_app(app, loop):
+        log.warn("stop_app.")
+        event.set()  # 设置事件，通知其他协程
+        child_conn.close()
+        if worker:
+            worker.stop()
+        # 关闭数据库连接
     # 没有 primary serve 调用loader创建一个个
     Sanic.serve(primary=app, app_loader=loader)
-    event.set()  # 设置事件，通知其他协程
 
 
 @singleton
@@ -131,7 +219,7 @@ class ViewManage:
         4. 在平台中增加某想功能，需要在蓝图中增加
     """
     viewDict: Dict[str, BaseView] = None
-    app:  App = None
+    app: App = None
     bluePrint: Blueprint = None
     createTime: datetime = None
 

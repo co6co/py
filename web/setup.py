@@ -35,7 +35,7 @@ setup(
     classifiers=["Programming Language :: Python :: 3", "Programming Language :: Python :: 3.6"],
     include_package_data=True, zip_safe=True,
     # 依赖哪些模块
-    install_requires=["co6co", "co6co.web-session>=0.0.1",  "co6co.db-ext", "sanic", "sanic-ext"],
+    install_requires=["co6co>=0.0.24", "co6co.web-session>=0.0.1"],
     # package_dir= {'utils':'src/log','main_package':'main'},#告诉Distutils哪些目录下的文件被映射到哪个源码
     author='co6co',
     author_email='co6co@qq.com',

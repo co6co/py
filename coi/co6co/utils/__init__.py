@@ -12,6 +12,30 @@ import sys
 import asyncio
 from typing import IO, Iterable, Callable, Tuple, Generator, List
 from .log import warn
+from functools import wraps
+
+
+def try_except(func):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        try:
+            return func(*args, **kwargs)
+        except Exception as e:
+            print(f"Error in {func.__name__}: {e}")
+            return None  # 或者根据需要返回其他默认值
+    return wrapper
+
+
+class DATA():
+    """
+    处理数据
+    """
+
+    def __init__(self, **kwargs):
+        [setattr(self, k, v) for k, v in kwargs.items()]
+
+    def __str__(self):
+        return str(self.__dict__)
 
 
 def isBase64(content: str) -> bool:
