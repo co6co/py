@@ -1,4 +1,6 @@
 from __future__ import annotations
+from multiprocessing.connection import PipeConnection
+import asyncio
 
 from sanic import Sanic
 from co6co.utils import log
@@ -32,29 +34,37 @@ def init(app: Sanic, _: dict):
     attach_cors(app)
     from api import api
     injectDbSessionFactory(app, app.config.db_settings)
-
+    '''
     @app.main_process_start
     async def setup(app: Sanic, _: Config):
+        pass
         # mainApp = app.ctx.mainApp  # 主进程
-        task = TasksMgr(app)
-        task.startTimeTask()
-        # log.warn("setup:", type(_), id(app), app.ctx)
-
+        # task = TasksMgr(app)
+        # task.startTimeTask()
+        # log.warn("setup:", type(_), id(app), app.ctx) 
+    @app.main_process_stop
+    async def _setup(app: Sanic, _: Config):
+        if hasattr(app.ctx, "taskMgr"):
+            task: TasksMgr = app.ctx.taskMgr
+            task.stop()
+        pass'
+    '''
     @app.before_server_start
     async def _(app: Sanic, _: Config):
         cache = Cache(maxsize=256, ttl=30, timer=time.time, default=None)
         app.ctx.Cache = cache
         pass
-
-    @app.main_process_stop
-    async def _(app: Sanic, _: Config):
-        if hasattr(app.ctx, "taskMgr"):
-            task: TasksMgr = app.ctx.taskMgr
-            task.stop()
-        pass
     app.blueprint(api)
     appendRoute(app)
     session.init(app)
+
+
+def createTask(app: Sanic, envent: asyncio.Event, conn: PipeConnection):
+    """
+    初始化"
+    """
+    worker = TasksMgr(app, envent, conn)
+    return worker
 
 
 def main():
@@ -65,7 +75,7 @@ def main():
     parser.add_argument("-c", "--config", default=configPath, help="default:{}".format(configPath))
     args = parser.parse_args()
     config = sanics.parserConfig(args.config)
-    sanics.startApp(config, init)
+    sanics.startApp(config, init, createTask)
 
 
 if __name__ == "__main__":

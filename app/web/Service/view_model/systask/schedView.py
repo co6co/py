@@ -15,9 +15,10 @@ from services.tasks import Scheduler
 from services.tasks import CuntomCronTrigger
 from datetime import datetime
 from co6co_permissions.model.enum import dict_state
-from co6co.utils import log
+from co6co.utils import log, DATA
 
 from multiprocessing.connection import PipeConnection
+from model.enum import CommandCategory
 
 
 class cronViews(AuthMethodView):
@@ -37,7 +38,7 @@ class cronViews(AuthMethodView):
 
     async def get(self, request: Request):
         """
-        cron 表达式 合法性检测        
+        cron 表达式 合法性检测
         ?cron=0 0 0 12 12 *
         """
         data = self.usable_args(request)
@@ -46,7 +47,7 @@ class cronViews(AuthMethodView):
 
     async def post(self, request: Request):
         """
-        cron 表达式 合法性检测 
+        cron 表达式 合法性检测
         json:{cron:'0 0 0 12 12 *'}
         """
         json: dict = request.json
@@ -107,17 +108,23 @@ class schedView(_codeView, AuthMethodView):
 
     async def post(self, request: Request, pk: int):
         """
-        调度 
+        调度
         周期性执行的可以执行完成的代码
         """
         select = Select(TaskPO).filter(TaskPO.id.__eq__(pk))
         po: TaskPO = await get_one(request, select)
         scheduler = self.getScheduler(request)
         exist = scheduler.exist(po.code)
-        if exist:
-            res = scheduler.addTask(po.code, po.sourceCode, po.cron)
+        conn = self.getScheduler(request)
+        conn.send(CommandCategory.createOption(CommandCategory.Exist, data=po.code))
+        result: DATA = conn.recv()
+        if exist.success:
+            conn.send(CommandCategory.createOption(CommandCategory.START, code=po.code, sourceCode=po.sourceCode, cron=po.cron))
+
         else:
-            res = scheduler.modifyTask(po.code, po.sourceCode, po.cron)
+            conn.send(CommandCategory.createOption(CommandCategory.MODIFY, code=po.code, sourceCode=po.sourceCode, cron=po.cron))
+        result: DATA = conn.recv()
+        res = result.success
         if res:
             return self.response_json(Result.success())
         else:
@@ -130,17 +137,17 @@ class schedView(_codeView, AuthMethodView):
         select = Select(TaskPO).filter(TaskPO.id.__eq__(pk))
         po: TaskPO = await get_one(request, select)
         conn = self.getScheduler(request)
-        conn.send("停止：", po.code)
-        result = conn.recv()
+        conn.send(CommandCategory.createOption(CommandCategory.REMOVE, data=po.code))
+        result: DATA = conn.recv()
         # result = scheduler.removeTask(po.code)
 
-        if result:
+        if result.success:
             po.execStatus = 0
             session = self.get_db_session(request)
             await session.commit()
             return self.response_json(Result.success(message="停止成功"))
         else:
-            return self.response_json(Result.fail(message="停止失败"))
+            return self.response_json(Result.fail(message="停止失败:"+result.data))
 
     async def put(self, request: Request, pk: int):
         """

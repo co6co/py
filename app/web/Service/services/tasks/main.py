@@ -1,3 +1,4 @@
+from model.enum import CommandCategory
 from co6co.task.thread import ThreadEvent
 from co6co_permissions.services.bll import BaseBll
 from model.pos.tables import TaskPO
@@ -6,64 +7,49 @@ from services.tasks import Scheduler
 from sqlalchemy.sql import Select, Update
 from co6co_db_ext.db_utils import db_tools, QueryListCallable
 from typing import List
-from co6co.utils import log
+from co6co.utils import log, DATA
 from co6co_permissions.model.enum import dict_state
-from co6co.utils.singleton import singleton, Singleton
 from multiprocessing.connection import PipeConnection
 
-import threading
 import asyncio
-import select as EventSelect
+from co6co_sanic_ext import sanics
 
 
-def recv_with_timeout(conn: PipeConnection, timeout: int):
-    if EventSelect.select([conn], [], [], timeout)[0]:
-        return conn.recv()
-    else:
-        raise TimeoutError("Recv timed out")
-
-
-@singleton
-class TasksMgr(BaseBll, Singleton):
-    def __init__(self, app: Sanic):
+class TasksMgr(BaseBll, sanics.Worker):
+    def __init__(self, app: Sanic, event: asyncio.Event, conn: PipeConnection):
         BaseBll.__init__(self, app=app)
+        sanics.Worker.__init__(self, event, conn)
         app.ctx.taskMgr = self
-        self.app = app
-        Singleton.__init__(self)
         self.scheduler = Scheduler()
-        log.succ("TasksMgr create", id(self), self.createTime)
-        p = threading.Thread(target=self.worker, name="worker", args=(app.ctx.parent_conn,))
-        # p = Process(target=self.worker, args=(app.ctx.parent_conn,))
-        log.warn("线程开始...")
-        p.start()
-        log.warn("线程开始.")
 
-    def worker(self, conn: PipeConnection):
-        event: asyncio.Event = self.app.ctx. quit_event
-        log.warn("worker start", event, id(event), type(event))
-        while True:
-            log.warn("worker wait")
-            try:
-                # quit = asyncio.run(asyncio.wait_for(event.wait(), 1))  # 等待事件
-                # log.warn("worker quit is:", quit)
-                # if (quit):
-                #    break
-                data = recv_with_timeout(conn, 5)   # 接收数据
-            except TimeoutError:
-                log.warn("worker timeout")
-                continue
-            conn.send("ok")  # 发送数据
-            # self.scheduler.removeTask(data)
-            log.warn("worker recv", data)
-
-    def extend(self, app: Sanic, extendName=None, extendObj=None):
+    def handler(self, data: str, conn: PipeConnection):
         """
-        扩展sanic
+        处理数据
         """
-        if not hasattr(app.ctx, "extensions"):
-            app.ctx.extensions = {}
-        if extendName and extendObj:
-            app.ctx.extensions[extendName] = extendObj
+        log.warn("接收到命令：", data)
+        data: DATA = data
+        command: CommandCategory = data.command
+        result = False
+        message: str = None
+        if command == CommandCategory.Exist:
+            result = self.scheduler.exist(data.data)
+            message = f"任务{data.data}，存在" if result else f"任务{data.data}，不存在"
+        # 下面都是任务存在才能处理的命令
+        if not self.scheduler.exist(data.data):
+            message = f"任务{data.data}，不存在"
+        else:
+            if command == CommandCategory.REMOVE:
+                result = self.scheduler.removeTask(data.data)
+            if command == CommandCategory.START:
+                result = self.scheduler.addTask(data.code, data.sourceCode, data.cron)
+            if command == CommandCategory.MODIFY:
+                result = self.scheduler.modifyTask(data.code, data.sourceCode, data.cron)
+            else:
+                result = False
+                message = f"未处理命令{command.key}"
+        resultData = CommandCategory.createOption(CommandCategory.GET, success=result, data=message)
+        conn.send(resultData)
+        log.succ(f"处理命令{data.data}结果", result) if result else log.warn(f"处理命令{data.data}结果", result)
 
     async def getData(self):
         """
@@ -102,7 +88,7 @@ class TasksMgr(BaseBll, Singleton):
             log.err("执行 ERROR", e)
             return None
 
-    def startTimeTask(self):
+    def _startTimeTask(self):
         """
         运行在数据库中的代码任务
         """
@@ -129,6 +115,15 @@ class TasksMgr(BaseBll, Singleton):
         fall_result = self.run(self.update_status, faile, 0)
         log.warn("状态更新,成功->{},失败->{}".format(succ_result, fall_result))
 
+    def start(self):
+        """
+        启动任务
+        """
+        super().start()
+        self._startTimeTask()
+        pass
+
     def stop(self):
+        super().stop()
         result = self.run(self.update_status)
         log.warn("状态更新,成功->{}".format(result))
