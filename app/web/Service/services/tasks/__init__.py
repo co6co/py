@@ -142,8 +142,9 @@ class Scheduler(Singleton):
         增加任务
         """
         if key in self._tasks:
-            log.warn("任务{}已存在!!".format(key))
-            return False
+            msg = "任务'{}'已在运行!!".format(key)
+            log.warn(msg)
+            return False, msg
         try:
             trigger = CuntomCronTrigger.resolvecron(corn)
             scheduler: BackgroundScheduler = self._scheduler
@@ -151,14 +152,16 @@ class Scheduler(Singleton):
             if res:
                 jobid = scheduler.add_job(main, trigger)
                 self._tasks[key] = jobid.id
-                return True
-            else:
-                log.warn("任务{}解析失败!!".format(key))
+                return True, ''
 
-            return False
+            else:
+                msg = "任务{}解析失败!!".format(key)
+                log.warn("任务{}解析失败!!".format(key))
+            return False, msg
         except Exception as e:
-            log.err("任务{}解析失败!!".format(key))
-            return False
+            msg = "任务{}发生错误:{}!!".format(key, e)
+            log.err(msg)
+            return False, msg
 
 
 """

@@ -1,9 +1,9 @@
 import { defineComponent, nextTick, VNodeChild } from 'vue'
 import { ref, reactive, onMounted } from 'vue'
-import { ElTag, ElButton, ElInput, ElTableColumn, ElMessage } from 'element-plus'
+import { ElTag, ElButton, ElInput, ElTableColumn, ElMessage, ElMessageBox } from 'element-plus'
 import { Search, Plus, Sugar, View, Edit } from '@element-plus/icons-vue'
 
-import { FormOperation, type Table_Module_Base } from 'co6co'
+import { FormOperation } from 'co6co'
 import {
   routeHook,
   DictSelect,
@@ -14,9 +14,10 @@ import {
 } from 'co6co-right'
 
 import { DictTypeCodes } from '@/api/app'
-import Diaglog, { type Item } from '@/components/sys/modifyTask'
+import Diaglog, { type Item } from '@/components/sys/modifyCode'
+import ShowCode from '@/components/sys/showCode'
 
-import { task_api as api } from '@/api/sys'
+import { code_api as api } from '@/api/sys'
 
 export default defineComponent({
   setup(prop, ctx) {
@@ -37,10 +38,16 @@ export default defineComponent({
     //:page
     const viewRef = ref<TableViewInstance>()
     const diaglogRef = ref<InstanceType<typeof Diaglog>>()
+    const showCodeRef = ref<InstanceType<typeof ShowCode>>()
     const categoryDictRef = ref<DictSelectInstance>()
     const stateDictRef = ref<DictSelectInstance>()
-    const statusDictRef = ref<DictSelectInstance>()
-
+    const isPythonCode = (category: number) => {
+      const result = categoryDictRef.value?.flagIs(String(category), 'python')
+      if (result == undefined) {
+        return false
+      }
+      return result
+    }
     const onOpenDialog = (row?: Item) => {
       DATA.title = row ? `编辑[${row?.name}]` : '增加'
       DATA.currentItem = row
@@ -72,18 +79,7 @@ export default defineComponent({
     onMounted(async () => {
       onSearch()
     })
-    const isRuning = (row: Item) => {
-      const allStatusData = statusDictRef.value!.stateHook.selectData
-      let result = false
-      if (!allStatusData.value) return false
-      allStatusData.value.forEach((item) => {
-        if (item.flag == 'RUNNING' && row.execStatus.toString() == item.value) {
-          result = true
-          return true
-        }
-      })
-      return result
-    }
+
     //:page reader
     const rander = (): VNodeChild => {
       return (
@@ -102,24 +98,18 @@ export default defineComponent({
                   <DictSelect
                     ref={categoryDictRef}
                     style="width: 160px"
-                    dictTypeCode={DictTypeCodes.TaskCategory}
+                    dictTypeCode={DictTypeCodes.CodeType}
                     v-model={DATA.query.category}
                     placeholder="类别"
                   />
                   <DictSelect
                     ref={stateDictRef}
                     style="width: 160px"
-                    dictTypeCode={DictTypeCodes.TaskState}
+                    dictTypeCode={DictTypeCodes.CodeState}
                     v-model={DATA.query.category}
-                    placeholder="任务状态"
+                    placeholder="状态"
                   />
-                  <DictSelect
-                    ref={statusDictRef}
-                    style="width: 160px"
-                    dictTypeCode={DictTypeCodes.TaskStatus}
-                    v-model={DATA.query.category}
-                    placeholder="运行状态"
-                  />
+
                   <ElButton type="primary" icon={Search} onClick={onSearch}>
                     搜索
                   </ElButton>
@@ -171,14 +161,7 @@ export default defineComponent({
                     )
                   }}
                 </ElTableColumn>
-                <ElTableColumn
-                  label="cron[s]"
-                  width="160"
-                  prop="cron"
-                  align="center"
-                  sortable="custom"
-                  showOverflowTooltip={true}
-                />
+
                 <ElTableColumn
                   label="状态"
                   prop="state"
@@ -192,19 +175,7 @@ export default defineComponent({
                     )
                   }}
                 </ElTableColumn>
-                <ElTableColumn
-                  label="运行状态"
-                  prop="execStatus"
-                  sortable="custom"
-                  align="center"
-                  showOverflowTooltip={true}
-                >
-                  {{
-                    default: (scope: { row: Item }) => (
-                      <ElTag>{statusDictRef.value?.getName(scope.row.execStatus)}</ElTag>
-                    )
-                  }}
-                </ElTableColumn>
+
                 <ElTableColumn
                   prop="createTime"
                   label="创建时间"
@@ -234,35 +205,18 @@ export default defineComponent({
 
                         <ElButton
                           text={true}
-                          disabled={isRuning(scope.row)}
-                          onClick={() => {
-                            api.exe_sched_svc(scope.row.id).then((r) => {
-                              ElMessage.success(r.message)
-                              onRefesh()
-                            })
-                          }}
-                        >
-                          调度
-                        </ElButton>
-                        <ElButton
-                          text={true}
-                          disabled={!isRuning(scope.row)}
-                          onClick={() => {
-                            api.stop_sched_svc(scope.row.id).then((r) => {
-                              ElMessage.success(r.message)
-                              onRefesh()
-                            })
-                          }}
-                        >
-                          停止
-                        </ElButton>
-                        <ElButton
-                          text={true}
                           title="不要执行时间太长的程序"
+                          disabled={!isPythonCode(scope.row.category)}
                           showOverflowTooltip
+                          v-permiss={getPermissKey(routeHook.ViewFeature.check)}
                           onClick={() => {
                             api.exe_once_svc(scope.row.id).then((r) => {
-                              ElMessage.success(r.message + r.data)
+                              console.info(showCodeRef.value)
+                              showCodeRef.value?.openDialog({
+                                content: r.data,
+                                isPathon: false
+                              })
+                              ElMessageBox.confirm(r.data, r.message)
                             })
                           }}
                         >
@@ -274,7 +228,12 @@ export default defineComponent({
                 </ElTableColumn>
               </>
             ),
-            footer: () => <Diaglog ref={diaglogRef} title={DATA.title} onSaved={onRefesh} />
+            footer: () => (
+              <>
+                <Diaglog ref={diaglogRef} title={DATA.title} onSaved={onRefesh} />
+                <ShowCode ref={showCodeRef} />
+              </>
+            )
           }}
         </TableView>
       )

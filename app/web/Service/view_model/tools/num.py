@@ -7,7 +7,7 @@ import re
 from sqlalchemy.sql import Select
 from co6co_db_ext.db_utils import db_tools, QueryOneCallable
 from co6co_permissions.view_model.base_view import AuthMethodView
-from model.pos.tables import TaskPO
+from model.pos.tables import DynamicCodePO
 from view_model._filters.sysTask import Filter
 from view_model.tools import data
 from model.enum import User_category
@@ -22,8 +22,8 @@ class Views(AuthMethodView):
         selectTree :  el-Tree
         """
         select = (
-            Select(TaskPO.id, TaskPO.name, TaskPO.code, TaskPO.state, TaskPO.execStatus)
-            .order_by(TaskPO.code.asc())
+            Select(DynamicCodePO.id, DynamicCodePO.name, DynamicCodePO.code, DynamicCodePO.state, DynamicCodePO.execStatus)
+            .order_by(DynamicCodePO.code.asc())
         )
         return await self.query_list(request, select,  isPO=False)
 

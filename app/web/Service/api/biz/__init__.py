@@ -1,4 +1,3 @@
-from sanic import Sanic, Blueprint, Request
-from api.biz.sysTask import api as sys_task_api
+from sanic import Blueprint
 from api.biz.ui import api as components_api
-biz_api = Blueprint.group(sys_task_api, components_api, url_prefix="/biz")
+biz_api = Blueprint.group(components_api, url_prefix="/biz")

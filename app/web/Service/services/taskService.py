@@ -1,6 +1,6 @@
 
 from co6co_db_ext.session import BaseBll
-from model.pos.tables import TaskPO
+from model.pos.tables import DynamicCodePO
 from sqlalchemy import Select
 from co6co.utils import log
 from co6co_db_ext.db_utils import QueryListCallable
@@ -15,8 +15,8 @@ class dynamicRouter(BaseBll):
         try:
             call = QueryListCallable(self.session)
             select = (
-                Select(TaskPO.sourceCode)
-                .filter(TaskPO.category == 2, TaskPO.state == dict_state.enabled.val)
+                Select(DynamicCodePO.sourceCode)
+                .filter(DynamicCodePO.category == 2, DynamicCodePO.state == dict_state.enabled.val)
             )
             result = await call(select, isPO=False)
             return [item.get("sourceCode") for item in result]

@@ -18,6 +18,13 @@ class Account_category(Base_Enum):
     wx = "wx", 1  # 微信账号
 
 
+class TaskStatue(Base_Enum):
+    RUNNING = "running", 1  # 运行中
+    STOPPED = "stopped", 0  # 已停止
+    ERROR = "error", 2  # 错误
+    UNKNOWN = "unknown", 3  # 未知
+
+
 class CommandCategory(Base_Enum):
     """
     操作类别

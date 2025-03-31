@@ -1,7 +1,7 @@
 from model.enum import CommandCategory
 from co6co.task.thread import ThreadEvent
 from co6co_permissions.services.bll import BaseBll
-from model.pos.tables import TaskPO
+from model.pos.tables import DynamicCodePO, SysTaskPO
 from sanic import Sanic
 from services.tasks import Scheduler
 from sqlalchemy.sql import Select, Update
@@ -26,30 +26,36 @@ class TasksMgr(BaseBll, sanics.Worker):
         """
         处理数据
         """
-        log.warn("接收到命令：", data)
         data: DATA = data
         command: CommandCategory = data.command
         result = False
         message: str = None
+        taskCode = data.code
         if command == CommandCategory.Exist:
-            result = self.scheduler.exist(data.data)
-            message = f"任务{data.data}，存在" if result else f"任务{data.data}，不存在"
-        # 下面都是任务存在才能处理的命令
-        if not self.scheduler.exist(data.data):
-            message = f"任务{data.data}，不存在"
+            result = self.scheduler.exist(taskCode)
+            message = f"任务'{taskCode}'->存在" if result else f"任务'{taskCode}'->不存在"
+        elif command == CommandCategory.START:
+            result, message = self.scheduler.addTask(taskCode, data.sourceCode, data.cron)
+            fall_result = self.run(self.update_status, [taskCode], 1)
         else:
-            if command == CommandCategory.REMOVE:
-                result = self.scheduler.removeTask(data.data)
-            if command == CommandCategory.START:
-                result = self.scheduler.addTask(data.code, data.sourceCode, data.cron)
-            if command == CommandCategory.MODIFY:
-                result = self.scheduler.modifyTask(data.code, data.sourceCode, data.cron)
+            # 下面都是任务存在才能处理的命令
+            if not self.scheduler.exist(taskCode):
+                message = f"任务{taskCode}，不存在"
             else:
-                result = False
-                message = f"未处理命令{command.key}"
+                log.warn("任务存在，开始处理命令：", command)
+                if command == CommandCategory.REMOVE:
+                    result = self.scheduler.removeTask(taskCode)
+                    if result:
+                        fall_result = self.run(self.update_status, [taskCode], 0)
+                        log.warn(f"任务{taskCode}，删除成功，更新状态：{fall_result}")
+                elif command == CommandCategory.MODIFY:
+                    result = self.scheduler.modifyTask(taskCode, data.sourceCode, data.cron)
+                else:
+                    result = False
+                    message = f"未处理命令{command.key}"
         resultData = CommandCategory.createOption(CommandCategory.GET, success=result, data=message)
         conn.send(resultData)
-        log.succ(f"处理命令{data.data}结果", result) if result else log.warn(f"处理命令{data.data}结果", result)
+        log.succ(f"处理命令’{command.key}‘{taskCode}结果:{result}->{message}") if result else log.warn(f"处理命令{command.key},{taskCode}结果:{result}->{message}")
 
     async def getData(self):
         """
@@ -58,8 +64,9 @@ class TasksMgr(BaseBll, sanics.Worker):
         try:
             call = QueryListCallable(self.session)
             select = (
-                Select(TaskPO.sourceCode, TaskPO.code, TaskPO.cron)
-                .filter(TaskPO.category == 1, TaskPO.state == dict_state.enabled.val)
+                Select(SysTaskPO.data, SysTaskPO.code, SysTaskPO.category, SysTaskPO.cron, DynamicCodePO.sourceCode)
+                .outerjoin(DynamicCodePO, DynamicCodePO.id == SysTaskPO.data)
+                .filter(DynamicCodePO.category == 1, DynamicCodePO.state == dict_state.enabled.val)
             )
             return await call(select, isPO=False)
 
@@ -77,9 +84,9 @@ class TasksMgr(BaseBll, sanics.Worker):
             if codeList and len(codeList) == 0:
                 return 0
             if codeList == None:
-                ccc = Update(TaskPO).where(TaskPO.category == 1, TaskPO.state == dict_state.enabled.val).values({TaskPO.execStatus: status})
+                ccc = Update(SysTaskPO).where(SysTaskPO.category == 1, SysTaskPO.state == dict_state.enabled.val).values({SysTaskPO.execStatus: status})
             else:
-                ccc = Update(TaskPO).where(TaskPO.category == 1, TaskPO.state == dict_state.enabled.val, TaskPO.code.in_(codeList)).values({TaskPO.execStatus: status})
+                ccc = Update(SysTaskPO).where(SysTaskPO.category == 1, SysTaskPO.state == dict_state.enabled.val, SysTaskPO.code.in_(codeList)).values({SysTaskPO.execStatus: status})
             result = await db_tools.execSQL(self.session, ccc)
             await self.session.commit()
             return result
@@ -100,9 +107,15 @@ class TasksMgr(BaseBll, sanics.Worker):
         faile = []
         for po in data:
             code = po.get("code")
-            sourceCode = po.get("sourceCode")
+            category = po.get("category")
             cron = po.get("cron")
+            sourceCode = po.get("sourceCode")
+            data = po.get("data")
             log.info("加载任务:{}...".format(code))
+            if category == 0:
+                log.warn("任务在代码中，加找到加载下个模块：{}".format(code))
+                continue
+            # 任务在表中，已经关联表读取完成
             if self. scheduler.checkCode(sourceCode, cron):
                 self. scheduler.addTask(code, sourceCode, cron)
                 success.append(code)
@@ -111,8 +124,12 @@ class TasksMgr(BaseBll, sanics.Worker):
                 faile.append(code)
                 log.warn("检查代码失败：{}".format(code))
         log.warn("加载任务完成,预加载：{}共加载{}个任务".format(len(data), self.scheduler.task_total))
-        succ_result = self.run(self.update_status, success, 1)
-        fall_result = self.run(self.update_status, faile, 0)
+        succ_result = 0
+        fall_result = 0
+        if len(success) > 0:
+            succ_result = self.run(self.update_status, success, 1)
+        if len(faile) > 0:
+            fall_result = self.run(self.update_status, faile, 0)
         log.warn("状态更新,成功->{},失败->{}".format(succ_result, fall_result))
 
     def start(self):

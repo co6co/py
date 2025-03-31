@@ -33,8 +33,8 @@ import {
   type FormRules
 } from 'element-plus'
 
-import { DictTypeCodes } from '../../api/app'
-import { task as api } from '../../api/biz'
+import { DictTypeCodes } from '@/api/app'
+import { code_api as api } from '@/api/sys'
 
 /**
  * npm install vue-codemirror codemirror
@@ -51,18 +51,16 @@ import { HighlightStyle } from '@codemirror/language'
 import { syntaxHighlighting } from '@codemirror/language'
 import { indentWithTab } from '@codemirror/commands'
 
+import ShowCode from './showCode'
+
 export interface Item extends FormItemBase {
   id: number
   name: string
   code: string
-  /** 任务类型 */
+  /** 代码类型 */
   category: number
-  cron: string
   state: number
-  /** 源码类型 */
-  sourceCategory: number
   sourceCode: string
-  execStatus: number
 }
 
 //Omit、Pick、Partial、Required
@@ -85,23 +83,17 @@ export default defineComponent({
   setup(prop, ctx) {
     const diaglogForm = ref<DialogFormInstance>()
 
-    const DATA = reactive<
-      FormData<number, FormItem> & { testing: boolean; showResult: boolean; testResult: string }
-    >({
+    const DATA = reactive<FormData<number, FormItem> & { testing: boolean; testResult: string }>({
       operation: FormOperation.add,
       id: 0,
       fromData: {
         name: '',
         code: '',
         category: 0,
-        cron: '',
         state: 0,
-        sourceCategory: 0,
-        sourceCode: '',
-        execStatus: 0
+        sourceCode: ''
       },
       testing: false,
-      showResult: false,
       testResult: ''
     })
 
@@ -155,7 +147,6 @@ export default defineComponent({
     const init_data = (oper: FormOperation, item?: Item) => {
       DATA.operation = oper
       DATA.testResult = ''
-      DATA.showResult = false
       DATA.testing = false
       switch (oper) {
         case FormOperation.add:
@@ -164,12 +155,8 @@ export default defineComponent({
 
           DATA.fromData.code = ''
           DATA.fromData.category = 0
-          DATA.fromData.sourceCategory = 0
-          DATA.fromData.cron = ''
           DATA.fromData.state = 0
           DATA.fromData.sourceCode = ''
-
-          DATA.fromData.execStatus = 0
           break
         case FormOperation.edit:
           if (!item) return false
@@ -177,11 +164,8 @@ export default defineComponent({
           DATA.fromData.name = item.name
           DATA.fromData.code = item.code
           DATA.fromData.category = item.category
-          DATA.fromData.sourceCategory = item.sourceCategory
-          DATA.fromData.cron = item.cron
           DATA.fromData.state = item.state
           DATA.fromData.sourceCode = item.sourceCode
-          DATA.fromData.execStatus = item.execStatus
           //可以在这里写一些use 获取其他的数据
           break
       }
@@ -216,7 +200,6 @@ export default defineComponent({
     onBeforeUnmount(() => {})
     const onRun = () => {
       DATA.testing = true
-      DATA.showResult = false
       api
         .test_exe_code_svc(DATA.fromData.sourceCode)
         .then((res) => {
@@ -224,37 +207,33 @@ export default defineComponent({
           if (typeof res.data == 'string') DATA.testResult = res.data
           if (typeof res.data == 'object') DATA.testResult = JSON.stringify(res.data)
           else DATA.testResult = String(res.data)
-          DATA.showResult = true
+
+          showCodeRef.value?.openDialog({
+            title: `执行${DATA.fromData.name}...`,
+            content: DATA.testResult,
+            isPathon: false
+          })
         })
         .finally(() => {
           DATA.testing = false
         })
     }
-    const taskCategoryRef = ref<DictSelectInstance>()
     const codeCategoryRef = ref<DictSelectInstance>()
-
-    const allowCorn = computed(() => {
-      return taskCategoryRef.value?.flagIs(String(DATA.fromData.category), 'enabled')
-    })
     const isPythonCode = computed(() => {
-      return codeCategoryRef.value?.flagIs(String(DATA.fromData.sourceCategory), 'python')
+      return codeCategoryRef.value?.flagIs(String(DATA.fromData.category), 'python')
     })
-    const onImage = upload_image_svc
-
     const valid = (promise: Promise<IResponse<boolean>>, rule: any, callback: validatorBack) => {
       promise.then((res) => {
         if (res.data) return callback()
         return (rule.message = res.message), callback(new Error(rule.message))
       })
     }
-    const validCron = (rule: any, value: any, callback: validatorBack) => {
-      valid(api.test_cron2_svc(value), rule, callback)
-    }
+
     const validSourceCode = (rule: any, value: any, callback: validatorBack) => {
       if (isPythonCode.value) valid(api.test_code_svc(value), rule, callback)
       else callback()
     }
-    const rules_base: FormRules = {
+    const rules: FormRules = {
       name: [{ required: true, message: '请输入名称', trigger: ['blur', 'change'] }],
       code: [{ required: true, message: '请输入编码', trigger: ['blur', 'change'] }],
       category: [{ required: true, message: '请选择类型', trigger: ['blur', 'change'] }],
@@ -264,25 +243,6 @@ export default defineComponent({
         { required: true, validator: validSourceCode, message: '源代码', trigger: ['blur'] }
       ]
     }
-    const cron_rules: FormRules = {
-      ...{
-        cron: [
-          {
-            required: true,
-            validator: validCron,
-            message: 'Cron表达式不正确',
-            trigger: ['blur']
-          }
-        ]
-      },
-      ...rules_base
-    }
-    const rules = computed(() => {
-      if (allowCorn.value) {
-        return cron_rules
-      }
-      return rules_base
-    })
 
     //富文本1
     const fromSlots = {
@@ -318,49 +278,24 @@ export default defineComponent({
               </ElFormItem>
             </ElCol>
             <ElCol span={12}>
-              <ElFormItem label="任务类别" prop="category">
+              <ElFormItem label="类别" prop="category">
                 <DictSelect
-                  ref={taskCategoryRef}
-                  dictTypeCode={DictTypeCodes.TaskCategory}
+                  ref={codeCategoryRef}
+                  dictTypeCode={DictTypeCodes.CodeType}
                   v-model={DATA.fromData.category}
                   isNumber={true}
-                  placeholder="任务类别"
                 />
               </ElFormItem>
             </ElCol>
           </ElRow>
           <ElRow>
             <ElCol span={12}>
-              <ElFormItem label="源码类型" prop="sourceCategory">
-                <DictSelect
-                  ref={codeCategoryRef}
-                  dictTypeCode={DictTypeCodes.TaskCodeCategory}
-                  v-model={DATA.fromData.sourceCategory}
-                  isNumber={true}
-                  placeholder="源码类型"
-                />
-              </ElFormItem>
-            </ElCol>
-            <ElCol span={12}>
               <ElFormItem label="编码" prop="code">
                 <ElInput v-model={DATA.fromData.code} placeholder="编码"></ElInput>
               </ElFormItem>
             </ElCol>
           </ElRow>
-          {allowCorn.value ? (
-            <ElRow>
-              <ElCol>
-                <ElFormItem label="cron表达式" prop="cron">
-                  <ElInput
-                    v-model={DATA.fromData.cron}
-                    placeholder="59[秒] 59[分] 23[时] 31[日] 12[月] ?[星期] 2024[年]"
-                  ></ElInput>
-                </ElFormItem>
-              </ElCol>
-            </ElRow>
-          ) : (
-            <></>
-          )}
+
           <ElRow>
             <ElCol>
               <ElFormItem label="执行代码" prop="sourceCode">
@@ -383,58 +318,31 @@ export default defineComponent({
             <ElCol span={12}>
               <ElFormItem label="状态" prop="state">
                 <DictSelect
-                  dictTypeCode={DictTypeCodes.TaskState}
+                  dictTypeCode={DictTypeCodes.CodeState}
                   v-model={DATA.fromData.state}
                   isNumber={true}
-                  placeholder="任务状态"
-                />
-              </ElFormItem>
-            </ElCol>
-            <ElCol span={12}>
-              <ElFormItem label="运行状态" prop="execStatus">
-                <DictSelect
-                  disabled={true}
-                  dictTypeCode={DictTypeCodes.TaskStatus}
-                  v-model={DATA.fromData.execStatus}
-                  isNumber={true}
-                  placeholder="运行状态"
                 />
               </ElFormItem>
             </ElCol>
           </ElRow>
-          {DATA.showResult ? (
-            <ElRow>
-              <ElCol>
-                <CodeMirror
-                  readonly
-                  style="width:100%"
-                  v-model={DATA.testResult}
-                  dark
-                  basic
-                  tab
-                  tabSize={4}
-                  gutter
-                  extensions={cmOptions.extensions}
-                />
-              </ElCol>
-            </ElRow>
-          ) : (
-            <></>
-          )}
         </>
       )
     }
+    const showCodeRef = ref<InstanceType<typeof ShowCode>>()
 
     const rander = (): VNode => {
       return (
-        <DialogForm
-          title={prop.title}
-          labelWidth={prop.labelWidth}
-          style={ctx.attrs}
-          rules={rules}
-          ref={diaglogForm}
-          v-slots={fromSlots}
-        />
+        <>
+          <DialogForm
+            title={prop.title}
+            labelWidth={prop.labelWidth}
+            style={ctx.attrs}
+            rules={rules}
+            ref={diaglogForm}
+            v-slots={fromSlots}
+          />
+          <ShowCode title="执行结果" ref={showCodeRef} />
+        </>
       )
     }
     const openDialog = (oper: FormOperation, item?: Item) => {
