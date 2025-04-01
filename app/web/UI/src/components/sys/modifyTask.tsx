@@ -181,7 +181,6 @@ export default defineComponent({
     const onLoadTaskData = (value: number) => {
       api.get_select_svc(value).then((res) => {
         if (!res.data || res.data.length == 0) selectValue.value = []
-
         selectValue.value = res.data.map((item: any) => {
           return {
             uid: item.id,

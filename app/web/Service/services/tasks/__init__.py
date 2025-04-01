@@ -3,8 +3,7 @@ from apscheduler.schedulers.background import BackgroundScheduler
 # from apscheduler.schedulers.blocking import BlockingScheduler
 # from apscheduler.schedulers.base import BaseScheduler
 from apscheduler.triggers.cron import CronTrigger
-
-
+from typing import Callable
 from co6co.utils.source import get_source_fun
 from co6co.utils .singleton import Singleton
 from typing import Tuple, Callable
@@ -107,20 +106,6 @@ class Scheduler(Singleton):
             log.info("任务{}不存在!!".format(key))
             return False
 
-    def modifyTask(self, key: str, code: str, corn: str):
-        """
-        修改任务
-        """
-        if key in self._tasks:
-            jobid = self._tasks[key]
-            self.scheduler.remove_job(jobid)
-            del self._tasks[key]
-            self.addTask(key, code, corn)
-            return True
-        else:
-            log.info("任务{}不存在!!".format(key))
-            return False
-
     def checkCode(self,  code: str, corn: str):
         """
         检查代码
@@ -137,7 +122,7 @@ class Scheduler(Singleton):
             log.warn(f"解析corn:{code}失败")
             return False
 
-    def addTask(self, key: str, code: str, corn: str):
+    def addTask(self, key: str, code: str | Callable[[], None], corn: str):
         """
         增加任务
         """
@@ -148,12 +133,15 @@ class Scheduler(Singleton):
         try:
             trigger = CuntomCronTrigger.resolvecron(corn)
             scheduler: BackgroundScheduler = self._scheduler
+            if isinstance(code, Callable):
+                jobid = scheduler.add_job(code, trigger)
+                self._tasks[key] = jobid.id
+                return True, ''
             res, main = Scheduler.parseCode(code)
             if res:
                 jobid = scheduler.add_job(main, trigger)
                 self._tasks[key] = jobid.id
                 return True, ''
-
             else:
                 msg = "任务{}解析失败!!".format(key)
                 log.warn("任务{}解析失败!!".format(key))
@@ -162,6 +150,20 @@ class Scheduler(Singleton):
             msg = "任务{}发生错误:{}!!".format(key, e)
             log.err(msg)
             return False, msg
+
+    def modifyTask(self, key: str, code: str | Callable[[], None], corn: str):
+        """
+        修改任务
+        """
+        if key in self._tasks:
+            jobid = self._tasks[key]
+            self.scheduler.remove_job(jobid)
+            del self._tasks[key]
+            self.addTask(key, code, corn)
+            return True
+        else:
+            log.info("任务{}不存在!!".format(key))
+            return False
 
 
 """

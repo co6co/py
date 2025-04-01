@@ -216,7 +216,6 @@ export default defineComponent({
                                 content: r.data,
                                 isPathon: false
                               })
-                              ElMessageBox.confirm(r.data, r.message)
                             })
                           }}
                         >

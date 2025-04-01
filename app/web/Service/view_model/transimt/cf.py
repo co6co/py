@@ -8,8 +8,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.sql import Select
 from co6co_db_ext.db_utils import db_tools
 from co6co_permissions.view_model.base_view import AuthMethodView
-import json as sysJson
-from co6co_permissions.services.configCache import ConfigCache
 from services.cfService import CfService
 from co6co.utils import log
 
@@ -17,19 +15,7 @@ from co6co.utils import log
 class ListView(AuthMethodView):
 
     async def init(self, request: Request):
-        configCache = ConfigCache(request)
-        KEY = "CF_CONFIG"
-        result: str = configCache.getConfig(KEY)
-        result = await configCache.queryConfig(KEY) if not result else result
-        if not result:
-            result = await configCache.queryConfig(KEY)
-        result = sysJson.loads(result)
-        api_token = result.get("api_token", None)
-        zone_id = result.get("zone_id", None)
-        if not api_token or not zone_id:
-            raise Exception("未配置API: api_key 或者 api_url")
-
-        self.service = CfService(api_token, zone_id)
+        self.service = await CfService.instance(request)
 
     def isSucc(self, data: dict):
         log.warn(data)

@@ -16,6 +16,7 @@ from co6co.utils import log, DATA
 from multiprocessing.connection import PipeConnection
 from model.enum import CommandCategory
 from view_model.systask.codeView import _codeView
+from services.tasks import custom
 
 
 class schedView(_codeView, AuthMethodView):
@@ -26,7 +27,7 @@ class schedView(_codeView, AuthMethodView):
         从数据库中读取 code ,sourceCode,cron
         """
         select = (
-            Select(SysTaskPO.code, SysTaskPO.category, SysTaskPO.cron, DynamicCodePO.sourceCode)
+            Select(SysTaskPO.code, SysTaskPO.category, SysTaskPO.cron, DynamicCodePO.sourceCode, SysTaskPO.data)
             .outerjoin(DynamicCodePO, DynamicCodePO.id == SysTaskPO.data)
             .filter(SysTaskPO.id.__eq__(pk))
         )
@@ -34,8 +35,10 @@ class schedView(_codeView, AuthMethodView):
         poDict: dict = await db_tools.execForMappings(self.get_db_session(request), select, queryOne=True)
         code = poDict.get("code")
         sourceCode = poDict.get("sourceCode")
+        data = poDict.get("data")
+        log.warn("sourceCode:", sourceCode)
         cron = poDict.get("cron")
-        return code, sourceCode, cron
+        return code, cron, sourceCode, data
 
     def getPipConn(self, request: Request) -> PipeConnection:
         return request.app.ctx.child_conn
@@ -45,13 +48,11 @@ class schedView(_codeView, AuthMethodView):
         调度
         周期性执行的可以执行完成的代码
         """
-        code, sourceCode, cron = await self.read_data(pk, request)
+        code,  cron, sourceCode, data = await self.read_data(pk, request)
         conn = self.getPipConn(request)
         conn.send(CommandCategory.createOption(CommandCategory.Exist, code=code))
         result: DATA = conn.recv()
-        param = {"code": code,
-                 "sourceCode": sourceCode,
-                 "cron": cron}
+        param = {"code": code, "sourceCode": sourceCode, "sourceForm": data, "cron": cron}
         if result.success:
             param.update({"command": CommandCategory.MODIFY})
         else:
@@ -83,5 +84,15 @@ class schedView(_codeView, AuthMethodView):
         """
         执行一次
         """
-        _, sourceCode, _ = await self.read_data(pk, request)
+        _,  _, sourceCode, data = await self.read_data(pk, request)
+        if not sourceCode:
+            try:
+                print(data)
+                task = custom.get_task(data)
+                print(type(task), data)
+                task.main()
+                return self.response_json(Result.success("None", message="执行成功"))
+            except Exception as e:
+                log.err("执行失败", e)
+                return self.response_json(Result.fail(e, message="执行失败"))
         return self.response_json(self.exec_py_code(sourceCode))

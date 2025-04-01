@@ -3,7 +3,7 @@ import { ref, reactive, onMounted } from 'vue'
 import { ElTag, ElButton, ElInput, ElTableColumn, ElMessage } from 'element-plus'
 import { Search, Plus, Sugar, View, Edit } from '@element-plus/icons-vue'
 
-import { FormOperation, type Table_Module_Base } from 'co6co'
+import { FormOperation } from 'co6co'
 import {
   routeHook,
   DictSelect,
@@ -17,6 +17,7 @@ import { DictTypeCodes } from '@/api/app'
 import Diaglog, { type Item } from '@/components/sys/modifyTask'
 
 import { task_api as api } from '@/api/sys'
+import ShowCode from '@/components/sys/showCode'
 
 export default defineComponent({
   setup(prop, ctx) {
@@ -37,6 +38,7 @@ export default defineComponent({
     //:page
     const viewRef = ref<TableViewInstance>()
     const diaglogRef = ref<InstanceType<typeof Diaglog>>()
+    const showCodeRef = ref<InstanceType<typeof ShowCode>>()
     const categoryDictRef = ref<DictSelectInstance>()
     const stateDictRef = ref<DictSelectInstance>()
     const statusDictRef = ref<DictSelectInstance>()
@@ -262,7 +264,14 @@ export default defineComponent({
                           showOverflowTooltip
                           onClick={() => {
                             api.exe_once_svc(scope.row.id).then((r) => {
-                              ElMessage.success(r.message + r.data)
+                              console.info(r)
+                              if (typeof r.data == 'object') {
+                                r.data = JSON.stringify(r.data, null, 2)
+                              }
+                              showCodeRef.value?.openDialog({
+                                content: r.data,
+                                isPathon: false
+                              })
                             })
                           }}
                         >
@@ -274,7 +283,12 @@ export default defineComponent({
                 </ElTableColumn>
               </>
             ),
-            footer: () => <Diaglog ref={diaglogRef} title={DATA.title} onSaved={onRefesh} />
+            footer: () => (
+              <>
+                <Diaglog ref={diaglogRef} title={DATA.title} onSaved={onRefesh} />
+                <ShowCode ref={showCodeRef} />
+              </>
+            )
           }}
         </TableView>
       )

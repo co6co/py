@@ -11,6 +11,7 @@ from co6co_permissions.view_model.base_view import AuthMethodView
 from model.pos.tables import SysTaskPO, DynamicCodePO
 from view_model._filters.sysTask import Filter
 from co6co_permissions.view_model.aop import exist, ObjectExistRoute
+from services.tasks import custom
 
 
 class ExistView(AuthMethodView):
@@ -30,7 +31,9 @@ class SelectViews(AuthMethodView):
         selectTree :  el-Tree
         """
         if category == 0:
-            return self.response_json(Result.fail(data=[], message="未实现"))
+            data = custom.get_list()
+            all = [{"id": t[1], "name": t[0]}for t in data]
+            return self.response_json(Result.success(data=all))
         else:
             select = (
                 Select(DynamicCodePO.id, DynamicCodePO.name)
