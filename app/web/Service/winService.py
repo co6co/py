@@ -65,8 +65,8 @@ class AppWinService(Winservice):
         python_path = 'C:\\Users\\Administrator\\Envs\\wechat\\Scripts\\python.exe'
         env['PATH'] = 'C:\\Users\\Administrator\\Envs\\wechat\\Scripts;' + os.environ['PATH']
 
-        with open("D:\\services\\logs\\sys_web_info.log", 'wb') as out_file, open("d:\\services\\logs\\sys_web_error.log", 'wb') as err_file:
-            self.process = subprocess.Popen("{} D:\\services\\sys\\app.py".format(python_path), env=env, stdout=out_file, stderr=err_file)
+        with open("E:\Tools\\www\\system\\logs\\sys_web_info.log", 'wb') as out_file, open("E:\Tools\\www\\system\\logs\\sys_web_error.log", 'wb') as err_file:
+            self.process = subprocess.Popen("{} E:\Tools\\www\\system\\service\\app.py".format(python_path), env=env, stdout=out_file, stderr=err_file)
             self.process.wait()  # 等待子进程结束
 
         '''

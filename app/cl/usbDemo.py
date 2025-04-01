@@ -100,6 +100,7 @@ try:
     if op == '1':
         clear_halt()
         characters = string.digits + string.ascii_lowercase
+        #characters=string.punctuation
         # 定义组合长度
         num = input('input repeat Length:')
         # 生成所有可能的组合
@@ -109,7 +110,7 @@ try:
         old=js.get("index",0)  
         for index,a in enumerate(combinations):
             if index<=old: 
-                print(f"从：{old}开始...")
+                print(f"从：{old}开始...{len(combinations)}")
                 continue  
             
             if index % 1000 ==0:

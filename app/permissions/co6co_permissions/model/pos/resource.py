@@ -19,6 +19,7 @@ class resourcePO(TimeStampedModelPO):
     uid = Column("uuid", String(36),  unique=True, default=uuid.uuid1())
     category = Column("category", Integer, comment="资源类型:0:图片资源,1:视频资源, 2:文件")
     subCategory = Column("sub_category", Integer, comment="子资源类型")
+    # mysql 56 leng String（256） unique -->Specified key was too long; max key length is 767 bytes
     hash = Column("hash", String(256), unique=True, comment="使用hash256计算值")
     url = Column("url_path", String(255), comment="资源路径,针对根路径下的绝对路径")
     metaName = Column("meta_name", String(255), comment="名称")
