@@ -16,9 +16,9 @@ class AppWinService(Winservice):
         super().__init__(args)
         self.process = None
         self.isrunning = False
-        self.logFolder = "E:\Tools\\www\\system\\logs"
+        self.logFolder = "E:\\Tools\\www\\system\\logs"
         self.virtualEnvPath = "C:\\Users\\Administrator\\Envs\\wechat"
-        self.appPath = "E:\Tools\\www\\system\\service\\app.py"
+        self.appPath = "E:\\Tools\\www\\system\\service\\app.py"
         if not os.path.exists(self.logFolder):
             os.makedirs(self.logFolder)
 
