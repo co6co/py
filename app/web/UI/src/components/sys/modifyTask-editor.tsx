@@ -182,7 +182,7 @@ export default defineComponent({
           <ElRow>
             <ElCol span={12}>
               <ElFormItem label="名称" prop="name">
-                <ElInput v-model={DATA.fromData.name} placeholder="名称"></ElInput>
+                <ElInput v-model={DATA.fromData.name} placeholder="名称" />
               </ElFormItem>
             </ElCol>
             <ElCol span={12}>
@@ -199,12 +199,12 @@ export default defineComponent({
           <ElRow>
             <ElCol span={12}>
               <ElFormItem label="cron表达式" prop="cron">
-                <ElInput v-model={DATA.fromData.cron} placeholder="0 0 0 31 12 ? 2024"></ElInput>
+                <ElInput v-model={DATA.fromData.cron} placeholder="0 0 0 31 12 ? 2024" />
               </ElFormItem>
             </ElCol>
             <ElCol span={12}>
               <ElFormItem label="编码" prop="code">
-                <ElInput v-model={DATA.fromData.code} placeholder="编码"></ElInput>
+                <ElInput v-model={DATA.fromData.code} placeholder="编码" />
               </ElFormItem>
             </ElCol>
           </ElRow>

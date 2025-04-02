@@ -161,7 +161,7 @@ export default defineComponent({
             {DATA.proxiable ? (
               <ElCol span={12}>
                 <ElFormItem label="代理" prop="proxied">
-                  <ElSwitch v-model={DATA.fromData.proxied}></ElSwitch>
+                  <ElSwitch v-model={DATA.fromData.proxied} />
                 </ElFormItem>
               </ElCol>
             ) : (

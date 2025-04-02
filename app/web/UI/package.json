@@ -1,7 +1,7 @@
 {
   "name": "系统管理",
   "private": true,
-  "version": "0.0.1",
+  "version": "0.4.20250402",
   "type": "module",
   "scripts": {
     "dev": "vite --mode dev",
