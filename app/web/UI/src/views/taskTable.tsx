@@ -1,9 +1,9 @@
 import { defineComponent, nextTick, VNodeChild } from 'vue'
 import { ref, reactive, onMounted } from 'vue'
 import { ElTag, ElButton, ElInput, ElTableColumn, ElMessage } from 'element-plus'
-import { Search, Plus, Sugar, View, Edit } from '@element-plus/icons-vue'
+import { Search, Plus, Edit } from '@element-plus/icons-vue'
 
-import { FormOperation } from 'co6co'
+import { FormOperation, showLoading, closeLoading, IResponse } from 'co6co'
 import {
   routeHook,
   DictSelect,
@@ -27,8 +27,14 @@ export default defineComponent({
       state?: number
       name?: string
     }
-    const DATA = reactive<{ title?: string; query: IQueryItem; currentItem?: Item }>({
-      query: {}
+    const DATA = reactive<{
+      title?: string
+      query: IQueryItem
+      currentItem?: Item
+      headItemWidth: number
+    }>({
+      query: {},
+      headItemWidth: 120
     })
 
     //:use
@@ -86,6 +92,42 @@ export default defineComponent({
       })
       return result
     }
+
+    const oncommand = (
+      row: Item,
+      svc: (id: number) => Promise<IResponse>,
+      showCode: boolean = false
+    ) => {
+      showLoading()
+      svc(row.id)
+        .then((r) => {
+          if (showCode) {
+            if (typeof r.data == 'object') {
+              r.data = JSON.stringify(r.data, null, 2)
+            }
+            showCodeRef.value?.openDialog({
+              content: r.data,
+              isPathon: false
+            })
+          } else {
+            ElMessage.success(r.message)
+            onRefesh()
+          }
+        })
+        .finally(() => {
+          closeLoading()
+        })
+    }
+    const onSched = (row: Item) => {
+      oncommand(row, api.exe_sched_svc)
+    }
+    const onStop = (row: Item) => {
+      oncommand(row, api.stop_sched_svc)
+    }
+    const onOneRun = (row: Item) => {
+      oncommand(row, api.exe_once_svc, true)
+    }
+
     //:page reader
     const rander = (): VNodeChild => {
       return (
@@ -95,7 +137,7 @@ export default defineComponent({
               <>
                 <div class="handle-box">
                   <ElInput
-                    style="width: 160px"
+                    width={DATA.headItemWidth}
                     clearable
                     v-model={DATA.query.name}
                     placeholder="模板标题"
@@ -103,21 +145,21 @@ export default defineComponent({
                   />
                   <DictSelect
                     ref={categoryDictRef}
-                    style="width: 160px"
+                    width={DATA.headItemWidth}
                     dictTypeCode={DictTypeCodes.TaskCategory}
                     v-model={DATA.query.category}
                     placeholder="类别"
                   />
                   <DictSelect
                     ref={stateDictRef}
-                    style="width: 160px"
+                    width={DATA.headItemWidth}
                     dictTypeCode={DictTypeCodes.TaskState}
                     v-model={DATA.query.category}
                     placeholder="任务状态"
                   />
                   <DictSelect
                     ref={statusDictRef}
-                    style="width: 160px"
+                    width={160}
                     dictTypeCode={DictTypeCodes.TaskStatus}
                     v-model={DATA.query.category}
                     placeholder="运行状态"
@@ -199,6 +241,7 @@ export default defineComponent({
                   prop="execStatus"
                   sortable="custom"
                   align="center"
+                  width={200}
                   showOverflowTooltip={true}
                 >
                   {{
@@ -237,24 +280,14 @@ export default defineComponent({
                         <ElButton
                           text={true}
                           disabled={isRuning(scope.row)}
-                          onClick={() => {
-                            api.exe_sched_svc(scope.row.id).then((r) => {
-                              ElMessage.success(r.message)
-                              onRefesh()
-                            })
-                          }}
+                          onClick={() => onSched(scope.row)}
                         >
                           调度
                         </ElButton>
                         <ElButton
                           text={true}
                           disabled={!isRuning(scope.row)}
-                          onClick={() => {
-                            api.stop_sched_svc(scope.row.id).then((r) => {
-                              ElMessage.success(r.message)
-                              onRefesh()
-                            })
-                          }}
+                          onClick={() => onStop(scope.row)}
                         >
                           停止
                         </ElButton>
@@ -262,17 +295,7 @@ export default defineComponent({
                           text={true}
                           title="不要执行时间太长的程序"
                           showOverflowTooltip
-                          onClick={() => {
-                            api.exe_once_svc(scope.row.id).then((r) => {
-                              if (typeof r.data == 'object') {
-                                r.data = JSON.stringify(r.data, null, 2)
-                              }
-                              showCodeRef.value?.openDialog({
-                                content: r.data,
-                                isPathon: false
-                              })
-                            })
-                          }}
+                          onClick={() => onOneRun(scope.row)}
                         >
                           执行
                         </ElButton>

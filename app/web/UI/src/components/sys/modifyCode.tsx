@@ -20,9 +20,7 @@ import {
   type FormData
 } from 'co6co'
 
-import { DictSelect, DictSelectInstance } from 'co6co-right'
-//import { DictSelect } from 'co6co-right/dist/api/dict/dictType'
-import { upload_image_svc, validatorBack, useDictHook } from 'co6co-right'
+import { DictSelect, DictSelectInstance, validatorBack } from 'co6co-right'
 import {
   ElRow,
   ElCol,
@@ -157,6 +155,8 @@ export default defineComponent({
     onBeforeUnmount(() => {})
     const onRun = () => {
       DATA.testing = true
+      showLoading()
+
       api
         .test_exe_code_svc(DATA.fromData.sourceCode)
         .then((res) => {
@@ -173,6 +173,7 @@ export default defineComponent({
         })
         .finally(() => {
           DATA.testing = false
+          closeLoading()
         })
     }
     const codeCategoryRef = ref<DictSelectInstance>()

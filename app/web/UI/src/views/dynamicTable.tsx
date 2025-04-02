@@ -3,7 +3,7 @@ import { ref, reactive, onMounted } from 'vue'
 import { ElTag, ElButton, ElInput, ElTableColumn, ElMessage, ElMessageBox } from 'element-plus'
 import { Search, Plus, Sugar, View, Edit } from '@element-plus/icons-vue'
 
-import { FormOperation } from 'co6co'
+import { FormOperation, showLoading, closeLoading } from 'co6co'
 import {
   routeHook,
   DictSelect,
@@ -89,7 +89,7 @@ export default defineComponent({
               <>
                 <div class="handle-box">
                   <ElInput
-                    style="width: 160px"
+                    width={160}
                     clearable
                     v-model={DATA.query.name}
                     placeholder="模板标题"
@@ -97,14 +97,14 @@ export default defineComponent({
                   />
                   <DictSelect
                     ref={categoryDictRef}
-                    style="width: 160px"
+                    width={160}
                     dictTypeCode={DictTypeCodes.CodeType}
                     v-model={DATA.query.category}
                     placeholder="类别"
                   />
                   <DictSelect
                     ref={stateDictRef}
-                    style="width: 160px"
+                    width={160}
                     dictTypeCode={DictTypeCodes.CodeState}
                     v-model={DATA.query.category}
                     placeholder="状态"
@@ -190,7 +190,7 @@ export default defineComponent({
                   width={160}
                   show-overflow-tooltip={true}
                 ></ElTableColumn>
-                <ElTableColumn label="操作" width={320} align="center" fixed="right">
+                <ElTableColumn label="操作" width={220} align="center" fixed="right">
                   {{
                     default: (scope: tableScope<Item>) => (
                       <>
@@ -210,15 +210,21 @@ export default defineComponent({
                           showOverflowTooltip
                           v-permiss={getPermissKey(routeHook.ViewFeature.check)}
                           onClick={() => {
-                            api.exe_once_svc(scope.row.id).then((r) => {
-                              if (typeof r.data == 'object') {
-                                r.data = JSON.stringify(r.data, null, 2)
-                              }
-                              showCodeRef.value?.openDialog({
-                                content: r.data,
-                                isPathon: false
+                            showLoading()
+                            api
+                              .exe_once_svc(scope.row.id)
+                              .then((r) => {
+                                if (typeof r.data == 'object') {
+                                  r.data = JSON.stringify(r.data, null, 2)
+                                }
+                                showCodeRef.value?.openDialog({
+                                  content: r.data,
+                                  isPathon: false
+                                })
                               })
-                            })
+                              .finally(() => {
+                                closeLoading()
+                              })
                           }}
                         >
                           执行
