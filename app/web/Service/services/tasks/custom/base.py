@@ -1,6 +1,5 @@
 
 from abc import ABC, abstractmethod
-
 # 定义接口
 
 

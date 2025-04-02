@@ -31,7 +31,7 @@ def init(app: Sanic, _: dict):
     """
     初始化
     """
-    log.warn("APP:",   id(app))
+    # log.warn("APP:",   id(app))
     attach_cors(app)
     from api import api
     injectDbSessionFactory(app, app.config.db_settings)
@@ -64,7 +64,7 @@ def createTask(app: Sanic, envent: asyncio.Event, conn: PipeConnection):
     """
     初始化"
     """
-    log.warn("主APP:", type(app), id(app))
+    # log.warn("主APP:", type(app), id(app))
     worker = TasksMgr(app, envent, conn)
     return worker
 

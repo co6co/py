@@ -14,6 +14,10 @@ class CfTaskMgr(ICustomTask):
 
     def __init__(self):
         self.cfService: CfService = asyncio.run(CfService.instance())
+        runonce = self.cfService.item.get("runOnce", True)
+        if runonce:
+            log.succ("cfTaskMgr:", "启动", "执行一次...")
+            self.main()
         pass
 
     def get_ipv4_address(self):

@@ -17,11 +17,12 @@ import win32serviceutil
 import servicemanager
 import win32event
 import win32service
+import psutil
+from abc import abstractmethod, ABC
 
 
-class Winservice(win32serviceutil.ServiceFramework):
+class Winservice(win32serviceutil.ServiceFramework, ABC):
     '''Base class to create winservice in Python'''
-
     _svc_name_ = 'pythonService'
     _svc_display_name_ = 'Python Service'
     _svc_description_ = 'Python Service Description'
@@ -33,6 +34,22 @@ class Winservice(win32serviceutil.ServiceFramework):
         解析命令行
         '''
         win32serviceutil.HandleCommandLine(cls)
+
+    @staticmethod
+    def kill_process_tree(pid, including_parent=True):
+        """
+        杀进程树
+        :param pid: 进程id
+        :param including_parent: 是否包括父进程
+        """
+        parent = psutil.Process(pid)
+        children = parent.children(recursive=True)
+        for child in children:
+            child.kill()
+        psutil.wait_procs(children, timeout=5)
+        if including_parent:
+            parent.kill()
+            parent.wait(5)
 
     def __init__(self, args):
         '''
@@ -60,6 +77,7 @@ class Winservice(win32serviceutil.ServiceFramework):
                               (self._svc_name_, ''))
         self.main()
 
+    @abstractmethod
     def start(self):
         '''
         Override to add logic before the start
@@ -67,6 +85,7 @@ class Winservice(win32serviceutil.ServiceFramework):
         '''
         pass
 
+    @abstractmethod
     def stop(self):
         '''
         Override to add logic before the stop
@@ -74,6 +93,7 @@ class Winservice(win32serviceutil.ServiceFramework):
         '''
         pass
 
+    @abstractmethod
     def main(self):
         '''
         Main class to be ovverridden to add logic

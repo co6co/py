@@ -3,6 +3,7 @@ import json as sysJson
 from sanic.request import Request
 from co6co_permissions.services.configCache import ConfigCache
 from co6co_permissions.services.bllConfig import config_bll
+from sanic import Sanic
 
 
 class CfService():
@@ -25,11 +26,12 @@ class CfService():
             if not jsonStr:
                 jsonStr = await configCache.queryConfig(KEY)
         else:
-            config = config_bll()
+            config = config_bll()  # Sanic.get_app().config.db_settings
             jsonStr = await config.query_config_value(KEY)
             key2 = "CF_CONFIG_ONE"
             item = await config.query_config_value(key2, parseDict=True)
             del config
+            pass
         result = sysJson.loads(jsonStr)
         api_token = result.get("api_token", None)
         zone_id = result.get("zone_id", None)

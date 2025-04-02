@@ -13,7 +13,7 @@
         "DB_NAME": "systemDb",
         "DB_USER": "root",
         "DB_PASSWORD": "mysql123456",
-        "echo": true,
+        "echo": false,
         "pool_size": 1,
         "max_overflow": 1
     }
