@@ -74,11 +74,7 @@ export default defineComponent({
 				case FormOperation.edit:
 					if (!item) return false;
 					DATA.id = item.id;
-					DATA.fromData.name = item.name;
-					DATA.fromData.code = item.code;
-
-					DATA.fromData.order = item.order;
-					DATA.fromData.remark = item.remark;
+					Object.assign(DATA.fromData, item);
 					//可以在这里写一些use 获取其他的数据
 					break;
 			}
@@ -173,12 +169,15 @@ export default defineComponent({
 		const rander = (): VNode => {
 			return (
 				<DialogForm
+					closeOnClickModal={false}
+					draggable
 					title={prop.title}
 					labelWidth={prop.labelWidth}
 					style={ctx.attrs}
 					rules={rules.value}
 					ref={diaglogForm}
-					v-slots={fromSlots}></DialogForm>
+					v-slots={fromSlots}
+				/>
 			);
 		};
 		const openDialog = (oper: FormOperation, item?: Item) => {

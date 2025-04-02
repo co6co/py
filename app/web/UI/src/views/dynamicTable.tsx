@@ -211,7 +211,9 @@ export default defineComponent({
                           v-permiss={getPermissKey(routeHook.ViewFeature.check)}
                           onClick={() => {
                             api.exe_once_svc(scope.row.id).then((r) => {
-                              console.info(showCodeRef.value)
+                              if (typeof r.data == 'object') {
+                                r.data = JSON.stringify(r.data, null, 2)
+                              }
                               showCodeRef.value?.openDialog({
                                 content: r.data,
                                 isPathon: false

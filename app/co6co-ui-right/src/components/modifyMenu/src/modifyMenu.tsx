@@ -118,12 +118,7 @@ export default defineComponent({
 				case FormOperation.edit:
 					if (!item) return false;
 					DATA.id = item.id;
-					DATA.fromData.name = item.name;
-					DATA.fromData.code = item.code;
-					DATA.fromData.parentId = item.parentId;
-					DATA.fromData.category = item.category;
-					DATA.fromData.icon = item.icon;
-					DATA.fromData.url = item.url;
+					Object.assign(DATA.fromData, item);
 
 					if (DATA.fromData.category == MenuCateCategory.API) {
 						DATA.fromData.methods =
@@ -134,11 +129,6 @@ export default defineComponent({
 						//button 需要
 						DATA.fromData.methods = item.methods;
 					}
-					DATA.fromData.permissionKey = item.permissionKey;
-					DATA.fromData.order = item.order;
-					DATA.fromData.status = item.status;
-					DATA.fromData.remark = item.remark;
-					DATA.fromData.component = item.component;
 					//可以在这里写一些use 获取其他的数据
 					break;
 			}
@@ -464,6 +454,8 @@ export default defineComponent({
 		const rander = (): VNode => {
 			return (
 				<DialogForm
+					closeOnClickModal={false}
+					draggable
 					title={prop.title}
 					labelWidth={prop.labelWidth}
 					style={ctx.attrs}

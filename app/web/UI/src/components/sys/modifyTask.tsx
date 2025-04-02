@@ -30,6 +30,8 @@ import {
   ElFormItem,
   ElInput,
   ElMessage,
+  ElSelect,
+  ElOption,
   type FormRules
 } from 'element-plus'
 
@@ -95,6 +97,7 @@ export default defineComponent({
       DATA.testResult = ''
       DATA.showResult = false
       DATA.testing = false
+
       switch (oper) {
         case FormOperation.add:
           DATA.id = 0
@@ -107,6 +110,7 @@ export default defineComponent({
             execStatus: 0
           }
           Object.assign(DATA.fromData, tmp)
+          DATA.fromData.data = ''
           break
         case FormOperation.edit:
           if (!item) return false
@@ -115,7 +119,6 @@ export default defineComponent({
           //可以在这里写一些use 获取其他的数据
           break
       }
-
       onLoadTaskData(DATA.fromData.category)
       return true
     }
@@ -279,6 +282,8 @@ export default defineComponent({
           labelWidth={prop.labelWidth}
           style={ctx.attrs}
           rules={cron_rules}
+          closeOnClickModal={false}
+          draggable
           ref={diaglogForm}
           v-slots={fromSlots}
         />

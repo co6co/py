@@ -59,4 +59,6 @@
     SessionId
 0.1.24
     优化
+0.1.25
+    v-model bug 修复
 ```

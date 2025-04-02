@@ -14,6 +14,7 @@ from co6co_permissions.view_model.aop import exist, ObjectExistRoute
 from view_model.systask.codeView import _codeView
 
 from co6co_web_db.view_model import get_one
+from co6co.utils import log
 
 
 class ExistView(AuthMethodView):

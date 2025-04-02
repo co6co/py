@@ -106,15 +106,7 @@ export default defineComponent({
 				case FormOperation.edit:
 					if (!item) return false;
 					DATA.id = item.id;
-					DATA.fromData.name = item.name;
-					DATA.fromData.code = item.code;
-					DATA.fromData.dictTypeId = item.dictTypeId;
-
-					DATA.fromData.sysFlag = item.sysFlag;
-					DATA.fromData.dictFlag = item.dictFlag;
-
-					DATA.fromData.value = item.value;
-					DATA.fromData.remark = item.remark;
+					Object.assign(DATA.fromData, item);
 					//可以在这里写一些use 获取其他的数据
 					//从后台获取的数据有系统标识，是有些数据就不允许更改
 					editData.sysFlag = item.sysFlag;
@@ -324,6 +316,8 @@ export default defineComponent({
 		const rander = (): VNode => {
 			return (
 				<DialogForm
+					closeOnClickModal={false}
+					draggable
 					title={prop.title}
 					labelWidth={prop.labelWidth}
 					style={ctx.attrs}

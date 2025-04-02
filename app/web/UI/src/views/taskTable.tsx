@@ -264,7 +264,6 @@ export default defineComponent({
                           showOverflowTooltip
                           onClick={() => {
                             api.exe_once_svc(scope.row.id).then((r) => {
-                              console.info(r)
                               if (typeof r.data == 'object') {
                                 r.data = JSON.stringify(r.data, null, 2)
                               }

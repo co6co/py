@@ -1,4 +1,4 @@
-import { ref, defineComponent, resolveComponent, h } from 'vue';
+import { ref, defineComponent, resolveComponent, h, watch } from 'vue';
 import { ElSelect, ElOption, ElIcon, ElEmpty } from 'element-plus';
 import * as icon from '@element-plus/icons-vue';
 import iconStyle from '@/assets/css/eciconselect.module.less';
@@ -24,6 +24,12 @@ export default defineComponent({
 			DATA.value = newValue;
 			context.emit('update:modelValue', newValue);
 		};
+		watch(
+			() => prop.modelValue,
+			(v) => {
+				DATA.value = v;
+			}
+		);
 
 		const vsolft = {
 			default: () => {
@@ -62,7 +68,8 @@ export default defineComponent({
 					v-model={DATA.value}
 					onChange={onChanged}
 					placeholder="请选择图标"
-					v-slots={vsolft}></ElSelect>
+					v-slots={vsolft}
+				/>
 			);
 		};
 	},

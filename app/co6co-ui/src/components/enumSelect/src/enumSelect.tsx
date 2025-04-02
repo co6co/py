@@ -1,7 +1,7 @@
-import { ref, defineComponent } from 'vue';
+import { ref, defineComponent, PropType, watch } from 'vue';
 import { IEnumSelect } from '@/constants';
 import { ElSelect, ElOption } from 'element-plus';
-
+type ModelValueType = string | number | undefined;
 export default defineComponent({
 	name: 'EnumSelect',
 	props: {
@@ -10,7 +10,8 @@ export default defineComponent({
 			required: true,
 		},
 		modelValue: {
-			type: [String, Number],
+			type: [String, Number, undefined] as PropType<ModelValueType>,
+			default: undefined,
 		},
 		placeholder: {
 			type: String,
@@ -26,6 +27,12 @@ export default defineComponent({
 		const onChanged = () => {
 			context.emit('update:modelValue', DATA.value);
 		};
+		watch(
+			() => prop.modelValue,
+			(v) => {
+				DATA.value = v;
+			}
+		);
 		return () => {
 			//可以写某些代码
 			return (

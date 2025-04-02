@@ -119,6 +119,8 @@ export default defineComponent({
     const rander = (): VNode => {
       return (
         <Dialog
+          closeOnClickModal={false}
+          draggable
           title={DATA.title ?? prop.title}
           labelWidth={prop.labelWidth}
           style={ctx.attrs}
