@@ -55,9 +55,12 @@
     优化
 0.0.24
     BLL 增加 CONFIGBLL
-0.0.25 2025-03-24-04-02
+0.0.25
     增加 ConfigCache.queryConfig 方法的返回值
+0.0.26 2025-04-02
 	优化 baseBll 类
-	
-
+    因setuptools模块的升级包名变为 co6co_permissions 为了兼容，在setup.py增加了CustomSdist,保持和原来包名一致。
+    安装有问题，请使用 0.0.27 版本
+0.0.27
+    修复安装问题
 ```

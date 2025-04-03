@@ -183,47 +183,6 @@ class TasksMgr(BaseBll, sanics.Worker):
         """
         data: DATA = data
         self.handlerChain.handle_request(data, conn)
-        """
-        command: CommandCategory = data.command
-        result = False
-        message: str = None
-        taskCode = data.code
-        sourceCode = data.get("sourceCode")
-        if not sourceCode:
-            sourceCode = data.sourceForm
-            task = custom.get_task(sourceCode)
-            if not task:
-                message = f"任务{taskCode}，未找到任务"
-                conn.send(CommandCategory.createOption(CommandCategory.GET, success=result, data=message))
-                return
-            sourceCode = task.main
-
-        if command == CommandCategory.Exist:
-            result = self.scheduler.exist(taskCode)
-            message = f"任务'{taskCode}'->存在" if result else f"任务'{taskCode}'->不存在"
-        elif command == CommandCategory.START:
-            result, message = self.scheduler.addTask(taskCode, sourceCode, data.cron)
-            fall_result = self.run(self.update_status, [taskCode], 1)
-        else:
-            # 下面都是任务存在才能处理的命令
-            if not self.scheduler.exist(taskCode):
-                message = f"任务{taskCode}，不存在"
-            else:
-                log.warn("任务存在，开始处理命令：", command)
-                if command == CommandCategory.REMOVE:
-                    result = self.scheduler.removeTask(taskCode)
-                    if result:
-                        fall_result = self.run(self.update_status, [taskCode], 0)
-                        log.warn(f"任务{taskCode}，删除成功，更新状态：{fall_result}")
-                elif command == CommandCategory.MODIFY:
-                    result = self.scheduler.modifyTask(taskCode, sourceCode, data.cron)
-                else:
-                    result = False
-                    message = f"未处理命令{command.key}"
-        resultData = CommandCategory.createOption(CommandCategory.GET, success=result, data=message)
-        conn.send(resultData)
-        log.succ(f"处理命令’{command.key}‘{taskCode}结果:{result}->{message}") if result else log.warn(f"处理命令{command.key},{taskCode}结果:{result}->{message}")
-        """
 
     async def getData(self):
         """

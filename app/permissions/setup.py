@@ -1,42 +1,33 @@
-from os import path
-from setuptools import setup, find_packages
+from setuptools import setup
 
+from setuptools.command.sdist import sdist
+import subprocess
+import sys
+import co6co.setupUtils as setupUtils
+# try:
+#    from co6co import setupUtils
+# except ImportError:
+#    subprocess.check_call([sys.executable, "-m", "pip", "install", "co6co>=0.0.25"])
+#    from co6co import setupUtils
 
-packages = find_packages()
-packageName = packages[0]
-
-
-def get_version():
-    package_dir = path.abspath(path.dirname(__file__))
-    version_file = path.join(package_dir, packageName, '__init__.py')
-    with open(version_file, "rb") as f:
-        source_code = f.read()
-    exec_code = compile(source_code, version_file, "exec")
-    scope = {}
-    exec(exec_code, scope)
-    version = scope.get("__version__", None)
-    if version:
-        return version
-    raise RuntimeError("Unable to find version string.")
-
-
-# read readmeFile contents
-currentDir = path.abspath(path.dirname(__file__))
-with open(path.join(currentDir, 'README.md'), encoding='utf-8') as f:
-    long_description = f.read()
+version = setupUtils.get_version(__file__)
+packageName, packages = setupUtils.package_name(__file__)
+long_description = setupUtils.readme_content(__file__)
 
 
 setup(
-    name=packageName.replace("_", '.', 1),
-    version=get_version(),
+    name=packageName,
+    version=version,
     description="web permissionsAPI",
-    packages=find_packages(),
+    packages=packages,
+
     long_description=long_description,
     long_description_content_type='text/markdown',
-    classifiers=["Programming Language :: Python :: 3", "Programming Language :: Python :: 3.6"],
+    classifiers=setupUtils.get_classifiers(),
     include_package_data=True, zip_safe=True,
     # 依赖哪些模块
-    install_requires=['requests', "co6co", "co6co.sanic_ext>=0.0.9", "co6co.web-db>=0.0.14","opencv-python==4.11.0.86","numpy==1.26.4","Pillow>=10.1.0"],
+    install_requires=['requests', "co6co>=0.0.26", "co6co.sanic_ext>=0.0.9", "co6co.web-db>=0.0.14", "opencv-python==4.11.0.86", "numpy==1.26.4", "Pillow>=10.1.0"],
+
     # package_dir= {'utils':'src/log','main_package':'main'},#告诉Distutils哪些目录下的文件被映射到哪个源码
     author='co6co',
     author_email='co6co@qq.com',
@@ -48,5 +39,7 @@ setup(
     package_data={
         '': ['*.txt', '*.md'],
         'bandwidth_reporter': ['*.txt']
+    }, cmdclass={
+        'sdist': setupUtils.CustomSdist
     }
 )

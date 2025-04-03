@@ -51,6 +51,10 @@
 0.0.24
     增加 choose 方法
     tryExcept 装饰器
+0.0.25
+    增加 setup 的相关函数及类
+0.0.26
+    get_classifiers
 ```
 
 # 安装
