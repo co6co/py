@@ -1,16 +1,11 @@
 // DragVerify.tsx
 import { ElButton } from 'element-plus';
-import {
-	defineComponent,
-	ref,
-	reactive,
-	onMounted,
-	onUnmounted,
-	watch,
-} from 'vue';
+import { defineComponent, ref, reactive, onMounted, onUnmounted } from 'vue';
 import style from '@/assets/css/dragVerify.module.less';
 import { IDragVerifyData, dragVerify_Svc } from '@/api/verify';
 import { ArrowRight } from '@element-plus/icons-vue';
+
+import { useModelWrapper, isMobileBrowser } from 'co6co';
 const DragVerify = defineComponent({
 	props: {
 		width: {
@@ -56,34 +51,41 @@ const DragVerify = defineComponent({
 			end: 0,
 		});
 		//存储本地值
-		const localValue = ref(props.modelValue);
+		//const localValue = ref(props.modelValue);
 		// 监听 modelValue 的变化 更新本地值
-		watch(
-			() => props.modelValue,
-			(newValue) => {
-				localValue.value = newValue;
-				//需要重新验证时
-				if (!newValue) {
-					currentX.value = 0;
-					verifySuccess.value = false;
-				}
+		//watch(
+		//	() => props.modelValue,
+		//	(newValue) => {
+		//		localValue.value = newValue;
+		//		//需要重新验证时
+		//		if (!newValue) {
+		//			currentX.value = 0;
+		//			verifySuccess.value = false;
+		//		}
+		//	}
+		//);
+
+		//const onChange = (newValue: string) => {
+		//	localValue.value = newValue;
+		//	ctx.emit('update:modelValue', newValue);
+		//};
+		const { onChange } = useModelWrapper(props, ctx, (newValue) => {
+			if (!newValue) {
+				currentX.value = 0;
+				verifySuccess.value = false;
 			}
-		);
-
-		const onChange = (newValue: string) => {
-			localValue.value = newValue;
-			ctx.emit('update:modelValue', newValue);
-		};
-
+		});
+		const isMobile = ref(false);
 		const handleMouseDown = (e: MouseEvent) => {
+			onstart(e.clientX);
+		};
+		const onstart = (clientX) => {
 			if (verifySuccess.value) return;
 			isDragging.value = true;
-			offsetX.value = e.clientX;
+			offsetX.value = clientX;
 			DATA.start = new Date().getTime();
 		};
-		const handleMouseMove = (e: MouseEvent) => {
-			// 取消上一次的requestAnimationFrame请求
-			if (!isDragging.value || verifySuccess.value) return;
+		const onMove = (e: { clientX; clientY }, onStop: () => void) => {
 			const diffX = e.clientX - offsetX.value;
 			DATA.data.push({
 				t: new Date().getTime(),
@@ -101,7 +103,7 @@ const DragVerify = defineComponent({
 				DATA.end = new Date().getTime();
 				verifySuccess.value = true;
 				//停止
-				handleMouseUp(e);
+				if (onStop) onStop();
 				dragVerify_Svc(DATA)
 					.then((res) => {
 						onChange(res.data);
@@ -120,6 +122,15 @@ const DragVerify = defineComponent({
 			}
 		};
 
+		const handleMouseMove = (e: MouseEvent) => {
+			//console.log('handleMouseMove', e);
+			// 取消上一次的requestAnimationFrame请求
+			if (!isDragging.value || verifySuccess.value) return;
+			onMove({ clientX: e.clientX, clientY: e.clientY }, () => {
+				handleMouseUp(e);
+			});
+		};
+
 		const handleMouseUp = (e: MouseEvent) => {
 			if (!isDragging.value) return;
 			isDragging.value = false;
@@ -127,16 +138,52 @@ const DragVerify = defineComponent({
 				currentX.value = 0;
 			}
 		};
+		//移动历览器
+		const isTouchStarted = ref(false);
+		const touchStartHandler = (event: TouchEvent) => {
+			// 阻止默认行为，例如防止页面滚动
+			event.preventDefault();
+			if (!isTouchStarted.value) {
+				isTouchStarted.value = true;
+				// 在这里添加触摸开始时的逻辑
+				//console.log('触摸开始，执行相关操作', event);
+				onstart(event.touches[0].clientX);
+			} else {
+				// 如果已经触摸开始，停止后续操作
+				//console.log('已经触摸开始，停止本次操作');
+			}
+		};
+
+		const touchMoveHandler = (e: TouchEvent) => {
+			if (isTouchStarted.value) {
+				onMove(
+					{ clientX: e.touches[0].clientX, clientY: e.touches[0].clientY },
+					() => {
+						isTouchStarted.value = false;
+					}
+				);
+				// 在这里添加触摸移动时的逻辑
+				//console.log('触摸移动，执行相关操作', e);
+			} else {
+				//console.log('尚未触摸开始，不执行移动操作');
+			}
+		};
 
 		onMounted(() => {
-			document.addEventListener('mousemove', handleMouseMove);
-			document.addEventListener('mouseup', handleMouseUp);
+			isMobile.value = isMobileBrowser();
+			if (!isMobile.value) {
+				document.addEventListener('mousemove', handleMouseMove);
+				document.addEventListener('mouseup', handleMouseUp);
+			}
+
 			bgWidth.value = BgRef.value?.clientWidth || 0;
 		});
 
 		onUnmounted(() => {
-			document.removeEventListener('mousemove', handleMouseMove);
-			document.removeEventListener('mouseup', handleMouseUp);
+			if (!isMobile.value) {
+				document.removeEventListener('mousemove', handleMouseMove);
+				document.removeEventListener('mouseup', handleMouseUp);
+			}
 		});
 
 		return () => (
@@ -163,7 +210,14 @@ const DragVerify = defineComponent({
 						style={{
 							left: `${currentX.value}px`,
 						}}
-						onMousedown={handleMouseDown}
+						{...(isMobile.value
+							? {
+									onTouchstart: touchStartHandler,
+									onTouchmove: touchMoveHandler,
+							  }
+							: {
+									onMousedown: handleMouseDown,
+							  })}
 					/>
 
 					{/* 提示信息 */}

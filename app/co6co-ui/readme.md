@@ -61,4 +61,6 @@
     优化
 0.1.25
     v-model bug 修复
+0.1.26 未发布
+    怎么useModelWrapper、isMobileBrowser 方法
 ```

@@ -1,6 +1,6 @@
-import { ref, defineComponent } from 'vue';
+import { defineComponent } from 'vue';
 import { ElSelect, ElOption, ElIcon, ElEmpty } from 'element-plus';
-import { getStoreInstance } from '@/hooks';
+import { getStoreInstance, useModelWrapper } from '@/hooks';
 import { Promotion } from '@element-plus/icons-vue';
 
 export default defineComponent({
@@ -21,26 +21,26 @@ export default defineComponent({
 	setup(prop, context) {
 		//const DATA = ref<undefined | string>(prop.modelValue);
 		//console.info('1.view Setup...');
-		const DATA = ref(prop.modelValue);
+		//const localValue = ref(prop.modelValue);
+		//const onChange = (newValue: undefined | string) => {
+		//	localValue.value = newValue;
+		//	context.emit('update:modelValue', newValue);
+		//};
 		const store = getStoreInstance();
-		const onChanged = (newValue: undefined | string) => {
-			DATA.value = newValue;
-			context.emit('update:modelValue', newValue);
-		};
-
+		const { localValue, onChange } = useModelWrapper(prop, context);
 		return () => {
 			//可以写某些代码
 			//console.info('2.rander...');
 			//console.info('prop changeed...');
-			DATA.value = prop.modelValue;
+			localValue.value = prop.modelValue;
 			return (
 				<ElSelect
 					clearable
 					filterable={true}
 					style={context.attrs}
 					class="iconList"
-					v-model={DATA.value}
-					onChange={onChanged}
+					v-model={localValue.value}
+					onChange={onChange}
 					placeholder="请选择视图">
 					{{
 						default: () => (

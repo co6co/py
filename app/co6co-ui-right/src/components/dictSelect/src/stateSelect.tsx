@@ -1,7 +1,8 @@
-import { defineComponent, onMounted, ref, watch, PropType, VNode } from 'vue';
+import { defineComponent, onMounted, PropType, VNode } from 'vue';
 import { ElSelect, ElOption } from 'element-plus';
 
 import { useState } from '@/hooks/useDictState';
+import { useModelWrapper } from 'co6co';
 type ModelValueType = string | number | null | undefined;
 export default defineComponent({
 	props: {
@@ -35,22 +36,24 @@ export default defineComponent({
 	},
 	setup(prop, ctx) {
 		//存储本地值
-		const localValue = ref(prop.modelValue);
-		// 监听 modelValue 的变化 更新本地值
-		watch(
-			() => prop.modelValue,
-			(newValue) => {
-				localValue.value = newValue;
-			}
-		);
+		//const localValue = ref(prop.modelValue);
+		//// 监听 modelValue 的变化 更新本地值
+		//watch(
+		//	() => prop.modelValue,
+		//	(newValue) => {
+		//		localValue.value = newValue;
+		//	}
+		//);
+		//const onChange = (newValue: ModelValueType) => {
+		//	localValue.value = newValue;
+		//	ctx.emit('update:modelValue', newValue);
+		//};
+		const { localValue, onChange } = useModelWrapper(prop, ctx);
 		const { loadData, selectData, getName, getTagType } = useState();
 		onMounted(async () => {
 			await loadData();
 		});
-		const onChange = (newValue: ModelValueType) => {
-			localValue.value = newValue;
-			ctx.emit('update:modelValue', newValue);
-		};
+
 		const rander = (): VNode => {
 			return (
 				<ElSelect

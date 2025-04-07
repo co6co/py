@@ -1,7 +1,8 @@
-import { ref, defineComponent, resolveComponent, h, watch } from 'vue';
+import { defineComponent, resolveComponent, h } from 'vue';
 import { ElSelect, ElOption, ElIcon, ElEmpty } from 'element-plus';
 import * as icon from '@element-plus/icons-vue';
 import iconStyle from '@/assets/css/eciconselect.module.less';
+import { useModelWrapper } from '@/hooks/useModelWrapper';
 
 export default defineComponent({
 	name: 'EcIconSelect',
@@ -19,18 +20,19 @@ export default defineComponent({
 		'update:modelValue': (v: string | undefined) => true,
 	},
 	setup(prop, context) {
-		const DATA = ref<undefined | string>(prop.modelValue);
-		const onChanged = (newValue: undefined | string) => {
-			DATA.value = newValue;
-			context.emit('update:modelValue', newValue);
-		};
-		watch(
-			() => prop.modelValue,
-			(v) => {
-				DATA.value = v;
-			}
-		);
+		//const localValue = ref<undefined | string>(prop.modelValue);
+		//const onChange = (newValue: undefined | string) => {
+		//	localValue.value = newValue;
+		//	context.emit('update:modelValue', newValue);
+		//};
+		//watch(
+		//	() => prop.modelValue,
+		//	(v) => {
+		//		localValue.value = v;
+		//	}
+		//);
 
+		const { localValue, onChange } = useModelWrapper(prop, context);
 		const vsolft = {
 			default: () => {
 				return (
@@ -47,8 +49,10 @@ export default defineComponent({
 			},
 
 			prefix: () => {
-				return DATA.value ? (
-					<ElIcon color="#c6c6c6">{h(resolveComponent(DATA.value))}</ElIcon>
+				return localValue.value ? (
+					<ElIcon color="#c6c6c6">
+						{h(resolveComponent(localValue.value))}
+					</ElIcon>
 				) : (
 					<>空</>
 				);
@@ -65,8 +69,8 @@ export default defineComponent({
 					filterable={true}
 					style={context.attrs}
 					class="iconList"
-					v-model={DATA.value}
-					onChange={onChanged}
+					v-model={localValue.value}
+					onChange={onChange}
 					placeholder="请选择图标"
 					v-slots={vsolft}
 				/>

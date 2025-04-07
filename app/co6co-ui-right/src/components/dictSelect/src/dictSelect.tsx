@@ -1,9 +1,10 @@
-import { defineComponent, ref, watch, PropType, onMounted, VNode } from 'vue';
+import { defineComponent, PropType, onMounted, VNode } from 'vue';
 import { ElSelect, ElOption } from 'element-plus';
 import { useDictHook } from '@/hooks';
 type ModelValueType = string | number | null | undefined;
 type ValueUseField = 'id' | 'name' | 'flag' | 'value' | 'desc';
 import { type DictSelectType } from '@/api/dict/dictType';
+import { useModelWrapper } from 'co6co';
 
 import { DictShowCategory } from '@/constants';
 export default defineComponent({
@@ -53,20 +54,8 @@ export default defineComponent({
 		//change: (data: ModelValueType) => true,
 	},
 	setup(prop, ctx) {
-		//存储本地值
-		const localValue = ref(prop.modelValue);
-		// 监听 modelValue 的变化 更新本地值
-		watch(
-			() => prop.modelValue,
-			(newValue) => {
-				localValue.value = newValue;
-			}
-		);
-		const onChange = (newValue: ModelValueType) => {
-			localValue.value = newValue;
-			//ctx.emit('change', newValue);
-			ctx.emit('update:modelValue', newValue);
-		};
+		const { localValue, onChange } = useModelWrapper(prop, ctx);
+
 		const stateHook = useDictHook.useDictSelect();
 		onMounted(async () => {
 			await stateHook.queryByCode(prop.dictTypeCode, prop.queryCategory);

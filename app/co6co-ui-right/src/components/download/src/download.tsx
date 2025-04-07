@@ -45,6 +45,15 @@ const props = {
 		type: Boolean,
 		default: true,
 	},
+	text: {
+		type: Boolean,
+		default: true,
+	},
+	title: {
+		type: String,
+		required: false,
+		default: '下载文件',
+	},
 } as const;
 
 //定义事件
@@ -142,12 +151,12 @@ export default defineComponent({
 		const defaultText = computed(() => {
 			return DATA.downloading
 				? '下载中...' + DATA.percentage + '%'
-				: '下载文件';
+				: prop.title;
 		});
 		const rander = (): VNode => {
 			return (
 				<ElButton
-					text={true}
+					text={prop.text}
 					icon={Download}
 					loading={DATA.downloading}
 					onClick={onDownLoad2}>

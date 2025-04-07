@@ -55,6 +55,8 @@
     增加 setup 的相关函数及类
 0.0.26
     get_classifiers
+0.0.27
+    增加network模块
 ```
 
 # 安装

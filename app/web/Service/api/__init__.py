@@ -9,5 +9,6 @@ from api.biz import biz_api
 from api.tools import tool_api
 from api.ai import Api as ai_api
 from api.transmit import transmit_api
-all_api = [permissions_api, sys_api, biz_api, tool_api, ai_api, transmit_api]
+from api.dev import dev_api
+all_api = [permissions_api, sys_api, biz_api, tool_api, ai_api, transmit_api, dev_api]
 api = Blueprint.group(*all_api, url_prefix="/api", version=1)

@@ -41,14 +41,13 @@ import { Lock, User } from '@element-plus/icons-vue'
 
 import { isDebug } from '../utils'
 import { useTagsStore } from '../store/tags'
-import { userSvc, registerRoute } from 'co6co-right'
-import { storeAuthonInfo, showLoading, closeLoading } from 'co6co'
+import { userSvc, registerRoute, DragVerify } from 'co6co-right'
+import { storeAuthonInfo, showLoading, closeLoading, isMobileBrowser } from 'co6co'
 
 import { router, ViewObjects } from '../router'
 import type { FormInstance, FormRules } from 'element-plus'
 import useSystem from '../hooks/useSystem'
 import { getPublicURL } from '../utils'
-import { DragVerify } from 'co6co-right'
 
 interface LoginInfo {
   username: string
@@ -74,7 +73,7 @@ const rules: FormRules = {
   verify: [
     {
       required: true,
-      message: '请拖动滑块验证',
+      message: '请拖动滑块验证' + isMobileBrowser(),
       trigger: 'blur',
       validator(rule, value, callback, source, options) {
         if (DATA.verify) {

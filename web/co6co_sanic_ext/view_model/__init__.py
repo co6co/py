@@ -104,21 +104,30 @@ class BaseView(HTTPMethodView):
         size = os.path.getsize(filePath) if os.path.isfile(filePath) else self.get_folder_size(filePath)
         return size
 
+    async def response_head(self, size: int, fileName: str = None):
+        """
+        返回响应头信息
+        @param size 文件大小
+        @param fileName 文件名
+        """
+        response = json({})
+
+        response.headers.update({"Accept-Ranges": "bytes", "Content-Length": size, "Content-Type": "application/octet-stream"})
+        if fileName:
+            headers = self.createContentDisposition(fileName)
+            response.headers.update(headers)
+        return response
+
     async def response_size(self,   fullPath: str):
         """
         文件或目录大小
         如果是文件包括文件名
         """
-        response = json({})
         size = os.path.getsize(fullPath) if os.path.isfile(fullPath) else self.get_folder_size(fullPath)
-        headers = None
+        fileName = None
         if os.path.isfile(fullPath):
             fileName = os.path.basename(fullPath)
-            headers = self.createContentDisposition(fileName)
-        response.headers.update({"Accept-Ranges": "bytes", "Content-Length": size, "Content-Type": "application/octet-stream"})
-        if headers != None:
-            response.headers.update(headers)
-        return response
+        return self.response_head(size, fileName)
 
     def parseRange(self, request: Request, *, filePath: str = None, fileSize: int = None):
         """

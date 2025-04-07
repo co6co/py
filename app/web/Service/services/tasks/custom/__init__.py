@@ -1,9 +1,10 @@
 
 from .base import ICustomTask
 from .cfTask import CfTaskMgr
+from .devCapImg import DeviceCuptureImage
 from typing import overload, List, Tuple
 from co6co.utils import log
-__all__ = ['ICustomTask', "CfTaskMgr"]
+__all__ = ['ICustomTask', "CfTaskMgr", 'DeviceCuptureImage']
 
 
 @overload

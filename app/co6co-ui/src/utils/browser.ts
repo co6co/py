@@ -29,3 +29,25 @@ export const unLoadScript = (src: string) => {
 	const scripts = document.querySelectorAll(`script[src="${src}"]`);
 	scripts.forEach((script) => document.body.removeChild(script));
 };
+
+/**
+ * 使用 userAgent 判断是否为手机浏览器
+ * @returns 是否是移动端浏览器
+ */
+export function isMobileBrowser() {
+	const userAgent = navigator.userAgent;
+	const mobileKeywords = [
+		'Android',
+		'iPhone',
+		'iPad',
+		'Windows Phone',
+		'BlackBerry',
+		'Opera Mini',
+	];
+	for (const keyword of mobileKeywords) {
+		if (userAgent.includes(keyword)) {
+			return true;
+		}
+	}
+	return false;
+}

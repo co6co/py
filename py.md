@@ -12,7 +12,7 @@ pip install --upgrade --no-deps co6co --index-url https://pypi.org/simple/
 ```
 co6co==0.0.26
 co6co.web_session=0.0.1
-co6co.sanic-ext==0.0.10
+co6co.sanic-ext==0.0.11
 co6co.db-ext==0.0.13
 co6co.web-db==0.0.14
 co6co.permissions==0.0.27
@@ -28,8 +28,8 @@ npm install --registry=http://registry.npm.taobao.org/ isomorphic-streams
 npm install --registry=https://registry.npmjs.org/ co6co
 
 ```
-co6co-ui==0.1.25
-co6co-right==0.0.33
+co6co-ui==0.1.26
+co6co-right==0.0.34
 co6co-wx==0.0.2
 
 
