@@ -106,6 +106,12 @@ class Scheduler(Singleton):
             log.info("任务{}不存在!!".format(key))
             return False
 
+    def removeAll(self):
+        for key in self._tasks:
+            jobid = self._tasks[key]
+            self.scheduler.remove_job(jobid)
+        self._tasks.clear()
+
     def checkCode(self,  code: str, corn: str):
         """
         检查代码

@@ -35,19 +35,6 @@ export default defineComponent({
 		'update:modelValue': (data: ModelValueType) => true,
 	},
 	setup(prop, ctx) {
-		//存储本地值
-		//const localValue = ref(prop.modelValue);
-		//// 监听 modelValue 的变化 更新本地值
-		//watch(
-		//	() => prop.modelValue,
-		//	(newValue) => {
-		//		localValue.value = newValue;
-		//	}
-		//);
-		//const onChange = (newValue: ModelValueType) => {
-		//	localValue.value = newValue;
-		//	ctx.emit('update:modelValue', newValue);
-		//};
 		const { localValue, onChange } = useModelWrapper(prop, ctx);
 		const { loadData, selectData, getName, getTagType } = useState();
 		onMounted(async () => {
@@ -73,10 +60,12 @@ export default defineComponent({
 		ctx.expose({
 			getName,
 			getTagType,
+			selectData,
 		});
 		//.d.ts 中的定义
 		rander.getName = getName;
 		rander.getTagType = getTagType;
+		rander.selectData = selectData;
 		return rander;
 	}, //end setup
 });

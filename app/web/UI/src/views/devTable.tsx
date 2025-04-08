@@ -1,9 +1,9 @@
 import { defineComponent, VNodeChild } from 'vue'
 import { ref, reactive, onMounted } from 'vue'
-import { ElTag, ElButton, ElInput, ElTableColumn } from 'element-plus'
-import { Search, Plus, Edit, Delete } from '@element-plus/icons-vue'
+import { ElTag, ElButton, ElInput, ElTableColumn, ElButtonGroup, ElMessageBox } from 'element-plus'
+import { Search, Plus, Edit, Delete, UploadFilled } from '@element-plus/icons-vue'
 
-import { FormOperation } from 'co6co'
+import { FormOperation, IResponse } from 'co6co'
 import {
   routeHook,
   DictSelectInstance,
@@ -12,9 +12,10 @@ import {
   deleteHook,
   TableViewInstance,
   StateSelect,
+  StateSelectInstance,
   useDictHook,
   Download,
-  upload_svc
+  UploadFile
 } from 'co6co-right'
 
 import Diaglog, { type Item } from '@/components/dev/modifyDev'
@@ -45,9 +46,7 @@ export default defineComponent({
     //:page
     const viewRef = ref<TableViewInstance>()
     const diaglogRef = ref<InstanceType<typeof Diaglog>>()
-    const categoryDictRef = ref<DictSelectInstance>()
-    const stateDictRef = ref<DictSelectInstance>()
-
+    const statueInstanceRef = ref<StateSelectInstance>()
     const onOpenDialog = (row?: Item) => {
       DATA.title = row ? `编辑[${row?.name}]` : '增加'
       DATA.currentItem = row
@@ -69,17 +68,20 @@ export default defineComponent({
       deleteSvc(row.id, row.name)
     }
 
-    const onImport = () => {
-      const formData = new FormData()
-      const fileInput = document.getElementById('fileInput')
-      const file = fileInput.files[0]
-      formData.append('file', file)
-      try {
-        api.upload_template(formData)
-      } catch (error) {}
+    const getName = (v: number) => {
+      return statueInstanceRef.value?.getName(v)
+    }
+    const getTagType = (v: number) => {
+      return statueInstanceRef.value?.getTagType(v)
+    }
+    const onSuccess = (data: IResponse) => {
+      ElMessageBox.alert(data.message, '提示', {
+        type: 'success',
+        confirmButtonText: '确定'
+      })
+      onSearch()
     }
 
-    const { loadData, getName, getTagType } = useDictHook.useState()
     //:page reader
     const rander = (): VNodeChild => {
       return (
@@ -104,6 +106,7 @@ export default defineComponent({
                   />
 
                   <StateSelect
+                    ref={statueInstanceRef}
                     style={DATA.headItemWidth}
                     v-model={DATA.query.state}
                     placeholder="状态"
@@ -121,11 +124,14 @@ export default defineComponent({
                   >
                     新增
                   </ElButton>
-                  <Download authon title="下载模板" url={api.getResourceUrl()} text={false} />
-
-                  <ElButton text={true} showOverflowTooltip onClick={() => onImport()}>
-                    导入
-                  </ElButton>
+                  <ElButtonGroup style="margin-left:10px">
+                    <Download authon title="下载模板" url={api.getResourceUrl()} text={false} />
+                    <UploadFile
+                      accept=".xlsx,.xls"
+                      onSuccess={onSuccess}
+                      uploadApi={api.upload_template}
+                    />
+                  </ElButtonGroup>
                 </div>
               </>
             ),
@@ -169,7 +175,7 @@ export default defineComponent({
                 >
                   {{
                     default: (scope: { row: Item }) => (
-                      <ElTag>{`${scope.row.lat},${scope.row.lng}`}</ElTag>
+                      <ElTag>{`${scope.row.lng},${scope.row.lat}`}</ElTag>
                     )
                   }}
                 </ElTableColumn>
@@ -182,9 +188,7 @@ export default defineComponent({
                 >
                   {{
                     default: (scope: { row: Item }) => (
-                      <ElTag type={getTagType(scope.row.state)}>
-                        {(getName(scope.row.state), scope.row.state)}
-                      </ElTag>
+                      <ElTag type={getTagType(scope.row.state)}>{getName(scope.row.state)}</ElTag>
                     )
                   }}
                 </ElTableColumn>

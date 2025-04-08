@@ -4,6 +4,7 @@ from .cfTask import CfTaskMgr
 from .devCapImg import DeviceCuptureImage
 from typing import overload, List, Tuple
 from co6co.utils import log
+from co6co_sanic_ext import sanics
 __all__ = ['ICustomTask', "CfTaskMgr", 'DeviceCuptureImage']
 
 
@@ -37,7 +38,7 @@ def get_list() -> List[Tuple[str, str]]:
     return _list
 
 
-def get_task(code: str) -> ICustomTask | None:
+def get_task(code: str, worker: sanics.Worker) -> ICustomTask | None:
     """
     获取所有子类的列表"
     """
@@ -45,7 +46,7 @@ def get_task(code: str) -> ICustomTask | None:
     for c in class_arr:
         if c.code == code:
             try:
-                return c()
+                return c(worker)
             except Exception as e:
                 log.err(f"实例化'{c}'失败", e)
     return None

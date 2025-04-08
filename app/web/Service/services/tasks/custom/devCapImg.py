@@ -15,7 +15,7 @@ from sqlalchemy.sql import Select, Update
 from typing import List, Tuple, TypedDict
 from co6co.utils import getDateFolder
 from pathlib import Path
-
+from co6co_sanic_ext import sanics
 import threading
 
 
@@ -31,6 +31,9 @@ class DeviceCuptureImage(ICustomTask):
     name = "抓图设备流图片"
     code = "CAPTURE_DEV_IMAGE"
 
+    def __init__(self, worker: sanics.Worker):
+        super().__init__(worker)
+
     async def queryTable(self, bll: BaseBll) -> List[TableEntry]:
         try:
             call = QueryListCallable(bll.session)
@@ -44,8 +47,9 @@ class DeviceCuptureImage(ICustomTask):
             log.err("执行 ERROR", e)
             return []
 
-    def queryAllDevice(self) -> Tuple[List[TableEntry], str, str, str]:
-        bll = config_bll()
+    @staticmethod
+    def queryConfig(bll: config_bll = None):
+        bll = bll or config_bll()
         deviceConfig: dict | None = bll.run(bll.query_config_value, "device_config", True)
         userName = "admin"
         password = "password"
@@ -56,6 +60,11 @@ class DeviceCuptureImage(ICustomTask):
             root = deviceConfig.get("root", root)
         else:
             log.warn("未找到设备配置,需配置 device_config,{userName:"",password:"",root:""}")
+        return userName, password, root
+
+    def queryAllDevice(self) -> Tuple[List[TableEntry], str, str, str]:
+        bll = config_bll()
+        userName, password, root = DeviceCuptureImage.queryConfig(bll)
         return bll.run(self.queryTable, bll), userName, password, root
 
     def capture_dev_image(self, video_path, output_image_path: str):
@@ -82,7 +91,7 @@ class DeviceCuptureImage(ICustomTask):
                     f.write(buffer)
                 print("图片已保存到:", output_image_path)
             else:
-                print("无法读取视频帧！")
+                print("无法读取视频帧！", video_path)
 
             # 释放资源
             cap.release()
@@ -95,11 +104,16 @@ class DeviceCuptureImage(ICustomTask):
         deviceList, userName, pwd, root = self.queryAllDevice()
         # print(deviceList, userName, pwd)
         for device in deviceList:
-            userName = device['userName'] or userName
-            pwd = device['passwd'] or pwd
-            video_path = f"rtsp://{userName}:{pwd}@{device['ip']}:554/Streaming/Channels/1"
-            path = Path(root) / getDateFolder()
+            if self.worker.isQuit:
+                break
+            newUser = device['userName'] or userName
+            newPwd = device['passwd'] or pwd
+            video_path = f"rtsp://{newUser}:{newPwd}@{device['ip']}:554/Streaming/Channels/1"
+            # log.warn("视频地址：", video_path)
+            path = Path(root) / getDateFolder("%Y-%m-%d")
             path.exists() or os.makedirs(path)
             output_image_path = path/f"{device['name']}_{device['ip']}.jpg"
-            print(video_path, output_image_path)
-            threading.Thread(target=self.capture_dev_image, args=(video_path, output_image_path)).start()
+            # print(video_path, output_image_path)
+            from co6co.task.pools import limitThreadPoolExecutor
+            self.capture_dev_image(video_path, output_image_path)
+            # threading.Thread(target=self.capture_dev_image, args=(video_path, output_image_path)).start()

@@ -145,20 +145,11 @@ export default defineComponent({
     onMounted(() => {})
     onBeforeUnmount(() => {})
 
-    const taskCategoryRef = ref<DictSelectInstance>()
-    const valid = (promise: Promise<IResponse<boolean>>, rule: any, callback: validatorBack) => {
-      promise.then((res) => {
-        if (res.data) return callback()
-        return (rule.message = res.message), callback(new Error(rule.message))
-      })
-    }
-
     const rules: FormRules = {
       name: [{ required: true, message: '请输入名称', trigger: ['blur', 'change'] }],
       code: [{ required: true, message: '请输入编码', trigger: ['blur', 'change'] }],
       ip: [{ required: true, message: '请输入网络地址', trigger: ['blur', 'change'] }],
-      lat: [{ required: true, message: '维度', trigger: ['blur', 'change'] }],
-      lng: [{ required: true, message: '经度', trigger: ['blur', 'change'] }],
+
       state: [{ required: true, message: '状态能为空', trigger: ['blur', 'change'] }]
     }
 
@@ -205,13 +196,13 @@ export default defineComponent({
               </ElFormItem>
             </ElCol>
             <ElCol span={12}>
-              <ElFormItem label="lat" prop="lat">
-                <ElInput v-model={DATA.fromData.lat} />
+              <ElFormItem label="经度" prop="lng">
+                <ElInput v-model={DATA.fromData.lng} />
               </ElFormItem>
             </ElCol>
             <ElCol span={12}>
-              <ElFormItem label="lng" prop="lng">
-                <ElInput v-model={DATA.fromData.lng} />
+              <ElFormItem label="维度" prop="lat">
+                <ElInput v-model={DATA.fromData.lat} />
               </ElFormItem>
             </ElCol>
 

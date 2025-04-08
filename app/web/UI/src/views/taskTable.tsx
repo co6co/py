@@ -31,10 +31,10 @@ export default defineComponent({
       title?: string
       query: IQueryItem
       currentItem?: Item
-      headItemWidth: number
+      headItemWidth: { width: string }
     }>({
       query: {},
-      headItemWidth: 120
+      headItemWidth: { width: '180px' }
     })
 
     //:use
@@ -137,7 +137,7 @@ export default defineComponent({
               <>
                 <div class="handle-box">
                   <ElInput
-                    width={DATA.headItemWidth}
+                    style={DATA.headItemWidth}
                     clearable
                     v-model={DATA.query.name}
                     placeholder="模板标题"
@@ -145,21 +145,21 @@ export default defineComponent({
                   />
                   <DictSelect
                     ref={categoryDictRef}
-                    width={DATA.headItemWidth}
+                    style={DATA.headItemWidth}
                     dictTypeCode={DictTypeCodes.TaskCategory}
                     v-model={DATA.query.category}
                     placeholder="类别"
                   />
                   <DictSelect
                     ref={stateDictRef}
-                    width={DATA.headItemWidth}
+                    style={DATA.headItemWidth}
                     dictTypeCode={DictTypeCodes.TaskState}
                     v-model={DATA.query.category}
                     placeholder="任务状态"
                   />
                   <DictSelect
                     ref={statusDictRef}
-                    width={160}
+                    style={DATA.headItemWidth}
                     dictTypeCode={DictTypeCodes.TaskStatus}
                     v-model={DATA.query.category}
                     placeholder="运行状态"

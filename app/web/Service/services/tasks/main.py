@@ -241,7 +241,7 @@ class TasksMgr(BaseBll, sanics.Worker):
             log.info("加载任务:{}...".format(code))
             if category == 0:
                 # log.warn("任务在代码中，加找到加载下个模块：{}".format(code))
-                task = custom. get_task(item)
+                task = custom. get_task(item, self)
                 if task:
                     self.scheduler.addTask(code, task.main, cron)
                     success.append(code)
@@ -277,4 +277,6 @@ class TasksMgr(BaseBll, sanics.Worker):
     def stop(self):
         super().stop()
         result = self.run(self.update_status)
+        self.scheduler.removeAll()
         log.warn("状态更新,成功->{}".format(result))
+        log.info("等待其他任务退出..")

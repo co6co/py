@@ -6,15 +6,18 @@ import asyncio
 from co6co.utils import try_except
 import socket
 from co6co.utils import http
+from co6co_sanic_ext import sanics
 
 
 class CfTaskMgr(ICustomTask):
     name = "更新cf解析记录"
     code = "CfTaskMgr"
 
-    def __init__(self):
+    def __init__(self, worker: sanics.Worker):
+        super().__init__(worker)
         self.cfService: CfService = asyncio.run(CfService.instance())
         runonce = self.cfService.item.get("runOnce", True)
+
         if runonce:
             log.succ("cfTaskMgr:", "启动", "执行一次...")
             self.main()

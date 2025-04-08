@@ -87,4 +87,6 @@
     1. dragVerify 手机端支持
 0.0.35
     1. 优化
+    2. 增加 uploadFile 组件
+
 ```
