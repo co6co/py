@@ -38,7 +38,7 @@ def get_list() -> List[Tuple[str, str]]:
     return _list
 
 
-def get_task(code: str, worker: sanics.Worker) -> ICustomTask | None:
+def get_task(code: str, worker: sanics.Worker = None) -> ICustomTask | None:
     """
     获取所有子类的列表"
     """

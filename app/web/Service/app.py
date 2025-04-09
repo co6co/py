@@ -5,6 +5,7 @@ from co6co.utils.win import execute_command
 from sanic import Sanic
 from co6co.utils import log
 from sanic.config import Config
+from sanic_ext import __version__
 from co6co_sanic_ext.utils.cors_utils import attach_cors
 from co6co_sanic_ext import sanics
 from co6co_sanic_ext import session

@@ -33,3 +33,6 @@ export const img_list_svc = (data: { date: string }): Promise<IResponse<Array<st
 export const img_preview_svc = (date: string, name: string): Promise<IResponse<Array<string>>> => {
   return request.get(`${base_img_URL}/preview/${date}/${name}`)
 }
+export const img_del_folder_svc = (date: string): Promise<IResponse> => {
+  return request.delete(`${base_img_URL}/${date}`)
+}

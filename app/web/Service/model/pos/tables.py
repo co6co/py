@@ -26,9 +26,9 @@ class SysTaskPO(UserTimeStampedModelPO):
         self.code = po.code
         self.state = po.state
         self.category = po.category
-        self.execStatus = po.execStatus
         self.data = po.data
         self.cron = po.cron
+        self.execStatus = po.execStatus
 
 
 class DynamicCodePO(UserTimeStampedModelPO):

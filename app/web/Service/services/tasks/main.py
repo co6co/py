@@ -39,7 +39,7 @@ class HandlerCommand(ABC):
         sourceCode = self. data.sourceCode
         if not sourceCode:
             code = self. data.sourceForm
-            task = custom.get_task(code)
+            task = custom.get_task(code, self.taskMgr)
             if task:
                 sourceCode = task.main
         if not sourceCode:
@@ -141,6 +141,7 @@ class RemoveHandler(HandlerCommand):
             if not self._taskisExist():
                 result = False
                 message = f"任务{self.taskCode}，不存在!"
+                fall_result = self.taskMgr.run(self.taskMgr.update_status, [self. taskCode], 0)
             else:
                 result = self.scheduler.removeTask(self. taskCode)
                 if result:
@@ -200,6 +201,17 @@ class TasksMgr(BaseBll, sanics.Worker):
         except Exception as e:
             log.err("执行 ERROR", e)
             return []
+
+    async def update_status__2(self):
+        """
+        意外状态更新
+        """
+        # 防止万一的代码
+        ccc = Update(SysTaskPO).where(SysTaskPO.state == dict_state.disabled.val, SysTaskPO.execStatus == 1).values({SysTaskPO.execStatus: 0})
+        result2 = await db_tools.execSQL(self.session, ccc)
+        log.info("更新状态不正确的任务：{}【应该为0】".format(result2))
+        await self.session.commit()
+        return result2
 
     async def update_status(self, codeList: List[str] = None, status: int = 0) -> int:
         """
@@ -264,7 +276,8 @@ class TasksMgr(BaseBll, sanics.Worker):
             succ_result = self.run(self.update_status, success, 1)
         if len(faile) > 0:
             fall_result = self.run(self.update_status, faile, 0)
-        log.warn("状态更新,成功->{},失败->{}".format(succ_result, fall_result))
+        exeStatue = self.run(self.update_status__2)
+        log.warn("状态更新,成功->{},失败->{},意外的状态：{}".format(succ_result, fall_result, exeStatue))
 
     def start(self):
         """

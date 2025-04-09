@@ -1,19 +1,15 @@
 
 from sanic.response import text, file, raw, json
+from sanic.exceptions import NotFound
 from sanic import Request
-from co6co_sanic_ext.utils import JSON_util
 from co6co_sanic_ext.model.res.result import Result
-from sqlalchemy.ext.asyncio import AsyncSession
-
-from sqlalchemy.sql import Select, Update, Insert
-from co6co_db_ext.db_utils import db_tools
 from co6co_permissions.view_model.base_view import AuthMethodView, BaseMethodView
-from model.pos.tables import DevicePO
-from view_model._filters.device import Filter
 from co6co.utils import log
-import ipaddress
 from services.tasks.custom.devCapImg import DeviceCuptureImage
 import os
+import shutil
+
+from urllib.parse import unquote
 
 
 class Views(BaseMethodView):
@@ -54,7 +50,30 @@ class Views(BaseMethodView):
 class PreView(Views):
     routePath = "/preview/<date:str>/<name:str>"
 
-    def get(self, date: str, name: str):
+    def get(self, request: Request, date: str, name: str):
         self.init()
-        log.warn(date, name)
-        return file(os.path.join(self.root, date, name))
+        self.parser_multipart_body
+        date = unquote(date)
+        name = unquote(name)
+        filePath = os.path.join(self.root, date, name)
+        log.warn(filePath)
+        if os.path.exists(filePath):
+            return file(filePath)
+        else:
+            return NotFound("图片不存在")
+
+
+class DeleteFolderViews(Views):
+    routePath = "/<date:str>"
+
+    async def delete(self, request: Request, date: str):
+        """
+        删除
+        """
+        self.init()
+        folder = os.path.join(self.root, date)
+        if os.path.exists(folder):
+            shutil.rmtree(folder)
+            return self.response_json(Result.success())
+        else:
+            return self.response_json(Result.fail("文件夹不存在"))

@@ -12,6 +12,8 @@ from model.pos.tables import SysTaskPO, DynamicCodePO
 from view_model._filters.sysTask import Filter
 from co6co_permissions.view_model.aop import exist, ObjectExistRoute
 from services.tasks import custom
+from co6co.utils import log
+from .schedView import schedView
 
 
 class ExistView(AuthMethodView):
@@ -92,6 +94,9 @@ class View(AuthMethodView):
             exist = await db_tools.exist(session, SysTaskPO.id != oldPo.id, SysTaskPO.code.__eq__(po.code), column=SysTaskPO.id)
             if exist:
                 return JSON_util.response(Result.fail(message=f"'{po.code}'已存在！"))
+            if oldPo.execStatus == 1:
+                return JSON_util.response(Result.fail(message=f"'任务正在运行中请先停止，后再进行编辑！"))
+
         return await self.edit(request, pk, SysTaskPO,  userId=self.getUserId(request), fun=before)
 
     async def delete(self, request: Request, pk: int):

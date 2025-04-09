@@ -17,6 +17,8 @@ from co6co.utils import getDateFolder
 from pathlib import Path
 from co6co_sanic_ext import sanics
 import threading
+from co6co.task.pools import limitThreadPoolExecutor
+from concurrent.futures import Future
 
 
 class TableEntry(TypedDict):
@@ -31,7 +33,7 @@ class DeviceCuptureImage(ICustomTask):
     name = "抓图设备流图片"
     code = "CAPTURE_DEV_IMAGE"
 
-    def __init__(self, worker: sanics.Worker):
+    def __init__(self, worker: sanics.Worker = None):
         super().__init__(worker)
 
     async def queryTable(self, bll: BaseBll) -> List[TableEntry]:
@@ -99,12 +101,27 @@ class DeviceCuptureImage(ICustomTask):
             log.err(f"执行 ERROR", e)
             print(f"发生{video_path},错误: {e}")
 
+    def result(self, f: Future):
+        if f.exception():
+            log.err(f"执行{f.path} ERROR", f.exception())
+            print(f"发生错误: {f.exception()}")
+        else:
+            print(f"任务{f.path}完成,保存到{f.savePath}")
+
     @try_except
     def main(self):
         deviceList, userName, pwd, root = self.queryAllDevice()
+        from co6co.task.utils import Timer
+        import time
         # print(deviceList, userName, pwd)
+        ns = time.time()
+        timeer = Timer(f"抓图设备流图片:{ns}")
+        timeer.start()
+        pool = limitThreadPoolExecutor(max_workers=4, thread_name_prefix="zip_pj")
+
         for device in deviceList:
-            if self.worker.isQuit:
+            if self.worker and self.worker.isQuit:
+                pool.shutdown(False, cancel_futures="工作线程退出")
                 break
             newUser = device['userName'] or userName
             newPwd = device['passwd'] or pwd
@@ -114,6 +131,11 @@ class DeviceCuptureImage(ICustomTask):
             path.exists() or os.makedirs(path)
             output_image_path = path/f"{device['name']}_{device['ip']}.jpg"
             # print(video_path, output_image_path)
-            from co6co.task.pools import limitThreadPoolExecutor
-            self.capture_dev_image(video_path, output_image_path)
-            # threading.Thread(target=self.capture_dev_image, args=(video_path, output_image_path)).start()
+            f = pool.submit(self.capture_dev_image, video_path, output_image_path)
+            f.path = video_path
+            f.savePath = output_image_path
+            f.add_done_callback(self.result)
+            # self.capture_dev_image(video_path, output_image_path)
+
+        timeer.stop()
+        log.warn(f"{ns}抓图设备流图片完成,耗时：", timeer.time)

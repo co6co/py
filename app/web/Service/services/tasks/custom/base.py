@@ -8,7 +8,7 @@ class ICustomTask(ABC):
     name = "抽象任务接口"
     code = "ICustomTask"
 
-    def __init__(self, worker: sanics.Worker):
+    def __init__(self, worker: sanics.Worker = None):
 
         super().__init__()
         self.worker = worker

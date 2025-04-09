@@ -40,7 +40,8 @@ class schedView(_codeView, AuthMethodView):
         cron = poDict.get("cron")
         return code, cron, sourceCode, data
 
-    def getPipConn(self, request: Request) -> PipeConnection:
+    @staticmethod
+    def getPipConn(request: Request) -> PipeConnection:
         return request.app.ctx.child_conn
 
     async def post(self, request: Request, pk: int):
@@ -49,7 +50,7 @@ class schedView(_codeView, AuthMethodView):
         周期性执行的可以执行完成的代码
         """
         code,  cron, sourceCode, data = await self.read_data(pk, request)
-        conn = self.getPipConn(request)
+        conn = schedView.getPipConn(request)
         conn.send(CommandCategory.createOption(CommandCategory.Exist, code=code))
         result: DATA = conn.recv()
         param = {"code": code, "sourceCode": sourceCode, "sourceForm": data, "cron": cron}
@@ -66,19 +67,27 @@ class schedView(_codeView, AuthMethodView):
         else:
             return self.response_json(Result.fail(message=result.data))
 
+    @staticmethod
+    async def stopSched(request: Request, code: str):
+        conn = schedView.getPipConn(request)
+        conn.send(CommandCategory.createOption(CommandCategory.REMOVE, code=code))
+        result: DATA = conn.recv()
+        if result.success:
+            return True, result.data
+        else:
+            return False, result.data
+
     async def delete(self, request: Request, pk: int):
         """
         停止调度
         """
         select = Select(SysTaskPO).filter(SysTaskPO.id.__eq__(pk))
         po: SysTaskPO = await get_one(request, select)
-        conn = self.getPipConn(request)
-        conn.send(CommandCategory.createOption(CommandCategory.REMOVE, code=po.code))
-        result: DATA = conn.recv()
-        if result.success:
+        success, msg = await schedView.stopSched(request, po.code)
+        if success:
             return self.response_json(Result.success(message="停止成功"))
         else:
-            return self.response_json(Result.fail(message="停止失败:"+result.data))
+            return self.response_json(Result.fail(message="停止失败:"+msg))
 
     async def put(self, request: Request, pk: int):
         """
@@ -89,7 +98,6 @@ class schedView(_codeView, AuthMethodView):
             try:
                 print(data)
                 task = custom.get_task(data)
-                print(type(task), data)
                 task.main()
                 return self.response_json(Result.success("None", message="执行成功"))
             except Exception as e:

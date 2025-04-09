@@ -65,6 +65,7 @@ class Scheduler(Singleton):
 
     def __init__(self) -> None:
         scheduler = BackgroundScheduler()
+
         # //todo 编译器解释 self._scheduler 为 Any 对象 为什么不是 BackgroundScheduler
         self._scheduler = scheduler
         self._scheduler.start()
@@ -107,9 +108,7 @@ class Scheduler(Singleton):
             return False
 
     def removeAll(self):
-        for key in self._tasks:
-            jobid = self._tasks[key]
-            self.scheduler.remove_job(jobid)
+        self. scheduler.remove_all_jobs()
         self._tasks.clear()
 
     def checkCode(self,  code: str, corn: str):
