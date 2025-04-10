@@ -5,7 +5,6 @@ from co6co.utils.win import execute_command
 from sanic import Sanic
 from co6co.utils import log
 from sanic.config import Config
-from sanic_ext import __version__
 from co6co_sanic_ext.utils.cors_utils import attach_cors
 from co6co_sanic_ext import sanics
 from co6co_sanic_ext import session
@@ -16,6 +15,7 @@ import time
 import os
 from services.taskService import dynamicRouter
 from services.tasks.main import TasksMgr
+import multiprocessing
 
 
 def appendRoute(app: Sanic):
@@ -71,6 +71,7 @@ def createTask(app: Sanic, envent: asyncio.Event, conn: PipeConnection):
 
 
 def main():
+    
     dir = os.path.dirname(__file__)
     defaultConfig = "{}/app_config.json".format(dir)
     configPath = os.path.abspath(defaultConfig)
@@ -82,6 +83,7 @@ def main():
 
 
 if __name__ == "__main__":
+    multiprocessing.freeze_support()
     # print("__file__", __file__)
     # current_file_path = os.path.abspath(__file__)
     # print("basename", os.path.basename(__file__))
