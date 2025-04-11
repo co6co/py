@@ -66,23 +66,14 @@ export default defineComponent({
       //const result: Array<image2Option> = []
       dataUrlsResult.value = []
       const result: IData[] = []
-      const flag = 5
-      for (let i = 0; i < data.length; i = i + flag) {
-        const temp: image2Option[] = []
-        for (let j = 0; j < flag; j++) {
-          const item = {
-            url: `${getBaseUrl()}/api/dev/img/preview/${DATA.query.date}/${data[i + j]}`,
-            authon: true
-          }
-          dataUrlsResult.value.push({ url: item.url, name: data[i + j] })
-          temp.push(item)
+      for (let i = 0; i < data.length; i++) {
+        const item = {
+          url: `${getBaseUrl()}/api/dev/img/preview/${DATA.query.date}/${data[i]}`,
+          authon: true
         }
-        result.push({ options: temp })
+        dataUrlsResult.value.push({ url: item.url, name: data[i] })
       }
-      dataResult.value = []
-      for (let i = 0; i < flag; i++) {
-        dataResult.value.push(i)
-      }
+
       return result
     }
     const onDelFolder = (name: string) => {
@@ -105,7 +96,7 @@ export default defineComponent({
             dataApi={api.img_list_svc}
             resultFilter={onFilter}
             ref={viewRef}
-            showPaged={false}
+            showPaged={true}
             query={DATA.query}
           >
             {{

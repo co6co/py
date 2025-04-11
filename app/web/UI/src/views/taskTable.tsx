@@ -1,7 +1,17 @@
 import { defineComponent, nextTick, VNodeChild } from 'vue'
 import { ref, reactive, onMounted } from 'vue'
-import { ElTag, ElButton, ElInput, ElTableColumn, ElMessage } from 'element-plus'
-import { Search, Plus, Edit } from '@element-plus/icons-vue'
+import {
+  ElTag,
+  ElButton,
+  ElInput,
+  ElTableColumn,
+  ElMessage,
+  ElDropdown,
+  ElDropdownMenu,
+  ElDropdownItem,
+  ElIcon
+} from 'element-plus'
+import { Search, Plus, Edit, Delete, ArrowDown } from '@element-plus/icons-vue'
 
 import { FormOperation, showLoading, closeLoading, IResponse } from 'co6co'
 import {
@@ -10,6 +20,7 @@ import {
   DictSelectInstance,
   tableScope,
   TableView,
+  deleteHook,
   TableViewInstance
 } from 'co6co-right'
 
@@ -93,7 +104,7 @@ export default defineComponent({
       return result
     }
 
-    const oncommand = (
+    const exeCommand = (
       row: Item,
       svc: (id: number) => Promise<IResponse>,
       showCode: boolean = false
@@ -118,14 +129,25 @@ export default defineComponent({
           closeLoading()
         })
     }
-    const onSched = (row: Item) => {
-      oncommand(row, api.exe_sched_svc)
+
+    const onCommand = (command: string, row: Item) => {
+      switch (command) {
+        case 'sched':
+          exeCommand(row, api.exe_sched_svc)
+          break
+        case 'stop':
+          exeCommand(row, api.stop_sched_svc)
+          break
+        case 'once':
+          exeCommand(row, api.exe_once_svc, true)
+          break
+      }
     }
-    const onStop = (row: Item) => {
-      oncommand(row, api.stop_sched_svc)
-    }
-    const onOneRun = (row: Item) => {
-      oncommand(row, api.exe_once_svc, true)
+    const { deleteSvc } = deleteHook.default(api.del_svc, () => {
+      onRefesh()
+    })
+    const onDelete = (row: Item) => {
+      deleteSvc(row.id, row.name)
     }
 
     //:page reader
@@ -276,29 +298,47 @@ export default defineComponent({
                         >
                           编辑
                         </ElButton>
-
                         <ElButton
                           text={true}
-                          disabled={isRuning(scope.row)}
-                          onClick={() => onSched(scope.row)}
+                          icon={Delete}
+                          onClick={() => onDelete(scope.row)}
+                          v-permiss={getPermissKey(routeHook.ViewFeature.del)}
                         >
-                          调度
+                          删除
                         </ElButton>
-                        <ElButton
-                          text={true}
-                          disabled={!isRuning(scope.row)}
-                          onClick={() => onStop(scope.row)}
-                        >
-                          停止
-                        </ElButton>
-                        <ElButton
-                          text={true}
-                          title="不要执行时间太长的程序"
-                          showOverflowTooltip
-                          onClick={() => onOneRun(scope.row)}
-                        >
-                          执行
-                        </ElButton>
+                        <ElDropdown trigger="click" onCommand={(cmd) => onCommand(cmd, scope.row)}>
+                          {{
+                            default: () => (
+                              <ElButton type="primary" text>
+                                更多
+                                <ElIcon>
+                                  <ArrowDown />
+                                </ElIcon>
+                              </ElButton>
+                            ),
+                            dropdown: () => (
+                              <div>
+                                <ElDropdownMenu>
+                                  <ElDropdownItem
+                                    disabled={!(scope.row.state == 1 && scope.row.execStatus == 0)}
+                                    command="sched"
+                                  >
+                                    调度
+                                  </ElDropdownItem>
+                                  <ElDropdownItem
+                                    disabled={scope.row.execStatus == 0}
+                                    command="stop"
+                                  >
+                                    停止
+                                  </ElDropdownItem>
+                                  <ElDropdownItem title="不要执行时间太长的程序" command="once">
+                                    执行
+                                  </ElDropdownItem>
+                                </ElDropdownMenu>
+                              </div>
+                            )
+                          }}
+                        </ElDropdown>
                       </>
                     )
                   }}

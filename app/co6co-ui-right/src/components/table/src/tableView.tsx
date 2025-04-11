@@ -151,11 +151,13 @@ export default defineComponent({
 						</ElMain>
 						{prop.showPaged ? (
 							<ElFooter>
+								{/*增加Pagination的相关参数*/}
 								<Pagination
 									option={DATA.query}
 									total={DATA.pageTotal}
 									onCurrentPageChange={queryData}
-									onSizeChage={queryData}></Pagination>
+									onSizeChage={queryData}
+								/>
 							</ElFooter>
 						) : (
 							<></>

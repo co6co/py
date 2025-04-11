@@ -11,8 +11,8 @@
     <module_usages />
   </module>
   <module name="__main__" kind="PythonMainModule" usage="root_module" reason="Root module" source_path="${cwd}\tools\ftpCheck.py">
-    <optimization-time pass="1" time="0.61" micro_passes="9" max_branch_merge="23" merged_total="2739" />
-    <optimization-time pass="2" time="0.04" micro_passes="1" max_branch_merge="21" merged_total="297" />
+    <optimization-time pass="1" time="0.35" micro_passes="9" max_branch_merge="23" merged_total="2659" />
+    <optimization-time pass="2" time="0.05" micro_passes="1" max_branch_merge="21" merged_total="287" />
     <distribution-usages>
       <distribution-usage name="co6co" />
     </distribution-usages>
@@ -317,8 +317,8 @@
     </module_usages>
   </module>
   <module name="__parents_main__" kind="CompiledPythonModule" usage="plugins" reason="Auto enable multiprocessing freeze support" source_path="${cwd}\tools\ftpCheck.py">
-    <optimization-time pass="1" time="0.11" micro_passes="9" max_branch_merge="23" merged_total="2272" />
-    <optimization-time pass="2" time="0.01" micro_passes="1" max_branch_merge="21" merged_total="220" />
+    <optimization-time pass="1" time="0.13" micro_passes="9" max_branch_merge="23" merged_total="2192" />
+    <optimization-time pass="2" time="0.01" micro_passes="1" max_branch_merge="21" merged_total="210" />
     <distribution-usages>
       <distribution-usage name="co6co" />
     </distribution-usages>
@@ -333,8 +333,8 @@
       <module_usage name="co6co.utils" finding="absolute" line="6" />
       <module_usage name="co6co.utils.log" finding="relative" line="6" />
       <module_usage name="signal" finding="absolute" line="7" />
-      <module_usage name="sys" finding="absolute" line="130" />
-      <module_usage name="multiprocessing.spawn" finding="absolute" line="133" />
+      <module_usage name="sys" finding="absolute" line="132" />
+      <module_usage name="multiprocessing.spawn" finding="absolute" line="135" />
     </module_usages>
   </module>
   <module name="__phello__" kind="UncompiledPythonPackage" usage="stdlib" reason="Including as part of the non-excluded parts of standard library." source_path="${sys.prefix}\Lib\__phello__\__init__.py">
@@ -373,7 +373,7 @@
     </module_usages>
   </module>
   <module name="_asyncio" kind="PythonExtensionModule" usage="import" reason="Extension module needed for standalone mode." source_path="${sys.prefix}\DLLs\_asyncio.pyd">
-    <optimization-time pass="1" time="0.01" />
+    <optimization-time pass="1" time="0.00" />
     <optimization-time pass="2" time="0.00" />
     <module_usages />
   </module>
@@ -634,7 +634,7 @@
   </module>
   <module name="asyncio" kind="UncompiledPythonPackage" usage="import" reason="Instructed by user to follow to all modules." source_path="${sys.prefix}\Lib\asyncio\__init__.py">
     <optimization-time pass="1" time="0.84" micro_passes="3" max_branch_merge="1" merged_total="1" />
-    <optimization-time pass="2" time="0.00" />
+    <optimization-time pass="2" time="0.01" />
     <module_usages>
       <module_usage name="os" finding="absolute" line="1" />
       <module_usage name="sys" finding="absolute" line="5" />
@@ -1259,7 +1259,7 @@
     </module_usages>
   </module>
   <module name="co6co" kind="CompiledPythonPackage" usage="import path parent" reason="Instructed by user to follow to all modules." source_path="${sys.prefix}\Lib\site-packages\co6co\__init__.py" distribution="co6co">
-    <optimization-time pass="1" time="0.01" micro_passes="5" max_branch_merge="12" merged_total="263" />
+    <optimization-time pass="1" time="0.02" micro_passes="5" max_branch_merge="12" merged_total="263" />
     <optimization-time pass="2" time="0.00" micro_passes="1" max_branch_merge="9" merged_total="45" />
     <module_usages>
       <module_usage name="os" finding="absolute" line="1" />
@@ -1267,7 +1267,7 @@
     </module_usages>
   </module>
   <module name="co6co.task" kind="CompiledPythonPackage" usage="import path parent" reason="Instructed by user to follow to all modules." source_path="${sys.prefix}\Lib\site-packages\co6co\task\__init__.py" distribution="co6co">
-    <optimization-time pass="1" time="0.03" micro_passes="6" max_branch_merge="29" merged_total="846" />
+    <optimization-time pass="1" time="0.04" micro_passes="6" max_branch_merge="29" merged_total="947" />
     <optimization-time pass="2" time="0.01" micro_passes="1" max_branch_merge="23" merged_total="125" />
     <module_usages>
       <module_usage name="os" finding="absolute" line="1" />
@@ -1278,7 +1278,7 @@
     </module_usages>
   </module>
   <module name="co6co.task.pools" kind="CompiledPythonModule" usage="import" reason="Instructed by user to follow to all modules." source_path="${sys.prefix}\Lib\site-packages\co6co\task\pools.py" distribution="co6co">
-    <optimization-time pass="1" time="0.01" micro_passes="4" max_branch_merge="14" merged_total="147" />
+    <optimization-time pass="1" time="0.02" micro_passes="4" max_branch_merge="14" merged_total="215" />
     <optimization-time pass="2" time="0.00" micro_passes="1" max_branch_merge="14" merged_total="31" />
     <module_usages>
       <module_usage name="concurrent.futures" finding="absolute" line="2" />
@@ -1287,8 +1287,8 @@
     </module_usages>
   </module>
   <module name="co6co.utils" kind="CompiledPythonPackage" usage="import" reason="Instructed by user to follow to all modules." source_path="${sys.prefix}\Lib\site-packages\co6co\utils\__init__.py" distribution="co6co">
-    <optimization-time pass="1" time="0.11" micro_passes="7" max_branch_merge="28" merged_total="2171" />
-    <optimization-time pass="2" time="0.02" micro_passes="1" max_branch_merge="19" merged_total="282" />
+    <optimization-time pass="1" time="0.13" micro_passes="7" max_branch_merge="28" merged_total="2272" />
+    <optimization-time pass="2" time="0.01" micro_passes="1" max_branch_merge="19" merged_total="282" />
     <module_usages>
       <module_usage name="os" finding="absolute" line="1" />
       <module_usage name="re" finding="absolute" line="2" />
@@ -1308,7 +1308,7 @@
     </module_usages>
   </module>
   <module name="co6co.utils.log" kind="CompiledPythonModule" usage="import fromlist" reason="Instructed by user to follow to all modules." source_path="${sys.prefix}\Lib\site-packages\co6co\utils\log.py" distribution="co6co">
-    <optimization-time pass="1" time="0.13" micro_passes="5" max_branch_merge="32" merged_total="686" />
+    <optimization-time pass="1" time="0.08" micro_passes="5" max_branch_merge="32" merged_total="696" />
     <optimization-time pass="2" time="0.01" micro_passes="1" max_branch_merge="27" merged_total="118" />
     <module_usages>
       <module_usage name="datetime" finding="absolute" line="3" />
@@ -5369,9 +5369,9 @@
     </module_usages>
   </module>
   <performance>
-    <memory_usage name="after_launch" value="43790336" />
-    <memory_usage name="before_c_code_generation" value="396128256" />
-    <memory_usage name="before_running_scons" value="396222464" />
+    <memory_usage name="after_launch" value="43614208" />
+    <memory_usage name="before_c_code_generation" value="69894144" />
+    <memory_usage name="before_running_scons" value="70455296" />
   </performance>
   <included_extension name="_asyncio.pyd" dest_path="_asyncio.pyd" source_path="${sys.prefix}\DLLs\_asyncio.pyd" package="" ignored="no" reason="used extension module" />
   <included_extension name="_bz2.pyd" dest_path="_bz2.pyd" source_path="${sys.prefix}\DLLs\_bz2.pyd" package="" ignored="no" reason="used extension module" />
@@ -5388,11 +5388,11 @@
   <included_extension name="pyexpat.pyd" dest_path="pyexpat.pyd" source_path="${sys.prefix}\DLLs\pyexpat.pyd" package="" ignored="no" reason="used extension module" />
   <included_extension name="select.pyd" dest_path="select.pyd" source_path="${sys.prefix}\DLLs\select.pyd" package="" ignored="no" reason="used extension module" />
   <included_extension name="unicodedata.pyd" dest_path="unicodedata.pyd" source_path="${sys.prefix}\DLLs\unicodedata.pyd" package="" ignored="no" reason="used extension module" />
-  <data_composer blob_size="7097474" total="1234">
+  <data_composer blob_size="7097461" total="1231">
     <module_data filename="__bytecode.const" blob_name=".bytecode" blob_size="7084001" input_size="7111752" />
     <module_data filename="__constants.const" blob_name="" blob_size="866" input_size="2206" />
-    <module_data filename="module.__main__.const" blob_name="__main__" blob_size="2370" input_size="3849" />
-    <module_data filename="module.__parents_main__.const" blob_name="__parents_main__" blob_size="1539" input_size="2681" />
+    <module_data filename="module.__main__.const" blob_name="__main__" blob_size="2369" input_size="3804" />
+    <module_data filename="module.__parents_main__.const" blob_name="__parents_main__" blob_size="1527" input_size="2634" />
     <module_data filename="module.co6co.const" blob_name="co6co" blob_size="600" input_size="1231" />
     <module_data filename="module.co6co.task.const" blob_name="co6co.task" blob_size="1575" input_size="2460" />
     <module_data filename="module.co6co.task.pools.const" blob_name="co6co.task.pools" blob_size="630" input_size="1005" />

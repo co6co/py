@@ -21,6 +21,8 @@ from multiprocessing import Pipe
 from multiprocessing.connection import PipeConnection
 import asyncio
 import threading
+import multiprocessing
+
 
 
 class Worker(ABC):
@@ -174,6 +176,7 @@ def startApp(configFile: str | Dict, apiInit: Callable[[Sanic, Dict], None], wor
     __main__     --> primary
     __mp_main__  --> multiprocessing
     """
+    multiprocessing.freeze_support() # 进行打包时，需要添加这行代码
     # all_param = {**locals()}
     event = asyncio.Event()
     parent_conn, child_conn = Pipe()

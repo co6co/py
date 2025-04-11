@@ -1,7 +1,7 @@
 import { defineComponent, nextTick, VNodeChild } from 'vue'
 import { ref, reactive, onMounted } from 'vue'
 import { ElTag, ElButton, ElInput, ElTableColumn, ElMessage, ElMessageBox } from 'element-plus'
-import { Search, Plus, Sugar, View, Edit } from '@element-plus/icons-vue'
+import { Search, Plus, Sugar, View, Edit, Delete } from '@element-plus/icons-vue'
 
 import { FormOperation, showLoading, closeLoading } from 'co6co'
 import {
@@ -10,6 +10,7 @@ import {
   DictSelectInstance,
   tableScope,
   TableView,
+  deleteHook,
   TableViewInstance
 } from 'co6co-right'
 
@@ -79,6 +80,12 @@ export default defineComponent({
     onMounted(async () => {
       onSearch()
     })
+    const { deleteSvc } = deleteHook.default(api.del_svc, () => {
+      onRefesh()
+    })
+    const onDelete = (row: Item) => {
+      deleteSvc(row.id, row.name)
+    }
 
     //:page reader
     const rander = (): VNodeChild => {
@@ -190,7 +197,7 @@ export default defineComponent({
                   width={160}
                   show-overflow-tooltip={true}
                 ></ElTableColumn>
-                <ElTableColumn label="操作" width={220} align="center" fixed="right">
+                <ElTableColumn label="操作" width={333} align="center" fixed="right">
                   {{
                     default: (scope: tableScope<Item>) => (
                       <>
@@ -202,9 +209,17 @@ export default defineComponent({
                         >
                           编辑
                         </ElButton>
-
                         <ElButton
                           text={true}
+                          icon={Delete}
+                          onClick={() => onDelete(scope.row)}
+                          v-permiss={getPermissKey(routeHook.ViewFeature.del)}
+                        >
+                          删除
+                        </ElButton>
+                        <ElButton
+                          text={true}
+                          icon={View}
                           title="不要执行时间太长的程序"
                           disabled={!isPythonCode(scope.row.category)}
                           showOverflowTooltip

@@ -71,7 +71,7 @@ def createTask(app: Sanic, envent: asyncio.Event, conn: PipeConnection):
 
 
 def main():
-    
+
     dir = os.path.dirname(__file__)
     defaultConfig = "{}/app_config.json".format(dir)
     configPath = os.path.abspath(defaultConfig)
@@ -83,7 +83,7 @@ def main():
 
 
 if __name__ == "__main__":
-    multiprocessing.freeze_support()
+    multiprocessing.freeze_support()  # 进行打包时，需要添加这行代码
     # print("__file__", __file__)
     # current_file_path = os.path.abspath(__file__)
     # print("basename", os.path.basename(__file__))
