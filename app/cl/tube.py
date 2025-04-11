@@ -9,9 +9,10 @@ from concurrent.futures import Future
 from co6co.utils.log import progress_bar,err,warn
 import signal
 from typing import Callable
+import os
 # url = "https://www.youtube.com/watch?v=lxOFGvHBsTY"
-#proxys = {"http": "http://127.0.0.1:10809", "https": "http://127.0.0.1:10809"}
-proxys = {"http": "http://127.0.0.1:9667", "https": "http://127.0.0.1:9667"}
+proxys = {"http": "http://127.0.0.1:10809", "https": "http://127.0.0.1:10809"}
+#proxys = {"http": "http://127.0.0.1:9667", "https": "http://127.0.0.1:9667"}
 
  
 def getInt(tip,default=-1):
@@ -20,8 +21,7 @@ def getInt(tip,default=-1):
         return int(c)
     except:
         return default
-
-
+ 
 class DownLoad:
     streams: List[Stream] = None
     captions: List[Caption] = None
@@ -51,12 +51,15 @@ class DownLoad:
         progress_bar(stream.downByts/stream.filesize, "stream,剩余：{}-{}".format(getByteUnit(bytes_remaining), stream.filesize))
 
     def __init__(self, url: str = None, title=None, streams: List[Stream] = None, captions: List[Caption] = None) -> None:
+        self.downloadFolder ="D:\\temp\\"
+        if not os.path.exists(self.downloadFolder):
+            os.makedirs(self.downloadFolder)
         if url == None:
             self.title = title
             self.streams = streams
             self.captions = captions
         else:
-            yt = YouTube(url, on_progress_callback=DownLoad. on_pro, proxies=proxys)
+            yt = YouTube(url, on_progress_callback=DownLoad. on_pro, proxies=proxys,use_po_token=True )
             # yt = YouTube(url, use_oauth=True, allow_oauth_cache=True, on_progress_callback=on_progress, proxies=proxys)
             print("视频标题", yt.title)
             self.title = yt.title
@@ -74,7 +77,7 @@ class DownLoad:
         """
         checkedList = [i for i in self.streams if i.itag == itag]
         for stream in checkedList:
-            stream.download()
+            stream.download(filename_prefix=self.downloadFolder)
 
     def downCaption(self):
         caption = self.captions
@@ -181,12 +184,7 @@ class downPlaylist:
         if not self.quitFlag and  len(self.errorList)>0:
             warn("开始下载有异常的数据:len-->{}".format(len(self.errorList)))
             self.start(itag=itag,errorDown=True)
-
-
-
-
             
-
     def custom_handler(self, signum, frame):
         print("Caught signal:", signum)
         self.quitFlag = True
@@ -195,7 +193,7 @@ class downPlaylist:
 if __name__ == "__main__":
     url = input("输入要下载的URL:")
     while True:
-        c = getInt("下载类型:0->列表,1-> 音视频,2->字幕,9->退出:")
+        c = getInt("下载类型:0->列表,1-> 音视频,2->字幕,8->重新输入url,9->退出:")
         if c == 0:
             download = downPlaylist(url)
             download.start()
@@ -210,6 +208,8 @@ if __name__ == "__main__":
         elif c == 2:
             down = DownLoad(url)
             down.downCaption()
+        elif c==8:
+            url= input("输入要下载的URL:")
         elif c == 9:
             break
 
