@@ -14,7 +14,6 @@ import {
 	type IPageParam,
 	onColChange,
 	type Table_Module_Base,
-	
 	Pagination,
 	PaginationProps,
 	IPageResponse,
@@ -48,7 +47,7 @@ export default defineComponent({
 			type: Function as PropType<filter>,
 			default: undefined,
 		},
-		
+
 		autoLoadData: {
 			type: Boolean,
 			default: true,
@@ -57,11 +56,10 @@ export default defineComponent({
 			type: Boolean,
 			default: true,
 		},
-		PagedOption  :{
-			type:Object as PropType<typeof PaginationProps>,  
-			default:PaginationProps
+		pagedOption: {
+			type: Object as PropType<typeof PaginationProps>,
+			default: PaginationProps,
 		},
-
 	},
 	slots: Object as SlotsType<{
 		header: () => any;
@@ -165,7 +163,7 @@ export default defineComponent({
 									total={DATA.pageTotal}
 									onCurrentPageChange={queryData}
 									onSizeChage={queryData}
-									{...prop.PagedOption}
+									{...prop.pagedOption}
 								/>
 							</ElFooter>
 						) : (
