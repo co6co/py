@@ -97,7 +97,7 @@ export default defineComponent({
             resultFilter={onFilter}
             ref={viewRef}
             showPaged={true}
-            pageOption={{ background: true, layouts: ['prev', 'pager', 'next', 'total', 'size'] }}
+            pageOption={{ background: true, layouts: ['prev', 'pager', 'next', 'total', 'sizes'] }} 
             query={DATA.query}
           >
             {{
