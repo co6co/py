@@ -63,4 +63,5 @@
     v-model bug 修复
 0.1.26 未发布
     怎么useModelWrapper、isMobileBrowser 方法
+    paged参数定义
 ```

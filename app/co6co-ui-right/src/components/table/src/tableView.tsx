@@ -14,7 +14,9 @@ import {
 	type IPageParam,
 	onColChange,
 	type Table_Module_Base,
+	
 	Pagination,
+	PaginationProps,
 	IPageResponse,
 	getTableIndex,
 } from 'co6co';
@@ -46,14 +48,20 @@ export default defineComponent({
 			type: Function as PropType<filter>,
 			default: undefined,
 		},
-		showPaged: {
-			type: Boolean,
-			default: true,
-		},
+		
 		autoLoadData: {
 			type: Boolean,
 			default: true,
 		},
+		showPaged: {
+			type: Boolean,
+			default: true,
+		},
+		PagedOption  :{
+			type:Object as PropType<typeof PaginationProps>,  
+			default:PaginationProps
+		},
+
 	},
 	slots: Object as SlotsType<{
 		header: () => any;
@@ -157,6 +165,7 @@ export default defineComponent({
 									total={DATA.pageTotal}
 									onCurrentPageChange={queryData}
 									onSizeChage={queryData}
+									{...prop.PagedOption}
 								/>
 							</ElFooter>
 						) : (

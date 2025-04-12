@@ -13,8 +13,22 @@ const allowedLayouts = [
 ] as const;
 type AllowedLayouts = (typeof allowedLayouts)[number];
 
+
+export const PaginationProps ={
+	background: {
+		type: Boolean,
+		default: true,
+	},
+	layouts: {
+		type: Object as PropType<Array<AllowedLayouts>>, // 使用类型断言指定类型
+		default: ['prev', 'pager', 'next', 'total'],
+	},
+} as const
+
+
 //定义属性
-const props = {
+  const props = {
+	...PaginationProps,
 	/**
 	 *属性串进去
 	 */
@@ -30,14 +44,7 @@ const props = {
 		type: Number,
 		required: true,
 	},
-	background: {
-		type: Boolean,
-		default: true,
-	},
-	layouts: {
-		type: Object as PropType<Array<AllowedLayouts>>, // 使用类型断言指定类型
-		default: ['prev', 'pager', 'next', 'total'],
-	},
+	
 } as const;
 
 //定义事件
