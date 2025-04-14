@@ -21,6 +21,7 @@ export default defineComponent({
     //:define
     interface IQueryItem {
       date?: string
+      name?: string
     }
     const DATA = reactive<{
       title?: string
@@ -97,7 +98,7 @@ export default defineComponent({
             resultFilter={onFilter}
             ref={viewRef}
             showPaged={true}
-            pageOption={{ background: true, layouts: ['prev', 'pager', 'next', 'total', 'size'] }}
+            pageOption={{ background: true, layouts: ['prev', 'pager', 'next', 'total', 'sizes'] }}
             query={DATA.query}
           >
             {{
@@ -114,6 +115,13 @@ export default defineComponent({
                         </ElOption>
                       ))}
                     </ElSelect>
+                    <ElInput
+                      width={160}
+                      clearable
+                      v-model={DATA.query.name}
+                      placeholder="文件名称"
+                      class="handle-input"
+                    />
 
                     <ElButton type="primary" icon={Search} onClick={onSearch}>
                       搜索
