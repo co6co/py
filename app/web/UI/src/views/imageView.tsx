@@ -8,7 +8,8 @@ import {
   ElOption,
   ElImage,
   ElImageViewer,
-  ElMessageBox
+  ElMessageBox,
+  ElInput
 } from 'element-plus'
 import { Search } from '@element-plus/icons-vue'
 
