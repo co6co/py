@@ -18,9 +18,11 @@ class FileFilter(absFilterItems):
     不需要 DevicePO 的字段
     """
     date: str = None
+    name: str = None
 
     def __init__(self, date: str = None):
         self.date = date
+        self.name = None
         super().__init__(DevicePO)
         pass
 
@@ -48,14 +50,22 @@ class Views(BaseMethodView):
         self.init()
         items = os.listdir(self.root)
         folders = [item for item in items if os.path.isdir(os.path.join(self.root, item))]
-        return self.response_json(Result.success(folders))
+        # 为每个项目获取完整路径
+        full_paths = [os.path.join(self.root, item) for item in folders]
+
+        # 按修改时间排序
+        sorted_items = sorted(full_paths, key=lambda x: os.path.getmtime(x), reverse=True)
+        sorted_items = [os.path.basename(item) for item in sorted_items]
+        return self.response_json(Result.success(sorted_items))
 
     @staticmethod
-    def paginated_os_walk(folder, page_size, page_number, image_extensions: list = None, allPath=False):
+    def paginated_os_walk(folder, page_size, page_number, image_extensions: list = None, allPath=False, name: str = None):
         start_index = (page_number - 1) * page_size
         end_index = start_index + page_size
         counter = 0
         for root, dirs, files in os.walk(folder):
+            if name:
+                files = [file for file in files if name in file]
             for file in files:
                 file_extension = os.path.splitext(file)[1].lower()
                 if image_extensions is None or file_extension in image_extensions:
@@ -83,7 +93,7 @@ class Views(BaseMethodView):
 
         # 存储图片文件的列表
         image_files = []
-        imagesgen = Views.paginated_os_walk(folder,  filter.pageSize, filter.pageIndex, image_extensions)
+        imagesgen = Views.paginated_os_walk(folder,  filter.pageSize, filter.pageIndex, image_extensions, name=filter.name)
         total = 0
         for image, count in imagesgen:
             total = count

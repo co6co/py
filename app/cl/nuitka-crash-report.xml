@@ -11,7 +11,7 @@
     <module_usages />
   </module>
   <module name="__main__" kind="PythonMainModule" usage="root_module" reason="Root module" source_path="${cwd}\tools\ftpCheck.py">
-    <optimization-time pass="1" time="0.35" micro_passes="9" max_branch_merge="23" merged_total="2659" />
+    <optimization-time pass="1" time="0.58" micro_passes="9" max_branch_merge="23" merged_total="2659" />
     <optimization-time pass="2" time="0.05" micro_passes="1" max_branch_merge="21" merged_total="287" />
     <distribution-usages>
       <distribution-usage name="co6co" />
@@ -317,7 +317,7 @@
     </module_usages>
   </module>
   <module name="__parents_main__" kind="CompiledPythonModule" usage="plugins" reason="Auto enable multiprocessing freeze support" source_path="${cwd}\tools\ftpCheck.py">
-    <optimization-time pass="1" time="0.13" micro_passes="9" max_branch_merge="23" merged_total="2192" />
+    <optimization-time pass="1" time="0.12" micro_passes="9" max_branch_merge="23" merged_total="2192" />
     <optimization-time pass="2" time="0.01" micro_passes="1" max_branch_merge="21" merged_total="210" />
     <distribution-usages>
       <distribution-usage name="co6co" />
@@ -634,7 +634,7 @@
   </module>
   <module name="asyncio" kind="UncompiledPythonPackage" usage="import" reason="Instructed by user to follow to all modules." source_path="${sys.prefix}\Lib\asyncio\__init__.py">
     <optimization-time pass="1" time="0.84" micro_passes="3" max_branch_merge="1" merged_total="1" />
-    <optimization-time pass="2" time="0.01" />
+    <optimization-time pass="2" time="0.00" />
     <module_usages>
       <module_usage name="os" finding="absolute" line="1" />
       <module_usage name="sys" finding="absolute" line="5" />
@@ -1116,7 +1116,7 @@
   </module>
   <module name="asyncio.windows_events" kind="UncompiledPythonModule" usage="import" reason="Instructed by user to follow to all modules." source_path="${sys.prefix}\Lib\asyncio\windows_events.py">
     <optimization-time pass="1" time="0.70" micro_passes="6" max_branch_merge="48" merged_total="9667" />
-    <optimization-time pass="2" time="0.00" />
+    <optimization-time pass="2" time="0.01" />
     <module_usages>
       <module_usage name="sys" finding="absolute" line="3" />
       <module_usage name="_overlapped" finding="absolute" line="8" />
@@ -1268,7 +1268,7 @@
   </module>
   <module name="co6co.task" kind="CompiledPythonPackage" usage="import path parent" reason="Instructed by user to follow to all modules." source_path="${sys.prefix}\Lib\site-packages\co6co\task\__init__.py" distribution="co6co">
     <optimization-time pass="1" time="0.04" micro_passes="6" max_branch_merge="29" merged_total="947" />
-    <optimization-time pass="2" time="0.01" micro_passes="1" max_branch_merge="23" merged_total="125" />
+    <optimization-time pass="2" time="0.00" micro_passes="1" max_branch_merge="23" merged_total="125" />
     <module_usages>
       <module_usage name="os" finding="absolute" line="1" />
       <module_usage name="threading" finding="absolute" line="1" />
@@ -1278,7 +1278,7 @@
     </module_usages>
   </module>
   <module name="co6co.task.pools" kind="CompiledPythonModule" usage="import" reason="Instructed by user to follow to all modules." source_path="${sys.prefix}\Lib\site-packages\co6co\task\pools.py" distribution="co6co">
-    <optimization-time pass="1" time="0.02" micro_passes="4" max_branch_merge="14" merged_total="215" />
+    <optimization-time pass="1" time="0.01" micro_passes="4" max_branch_merge="14" merged_total="215" />
     <optimization-time pass="2" time="0.00" micro_passes="1" max_branch_merge="14" merged_total="31" />
     <module_usages>
       <module_usage name="concurrent.futures" finding="absolute" line="2" />
@@ -1287,7 +1287,7 @@
     </module_usages>
   </module>
   <module name="co6co.utils" kind="CompiledPythonPackage" usage="import" reason="Instructed by user to follow to all modules." source_path="${sys.prefix}\Lib\site-packages\co6co\utils\__init__.py" distribution="co6co">
-    <optimization-time pass="1" time="0.13" micro_passes="7" max_branch_merge="28" merged_total="2272" />
+    <optimization-time pass="1" time="0.18" micro_passes="7" max_branch_merge="28" merged_total="2272" />
     <optimization-time pass="2" time="0.01" micro_passes="1" max_branch_merge="19" merged_total="282" />
     <module_usages>
       <module_usage name="os" finding="absolute" line="1" />
@@ -1308,8 +1308,8 @@
     </module_usages>
   </module>
   <module name="co6co.utils.log" kind="CompiledPythonModule" usage="import fromlist" reason="Instructed by user to follow to all modules." source_path="${sys.prefix}\Lib\site-packages\co6co\utils\log.py" distribution="co6co">
-    <optimization-time pass="1" time="0.08" micro_passes="5" max_branch_merge="32" merged_total="696" />
-    <optimization-time pass="2" time="0.01" micro_passes="1" max_branch_merge="27" merged_total="118" />
+    <optimization-time pass="1" time="0.10" micro_passes="5" max_branch_merge="32" merged_total="696" />
+    <optimization-time pass="2" time="0.00" micro_passes="1" max_branch_merge="27" merged_total="118" />
     <module_usages>
       <module_usage name="datetime" finding="absolute" line="3" />
       <module_usage name="sys" finding="absolute" line="4" />
@@ -3706,7 +3706,7 @@
   </module>
   <module name="multiprocessing.context" kind="UncompiledPythonModule" usage="import fromlist" reason="Multiprocessing plugin needs this to monkey patch it." source_path="${sys.prefix}\Lib\multiprocessing\context.py">
     <optimization-time pass="1" time="0.58" micro_passes="6" max_branch_merge="82" merged_total="3650" />
-    <optimization-time pass="2" time="0.00" />
+    <optimization-time pass="2" time="0.01" />
     <module_usages>
       <module_usage name="os" finding="absolute" line="1" />
       <module_usage name="sys" finding="absolute" line="2" />
@@ -5369,9 +5369,9 @@
     </module_usages>
   </module>
   <performance>
-    <memory_usage name="after_launch" value="43614208" />
-    <memory_usage name="before_c_code_generation" value="69894144" />
-    <memory_usage name="before_running_scons" value="70455296" />
+    <memory_usage name="after_launch" value="43683840" />
+    <memory_usage name="before_c_code_generation" value="69832704" />
+    <memory_usage name="before_running_scons" value="70393856" />
   </performance>
   <included_extension name="_asyncio.pyd" dest_path="_asyncio.pyd" source_path="${sys.prefix}\DLLs\_asyncio.pyd" package="" ignored="no" reason="used extension module" />
   <included_extension name="_bz2.pyd" dest_path="_bz2.pyd" source_path="${sys.prefix}\DLLs\_bz2.pyd" package="" ignored="no" reason="used extension module" />

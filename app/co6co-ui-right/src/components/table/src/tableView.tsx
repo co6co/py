@@ -56,10 +56,7 @@ export default defineComponent({
 			type: Boolean,
 			default: true,
 		},
-		pagedOption: {
-			type: Object as PropType<typeof PaginationProps>,
-			default: PaginationProps,
-		},
+		...PaginationProps,
 	},
 	slots: Object as SlotsType<{
 		header: () => any;
@@ -161,9 +158,11 @@ export default defineComponent({
 								<Pagination
 									option={DATA.query}
 									total={DATA.pageTotal}
+									background={prop.background}
+									layouts={prop.layouts}
+									pageSizes={prop.pageSizes}
 									onCurrentPageChange={queryData}
 									onSizeChage={queryData}
-									{...prop.pagedOption}
 								/>
 							</ElFooter>
 						) : (

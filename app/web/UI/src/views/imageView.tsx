@@ -13,7 +13,7 @@ import {
 } from 'element-plus'
 import { Search } from '@element-plus/icons-vue'
 
-import { getBaseUrl } from 'co6co'
+import { getBaseUrl, Pagination, PaginationProps } from 'co6co'
 import { TableView, TableViewInstance, image2Option } from 'co6co-right'
 import style from '@/assets/css/imageView.module.less'
 import * as api from '@/api/dev'
@@ -90,6 +90,9 @@ export default defineComponent({
         })
       })
     }
+    const bg = true as const
+    const layouts = ['prev', 'pager', 'next', 'total', 'sizes'] as const
+
     //:page reader
     const rander = (): VNodeChild => {
       return (
@@ -99,8 +102,8 @@ export default defineComponent({
             resultFilter={onFilter}
             ref={viewRef}
             showPaged={true}
-            pageOption={{ background: true, layouts: ['prev', 'pager', 'next', 'total', 'sizes'] }}
             query={DATA.query}
+            layouts={layouts}
           >
             {{
               header: () => (
@@ -140,7 +143,7 @@ export default defineComponent({
           </TableView>
           {dataUrlsResult.value.map((v, i) => {
             return (
-              <div class="block" onClick={() => onShowImage(v.name, i)}>
+              <div class="block">
                 <span class="demonstration">{v.name}</span>
                 <ElImage
                   key={i}
@@ -150,6 +153,7 @@ export default defineComponent({
                   maxScale={7}
                   minScale={0.2}
                   showPropress
+                  onClick={() => onShowImage(v.name, i)}
                 />
               </div>
             )

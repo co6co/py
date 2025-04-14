@@ -61,8 +61,10 @@
     优化
 0.1.25
     v-model bug 修复
-0.1.26 未发布
+0.1.26
     怎么useModelWrapper、isMobileBrowser 方法
 0.1.27
     paged参数定义
+0.1.28
+    优化
 ```
