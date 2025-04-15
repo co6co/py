@@ -6,9 +6,10 @@
 /**/build/
 /coi/XXXX
 /**/.fleet/ 
-/**/*.pyc 
-/**/tmp/
+/**/*.pyc  
 /**/tmp/
 /**/hk-dev-service/lib/
 /**/*.spec
 /**/*.tgz
+/**/*.build/
+/**/*.dist/
