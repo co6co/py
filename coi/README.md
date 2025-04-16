@@ -57,6 +57,8 @@
     get_classifiers
 0.0.27
     增加network模块
+0.0.28
+    增加 timeout 方法
 ```
 
 # 安装
