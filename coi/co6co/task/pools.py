@@ -27,11 +27,10 @@ def timeout(timeout, func,   *args, **kwargs):
     """
     此函数用于在指定时间内尝试打开视频流
     :param timeout: 超时时间（秒）
-    :param func (...,stop_event,kv..), *args, **kwargs
+    :param func , *args, **kwargs
     :return: 是否超时
     """
     # 创建并启动新线程来打开视频流
-    # stop_event = threading.Event()
     thread = threading.Thread(target=func, args=args, kwargs=kwargs)
     thread.start()
     # 等待指定的超时时间
@@ -39,9 +38,12 @@ def timeout(timeout, func,   *args, **kwargs):
     if thread.is_alive():
         # //todo 这里不知要怎么停止线程，_stop 有锁时，会有断言错误，
         # 如果线程仍在运行，说明超时了
-        # stop_event.set()
-        # thread.join()
-        # thread._stop()  # 会有资源不能是否会报断言错误
+        lock = thread._tstate_lock
+        if lock is None:
+            thread._stop()
+        else:
+            # 让它自己完成后停止
+            pass
         return True
     return False
 
