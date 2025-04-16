@@ -1,7 +1,4 @@
 from __future__ import annotations
-from multiprocessing.connection import PipeConnection
-import asyncio
-from co6co.utils.win import execute_command
 from sanic import Sanic
 from co6co.utils import log
 from sanic.config import Config
@@ -13,8 +10,8 @@ import argparse
 from cacheout import Cache
 import time
 import os
-from services.taskService import dynamicRouter
-from services.tasks.main import TasksMgr
+from co6co_task.service.RouterService import dynamicRouter
+from co6co_task.service.Tasks import TasksMgr
 import multiprocessing
 
 
@@ -57,17 +54,8 @@ def init(app: Sanic, _: dict):
         app.ctx.Cache = cache
         pass
     app.blueprint(api)
-    appendRoute(app)
+    dynamicRouter.appendRoute(app)
     session.init(app)
-
-
-def createTask(app: Sanic, envent: asyncio.Event, conn: PipeConnection):
-    """
-    初始化"
-    """
-    # log.warn("主APP:", type(app), id(app))
-    worker = TasksMgr(app, envent, conn)
-    return worker
 
 
 def main():
@@ -79,7 +67,7 @@ def main():
     parser.add_argument("-c", "--config", default=configPath, help="default:{}".format(configPath))
     args = parser.parse_args()
     config = sanics.parserConfig(args.config)
-    sanics.startApp(config, init, createTask)
+    sanics.startApp(config, init, TasksMgr.create_instance)
 
 
 if __name__ == "__main__":

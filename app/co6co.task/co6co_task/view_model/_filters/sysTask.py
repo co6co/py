@@ -1,16 +1,17 @@
 
 
-from model.pos.tables import SysTaskPO
 from sqlalchemy .orm.attributes import InstrumentedAttribute
 from typing import Tuple
 from co6co_db_ext.db_filter import absFilterItems
 from co6co.utils import log
 from sqlalchemy import func, or_, and_, Select
 
+from ...model.pos.tables import SysTaskPO
+
 
 class Filter(absFilterItems):
     """
-    违法代码 filter
+    任务 filter
     """
     name: str = None
     code: str = None

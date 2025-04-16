@@ -8,15 +8,15 @@ from sqlalchemy.sql import Select, Update
 from co6co_db_ext.db_utils import db_tools
 from co6co_permissions.view_model.base_view import AuthMethodView
 from co6co_web_db.view_model import get_one
-from model.pos.tables import DynamicCodePO, SysTaskPO
+from ...model.pos.tables import DynamicCodePO, SysTaskPO
 from datetime import datetime
 from co6co_permissions.model.enum import dict_state
 from co6co.utils import log, DATA
 
 from multiprocessing.connection import PipeConnection
-from model.enum import CommandCategory
-from view_model.systask.codeView import _codeView
-from services.tasks import custom
+from ...model.enum import CommandCategory
+from .codeView import _codeView
+from ...service import CustomTask as custom
 
 
 class schedView(_codeView, AuthMethodView):

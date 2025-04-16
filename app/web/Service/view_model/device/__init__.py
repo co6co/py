@@ -11,7 +11,7 @@ from co6co_permissions.view_model.base_view import AuthMethodView
 from model.pos.tables import DevicePO
 from view_model._filters.device import Filter
 from co6co_permissions.view_model.aop import exist, ObjectExistRoute
-from services.tasks import custom
+
 import pandas as pd
 from co6co.utils import log
 from io import BytesIO

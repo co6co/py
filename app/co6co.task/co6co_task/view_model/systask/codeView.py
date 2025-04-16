@@ -4,9 +4,8 @@ from sanic.response import text
 from sanic import Request
 from co6co_sanic_ext.model.res.result import Result
 from co6co_permissions.view_model.base_view import AuthMethodView
-from services.tasks import Scheduler
-from services.tasks import CuntomCronTrigger
 from datetime import datetime
+from ...service import Scheduler, CuntomCronTrigger
 
 
 class cronViews(AuthMethodView):

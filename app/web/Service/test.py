@@ -1,12 +1,10 @@
-from co6co_web_db.view_model import BaseMethodView
-from typing import Callable
-import services.tasks.custom as custom
-from services.tasks import CuntomCronTrigger
+import services.tasks.devCapImg as custom
+from co6co_task.service import CustomTask, CuntomCronTrigger
 
 ccc = CuntomCronTrigger.resolvecron("0 0 12 * * 2 *")
 print(ccc)
 
-subclasses = custom.get_all_subclasses()
+subclasses = CustomTask.get_all_subclasses()
 for subclass in subclasses:
     cl: custom.ICustomTask = subclass
     print(cl.name)

@@ -4,16 +4,15 @@ from sanic import Request
 from co6co_sanic_ext.utils import JSON_util
 from co6co_sanic_ext.model.res.result import Result
 from sqlalchemy.ext.asyncio import AsyncSession
-
-from sqlalchemy.sql import Select
 from co6co_db_ext.db_utils import db_tools
 from co6co_permissions.view_model.base_view import AuthMethodView
-from model.pos.tables import SysTaskPO, DynamicCodePO
-from view_model._filters.sysTask import Filter
 from co6co_permissions.view_model.aop import exist, ObjectExistRoute
-from ...tasks import custom
+from sqlalchemy.sql import Select
 from co6co.utils import log
-from .schedView import schedView
+
+from ...model.pos.tables import SysTaskPO, DynamicCodePO
+from .._filters.sysTask import Filter
+from ...service import CustomTask as custom
 
 
 class ExistView(AuthMethodView):

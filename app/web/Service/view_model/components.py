@@ -8,7 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from sqlalchemy.sql import Select
 from co6co_permissions.view_model.base_view import AuthMethodView
-from model.pos.tables import DynamicCodePO
+from co6co_task. model.pos.tables import DynamicCodePO
 from co6co_permissions.model.enum import dict_state
 
 
