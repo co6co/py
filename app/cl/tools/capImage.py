@@ -15,12 +15,12 @@ def capture_dev_image(video_path, output_image_path: str):
     try:
         print("开始执行...", video_path)
         # 打开视频文件
+        # 给地地址不通，会阻塞在这里
         cap = cv2.VideoCapture(video_path)
         urlparse.quote(video_path)
         if not cap.isOpened():
             print("无法打开视频文件！")
             return
-
         # 读取一帧
         ret, frame = cap.read()
         if ret:

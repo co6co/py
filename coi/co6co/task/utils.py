@@ -31,7 +31,7 @@ class Timer:
             pass
     """
 
-    def __init__(self, activity_name="任务"):
+    def __init__(self, activity_name="任务", ndigits: int = 4, showMsg: bool = True):
         """
         初始化计时器类
         :param activity_name: 计时器描述名称，默认为 "任务"
@@ -39,25 +39,37 @@ class Timer:
         self.activity_name = activity_name
         self.start_time = None
         self.end_time = None
+        self.ndigits = ndigits
+        self.show = showMsg
 
     def start(self):
         """
         开始计时
         """
         self.start_time = time.time()
-        print(f"{self.activity_name} 开始...")
+        if self.show:
+            print(f"{self.activity_name} 开始...")
+
+    @property
+    def elapsed(self):
+        """
+        经过了多少秒
+        :return: 经过的秒数
+        """
+        start_time = self.start_time or time.time()
+        end_time = self.end_time or time.time()
+        elapsed_time = end_time - start_time
+        return round(elapsed_time, self.ndigits)
 
     def stop(self):
         """
         停止计时并打印耗时
         """
         if self.start_time is None:
-            print("请先调用 start() 方法开始计时！")
-            return
-
+            raise ValueError("计时器未开始，请先调用 start() 方法！")
         self.end_time = time.time()
-        elapsed_time = self.end_time - self.start_time
-        print(f"{self.activity_name} 结束，耗时：{elapsed_time:.6f} 秒")
+        if self.show:
+            print(f"{self.activity_name} 结束，耗时：{self.elapsed} 秒")
 
     def __enter__(self):
         """

@@ -22,7 +22,8 @@ from multiprocessing.connection import PipeConnection
 import asyncio
 import threading
 import multiprocessing
-
+import os
+import argparse
 
 
 class Worker(ABC):
@@ -176,7 +177,7 @@ def startApp(configFile: str | Dict, apiInit: Callable[[Sanic, Dict], None], wor
     __main__     --> primary
     __mp_main__  --> multiprocessing
     """
-    multiprocessing.freeze_support() # 进行打包时，需要添加这行代码
+
     # all_param = {**locals()}
     event = asyncio.Event()
     parent_conn, child_conn = Pipe()
@@ -208,6 +209,29 @@ def startApp(configFile: str | Dict, apiInit: Callable[[Sanic, Dict], None], wor
         # 关闭数据库连接
     # 没有 primary serve 调用loader创建一个个
     Sanic.serve(primary=app, app_loader=loader)
+
+
+def getConfigFilder(mainFilePath: str):
+    dir = os.path.dirname(mainFilePath)
+    return dir
+
+
+def getConfig(configFolder: str):
+    """
+    当程序被打包后 if __name__ == "__main__" # 执行多次
+    __file__ ==> _internal\\app.py
+    __file__ ==> Temp\_MEI131322\\app.py
+    """
+    if os.name == "nt":  # 当程序被打包后 if __name__ == "__main__" # 执行多次
+        multiprocessing.freeze_support()  # 进行打包时，需要添加这行代码,子进程将不在执行这下面的代码
+    dir = configFolder
+    defaultConfig = "{}/app_config.json".format(dir)
+    configPath = os.path.abspath(defaultConfig)
+    parser = argparse.ArgumentParser(description="System Service.")
+    parser.add_argument("-c", "--config", default=configPath, help="default:{}".format(configPath))
+    args = parser.parse_args()
+    config = parserConfig(args.config)
+    return config
 
 
 @singleton

@@ -6,13 +6,10 @@ from co6co_sanic_ext.utils.cors_utils import attach_cors
 from co6co_sanic_ext import sanics
 from co6co_sanic_ext import session
 from co6co_web_db.services.db_service import injectDbSessionFactory
-import argparse
 from cacheout import Cache
 import time
-import os
 from co6co_task.service.RouterService import dynamicRouter
 from co6co_task.service.Tasks import TasksMgr
-import multiprocessing
 
 
 def appendRoute(app: Sanic):
@@ -58,20 +55,13 @@ def init(app: Sanic, _: dict):
     session.init(app)
 
 
-def main():
-
-    dir = os.path.dirname(__file__)
-    defaultConfig = "{}/app_config.json".format(dir)
-    configPath = os.path.abspath(defaultConfig)
-    parser = argparse.ArgumentParser(description="System Service.")
-    parser.add_argument("-c", "--config", default=configPath, help="default:{}".format(configPath))
-    args = parser.parse_args()
-    config = sanics.parserConfig(args.config)
+def main(config: dict):
     sanics.startApp(config, init, TasksMgr.create_instance)
+    log.succ("***,main", __file__) # 子进程不执行
+
 
 
 if __name__ == "__main__":
-    multiprocessing.freeze_support()  # 进行打包时，需要添加这行代码
     # print("__file__", __file__)
     # current_file_path = os.path.abspath(__file__)
     # print("basename", os.path.basename(__file__))
@@ -80,4 +70,6 @@ if __name__ == "__main__":
     # current_directory = os.getcwd()
     # print("当前工作目录：", current_directory)
     # print("当前dir：", os.path.curdir)
-    main()
+    log.succ("##", __name__)
+    config = sanics.getConfig(sanics.getConfigFilder(__file__))
+    main(config)

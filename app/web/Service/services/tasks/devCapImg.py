@@ -84,14 +84,19 @@ class DeviceCuptureImage(ICustomTask):
         return bll.run(self.queryTable, bll), userName, password, root, date
 
     def capture_dev_image_timeOut(self, video_path, output_image_path: str):
-        # result = self.loop.run_until_complete(timeout_async(5, self.capture_dev_image, video_path, output_image_path))
+        # result = self.loop.run_until_complete(timeout_async(5, self.capture_dev_image_async, video_path, output_image_path))
         # if type(result) == bool and result == False:
         #    log.warn("超时", video_path)
-        result = timeout(10, self.capture_dev_image,   video_path, output_image_path)
+        log.info("time start...", *locals())
+        result = timeout(60, self.capture_dev_image,   video_path, output_image_path)
         if result:
             log.warn("超时", video_path)
 
-    async def capture_dev_image(self, video_path, output_image_path: str):
+    async def capture_dev_image_async(self, video_path, output_image_path: str):
+        log.succ("kkkkkkkk", *locals())
+        self.capture_dev_image(video_path, output_image_path)
+
+    def capture_dev_image(self, video_path, output_image_path: str, ip: str):
         """
         从视频文件中捕获一帧并保存为图片。
         :param video_path: 视频文件路径。
@@ -99,6 +104,7 @@ class DeviceCuptureImage(ICustomTask):
         """
         # 视频文件路径
         try:
+            log.info(f"从{ip}获取图片...:")
             # 打开视频文件
             cap = cv2.VideoCapture(video_path)
             if not cap.isOpened():
@@ -112,7 +118,7 @@ class DeviceCuptureImage(ICustomTask):
                 ret, buffer = cv2.imencode('.jpg', frame)
                 with open(output_image_path, 'wb') as f:
                     f.write(buffer)
-                log.info("图片已保存到:", output_image_path)
+                log.info(f"{ip}图片已保存到‘{output_image_path}’")
             else:
                 log.warn("无法读取视频帧！", video_path)
 
@@ -127,14 +133,19 @@ class DeviceCuptureImage(ICustomTask):
                 log.err(f"执行{f.path} ERROR", f.exception())
                 print(f"发生错误: {f.exception()}")
         except Exception as e:
-            log.warn("执行result ERROR", e, f.cancelled())
+            log.warn("执行result ERROR", str(e), "Future canceled->", f.cancelled())
 
-    def mainOne(self, pool: limitThreadPoolExecutor, video_path: str, output_image_path: str):
+    def mainOne(self, pool: limitThreadPoolExecutor, video_path: str, output_image_path: str, ip: str):
         try:
 
             # 这里分配了 某个值 个线程会会卡在这里等等有线程空闲
-            f = pool.submit(self.capture_dev_image_timeOut, video_path, output_image_path)
-            if self.worker and self.worker.isQuit:
+            #  pool shutdown 会触发 RuntimeError('cannot schedule new futures after shutdown')
+            if pool._shutdown:
+                log.warn("线程池已关闭,不再接收新任务...")
+                return False
+            f = pool.submit(self.capture_dev_image, video_path, output_image_path, ip)
+            # f = pool.submit(self.capture_dev_image_timeOut, video_path, output_image_path, ip)
+            if self.worker and self.worker.isQuit and not pool._shutdown:
                 log.warn("关闭线程池,不再接收新任务...,等等正在执行的任务完成...")
                 pool.shutdown(False, cancel_futures=True)
                 return False
@@ -152,26 +163,33 @@ class DeviceCuptureImage(ICustomTask):
     def main(self):
         deviceList, userName, pwd, root, date = self.queryAllDevice()
         # print(deviceList, userName, pwd)
-        ns = time.time()
-        timeer = Timer(f"抓图设备流图片:{ns}")
+        timeer = Timer(f"{self.name}:{time.time()}", showMsg=False)
+        log.warn(f"{self.name}开始...")
         timeer.start()
         pool = limitThreadPoolExecutor(max_workers=4, thread_name_prefix="capture_pj")
-
         # 遍历设备列表
         for device in deviceList:
-            if self.worker and self.worker.isQuit:
+            if self.worker and self.worker.isQuit and not pool._shutdown:
                 log.warn("关闭线程池,不再接收新任务...,等等正在执行的任务完成...")
                 pool.shutdown(False, cancel_futures=True)
                 break
+
             newUser = device['userName'] or userName
             newPwd = device['passwd'] or pwd
+            ip = device['ip']
             path = Path(root) / date
             path.exists() or os.makedirs(path)
-            video_path = f"rtsp://{newUser}:{newPwd}@{device['ip']}:554/Streaming/Channels/1"
-            output_image_path = path/f"{device['name']}_{device['ip']}.jpg"
-            if not self.mainOne(pool, video_path, output_image_path):
+            video_path = f"rtsp://{newUser}:{newPwd}@{ip}:554/Streaming/Channels/1"
+            output_image_path = path/f"{device['name']}_{ip}.jpg"
+            if not self.mainOne(pool, video_path, output_image_path, ip):
                 break
 
+        beforeShow = True
+        if pool._shutdown:
+            log.info("等待正在运行的线程退出..")
+        else:
+            log.info("等待所有任务结束....")
+            beforeShow = False
+            pool.shutdown(True)
         timeer.stop()
-        log.succ("我已经执行完成了.................")
-        log.warn(f"{ns}抓图设备流图片完成,耗时：", timeer.time)
+        log.warn(f"{timeer.activity_name}完成,提前结束—>{beforeShow},耗时->{timeer.elapsed}秒", )

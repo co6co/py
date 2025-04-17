@@ -29,6 +29,8 @@
     3. 增加主进程与子进程通信
 0.0.11 2025-04-07
     1. response_head
+0.0.12 2025-04-17
+    1. 新增： getconfig for win package
 
 ```
 
