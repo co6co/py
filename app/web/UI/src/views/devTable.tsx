@@ -3,7 +3,7 @@ import { ref, reactive, onMounted } from 'vue'
 import { ElTag, ElButton, ElInput, ElTableColumn, ElButtonGroup, ElMessageBox } from 'element-plus'
 import { Search, Plus, Edit, Delete, UploadFilled } from '@element-plus/icons-vue'
 
-import { FormOperation, IResponse } from 'co6co'
+import { FormOperation, IResponse, EnumSelect, IEnumSelect } from 'co6co'
 import {
   routeHook,
   DictSelectInstance,
@@ -28,6 +28,7 @@ export default defineComponent({
       state?: number
       name?: string
       code?: string
+      category?: number
     }
     const DATA = reactive<{
       title?: string
@@ -58,7 +59,10 @@ export default defineComponent({
     const onRefesh = () => {
       viewRef.value?.refesh()
     }
+    const DeviceCategory = ref<IEnumSelect[]>([])
     onMounted(async () => {
+      const res = await api.dev_category_svc()
+      DeviceCategory.value = res.data
       onSearch()
     })
     const { deleteSvc } = deleteHook.default(api.del_svc, () => {
@@ -104,7 +108,12 @@ export default defineComponent({
                     placeholder="设备代码"
                     class="handle-input"
                   />
-
+                  <EnumSelect
+                    style={DATA.headItemWidth}
+                    data={DeviceCategory.value}
+                    v-model={DATA.query.category}
+                    placeholder="设备类型"
+                  />
                   <StateSelect
                     ref={statueInstanceRef}
                     style={DATA.headItemWidth}

@@ -19,7 +19,7 @@ from co6co.task.pools import limitThreadPoolExecutor, timeout, timeout_async
 from concurrent.futures import Future
 from co6co.task.utils import Timer
 import time
-import asyncio
+from model.enum import DeviceCategory
 
 
 class TableEntry(TypedDict):
@@ -42,7 +42,7 @@ class DeviceCuptureImage(ICustomTask):
         try:
             call = QueryListCallable(bll.session)
             select = (
-                Select(DevicePO.name, DevicePO.code, DevicePO.ip, DevicePO.userName, DevicePO.passwd)
+                Select(DevicePO.name, DevicePO.code, DevicePO.ip, DevicePO.userName, DevicePO.passwd, DevicePO.category)
                 .filter(DevicePO.state == dict_state.enabled.val)
             )
             return await call(select, isPO=False)
@@ -176,9 +176,19 @@ class DeviceCuptureImage(ICustomTask):
 
             newUser = device['userName'] or userName
             newPwd = device['passwd'] or pwd
+            category = device['category'] or 0
             ip = device['ip']
+            deviceCategory: DeviceCategory = DeviceCategory.val2enum(category)
+
             path = Path(root) / date
             path.exists() or os.makedirs(path)
+            # 一体机有两个通道
+            if deviceCategory == DeviceCategory.ParkAndPass:
+                video_path = f"rtsp://{newUser}:{newPwd}@{ip}:554/Streaming/Channels/2"
+                output_image_path = path/f"{device['name']}_{ip}_2.jpg"
+                if not self.mainOne(pool, video_path, output_image_path, ip):
+                    break
+
             video_path = f"rtsp://{newUser}:{newPwd}@{ip}:554/Streaming/Channels/1"
             output_image_path = path/f"{device['name']}_{ip}.jpg"
             if not self.mainOne(pool, video_path, output_image_path, ip):

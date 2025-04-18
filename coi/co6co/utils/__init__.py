@@ -26,6 +26,13 @@ def try_except(func):
     return wrapper
 
 
+def try2int(value: any, default=0):
+    try:
+        return int(value)
+    except:
+        return default
+
+
 class DATA():
     """
     处理数据

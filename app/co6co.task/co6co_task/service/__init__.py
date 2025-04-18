@@ -17,8 +17,8 @@ TornadoScheduler :      当你的程序基于Tornado（一个web框架）的时�
 TwistedScheduler :      当你的程序使用了Twisted（一个异步框架）的时候使用
 QtScheduler :           如果你的应用是一个Qt应用的时候可以使用
 '''
-
-
+ 
+    
 class CuntomCronTrigger(CronTrigger):
     """
     Cron 表达式解析器
@@ -50,16 +50,25 @@ class CuntomCronTrigger(CronTrigger):
         斜线（/）：用于指定间隔值。例如，*/5 在分钟字段中表示每 5 分钟执行一次。
         连字符（-）：用于指定范围。例如，10-20 在日期字段中表示从 10 号到 20 号。
         问号（?）：仅用于[日月周]字段，表示不指定具体值。通常用于避免冲突。
+        weekday_mapping = {
+            0: 'SUN',
+            1: 'MON',
+            2: 'TUE',
+            3: 'WED',
+            4: 'THU',
+            5: 'FRI',
+            6: 'SAT',
+        }  
         """
+        'SUN MON TUE WED THU FRI SAT',
         values = expr.split()
         if len(values) == 6:
             values.append(None)
         if len(values) != 7:
-            raise ValueError('Wrong number of fields; got {}, expected 7'.format(len(values)))
+            raise ValueError('Wrong number of fields; got {}, expected 7,week:SUN MON TUE WED THU FRI SAT,不使用0-6的方式'.format(len(values))) 
         return cls(second=values[0], minute=values[1], hour=values[2], day=values[3], month=values[4],
                    day_of_week=values[5], year=values[6], timezone=timezone)
-
-
+    
 class Scheduler(Singleton):
     _scheduler: BackgroundScheduler = None
 

@@ -17,6 +17,7 @@ from co6co.utils import log
 from io import BytesIO
 from datetime import datetime
 import ipaddress
+from model.enum import DeviceCategory
 
 
 class ExistView(AuthMethodView):
@@ -25,6 +26,16 @@ class ExistView(AuthMethodView):
     async def get(self, request: Request, code: str, pk: int = 0):
         result = await self.exist(request, DevicePO.code == code, DevicePO.id != pk)
         return exist(result, "编码编码", code)
+
+
+class DeviceCategoryView(AuthMethodView):
+    routePath = "/category"
+
+    async def get(self, request: Request):
+        """
+        树形选择下拉框数据 
+        """
+        return JSON_util.response(Result.success(DeviceCategory.to_dict_list()))
 
 
 class Views(AuthMethodView):
@@ -45,7 +56,6 @@ class Views(AuthMethodView):
         tree 形状 table
         """
         param = Filter()
-        param.__dict__.update(request.json)
 
         return await self.query_page(request, param)
 
@@ -93,14 +103,26 @@ class ImportView(AuthMethodView):
 
     def template(self):
         # 假设模板文件名为 template.xlsx，放在当前目录下
-        columns = ['编号', '名称', "IP地址", "经度", "维度", "状态 1:启用 0:禁用", "用户名（可空）", "密码（可空）"]
+        columns = ['编号', f"设备类型({DeviceCategory.to_cn_str()})", '名称', "IP地址", "经度", "维度", "状态(1:启用 0:禁用)", "用户名（可空）", "密码（可空）"]
         df = pd.DataFrame(columns=columns)
+        # 表头宽带自适应
+        # df.style.set_table_styles([
+        #    {
+        #        'selector': 'th',
+        #        'props': [('white-space', 'nowrap'), ('width', 'auto'), ('font-weight', 'bold')]
+        #    }
+        # ])
+
+        # 设置适应内容宽度
+        pd.set_option('display.max_colwidth', None)
         # new_data = [
         #    [1, '小明', 95],
         #    [2, '小红', 88]
         # ]
         # df = pd.DataFrame(new_data, columns=columns)
-        # df = pd.concat([df, new_df], ignore_index=True)
+        # df = pd.concat([df,
+        #
+        # ], ignore_index=True)
         # 创建一个内存中的二进制流
         output = BytesIO()
         # 将 DataFrame 写入二进制流，这里以 Excel 格式为例
@@ -159,14 +181,15 @@ class ImportView(AuthMethodView):
                     # nan!=nan
                     item = ['' if x != x else x for x in item]
                     code = str(item[0])
-                    name = str(item[1])
-                    ip = self.paraserIP(item[2])
-                    lng = str(item[3])
-                    lat = str(item[4])
-                    state = int(item[5])
+                    category = int(item[1])
+                    name = str(item[2])
+                    ip = self.paraserIP(item[3])
+                    lng = str(item[4])
+                    lat = str(item[5])
+                    state = int(item[6])
 
-                    username = str(item[6])
-                    password = str(item[7])
+                    username = str(item[7])
+                    password = str(item[8])
                     if not ip:
                         msg = f"IP地址{ip}格式错误"
                         errorNum += 1
@@ -177,6 +200,7 @@ class ImportView(AuthMethodView):
                         updateSml = Update(DevicePO).filter(DevicePO.ip.__eq__(ip)).values(
                             {
                                 DevicePO.code: code,
+                                DevicePO.category: category,
                                 DevicePO.name: name,
                                 DevicePO.lng: lng,
                                 DevicePO.lat: lat,
@@ -195,6 +219,7 @@ class ImportView(AuthMethodView):
                             {
                                 DevicePO.code: code,
                                 DevicePO.name: name,
+                                DevicePO.category: category,
                                 DevicePO.ip: ip,
                                 DevicePO.lng: lng,
                                 DevicePO.lat: lat,

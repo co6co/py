@@ -1,6 +1,6 @@
 import request from '@/utils/request'
 
-import type { IResponse } from 'co6co'
+import type { IResponse, IEnumSelect } from 'co6co'
 import { create_svc } from 'co6co-right'
 import { getBaseUrl, createServiceInstance, HttpContentType } from 'co6co'
 
@@ -19,6 +19,9 @@ export const upload_template = (data: FormData): Promise<IResponse<string>> => {
 }
 export const download_template = (): Promise<IResponse<string>> => {
   return request.get(`${base_URL}/import`)
+}
+export const dev_category_svc = (): Promise<IResponse<Array<IEnumSelect>>> => {
+  return request.get(`${base_URL}/category`)
 }
 
 export const getResourceUrl = () => {

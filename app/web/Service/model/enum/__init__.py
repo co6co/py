@@ -23,3 +23,21 @@ class TaskStatue(Base_Enum):
     STOPPED = "stopped", 0  # 已停止
     ERROR = "error", 2  # 错误
     UNKNOWN = "unknown", 3  # 未知
+
+
+class DeviceCategory(Base_EC_Enum):
+    # 卡口
+    Pass = 'pass', "卡口设备", 0
+    # 电警
+    Ele = 'ele', "电警设备", 1
+
+    # 违停身边
+    Park = 'park', "违停设备", 2
+    # 一体机
+    ParkAndPass = 'parkAndPass', "一体机设备", 3
+
+    @classmethod
+    def to_cn_str(cls) -> str:
+        result: list = []
+        [result.append(f"{i.val}:{i.label}") for i in cls]
+        return ",".join(result)
