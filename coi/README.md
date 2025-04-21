@@ -61,6 +61,7 @@
     增加 timeout 方法
 0.0.29 未发布
     优化
+    importExcell
 ```
 
 # 安装
