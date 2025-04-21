@@ -28,6 +28,7 @@ import {
 	ElButton,
 	ElFormItem,
 	ElInput,
+	ElTooltip,
 	ElMessage,
 	type FormRules,
 } from 'element-plus';
@@ -260,15 +261,18 @@ export default defineComponent({
 									placeholder="编码"></ElInput>
 							</ElFormItem>
 						</ElCol>
-					</ElRow>
-
-					<ElRow>
-						<ElCol span={12}>
+						<ElCol span={24}>
 							<ElFormItem label="cron表达式" prop="cron">
-								<ElInput
-									v-model={DATA.fromData.cron}
-									placeholder="59[秒] 59[分] 23[时] 31[日] 12[月] ?[星期] 2024[年]"
-								/>
+								<ElTooltip
+									showAfter={3000}
+									placement="top"
+									showArrow={true}
+									content="带秒cron表达式,星期使用英文描述,如:MON,TUE,WED,THU,FRI,SAT,SUN,（不使用0-6,0表示周日描述）">
+									<ElInput
+										v-model={DATA.fromData.cron}
+										placeholder="59[秒] 59[分] 23[时] 31[日] 12[月] ?[星期] 2024[年]"
+									/>
+								</ElTooltip>
 							</ElFormItem>
 						</ElCol>
 						<ElCol span={12}>
@@ -279,8 +283,6 @@ export default defineComponent({
 								/>
 							</ElFormItem>
 						</ElCol>
-					</ElRow>
-					<ElRow>
 						<ElCol span={12}>
 							<ElFormItem label="运行状态" prop="execStatus">
 								<DictSelect

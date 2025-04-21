@@ -18,6 +18,20 @@ from io import BytesIO
 from datetime import datetime
 import ipaddress
 from model.enum import DeviceCategory
+from co6co.utils import try2int
+from typing import TypedDict
+
+
+class columnsMap(TypedDict):
+    code: str
+    category: str
+    name: str
+    ip: str
+    lng: str
+    lat: str
+    state: str
+    username: str
+    password: str
 
 
 class ExistView(AuthMethodView):
@@ -75,6 +89,19 @@ class Views(AuthMethodView):
         return await self.add(request, po, json2Po=False, userId=userId, beforeFun=before)
 
 
+class columnsMap:
+    def __init__(self, codeIndex: int, categoryIndex: int, nameIndex: int, ipIndex: int, lngIndex: int, latIndex: int, stateIndex: int, userNameIndex: int, passwordIndex: int):
+        self.codeIndex = codeIndex
+        self.categoryIndex = categoryIndex
+        self.nameIndex = nameIndex
+        self.ipIndex = ipIndex
+        self.lngIndex = lngIndex
+        self.latIndex = latIndex
+        self.stateIndex = stateIndex
+        self.userNameIndex = userNameIndex
+        self.passwordIndex = passwordIndex
+
+
 class View(AuthMethodView):
     routePath = "/<pk:int>"
 
@@ -101,29 +128,43 @@ class ImportView(AuthMethodView):
     def __init__(self):
         self.sheet_name = "设备列表"
 
+    def templateMap(self):
+        code = "编号",
+        category = f"设备类型({DeviceCategory.to_cn_str()})",
+        name = "名称",
+        ip = "IP地址",
+        lng = "经度",
+        lat = "纬度",
+        state = "状态(1:启用 0:禁用)",
+        username = "用户名（可空）",
+        password = "密码（可空）"
+        columns = [code, category, name, ip, lng, lat, state, username, password]
+        col_type_mapping = {
+            code: "codeIndex",
+            category: "categoryIndex",
+            name: "nameIndex",
+            ip: "ipIndex",
+            lng: "lngIndex",
+            lat: "latIndex",
+            state: "stateIndex",
+            username: "userNameIndex",
+            password: "passwordIndex"
+        }
+        col_dict = {col_type_mapping[col]: idx for idx, col in enumerate(columns) if col in columns}
+        print(col_dict, columns)
+        # 动态生成 TypedDict
+        # ColMap = TypedDict('ColMap', {v: int for v in col_dict.values()})
+        # colmap = ColMap(**col_dict)
+        return columns, columnsMap(**col_dict)
+
+    pass
+
     def template(self):
         # 假设模板文件名为 template.xlsx，放在当前目录下
-        columns = ['编号', f"设备类型({DeviceCategory.to_cn_str()})", '名称', "IP地址", "经度", "维度", "状态(1:启用 0:禁用)", "用户名（可空）", "密码（可空）"]
+        columns, _ = self. templateMap()
         df = pd.DataFrame(columns=columns)
-        # 表头宽带自适应
-        # df.style.set_table_styles([
-        #    {
-        #        'selector': 'th',
-        #        'props': [('white-space', 'nowrap'), ('width', 'auto'), ('font-weight', 'bold')]
-        #    }
-        # ])
-
         # 设置适应内容宽度
         pd.set_option('display.max_colwidth', None)
-        # new_data = [
-        #    [1, '小明', 95],
-        #    [2, '小红', 88]
-        # ]
-        # df = pd.DataFrame(new_data, columns=columns)
-        # df = pd.concat([df,
-        #
-        # ], ignore_index=True)
-        # 创建一个内存中的二进制流
         output = BytesIO()
         # 将 DataFrame 写入二进制流，这里以 Excel 格式为例
         df.to_excel(output, index=False, sheet_name=self.sheet_name)
@@ -132,7 +173,6 @@ class ImportView(AuthMethodView):
         # 获取二进制数据
         binary_data = output.read()
         template_path = 'template.xlsx'
-        # df.to_excel(template_path, index=False)
         return binary_data, template_path
 
     async def head(self, request: Request):
@@ -175,21 +215,23 @@ class ImportView(AuthMethodView):
         errorNum = 0
         msg = ""
         userId = self.getUserId(request)
+
         if data:
             try:
+                _, colMap = self. templateMap()
+                print(colMap, colMap.codeIndex)
                 for item in data:
                     # nan!=nan
                     item = ['' if x != x else x for x in item]
-                    code = str(item[0])
-                    category = int(item[1])
-                    name = str(item[2])
-                    ip = self.paraserIP(item[3])
-                    lng = str(item[4])
-                    lat = str(item[5])
-                    state = int(item[6])
-
-                    username = str(item[7])
-                    password = str(item[8])
+                    code = str(item[colMap.codeIndex])
+                    category = try2int(item[colMap.categoryIndex])
+                    name = str(item[colMap.nameIndex])
+                    ip = self.paraserIP(item[colMap.ipIndex])
+                    lng = str(item[colMap.lngIndex])
+                    lat = str(item[colMap.latIndex])
+                    state = try2int(item[colMap.stateIndex], 1)
+                    username = str(item[colMap.userNameIndex])
+                    password = str(item[colMap.passwordIndex])
                     if not ip:
                         msg = f"IP地址{ip}格式错误"
                         errorNum += 1

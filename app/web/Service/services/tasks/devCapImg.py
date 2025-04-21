@@ -20,6 +20,7 @@ from concurrent.futures import Future
 from co6co.task.utils import Timer
 import time
 from model.enum import DeviceCategory
+from co6co.utils import network
 
 
 class TableEntry(TypedDict):
@@ -83,18 +84,16 @@ class DeviceCuptureImage(ICustomTask):
         userName, password, root, date = DeviceCuptureImage.queryConfig(bll)
         return bll.run(self.queryTable, bll), userName, password, root, date
 
-    def capture_dev_image_timeOut(self, video_path, output_image_path: str):
-        # result = self.loop.run_until_complete(timeout_async(5, self.capture_dev_image_async, video_path, output_image_path))
-        # if type(result) == bool and result == False:
-        #    log.warn("超时", video_path)
-        log.info("time start...", *locals())
-        result = timeout(60, self.capture_dev_image,   video_path, output_image_path)
-        if result:
-            log.warn("超时", video_path)
-
-    async def capture_dev_image_async(self, video_path, output_image_path: str):
-        log.succ("kkkkkkkk", *locals())
-        self.capture_dev_image(video_path, output_image_path)
+    def capture(self, ip: str, port, video_path, output_image_path: str):
+        """
+        从视频文件中捕获一帧并保存为图片。
+        :param video_path: 视频文件路径。
+        """
+        result, msg = network.check_port(ip, port)
+        if not result:
+            log.warn(f"{ip}:{port} 网络不通或554端口未打开,error msg: {msg}")
+        else:
+            self.capture_dev_image(video_path, output_image_path, ip)
 
     def capture_dev_image(self, video_path, output_image_path: str, ip: str):
         """
@@ -135,7 +134,7 @@ class DeviceCuptureImage(ICustomTask):
         except Exception as e:
             log.warn("执行result ERROR", str(e), "Future canceled->", f.cancelled())
 
-    def mainOne(self, pool: limitThreadPoolExecutor, video_path: str, output_image_path: str, ip: str):
+    def mainOne(self, pool: limitThreadPoolExecutor, video_path: str, output_image_path: str, ip: str, port=554):
         try:
 
             # 这里分配了 某个值 个线程会会卡在这里等等有线程空闲
@@ -143,8 +142,7 @@ class DeviceCuptureImage(ICustomTask):
             if pool._shutdown:
                 log.warn("线程池已关闭,不再接收新任务...")
                 return False
-            f = pool.submit(self.capture_dev_image, video_path, output_image_path, ip)
-            # f = pool.submit(self.capture_dev_image_timeOut, video_path, output_image_path, ip)
+            f = pool.submit(self.capture, ip, port, video_path, output_image_path)
             if self.worker and self.worker.isQuit and not pool._shutdown:
                 log.warn("关闭线程池,不再接收新任务...,等等正在执行的任务完成...")
                 pool.shutdown(False, cancel_futures=True)
