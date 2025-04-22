@@ -17,6 +17,7 @@ class CommandCategory(Base_Enum):
     DELETE = "DELETE", 4  # 移除任务
     RESTART = "restart", 5  # 重启任务
     MODIFY = "modify", 6  # 修改任务
+    GETNextTime = "nextTime", 7  # 获取下一次执行时间
 
     @staticmethod
     def createOption(command: CommandCategory, data: str = "", success: bool = True, **kwarg) -> DATA:

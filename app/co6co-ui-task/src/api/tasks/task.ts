@@ -23,6 +23,9 @@ export const exe_sched_svc = (id: number): Promise<IResponse> => {
 export const stop_sched_svc = (id: number): Promise<IResponse> => {
 	return createServiceInstance().delete(`${base_s_URL}/${id}`);
 };
+export const get_next_exec_time_svc = (id: number): Promise<IResponse> => {
+	return createServiceInstance().patch(`${base_s_URL}/${id}`);
+};
 export const test_cron_svc = (cron: string): Promise<IResponse<boolean>> => {
 	return createServiceInstance().get(`${base_cron_URL}?cron=${cron}`);
 };

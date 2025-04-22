@@ -265,6 +265,7 @@ export default defineComponent({
 							<ElFormItem label="cron表达式" prop="cron">
 								<ElTooltip
 									showAfter={3000}
+									triggerKeys={[]}
 									placement="top"
 									showArrow={true}
 									content="带秒cron表达式,星期使用英文描述,如:MON,TUE,WED,THU,FRI,SAT,SUN,（不使用0-6,0表示周日描述）">

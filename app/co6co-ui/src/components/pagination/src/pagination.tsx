@@ -1,17 +1,14 @@
 import { defineComponent, VNodeChild, PropType, computed, reactive } from 'vue';
 import { ElPagination } from 'element-plus';
-import { type IPageParam } from '@/constants';
+import {
+	type IPageParam,
+	PageAllLayouts,
+	PageDefaultLayouts,
+} from '@/constants';
 
 //使用 `as const` 来确保 `allowedColors` 是一个不可变的数组
-const allowedLayouts = [
-	'prev',
-	'pager',
-	'next',
-	'jumper',
-	'total',
-	'sizes',
-] as const;
-type AllowedLayouts = (typeof allowedLayouts)[number];
+
+type AllowedLayouts = (typeof PageAllLayouts)[number];
 
 export const PaginationProps = {
 	background: {
@@ -20,7 +17,7 @@ export const PaginationProps = {
 	},
 	layouts: {
 		type: Object as PropType<Array<AllowedLayouts>>, // 使用类型断言指定类型
-		default: ['prev', 'pager', 'next', 'total'],
+		default: PageDefaultLayouts,
 	},
 	pageSizes: {
 		type: Object as PropType<Array<number>>, // 使用类型断言指定类型

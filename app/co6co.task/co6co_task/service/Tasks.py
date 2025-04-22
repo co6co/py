@@ -45,8 +45,8 @@ class HandlerCommand(ABC):
             self.sendData(False, message)
         return sourceCode
 
-    def sendData(self, success: bool, message: str):
-        resultData = CommandCategory.createOption(CommandCategory.GET, success=success, data=message)
+    def sendData(self, success: bool, data: str | any):
+        resultData = CommandCategory.createOption(CommandCategory.GET, success=success, data=data)
         self.conn.send(resultData)
 
     def _taskisExist(self):
@@ -79,6 +79,32 @@ class ExistHandler(HandlerCommand):
             self.sendData(result, message)
         except Exception as e:
             log.err("ExistHandler", e)
+        return True
+
+
+class GetNextRunTimeHandler(HandlerCommand):
+
+    def check(self):
+        return self.command == CommandCategory.GETNextTime
+
+    def _handle(self):
+        if not self.check():
+            return False
+        try:
+            message = ""
+            if not self._taskisExist():
+                result = False
+                message = f"任务{self.taskCode}，不存在!"
+            else:
+                message = self.scheduler.getNextRun(self. taskCode)
+                if not message:
+                    result = False
+                    message = f"任务{self.taskCode}，查询下一次执行时间失败！"
+                else:
+                    result = True
+            self.sendData(result, message)
+        except Exception as e:
+            log.err("RemoveHandler", e)
         return True
 
 
@@ -131,7 +157,7 @@ class ModifyHandler(HandlerCommand):
 
 class RemoveHandler(HandlerCommand):
     def check(self):
-        return self.command == CommandCategory.REMOVE
+        return self.command == CommandCategory.REMOVE or self.command == CommandCategory.STOP
 
     def _handle(self):
         if not self.check():
@@ -184,7 +210,7 @@ class TasksMgr(BaseBll, sanics.Worker):
         sanics.Worker.__init__(self, event, conn)
         app.ctx.taskMgr = self
         self.scheduler = Scheduler()
-        self.handlerChain = ExistHandler(StartHandler(ModifyHandler(RemoveHandler(UnknownHandler(taskMgr=self)))))
+        self.handlerChain = ExistHandler(StartHandler(ModifyHandler(RemoveHandler(GetNextRunTimeHandler(UnknownHandler(taskMgr=self))))))
 
     @try_except
     def handler(self, data: str | DATA, conn: PipeConnection):
@@ -299,6 +325,6 @@ class TasksMgr(BaseBll, sanics.Worker):
     def stop(self):
         super().stop()
         result = self.run(self.update_status)
-        self.scheduler.removeAll()
+        self.scheduler.stop()
         log.warn("状态更新,成功->{}".format(result))
         log.info("等待其他任务退出..")

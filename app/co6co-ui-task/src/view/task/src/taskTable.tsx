@@ -132,6 +132,9 @@ export default defineComponent({
 				case 'once':
 					exeCommand(row, api.exe_once_svc, true);
 					break;
+				case 'nextTime':
+					exeCommand(row, api.get_next_exec_time_svc, true);
+					break;
 			}
 		};
 		const { deleteSvc } = deleteHook.default(api.del_svc, () => {
@@ -332,6 +335,11 @@ export default defineComponent({
 																		title="不要执行时间太长的程序"
 																		command="once">
 																		执行
+																	</ElDropdownItem>
+																	<ElDropdownItem
+																		title="下一次执行时间"
+																		command="nextTime">
+																		下一次时间
 																	</ElDropdownItem>
 																</ElDropdownMenu>
 															</div>

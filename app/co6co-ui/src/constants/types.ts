@@ -6,13 +6,7 @@ export interface IResponse<T = any> {
 export interface IPageResponse<T = any> extends IResponse<T> {
 	total: number;
 }
-export interface IPageParam<T = any> {
-	pageIndex: number;
-	pageSize: number;
-	orderBy?: string;
-	order?: 'desc' | 'asc'; // string //[desc|asc]
-	data?: T extends any ? T : T & any;
-}
+
 export interface Table_Module_Base {
 	pageTotal: number;
 	diaglogTitle?: string;

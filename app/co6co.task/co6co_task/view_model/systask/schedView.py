@@ -68,14 +68,29 @@ class schedView(_codeView, AuthMethodView):
             return self.response_json(Result.fail(message=result.data))
 
     @staticmethod
-    async def stopSched(request: Request, code: str):
+    async def execCommand(request: Request, code: str, command: CommandCategory):
+        """
+        执行一些简单命令
+        """
         conn = schedView.getPipConn(request)
-        conn.send(CommandCategory.createOption(CommandCategory.REMOVE, code=code))
+        conn.send(CommandCategory.createOption(command, code=code))
         result: DATA = conn.recv()
         if result.success:
             return True, result.data
         else:
             return False, result.data
+
+    async def patch(self, request: Request, pk: int):
+        """
+        查询下一次运行时间
+        """
+        select = Select(SysTaskPO).filter(SysTaskPO.id.__eq__(pk))
+        po: SysTaskPO = await get_one(request, select)
+        success, data = await schedView.execCommand(request, po.code, CommandCategory.GETNextTime)
+        if success:
+            return self.response_json(Result.success(data, message="获取成功"))
+        else:
+            return self.response_json(Result.fail(message="获取失败:"+data))
 
     async def delete(self, request: Request, pk: int):
         """
@@ -83,7 +98,7 @@ class schedView(_codeView, AuthMethodView):
         """
         select = Select(SysTaskPO).filter(SysTaskPO.id.__eq__(pk))
         po: SysTaskPO = await get_one(request, select)
-        success, msg = await schedView.stopSched(request, po.code)
+        success, msg = await schedView.execCommand(request, po.code, CommandCategory.STOP)
         if success:
             return self.response_json(Result.success(message="停止成功"))
         else:

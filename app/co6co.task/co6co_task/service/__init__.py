@@ -7,7 +7,7 @@ from typing import Callable
 from co6co.utils.source import get_source_fun
 from co6co.utils .singleton import Singleton
 from typing import Tuple, Callable
-from co6co.utils import log
+from co6co.utils import log, try_except
 '''
 BlockingScheduler :     当调度器是你应用中唯一要运行的东西时
 BackgroundScheduler :   当你没有运行任何其他框架并希望调度器在你应用的后台执行时使用（充电桩即使用此种方式）
@@ -17,8 +17,8 @@ TornadoScheduler :      当你的程序基于Tornado（一个web框架）的时�
 TwistedScheduler :      当你的程序使用了Twisted（一个异步框架）的时候使用
 QtScheduler :           如果你的应用是一个Qt应用的时候可以使用
 '''
- 
-    
+
+
 class CuntomCronTrigger(CronTrigger):
     """
     Cron 表达式解析器
@@ -65,10 +65,11 @@ class CuntomCronTrigger(CronTrigger):
         if len(values) == 6:
             values.append(None)
         if len(values) != 7:
-            raise ValueError('Wrong number of fields; got {}, expected 7,week:SUN MON TUE WED THU FRI SAT,不使用0-6的方式'.format(len(values))) 
+            raise ValueError('Wrong number of fields; got {}, expected 7,week:SUN MON TUE WED THU FRI SAT,不使用0-6的方式'.format(len(values)))
         return cls(second=values[0], minute=values[1], hour=values[2], day=values[3], month=values[4],
                    day_of_week=values[5], year=values[6], timezone=timezone)
-    
+
+
 class Scheduler(Singleton):
     _scheduler: BackgroundScheduler = None
 
@@ -103,6 +104,42 @@ class Scheduler(Singleton):
         """
         return key in self._tasks
 
+    def _getKey(self, jobid: str) -> str:
+        """
+        获取任务key
+        """
+        for key, value in self._tasks.items():
+            if value == jobid:
+                return key
+        return None
+
+    @try_except
+    def getNextRun(self, key: str = None):
+        # 获取所有作业
+        jobs = self. scheduler.get_jobs()
+        jobid = None
+        if key:
+            jobid = self._tasks[key]
+        data = []
+        for job in jobs:
+            if jobid and job.id != jobid:
+                continue
+            elif jobid:
+                data.append({
+                    "key": key,
+                    "job_id": job.id,
+                    "next_run_time": job.next_run_time,
+                })
+            else:
+                key = self._getKey(job.id)
+                data.append({
+                    "key": key,
+                    "job_id": job.id,
+                    "next_run_time": job.next_run_time,
+                })
+
+        return data
+
     def removeTask(self, key: str):
         """
         移除任务
@@ -119,6 +156,10 @@ class Scheduler(Singleton):
     def removeAll(self):
         self. scheduler.remove_all_jobs()
         self._tasks.clear()
+
+    def stop(self):
+        self.removeAll()
+        self.scheduler.shutdown()
 
     def checkCode(self,  code: str, corn: str):
         """
