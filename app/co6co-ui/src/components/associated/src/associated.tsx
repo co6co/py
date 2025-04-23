@@ -42,23 +42,18 @@ import {
 	type ITreeSelect,
 	type IAssociation,
 	type IResponse,
+	ITreeAssociatedItem,
 } from '@/constants';
 
 //Omit、Pick、Partial、Required
 //export type FormItem = Omit<Item, 'createUser' | 'updateUser' | 'createTime' | 'updateTime'>
 export type FormItem = IAssociation;
 
-/**
- * 关联模型
- */
-export type AssociatedSelect = ITreeSelect & {
-	associatedValue: number | boolean;
-};
-export type get_svc = (
+export type getAssociatedSvc = (
 	associatedId: number,
 	data: any
-) => Promise<IResponse<AssociatedSelect[]>>;
-export type save_svc = (
+) => Promise<IResponse<ITreeAssociatedItem[]>>;
+export type saveAssociatedSvc = (
 	associatedId: number,
 	data: IAssociation
 ) => Promise<IResponse>;
@@ -80,7 +75,7 @@ interface FormTree {
 	 * 是否选中所有按钮
 	 */
 	allChecked: boolean;
-	save_svc?: save_svc;
+	save_svc?: saveAssociatedSvc;
 	filter?: filter;
 }
 
@@ -125,7 +120,10 @@ export default defineComponent({
 		const key = Symbol('formData') as InjectionKey<FormItem>; //'formData'
 		provide('formData', DATA.fromData);
 
-		const init_data = (associatedId: number, get_association_svc: get_svc) => {
+		const init_data = (
+			associatedId: number,
+			get_association_svc: getAssociatedSvc
+		) => {
 			DATA.operation = FormOperation.edit;
 			switch (DATA.operation) {
 				case FormOperation.edit:
@@ -138,7 +136,7 @@ export default defineComponent({
 						DATA.treeSelectData = res.data;
 						traverseTreeData(res.data, (d) => {
 							//选中的值
-							const dt = d as AssociatedSelect;
+							const dt = d as ITreeAssociatedItem;
 							if (DATA.filter)
 								DATA.allIds.push(...[dt].filter(DATA.filter).map((m) => m.id));
 							else DATA.allIds.push(dt.id);
@@ -323,8 +321,8 @@ export default defineComponent({
 		};
 		const openDialog = (
 			associationId: number,
-			get_association_svc: get_svc,
-			save_association_svc: save_svc,
+			get_association_svc: getAssociatedSvc,
+			save_association_svc: saveAssociatedSvc,
 			filter?: filter
 		) => {
 			init_data(associationId, get_association_svc);

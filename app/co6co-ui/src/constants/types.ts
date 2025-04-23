@@ -49,7 +49,20 @@ export interface ITreeSelect {
 	parentId: number;
 	children?: ITreeSelect[];
 }
-
+/**
+ * 列表关联
+ */
+export type ITransferItem = {
+	id: number | string;
+	name: string;
+	associatedValue: number | boolean;
+};
+/**
+ * 树形关联模型
+ */
+export type ITreeAssociatedItem = ITreeSelect & {
+	associatedValue: number | boolean;
+};
 export interface IAssociation {
 	add: Array<number | string>;
 	remove: Array<number | string>;
