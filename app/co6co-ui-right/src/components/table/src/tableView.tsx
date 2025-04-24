@@ -1,4 +1,10 @@
-import { defineComponent, PropType, VNodeChild, SlotsType } from 'vue';
+import {
+	defineComponent,
+	PropType,
+	VNodeChild,
+	SlotsType,
+	computed,
+} from 'vue';
 import { ref, reactive, onMounted } from 'vue';
 import {
 	ElTable,
@@ -74,6 +80,7 @@ export default defineComponent({
 			data: any[];
 			currentItem?: any;
 		}
+
 		//:use
 		//const { getPermissKey } = routeHook.usePermission()
 		//const dictHook = useDictHook.useDictSelect()
@@ -92,12 +99,16 @@ export default defineComponent({
 			pageTotal: -1,
 			diaglogTitle: '',
 		});
+		const query_temp_Data = computed(() => {
+			if (prop.showPaged) return { ...prop.query, ...DATA.query };
+			else return { ...prop.query };
+		});
+
 		// 获取表格数据
 		const queryData = () => {
 			showLoading();
-			let data = prop.showPaged
-				? { ...DATA.query, ...prop.query }
-				: { ...prop.query };
+			let data = query_temp_Data.value;
+			console.info(data);
 			if (prop.beforeApi) data = prop.beforeApi(data);
 			prop
 				.dataApi(data)

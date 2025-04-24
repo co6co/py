@@ -52,3 +52,5 @@ export enum DictShowCategory {
 	NameFlag = 2,
 	All = 999,
 }
+
+export * from './api';

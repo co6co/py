@@ -6,6 +6,31 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from .baseCache import BaseCache
 from co6co_db_ext.db_utils import DbCallable, db_tools
 from ..model.pos.other import sysConfigPO
+import json as sysJson
+from typing import TypedDict
+
+
+async def get_config(request: Request, code: str, *, useDist=False, default: any = None) -> str | dict | None:
+    """
+    获取配置
+    """
+    try:
+        cache = ConfigCache(request)
+        result = cache.getConfig(code)
+        if result == None:
+            await cache.queryConfig(code)
+            result = cache.getConfig(code)
+        if result and useDist:
+            result = sysJson.loads(result)
+            # 　如果default是dict,则合并，
+            result = default.update(result) if default and isinstance(default, dict) else result
+        if result == None:
+            log.warn("未找到'{}'的相关配置,使用默认配置：{}".format(code, default))
+            result = default
+        return result
+    except Exception as e:
+        log.error("获取配置失败:{},使用默认配置：{}".format(e, default))
+        return default
 
 
 async def get_upload_path(request: Request) -> str:
@@ -14,15 +39,20 @@ async def get_upload_path(request: Request) -> str:
     数据库未配置使用 /upload
     """
     key = "SYS_CONFIG_UPLOAD_PATH"
-    cache = ConfigCache(request)
-    path = cache.getConfig(key)
-    if path == None:
-        await cache.queryConfig(key)
-        path = cache.getConfig(key)
-    if path == None:
-        path = "/upload"
-        log.warn("未配置上传路径:key:{},使用默认值:{}".format(key, path))
-    return path
+    return get_config(request, key, default="/upload")
+
+
+class UserConfig(TypedDict):
+    loginFail: int
+    lockSeconds: int
+
+
+async def get_user_config(request: Request) -> UserConfig:
+    key = "SYS_USER_CONFIG"
+    default = {"loginFail": 3, "lockSeconds": 5*60}
+    config = await get_config(request, key, useDist=True, default=default)
+
+    return config
 
 
 class ConfigCache(BaseCache):

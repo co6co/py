@@ -1,20 +1,7 @@
-import { ref } from 'vue';
-import { IEnumSelect } from 'co6co';
-import { get_state_svc } from '@/api/sys/user';
-
+import { get_state_svc, get_category_svc } from '@/api/sys/user';
+import { useEnum } from './base';
 export const useState = () => {
-	const selectData = ref<IEnumSelect[]>([]);
-	const refresh = async () => {
-		selectData.value = [];
-		const res = await get_state_svc();
-		selectData.value = res.data;
-	};
-	const getName = (value?: number) => {
-		if (value != undefined)
-			return selectData.value.find((m) => m.value == value)?.label;
-		return '';
-	};
-
+	const { loadData, selectData, refresh, getName } = useEnum(get_state_svc);
 	const getTagType = (value?: number) => {
 		if (value != undefined) {
 			switch (value) {
@@ -29,6 +16,10 @@ export const useState = () => {
 		return 'info';
 	};
 
-	const loadData = refresh;
 	return { loadData, selectData, refresh, getName, getTagType };
+};
+
+export const useCategory = () => {
+	const { loadData, selectData, refresh, getName } = useEnum(get_category_svc);
+	return { loadData, selectData, refresh, getName };
 };

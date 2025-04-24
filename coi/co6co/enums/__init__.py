@@ -1,6 +1,6 @@
 from enum import Enum, unique
 # from abc import ABC, abstractclassmethod  抽象
-from typing import List, Dict
+from typing import List, Dict, Literal
 
 from co6co import T
 
@@ -74,6 +74,14 @@ class Base_Enum (Enum):
             yield v
 
     @classmethod
+    def _to_str(cls, attr) -> str:
+        return ",".join([f"{i.val}:{getattr(i, attr)}" for i in cls])
+
+    @classmethod
+    def to_str(cls, attr: Literal["key", "name"]) -> str:
+        return cls._to_str(attr)
+
+    @classmethod
     def value_of(cls, name: str, ignoreError: False):
         """
         枚举的字符串 转枚举
@@ -100,7 +108,7 @@ class Base_Enum (Enum):
 @unique
 class Base_EC_Enum(Base_Enum):
     """
-    枚举[key:英文 ,name:中文 ,val:数字] 
+    枚举[key:英文 ,label:中文 ,val:数字] 
     """
     key: T
     label: T
@@ -119,6 +127,14 @@ class Base_EC_Enum(Base_Enum):
     def to_dict_list(cls) -> List[Dict]:
         status = [{'uid': i.name, "label": i.label, 'key': i.key, 'value': i.val} for i in cls]
         return status
+
+    @classmethod
+    def to_str(cls, attr: Literal["key", "name", 'label']) -> str:
+        return cls._to_str(attr)
+
+    @classmethod
+    def to_labels_str(cls) -> str:
+        return cls.to_str("label")
 
     def __str__(self):
         """

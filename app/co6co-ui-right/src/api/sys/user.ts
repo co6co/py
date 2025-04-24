@@ -50,3 +50,6 @@ export const login_svc = (
 export const get_state_svc = (): Promise<IResponse<IEnumSelect[]>> => {
 	return createServiceInstance().post(`${base_URL}/status`);
 };
+export const get_category_svc = (): Promise<IResponse<IEnumSelect[]>> => {
+	return createServiceInstance().post(`${base_URL}/category`);
+};

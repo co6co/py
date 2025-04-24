@@ -15,12 +15,13 @@ import {
 	closeLoading,
 	type DialogFormInstance,
 	type FormData,
+	EnumSelect,
 } from 'co6co';
 
 import * as api_type from 'co6co';
 import api from '@/api/sys/user';
 import { useTree } from '@/hooks/useUserGroupSelect';
-import { useState } from '@/hooks/useUserSelect';
+import { useState, useCategory } from '@/hooks/useUserSelect';
 import {
 	ElButton,
 	ElFormItem,
@@ -35,6 +36,7 @@ import {
 export interface Item extends api_type.FormItemBase {
 	id: number;
 	userName?: string;
+	category: number;
 	/**
 	 * 用户密码增加用户需要
 	 */
@@ -64,11 +66,13 @@ export default defineComponent({
 	setup(prop, ctx) {
 		const hookTree = useTree(0);
 		const { loadData, selectData } = useState();
+		const useCategoryHook = useCategory();
+
 		const diaglogForm = ref<DialogFormInstance>();
 		const DATA = reactive<FormData<number, FormItem>>({
 			operation: FormOperation.add,
 			id: 0,
-			fromData: { userName: '', state: 0, userGroupId: 0 },
+			fromData: { userName: '', category: 0, state: 0, userGroupId: 0 },
 		});
 		//@ts-ignore
 		const key = Symbol('formData') as InjectionKey<FormItem>; //'formData'
@@ -76,14 +80,17 @@ export default defineComponent({
 		onMounted(async () => {
 			await hookTree.loadData();
 			await loadData();
+			await useCategoryHook.loadData();
 		});
 		const init_data = (oper: FormOperation, item?: Item) => {
 			DATA.operation = oper;
 			switch (oper) {
 				case FormOperation.add:
 					DATA.id = 0;
+
 					DATA.fromData.userName = '';
 					DATA.fromData.state = 0;
+					DATA.fromData.category = 0;
 					DATA.fromData.password = '';
 					DATA.fromData.userGroupId = undefined;
 					break;
@@ -125,6 +132,7 @@ export default defineComponent({
 			userGroupId: [
 				{ required: true, message: '请选择用户组', trigger: 'blur' },
 			],
+			category: [{ required: true, message: '用户类型', trigger: 'blur' }],
 			state: [{ required: true, message: '请用户组编码', trigger: 'blur' }],
 		};
 		const rules_add: FormRules = {
@@ -186,9 +194,16 @@ export default defineComponent({
 			default: () => (
 				<>
 					<ElFormItem label="用户名" prop="userName">
-						<ElInput
-							v-model={DATA.fromData.userName}
-							placeholder="用户名"></ElInput>
+						<ElInput v-model={DATA.fromData.userName} placeholder="用户名" />
+					</ElFormItem>
+					<ElFormItem label="用户类别" prop="category">
+						<EnumSelect
+							clearable
+							data={useCategoryHook.selectData.value}
+							v-model={DATA.fromData.category}
+							style="width:100%"
+							placeholder="用户类型"
+						/>
 					</ElFormItem>
 					<ElFormItem label="所属用户组" prop="userGroupId">
 						<ElTreeSelect
@@ -196,7 +211,8 @@ export default defineComponent({
 							multiple={false}
 							check-strictly
 							props={{ children: 'children', label: 'name', value: 'id' }}
-							data={hookTree.treeSelectData.value}></ElTreeSelect>
+							data={hookTree.treeSelectData.value}
+						/>
 					</ElFormItem>
 					{DATA.operation == FormOperation.add ? (
 						<ElFormItem label="密码" prop="password">
@@ -204,7 +220,8 @@ export default defineComponent({
 								v-model={DATA.fromData.password}
 								type="password"
 								showPassword={true}
-								placeholder="密码"></ElInput>
+								placeholder="密码"
+							/>
 						</ElFormItem>
 					) : (
 						<></>

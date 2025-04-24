@@ -4,7 +4,7 @@ from ..view_model.user import user_ass_view, users_view, user_view, sys_users_vi
 from ..view_model.currentUser import changePwd_view, user_info_view
 from ..view_model.login import login_view
 from ..view_model.aop.api_auth import authorized
-from ..model.enum import user_state
+from ..model.enum import user_state, user_category
 from co6co_db_ext.db_utils import db_tools
 from ..model.pos.right import UserPO
 from co6co_sanic_ext.model.res.result import Result
@@ -24,6 +24,16 @@ async def getUserStatus(request: Request):
     用户状态
     """
     states = user_state.to_dict_list()
+    return JSON_util.response(Result.success(data=states))
+
+
+@user_api.route("/category", methods=["GET", "POST"])
+@authorized
+async def getUserCategory(request: Request):
+    """
+    用户类别
+    """
+    states = user_category.to_dict_list()
     return JSON_util.response(Result.success(data=states))
 
 

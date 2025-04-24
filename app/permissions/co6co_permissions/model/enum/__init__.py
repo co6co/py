@@ -38,6 +38,12 @@ class menu_state(Base_EC_Enum):
     disabled = "disabled", "禁用", 1
 
 
+class user_category(Base_EC_Enum):
+    normal = "normal", "普通", 0
+    system = "system", "系统", 1
+    terminal = "terminal ", "终端", 2
+
+
 class user_state(Base_EC_Enum):
     enabled = "enabled", "启用", 0
     disabled = "disabled", "禁用", 1

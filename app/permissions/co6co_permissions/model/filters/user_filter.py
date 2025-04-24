@@ -1,5 +1,5 @@
 
-from ..pos.right import UserPO,UserGroupPO
+from ..pos.right import UserPO, UserGroupPO
 from sqlalchemy .orm.attributes import InstrumentedAttribute
 from typing import Tuple
 from co6co_db_ext.db_filter import absFilterItems
@@ -13,14 +13,13 @@ class user_filter(absFilterItems):
     """
     name: str = None
     userGroupId: int = None
-    state:int=None
+    state: int = None
 
     def __init__(self, userName=None, userGroupId: int = None):
         super().__init__(UserPO)
         self.name = userName
         self.userGroupId = userGroupId
-        self.listSelectFields=[UserPO.id,UserPO.userGroupId,UserPO.state,UserPO.createTime, UserPO.userName]
-         
+        self.listSelectFields = [UserPO.id, UserPO.userGroupId, UserPO.category, UserPO.state, UserPO.createTime, UserPO.userName]
 
     def filter(self) -> list:
         """
@@ -36,11 +35,11 @@ class user_filter(absFilterItems):
         return filters_arr
 
     def create_List_select(self):
-        select=(
-				Select(UserPO.id,UserPO.userGroupId,UserPO.state,UserPO.createTime, UserPO.userName,UserGroupPO.name.label("groupName"),UserGroupPO.id.label("groupId"))
-                .join(UserGroupPO,isouter=True,onclause=UserPO.userGroupId==UserGroupPO.id)
-				.filter(and_(*self.filter()))  
-		)
+        select = (
+            Select(UserPO.id, UserPO.userGroupId, UserPO.state, UserPO.category, UserPO.createTime, UserPO.userName, UserGroupPO.name.label("groupName"), UserGroupPO.id.label("groupId"))
+            .join(UserGroupPO, isouter=True, onclause=UserPO.userGroupId == UserGroupPO.id)
+            .filter(and_(*self.filter()))
+        )
         return select
 
     def getDefaultOrderBy(self) -> Tuple[InstrumentedAttribute]:

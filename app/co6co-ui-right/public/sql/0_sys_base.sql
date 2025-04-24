@@ -159,6 +159,7 @@ CREATE TABLE `sys_user` (
   `user_salt` varchar(64) DEFAULT NULL COMMENT 'pwd=盐',
   `user_group_id` int(11) unsigned DEFAULT NULL COMMENT '用户组,仅简单对照:1:超级管理员,2:普通用户',
   `state` int(11) DEFAULT '0' COMMENT '用户状态：0启用，1锁定，2禁用',
+  `lock_time`  datetime DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
   `avatar` varchar(256) DEFAULT NULL COMMENT '图像',
   `remark` varchar(1500) DEFAULT NULL COMMENT '备注',
   `create_time` datetime DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,

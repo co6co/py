@@ -154,11 +154,6 @@
 		Setting,
 	} from '@element-plus/icons-vue';
 	import { useState } from '@/hooks/useUserSelect';
-	import svc, { association_service as ass_api } from '@/api/sys/user';
-	import modifyDiaglog, {
-		type UserItem as Item,
-	} from '@/components/modifyUser';
-	import resetPwdDiaglog from '@/components/resetPwd';
 
 	import {
 		EnumSelect,
@@ -172,6 +167,11 @@
 	import useDelete from '@/hooks/useDelete';
 
 	import { Associated as associatedDiaglog } from 'co6co';
+	import svc, { association_service as ass_api } from '@/api/sys/user';
+	import modifyDiaglog, {
+		type UserItem as Item,
+	} from '@/components/modifyUser';
+	import resetPwdDiaglog from '@/components/resetPwd';
 	import { usePermission, ViewFeature } from '@/hooks/useRoute';
 
 	interface IQueryItem extends IPageParam {

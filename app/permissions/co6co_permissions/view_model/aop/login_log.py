@@ -28,7 +28,7 @@ async def _loginLog(response: JSONResponse, request: Request):
             po.state = "成功"
         else:
             po.state = "失败"
-        log.warn(po.__dict__)
+        # log.warn(po.__dict__)
         insert = InsertCallable(request.ctx.session)
         await insert(po)
     except Exception as e:
