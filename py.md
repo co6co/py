@@ -13,7 +13,7 @@ pip install --upgrade --no-deps co6co --index-url https://pypi.org/simple/
 co6co==0.0.26
 co6co.web_session=0.0.1
 co6co.sanic-ext==0.0.11
-co6co.db-ext==0.0.13
+co6co.db-ext==0.0.14
 co6co.web-db==0.0.14
 co6co.permissions==0.0.27
 
@@ -29,7 +29,7 @@ npm install --registry=https://registry.npmjs.org/ co6co
 
 ```
 co6co-ui==0.1.30
-co6co-right==0.0.38
+co6co-right==0.0.39
 co6co-wx==0.0.2
 
 

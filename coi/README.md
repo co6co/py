@@ -59,7 +59,7 @@
     增加network模块
 0.0.28
     增加 timeout 方法
-0.0.29 未发布
+0.0.29
     优化
     importExcell
 ```

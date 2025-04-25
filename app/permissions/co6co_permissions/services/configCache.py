@@ -42,6 +42,15 @@ async def get_upload_path(request: Request) -> str:
     return get_config(request, key, default="/upload")
 
 
+async def get_terminal_access_token(request: Request) -> str:
+    """
+    获取终端配置
+    """
+    cache = ConfigCache(request)
+    # 获取
+    return cache.getConfig("SYS_CONFIG_TERMINAL_ACCESS_TOKEN")
+
+
 class UserConfig(TypedDict):
     loginFail: int
     lockSeconds: int

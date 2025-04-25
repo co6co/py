@@ -97,12 +97,20 @@ class db_tools:
         # sqlalchemy.engine.result.ChunkedIteratorResult
         return [dict(zip(a._fields, a)) for a in executeResult]
 
+    async def execSelect(session: AsyncSession, select: Select, params: Dict | List | Tuple = None) -> int | None:
+        """
+        执行查询语句
+        @return: int | None
+        """
+        exec = await session.execute(select, params)
+        return exec.scalar()
+
     async def count(session: AsyncSession, *filters: ColumnElement[bool], column: InstrumentedAttribute = "*") -> int:
         """
         count
         """
-        exec = await session.execute(select(func.count(column)).filter(and_(*filters)))
-        return exec.scalar()
+        sql = select(func.count(column)).filter(and_(*filters))
+        return await db_tools.execSelect(session, sql)
 
     async def exist(session: AsyncSession, *filters: ColumnElement[bool], column: InstrumentedAttribute = "*") -> bool:
         """
@@ -271,8 +279,7 @@ class QueryListCallable(DbCallable):
 class QueryPagedCallable(DbCallable):
     async def __call__(self, countSelect: Select, select: Select, isPO: bool = True, remove_db_instance=True, param: Dict | List | Tuple = None) -> Tuple[int, List[dict]]:
         async def exec(session: AsyncSession):
-            total = await session.execute(countSelect, param)
-            total = total.scalar()
+            total = await db_tools.execSelect(session, countSelect, param)
             if isPO:
                 result = await db_tools.execForPos(session, select, remove_db_instance, param)
             else:

@@ -107,8 +107,7 @@ export default defineComponent({
 		// 获取表格数据
 		const queryData = () => {
 			showLoading();
-			let data = query_temp_Data.value;
-			console.info(data);
+			let data = query_temp_Data.value; 
 			if (prop.beforeApi) data = prop.beforeApi(data);
 			prop
 				.dataApi(data)

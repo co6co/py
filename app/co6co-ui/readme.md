@@ -70,5 +70,5 @@
 0.1.29
     优化
 0.1.30
-    增加 associatedByTransfer 组件
+    增加 transfer 组件
 ```

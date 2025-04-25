@@ -24,6 +24,8 @@ db_session.py  72 z
     增加数据其他线程的数据库操作 -->session.BaseBll
 0.0.13
     session.BaseBll 修复 connect 报错异常
+0.0.14
+    优化功能
 
 
 
