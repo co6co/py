@@ -1,5 +1,7 @@
 from multiprocessing.managers import DictProxy
 from sanic import Sanic, Request
+from co6co_db_ext.db_session import db_service
+from sqlalchemy.ext.asyncio import AsyncSession
 
 
 class CacheManage:
@@ -11,7 +13,8 @@ class CacheManage:
         return app
 
     @staticmethod
-    def session(request: Request):
+    def session(request: Request) -> AsyncSession:
+        request.app.ctx.session
         return request.ctx.session
 
     def __init__(self, app: Sanic) -> None:
@@ -26,7 +29,7 @@ class CacheManage:
         return self.app.shared_ctx.cache
 
     @property
-    def dbservice(self):
+    def dbservice(self) -> db_service:
         return self.app.ctx.service
 
     def setCache(self, key: str, value: any):

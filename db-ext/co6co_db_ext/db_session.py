@@ -1,4 +1,4 @@
-from sqlalchemy.ext.asyncio import create_async_engine
+from sqlalchemy.ext.asyncio import create_async_engine, AsyncEngine
 
 from contextvars import ContextVar
 
@@ -7,7 +7,7 @@ from sqlalchemy.orm import scoped_session, sessionmaker
 
 # from model.pos.DbModelPo import User, Process
 
-from sqlalchemy import select, create_engine
+from sqlalchemy import select, create_engine, Engine
 from sqlalchemy.orm import selectinload
 
 import asyncio
@@ -45,28 +45,67 @@ class db_service:
     poolSize: int = None
     poolSize: int = None
 
+    def createEngine(self, url, **kwargs) -> Engine:
+        setting = {
+            "ping": self.settings.get("pool_pre_ping"),
+            "echo": True if type(self.settings.get("echo")) != bool else self.settings.get("echo"),
+            "pool_size": self.settings.get("pool_size"),
+            "max_overflow": self.settings.get("max_overflow"),
+            "poolclass": NullPool
+        }
+        setting.update(kwargs)
+        return create_engine(url, **setting)
+
+    def createAsyncEngine(self, url, **kwargs) -> AsyncEngine:
+        setting = {
+            "pool_pre_ping": self.settings.get("pool_pre_ping"),
+            "echo": True if type(self.settings.get("echo")) != bool else self.settings.get("echo"),
+            "pool_size": self.settings.get("pool_size"),
+            "max_overflow": self.settings.get("max_overflow")
+        }
+        setting.update(kwargs)
+        return create_async_engine(url, **setting)
+
+    def _session_factory(self, engine: Engine = None, **kv) -> AsyncSession:
+        if engine == None:
+            engine = self.createEngine(self.url)
+        default = {
+            "autoflush": False,
+            "autocommit": False,
+        }
+        default.update(kv)
+        factory = sessionmaker(bind=self.engine,  **default)
+        return factory
+
+    def _async_session_factory(self, engine: AsyncEngine = None, **kv) -> AsyncSession:
+        if engine == None:
+            engine = self.createAsyncEngine(self.url)
+        default = {
+            "expire_on_commit": False,
+            "class_": AsyncSession,
+        }
+        default.update(kv)
+        factory = sessionmaker(engine, **default)
+        return factory
+
+    def createSession(self, engine: AsyncEngine = None, **kv) -> scoped_session:
+        factory = self._session_factory(engine, **kv)
+        return scoped_session(factory)
+
+    def createAsyncSession(self, engine: AsyncEngine = None, **kv) -> AsyncSession:
+        factory = self._async_session_factory(engine, **kv)
+        return factory()
+
     def _createEngine(self, url: str):
         self.useAsync = True
-        # 字符串 除了 bool(''/""/()/[]/{}/None )== False
-        echo = self.settings.get("echo")
-        ping = self.settings.get("pool_pre_ping")
-        if type(echo) != bool:
-            echo = True
-
-        pool_size = self.settings.get("pool_size")
-        max_overflow = self.settings.get("max_overflow")
         if "sqlite" in url:
             self.useAsync = False
-            self.engine = create_engine(
-                url, echo=echo, poolclass=NullPool, pool_pre_ping=ping)
-            self.session = scoped_session(sessionmaker(
-                autoflush=False, autocommit=False, bind=self.engine))
+            self.engine = self.createEngine(url)
+            self.session = self.createSession(self.engine)
             BasePO.query = self.session.query_property()
         else:  # AsyncSession
-            self.engine = create_async_engine(
-                url, echo=echo, pool_size=pool_size, max_overflow=max_overflow, pool_pre_ping=ping)
-            self.async_session_factory = sessionmaker(
-                self.engine, expire_on_commit=False, class_=AsyncSession)  # AsyncSession,
+            self.engine = self.createAsyncEngine(url)
+            self.async_session_factory = self._async_session_factory(self.engine)
 
         self.base_model_session_ctx = ContextVar("session")
         pass
@@ -76,7 +115,7 @@ class db_service:
         if engineUrl == None:
             self.settings .update(config)
             engineUrl = "mysql+aiomysql://{}:{}@{}/{}".format(self.settings['DB_USER'], self.settings['DB_PASSWORD'], self.settings['DB_HOST'], self.settings['DB_NAME'])
-
+        self.url = engineUrl
         self._createEngine(engineUrl)
         pass
 

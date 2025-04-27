@@ -10,6 +10,9 @@ from ..model.pos.right import UserPO
 from co6co_sanic_ext.model.res.result import Result
 from co6co_sanic_ext.utils import JSON_util
 from ..view_model.aop import exist
+import random
+import string
+
 
 user_api = Blueprint("users_API", url_prefix="/users")
 add_routes(user_api, login_view, ticketView)
@@ -57,3 +60,23 @@ async def userExistPost(request: Request):
     userName = request.json.get("userName")
     result = await db_tools.exist(request.ctx.session, UserPO.userName == userName, UserPO.id != id)
     return exist(result, "用户", userName)
+
+
+@user_api.route("/generatePwd/<length:int>", methods=["GET", "POST"])
+async def generatePwd2(request: Request, length: int = 256):
+    """
+    生成随机密码 /generatePwd/<length:int>
+
+    """
+    all_characters = string.ascii_letters + string.digits  # + string.punctuation
+    password = ''.join(random.choice(all_characters) for _ in range(length))
+    return JSON_util.response(Result.success(data=password))
+
+
+@user_api.route("/generatePwd", methods=["GET", "POST"])
+async def generatePwd(request: Request):
+    """
+    生成随机密码 /generatePwd/256
+
+    """
+    return await generatePwd2(request, 256)

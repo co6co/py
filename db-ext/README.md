@@ -26,6 +26,8 @@ db_session.py  72 z
     session.BaseBll 修复 connect 报错异常
 0.0.14
     优化功能
+0.0.15
+    优化
 
 
 

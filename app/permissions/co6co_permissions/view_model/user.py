@@ -12,9 +12,16 @@ from co6co.utils import getRandomStr
 
 from .base_view import AuthMethodView, BaseMethodView
 from ..model.pos.right import UserPO, RolePO, UserRolePO, AccountPO
+from ..model.enum import user_category
 from ..model.filters.user_filter import user_filter
 from .aop.api_auth import userRoleChanged
 from ..services import generatePageToken, queryUer, getSecret, decodeCode
+from .aop.user_aop import AccessTokenChange
+
+
+@AccessTokenChange
+def accessTokenChange(self, token: str, userPo: UserPO = None):
+    return userPo.to_jwt_dict()
 
 
 class user_ass_view(AuthMethodView):
@@ -89,7 +96,10 @@ class users_view(AuthMethodView):
                 return JSON_util.response(Result.fail(message=f"'{po.userName}'已存在！"))
             if po.salt == None:
                 po.salt = getRandomStr(6)
-            po.password = po.encrypt(po.password)
+            if po.category == user_category.normal or po.category == user_category.system:
+                po.password = po.encrypt(po.password)
+            else:
+                accessTokenChange(po.password, po)
         return await self.add(request, po, userId=userId, beforeFun=before)
 
 
@@ -144,7 +154,11 @@ class sys_users_view(AuthMethodView):
             if one != None:
                 if one.salt == None:
                     return JSON_util.response(Result.fail(message=f"用户[{userName}],通过关联创建的用户，完善信息才能重置密码"))
-                one.password = one.encrypt(password)
+                if one.category == user_category.normal or one.category == user_category.system:
+                    one.password = one.encrypt(password)
+                else:
+                    one.password = password
+                    accessTokenChange(password, one)
                 return JSON_util.response(Result.success())
             else:
                 return JSON_util.response(Result.fail(message=f"所提供的用户名[{userName}]不存在，请刷新重试！"))

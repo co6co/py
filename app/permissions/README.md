@@ -66,4 +66,6 @@
 0.0.28
     优化一些逻辑
     usertable 增加 locakTime 字段
+0.0.29
+    增加 token验证
 ```

@@ -47,6 +47,7 @@ async def get_terminal_access_token(request: Request) -> str:
     获取终端配置
     """
     cache = ConfigCache(request)
+    cache.setCache("SYS_CONFIG_TERMINAL_ACCESS_TOKEN", "123456")
     # 获取
     return cache.getConfig("SYS_CONFIG_TERMINAL_ACCESS_TOKEN")
 

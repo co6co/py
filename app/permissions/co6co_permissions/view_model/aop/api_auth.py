@@ -16,6 +16,7 @@ from ...model.pos.right import UserPO, UserRolePO, UserGroupRolePO, menuPO, Menu
 from ...model.enum import menu_type
 from .api_check import apiPermissionCheck
 from .authonCache import AuthonCacheManage
+from ...services.baseCache import AccessTokenCache
 
 
 async def checkApi(request: Request):
@@ -35,14 +36,22 @@ def authorized(f):
     @wraps(f)
     async def decorated_function(request: Request, *args, **kwargs):
         secret = request.app.config.SECRET
-        # 解密 session
-        # if request.headers.get("Session"):
-        #    jsw = JWT_service(secret)
-        #    session = jsw.decode(request.headers.get("Session"))
-        #    request.headers["Session"] = session
-        # run some method that checks the request
-        # for the client's authorization status
-        valid = await validToken(request, secret)
+        token = request.token
+        valid = False
+        # 使用 accessToken 认证
+        if '.' not in token:
+            accessToken = AccessTokenCache(request)
+            valid = await accessToken.validAccessToken(token)
+        else:
+            # 解密 session
+            # if request.headers.get("Session"):
+            #    jsw = JWT_service(secret)
+            #    session = jsw.decode(request.headers.get("Session"))
+            #    request.headers["Session"] = session
+            # run some method that checks the request
+            # for the client's authorization status
+
+            valid = await validToken(request, secret)
         if not valid:
             return JSON_util.response(Result.fail(message="token invalid or expire"), status=403)
         # //dodo debug
