@@ -3,7 +3,7 @@
 import json
 import base64
 import os
-from co6co.utils import hash
+from ..utils import hash
 
 
 class File:
