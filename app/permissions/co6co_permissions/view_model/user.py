@@ -96,7 +96,7 @@ class users_view(AuthMethodView):
                 return JSON_util.response(Result.fail(message=f"'{po.userName}'已存在！"))
             if po.salt == None:
                 po.salt = getRandomStr(6)
-            if po.category == user_category.normal or po.category == user_category.system:
+            if po.category == user_category.normal.val or po.category == user_category.system.val:
                 po.password = po.encrypt(po.password)
             else:
                 accessTokenChange(po.password, po)
@@ -154,7 +154,7 @@ class sys_users_view(AuthMethodView):
             if one != None:
                 if one.salt == None:
                     return JSON_util.response(Result.fail(message=f"用户[{userName}],通过关联创建的用户，完善信息才能重置密码"))
-                if one.category == user_category.normal or one.category == user_category.system:
+                if one.category == user_category.normal.val or one.category == user_category.system.val:
                     one.password = one.encrypt(password)
                 else:
                     one.password = password

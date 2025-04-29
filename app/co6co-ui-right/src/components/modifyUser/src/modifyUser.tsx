@@ -120,6 +120,12 @@ export default defineComponent({
 				else return callback();
 			});
 		};
+		const passwordShowTxt = computed(() => {
+			return DATA.fromData.category == 2 ? 'AccessToken' : '密码';
+		});
+		const passwordShowType = computed(() => {
+			return DATA.fromData.category == 2 ? 'textarea' : 'password';
+		});
 		const rules_edit: FormRules = {
 			userName: [
 				{
@@ -141,9 +147,9 @@ export default defineComponent({
 					{
 						required: true,
 						min: 6,
-						max: 20,
-						message: '请输入6-20位密码',
-						trigger: 'blur',
+						max: 256,
+						message: '请输入6-256位字符',
+						trigger: ['blur', 'change'],
 					},
 				],
 			},
@@ -157,6 +163,7 @@ export default defineComponent({
 					return rules_edit;
 			}
 		});
+
 		const save = () => {
 			//提交数据
 			let promist: Promise<api_type.IResponse>;
@@ -215,12 +222,12 @@ export default defineComponent({
 						/>
 					</ElFormItem>
 					{DATA.operation == FormOperation.add ? (
-						<ElFormItem label="密码" prop="password">
+						<ElFormItem label={passwordShowTxt.value} prop="password">
 							<ElInput
 								v-model={DATA.fromData.password}
-								type="password"
+								type={passwordShowType.value}
 								showPassword={true}
-								placeholder="密码"
+								placeholder={passwordShowTxt.value}
 							/>
 						</ElFormItem>
 					) : (

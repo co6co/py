@@ -72,7 +72,7 @@ export default defineComponent({
 		const resetPwdDiaglogRef = ref<InstanceType<typeof ResetPwdDiaglog>>();
 		const onOpenResetDialog = (_: number, row?: Item) => {
 			DATA.currentItem = row;
-			resetPwdDiaglogRef.value?.openDialog(row);
+			resetPwdDiaglogRef.value?.openDialog(row?.category!, row);
 		};
 		//删除
 		const { deleteSvc } = useDelete(api.del_svc, onRefesh);
@@ -248,6 +248,7 @@ export default defineComponent({
 
 								<ResetPwdDiaglog
 									ref={resetPwdDiaglogRef}
+									pwdShowType={true}
 									title="重置密码"
 									style="width: 40%"
 								/>

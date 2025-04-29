@@ -71,4 +71,6 @@
     优化
 0.1.30
     增加 transfer 组件
+0.1.31
+    bug transfer 修复
 ```

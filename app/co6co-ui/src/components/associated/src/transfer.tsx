@@ -208,13 +208,16 @@ export default defineComponent({
 							onChange={onChange}
 							buttonTexts={prop.buttonTexts}>
 							{{
-								default: (data: { option: Option }) => (
-									<ElTooltip
-										showAfter={prop.afterShowTip}
-										content={`${data.option.label}`}>
-										<span>{`${data.option.label}`}</span>
-									</ElTooltip>
-								),
+								default: (data: { option: Option }) =>
+									slots.default ? (
+										slots.default(data, prop.afterShowTip)
+									) : (
+										<ElTooltip
+											showAfter={prop.afterShowTip}
+											content={`${data.option.label}`}>
+											<span>{`${data.option.label}`}</span>
+										</ElTooltip>
+									),
 								'left-footer': () => slots.leftFooter && slots.leftFooter(),
 								'right-footer': () => slots.rightFooter && slots.rightFooter(),
 								'left-empty': () =>

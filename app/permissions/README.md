@@ -68,4 +68,6 @@
     usertable 增加 locakTime 字段
 0.0.29
     增加 token验证
+0.0.30
+    bug 修复
 ```

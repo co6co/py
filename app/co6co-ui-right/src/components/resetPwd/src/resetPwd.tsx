@@ -36,6 +36,7 @@ export type FormItem = Omit<
 	Item,
 	'id' | 'createUser' | 'updateUser' | 'createTime' | 'updateTime'
 >;
+
 export default defineComponent({
 	props: {
 		title: {
@@ -43,7 +44,7 @@ export default defineComponent({
 		},
 		labelWidth: {
 			type: Number, //as PropType<ObjectConstructor>,
-			default: 110,
+			default: 120,
 		},
 	},
 	emits: {
@@ -56,10 +57,11 @@ export default defineComponent({
 		//@ts-ignore
 		const { loadData, selectData } = useState();
 		const diaglogForm = ref<DialogFormInstance>();
-		const DATA = reactive<FormData<number, FormItem>>({
+		const DATA = reactive<FormData<number, FormItem> & { category: number }>({
 			operation: FormOperation.add,
 			id: 0,
 			fromData: { userName: '' },
+			category: 0,
 		});
 		//@ts-ignore
 		const key = Symbol('formData') as InjectionKey<FormItem>; //'formData'
@@ -71,6 +73,7 @@ export default defineComponent({
 		const init_data = (item?: Item) => {
 			DATA.operation = api_type.FormOperation.edit;
 			if (!item) return false;
+
 			DATA.fromData.userName = item.userName;
 			DATA.fromData.password = '';
 			return true;
@@ -83,13 +86,18 @@ export default defineComponent({
 				{
 					required: true,
 					min: 6,
-					max: 20,
-					message: '请输入6-20位新密码',
+					max: 256,
+					message: '请输入6-256位字符',
 					trigger: ['blur', 'change'],
 				},
 			],
 		};
-
+		const passwordShowTxt = computed(() => {
+			return DATA.category == 2 ? '新AccessToken' : '新密码';
+		});
+		const passwordShowType = computed(() => {
+			return DATA.category == 2 ? 'textarea' : 'password';
+		});
 		const rules = computed(() => rules_base);
 		const save = () => {
 			//提交数据
@@ -109,6 +117,7 @@ export default defineComponent({
 					closeLoading();
 				});
 		};
+
 		const fromSlots = {
 			buttons: () => (
 				<>
@@ -125,11 +134,13 @@ export default defineComponent({
 					<ElFormItem label="用户名" prop="userName">
 						<ElInput v-model={DATA.fromData.userName} readonly></ElInput>
 					</ElFormItem>
-					<ElFormItem label="新密码" prop="password">
+
+					<ElFormItem label={passwordShowTxt.value} prop="password">
 						<ElInput
-							type="password"
 							v-model={DATA.fromData.password}
-							show-password
+							type={passwordShowType.value}
+							showPassword={true}
+							placeholder={passwordShowTxt.value}
 						/>
 					</ElFormItem>
 				</>
@@ -150,8 +161,9 @@ export default defineComponent({
 				/>
 			);
 		};
-		const openDialog = (item?: Item) => {
+		const openDialog = (category: number, item?: Item) => {
 			init_data(item);
+			DATA.category = category;
 			diaglogForm.value?.openDialog();
 		};
 		const update = () => {
