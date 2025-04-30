@@ -6,7 +6,7 @@ from apscheduler.triggers.cron import CronTrigger
 from typing import Callable
 from co6co.utils.source import get_source_fun
 from co6co.utils .singleton import Singleton
-from typing import Tuple, Callable
+from typing import Tuple, Callable, Dict
 from co6co.utils import log, try_except
 '''
 BlockingScheduler :     当调度器是你应用中唯一要运行的东西时
@@ -73,13 +73,21 @@ class CuntomCronTrigger(CronTrigger):
 class Scheduler(Singleton):
     _scheduler: BackgroundScheduler = None
 
+    class Task:
+        jobid: str = None
+        stop: Callable[[], None] = None
+
+        def __init__(self, jobid: str, stop: Callable[[], None]) -> None:
+            self.jobid = jobid
+            self.stop = stop
+
     def __init__(self) -> None:
         scheduler = BackgroundScheduler()
 
         # //todo 编译器解释 self._scheduler 为 Any 对象 为什么不是 BackgroundScheduler
         self._scheduler = scheduler
         self._scheduler.start()
-        self._tasks = {}  # {key:str,jobid:str}
+        self._tasks: Dict[str, Scheduler.Task] = {}  # {key:str,jobid:str}
         pass
 
     @property
@@ -109,7 +117,7 @@ class Scheduler(Singleton):
         获取任务key
         """
         for key, value in self._tasks.items():
-            if value == jobid:
+            if value.jobid == jobid:
                 return key
         return None
 
@@ -118,9 +126,9 @@ class Scheduler(Singleton):
         # 获取所有作业
         jobs = self. scheduler.get_jobs()
         jobid = None
-        if key:
-            jobid = self._tasks[key]
         data = []
+        if key and key in self._tasks:
+            jobid = self._tasks[key].jobid
         for job in jobs:
             if jobid and job.id != jobid:
                 continue
@@ -145,8 +153,10 @@ class Scheduler(Singleton):
         移除任务
         """
         if key in self._tasks:
-            jobid = self._tasks[key]
-            self.scheduler.remove_job(jobid)
+            task = self._tasks[key]
+            self.scheduler.remove_job(task.jobid)
+            if task.stop:
+                task.stop()
             del self._tasks[key]
             return True
         else:
@@ -155,6 +165,9 @@ class Scheduler(Singleton):
 
     def removeAll(self):
         self. scheduler.remove_all_jobs()
+        for key, value in self._tasks.items():
+            if value.stop:
+                value.stop()
         self._tasks.clear()
 
     def stop(self):
@@ -177,7 +190,7 @@ class Scheduler(Singleton):
             log.warn(f"解析corn:{code}失败")
             return False
 
-    def addTask(self, key: str, code: str | Callable[[], None], corn: str):
+    def addTask(self, key: str, code: str | Callable[[], None], corn: str, stop: Callable[[], None] = None):
         """
         增加任务
         """
@@ -190,12 +203,12 @@ class Scheduler(Singleton):
             scheduler: BackgroundScheduler = self._scheduler
             if isinstance(code, Callable):
                 jobid = scheduler.add_job(code, trigger)
-                self._tasks[key] = jobid.id
+                self._tasks[key] = Scheduler.Task(jobid.id, stop)
                 return True, ''
             res, main = Scheduler.parseCode(code)
             if res:
                 jobid = scheduler.add_job(main, trigger)
-                self._tasks[key] = jobid.id
+                self._tasks[key] = Scheduler.Task(jobid.id, stop)
                 return True, ''
             else:
                 msg = "任务{}解析失败!!".format(key)
@@ -206,15 +219,15 @@ class Scheduler(Singleton):
             log.err(msg)
             return False, msg
 
-    def modifyTask(self, key: str, code: str | Callable[[], None], corn: str):
+    def modifyTask(self, key: str, code: str | Callable[[], None], corn: str, stop: Callable[[], None] = None):
         """
         修改任务
         """
         if key in self._tasks:
-            jobid = self._tasks[key]
-            self.scheduler.remove_job(jobid)
+            task = self._tasks[key]
+            self.scheduler.remove_job(task.jobid)
             del self._tasks[key]
-            self.addTask(key, code, corn)
+            self.addTask(key, code, corn, stop)
             return True
         else:
             log.info("任务{}不存在!!".format(key))

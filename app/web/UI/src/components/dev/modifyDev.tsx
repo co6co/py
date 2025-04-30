@@ -40,6 +40,7 @@ import * as api from '@/api/dev'
 export interface Item extends FormItemBase {
   id: number
   name: string
+  category: number
   code: string
   ip: string
   lat: string
@@ -74,6 +75,7 @@ export default defineComponent({
       fromData: {
         name: '',
         code: '',
+        category: 0,
 
         state: 0,
         ip: '',
@@ -97,7 +99,7 @@ export default defineComponent({
           const tmp: FormItem = {
             name: '',
             code: '',
-
+            category: 0,
             state: 0,
             ip: '',
             lat: '',
@@ -142,14 +144,20 @@ export default defineComponent({
           closeLoading()
         })
     }
-    onMounted(() => {})
+    const DeviceCategory = ref<IEnumSelect[]>([])
+
+    onMounted(async () => {
+      const res = await api.dev_category_svc()
+      DeviceCategory.value = res.data
+    })
+
     onBeforeUnmount(() => {})
 
     const rules: FormRules = {
       name: [{ required: true, message: '请输入名称', trigger: ['blur', 'change'] }],
       code: [{ required: true, message: '请输入编码', trigger: ['blur', 'change'] }],
+      category: [{ required: true, message: '设备类型', trigger: ['blur', 'change'] }],
       ip: [{ required: true, message: '请输入网络地址', trigger: ['blur', 'change'] }],
-
       state: [{ required: true, message: '状态能为空', trigger: ['blur', 'change'] }]
     }
 
@@ -173,10 +181,18 @@ export default defineComponent({
                 <ElInput v-model={DATA.fromData.name} placeholder="名称"></ElInput>
               </ElFormItem>
             </ElCol>
-
             <ElCol span={12}>
               <ElFormItem label="编码" prop="code">
                 <ElInput v-model={DATA.fromData.code} placeholder="编码"></ElInput>
+              </ElFormItem>
+            </ElCol>
+            <ElCol span={12}>
+              <ElFormItem label="设备类型" prop="category">
+                <EnumSelect
+                  data={DeviceCategory.value}
+                  v-model={DATA.fromData.category}
+                  placeholder="设备类型"
+                />
               </ElFormItem>
             </ElCol>
 

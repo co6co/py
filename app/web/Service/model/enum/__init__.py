@@ -35,9 +35,8 @@ class DeviceCategory(Base_EC_Enum):
     Park = 'park', "违停设备", 2
     # 一体机
     ParkAndPass = 'parkAndPass', "一体机设备", 3
+    monitor = 'monitor', "监控", 4
+    # 一体机
+    other = 'other', "其他设备", 9
 
-    @classmethod
-    def to_cn_str(cls) -> str:
-        result: list = []
-        [result.append(f"{i.val}:{i.label}") for i in cls]
-        return ",".join(result)
+    

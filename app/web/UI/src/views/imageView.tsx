@@ -9,11 +9,13 @@ import {
   ElImage,
   ElImageViewer,
   ElMessageBox,
-  ElInput
+  ElInput,
+  ElAffix,
+  ElDivider
 } from 'element-plus'
 import { Search } from '@element-plus/icons-vue'
 
-import { getBaseUrl, Pagination, PaginationProps } from 'co6co'
+import { getBaseUrl, PageAllLayouts } from 'co6co'
 import { TableView, TableViewInstance, image2Option } from 'co6co-right'
 import style from '@/assets/css/imageView.module.less'
 import * as api from '@/api/dev'
@@ -90,85 +92,102 @@ export default defineComponent({
         })
       })
     }
-    const bg = true as const
-    const layouts = ['prev', 'pager', 'next', 'total', 'sizes'] as const
 
     //:page reader
     const rander = (): VNodeChild => {
       return (
-        <div id={style.imgList}>
-          <TableView
-            dataApi={api.img_list_svc}
-            resultFilter={onFilter}
-            ref={viewRef}
-            showPaged={true}
-            query={DATA.query}
-            layouts={layouts}
-          >
-            {{
-              header: () => (
-                <>
-                  <div class="handle-box">
-                    <ElSelect style={DATA.headItemWidth} v-model={DATA.query.date}>
-                      {DATA.selectData.map((v, i) => (
-                        <ElOption label={v} key={i} value={v}>
-                          <span>{v}</span>
-                          <ElButton text onClick={() => onDelFolder(v)}>
-                            删除
-                          </ElButton>
-                        </ElOption>
-                      ))}
-                    </ElSelect>
-                    <ElInput
-                      width={160}
-                      clearable
-                      v-model={DATA.query.name}
-                      placeholder="文件名称"
-                      class="handle-input"
-                    />
+        <>
+          <style>{` 
+          .el-affix{width:100%}
+          .el-affix--fixed {
+            background: #f0f0f0;
+            margin-top:-20px;
+            padding-top:8px;
+          }
+          .el-divider--horizontal{ margin:5px 0 5px 0;}
+          .el-footer{height:auto;}
+        `}</style>
 
-                    <ElButton type="primary" icon={Search} onClick={onSearch}>
-                      搜索
-                    </ElButton>
-                  </div>
-                </>
-              ),
-              default: () => (
-                <>
-                  <ElTableColumn />
-                </>
-              ),
-              footer: () => <></>
-            }}
-          </TableView>
-          {dataUrlsResult.value.map((v, i) => {
-            return (
-              <div class="block">
-                <span class="demonstration">{v.name}</span>
-                <ElImage
-                  key={i}
-                  src={v.url}
-                  lazy
-                  zoomRate={1.2}
-                  maxScale={7}
-                  minScale={0.2}
-                  showPropress
-                  onClick={() => onShowImage(v.name, i)}
-                />
-              </div>
-            )
-          })}
-          {preview.value && preview.value.show ? (
-            <ElImageViewer
-              urlList={urls.value}
-              show-progress
-              initialIndex={preview.value.index}
-              onClose={() => (preview.value.show = false)}
-            />
-          ) : (
-            <div />
-          )}
-        </div>
+          <div id={style.imgList} class="affix-container">
+            <ElAffix offset={120} target=".affix-container">
+              <TableView
+                dataApi={api.img_list_svc}
+                resultFilter={onFilter}
+                ref={viewRef}
+                showPaged={true}
+                query={DATA.query}
+                layouts={PageAllLayouts}
+              >
+                {{
+                  header: () => (
+                    <>
+                      <div class="handle-box">
+                        <ElSelect style={DATA.headItemWidth} v-model={DATA.query.date}>
+                          {DATA.selectData.map((v, i) => (
+                            <ElOption label={v} key={i} value={v}>
+                              <span>{v}</span>
+                              <ElButton text onClick={() => onDelFolder(v)}>
+                                删除
+                              </ElButton>
+                            </ElOption>
+                          ))}
+                        </ElSelect>
+                        <ElInput
+                          width={160}
+                          clearable
+                          v-model={DATA.query.name}
+                          placeholder="文件名称"
+                          class="handle-input"
+                        />
+
+                        <ElButton type="primary" icon={Search} onClick={onSearch}>
+                          搜索
+                        </ElButton>
+                      </div>
+                    </>
+                  ),
+                  default: () => (
+                    <>
+                      <ElTableColumn />
+                    </>
+                  ),
+                  footer: () => (
+                    <>
+                      <ElDivider />
+                    </>
+                  )
+                }}
+              </TableView>
+            </ElAffix>
+            {dataUrlsResult.value.map((v, i) => {
+              return (
+                <div class="block">
+                  <span class="demonstration">{v.name}</span>
+                  <ElImage
+                    key={i}
+                    src={v.url}
+                    lazy
+                    zoomRate={1.2}
+                    maxScale={7}
+                    minScale={0.2}
+                    showPropress
+                    onClick={() => onShowImage(v.name, i)}
+                  />
+                </div>
+              )
+            })}
+            {preview.value && preview.value.show ? (
+              <ElImageViewer
+                urlList={urls.value}
+                show-progress
+                initialIndex={preview.value.index}
+                onClose={() => (preview.value.show = false)}
+              />
+            ) : (
+              <div />
+            )}
+          </div>
+        </>
       )
     }
     return rander

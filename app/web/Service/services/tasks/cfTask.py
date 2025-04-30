@@ -13,8 +13,8 @@ class CfTaskMgr(CustomTask.ICustomTask):
     name = "更新cf解析记录"
     code = "CfTaskMgr"
 
-    def __init__(self, worker: sanics.Worker = None):
-        super().__init__(worker)
+    def __init__(self ):
+        super().__init__()
         self.cfService: CfService = asyncio.run(CfService.instance())
         runonce = self.cfService.item.get("runOnce", True)
 

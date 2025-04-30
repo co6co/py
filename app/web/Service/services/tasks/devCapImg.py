@@ -35,9 +35,9 @@ class DeviceCuptureImage(ICustomTask):
     name = "抓图设备流图片"
     code = "CAPTURE_DEV_IMAGE"
 
-    def __init__(self, worker: sanics.Worker = None):
+    def __init__(self):
         # self.loop = asyncio.new_event_loop()
-        super().__init__(worker)
+        super().__init__()
 
     async def queryTable(self, bll: BaseBll) -> List[TableEntry]:
         try:
@@ -143,7 +143,7 @@ class DeviceCuptureImage(ICustomTask):
                 log.warn("线程池已关闭,不再接收新任务...")
                 return False
             f = pool.submit(self.capture, ip, port, video_path, output_image_path)
-            if self.worker and self.worker.isQuit and not pool._shutdown:
+            if self.isQuit and not pool._shutdown:
                 log.warn("关闭线程池,不再接收新任务...,等等正在执行的任务完成...")
                 pool.shutdown(False, cancel_futures=True)
                 return False
@@ -167,7 +167,7 @@ class DeviceCuptureImage(ICustomTask):
         pool = limitThreadPoolExecutor(max_workers=4, thread_name_prefix="capture_pj")
         # 遍历设备列表
         for device in deviceList:
-            if self.worker and self.worker.isQuit and not pool._shutdown:
+            if self.isQuit and not pool._shutdown:
                 log.warn("关闭线程池,不再接收新任务...,等等正在执行的任务完成...")
                 pool.shutdown(False, cancel_futures=True)
                 break

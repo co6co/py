@@ -1,11 +1,9 @@
 
 from __future__ import annotations
 from abc import ABC, abstractmethod
-from co6co_sanic_ext import sanics
 # 定义接口
 from typing import overload, List, Tuple
 from co6co.utils import log
-from co6co_sanic_ext import sanics
 
 
 class ICustomTask(ABC):
@@ -14,14 +12,22 @@ class ICustomTask(ABC):
     """
     name = "抽象任务接口"
     code = "ICustomTask"
+    _isQuit: bool = None
 
-    def __init__(self, worker: sanics.Worker = None):
-
+    def __init__(self):
         super().__init__()
-        self.worker = worker
+        self._isQuit = False
 
     @abstractmethod
     def main(self):
+        pass
+
+    @property
+    def isQuit(self) -> bool:
+        return self._isQuit
+
+    def stop(self):
+        self._isQuit = True
         pass
 
 
@@ -60,7 +66,7 @@ def get_list() -> List[Tuple[str, str]]:
     return _list
 
 
-def get_task(code: str, worker: sanics.Worker = None) -> ICustomTask | None:
+def get_task(code: str) -> ICustomTask | None:
     """
     获取所有子类的列表"
     """
@@ -68,7 +74,7 @@ def get_task(code: str, worker: sanics.Worker = None) -> ICustomTask | None:
     for c in class_arr:
         if c.code == code:
             try:
-                return c(worker)
+                return c()
             except Exception as e:
                 log.err(f"实例化'{c}'失败", e)
     return None

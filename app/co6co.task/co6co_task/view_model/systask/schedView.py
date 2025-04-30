@@ -17,6 +17,7 @@ from multiprocessing.connection import PipeConnection
 from ...model.enum import CommandCategory
 from .codeView import _codeView
 from ...service import CustomTask as custom
+from co6co.task.pools import timeout
 
 
 class schedView(_codeView, AuthMethodView):
@@ -109,13 +110,20 @@ class schedView(_codeView, AuthMethodView):
         执行一次
         """
         _,  _, sourceCode, data = await self.read_data(pk, request)
+        isTimeout = False
+        secounds = 4
+        result = Result.success()
         if not sourceCode:
             try:
-                print(data)
                 task = custom.get_task(data)
-                task.main()
-                return self.response_json(Result.success("None", message="执行成功"))
+                isTimeout, _ = timeout(secounds, task.main)
+                log.warn("执行成功", isTimeout)
             except Exception as e:
                 log.err("执行失败", e)
                 return self.response_json(Result.fail(e, message="执行失败"))
-        return self.response_json(self.exec_py_code(sourceCode))
+        else:
+            isTimeout, result = timeout(secounds,  self.exec_py_code, False, sourceCode)
+        if isTimeout:
+            return self.response_json(Result.success(data="执行时间过长", message="执行时间过长！"))
+        else:
+            return self.response_json(result)

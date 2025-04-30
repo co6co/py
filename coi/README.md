@@ -62,6 +62,8 @@
 0.0.29
     优化
     importExcell
+0.0.30
+   timeout 优化
 ```
 
 # 安装

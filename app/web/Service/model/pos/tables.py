@@ -8,15 +8,16 @@ import sqlalchemy
 from sqlalchemy.schema import DDL
 from sqlalchemy import MetaData
 from sqlalchemy.dialects.mysql import VARCHAR
-
- 
+from model.enum import DeviceCategory
 
 
 
 class DevicePO(UserTimeStampedModelPO):
+    """设备表"""
     __tablename__ = "tb_device"
     id = Column("id", Integer, comment="主键",  autoincrement=True, primary_key=True)
     name = Column("name", String(64),  comment="代码名称")
+    category = Column("category", Integer, comment=f"设备类型: {DeviceCategory.to_labels_str()}")
     code = Column("code", String(64),  comment="代码编码")
     ip = Column("ip", String(64),  comment="代码编码")
     lat = Column("lat", String(64),  comment="经度")
@@ -27,6 +28,7 @@ class DevicePO(UserTimeStampedModelPO):
 
     def update(self, po: DevicePO):
         self.name = po.name
+        self.category = po.category
         self.code = po.code
         self.ip = po.ip
         self.lat = po.lat

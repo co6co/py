@@ -3,7 +3,7 @@ from concurrent.futures import ThreadPoolExecutor
 import queue
 import asyncio
 import threading
-from typing import Callable
+from typing import Callable, Tuple, Any
 
 
 async def timeout_async(timeout, func, *args, **kwargs):
@@ -23,15 +23,27 @@ async def timeout_async(timeout, func, *args, **kwargs):
         return False
 
 
-def timeout(timeout, func,   *args, **kwargs):
+def timeout(timeout, func, throw: bool = True,  *args, **kwargs) -> Tuple[bool, Any | None]:
     """
     此函数用于在指定时间内尝试打开视频流
     :param timeout: 超时时间（秒）
     :param func , *args, **kwargs
-    :return: 是否超时
+    :param throw: 是否抛出异常
+
+    func 执行异常会抛出异常
+
+    :return: 是否超时,返回值
     """
+    result = []
+    exception = []
+
+    def wrapper():
+        try:
+            result.append(func(*args, **kwargs))
+        except Exception as e:
+            exception.append(e)
     # 创建并启动新线程来打开视频流
-    thread = threading.Thread(target=func, args=args, kwargs=kwargs)
+    thread = threading.Thread(target=wrapper)
     thread.start()
     # 等待指定的超时时间
     thread.join(timeout)
@@ -44,8 +56,10 @@ def timeout(timeout, func,   *args, **kwargs):
         else:
             # 让它自己完成后停止
             pass
-        return True
-    return False
+        return True, None
+    if throw and exception:
+        raise exception[0]
+    return False, result[0]
 
 
 class limitThreadPoolExecutor(ThreadPoolExecutor):

@@ -10,6 +10,7 @@ from co6co_permissions.model.enum import dict_state
 from multiprocessing.connection import PipeConnection
 from co6co.utils import try_except
 import asyncio
+from typing import Tuple
 from co6co_sanic_ext import sanics
 from abc import ABC, abstractmethod
 from ..model.pos.tables import DynamicCodePO, SysTaskPO
@@ -33,17 +34,19 @@ class HandlerCommand(ABC):
         if not handled and self.successor:
             self.successor.handle_request(data, conn)
 
-    def getSourceCode(self):
-        sourceCode = self. data.sourceCode
+    def getSourceCode(self) -> Tuple[str | callable, callable | None]:
+        sourceCode = self.data.sourceCode
+        stop = None
         if not sourceCode:
             code = self. data.sourceForm
-            task = custom.get_task(code, self.taskMgr)
+            task = custom.get_task(code)
             if task:
                 sourceCode = task.main
+                stop = task.stop
         if not sourceCode:
             message = f"任务{self.taskCode}，未找到任务"
             self.sendData(False, message)
-        return sourceCode
+        return sourceCode, stop
 
     def sendData(self, success: bool, data: str | any):
         resultData = CommandCategory.createOption(CommandCategory.GET, success=success, data=data)
@@ -117,11 +120,11 @@ class StartHandler(HandlerCommand):
         if not self.check():
             return False
         try:
-            sourceCode = self.getSourceCode()
+            sourceCode, stop = self.getSourceCode()
             if not sourceCode:
                 return
             if not self._taskisExist():
-                result, message = self.scheduler.addTask(self.taskCode, sourceCode, self. data.cron)
+                result, message = self.scheduler.addTask(self.taskCode, sourceCode, self. data.cron, stop)
                 fall_result = self.taskMgr.run(self.taskMgr.update_status, [self.taskCode], 1)
             else:
                 result = False
@@ -140,14 +143,14 @@ class ModifyHandler(HandlerCommand):
         if not self.check():
             return False
         try:
-            sourceCode = self.getSourceCode()
+            sourceCode, stop = self.getSourceCode()
             if not sourceCode:
                 return
             if not self._taskisExist():
                 result = False
                 message = f"任务{self.taskCode}，不存在"
             else:
-                result = self.scheduler.modifyTask(self.taskCode, sourceCode, self.data.cron)
+                result = self.scheduler.modifyTask(self.taskCode, sourceCode, self.data.cron, stop)
                 message = f"任务{self.taskCode}，修改成功" if result else f"任务{self.taskCode}，修改失败"
             self.sendData(result, message)
         except Exception as e:
@@ -195,7 +198,10 @@ class UnknownHandler(HandlerCommand):
 
 
 class TasksMgr(BaseBll, sanics.Worker):
-
+    """
+    任务管理器
+    需要使用 sanics.Worker 通讯方式
+    """
     @staticmethod
     def create_instance(app: Sanic, envent: asyncio.Event, conn: PipeConnection):
         """
@@ -208,6 +214,7 @@ class TasksMgr(BaseBll, sanics.Worker):
     def __init__(self, app: Sanic, event: asyncio.Event, conn: PipeConnection):
         BaseBll.__init__(self, app=app)
         sanics.Worker.__init__(self, event, conn)
+        # super(sanics.Worker, self).__init__(event, conn)
         app.ctx.taskMgr = self
         self.scheduler = Scheduler()
         self.handlerChain = ExistHandler(StartHandler(ModifyHandler(RemoveHandler(GetNextRunTimeHandler(UnknownHandler(taskMgr=self))))))
@@ -288,9 +295,9 @@ class TasksMgr(BaseBll, sanics.Worker):
             log.info("加载任务:{}...".format(code))
             if category == 0:
                 # log.warn("任务在代码中，加找到加载下个模块：{}".format(code))
-                task = custom. get_task(item, self)
+                task = custom. get_task(item)
                 if task:
-                    self.scheduler.addTask(code, task.main, cron)
+                    self.scheduler.addTask(code, task.main, cron, task.stop)
                     success.append(code)
                 else:
                     faile.append(code)

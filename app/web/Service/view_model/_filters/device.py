@@ -16,9 +16,15 @@ class Filter(absFilterItems):
     code: str = None
     state: int = None
     ip: str = None
+    category: int = None
 
     def __init__(self):
         super().__init__(DevicePO)
+        self.name = None
+        self.code = None
+        self.state = None
+        self.ip = None
+        self.category = None
 
     def filter(self) -> list:
         """
@@ -33,6 +39,8 @@ class Filter(absFilterItems):
             filters_arr.append(DevicePO.code.like(f"%{self.code}%"))
         if self.checkFieldValue(self.state):
             filters_arr.append(DevicePO.state.__eq__(self.state))
+        if self.checkFieldValue(self.category):
+            filters_arr.append(DevicePO.category.__eq__(self.category))
         return filters_arr
 
     def getDefaultOrderBy(self) -> Tuple[InstrumentedAttribute]:
