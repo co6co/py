@@ -72,6 +72,9 @@ export default defineComponent({
 		const resetPwdDiaglogRef = ref<InstanceType<typeof ResetPwdDiaglog>>();
 		const onOpenResetDialog = (_: number, row?: Item) => {
 			DATA.currentItem = row;
+			if (!row) {
+				return;
+			}
 			resetPwdDiaglogRef.value?.openDialog(row?.category!, row);
 		};
 		//删除

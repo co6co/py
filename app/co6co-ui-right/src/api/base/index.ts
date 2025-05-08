@@ -1,6 +1,25 @@
-import { createServiceInstance } from 'co6co';
+import {
+	createServiceInstance,
+	createAxiosInstance,
+	getBaseUrl,
+	useRequestToken,
+	HttpContentType,
+} from 'co6co';
 import * as api_type from 'co6co';
 
+export const createStreamServiceInstance = (
+	requestType?: HttpContentType,
+	response?: HttpContentType
+) => {
+	const service = createAxiosInstance(
+		getBaseUrl(),
+		30 * 1000,
+		requestType ? requestType : HttpContentType.json,
+		response ? response : HttpContentType.stream
+	);
+	service.interceptors.request.use(useRequestToken);
+	return service;
+};
 export const create_svc = (baseUrl: string) => {
 	const get_select_svc = (
 		data?: any

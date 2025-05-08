@@ -73,4 +73,6 @@
     增加 transfer 组件
 0.1.31
     bug transfer 修复
+0.1.32
+    增加工具类方法base64ToFile
 ```

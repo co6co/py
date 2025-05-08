@@ -22,11 +22,11 @@
           <span class="btn-bell-badge" v-if="message"></span>
         </div>
         <!-- 用户头像 -->
-        <el-avatar class="user-avator" :size="30" :src="imgurl" />
+        <el-avatar class="user-avator" :size="30" :src="userInfo.avatar.value" />
         <!-- 用户名下拉菜单 -->
         <el-dropdown class="user-name" trigger="click" @command="handleCommand">
           <span class="el-dropdown-link">
-            {{ username }}
+            {{ userName }}
             <el-icon class="el-icon--right">
               <arrow-down />
             </el-icon>
@@ -53,11 +53,13 @@
 import { onMounted, ref } from 'vue'
 import { useSidebarStore } from '../store/sidebar'
 import { useRouter } from 'vue-router'
-import imgurl from '../assets/img/img.jpg'
+import defaultAvatar from '../assets/img/img.jpg'
 import { Storage, removeAuthonInfo } from 'co6co'
+import { useUserHook } from 'co6co-right'
 import useSystem from '../hooks/useSystem'
 import historyDialog from './log'
-const username: string | null = localStorage.getItem('ms_username')
+import { getUserName } from 'co6co'
+const userName = ref(getUserName())
 const message: number = 2
 const storage = new Storage()
 const sidebar = useSidebarStore()
@@ -66,7 +68,10 @@ const { systeminfo } = useSystem()
 const collapseChage = () => {
   sidebar.handleCollapse()
 }
-
+const userInfo = useUserHook.getUserInfo()
+onMounted(() => {
+  userInfo.avatar.value = userInfo.avatar.value || defaultAvatar
+})
 onMounted(() => {
   //屏幕宽度小于 1500 收起
   if (document.body.clientWidth < 1500) {

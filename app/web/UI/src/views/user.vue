@@ -10,12 +10,12 @@
           </template>
           <div class="info">
             <div class="info-image" @click="showDialog">
-              <el-avatar :size="100" :src="avatarImg" />
+              <el-avatar :size="100" :src="userInfo.avatar.value" />
               <span class="info-edit">
                 <i class="el-icon-lx-camerafill"></i>
               </span>
             </div>
-            <div class="info-name">{{ name }}</div>
+            <div class="info-name">{{ userName }}</div>
             <div class="info-desc">{{ changePwdFrom.remark }}</div>
           </div>
         </el-card>
@@ -28,7 +28,7 @@
             </div>
           </template>
           <el-form label-width="90px" :model="changePwdFrom" :rules="changePwdRules" ref="Form">
-            <el-form-item label="用户名："> {{ name }} </el-form-item>
+            <el-form-item label="用户名："> {{ userName }} </el-form-item>
             <el-form-item label="旧密码：" prop="oldPassword">
               <el-input type="password" v-model="changePwdFrom.oldPassword"></el-input>
             </el-form-item>
@@ -38,6 +38,9 @@
                 show-password
                 v-model="changePwdFrom.newPassword"
               ></el-input>
+            </el-form-item>
+            <el-form-item label="简介：" prop="remark">
+              <el-input v-model="changePwdFrom.remark" type="textarea" />
             </el-form-item>
             <el-form-item>
               <el-button type="primary" @click="onSubmit(Form)">保存</el-button>
@@ -76,30 +79,29 @@
 </template>
 
 <script setup lang="ts" name="user">
-import { reactive, ref } from 'vue'
-//import VueCropper from 'vue-cropperjs';
+import { reactive, ref, onMounted } from 'vue'
+import VueCropper from 'vue-cropperjs'
 import { ElMessage, type FormRules, type FormInstance } from 'element-plus'
 import 'cropperjs/dist/cropper.css'
-import avatar from '@/assets/img/img.jpg'
-import { userSvc } from 'co6co-right'
-import { getUserName } from 'co6co'
-const name = getUserName()
-
+import defaultAvatar from '@/assets/img/img.jpg'
+import { userSvc, useUserHook } from 'co6co-right'
+import { getUserName, base64ToFile } from 'co6co'
+const userName = ref(getUserName())
 let changePwdFrom = reactive({
   newPassword: '',
   oldPassword: '',
-  remark: '不可能！我的代码怎么可能会有bug！'
+  remark: '我是备注信息'
 })
 const loadCurrentUserInfo = () => {
   userSvc.currentUser_svc().then((res) => {
     changePwdFrom.remark = res.data.remark
     imgSrc.value = res.data.avatar
+    if (res.data.userName) userName.value = res.data.userName
     changePwdFrom.newPassword = ''
     changePwdFrom.oldPassword = ''
   })
 }
 loadCurrentUserInfo()
-
 const Form = ref<FormInstance>()
 const changePwdRules: FormRules = {
   oldPassword: [{ required: true, message: '请输入旧密码', trigger: ['blur', 'change'] }],
@@ -118,18 +120,19 @@ const onSubmit = (formEl: FormInstance | undefined) => {
     }
   })
 }
-
-const avatarImg = ref(avatar)
+//img 路径
 const imgSrc = ref('')
 const cropImg = ref('')
 const dialogVisible = ref(false)
 const cropper: any = ref()
-
+const userInfo = useUserHook.getUserInfo()
 const showDialog = () => {
   dialogVisible.value = true
-  imgSrc.value = avatarImg.value
+  imgSrc.value = userInfo.avatar.value
 }
-
+onMounted(() => {
+  userInfo.avatar.value = userInfo.avatar.value || defaultAvatar
+})
 const setImage = (e: any) => {
   const file = e.target.files[0]
   if (!file.type.includes('image/')) {
@@ -143,13 +146,20 @@ const setImage = (e: any) => {
   }
   reader.readAsDataURL(file)
 }
-
+/** 剪切 */
 const cropImage = () => {
   cropImg.value = cropper.value.getCroppedCanvas().toDataURL()
 }
 
 const saveAvatar = () => {
-  avatarImg.value = cropImg.value
+  userInfo.avatar.value = cropImg.value
+  let formData = new FormData()
+  const file = base64ToFile(cropImg.value, 'abc.png', 'image/png')
+  formData.append('file', file)
+
+  userSvc.put_user_avatar(formData).then((res) => {
+    ElMessage.success(res.message || `保存成功`)
+  })
   dialogVisible.value = false
 }
 </script>

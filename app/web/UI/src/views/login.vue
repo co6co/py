@@ -102,6 +102,7 @@ const submitForm = (formEl: FormInstance | undefined) => {
         )
         .then((res) => {
           message.value = res.message
+
           storeAuthonInfo(res.data, DATA.username)
           registerRoute(ViewObjects, router, () => {
             window.location.href = getPublicURL('/')

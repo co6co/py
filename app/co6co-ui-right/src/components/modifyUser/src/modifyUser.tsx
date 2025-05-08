@@ -35,7 +35,7 @@ import {
 
 export interface Item extends api_type.FormItemBase {
 	id: number;
-	userName?: string;
+	userName: string;
 	category: number;
 	/**
 	 * 用户密码增加用户需要

@@ -37,6 +37,37 @@ export const createStateEndDatetime = (type: number, beforeHour: number) => {
 	];
 };
 
+/**
+ * base64 转 file
+ * @param base64
+ * @param filename
+ * @param contentType
+ * @returns File
+ */
+export const base64ToFile = (
+	base64: string,
+	filename: string,
+	contentType: string
+): File => {
+	const sliceSize = 512;
+	const byteCharacters = atob(base64.split(',')[1]);
+	const byteArrays: Array<any> = [];
+
+	for (let offset = 0; offset < byteCharacters.length; offset += sliceSize) {
+		const slice = byteCharacters.slice(offset, offset + sliceSize);
+
+		const byteNumbers = new Array(slice.length);
+		for (let i = 0; i < slice.length; i++) {
+			byteNumbers[i] = slice.charCodeAt(i);
+		}
+
+		const byteArray = new Uint8Array(byteNumbers);
+		byteArrays.push(byteArray);
+	}
+
+	const blob = new Blob(byteArrays, { type: contentType });
+	return new File([blob], filename, { type: contentType });
+};
 //生成随机字符串
 export const randomString = (
 	len: number,

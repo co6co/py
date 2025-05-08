@@ -4,13 +4,12 @@ from sanic.response import file
 from sanic.request.form import File
 from sqlalchemy.orm import selectinload
 from co6co.utils import log
-from . import resource_baseView
+from . import resource_baseView, FileResult
 from ...services.configCache import get_upload_path
 from co6co_sanic_ext.model.res.result import Result
 from ...model.pos.resource import resourcePO, userResourcePO
 from ...model.enum import resource_category
-from co6co.utils import hash, getDateFolder
-import uuid
+
 import os
 from datetime import datetime
 from co6co_db_ext.db_utils import DbCallable, db_tools
@@ -19,26 +18,6 @@ from sqlalchemy.sql import Select
 from sqlalchemy.ext.asyncio import AsyncSession
 from co6co_web_db.view_model import errorLog
 from co6co.utils.tool_util import get_current_function_name
-
-
-class FileResult:
-    fullPath: str
-    path: str
-    hash: str
-    name: str
-    size: int
-
-    def toPo(self, category: resource_category, subCategory: int = 0):
-        po = resourcePO()
-        po .uid = uuid.uuid4()
-        po .category = category.val
-        po .subCategory = subCategory
-        po .hash = self.hash
-        po .url = self.path
-        po .metaName = self.name
-        po .size = self.size
-        po.createTime = datetime.now()
-        return po
 
 
 class Upload_View(resource_baseView):
@@ -57,31 +36,6 @@ class Upload_View(resource_baseView):
             file_size += len(chunk)
         file.body.seek(0)
         return file_size
-
-    async def saveFile(self, request: Request):
-        try:
-            fullPath = None
-            basePath = await get_upload_path(request)
-            if "file" not in request.files:
-                return self.response_json(Result.fail("No file part in the request"))
-            file: File = request.files.get("file")
-
-            size = len(file.body)  # await self. readFileSize(file)
-            _, file_extension = os.path.splitext(file.name)
-            fileName = getDateFolder(format='%Y-%m-%d-%H-%M-%S')
-            fullPath, path = self.getFullPath(basePath, "{}{}".format(fileName, file_extension))
-            await self.save_file(file, fullPath)
-            result = FileResult()
-            result.name = file.name
-            result.hash = hash.file_sha256(fullPath)
-            result.size = size
-            result.fullPath = fullPath
-            result.path = path
-
-            return result
-        except Exception as e:
-            log.warn("保存文件失败：", fullPath, e)
-            return self.response_json(Result.fail(message=e))
 
     async def saveDb(self, request: Request,  param: FileResult, category: resource_category) -> int:
         call = DbCallable(self.get_db_session(request))

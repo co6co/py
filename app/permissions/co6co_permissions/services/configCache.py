@@ -39,7 +39,7 @@ async def get_upload_path(request: Request) -> str:
     数据库未配置使用 /upload
     """
     key = "SYS_CONFIG_UPLOAD_PATH"
-    return get_config(request, key, default="/upload")
+    return await get_config(request, key, default="/upload")
 
 
 async def get_terminal_access_token(request: Request) -> str:

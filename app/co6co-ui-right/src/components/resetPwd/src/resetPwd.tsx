@@ -28,7 +28,7 @@ import {
 } from 'element-plus';
 
 export interface Item extends api_type.FormItemBase {
-	userName?: string;
+	userName: string;
 	password?: string;
 }
 //Omit、Pick、Partial、Required
@@ -60,7 +60,10 @@ export default defineComponent({
 		const DATA = reactive<FormData<number, FormItem> & { category: number }>({
 			operation: FormOperation.add,
 			id: 0,
-			fromData: { userName: '' },
+			fromData: {
+				userName: '',
+				password: '',
+			},
 			category: 0,
 		});
 		//@ts-ignore
@@ -101,7 +104,8 @@ export default defineComponent({
 		const rules = computed(() => rules_base);
 		const save = () => {
 			//提交数据
-			let promist: Promise<api_type.IResponse> = retsetPwd_svc(DATA.fromData);
+			const param = { ...{ password: '' }, ...DATA.fromData };
+			let promist: Promise<api_type.IResponse> = retsetPwd_svc(param);
 			showLoading();
 			promist
 				.then((res) => {
@@ -161,7 +165,7 @@ export default defineComponent({
 				/>
 			);
 		};
-		const openDialog = (category: number, item?: Item) => {
+		const openDialog = (category: number, item: Item) => {
 			init_data(item);
 			DATA.category = category;
 			diaglogForm.value?.openDialog();

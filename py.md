@@ -15,7 +15,7 @@ co6co.web_session=0.0.1
 co6co.sanic-ext==0.0.11
 co6co.db-ext==0.0.14
 co6co.web-db==0.0.15
-co6co.permissions==0.0.30
+co6co.permissions==0.0.31
 co6co.rigth==0.1.1
 
 ```
@@ -29,8 +29,8 @@ npm install --registry=http://registry.npm.taobao.org/ isomorphic-streams
 npm install --registry=https://registry.npmjs.org/ co6co
 
 ```
-co6co-ui==0.1.31
-co6co-right==0.0.40
+co6co-ui==0.1.32
+co6co-right==0.0.41
 co6co-wx==0.0.2
 
 
