@@ -1,20 +1,24 @@
-import { defineComponent, VNodeChild } from 'vue';
-import { ref, reactive, onMounted } from 'vue';
-import { ElButton, ElInput, ElTableColumn } from 'element-plus';
-import { Search, Plus, Delete, Edit } from '@element-plus/icons-vue';
+import { defineComponent, VNodeChild, ref, reactive } from 'vue';
 
-import { FormOperation } from 'co6co';
+import { ElButton, ElInput, ElTableColumn } from 'element-plus';
+import { Search, Plus, Delete, Edit, Setting } from '@element-plus/icons-vue';
+
+import {
+	FormOperation,
+	Associated as AssDiaglog,
+	AssociatedInstance as AssDiaglogInstance,
+} from 'co6co';
 import { routeHook } from '@/hooks';
 import { tableScope } from '@/constants';
 
 import { TableView, type TableViewInstance } from '@/components/table';
-import useDelete from '@/hooks/useDelete';
 
 import Diaglog, {
-	type ConfigItem as Item,
-	type MdifyConfigInstance as DiaglogInstance,
-} from '@/components/modifyConfig';
-import { configSvc as api } from '@/api/config';
+	type RoleItem as Item,
+	type ModifyRoleInstance as DiaglogInstance,
+} from '@/components/modifyRole';
+import api, { association_service as ass_api } from '@/api/sys/role';
+import useDelete from '@/hooks/useDelete';
 export default defineComponent({
 	setup(prop, ctx) {
 		//:define
@@ -34,18 +38,26 @@ export default defineComponent({
 
 		//:use
 		const { getPermissKey } = routeHook.usePermission();
-
 		//end use
 		//:page
 		const viewRef = ref<TableViewInstance>();
 		const diaglogRef = ref<DiaglogInstance>();
-
 		const onOpenDialog = (row?: Item) => {
-			DATA.title = row ? `编辑[${row?.name}]` : '增加';
+			DATA.title = row ? `编辑[${row?.name}]角色` : '增加角色';
 			DATA.currentItem = row;
 			diaglogRef.value?.openDialog(
 				row ? FormOperation.edit : FormOperation.add,
 				row
+			);
+		};
+		//关联权限
+		const assDiaglogRef = ref<AssDiaglogInstance>();
+		const onOpenAssDiaglog = (row?: Item) => {
+			DATA.currentItem = row;
+			assDiaglogRef.value?.openDialog(
+				row!.id,
+				ass_api.get_association_svc,
+				ass_api.save_association_svc
 			);
 		};
 		const onSearch = () => {
@@ -59,14 +71,16 @@ export default defineComponent({
 		const onDelete = (_: number, row: Item) => {
 			deleteSvc(row.id, row.name);
 		};
-		onMounted(async () => {
-			onSearch();
-		});
 
 		//:page reader
 		const rander = (): VNodeChild => {
 			return (
-				<TableView dataApi={api.get_table_svc} ref={viewRef} query={DATA.query}>
+				<TableView
+					dataApi={api.get_table_svc}
+					ref={viewRef}
+					query={DATA.query}
+					row-key="id"
+					treeProps={{ children: 'children' }}>
 					{{
 						header: () => (
 							<>
@@ -75,7 +89,7 @@ export default defineComponent({
 										style={DATA.headItemWidth}
 										clearable
 										v-model={DATA.query.name}
-										placeholder="名称"
+										placeholder="角色名"
 									/>
 									<ElInput
 										style={DATA.headItemWidth}
@@ -117,16 +131,18 @@ export default defineComponent({
 								/>
 								<ElTableColumn
 									prop="code"
-									label="编码"
+									width={120}
+									label="代码"
 									align="center"
 									sortable="custom"
 									showOverflowTooltip={true}
 								/>
 								<ElTableColumn
-									prop="value"
-									label="配置"
+									prop="order"
+									width={80}
+									label="排序"
+									align="center"
 									sortable="custom"
-									showOverflowTooltip={true}
 								/>
 
 								<ElTableColumn
@@ -145,7 +161,7 @@ export default defineComponent({
 								/>
 								<ElTableColumn
 									label="操作"
-									width={222}
+									width={340}
 									align="center"
 									fixed="right">
 									{{
@@ -157,6 +173,15 @@ export default defineComponent({
 													onClick={() => onOpenDialog(scope.row)}
 													v-permiss={getPermissKey(routeHook.ViewFeature.edit)}>
 													编辑
+												</ElButton>
+												<ElButton
+													text={true}
+													icon={Setting}
+													onClick={() => onOpenAssDiaglog(scope.row)}
+													v-permiss={getPermissKey(
+														routeHook.ViewFeature.associated
+													)}>
+													权限设置
 												</ElButton>
 												<ElButton
 													text={true}
@@ -172,7 +197,19 @@ export default defineComponent({
 							</>
 						),
 						footer: () => (
-							<Diaglog ref={diaglogRef} title={DATA.title} onSaved={onRefesh} />
+							<>
+								<Diaglog
+									ref={diaglogRef}
+									title={DATA.title}
+									onSaved={onRefesh}
+								/>
+								<AssDiaglog
+									ref={assDiaglogRef}
+									checkStrictly={true}
+									style="width: 30%"
+									title="权限设置"
+								/>
+							</>
 						),
 					}}
 				</TableView>

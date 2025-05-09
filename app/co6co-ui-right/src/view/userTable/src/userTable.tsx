@@ -32,8 +32,10 @@ export default defineComponent({
 			title?: string;
 			query: IQueryItem;
 			currentItem?: Item;
+			headItemWidth: { width: string };
 		}>({
 			query: {},
+			headItemWidth: { width: '180px' },
 		});
 
 		//:use
@@ -103,23 +105,23 @@ export default defineComponent({
 								<div class="handle-box">
 									<ElInput
 										clearable
+										style={DATA.headItemWidth}
 										v-model={DATA.query.name}
 										placeholder="名称"
-										class="handle-input"
 									/>
 									<EnumSelect
 										clearable
+										style={DATA.headItemWidth}
 										data={userCategoryHook.selectData.value}
 										v-model={DATA.query.category}
 										placeholder="用户类型"
-										class="handle-input"
 									/>
 									<EnumSelect
 										clearable
 										data={selectData.value}
+										style={DATA.headItemWidth}
 										v-model={DATA.query.state}
 										placeholder="状态"
-										class="handle-input"
 									/>
 
 									<ElButton type="primary" icon={Search} onClick={onSearch}>

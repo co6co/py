@@ -29,6 +29,10 @@ type DataApi = (query: any) => Promise<IPageResponse>;
 type filter = (data: any) => Array<Object>;
 type beforeApi = (queryData: any) => any;
 type afterApi = () => void;
+export interface TreeProp {
+	hasChildren?: string;
+	children?: string;
+}
 export default defineComponent({
 	name: 'tableView',
 	inheritAttrs: false,
@@ -61,6 +65,18 @@ export default defineComponent({
 		showPaged: {
 			type: Boolean,
 			default: true,
+		},
+		//树形菜单
+		rowKey: {
+			type: String,
+			default: '',
+		},
+		treeProps: {
+			type: Object as PropType<TreeProp>,
+			default: {
+				hasChildren: undefined,
+				children: undefined,
+			},
 		},
 		...PaginationProps,
 	},
@@ -107,7 +123,7 @@ export default defineComponent({
 		// 获取表格数据
 		const queryData = () => {
 			showLoading();
-			let data = query_temp_Data.value; 
+			let data = query_temp_Data.value;
 			if (prop.beforeApi) data = prop.beforeApi(data);
 			prop
 				.dataApi(data)
@@ -155,6 +171,8 @@ export default defineComponent({
 									border={true}
 									class="table"
 									ref={tableRef}
+									rowKey={prop.rowKey}
+									treeProps={prop.treeProps}
 									headerCellClassName="table-header"
 									onRow-click={onRowChanged}
 									onSort-change={onColChange2}>

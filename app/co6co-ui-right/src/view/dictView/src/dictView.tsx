@@ -1,24 +1,33 @@
-import { defineComponent, VNodeChild } from 'vue';
-import { ref, reactive, onMounted } from 'vue';
-import { ElButton, ElInput, ElTableColumn } from 'element-plus';
+import { defineComponent, VNodeChild, ref, reactive, onMounted } from 'vue';
+
+import { useRoute, useRouter } from 'vue-router';
+import {
+	ElButton,
+	ElInput,
+	ElTableColumn,
+	ElMessage,
+	ElTag,
+} from 'element-plus';
 import { Search, Plus, Delete, Edit } from '@element-plus/icons-vue';
 
 import { FormOperation } from 'co6co';
 import { routeHook } from '@/hooks';
+import { useState } from '@/hooks/useDictState';
 import { tableScope } from '@/constants';
 
 import { TableView, type TableViewInstance } from '@/components/table';
-import useDelete from '@/hooks/useDelete';
 
 import Diaglog, {
-	type ConfigItem as Item,
-	type MdifyConfigInstance as DiaglogInstance,
-} from '@/components/modifyConfig';
-import { configSvc as api } from '@/api/config';
+	type DictItem as Item,
+	type ModifyDictInstance as DiaglogInstance,
+} from '@/components/modifyDict';
+import { dictSvc as api } from '@/api/dict';
+import useDelete from '@/hooks/useDelete';
 export default defineComponent({
 	setup(prop, ctx) {
 		//:define
 		interface IQueryItem {
+			dictTypeId: number;
 			name?: string;
 			code?: string;
 		}
@@ -28,23 +37,26 @@ export default defineComponent({
 			currentItem?: Item;
 			headItemWidth: { width: string };
 		}>({
-			query: {},
+			query: { dictTypeId: 0 },
 			headItemWidth: { width: '180px' },
 		});
 
 		//:use
 		const { getPermissKey } = routeHook.usePermission();
-
+		const { loadData, getName, getTagType } = useState();
+		const route = useRoute();
+		const router = useRouter();
 		//end use
 		//:page
 		const viewRef = ref<TableViewInstance>();
 		const diaglogRef = ref<DiaglogInstance>();
 
 		const onOpenDialog = (row?: Item) => {
-			DATA.title = row ? `编辑[${row?.name}]` : '增加';
+			DATA.title = row ? `编辑[${row?.name}]字典` : '增加字典';
 			DATA.currentItem = row;
 			diaglogRef.value?.openDialog(
 				row ? FormOperation.edit : FormOperation.add,
+				DATA.query.dictTypeId,
 				row
 			);
 		};
@@ -59,8 +71,16 @@ export default defineComponent({
 		const onDelete = (_: number, row: Item) => {
 			deleteSvc(row.id, row.name);
 		};
+
 		onMounted(async () => {
-			onSearch();
+			await loadData();
+			let id = router.currentRoute.value.params.id || route.query.id;
+			if (id) {
+				DATA.query.dictTypeId = Number(id);
+				onSearch();
+			} else {
+				ElMessage.error('参数不正确！');
+			}
 		});
 
 		//:page reader
@@ -75,13 +95,13 @@ export default defineComponent({
 										style={DATA.headItemWidth}
 										clearable
 										v-model={DATA.query.name}
-										placeholder="名称"
+										placeholder="字典名称"
 									/>
 									<ElInput
 										style={DATA.headItemWidth}
 										clearable
 										v-model={DATA.query.code}
-										placeholder="编码"
+										placeholder="字典编码"
 									/>
 
 									<ElButton type="primary" icon={Search} onClick={onSearch}>
@@ -116,8 +136,8 @@ export default defineComponent({
 									showOverflowTooltip={true}
 								/>
 								<ElTableColumn
-									prop="code"
-									label="编码"
+									prop="value"
+									label="值"
 									align="center"
 									sortable="custom"
 									showOverflowTooltip={true}
@@ -126,8 +146,15 @@ export default defineComponent({
 									prop="value"
 									label="配置"
 									sortable="custom"
-									showOverflowTooltip={true}
-								/>
+									showOverflowTooltip={true}>
+									{{
+										default: (scope: tableScope<Item>) => (
+											<ElTag type={getTagType(scope.row.state)}>
+												{getName(scope.row.state)}
+											</ElTag>
+										),
+									}}
+								</ElTableColumn>
 
 								<ElTableColumn
 									prop="createTime"
@@ -172,7 +199,13 @@ export default defineComponent({
 							</>
 						),
 						footer: () => (
-							<Diaglog ref={diaglogRef} title={DATA.title} onSaved={onRefesh} />
+							<>
+								<Diaglog
+									ref={diaglogRef}
+									title={DATA.title}
+									onSaved={onRefesh}
+								/>
+							</>
 						),
 					}}
 				</TableView>

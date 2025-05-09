@@ -1,26 +1,36 @@
-import { defineComponent, VNodeChild } from 'vue';
-import { ref, reactive, onMounted } from 'vue';
+import {
+	defineComponent,
+	VNodeChild,
+	ref,
+	reactive,
+	computed,
+	onMounted,
+} from 'vue';
+
 import { ElButton, ElInput, ElTableColumn } from 'element-plus';
 import { Search, Plus, Delete, Edit } from '@element-plus/icons-vue';
 
 import { FormOperation } from 'co6co';
 import { routeHook } from '@/hooks';
 import { tableScope } from '@/constants';
-
+import useSelect, { MenuCateCategory } from '@/hooks/useMenuSelect';
 import { TableView, type TableViewInstance } from '@/components/table';
-import useDelete from '@/hooks/useDelete';
 
 import Diaglog, {
-	type ConfigItem as Item,
-	type MdifyConfigInstance as DiaglogInstance,
-} from '@/components/modifyConfig';
-import { configSvc as api } from '@/api/config';
+	type MenuItem as Item,
+	BatchAddMenu as BatchDiaglog,
+	type ModifyMenuInstance as DiaglogInstance,
+	type BatchAddMenuInstance as BatchInstance,
+} from '@/components/modifyMenu';
+import api from '@/api/sys/menu';
+import useDelete from '@/hooks/useDelete';
 export default defineComponent({
 	setup(prop, ctx) {
 		//:define
 		interface IQueryItem {
 			name?: string;
 			code?: string;
+			parentId?: number;
 		}
 		const DATA = reactive<{
 			title?: string;
@@ -34,25 +44,42 @@ export default defineComponent({
 
 		//:use
 		const { getPermissKey } = routeHook.usePermission();
-
+		const { refresh, getName } = useSelect();
 		//end use
 		//:page
 		const viewRef = ref<TableViewInstance>();
 		const diaglogRef = ref<DiaglogInstance>();
-
 		const onOpenDialog = (row?: Item) => {
-			DATA.title = row ? `编辑[${row?.name}]` : '增加';
+			DATA.title = row ? `编辑[${row?.name}]菜单` : '增加新菜单';
 			DATA.currentItem = row;
 			diaglogRef.value?.openDialog(
 				row ? FormOperation.edit : FormOperation.add,
 				row
 			);
 		};
+
+		//批量添加
+		const batchDiaglogRef = ref<BatchInstance>();
+		const onOpenBatchDialog = () => {
+			DATA.title = '批量增加';
+			batchDiaglogRef.value?.openDialog(DATA.currentItem!);
+		};
+		const onCurrentChange = (currentRow: Item, oldCurrentRow: Item) => {
+			DATA.currentItem = currentRow;
+		};
+		const allowBatch = computed(() => {
+			return (
+				DATA.currentItem &&
+				(DATA.currentItem.category == MenuCateCategory.SubVIEW ||
+					DATA.currentItem.category == MenuCateCategory.VIEW)
+			);
+		});
 		const onSearch = () => {
 			viewRef.value?.search();
 		};
-		const onRefesh = () => {
+		const onRefesh = async () => {
 			viewRef.value?.refesh();
+			await refresh();
 		};
 
 		const { deleteSvc } = useDelete(api.del_svc, onRefesh);
@@ -60,13 +87,19 @@ export default defineComponent({
 			deleteSvc(row.id, row.name);
 		};
 		onMounted(async () => {
-			onSearch();
+			await refresh();
 		});
-
 		//:page reader
 		const rander = (): VNodeChild => {
 			return (
-				<TableView dataApi={api.get_table_svc} ref={viewRef} query={DATA.query}>
+				<TableView
+					dataApi={api.get_tree_table_svc}
+					highlightCurrentRow={true}
+					ref={viewRef}
+					query={DATA.query}
+					row-key="id"
+					onCurrentChange={onCurrentChange}
+					treeProps={{ children: 'children' }}>
 					{{
 						header: () => (
 							<>
@@ -75,13 +108,13 @@ export default defineComponent({
 										style={DATA.headItemWidth}
 										clearable
 										v-model={DATA.query.name}
-										placeholder="名称"
+										placeholder="菜单名称"
 									/>
 									<ElInput
 										style={DATA.headItemWidth}
 										clearable
 										v-model={DATA.query.code}
-										placeholder="编码"
+										placeholder="菜单编码"
 									/>
 
 									<ElButton type="primary" icon={Search} onClick={onSearch}>
@@ -96,12 +129,25 @@ export default defineComponent({
 										}}>
 										新增
 									</ElButton>
+									{allowBatch.value ? (
+										<ElButton
+											type="primary"
+											icon={Plus}
+											v-permiss={getPermissKey(routeHook.ViewFeature.add)}
+											onClick={() => {
+												onOpenBatchDialog();
+											}}>
+											批量新增
+										</ElButton>
+									) : (
+										<></>
+									)}
 								</div>
 							</>
 						),
 						default: () => (
 							<>
-								<ElTableColumn label="序号" width={55} align="center">
+								<ElTableColumn label="序号" width={110} align="center">
 									{{
 										default: (scope: tableScope) =>
 											viewRef.value?.rowIndex(scope.$index),
@@ -117,16 +163,31 @@ export default defineComponent({
 								/>
 								<ElTableColumn
 									prop="code"
-									label="编码"
+									width={120}
+									label="父节点"
+									align="center"
+									sortable="custom"
+									showOverflowTooltip={true}>
+									{{
+										default: (scope: tableScope<Item>) => {
+											return getName(scope.row.parentId) || '-';
+										},
+									}}
+								</ElTableColumn>
+								<ElTableColumn
+									prop="code"
+									width={120}
+									label="代码"
 									align="center"
 									sortable="custom"
 									showOverflowTooltip={true}
 								/>
 								<ElTableColumn
-									prop="value"
-									label="配置"
+									prop="order"
+									width={80}
+									label="排序"
+									align="center"
 									sortable="custom"
-									showOverflowTooltip={true}
 								/>
 
 								<ElTableColumn
@@ -158,6 +219,7 @@ export default defineComponent({
 													v-permiss={getPermissKey(routeHook.ViewFeature.edit)}>
 													编辑
 												</ElButton>
+
 												<ElButton
 													text={true}
 													icon={Delete}
@@ -172,7 +234,19 @@ export default defineComponent({
 							</>
 						),
 						footer: () => (
-							<Diaglog ref={diaglogRef} title={DATA.title} onSaved={onRefesh} />
+							<>
+								<Diaglog
+									ref={diaglogRef}
+									title={DATA.title}
+									onSaved={onRefesh}
+								/>
+								<BatchDiaglog
+									ref={batchDiaglogRef}
+									checkStrictly={true}
+									onSaved={onRefesh}
+									title={DATA.title}
+								/>
+							</>
 						),
 					}}
 				</TableView>

@@ -7,6 +7,6 @@ import { withInstall } from 'co6co';
 export const ModifyMenu = withInstall(modifyMenu);
 export default ModifyMenu;
 */
-import batchAddMenu from './src/batchAddMenu';
-export { batchAddMenu as BatchAddMenu };
+import BatchAddMenu from './src/batchAddMenu';
+export { BatchAddMenu };
 export * from './src';

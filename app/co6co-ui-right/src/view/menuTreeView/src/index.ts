@@ -1,2 +1,2 @@
-import type menuTreeView from './menuTreeView.vue';
+import type menuTreeView from './menuTreeView';
 export type MenuTreeViewInstance = InstanceType<typeof menuTreeView>;

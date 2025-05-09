@@ -3,7 +3,7 @@ import { ElTable, ElTableColumn, ElButton, ElMessageBox, ElMessage } from 'eleme
 
 import { ref, defineComponent, VNodeChild } from 'vue'
 import { TableView } from 'co6co-right'
-import { get_table_svc } from '@/api/sys/task'
+import { get_table_svc } from '@/api/dev'
 import { useRouter } from 'vue-router'
 export default defineComponent({
   setup(prop, ctx) {

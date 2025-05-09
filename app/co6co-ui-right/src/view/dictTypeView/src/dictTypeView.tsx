@@ -1,21 +1,27 @@
-import { defineComponent, VNodeChild } from 'vue';
-import { ref, reactive, onMounted } from 'vue';
-import { ElButton, ElInput, ElTableColumn } from 'element-plus';
+import { defineComponent, VNodeChild, ref, reactive, onMounted } from 'vue';
+import { RouterLink } from 'vue-router';
+import { ElButton, ElInput, ElTableColumn, ElTag } from 'element-plus';
 import { Search, Plus, Delete, Edit } from '@element-plus/icons-vue';
 
 import { FormOperation } from 'co6co';
-import { routeHook } from '@/hooks';
-import { tableScope } from '@/constants';
 
 import { TableView, type TableViewInstance } from '@/components/table';
-import useDelete from '@/hooks/useDelete';
+import { tableScope } from '@/constants';
+import { usePermission, ViewFeature } from '@/hooks/useRoute';
+import { useState } from '@/hooks/useDictState';
+import { useViewData } from '@/hooks/useView';
+import { replaceRouteParams } from '@/utils';
+import { dictTypeSvc as api } from '@/api/dict';
 
 import Diaglog, {
-	type ConfigItem as Item,
-	type MdifyConfigInstance as DiaglogInstance,
-} from '@/components/modifyConfig';
-import { configSvc as api } from '@/api/config';
+	type DictTypeItem as Item,
+	type ModifyDictTypeInstance as DiaglogInstance,
+} from '@/components/modifyDictType';
+
+import useDelete from '@/hooks/useDelete';
+
 export default defineComponent({
+	name: 'DictTypeView',
 	setup(prop, ctx) {
 		//:define
 		interface IQueryItem {
@@ -33,8 +39,8 @@ export default defineComponent({
 		});
 
 		//:use
-		const { getPermissKey } = routeHook.usePermission();
-
+		const { getPermissKey } = usePermission();
+		const { loadData, getName, getTagType } = useState();
 		//end use
 		//:page
 		const viewRef = ref<TableViewInstance>();
@@ -60,9 +66,16 @@ export default defineComponent({
 			deleteSvc(row.id, row.name);
 		};
 		onMounted(async () => {
+			await loadData();
 			onSearch();
 		});
-
+		//:特殊
+		const { subViewPath } = useViewData('DictView');
+		const getsubViewPath = (dictTypeId: number) => {
+			return replaceRouteParams(subViewPath.value, {
+				id: dictTypeId.toString(),
+			});
+		};
 		//:page reader
 		const rander = (): VNodeChild => {
 			return (
@@ -90,7 +103,7 @@ export default defineComponent({
 									<ElButton
 										type="primary"
 										icon={Plus}
-										v-permiss={getPermissKey(routeHook.ViewFeature.add)}
+										v-permiss={getPermissKey(ViewFeature.add)}
 										onClick={() => {
 											onOpenDialog();
 										}}>
@@ -113,8 +126,22 @@ export default defineComponent({
 									align="center"
 									width={180}
 									sortable="custom"
-									showOverflowTooltip={true}
-								/>
+									showOverflowTooltip={true}>
+									{{
+										default: (scope: tableScope<Item>) => (
+											<>
+												<RouterLink
+													v-permiss={getPermissKey(ViewFeature.view)}
+													to={getsubViewPath(scope.row.id)}>
+													{scope.row.name}
+												</RouterLink>
+												<span v-non-permiss={getPermissKey(ViewFeature.view)}>
+													{scope.row.name}
+												</span>
+											</>
+										),
+									}}
+								</ElTableColumn>
 								<ElTableColumn
 									prop="code"
 									label="编码"
@@ -123,11 +150,18 @@ export default defineComponent({
 									showOverflowTooltip={true}
 								/>
 								<ElTableColumn
-									prop="value"
-									label="配置"
+									prop="state"
+									label="状态"
 									sortable="custom"
-									showOverflowTooltip={true}
-								/>
+									showOverflowTooltip={true}>
+									{{
+										default: (scope: tableScope<Item>) => (
+											<ElTag type={getTagType(scope.row.state)}>
+												{getName(scope.row.state)}
+											</ElTag>
+										),
+									}}
+								</ElTableColumn>
 
 								<ElTableColumn
 									prop="createTime"
@@ -155,14 +189,14 @@ export default defineComponent({
 													text={true}
 													icon={Edit}
 													onClick={() => onOpenDialog(scope.row)}
-													v-permiss={getPermissKey(routeHook.ViewFeature.edit)}>
+													v-permiss={getPermissKey(ViewFeature.edit)}>
 													编辑
 												</ElButton>
 												<ElButton
 													text={true}
 													icon={Delete}
 													onClick={() => onDelete(scope.$index, scope.row)}
-													v-permiss={getPermissKey(routeHook.ViewFeature.del)}>
+													v-permiss={getPermissKey(ViewFeature.del)}>
 													删除
 												</ElButton>
 											</>
@@ -172,7 +206,13 @@ export default defineComponent({
 							</>
 						),
 						footer: () => (
-							<Diaglog ref={diaglogRef} title={DATA.title} onSaved={onRefesh} />
+							<>
+								<Diaglog
+									ref={diaglogRef}
+									title={DATA.title}
+									onSaved={onRefesh}
+								/>
+							</>
 						),
 					}}
 				</TableView>
