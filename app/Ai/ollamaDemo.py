@@ -1,7 +1,6 @@
 # pip install ollama
 import asyncio
-from ollama import AsyncClient
-from ollama import Client
+from ollama import AsyncClient, Client
 import ollama
 import time
 import os
