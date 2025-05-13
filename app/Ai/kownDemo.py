@@ -1,5 +1,6 @@
 
 from deepseek import KnowledgeBase
+import os
 
 kb = KnowledgeBase(api_key="your_key")
 kb.create(
