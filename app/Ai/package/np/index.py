@@ -35,31 +35,42 @@ print("原始数组：",my_arr,names == 'Bob',my_arr[names == 'Bob'],sep="\n")
 my_arr = np.arange(9)
 print(my_arr[1:5])
 print(my_arr[:])
-print(my_arr[1:8:2])
-print(my_arr[::2])
-print(my_arr[:5:2])
-print(my_arr[:8:])
-print(my_arr[::-1])
-
+print("1:8:2",my_arr[1:8:2])
+print("::2",my_arr[::2])
+print(":5:2",my_arr[:5:2])
+print(":8:",my_arr[:8:])
+print("::-3",my_arr[::-3])
+print("::",my_arr[::])
+print("二维数组切片：")
 my_arr = np.arange(9).reshape((3,3))
-print(my_arr[:])
-print(my_arr[0, :])
-print(my_arr[:, 0])
-print(my_arr[:2, :1])
-print(my_arr[0:2, 0:2])
-print(my_arr[[0, 2], :])
-print(my_arr[::-1])
+print("[:]->",my_arr[:],end="\n\n")
+print("[0, :]->",my_arr[0, :],end="\n\n")
+print("[:, 0]->",my_arr[:, 0],end="\n\n")
+print("[:2, :1]->",my_arr[:2, :1],end="\n\n")
+print("[0:2, 0:2]->",my_arr[0:2, 0:2],end="\n\n")
+print("[[0, 2], :]->",my_arr[[0, 2], :],end="\n\n")
+print("[::-1]->",my_arr[::-1],end="\n\n")
+print("[::-2]->",my_arr[::-2],end="\n\n")
 
 # 遍历
 my_arr = np.arange(9).reshape((3,3))
+print("遍历：\n",my_arr,end="\n\n")
+
 for r in my_arr:
+    print( "行->",r)
     for c in r:
         print(c) 
+print("将二维数组进行平铺，然后使用一重循环进行遍历")
+print("\n" ,my_arr,"平铺[flatten]->",my_arr.flatten(),type(my_arr.flatten()),"\n")
 for i in my_arr.flatten():
-    print(i)
+    print( "元素->",i) 
 # 行优先
+print("#行优先\n", type( np.nditer(my_arr, order='C')))
 for i in np.nditer(my_arr, order='C'):
-    print(i)
-# 列优先
+    print(i) 
+print("#列优先\n", type( np.nditer(my_arr, order='F')))
 for i in np.nditer(my_arr, order='F'):
+    print(i)
+print("#存储顺序\n", type( np.nditer(my_arr, order='K')))
+for i in np.nditer(my_arr, order='K'):
     print(i)
