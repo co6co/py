@@ -48,7 +48,7 @@ class DownLoad:
             stream.downByts = len(bytes)
         else:
             stream.downByts += len(bytes)
-        progress_bar(stream.downByts/stream.filesize, "stream,剩余：{}-{}".format(getByteUnit(bytes_remaining), stream.filesize))
+        progress_bar(stream.downByts/stream.filesize, "stream,完成/剩余/总：{}/{}/{}".format(getByteUnit(stream.downByts),getByteUnit(bytes_remaining), getByteUnit(stream.filesize)))
 
     def __init__(self, url: str = None, title=None, streams: List[Stream] = None, captions: List[Caption] = None) -> None:
         self.downloadFolder ="D:\\temp\\"
@@ -68,6 +68,7 @@ class DownLoad:
         pass
 
     def print(self):
+        #https://www.youtube.com/playlist?list=PLgjl5F_IQpFfv48q3aRChUfETXGafDR9z
         for item in self.streams:
             print(item)
 
@@ -77,7 +78,7 @@ class DownLoad:
         """
         checkedList = [i for i in self.streams if i.itag == itag]
         for stream in checkedList:
-            stream.download(filename_prefix=self.downloadFolder)
+            stream.download(filename_prefix=self.downloadFolder ,timeout=60)
 
     def downCaption(self):
         caption = self.captions
@@ -176,11 +177,11 @@ class downPlaylist:
                     progress_bar((count-len(self.downingArr))/count, "等待已创建的任务完成") 
                 break
             if itag==None:
-                itag=self.downOne(index,video,pool)
+                itag=self.downOne(index,video,pool) 
             else :self.downOne(index,video,pool,itag)
-        while len(self.downingArr):
-            time.sleep(1)
-            print("loading ...",len(self.downingArr))
+        while len(self.downingArr) and not self.quitFlag:
+            time.sleep(10)
+            print("loading ...，剩余下载数->",len(self.downingArr))
         if not self.quitFlag and  len(self.errorList)>0:
             warn("开始下载有异常的数据:len-->{}".format(len(self.errorList)))
             self.start(itag=itag,errorDown=True)
