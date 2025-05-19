@@ -49,7 +49,7 @@ print("my_arr1 原数组->", my_arr1)
 my_slice = my_arr1[2:4]
 
 my_slice[:] = 10
-print("改变切片的所有值为10，后原数组->", my_arr1)
+print("改变切片的所有值为10,原数组->", my_arr1, '切片->', my_slice)
 print("视图除了数据是共享的，其他都是独立的。另外，前面介绍的**切片操作**，得到的也是一个数组的视图")
 
 # 拷贝
@@ -58,7 +58,7 @@ my_arr2 = my_arr1.copy()
 
 print(my_arr2 is my_arr1)
 print(my_arr2.base is my_arr1)
-print("my_arr1.copy(),后my_arr1 和 my_arr2 是两个独立的数组。对其中一个数组中元素的改变不会影响另外一个数组")
+print("my_arr1.copy(),my_arr1 和 my_arr2 是两个独立的数组.")
 
 
 # 广播 broadcasting
