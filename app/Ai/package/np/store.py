@@ -21,7 +21,7 @@ print("保存后读取的数据\n->> \n", arch)
 my_arr1 = arch['my_arr1']
 my_arr2 = arch['my_arr2']
 print("保存后读取的数据2\n->> \n", my_arr1)
-print("保存后读取的数据2\n->> \n", my_arr2)
+
 save_path = rootPath/'my_arr2_by_compressed'
 np.savez_compressed(save_path, my_arr1=my_arr1, my_arr2=my_arr2)
 arch = np.load(f"{save_path}.npz")
