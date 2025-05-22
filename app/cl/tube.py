@@ -3,6 +3,7 @@ from pytubefix import YouTube, Stream, Caption
 from pytubefix.cli import on_progress, display_progress_bar
 from pytubefix import Playlist
 from co6co import getByteUnit
+from co6co.utils import convert_size
 from typing import List
 from co6co.task.pools import limitThreadPoolExecutor
 from concurrent.futures import Future
@@ -13,7 +14,7 @@ import os
 # url = "https://www.youtube.com/watch?v=lxOFGvHBsTY"
 proxys = {"http": "http://127.0.0.1:10809", "https": "http://127.0.0.1:10809"}
 #proxys = {"http": "http://127.0.0.1:9667", "https": "http://127.0.0.1:9667"}
-
+#proxys = {"http": "http://127.0.0.1:9666", "https": "http://127.0.0.1:9666"}
  
 def getInt(tip,default=-1):
     try:
@@ -36,8 +37,8 @@ class DownLoad:
             stream.downByts = len(chunk)
         else:
             stream.downByts += len(chunk)
-        sum = stream.downByts+bytes_remaining
-        print(f'download {getByteUnit(len(chunk))}, downloading {round(stream.downByts/sum, 4)*100}% {getByteUnit(stream.downByts)}/{getByteUnit(sum)}  remainng:{getByteUnit(bytes_remaining)} data to file .. ')
+        sum = stream.downByts+bytes_remaining 
+        print(f'download {convert_size(len(chunk))}, downloading {round(stream.downByts/sum*100, 2)}% {convert_size(stream.downByts)}/{convert_size(sum)}  remainng:{convert_size(bytes_remaining)} data to file .. ')
         filesize = stream.filesize
         bytes_received = filesize - bytes_remaining
         display_progress_bar(bytes_received, filesize)
@@ -48,23 +49,23 @@ class DownLoad:
             stream.downByts = len(bytes)
         else:
             stream.downByts += len(bytes)
-        progress_bar(stream.downByts/stream.filesize, "stream,完成/剩余/总：{}/{}/{}".format(getByteUnit(stream.downByts),getByteUnit(bytes_remaining), getByteUnit(stream.filesize)))
+        progress_bar(stream.downByts/stream.filesize, "stream,完成/剩余/总：{}/{}/{}".format(convert_size(stream.downByts),convert_size(bytes_remaining), convert_size(stream.filesize)))
 
-    def __init__(self, url: str = None, title=None, streams: List[Stream] = None, captions: List[Caption] = None) -> None:
+    @staticmethod
+    def createYoube(url:str):
+        yt = YouTube(url, on_progress_callback=DownLoad.on_pro, proxies=proxys,use_po_token=True )
+        return yt
+    def __init__(self, yt:YouTube  ) -> None:
         self.downloadFolder ="D:\\temp\\"
         if not os.path.exists(self.downloadFolder):
-            os.makedirs(self.downloadFolder)
-        if url == None:
-            self.title = title
-            self.streams = streams
-            self.captions = captions
-        else:
-            yt = YouTube(url, on_progress_callback=DownLoad. on_pro, proxies=proxys,use_po_token=True )
-            # yt = YouTube(url, use_oauth=True, allow_oauth_cache=True, on_progress_callback=on_progress, proxies=proxys)
-            print("视频标题", yt.title)
-            self.title = yt.title
-            self.streams = yt.streams.all()
-            self.captions = yt.captions.all()
+            os.makedirs(self.downloadFolder) 
+        print("视频标题", yt.title)
+        self.title = yt.title
+        #self.streams = yt.streams.all()
+        #self.captions = yt.captions.all() 
+        self.streams = yt.streams
+        self.captions =yt. captions
+           
         pass
 
     def print(self):
@@ -77,8 +78,8 @@ class DownLoad:
         下载视频或音频
         """
         checkedList = [i for i in self.streams if i.itag == itag]
-        for stream in checkedList:
-            stream.download(filename_prefix=self.downloadFolder ,timeout=60)
+        for stream in checkedList: 
+            stream.download(filename_prefix=self.downloadFolder ,max_retries=100,timeout=600)
 
     def downCaption(self):
         caption = self.captions
@@ -135,19 +136,20 @@ class downPlaylist:
         self.errorList=[]
        
         pass
-    def downOne(self,index,video,pool:limitThreadPoolExecutor,itag:int=None,errorDown:bool=None):
+    def downOne(self,index,yt:YouTube,pool:limitThreadPoolExecutor,itag:int=None,errorDown:bool=None):
         """
         返回Itag
         """  
         try: 
-            print(index, "=>", self.urlList[index])
-            down = DownLoad(title=video.title, streams=video.streams, captions=video.captions) 
+            print(index, "=>", self.urlList[index],isinstance(yt,YouTube)) 
+            yt.register_on_progress_callback(DownLoad.on_progress)
+            down = DownLoad(yt ) 
             if itag == None: 
                 down.print()
                 itag = getInt("下载itag,只有第一次会出现后面按第一次选择的下载:")
             f = pool.submit(down.downloadVideo, itag)
             f.pool = pool
-            f.title = video.title
+            f.title = yt.title
             f.url = self.urlList[index]
             f.index = index
             f.errFlag=errorDown
@@ -163,12 +165,14 @@ class downPlaylist:
         signal.signal(signal.SIGINT, self.custom_handler)
         pool = limitThreadPoolExecutor(max_workers=worker, thread_name_prefix="download") 
         if not errorDown:
-            s = getInt("indexStartValue:0-{}:<-".format(len(self.playList.videos)),0)
-            e = getInt("indexEndValue:{}:<-".format(len(self.playList.videos)),len(self.playList.videos))
+            max=len(self.playList.videos)-1
+            s = getInt(f"indexStartValue:0-{max}:<==",0)
+            e = getInt(f"indexEndValue:{max}:<==",max)
        
-        for index, video in enumerate(self.playList.videos):
+        for index, youTube in enumerate(self.playList.videos): 
+            youTube.use_po_token=True
             if errorDown and index not in self.errorList:continue 
-            if not errorDown and (index<s or index >=e) :continue
+            if not errorDown and (index<s or index >e) :continue
             if self.quitFlag:
                 print("用户主动退出下载，等待下载的任务..")
                 count = len(self.downingArr)
@@ -177,8 +181,8 @@ class downPlaylist:
                     progress_bar((count-len(self.downingArr))/count, "等待已创建的任务完成") 
                 break
             if itag==None:
-                itag=self.downOne(index,video,pool) 
-            else :self.downOne(index,video,pool,itag)
+                itag=self.downOne(index,youTube,pool) 
+            else :self.downOne(index,youTube,pool,itag)
         while len(self.downingArr) and not self.quitFlag:
             time.sleep(10)
             print("loading ...，剩余下载数->",len(self.downingArr))
@@ -198,8 +202,8 @@ if __name__ == "__main__":
         if c == 0:
             download = downPlaylist(url)
             download.start()
-        elif c == 1:
-            down = DownLoad(url)
+        elif c == 1: 
+            down = DownLoad(DownLoad.createYoube(url))
             while True:
                 down.print()
                 c = getInt("请输入itag:")
