@@ -29,8 +29,9 @@ def download_with_resume(stream :Stream, output_path=None, filename=None):
         output_path = os.getcwd()
     if filename is None:
         filename = stream.default_filename
-    stream.title
-    stream.mime_type
+    #stream.title
+    #stream.mime_type
+    print("下载文件名：",filename)
     file_path = os.path.join(output_path, filename)
     temp_file = file_path + '.part'
     
@@ -113,7 +114,7 @@ class ResumableStream(Stream):
          # 开始下载或继续下载
         headers = {'Range': f'bytes={downloaded}-'} if downloaded else {} 
         try:
-            with requests.get(self.url, headers=headers, stream=True, timeout=10) as r:
+            with requests.get(self.url, headers=headers,proxies=proxys, stream=True, timeout=10) as r:
                 r.raise_for_status()
                 mode = 'ab' if downloaded else 'wb'
                 with open(temp_file, mode) as f:
@@ -196,8 +197,10 @@ class DownLoad:
         for stream in checkedList: 
             #self.youtTube.fmt_streams
             #stream_dict= self.youtTube.streams.get_highest_resolution().stream_dict
-            ResumableStream(stream.to_dict)
-            stream.download(output_path=self.downloadFolder ,max_retries=100,timeout=600,skip_existing=False)
+            #ResumableStream(stream.to_dict)
+            filePath=stream.download(output_path=self.downloadFolder,filename_prefix=itag, max_retries=100,timeout=600,skip_existing=False)
+            #filePath=download_with_resume(stream,self.downloadFolder)
+            print(f"{self.title},保存到{filePath}")
     def _downLoadHighestResolution(self ):
         """
         高清流
@@ -260,7 +263,6 @@ class downPlaylist:
     """
     字幕代码
     """
-
     def error( self,index:int,url:str,e:Exception):
         if index not in self.errorList :
             self.errorList.append(index)
@@ -275,7 +277,7 @@ class downPlaylist:
             if f.errFlag:
                 print("移除ErrorList",f.index,"...")
                 self.errorList.remove(f.index) 
-                print("移除ErrorList",self.errorList)
+                print("移除ErrorList,剩余：",self.errorList)
         else:
             # 如果获取不到异常说明破解成功 
             self.error(f.index,f.url,exception) 
@@ -353,7 +355,7 @@ class downPlaylist:
             self.downOne(index,youTube,pool,errorDown)
         while len(self.downingArr) and not self.quitFlag:
             time.sleep(10)
-            print("downloading ...，剩余下载数->",len(self.downingArr),"errorList->",len(self.errorList),self.errorList)
+            print("downloading ...，剩余下载数->",len(self.downingArr),self.downingArr,"errorList->",len(self.errorList),self.errorList)
         if not self.quitFlag and  len(self.errorList)>0:
             warn("开始下载有异常的数据:len-->{}".format(len(self.errorList)))
             self.start(itag=itag,errorDown=True)
@@ -396,8 +398,13 @@ def demo(url):
 
     yt = YouTube(url, proxies=proxys )
     print(yt.title) 
-    stream = yt.streams.get_highest_resolution()
-    stream.download() 
+    listStream=yt.streams.filter(progressive=True, mime_type=None).order_by("resolution")
+    print(*listStream)
+    allStream=yt.streams.order_by("resolution").all()
+    print("allStream->")
+    print( *allStream,sep='\n')
+    #stream = yt.streams.get_highest_resolution()
+    #stream.download() 
 if __name__ == "__main__":
     url = input("输入要下载的URL:")
     while True:
@@ -407,15 +414,12 @@ if __name__ == "__main__":
             download.start()
         elif c == 1: 
             down = DownLoad(DownLoad.createYoube(url))
-            while True:
-                if getInt("是否下载高清流[1]:")==1:
-                    down._downLoadHighestResolution()
-                else:
-                    down.print()
-                    c = getInt("请输入itag,[0->高清流]:")
-                    if c == -1:
-                        break
-                    down._downloadVideo(c)
+            while True: 
+                down.print()
+                c = getInt("请输入itag,[0->高清流]:")
+                if c == -1:
+                    break
+                down.download(c)
         elif c == 2:
             down = DownLoad(url)
             down.downCaption()
