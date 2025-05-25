@@ -16,6 +16,42 @@ proxys = {"http": "http://127.0.0.1:10809", "https": "http://127.0.0.1:10809"}
 #proxys = {"http": "http://127.0.0.1:9667", "https": "http://127.0.0.1:9667"}
 #proxys = {"http": "http://127.0.0.1:9666", "https": "http://127.0.0.1:9666"}
  
+
+
+"""
+# ++++++
+        # 获取本地文件已存在的大小
+        existing_size = 0
+        if os.path.exists(file_path):
+            existing_size = os.path.getsize(file_path)
+            logger.debug(f"本地文件已存在，大小为 {existing_size} 字节")
+        # 计算剩余需要下载的字节数
+        bytes_remaining =self.filesize - existing_size if self.filesize else None
+        #print("文件大小",bytes_remaining)
+        
+        #++++++
+        with open(file_path, "ab") as fh:
+            try: 
+                #if existing_size:
+                #    self.on_progress(existing_size, fh, bytes_remaining)
+
+                
+# request
+def stream(url,
+           timeout=socket._GLOBAL_DEFAULT_TIMEOUT, 
+           max_retries=0,downloaded:int=0):
+     
+    file_size: int = default_range_size   # fake filesize to start 
+    first=True
+    while first or downloaded < file_size: 
+        stop_pos = min(downloaded + default_range_size, file_size) - 1
+        if  first:
+            first=False
+            stop_pos=(downloaded + default_range_size)-1
+        else:
+            stop_pos = min(downloaded + default_range_size, file_size) - 1
+        range_header = f"bytes={downloaded}-{stop_pos}"
+"""
 def getInt(tip,default=-1):
     try:
         c = input(tip)
