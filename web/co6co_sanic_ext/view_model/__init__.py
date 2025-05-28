@@ -127,7 +127,7 @@ class BaseView(HTTPMethodView):
         fileName = None
         if os.path.isfile(fullPath):
             fileName = os.path.basename(fullPath)
-        return self.response_head(size, fileName)
+        return await self.response_head(size, fileName)
 
     def parseRange(self, request: Request, *, filePath: str = None, fileSize: int = None):
         """

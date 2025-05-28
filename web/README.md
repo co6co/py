@@ -31,7 +31,8 @@
     1. response_head
 0.0.12 2025-04-17
     1. 新增： getconfig for win package
-
+0.0.13 2025-05-28
+    1. bug
 ```
 
 webSocket 测试地址
