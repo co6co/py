@@ -29,7 +29,14 @@ import Diaglog, { type Item } from '@/components/modifyTask';
 
 import { task_api as api } from '@/api/tasks';
 import ShowCode from '@/components/showCode/src/showCode';
-
+export const TaskTableViewFeatures = {
+	add: routeHook.ViewFeature.add,
+	edit: routeHook.ViewFeature.edit,
+	del: routeHook.ViewFeature.del,
+	sched: routeHook.ViewFeature.effective,
+	stop: routeHook.ViewFeature.reset,
+	execute: routeHook.ViewFeature.get,
+};
 export default defineComponent({
 	setup(prop, ctx) {
 		//:define
@@ -73,14 +80,12 @@ export default defineComponent({
 			//console.info('123', viewRef.value?.tableRef?.$el)
 
 			viewRef.value?.search();
-
 			nextTick(() => {
 				const index = 10;
 				// 获取目标行的 DOM 元素
 				const targetRow = viewRef.value?.tableRef?.$el.querySelector(
 					`tbody tr:nth-child(${index + 1})`
 				);
-
 				if (targetRow) {
 					// 计算目标行相对于 el-scrollbar.wrap 的位置
 					const targetOffsetTop = targetRow.offsetTop;
@@ -186,7 +191,7 @@ export default defineComponent({
 									<ElButton
 										type="primary"
 										icon={Plus}
-										v-permiss={getPermissKey(routeHook.ViewFeature.add)}
+										v-permiss={getPermissKey(TaskTableViewFeatures.add)}
 										onClick={() => {
 											onOpenDialog();
 										}}>
@@ -272,13 +277,15 @@ export default defineComponent({
 									label="创建时间"
 									sortable="custom"
 									width={160}
-									show-overflow-tooltip={true}></ElTableColumn>
+									show-overflow-tooltip={true}
+								/>
 								<ElTableColumn
 									prop="updateTime"
 									label="更新时间"
 									sortable="custom"
 									width={160}
-									show-overflow-tooltip={true}></ElTableColumn>
+									show-overflow-tooltip={true}
+								/>
 								<ElTableColumn
 									label="操作"
 									width={320}
@@ -291,14 +298,14 @@ export default defineComponent({
 													text={true}
 													icon={Edit}
 													onClick={() => onOpenDialog(scope.row)}
-													v-permiss={getPermissKey(routeHook.ViewFeature.edit)}>
+													v-permiss={getPermissKey(TaskTableViewFeatures.edit)}>
 													编辑
 												</ElButton>
 												<ElButton
 													text={true}
 													icon={Delete}
 													onClick={() => onDelete(scope.row)}
-													v-permiss={getPermissKey(routeHook.ViewFeature.del)}>
+													v-permiss={getPermissKey(TaskTableViewFeatures.del)}>
 													删除
 												</ElButton>
 												<ElDropdown
@@ -323,16 +330,25 @@ export default defineComponent({
 																				scope.row.execStatus == 0
 																			)
 																		}
+																		v-permiss={getPermissKey(
+																			TaskTableViewFeatures.sched
+																		)}
 																		command="sched">
 																		调度
 																	</ElDropdownItem>
 																	<ElDropdownItem
 																		disabled={scope.row.execStatus == 0}
+																		v-permiss={getPermissKey(
+																			TaskTableViewFeatures.stop
+																		)}
 																		command="stop">
 																		停止
 																	</ElDropdownItem>
 																	<ElDropdownItem
 																		title="不要执行时间太长的程序"
+																		v-permiss={getPermissKey(
+																			TaskTableViewFeatures.execute
+																		)}
 																		command="once">
 																		执行
 																	</ElDropdownItem>

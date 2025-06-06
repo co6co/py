@@ -15,6 +15,15 @@ import Diaglog, {
 	type MdifyConfigInstance as DiaglogInstance,
 } from '@/components/modifyConfig';
 import { configSvc as api } from '@/api/config';
+
+export const ViewFeatures = {
+	add: routeHook.ViewFeature.add,
+	edit: routeHook.ViewFeature.edit,
+	del: routeHook.ViewFeature.del,
+	sched: routeHook.ViewFeature.effective,
+	stop: routeHook.ViewFeature.reset,
+	execute: routeHook.ViewFeature.get,
+};
 export default defineComponent({
 	setup(prop, ctx) {
 		//:define

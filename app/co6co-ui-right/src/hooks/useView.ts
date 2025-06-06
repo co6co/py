@@ -1,6 +1,6 @@
 import { ref } from 'vue';
 import { useRouteData, type RouteItem } from '@/hooks/useRoute';
-import { getViewPath /*views*/ } from '@/views';
+import { getViewPath /*views*/ } from 'co6co';
 import { Router } from 'vue-router';
 import { replaceRouteParams } from '@/utils';
 

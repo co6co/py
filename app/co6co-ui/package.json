@@ -1,7 +1,8 @@
 {
   "name": "co6co",
+  "moduleName": "co6co",
   "private": false,
-  "version": "0.1.32",
+  "version": "0.1.33",
   "type": "module",
   "files": [
     "dist"

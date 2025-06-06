@@ -12,7 +12,7 @@ import 'co6co-right/dist/index.css'
 //import './assets/css/icon.css' 查看在那用 影响全局
 
 const app = createApp(App)
-app.use(co6coPlugin, {})
+app.use(co6coPlugin, {}) // co6coPlugin.install(app)
 try {
   setBaseUrl()
   app.use(useRouter())

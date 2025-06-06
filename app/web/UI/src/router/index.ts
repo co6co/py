@@ -22,12 +22,14 @@ import { views as taskViews, moduleName as taskName } from 'co6co-task'
 const allView = {}
 allView[moduleName] = { ...views }
 allView[taskName] = { ...taskViews }
+console.info('taskView', taskViews)
 Object.keys(allView).forEach((name) => {
   const moduelView = allView[name]
   Object.keys(moduelView).forEach((key) => {
     viewObjects[getViewPath(key, name)] = moduelView[key]
   })
 })
+
 const store = getStoreInstance()
 store.setViews(viewObjects)
 //console.info(viewObjects)
