@@ -54,3 +54,4 @@ export enum DictShowCategory {
 }
 
 export * from './api';
+export * from './pageFeature';

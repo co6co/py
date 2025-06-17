@@ -5,7 +5,7 @@ import { Search, Plus, Delete, Edit } from '@element-plus/icons-vue';
 
 import { FormOperation } from 'co6co';
 import { routeHook } from '@/hooks';
-import { tableScope } from '@/constants';
+import { tableScope, ViewFeature } from '@/constants';
 
 import { TableView, type TableViewInstance } from '@/components/table';
 import useDelete from '@/hooks/useDelete';
@@ -17,12 +17,12 @@ import Diaglog, {
 import { configSvc as api } from '@/api/config';
 
 export const ViewFeatures = {
-	add: routeHook.ViewFeature.add,
-	edit: routeHook.ViewFeature.edit,
-	del: routeHook.ViewFeature.del,
-	sched: routeHook.ViewFeature.effective,
-	stop: routeHook.ViewFeature.reset,
-	execute: routeHook.ViewFeature.get,
+	add: ViewFeature.add,
+	edit: ViewFeature.edit,
+	del: ViewFeature.del,
+	sched: ViewFeature.sched,
+	stop: ViewFeature.stop,
+	execute: ViewFeature.execute,
 };
 export default defineComponent({
 	setup(prop, ctx) {
@@ -99,7 +99,7 @@ export default defineComponent({
 									<ElButton
 										type="primary"
 										icon={Plus}
-										v-permiss={getPermissKey(routeHook.ViewFeature.add)}
+										v-permiss={getPermissKey(ViewFeature.add)}
 										onClick={() => {
 											onOpenDialog();
 										}}>
@@ -164,14 +164,14 @@ export default defineComponent({
 													text={true}
 													icon={Edit}
 													onClick={() => onOpenDialog(scope.row)}
-													v-permiss={getPermissKey(routeHook.ViewFeature.edit)}>
+													v-permiss={getPermissKey(ViewFeature.edit)}>
 													编辑
 												</ElButton>
 												<ElButton
 													text={true}
 													icon={Delete}
 													onClick={() => onDelete(scope.$index, scope.row)}
-													v-permiss={getPermissKey(routeHook.ViewFeature.del)}>
+													v-permiss={getPermissKey(ViewFeature.del)}>
 													删除
 												</ElButton>
 											</>

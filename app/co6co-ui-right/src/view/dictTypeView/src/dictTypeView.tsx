@@ -7,11 +7,12 @@ import { FormOperation } from 'co6co';
 
 import { TableView, type TableViewInstance } from '@/components/table';
 import { tableScope } from '@/constants';
-import { usePermission, ViewFeature } from '@/hooks/useRoute';
+import { usePermission } from '@/hooks/useRoute';
 import { useState } from '@/hooks/useDictState';
 import { useViewData } from '@/hooks/useView';
 import { replaceRouteParams } from '@/utils';
 import { dictTypeSvc as api } from '@/api/dict';
+import { ViewFeature } from '@/constants';
 
 import Diaglog, {
 	type DictTypeItem as Item,

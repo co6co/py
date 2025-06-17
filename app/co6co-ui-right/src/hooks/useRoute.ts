@@ -4,6 +4,7 @@ import { Storage, traverseTreeData, randomString } from 'co6co';
 //确保你在 Vue 组件的 <script setup> 或 setup() 函数中使用 useRouter。
 // 如果你需要在其他地方访问路由器，考虑通过参数传递路由器实例，或者在应用初始化时保存对它的引用。
 import { useRouter } from 'vue-router';
+import { ViewFeature } from '@/constants';
 /**
  * VIEW 功能
  * 为控制页面按钮权限
@@ -11,40 +12,7 @@ import { useRouter } from 'vue-router';
  * 需要调整 还需调整 useMethods
  * @returns
  */
-export enum ViewFeature {
-	//** 查看 */
-	view = 'view',
-	//** 查看 */
-	get = 'get',
-	//** 增加 */
-	add = 'add',
-	//** 编辑 */
-	edit = 'edit',
-	//** 删除 */
-	del = 'del',
-	//** 设备 */
-	setting = 'setting',
-	//** 检查 */
-	check = 'check',
-	//** 下载 */
-	downloads = 'downloads',
-	//** 下载 */
-	download = 'download',
-	upload = 'upload',
-	//** 关联 */
-	associated = 'associated',
-	//** 重置 */
-	reset = 'reset',
-	//** 推送 */
-	push = 'push',
-	//** 使生效 **/
-	effective = 'effective',
-	settingName = 'settingName',
-	//** 设备编号 */
-	settingNo = 'settingNo',
-	//** 设置优先级 */
-	settingPriority = 'settingPriority',
-}
+
 /**
  * 获取当前路由
  * @returns 当前路由
@@ -59,10 +27,8 @@ export const getCurrentRoute = () => {
 };
 /**
  * 获取指定视图权限字
- *
  */
 export default getCurrentRoute;
-
 const getViewFeature = (pageUrl: string) => {
 	const { getRouteData } = useRouteData();
 	const data = getRouteData();
