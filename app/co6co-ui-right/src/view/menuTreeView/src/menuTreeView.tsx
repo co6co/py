@@ -12,7 +12,7 @@ import { Search, Plus, Delete, Edit } from '@element-plus/icons-vue';
 
 import { FormOperation } from 'co6co';
 import { routeHook } from '@/hooks';
-import { tableScope } from '@/constants';
+import { tableScope, ViewFeature } from '@/constants';
 import useSelect, { MenuCateCategory } from '@/hooks/useMenuSelect';
 import { TableView, type TableViewInstance } from '@/components/table';
 
@@ -24,6 +24,12 @@ import Diaglog, {
 } from '@/components/modifyMenu';
 import api from '@/api/sys/menu';
 import useDelete from '@/hooks/useDelete';
+
+export const ViewFeatures = {
+	add: ViewFeature.add,
+	edit: ViewFeature.edit,
+	del: ViewFeature.del,
+};
 export default defineComponent({
 	setup(prop, ctx) {
 		//:define
@@ -123,7 +129,7 @@ export default defineComponent({
 									<ElButton
 										type="primary"
 										icon={Plus}
-										v-permiss={getPermissKey(routeHook.ViewFeature.add)}
+										v-permiss={getPermissKey(ViewFeature.add)}
 										onClick={() => {
 											onOpenDialog();
 										}}>
@@ -133,7 +139,7 @@ export default defineComponent({
 										<ElButton
 											type="primary"
 											icon={Plus}
-											v-permiss={getPermissKey(routeHook.ViewFeature.add)}
+											v-permiss={getPermissKey(ViewFeature.add)}
 											onClick={() => {
 												onOpenBatchDialog();
 											}}>
@@ -216,7 +222,7 @@ export default defineComponent({
 													text={true}
 													icon={Edit}
 													onClick={() => onOpenDialog(scope.row)}
-													v-permiss={getPermissKey(routeHook.ViewFeature.edit)}>
+													v-permiss={getPermissKey(ViewFeature.edit)}>
 													编辑
 												</ElButton>
 
@@ -224,7 +230,7 @@ export default defineComponent({
 													text={true}
 													icon={Delete}
 													onClick={() => onDelete(scope.$index, scope.row)}
-													v-permiss={getPermissKey(routeHook.ViewFeature.del)}>
+													v-permiss={getPermissKey(ViewFeature.del)}>
 													删除
 												</ElButton>
 											</>

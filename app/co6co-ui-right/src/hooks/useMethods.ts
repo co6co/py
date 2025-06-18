@@ -22,15 +22,21 @@ export default () => {
 	return { selectData, getName };
 };
 
-export const usePageFeature = () => {
+/**
+ *
+ * @param pageFeature 页面字段 {get:"get",add:"add" sched:{value:"sched",text:"调度表"}}
+ * @returns
+ */
+export const usePageFeature = (pageFeature?: object) => {
 	let index = -1;
 	const list: Array<IEnumSelect> = [];
-	Object.keys(ViewFeature).forEach((key) => {
-		console.log(key, ViewFeature[key as keyof typeof ViewFeature]);
+	pageFeature = pageFeature ?? ViewFeature;
+	Object.keys(pageFeature).forEach((key) => {
+		//console.log(key, ViewFeature[key as keyof typeof ViewFeature]);
 		list.push({
 			uid: ++index,
 			key: key,
-			label: ViewFeatureDesc.getDesc(key),
+			label: ViewFeatureDesc.getDesc(key, pageFeature),
 			value: key,
 		});
 	});

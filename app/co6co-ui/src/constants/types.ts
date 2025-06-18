@@ -1,3 +1,4 @@
+import { App } from 'vue';
 export interface IResponse<T = any> {
 	code: number;
 	message: string;
@@ -12,6 +13,13 @@ export interface Table_Module_Base {
 	diaglogTitle?: string;
 }
 
+export interface IView {
+	features: object;
+	name?: string;
+	install: (app: App) => void;
+	setup: (prop, ctx) => void;
+}
+export type TIView = Function | IView; // function () => import("/system/src/views/user.vue")
 /**
  * 增|编 表单所有模块
  */

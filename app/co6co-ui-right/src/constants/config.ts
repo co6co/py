@@ -1,4 +1,4 @@
-import { routeHook } from '@/hooks';
+import { ViewFeature } from '@/constants';
 /**
  * 不对外导出
  */
@@ -8,7 +8,7 @@ export enum ConfigCodes {
 }
 
 export const defaultViewFeatures = {
-	add: routeHook.ViewFeature.add,
-	edit: routeHook.ViewFeature.edit,
-	del: routeHook.ViewFeature.del,
+	add: ViewFeature.add,
+	edit: ViewFeature.edit,
+	del: ViewFeature.del,
 };

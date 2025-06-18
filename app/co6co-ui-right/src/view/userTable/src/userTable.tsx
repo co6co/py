@@ -4,7 +4,7 @@ import { ElButton, ElInput, ElTableColumn, ElTag } from 'element-plus';
 import { Search, Plus, Delete, Edit } from '@element-plus/icons-vue';
 
 import { routeHook } from '@/hooks';
-import { tableScope } from '@/constants';
+import { tableScope, ViewFeature } from '@/constants';
 
 import { TableView, type TableViewInstance } from '@/components/table';
 import { useState, useCategory } from '@/hooks/useUserSelect';
@@ -19,6 +19,15 @@ import ModifyDiaglog, {
 	ModifyUserInstance,
 } from '@/components/modifyUser';
 import ResetPwdDiaglog from '@/components/resetPwd';
+
+export const ViewFeatures = {
+	add: ViewFeature.add,
+	edit: ViewFeature.edit,
+	del: ViewFeature.del,
+	associated: ViewFeature.associated,
+	reset: { value: ViewFeature.reset, text: '重置密码' },
+};
+
 export default defineComponent({
 	name: 'UserTable',
 	setup(prop, ctx) {
@@ -130,7 +139,7 @@ export default defineComponent({
 									<ElButton
 										type="primary"
 										icon={Plus}
-										v-permiss={getPermissKey(routeHook.ViewFeature.add)}
+										v-permiss={getPermissKey(ViewFeature.add)}
 										onClick={() => {
 											onOpenDialog(FormOperation.add);
 										}}>
@@ -206,23 +215,21 @@ export default defineComponent({
 													onClick={() =>
 														onOpenDialog(FormOperation.edit, scope.row)
 													}
-													v-permiss={getPermissKey(routeHook.ViewFeature.edit)}>
+													v-permiss={getPermissKey(ViewFeature.edit)}>
 													编辑
 												</ElButton>
 												<ElButton
 													text={true}
 													icon={Edit}
 													onClick={() => onOpenAssDiaglog(scope.row)}
-													v-permiss={getPermissKey(
-														routeHook.ViewFeature.associated
-													)}>
+													v-permiss={getPermissKey(ViewFeature.associated)}>
 													关联
 												</ElButton>
 												<ElButton
 													text={true}
 													icon={Delete}
 													onClick={() => onDelete(scope.$index, scope.row)}
-													v-permiss={getPermissKey(routeHook.ViewFeature.del)}>
+													v-permiss={getPermissKey(ViewFeature.del)}>
 													删除
 												</ElButton>
 												<ElButton
@@ -231,9 +238,7 @@ export default defineComponent({
 													onClick={() =>
 														onOpenResetDialog(scope.$index, scope.row)
 													}
-													v-permiss={getPermissKey(
-														routeHook.ViewFeature.reset
-													)}>
+													v-permiss={getPermissKey(ViewFeature.reset)}>
 													重置密码
 												</ElButton>
 											</>

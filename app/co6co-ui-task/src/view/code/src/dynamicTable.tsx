@@ -6,6 +6,7 @@ import { Search, Plus, View, Edit, Delete } from '@element-plus/icons-vue';
 import { FormOperation, showLoading, closeLoading } from 'co6co';
 import {
 	routeHook,
+	ViewFeature,
 	DictSelect,
 	DictSelectInstance,
 	tableScope,
@@ -19,7 +20,12 @@ import Diaglog, { type Item } from '@/components/modifyCode';
 import ShowCode from '@/components/showCode/src/showCode';
 
 import { code_api as api } from '@/api/tasks';
-
+export const ViewFeatures = {
+	add: ViewFeature.add,
+	edit: ViewFeature.edit,
+	del: ViewFeature.del,
+	execute: ViewFeature.execute,
+};
 export default defineComponent({
 	setup(prop, ctx) {
 		//:define
@@ -130,7 +136,7 @@ export default defineComponent({
 									<ElButton
 										type="primary"
 										icon={Plus}
-										v-permiss={getPermissKey(routeHook.ViewFeature.add)}
+										v-permiss={getPermissKey(ViewFeature.add)}
 										onClick={() => {
 											onOpenDialog();
 										}}>
@@ -214,14 +220,14 @@ export default defineComponent({
 													text={true}
 													icon={Edit}
 													onClick={() => onOpenDialog(scope.row)}
-													v-permiss={getPermissKey(routeHook.ViewFeature.edit)}>
+													v-permiss={getPermissKey(ViewFeature.edit)}>
 													编辑
 												</ElButton>
 												<ElButton
 													text={true}
 													icon={Delete}
 													onClick={() => onDelete(scope.row)}
-													v-permiss={getPermissKey(routeHook.ViewFeature.del)}>
+													v-permiss={getPermissKey(ViewFeature.del)}>
 													删除
 												</ElButton>
 												<ElButton
@@ -230,7 +236,7 @@ export default defineComponent({
 													title="不要执行时间太长的程序"
 													disabled={!isPythonCode(scope.row.category)}
 													showOverflowTooltip
-													v-permiss={getPermissKey(routeHook.ViewFeature.check)}
+													v-permiss={getPermissKey(ViewFeature.execute)}
 													onClick={() => {
 														showLoading();
 														api

@@ -1,8 +1,7 @@
 import { withInstall } from 'co6co';
 
-import userTable from './src/userTable';
-
-export const UserTableView = withInstall(userTable);
+import userTable, { ViewFeatures } from './src/userTable';
+export const UserTableView = withInstall(userTable, { features: ViewFeatures });
 //export default UserTableView;
 
 export * from './src';

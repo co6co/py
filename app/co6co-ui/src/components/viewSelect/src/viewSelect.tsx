@@ -2,6 +2,7 @@ import { defineComponent } from 'vue';
 import { ElSelect, ElOption, ElIcon, ElEmpty } from 'element-plus';
 import { getStoreInstance, useModelWrapper } from '@/hooks';
 import { Promotion } from '@element-plus/icons-vue';
+import { TIView } from '@/constants/types';
 
 export default defineComponent({
 	name: 'ViewSelect',
@@ -17,6 +18,8 @@ export default defineComponent({
 	emits: {
 		//@ts-ignore
 		'update:modelValue': (v: undefined | string) => true,
+		//定义 事件不要加 on ，vue 编译时会自动加上，这个问题花了1h才发现
+		change: (componentPath: string, component: TIView) => true,
 	},
 	setup(prop, context) {
 		//const DATA = ref<undefined | string>(prop.modelValue);
@@ -28,10 +31,12 @@ export default defineComponent({
 		//};
 		const store = getStoreInstance();
 		const { localValue, onChange } = useModelWrapper(prop, context);
+		const onChange2 = (newValue) => {
+			const data = store.views[newValue];
+			context.emit('change', newValue, data);
+			onChange(newValue);
+		};
 		return () => {
-			//可以写某些代码
-			//console.info('2.rander...');
-			//console.info('prop changeed...');
 			localValue.value = prop.modelValue;
 			return (
 				<ElSelect
@@ -40,7 +45,7 @@ export default defineComponent({
 					style={context.attrs}
 					class="iconList"
 					v-model={localValue.value}
-					onChange={onChange}
+					onChange={onChange2}
 					placeholder="请选择视图">
 					{{
 						default: () => (

@@ -10,6 +10,17 @@ export const get_category_svc = (): Promise<IResponse<IEnumSelect[]>> => {
 export const get_state_svc = (): Promise<IResponse<IEnumSelect[]>> => {
 	return createServiceInstance().post(`${base_URL}/status`);
 };
+interface IMenuOne {
+	id: number;
+	name: string;
+	component: string;
+	category: number;
+	code: string;
+	status: number;
+}
+export const get_one_svc = (id: number): Promise<IResponse<IMenuOne>> => {
+	return createServiceInstance().get(`${base_URL}/${id}`);
+};
 
 export const batch_add_svc = (
 	data: Array<any>

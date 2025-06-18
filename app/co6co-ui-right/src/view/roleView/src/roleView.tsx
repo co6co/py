@@ -9,7 +9,7 @@ import {
 	AssociatedInstance as AssDiaglogInstance,
 } from 'co6co';
 import { routeHook } from '@/hooks';
-import { tableScope } from '@/constants';
+import { tableScope, ViewFeature } from '@/constants';
 
 import { TableView, type TableViewInstance } from '@/components/table';
 
@@ -19,6 +19,12 @@ import Diaglog, {
 } from '@/components/modifyRole';
 import api, { association_service as ass_api } from '@/api/sys/role';
 import useDelete from '@/hooks/useDelete';
+export const ViewFeatures = {
+	add: ViewFeature.add,
+	edit: ViewFeature.edit,
+	del: ViewFeature.del,
+	associated: ViewFeature.associated,
+};
 export default defineComponent({
 	setup(prop, ctx) {
 		//:define
@@ -104,7 +110,7 @@ export default defineComponent({
 									<ElButton
 										type="primary"
 										icon={Plus}
-										v-permiss={getPermissKey(routeHook.ViewFeature.add)}
+										v-permiss={getPermissKey(ViewFeature.add)}
 										onClick={() => {
 											onOpenDialog();
 										}}>
@@ -171,23 +177,21 @@ export default defineComponent({
 													text={true}
 													icon={Edit}
 													onClick={() => onOpenDialog(scope.row)}
-													v-permiss={getPermissKey(routeHook.ViewFeature.edit)}>
+													v-permiss={getPermissKey(ViewFeature.edit)}>
 													编辑
 												</ElButton>
 												<ElButton
 													text={true}
 													icon={Setting}
 													onClick={() => onOpenAssDiaglog(scope.row)}
-													v-permiss={getPermissKey(
-														routeHook.ViewFeature.associated
-													)}>
+													v-permiss={getPermissKey(ViewFeature.associated)}>
 													权限设置
 												</ElButton>
 												<ElButton
 													text={true}
 													icon={Delete}
 													onClick={() => onDelete(scope.$index, scope.row)}
-													v-permiss={getPermissKey(routeHook.ViewFeature.del)}>
+													v-permiss={getPermissKey(ViewFeature.del)}>
 													删除
 												</ElButton>
 											</>

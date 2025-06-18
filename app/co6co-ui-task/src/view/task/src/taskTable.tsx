@@ -16,6 +16,7 @@ import { Search, Plus, Edit, Delete, ArrowDown } from '@element-plus/icons-vue';
 import { FormOperation, showLoading, closeLoading, IResponse } from 'co6co';
 import {
 	routeHook,
+	ViewFeature,
 	DictSelect,
 	DictSelectInstance,
 	tableScope,
@@ -30,12 +31,12 @@ import Diaglog, { type Item } from '@/components/modifyTask';
 import { task_api as api } from '@/api/tasks';
 import ShowCode from '@/components/showCode/src/showCode';
 export const TaskTableViewFeatures = {
-	add: routeHook.ViewFeature.add,
-	edit: routeHook.ViewFeature.edit,
-	del: routeHook.ViewFeature.del,
-	sched: routeHook.ViewFeature.effective,
-	stop: routeHook.ViewFeature.reset,
-	execute: routeHook.ViewFeature.get,
+	add: ViewFeature.add,
+	edit: ViewFeature.edit,
+	del: ViewFeature.del,
+	sched: ViewFeature.sched,
+	stop: ViewFeature.stop,
+	execute: ViewFeature.execute,
 };
 export default defineComponent({
 	setup(prop, ctx) {

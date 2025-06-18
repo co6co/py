@@ -4,6 +4,7 @@ import {
 	reactive,
 	provide,
 	computed,
+	watch,
 	VNode,
 	onMounted,
 } from 'vue';
@@ -19,9 +20,11 @@ import {
 	FormOperation,
 	type IResponse,
 	type FormItemBase,
+	type TIView,
+	getStoreInstance,
 } from 'co6co';
 
-import api from '@/api/sys/menu';
+import api, { get_one_svc } from '@/api/sys/menu';
 import {
 	useTree,
 	useMenuCategory,
@@ -82,9 +85,16 @@ export default defineComponent({
 		const httpMethods = useHttpMethods();
 		const pageFeature = usePageFeature();
 		const diaglogForm = ref<DialogFormInstance>();
-		const DATA = reactive<FormData<number, FormItem>>({
+		const DATA = reactive<
+			FormData<number, FormItem> & {
+				parentCategory: number;
+				parentComponent?: string;
+			}
+		>({
 			operation: FormOperation.add,
 			id: 0,
+			parentCategory: -1,
+
 			fromData: { category: MenuCateCategory.GROUP },
 		});
 		//@ts-ignore
@@ -93,9 +103,13 @@ export default defineComponent({
 
 		const init_data = (oper: FormOperation, item?: Item) => {
 			DATA.operation = oper;
+			DATA.parentCategory = -1;
+			DATA.parentComponent = undefined;
 			switch (oper) {
 				case FormOperation.add:
 					DATA.id = -1;
+					DATA.parentCategory = item ? item.category : -1;
+					DATA.parentComponent = item ? item.component : undefined;
 					DATA.fromData.name = '';
 					DATA.fromData.code = '';
 					DATA.fromData.parentId = item ? item.id : 0;
@@ -132,13 +146,42 @@ export default defineComponent({
 					//可以在这里写一些use 获取其他的数据
 					break;
 			}
+
 			return true;
 		};
+		watch(
+			() => DATA.fromData.parentId,
+			(newDATA, old) => {
+				if (newDATA)
+					get_one_svc(newDATA).then((res) => {
+						DATA.parentCategory = res.data.category;
+						DATA.parentComponent = res.data.component;
+					});
+			}
+		);
+		const allowFeature = computed(() => {
+			return (
+				typeof DATA.parentCategory == 'number' &&
+				(DATA.parentCategory == MenuCateCategory.SubVIEW ||
+					DATA.parentCategory == MenuCateCategory.VIEW)
+			);
+		});
+		const store = getStoreInstance();
+		const Feature = computed(async () => {
+			if (allowFeature.value && DATA.parentComponent) {
+				const component = store.views[DATA.parentComponent] as TIView;
+				if (typeof component == 'object') return component.features;
+				else await component();
+			} else {
+				return pageFeature.selectData.value;
+			}
+		});
 		onMounted(async () => {
 			await loadData();
 			await menuStateData.loadData();
 			await menuCategoryData.loadData();
 		});
+
 		const triggers = ['blur', 'change'];
 		const trigger = 'blur';
 		const rules_b: FormRules = {
@@ -215,6 +258,7 @@ export default defineComponent({
 			if (!DATA.fromData.permissionKey)
 				DATA.fromData.permissionKey = DATA.fromData.methods as string;
 		};
+
 		const save = () => {
 			//提交数据
 			let promist: Promise<IResponse>;
@@ -242,6 +286,14 @@ export default defineComponent({
 					closeLoading();
 				});
 		};
+		const onComponent = (componentName: string, component: TIView) => {
+			if (typeof component == 'function') {
+				(component() as Promise<any>).then((res) => {
+					console.info('组件为函数', res);
+				});
+			}
+			console.info(componentName, typeof component, component);
+		};
 
 		const fromSlots = {
 			buttons: () => (
@@ -257,10 +309,6 @@ export default defineComponent({
 			default: () => (
 				<>
 					<ElRow>
-						<ElCol span={12}></ElCol>
-						<ElCol span={12}></ElCol>
-					</ElRow>
-					<ElRow>
 						<ElCol span={12}>
 							<ElFormItem label="名称" prop="name">
 								<ElInput
@@ -273,7 +321,8 @@ export default defineComponent({
 								<ElSelectV2
 									options={menuCategoryData.selectData.value}
 									v-model={DATA.fromData.category}
-									placeholder="菜单类别"></ElSelectV2>
+									placeholder="菜单类别"
+								/>
 							</ElFormItem>
 						</ElCol>
 					</ElRow>
@@ -283,7 +332,8 @@ export default defineComponent({
 							multiple={false}
 							check-strictly
 							props={{ children: 'children', label: 'name', value: 'id' }}
-							data={treeSelectData.value}></ElTreeSelect>
+							data={treeSelectData.value}
+						/>
 					</ElFormItem>
 					<ElRow>
 						<ElCol span={12}>
@@ -310,7 +360,8 @@ export default defineComponent({
 										<ElInput
 											clearable={true}
 											v-model={DATA.fromData.url}
-											placeholder="权限字"></ElInput>
+											placeholder="权限字"
+										/>
 									</ElFormItem>
 								</ElCol>
 								<ElCol span={12}>
@@ -319,7 +370,8 @@ export default defineComponent({
 											multiple={true}
 											options={httpMethods.selectData.value}
 											v-model={DATA.fromData.methods}
-											placeholder="操作类型"></ElSelectV2>
+											placeholder="操作类型"
+										/>
 									</ElFormItem>
 								</ElCol>
 							</ElRow>
@@ -352,7 +404,8 @@ export default defineComponent({
 												options={pageFeature.selectData.value}
 												v-model={DATA.fromData.methods}
 												placeholder="子视图操作类型一般用view,做了特殊出来可选其他"
-												onChange={onFeatueMethod}></ElSelectV2>
+												onChange={onFeatueMethod}
+											/>
 										</ElFormItem>
 									</ElCol>
 								</ElRow>
@@ -362,6 +415,7 @@ export default defineComponent({
 									<ElFormItem label="组件地址" prop="component">
 										<ViewSelect
 											clearable={true}
+											onChange={onComponent}
 											v-model={DATA.fromData.component}
 										/>
 									</ElFormItem>
@@ -401,7 +455,7 @@ export default defineComponent({
 								<ElCol span={12}>
 									<ElFormItem label="操作类型" prop="methods">
 										<ElSelectV2
-											options={pageFeature.selectData.value}
+											options={Feature.value}
 											v-model={DATA.fromData.methods}
 											placeholder="操作类型"
 											onChange={onFeatueMethod}></ElSelectV2>
@@ -431,7 +485,8 @@ export default defineComponent({
 							type="textarea"
 							clearable={true}
 							v-model={DATA.fromData.remark}
-							placeholder="备注"></ElInput>
+							placeholder="备注"
+						/>
 					</ElFormItem>
 				</>
 			),
@@ -461,7 +516,8 @@ export default defineComponent({
 					style={ctx.attrs}
 					rules={rules.value}
 					ref={diaglogForm}
-					v-slots={fromSlots}></DialogForm>
+					v-slots={fromSlots}
+				/>
 			);
 		};
 		const openDialog = (oper: FormOperation, item?: Item) => {

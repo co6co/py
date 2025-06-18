@@ -31,7 +31,7 @@ import {
 import style from '@/assets/css/file.module.less';
 import { byte2Unit, showLoading, closeLoading, getStoreInstance } from 'co6co';
 import { routeHook, deleteHook } from '@/hooks';
-import { tableScope } from '@/constants';
+import { tableScope, ViewFeature } from '@/constants';
 import { download_header_svc } from '@/api';
 
 import { TableView, TableViewInstance } from '@/components/table';
@@ -53,6 +53,12 @@ import { useConfig } from '@/hooks/useConfig';
 import { useKeyUp } from '@/hooks/useKey';
 import { useViewData, goToNameRoute } from '@/hooks/useView';
 import { useRouter } from 'vue-router';
+export const ViewFeatures = {
+	upload: ViewFeature.upload,
+	del: ViewFeature.del,
+	rename: ViewFeature.settingName,
+	view: ViewFeature.view,
+};
 export default defineComponent({
 	name: 'FileManageView',
 	setup(prop, ctx) {
@@ -153,7 +159,7 @@ export default defineComponent({
 		};
 
 		const onDrop = (event) => {
-			if (getPermissKey(routeHook.ViewFeature.upload)) {
+			if (getPermissKey(ViewFeature.upload)) {
 				diaglogRef.value?.clearFile();
 				diaglogRef.value?.onDrop(event);
 				DATA.isMask = false;
@@ -171,7 +177,7 @@ export default defineComponent({
 			}
 		);
 		const onDragOver = (event) => {
-			if (getPermissKey(routeHook.ViewFeature.upload)) {
+			if (getPermissKey(ViewFeature.upload)) {
 				DATA.isMask = true;
 				diaglogRef.value?.onDragOver(event);
 			}
@@ -334,14 +340,14 @@ export default defineComponent({
 											<ElButton
 												style="flex:0 0"
 												icon={UploadFilled}
-												v-permiss={getPermissKey(routeHook.ViewFeature.upload)}
+												v-permiss={getPermissKey(ViewFeature.upload)}
 												onClick={() => onOpenDialog()}
 												v-slots={{ default: () => '上传' }}
 											/>
 											<ElButton
 												style="flex:0 0"
 												icon={CirclePlus}
-												v-permiss={getPermissKey(routeHook.ViewFeature.add)}
+												v-permiss={getPermissKey(ViewFeature.add)}
 												onClick={() => onNewFolder()}
 												v-slots={{ default: () => '新建文件夹' }}
 											/>
@@ -349,7 +355,7 @@ export default defineComponent({
 												<ElButton
 													type="danger"
 													icon={Delete}
-													v-permiss={getPermissKey(routeHook.ViewFeature.del)}
+													v-permiss={getPermissKey(ViewFeature.del)}
 													onClick={onBatchDel}>
 													删除选中
 												</ElButton>
@@ -444,25 +450,21 @@ export default defineComponent({
 															scope.row.path,
 															scope.row.isFile
 														)}
-														v-permiss={getPermissKey(
-															routeHook.ViewFeature.download
-														)}
+														v-permiss={getPermissKey(ViewFeature.download)}
 													/>
 
 													<ElButton
 														text={true}
 														icon={Document}
 														onClick={() => onRename(scope.$index, scope.row)}
-														v-permiss={getPermissKey(
-															routeHook.ViewFeature.settingName
-														)}
+														v-permiss={getPermissKey(ViewFeature.settingName)}
 														v-slots={{ default: () => '重命名' }}
 													/>
 													<ElButton
 														text={true}
 														icon={Delete}
 														onClick={() => onDelete(scope.$index, scope.row)}
-														v-permiss={getPermissKey(routeHook.ViewFeature.del)}
+														v-permiss={getPermissKey(ViewFeature.del)}
 														v-slots={{ default: () => '删除' }}
 													/>
 													{scope.row.isFile ? (
@@ -470,9 +472,7 @@ export default defineComponent({
 															text={true}
 															icon={ViewIcon}
 															onClick={() => onPreview(scope.$index, scope.row)}
-															v-permiss={getPermissKey(
-																routeHook.ViewFeature.view
-															)}
+															v-permiss={getPermissKey(ViewFeature.view)}
 															v-slots={{ default: () => '预览' }}
 														/>
 													) : (

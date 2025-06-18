@@ -20,7 +20,11 @@ import Diaglog, {
 } from '@/components/modifyDictType';
 
 import useDelete from '@/hooks/useDelete';
-
+export const ViewFeatures = {
+	add: ViewFeature.add,
+	edit: ViewFeature.edit,
+	del: ViewFeature.del,
+};
 export default defineComponent({
 	name: 'DictTypeView',
 	setup(prop, ctx) {

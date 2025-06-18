@@ -98,6 +98,13 @@ class menus_view(AuthMethodView):
 class menu_view(AuthMethodView):
     routePath = "/<pk:int>"
 
+    async def get(self, request: Request, pk: int):
+        select = (
+            Select(menuPO.id, menuPO.name, menuPO.component, menuPO.category, menuPO.code, menuPO.status)
+            .filter(menuPO.id.__eq__(pk))
+        )
+        return await self.get_one(request, select, menuPO, isPO=False)
+
     @menuChanged
     async def put(self, request: Request, pk: int):
         """

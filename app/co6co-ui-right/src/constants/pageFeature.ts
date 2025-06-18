@@ -57,12 +57,22 @@ export const ViewFeatureDesc = {
 	stop: '停止',
 	execute: '执行',
 	/**
-	 * => 函数 使用的this = 全局
-	 * @param field
+	 *
+	 * @param field 字段名称
+	 * @param feature 所有字段 {get:"get",add:"add" sched:{value:"sched",text:"调度表"}}
 	 * @returns
 	 */
-	getDesc: function (field: string) {
+	getDesc: function (field: string, feature: object) {
+		//使用自定义属性描述
+		if (
+			feature.hasOwnProperty(field) &&
+			typeof feature[field] == 'object' &&
+			feature[field].hasOwnProperty('text')
+		)
+			return feature[field]['text'];
+		//使用本对象描述
 		if (this.hasOwnProperty(field)) return this[field];
+		//使用 穿入值
 		return field;
 	},
 };

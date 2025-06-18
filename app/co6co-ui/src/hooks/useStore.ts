@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia';
 import { piniaInstance } from '../index';
+import { getViewPath } from '../view';
 type ConfigValue = string | number | boolean | any;
 interface Config {
 	[key: string]: ConfigValue;
@@ -8,7 +9,7 @@ interface ViewObjects {
 	[key: string]: any;
 }
 const baseUrl = 'baseURL';
-export const useStore = defineStore('co6co_store', {
+const useStore = defineStore('co6co_store', {
 	state: () => {
 		return {
 			ViewObject: <ViewObjects>{},
@@ -18,6 +19,9 @@ export const useStore = defineStore('co6co_store', {
 	getters: {
 		config: (state) => {
 			return state.Config;
+		},
+		apiBaseUrl: (state) => {
+			return state.Config[baseUrl] as string;
 		},
 		views: (state) => {
 			return state.ViewObject;
@@ -39,13 +43,19 @@ export const useStore = defineStore('co6co_store', {
 		clearConfig() {
 			this.Config = {};
 		},
-		setViews(views: any) {
+		setViews(views: ViewObjects) {
 			Object.keys(views).forEach((key) => {
 				this.ViewObject[key] = views[key];
 			});
 		},
-		setView(key: string, view: any) {
+		appendView(key: string, view: any) {
 			this.ViewObject[key] = view;
+		},
+		appendViews(model: string, views: ViewObjects) {
+			Object.keys(views).forEach((key) => {
+				const path = getViewPath(model, key);
+				this.appendView(path, views[key]);
+			});
 		},
 		clearView() {
 			this.ViewObject = {};
