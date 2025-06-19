@@ -1,4 +1,4 @@
-import { App } from 'vue';
+import { App, Component } from 'vue';
 export interface IResponse<T = any> {
 	code: number;
 	message: string;
@@ -17,9 +17,29 @@ export interface IView {
 	features: object;
 	name?: string;
 	install: (app: App) => void;
-	setup: (prop, ctx) => void;
+	setup: (prop: any, ctx: any) => void;
 }
-export type TIView = Function | IView; // function () => import("/system/src/views/user.vue")
+export type ViewComponent =
+	| Component
+	| (() => Promise<{ default: Component; features?: object }>);
+export type TIView = ViewComponent | IView;
+
+// 类型守卫：判断是否为 fileSFC 类型
+export function isViewComponent(param: TIView): param is ViewComponent {
+	return typeof param === 'function';
+}
+
+// 类型守卫：判断是否为 IView 类型
+export function isIView(param: TIView): param is IView {
+	return (
+		typeof param === 'object' &&
+		param !== null &&
+		'install' in param &&
+		typeof param.install === 'function' &&
+		'setup' in param &&
+		typeof param.setup === 'function'
+	);
+}
 /**
  * 增|编 表单所有模块
  */

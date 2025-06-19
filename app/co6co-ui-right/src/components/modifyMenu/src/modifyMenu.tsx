@@ -20,8 +20,6 @@ import {
 	FormOperation,
 	type IResponse,
 	type FormItemBase,
-	type TIView,
-	getStoreInstance,
 } from 'co6co';
 
 import api, { get_one_svc } from '@/api/sys/menu';
@@ -32,6 +30,7 @@ import {
 	MenuCateCategory,
 } from '@/hooks/useMenuSelect';
 import useHttpMethods, { usePageFeature } from '@/hooks/useMethods';
+import { useViewFeature } from '@/hooks/useView';
 import {
 	ElRow,
 	ElCol,
@@ -166,12 +165,10 @@ export default defineComponent({
 					DATA.parentCategory == MenuCateCategory.VIEW)
 			);
 		});
-		const store = getStoreInstance();
 		const Feature = computed(async () => {
 			if (allowFeature.value && DATA.parentComponent) {
-				const component = store.views[DATA.parentComponent] as TIView;
-				if (typeof component == 'object') return component.features;
-				else await component();
+				const features = await useViewFeature(DATA.parentComponent);
+				return features;
 			} else {
 				return pageFeature.selectData.value;
 			}
@@ -285,14 +282,6 @@ export default defineComponent({
 				.finally(() => {
 					closeLoading();
 				});
-		};
-		const onComponent = (componentName: string, component: TIView) => {
-			if (typeof component == 'function') {
-				(component() as Promise<any>).then((res) => {
-					console.info('组件为函数', res);
-				});
-			}
-			console.info(componentName, typeof component, component);
 		};
 
 		const fromSlots = {
@@ -415,7 +404,6 @@ export default defineComponent({
 									<ElFormItem label="组件地址" prop="component">
 										<ViewSelect
 											clearable={true}
-											onChange={onComponent}
 											v-model={DATA.fromData.component}
 										/>
 									</ElFormItem>

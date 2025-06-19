@@ -12,7 +12,13 @@
     </div>
   </div>
 </template>
-
+<script lang="ts">
+import { ViewFeature } from 'co6co-right'
+// 导出类型
+export const features = {
+  add: ViewFeature.add
+}
+</script>
 <script setup lang="ts" name="404">
 import { useRouter } from 'vue-router'
 

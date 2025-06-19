@@ -37,6 +37,9 @@ export default defineConfig({
 					vue: 'Vue',
 					'element-plus': 'elementPlus',
 				},
+				//preserveModules: true, // 保留模块结构
+				//preserveModulesRoot: 'src', // 保留源码目录结构
+				//inlineDynamicImports: false,
 				//静态资源输出配置
 				assetFileNames(assetInfo: PreRenderedAsset) {
 					if (assetInfo.name) {

@@ -1,6 +1,11 @@
-import { ref } from 'vue';
+import { ref, Component } from 'vue';
 import { useRouteData, type RouteItem } from '@/hooks/useRoute';
-import { getViewPath /*views*/ } from 'co6co';
+import {
+	getViewPath /*views*/,
+	getStoreInstance,
+	isIView,
+	isViewComponent,
+} from 'co6co';
 import { Router } from 'vue-router';
 import { replaceRouteParams } from '@/utils';
 
@@ -50,4 +55,24 @@ export const goToNameRoute = (
 ) => {
 	//const router = useRouter(); //在这里无法获得router
 	router.push(param);
+};
+/**
+ * 获取该 试图下面的功能
+ * @param viewPath 组件地址
+ * @returns 功能对象 {add:'add',other:{value:'other',text:'功能1'}}
+ */
+export const useViewFeature = async (viewPath: string) => {
+	const store = getStoreInstance();
+	const loader = store.views[viewPath];
+	if (isIView(loader)) {
+		return loader.features;
+	} else if (isViewComponent(loader) && typeof loader == 'function') {
+		const loader2 = loader as () => Promise<{
+			default: Component;
+			features?: object;
+		}>;
+		const com = await loader2();
+		const component = com.default;
+		return com.features;
+	}
 };
