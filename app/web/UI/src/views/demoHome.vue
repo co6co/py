@@ -39,9 +39,9 @@
 import basis from '../components/demo/composition002'
 import ss from '@/components/demo/demo004.vue'
 import demo from '@/components/demo/demo2'
-import { routeHook } from 'co6co-right'
+import { routeHook, ViewFeature } from 'co6co-right'
 const { getPermissKey } = routeHook.usePermission()
-const result = getPermissKey(routeHook.ViewFeature.push)
+const result = getPermissKey(ViewFeature.push)
 console.info('11111', result)
 
 import type { TableInstance } from 'element-plus'

@@ -33,7 +33,7 @@ export default defineComponent({
 
 	emits: {
 		//@ts-ignore
-		error: (msg: string) => true,
+		error: (msg: string, ValidateFieldsError) => true,
 		submit: () => true,
 	},
 	setup(prop, { attrs, slots, emit, expose }) {
@@ -45,14 +45,15 @@ export default defineComponent({
 		) => {
 			if (!instance) {
 				ElMessage.error('表单对象为空！');
-				emit('error', '表单对象为空！');
+				emit('error', '表单对象为空！', {});
 				return false;
 			}
 			if (validateBefore) validateBefore();
-			instance.validate((value) => {
+
+			instance.validate((value, invalidFields) => {
 				if (!value) {
 					ElMessage.error('请检查输入的数据！');
-					emit('error', '请检查输入的数据！');
+					emit('error', '请检查输入的数据！', invalidFields);
 					return Promise.reject('valid Form Error');
 				}
 				//提交数据

@@ -2,13 +2,11 @@ import {
 	defineComponent,
 	ref,
 	reactive,
-	provide,
 	computed,
 	watch,
 	VNode,
 	onMounted,
 } from 'vue';
-import type { InjectionKey } from 'vue';
 import {
 	DialogForm,
 	IconSelect,
@@ -22,15 +20,15 @@ import {
 	type FormItemBase,
 } from 'co6co';
 
-import api, { get_one_svc } from '@/api/sys/menu';
+import api, { get_one_svc, type IMenuOne } from '@/api/sys/menu';
 import {
 	useTree,
 	useMenuCategory,
 	useMenuState,
 	MenuCateCategory,
 } from '@/hooks/useMenuSelect';
-import useHttpMethods, { usePageFeature } from '@/hooks/useMethods';
-import { useViewFeature } from '@/hooks/useView';
+import useHttpMethods, { useFeatureSelect } from '@/hooks/useMethods';
+import { queryViewFeature } from '@/hooks/useView';
 import {
 	ElRow,
 	ElCol,
@@ -82,33 +80,49 @@ export default defineComponent({
 		const menuStateData = useMenuState();
 		const menuCategoryData = useMenuCategory();
 		const httpMethods = useHttpMethods();
-		const pageFeature = usePageFeature();
 		const diaglogForm = ref<DialogFormInstance>();
 		const DATA = reactive<
 			FormData<number, FormItem> & {
-				parentCategory: number;
-				parentComponent?: string;
+				parentItem: IMenuOne;
 			}
 		>({
 			operation: FormOperation.add,
 			id: 0,
-			parentCategory: -1,
-
 			fromData: { category: MenuCateCategory.GROUP },
+			parentItem: {
+				id: 0,
+				name: '',
+				component: '',
+				category: MenuCateCategory.GROUP,
+				code: '',
+				status: 0,
+			},
 		});
-		//@ts-ignore
-		const key = Symbol('formData') as InjectionKey<FormItem>; //'formData'
-		provide('formData', DATA.fromData);
-
+		const FeaturesRef = ref();
+		watch(
+			() => DATA.fromData.parentId,
+			(newVal) => {
+				if (newVal && DATA.fromData.category == MenuCateCategory.Button) {
+					get_one_svc(newVal).then((res) => {
+						Object.assign(DATA.parentItem, res.data);
+						if (DATA.parentItem.component) {
+							queryViewFeature(DATA.parentItem.component!).then((features) => {
+								FeaturesRef.value = features;
+							});
+						}
+					});
+				}
+			}
+		);
+		const featureSelect = computed(() => {
+			return useFeatureSelect(FeaturesRef.value);
+		});
 		const init_data = (oper: FormOperation, item?: Item) => {
 			DATA.operation = oper;
-			DATA.parentCategory = -1;
-			DATA.parentComponent = undefined;
+
 			switch (oper) {
 				case FormOperation.add:
 					DATA.id = -1;
-					DATA.parentCategory = item ? item.category : -1;
-					DATA.parentComponent = item ? item.component : undefined;
 					DATA.fromData.name = '';
 					DATA.fromData.code = '';
 					DATA.fromData.parentId = item ? item.id : 0;
@@ -132,7 +146,6 @@ export default defineComponent({
 					if (!item) return false;
 					DATA.id = item.id;
 					Object.assign(DATA.fromData, item);
-
 					if (DATA.fromData.category == MenuCateCategory.API) {
 						DATA.fromData.methods =
 							item.methods && (item.methods as string)
@@ -148,31 +161,15 @@ export default defineComponent({
 
 			return true;
 		};
-		watch(
-			() => DATA.fromData.parentId,
-			(newDATA, old) => {
-				if (newDATA)
-					get_one_svc(newDATA).then((res) => {
-						DATA.parentCategory = res.data.category;
-						DATA.parentComponent = res.data.component;
-					});
-			}
-		);
-		const allowFeature = computed(() => {
-			return (
-				typeof DATA.parentCategory == 'number' &&
-				(DATA.parentCategory == MenuCateCategory.SubVIEW ||
-					DATA.parentCategory == MenuCateCategory.VIEW)
-			);
-		});
-		const Feature = computed(async () => {
-			if (allowFeature.value && DATA.parentComponent) {
-				const features = await useViewFeature(DATA.parentComponent);
-				return features;
-			} else {
-				return pageFeature.selectData.value;
-			}
-		});
+
+		//const allowFeature = computed(() => {
+		//	return (
+		//		typeof DATA.parentItem.category == 'number' &&
+		//		(DATA.parentItem.category == MenuCateCategory.SubVIEW ||
+		//			DATA.parentItem.category == MenuCateCategory.VIEW)
+		//	);
+		//});
+
 		onMounted(async () => {
 			await loadData();
 			await menuStateData.loadData();
@@ -390,7 +387,7 @@ export default defineComponent({
 									<ElCol>
 										<ElFormItem label="操作类型" prop="methods">
 											<ElSelectV2
-												options={pageFeature.selectData.value}
+												options={featureSelect.value.selectData.value}
 												v-model={DATA.fromData.methods}
 												placeholder="子视图操作类型一般用view,做了特殊出来可选其他"
 												onChange={onFeatueMethod}
@@ -443,7 +440,7 @@ export default defineComponent({
 								<ElCol span={12}>
 									<ElFormItem label="操作类型" prop="methods">
 										<ElSelectV2
-											options={Feature.value}
+											options={featureSelect.value.selectData.value}
 											v-model={DATA.fromData.methods}
 											placeholder="操作类型"
 											onChange={onFeatueMethod}></ElSelectV2>
@@ -504,6 +501,7 @@ export default defineComponent({
 					style={ctx.attrs}
 					rules={rules.value}
 					ref={diaglogForm}
+					model={DATA.fromData}
 					v-slots={fromSlots}
 				/>
 			);

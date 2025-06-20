@@ -2,7 +2,7 @@ import { defineComponent } from 'vue';
 import { ElSelect, ElOption, ElIcon, ElEmpty } from 'element-plus';
 import { getStoreInstance, useModelWrapper } from '@/hooks';
 import { Promotion } from '@element-plus/icons-vue';
-import { TIView } from '@/constants/types';
+import { ViewComponent } from '@/constants/types';
 
 export default defineComponent({
 	name: 'ViewSelect',
@@ -19,7 +19,7 @@ export default defineComponent({
 		//@ts-ignore
 		'update:modelValue': (v: undefined | string) => true,
 		//定义 事件不要加 on ，vue 编译时会自动加上，这个问题花了1h才发现
-		change: (componentPath: string, component: TIView) => true,
+		change: (componentPath: string, component: ViewComponent) => true,
 	},
 	setup(prop, context) {
 		//const DATA = ref<undefined | string>(prop.modelValue);

@@ -1,10 +1,12 @@
-import { ref, Component } from 'vue';
+import { ref } from 'vue';
 import { useRouteData, type RouteItem } from '@/hooks/useRoute';
+
+import { ViewFeature } from '@/constants';
 import {
 	getViewPath /*views*/,
 	getStoreInstance,
-	isIView,
-	isViewComponent,
+	isTsxView,
+	isFuncView,
 } from 'co6co';
 import { Router } from 'vue-router';
 import { replaceRouteParams } from '@/utils';
@@ -57,22 +59,21 @@ export const goToNameRoute = (
 	router.push(param);
 };
 /**
- * 获取该 试图下面的功能
+ * 获取该 视图 功能
  * @param viewPath 组件地址
  * @returns 功能对象 {add:'add',other:{value:'other',text:'功能1'}}
  */
-export const useViewFeature = async (viewPath: string) => {
+export const queryViewFeature = async (viewPath: string) => {
 	const store = getStoreInstance();
-	const loader = store.views[viewPath];
-	if (isIView(loader)) {
-		return loader.features;
-	} else if (isViewComponent(loader) && typeof loader == 'function') {
-		const loader2 = loader as () => Promise<{
-			default: Component;
-			features?: object;
-		}>;
-		const com = await loader2();
-		const component = com.default;
-		return com.features;
+	const viewComponent = store.views[viewPath];
+	if (isTsxView(viewComponent)) {
+		return viewComponent.features;
+	} else if (isFuncView(viewComponent)) {
+		const com = await viewComponent();
+		//const component = com.default;
+		return com.features!;
+	} else {
+		//默认的 组件 ，没有 features 属性
+		return ViewFeature;
 	}
 };

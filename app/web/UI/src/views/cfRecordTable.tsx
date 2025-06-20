@@ -6,7 +6,7 @@ import { Search, Plus, Edit, Delete } from '@element-plus/icons-vue'
 import { FormOperation, isMobileBrowser } from 'co6co'
 import {
   routeHook,
-  DictSelectInstance,
+  defaultViewFeatures as features,
   tableScope,
   TableView,
   TableViewInstance,
@@ -16,7 +16,7 @@ import {
 import * as api from '@/api/transimit/cf'
 import { type IListItem as Item } from '@/api/transimit/cf'
 import Diaglog from '@/components/transmit/modifyRecord'
-
+export { features }
 export default defineComponent({
   setup(prop, ctx) {
     //:define
@@ -95,7 +95,7 @@ export default defineComponent({
                     <ElButton
                       type="primary"
                       icon={Plus}
-                      v-permiss={getPermissKey(routeHook.ViewFeature.add)}
+                      v-permiss={getPermissKey(features.add)}
                       onClick={() => onOpenDialog()}
                     >
                       新增
@@ -182,7 +182,7 @@ export default defineComponent({
                             text={true}
                             icon={Edit}
                             onClick={() => onOpenDialog(scope.row)}
-                            v-permiss={getPermissKey(routeHook.ViewFeature.edit)}
+                            v-permiss={getPermissKey(features.edit)}
                           >
                             编辑
                           </ElButton>
@@ -190,7 +190,7 @@ export default defineComponent({
                             text={true}
                             icon={Delete}
                             onClick={() => onDelete(scope.row)}
-                            v-permiss={getPermissKey(routeHook.ViewFeature.del)}
+                            v-permiss={getPermissKey(features.del)}
                           >
                             删除
                           </ElButton>

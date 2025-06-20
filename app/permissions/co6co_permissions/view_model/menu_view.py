@@ -103,7 +103,7 @@ class menu_view(AuthMethodView):
             Select(menuPO.id, menuPO.name, menuPO.component, menuPO.category, menuPO.code, menuPO.status)
             .filter(menuPO.id.__eq__(pk))
         )
-        return await self.get_one(request, select, menuPO, isPO=False)
+        return await self.get_one(request, select,  isPO=False)
 
     @menuChanged
     async def put(self, request: Request, pk: int):

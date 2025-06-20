@@ -1,5 +1,13 @@
-import { defineComponent, ref, reactive, provide, VNode, onMounted } from 'vue';
-import type { InjectionKey } from 'vue';
+import {
+	defineComponent,
+	ref,
+	reactive,
+	//provide,
+	VNode,
+	onMounted,
+	computed,
+} from 'vue';
+//import type { InjectionKey } from 'vue';
 import {
 	DialogForm,
 	showLoading,
@@ -10,9 +18,10 @@ import {
 	type IResponse,
 } from 'co6co';
 
-import { batch_add_svc } from '@/api/sys/menu';
+import { batch_add_svc, get_one_svc, type IMenuOne } from '@/api/sys/menu';
 import { useTree, useMenuState, MenuCateCategory } from '@/hooks/useMenuSelect';
-import { usePageFeature } from '@/hooks/useMethods';
+import { queryViewFeature } from '@/hooks/useView';
+import { useFeatureSelect } from '@/hooks/useMethods';
 import {
 	ElRow,
 	ElCol,
@@ -38,6 +47,11 @@ interface Item {
 	status?: number;
 	remark?: string;
 }
+type FormItem = Partial<IMenuOne> & {
+	remark?: string;
+	order?: number;
+	methods?: string[];
+};
 
 export default defineComponent({
 	name: 'addSubMenus',
@@ -56,45 +70,59 @@ export default defineComponent({
 	setup(prop, ctx) {
 		const { loadData, treeSelectData, refresh } = useTree();
 		const menuStateData = useMenuState();
-
-		const pageFeature = usePageFeature();
 		const diaglogForm = ref<DialogFormInstance>();
+		const FeaturesRef = ref();
 		const DATA = reactive<
-			FormData<number, Array<Item>> & {
-				base: Item & { methods?: Array<string> };
+			FormData<number, FormItem> & {
+				postData: Array<Item>;
 			}
 		>({
 			operation: FormOperation.add,
 			id: 0,
-			base: { category: MenuCateCategory.Button },
-			fromData: [{ category: MenuCateCategory.Button }],
+			fromData: { category: MenuCateCategory.Button, status: 111 },
+			postData: [],
 		});
 		//@ts-ignore
-		const key = Symbol('formData') as InjectionKey<FormItem>; //'formData'
-		provide('formData', DATA.base);
+		//const key = Symbol('formData') as InjectionKey<FormItem>; //'formData'
+		//provide('formData', DATA.fromData);
 		onMounted(async () => {
 			await menuStateData.loadData();
 			await loadData();
 		});
 		const init_data = (item: Item) => {
 			DATA.id = -1;
-			DATA.base.name = item.name;
-			DATA.base.code = item.code;
-			DATA.base.parentId = item.id;
-			DATA.base.category = MenuCateCategory.Button;
+			if (!item.id) {
+				ElMessage.error('请选择对应试图在继续!');
+				return false;
+			}
+			get_one_svc(item.id).then((res) => {
+				//DATA.fromData = res.data; //不能使用这种方式直接赋值
+				Object.assign(DATA.fromData, res.data);
+				if (DATA.fromData.component) {
+					queryViewFeature(DATA.fromData.component!).then((features) => {
+						FeaturesRef.value = features;
+					});
+				}
+			});
+
 			if (
 				menuStateData.selectData.value &&
 				menuStateData.selectData.value.length > 0
 			)
-				DATA.base.status = menuStateData.selectData.value[0].value as number;
-			else DATA.base.status = undefined;
-
+				DATA.fromData.status = menuStateData.selectData.value[0]
+					.value as number;
+			else DATA.fromData.status = undefined;
 			return true;
 		};
+
+		const featureSelect = computed(() => {
+			return useFeatureSelect(FeaturesRef.value);
+		});
 		const rules: FormRules = {
 			name: [{ required: true, message: '请输入菜单称', trigger: 'blur' }],
-			parentId: [{ required: true, message: '请选择父节点', trigger: 'blur' }],
-			code: [{ required: true, message: '请菜单编码', trigger: 'blur' }],
+			id: [{ required: true, message: '请选择父节点', trigger: 'blur' }],
+			code: [{ required: true, message: '请输入代码', trigger: 'blur' }],
+			order: [{ required: true, message: '排序不能为空', trigger: 'blur' }],
 			status: [
 				{ required: true, message: '请选择状态', trigger: ['blur', 'change'] },
 			],
@@ -108,28 +136,28 @@ export default defineComponent({
 		};
 
 		const genPostData = () => {
-			const data = DATA.base.methods?.map((method, index) => {
+			const data = DATA.fromData.methods?.map((method, index) => {
 				const item = {
-					parentId: DATA.base.parentId,
-					name: DATA.base.name + '_' + method,
-					code: DATA.base.code + '_' + method,
-					category: DATA.base.category,
+					parentId: DATA.fromData.id,
+					name: DATA.fromData.name + '_' + method,
+					code: DATA.fromData.code + '_' + method,
+					category: MenuCateCategory.Button,
 					permissionKey: method,
 					methods: method,
-					order: (DATA.base.order ? DATA.base.order : 0) + index,
-					status: DATA.base.status,
-					remark: DATA.base.remark,
+					order: (DATA.fromData.order ? DATA.fromData.order : 0) + index,
+					status: DATA.fromData.status,
+					remark: DATA.fromData.remark,
 				};
 				return item;
 			});
-			if (data) DATA.fromData = data;
+			if (data) DATA.postData = data;
 		};
 		const save = () => {
 			//提交数据
 			let promist: Promise<IResponse>;
 			genPostData();
-			if (!DATA.fromData || DATA.fromData.length == 0) return;
-			promist = batch_add_svc(DATA.fromData);
+			if (!DATA.postData || DATA.postData.length == 0) return;
+			promist = batch_add_svc(DATA.postData);
 			showLoading();
 			promist
 				.then((res) => {
@@ -159,19 +187,19 @@ export default defineComponent({
 					<ElRow>
 						<ElCol span={12}>
 							<ElFormItem label="名称" prop="name">
-								<ElInput v-model={DATA.base.name} placeholder="名称" />
+								<ElInput v-model={DATA.fromData.name} placeholder="名称" />
 							</ElFormItem>
 						</ElCol>
 						<ElCol span={12}>
 							<ElFormItem label="代码" prop="code">
-								<ElInput v-model={DATA.base.code} placeholder="代码" />
+								<ElInput v-model={DATA.fromData.code} placeholder="代码" />
 							</ElFormItem>
 						</ElCol>
 					</ElRow>
-					<ElFormItem label="父节点" prop="parentId">
+					<ElFormItem label="父节点" prop="id">
 						<ElTreeSelect
 							disabled
-							v-model={DATA.base.parentId}
+							v-model={DATA.fromData.id}
 							multiple={false}
 							check-strictly
 							props={{ children: 'children', label: 'name', value: 'id' }}
@@ -182,15 +210,18 @@ export default defineComponent({
 						<ElSelectV2
 							multiple
 							clearable
-							options={pageFeature.selectData.value}
-							v-model={DATA.base.methods}
+							options={featureSelect.value.selectData.value}
+							v-model={DATA.fromData.methods}
 							placeholder="操作类型"
 						/>
 					</ElFormItem>
 					<ElRow>
 						<ElCol span={12}>
 							<ElFormItem label="排序" prop="order">
-								<ElInputNumber v-model={DATA.base.order} placeholder="排序" />
+								<ElInputNumber
+									v-model={DATA.fromData.order}
+									placeholder="排序"
+								/>
 							</ElFormItem>
 						</ElCol>
 						<ElCol span={12}>
@@ -198,7 +229,7 @@ export default defineComponent({
 								<ElSelectV2
 									multiple={false}
 									options={menuStateData.selectData.value}
-									v-model={DATA.base.status}
+									v-model={DATA.fromData.status}
 									placeholder="状态"
 								/>
 							</ElFormItem>
@@ -209,7 +240,7 @@ export default defineComponent({
 						<ElInput
 							type="textarea"
 							clearable={true}
-							v-model={DATA.base.remark}
+							v-model={DATA.fromData.remark}
 							placeholder="备注"
 						/>
 					</ElFormItem>
@@ -226,14 +257,16 @@ export default defineComponent({
 					labelWidth={prop.labelWidth}
 					style={ctx.attrs}
 					rules={rules}
+					model={DATA.fromData}
 					ref={diaglogForm}
-					v-slots={fromSlots}></DialogForm>
+					v-slots={fromSlots}
+				/>
 			);
 		};
 		const openDialog = (item: Item) => {
 			refresh();
-			init_data(item);
-			diaglogForm.value?.openDialog();
+			const result = init_data(item);
+			if (result) diaglogForm.value?.openDialog();
 		};
 
 		ctx.expose({

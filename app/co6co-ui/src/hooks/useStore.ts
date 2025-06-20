@@ -1,13 +1,13 @@
 import { defineStore } from 'pinia';
 import { piniaInstance } from '../index';
 import { getViewPath } from '../view';
-import { TIView } from '@/constants';
+import { ViewComponent } from '@/constants';
 type ConfigValue = string | number | boolean | any;
 interface Config {
 	[key: string]: ConfigValue;
 }
 interface ViewObjects {
-	[key: string]: TIView;
+	[key: string]: ViewComponent;
 }
 const baseUrl = 'baseURL';
 const useStore = defineStore('co6co_store', {
@@ -54,7 +54,7 @@ const useStore = defineStore('co6co_store', {
 		},
 		appendViews(model: string, views: ViewObjects) {
 			Object.keys(views).forEach((key) => {
-				const path = getViewPath(model, key);
+				const path = getViewPath(key, model);
 				this.appendView(path, views[key]);
 			});
 		},

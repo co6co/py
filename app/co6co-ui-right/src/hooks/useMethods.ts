@@ -27,7 +27,7 @@ export default () => {
  * @param pageFeature 页面字段 {get:"get",add:"add" sched:{value:"sched",text:"调度表"}}
  * @returns
  */
-export const usePageFeature = (pageFeature?: object) => {
+export const useFeatureSelect = (pageFeature?: object) => {
 	let index = -1;
 	const list: Array<IEnumSelect> = [];
 	pageFeature = pageFeature ?? ViewFeature;

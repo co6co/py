@@ -9,6 +9,7 @@ import {
   tableScope,
   TableView,
   deleteHook,
+  ViewFeature,
   TableViewInstance,
   StateSelect,
   StateSelectInstance,
@@ -160,7 +161,7 @@ export default defineComponent({
                     <ElButton
                       type="primary"
                       icon={Plus}
-                      v-permiss={getPermissKey(routeHook.ViewFeature.add)}
+                      v-permiss={getPermissKey(ViewFeature.add)}
                       onClick={() => {
                         onOpenDialog()
                       }}
@@ -280,7 +281,7 @@ export default defineComponent({
                             text={true}
                             icon={Edit}
                             onClick={() => onOpenDialog(scope.row)}
-                            v-permiss={getPermissKey(routeHook.ViewFeature.edit)}
+                            v-permiss={getPermissKey(ViewFeature.edit)}
                           >
                             编辑
                           </ElButton>
@@ -288,7 +289,7 @@ export default defineComponent({
                             text={true}
                             icon={Delete}
                             onClick={() => onDelete(scope.row)}
-                            v-permiss={getPermissKey(routeHook.ViewFeature.del)}
+                            v-permiss={getPermissKey(ViewFeature.del)}
                           >
                             删除
                           </ElButton>

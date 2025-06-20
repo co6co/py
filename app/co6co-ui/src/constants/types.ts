@@ -13,24 +13,26 @@ export interface Table_Module_Base {
 	diaglogTitle?: string;
 }
 
-export interface IView {
+export interface CustomTsxComponent {
 	features: object;
 	name?: string;
 	install: (app: App) => void;
 	setup: (prop: any, ctx: any) => void;
 }
-export type ViewComponent =
-	| Component
-	| (() => Promise<{ default: Component; features?: object }>);
-export type TIView = ViewComponent | IView;
+export type CustomVueComponent = () => Promise<{
+	default: Component;
+	features?: object;
+}>;
+export type VueComponent = Component | CustomVueComponent;
+export type ViewComponent = VueComponent | CustomTsxComponent;
 
-// 类型守卫：判断是否为 fileSFC 类型
-export function isViewComponent(param: TIView): param is ViewComponent {
+// 类型守卫：判断是否为 CustomVueComponent 类型
+export function isFuncView(param: ViewComponent): param is CustomVueComponent {
 	return typeof param === 'function';
 }
 
-// 类型守卫：判断是否为 IView 类型
-export function isIView(param: TIView): param is IView {
+// 类型守卫：判断是否为 CustomTsxComponent 类型
+export function isTsxView(param: ViewComponent): param is CustomTsxComponent {
 	return (
 		typeof param === 'object' &&
 		param !== null &&

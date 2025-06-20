@@ -21,7 +21,6 @@ let viewObjects: Record<string, ViewComponent> = import.meta.glob([
   '../views/**/*.tsx'
 ])
 
-import { getViewPath } from 'co6co'
 import { views, moduleName } from 'co6co-right'
 import { views as taskViews, moduleName as taskName } from 'co6co-task'
 /**
@@ -37,17 +36,20 @@ Object.keys(viewObjects).forEach((key) => {
       console.info(`解析view:'${key}'\terror,${e}`)
     })
 }) */
-const allView = {}
-allView[moduleName] = { ...views }
-allView[taskName] = { ...taskViews }
-Object.keys(allView).forEach((name) => {
-  const moduelView = allView[name]
-  Object.keys(moduelView).forEach((key) => {
-    viewObjects[getViewPath(key, name)] = moduelView[key]
-  })
-})
+//const allView = {}
+//allView[moduleName] = { ...views }
+//allView[taskName] = { ...taskViews }
+//Object.keys(allView).forEach((name) => {
+//  const moduelView = allView[name]
+//  Object.keys(moduelView).forEach((key) => {
+//    viewObjects[getViewPath(key, name)] = moduelView[key]
+//  })
+//})
 
 const store = getStoreInstance()
 store.setViews(viewObjects)
-//console.info(viewObjects)
-export const ViewObjects = viewObjects
+store.appendViews(moduleName, views)
+store.appendViews(taskName, taskViews)
+
+//console.info(store.views)
+export const ViewObjects = store.views

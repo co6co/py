@@ -35,6 +35,12 @@ export enum ViewFeature {
 	stop = 'stop',
 	execute = 'execute',
 }
+export const defaultViewFeatures = {
+	add: ViewFeature.add,
+	edit: ViewFeature.edit,
+	del: ViewFeature.del,
+};
+
 export const ViewFeatureDesc = {
 	view: '查看',
 	get: '获取',
