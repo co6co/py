@@ -42,9 +42,13 @@ import { Lock, User } from '@element-plus/icons-vue'
 import { isDebug } from '../utils'
 import { useTagsStore } from '../store/tags'
 import { userSvc, registerRoute, DragVerify } from 'co6co-right'
-import { storeAuthonInfo, showLoading, closeLoading, isMobileBrowser } from 'co6co'
-
-import { router, ViewObjects } from '../router'
+import {
+  storeAuthonInfo,
+  showLoading,
+  closeLoading,
+  isMobileBrowser,
+  getStoreInstance
+} from 'co6co'
 import type { FormInstance, FormRules } from 'element-plus'
 import useSystem from '../hooks/useSystem'
 import { getPublicURL } from '../utils'
@@ -102,9 +106,9 @@ const submitForm = (formEl: FormInstance | undefined) => {
         )
         .then((res) => {
           message.value = res.message
-
           storeAuthonInfo(res.data, DATA.username)
-          registerRoute(ViewObjects, router, () => {
+          const router = getStoreInstance().router
+          registerRoute(router, () => {
             window.location.href = getPublicURL('/')
           })
         })

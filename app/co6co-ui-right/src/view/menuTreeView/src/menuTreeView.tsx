@@ -15,7 +15,7 @@ import { routeHook } from '@/hooks';
 import { tableScope, ViewFeature } from '@/constants';
 import useSelect, { MenuCateCategory } from '@/hooks/useMenuSelect';
 import { TableView, type TableViewInstance } from '@/components/table';
-
+import { defaultViewFeatures } from '@/constants';
 import Diaglog, {
 	type MenuItem as Item,
 	BatchAddMenu as BatchDiaglog,
@@ -25,11 +25,7 @@ import Diaglog, {
 import api from '@/api/sys/menu';
 import useDelete from '@/hooks/useDelete';
 
-export const ViewFeatures = {
-	add: ViewFeature.add,
-	edit: ViewFeature.edit,
-	del: ViewFeature.del,
-};
+export const ViewFeatures = defaultViewFeatures;
 export default defineComponent({
 	setup(prop, ctx) {
 		//:define
@@ -57,10 +53,10 @@ export default defineComponent({
 		const diaglogRef = ref<DiaglogInstance>();
 		const onOpenDialog = (row?: Item) => {
 			DATA.title = row ? `编辑[${row?.name}]菜单` : '增加新菜单';
-			DATA.currentItem = row;
+			if (row) DATA.currentItem = row;
 			diaglogRef.value?.openDialog(
 				row ? FormOperation.edit : FormOperation.add,
-				row
+				DATA.currentItem
 			);
 		};
 

@@ -2,6 +2,7 @@ import { defineStore } from 'pinia';
 import { piniaInstance } from '../index';
 import { getViewPath } from '../view';
 import { ViewComponent } from '@/constants';
+import { Router } from 'vue-router';
 type ConfigValue = string | number | boolean | any;
 interface Config {
 	[key: string]: ConfigValue;
@@ -10,6 +11,7 @@ interface ViewObjects {
 	[key: string]: ViewComponent;
 }
 const baseUrl = 'baseURL';
+const routerKey = 'Router';
 const useStore = defineStore('co6co_store', {
 	state: () => {
 		return {
@@ -27,6 +29,9 @@ const useStore = defineStore('co6co_store', {
 		views: (state) => {
 			return state.ViewObject;
 		},
+		router: (state) => {
+			return state.Config[routerKey] as Router;
+		},
 	},
 	actions: {
 		setConfig(key: string, value: ConfigValue) {
@@ -40,6 +45,10 @@ const useStore = defineStore('co6co_store', {
 		},
 		setBaseUrl(url: string) {
 			this.Config[baseUrl] = url;
+		},
+
+		setRouter(router: Router) {
+			this.Config[routerKey] = router;
 		},
 		clearConfig() {
 			this.Config = {};

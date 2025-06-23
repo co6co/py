@@ -1,7 +1,7 @@
 import { ref } from 'vue';
 import { useRouteData, type RouteItem } from '@/hooks/useRoute';
 
-import { ViewFeature } from '@/constants';
+import { ViewFeature, ViewSubFeatures } from '@/constants';
 import {
 	getViewPath /*views*/,
 	getStoreInstance,
@@ -10,6 +10,7 @@ import {
 } from 'co6co';
 import { Router } from 'vue-router';
 import { replaceRouteParams } from '@/utils';
+import { MenuCateCategory } from '@/hooks/useMenuSelect';
 
 /**
  * 获取子视图Path
@@ -63,17 +64,27 @@ export const goToNameRoute = (
  * @param viewPath 组件地址
  * @returns 功能对象 {add:'add',other:{value:'other',text:'功能1'}}
  */
-export const queryViewFeature = async (viewPath: string) => {
-	const store = getStoreInstance();
-	const viewComponent = store.views[viewPath];
-	if (isTsxView(viewComponent)) {
-		return viewComponent.features;
-	} else if (isFuncView(viewComponent)) {
-		const com = await viewComponent();
-		//const component = com.default;
-		return com.features!;
-	} else {
-		//默认的 组件 ，没有 features 属性
-		return ViewFeature;
+export const queryViewFeature = async (
+	viewPath: string,
+	category: MenuCateCategory
+) => {
+	switch (category) {
+		case MenuCateCategory.Button:
+			const store = getStoreInstance();
+			const viewComponent = store.views[viewPath];
+			if (isTsxView(viewComponent)) {
+				return viewComponent.features;
+			} else if (isFuncView(viewComponent)) {
+				const com = await viewComponent();
+				//const component = com.default;
+				return com.features!;
+			} else {
+				//默认的 组件 ，没有 features 属性
+				return ViewFeature;
+			}
+		case MenuCateCategory.SubVIEW:
+			return ViewSubFeatures;
+		default:
+			return {};
 	}
 };

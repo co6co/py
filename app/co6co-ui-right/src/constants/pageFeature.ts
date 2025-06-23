@@ -40,6 +40,9 @@ export const defaultViewFeatures = {
 	edit: ViewFeature.edit,
 	del: ViewFeature.del,
 };
+export const ViewSubFeatures = {
+	view: { value: ViewFeature.view, text: '子视图' },
+};
 
 export const ViewFeatureDesc = {
 	view: '查看',

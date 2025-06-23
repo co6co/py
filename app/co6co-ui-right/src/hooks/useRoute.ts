@@ -5,14 +5,7 @@ import { Storage, traverseTreeData, randomString } from 'co6co';
 // 如果你需要在其他地方访问路由器，考虑通过参数传递路由器实例，或者在应用初始化时保存对它的引用。
 import { useRouter } from 'vue-router';
 import { ViewFeature } from '@/constants';
-/**
- * VIEW 功能
- * 为控制页面按钮权限
- *
- * 需要调整 还需调整 useMethods
- * @returns
- */
-
+import { ElMessage } from 'element-plus';
 /**
  * 获取当前路由
  * @returns 当前路由
@@ -201,3 +194,84 @@ export const useRouteData = () => {
 
 	return { queryRouteData, getRouteData, queryRouteItem, clearRouteData };
 };
+
+function jump(next: (path?: string) => void, path?: string) {
+	path ? next(path) : next();
+}
+import { usePermissStore, getToken, getStoreInstance } from 'co6co';
+import { registerRoute, validAuthenticate } from '@/utils';
+import {
+	Router,
+	createRouter,
+	createWebHistory,
+	type RouteRecordRaw,
+} from 'vue-router';
+
+function setupRouterHooks(
+	router: Router,
+	loginPath?: string,
+	notFoundPath?: string
+) {
+	loginPath = loginPath ?? '/login';
+	notFoundPath = notFoundPath ?? '/404';
+	let registerRefesh = true;
+	const permiss = usePermissStore();
+	router.beforeEach((to, _, next) => {
+		document.title = to.meta.title
+			? `${to.meta.title}`
+			: import.meta.env.VITE_SYSTEM_NAME;
+		if (registerRefesh) {
+			registerRoute(router, (msg) => {
+				if (msg && getToken()) {
+					ElMessage.error(msg);
+				}
+				registerRefesh = false;
+				next({ ...to, replace: true });
+			});
+		} else {
+			let pathTemp: string | undefined | any = undefined;
+			validAuthenticate(
+				() => {
+					if (to.meta.permiss && !permiss.includes(String(to.meta.permiss))) {
+						pathTemp = notFoundPath;
+					}
+					jump(next, pathTemp);
+				},
+				() => {
+					if (to.path !== loginPath) pathTemp = loginPath;
+					jump(next, pathTemp);
+				}
+			);
+		}
+	});
+	router.afterEach((to) => {
+		localStorage.setItem('new', to.path);
+	});
+}
+
+/***
+ *
+ * 创建路由
+ *
+ * `${import.meta.env.VITE_UI_PATH}${import.meta.env.VITE_UI_PC_INDEX}`
+ * @param basePath
+ * @param basicRoutes 静态路由
+ * @param loginPath 登录路径
+ * @param notFoundPath 404路径
+ *
+ */
+export function CreateRouter(
+	basePath: string,
+	basicRoutes: RouteRecordRaw[],
+	loginPath?: string,
+	notFoundPath?: string
+): Router {
+	const router = createRouter({
+		history: createWebHistory(basePath), //有二級路徑需要配置，
+		routes: basicRoutes,
+	});
+	// 路由钩子函数
+	setupRouterHooks(router, loginPath, notFoundPath);
+	getStoreInstance().setRouter(router);
+	return router;
+}

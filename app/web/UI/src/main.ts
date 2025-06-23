@@ -1,7 +1,7 @@
 import { createApp } from 'vue'
 import * as ElementPlusIconsVue from '@element-plus/icons-vue'
 import App from './App'
-import useRouter from './router'
+import router from './router'
 
 import { co6coPlugin } from 'co6co'
 import { setBaseUrl } from './utils'
@@ -15,7 +15,7 @@ const app = createApp(App)
 app.use(co6coPlugin, {}) // co6coPlugin.install(app)
 try {
   setBaseUrl()
-  app.use(useRouter())
+  app.use(router)
   // 注册图标
   for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
     app.component(key, component)

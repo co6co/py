@@ -1,5 +1,6 @@
-export const isDebug = Boolean(Number(import.meta.env.VITE_IS_DEBUG))
 import { getStoreInstance } from 'co6co'
+
+export const isDebug = Boolean(Number(import.meta.env.VITE_IS_DEBUG))
 export const setBaseUrl = () => {
   const store = getStoreInstance()
   const baseUrl = import.meta.env.VITE_BASE_URL

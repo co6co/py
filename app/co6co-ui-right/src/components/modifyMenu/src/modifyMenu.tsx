@@ -100,16 +100,17 @@ export default defineComponent({
 		});
 		const FeaturesRef = ref();
 		watch(
-			() => DATA.fromData.parentId,
+			[() => DATA.fromData.parentId, () => DATA.fromData.category],
 			(newVal) => {
-				if (newVal && DATA.fromData.category == MenuCateCategory.Button) {
-					get_one_svc(newVal).then((res) => {
+				if (newVal && newVal[0]) {
+					DATA.fromData.methods = [];
+					get_one_svc(newVal[0]).then((res) => {
 						Object.assign(DATA.parentItem, res.data);
-						if (DATA.parentItem.component) {
-							queryViewFeature(DATA.parentItem.component!).then((features) => {
+						queryViewFeature(DATA.parentItem.component!, newVal[1]).then(
+							(features) => {
 								FeaturesRef.value = features;
-							});
-						}
+							}
+						);
 					});
 				}
 			}
@@ -161,14 +162,6 @@ export default defineComponent({
 
 			return true;
 		};
-
-		//const allowFeature = computed(() => {
-		//	return (
-		//		typeof DATA.parentItem.category == 'number' &&
-		//		(DATA.parentItem.category == MenuCateCategory.SubVIEW ||
-		//			DATA.parentItem.category == MenuCateCategory.VIEW)
-		//	);
-		//});
 
 		onMounted(async () => {
 			await loadData();

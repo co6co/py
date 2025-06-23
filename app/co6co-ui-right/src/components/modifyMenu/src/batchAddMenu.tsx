@@ -99,7 +99,10 @@ export default defineComponent({
 				//DATA.fromData = res.data; //不能使用这种方式直接赋值
 				Object.assign(DATA.fromData, res.data);
 				if (DATA.fromData.component) {
-					queryViewFeature(DATA.fromData.component!).then((features) => {
+					queryViewFeature(
+						DATA.fromData.component!,
+						MenuCateCategory.Button
+					).then((features) => {
 						FeaturesRef.value = features;
 					});
 				}
