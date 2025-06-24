@@ -3,6 +3,7 @@ import { piniaInstance } from '../index';
 import { getViewPath } from '../view';
 import { ViewComponent } from '@/constants';
 import { Router } from 'vue-router';
+import { markRaw } from 'vue';
 type ConfigValue = string | number | boolean | any;
 interface Config {
 	[key: string]: ConfigValue;
@@ -59,12 +60,13 @@ const useStore = defineStore('co6co_store', {
 			});
 		},
 		appendView(key: string, view: any) {
-			this.ViewObject[key] = view;
+			// Vue received a Component that was made a reactive object. This can lead to unnecessary performance overhead and should be avoided by marking the component with `markRaw` or using `shallowRef` instead of `ref
+			this.ViewObject[key] = markRaw(view);
 		},
 		appendViews(model: string, views: ViewObjects) {
 			Object.keys(views).forEach((key) => {
 				const path = getViewPath(key, model);
-				this.appendView(path, views[key]);
+				this.appendView(path, markRaw(views[key]));
 			});
 		},
 		clearView() {

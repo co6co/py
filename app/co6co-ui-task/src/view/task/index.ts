@@ -1,7 +1,7 @@
 import { withInstall } from 'co6co';
 
-import taskTable, { TaskTableViewFeatures } from './src/taskTable';
+import taskTable, { Features } from './src/taskTable';
 export const TaskTableView = withInstall(taskTable, {
-	features: TaskTableViewFeatures,
+	features: Features,
 });
 export * from './src';

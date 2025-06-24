@@ -13,7 +13,13 @@ import {
 } from 'element-plus';
 import { Search, Plus, Edit, Delete, ArrowDown } from '@element-plus/icons-vue';
 
-import { FormOperation, showLoading, closeLoading, IResponse } from 'co6co';
+import {
+	FormOperation,
+	showLoading,
+	closeLoading,
+	IResponse,
+	hasAuthority,
+} from 'co6co';
 import {
 	routeHook,
 	ViewFeature,
@@ -30,7 +36,7 @@ import Diaglog, { type Item } from '@/components/modifyTask';
 
 import { task_api as api } from '@/api/tasks';
 import ShowCode from '@/components/showCode/src/showCode';
-export const TaskTableViewFeatures = {
+export const Features = {
 	add: ViewFeature.add,
 	edit: ViewFeature.edit,
 	del: ViewFeature.del,
@@ -192,7 +198,7 @@ export default defineComponent({
 									<ElButton
 										type="primary"
 										icon={Plus}
-										v-permiss={getPermissKey(TaskTableViewFeatures.add)}
+										v-permiss={getPermissKey(Features.add)}
 										onClick={() => {
 											onOpenDialog();
 										}}>
@@ -299,14 +305,14 @@ export default defineComponent({
 													text={true}
 													icon={Edit}
 													onClick={() => onOpenDialog(scope.row)}
-													v-permiss={getPermissKey(TaskTableViewFeatures.edit)}>
+													v-permiss={getPermissKey(Features.edit)}>
 													编辑
 												</ElButton>
 												<ElButton
 													text={true}
 													icon={Delete}
 													onClick={() => onDelete(scope.row)}
-													v-permiss={getPermissKey(TaskTableViewFeatures.del)}>
+													v-permiss={getPermissKey(Features.del)}>
 													删除
 												</ElButton>
 												<ElDropdown
@@ -331,28 +337,30 @@ export default defineComponent({
 																				scope.row.execStatus == 0
 																			)
 																		}
-																		v-permiss={getPermissKey(
-																			TaskTableViewFeatures.sched
+																		v-if={hasAuthority(
+																			getPermissKey(Features.sched)
 																		)}
 																		command="sched">
 																		调度
 																	</ElDropdownItem>
 																	<ElDropdownItem
 																		disabled={scope.row.execStatus == 0}
-																		v-permiss={getPermissKey(
-																			TaskTableViewFeatures.stop
+																		v-if={hasAuthority(
+																			getPermissKey(Features.stop)
 																		)}
 																		command="stop">
 																		停止
 																	</ElDropdownItem>
+
 																	<ElDropdownItem
 																		title="不要执行时间太长的程序"
-																		v-permiss={getPermissKey(
-																			TaskTableViewFeatures.execute
+																		v-if={hasAuthority(
+																			getPermissKey(Features.execute)
 																		)}
 																		command="once">
 																		执行
 																	</ElDropdownItem>
+
 																	<ElDropdownItem
 																		title="下一次执行时间"
 																		command="nextTime">

@@ -305,7 +305,7 @@ export default defineComponent({
 						{{
 							header: () => (
 								<ElRow>
-									<ElCol span={12}>
+									<ElCol span={14}>
 										<div class="handle-box">
 											<ElInput
 												style="flex:0 0 70%"
@@ -364,17 +364,26 @@ export default defineComponent({
 											)}
 										</div>
 									</ElCol>
-									<ElCol span={6} offset={6}>
+									<ElCol span={6} offset={4}>
 										<ElInput
-											style="width: 160px"
 											clearable
 											v-model={DATA.query.name}
 											placeholder="搜索文件/目录"
-											class="handle-input"
-										/>
-										<ElButton type="primary" icon={Search} onClick={onSearch}>
-											搜索
-										</ElButton>
+											class="handle-input">
+											{{
+												append: () => (
+													<>
+														<ElButton
+															title="刷新"
+															type="primary"
+															icon={Search}
+															onClick={onSearch}>
+															搜索
+														</ElButton>
+													</>
+												),
+											}}
+										</ElInput>
 									</ElCol>
 								</ElRow>
 							),

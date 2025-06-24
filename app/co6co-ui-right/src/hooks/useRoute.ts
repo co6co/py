@@ -198,7 +198,7 @@ export const useRouteData = () => {
 function jump(next: (path?: string) => void, path?: string) {
 	path ? next(path) : next();
 }
-import { usePermissStore, getToken, getStoreInstance } from 'co6co';
+import { getPermissStoreInstance, getToken, getStoreInstance } from 'co6co';
 import { registerRoute, validAuthenticate } from '@/utils';
 import {
 	Router,
@@ -215,7 +215,7 @@ function setupRouterHooks(
 	loginPath = loginPath ?? '/login';
 	notFoundPath = notFoundPath ?? '/404';
 	let registerRefesh = true;
-	const permiss = usePermissStore();
+	const permiss = getPermissStoreInstance();
 	router.beforeEach((to, _, next) => {
 		document.title = to.meta.title
 			? `${to.meta.title}`

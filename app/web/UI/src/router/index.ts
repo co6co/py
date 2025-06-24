@@ -12,6 +12,7 @@ import { views, moduleName } from 'co6co-right'
 import { views as taskViews, moduleName as taskName } from 'co6co-task'
 const store = getStoreInstance()
 store.setViews(viewObjects)
+
 store.appendViews(moduleName, views)
 store.appendViews(taskName, taskViews)
 

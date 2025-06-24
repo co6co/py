@@ -10,7 +10,7 @@ import {
 	getToken,
 	getRefreshToken,
 	storeAuthonInfo,
-	usePermissStore,
+	getPermissStoreInstance,
 	getStoreInstance,
 } from 'co6co';
 import { Router } from 'vue-router';
@@ -42,7 +42,7 @@ export function replaceRouteParams(
 export function registerRoute(router: Router, bck?: (msg?: string) => void) {
 	const { queryRouteData } = useRouteData();
 	//console.info("to:",to,"from:",from)
-	const permiss = usePermissStore();
+	const permiss = getPermissStoreInstance();
 	//console.info('route..query api...')
 	const ViewObjects = getStoreInstance().views;
 	queryRouteData((data: IRouteData[], e) => {

@@ -1,4 +1,4 @@
-import { usePermissStore } from './hook';
+import { usePermissStore, getPermissStoreInstance } from './hook';
 import type { Pinia } from 'pinia';
 import type { DirectiveBinding, ObjectDirective } from 'vue';
 
@@ -24,6 +24,10 @@ const createPermissDirective = (pinia?: Pinia) => {
 	};
 	return { permissDirective, nonPermissDirective };
 };
-
+const hasAuthority = (key: string) => {
+	const store = getPermissStoreInstance();
+	if (key) return store.includes(key);
+	else return false;
+};
 export default createPermissDirective;
-export { usePermissStore };
+export { hasAuthority, getPermissStoreInstance };

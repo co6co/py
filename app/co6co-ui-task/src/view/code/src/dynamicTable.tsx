@@ -20,7 +20,7 @@ import Diaglog, { type Item } from '@/components/modifyCode';
 import ShowCode from '@/components/showCode/src/showCode';
 
 import { code_api as api } from '@/api/tasks';
-export const ViewFeatures = {
+export const Features = {
 	add: ViewFeature.add,
 	edit: ViewFeature.edit,
 	del: ViewFeature.del,
@@ -38,8 +38,12 @@ export default defineComponent({
 			title?: string;
 			query: IQueryItem;
 			currentItem?: Item;
+			headItemWidth: { width: string };
 		}>({
 			query: {},
+			headItemWidth: {
+				width: '180px',
+			},
 		});
 
 		//:use
@@ -109,7 +113,7 @@ export default defineComponent({
 							<>
 								<div class="handle-box">
 									<ElInput
-										width={160}
+										style={DATA.headItemWidth}
 										clearable
 										v-model={DATA.query.name}
 										placeholder="模板标题"
@@ -117,14 +121,14 @@ export default defineComponent({
 									/>
 									<DictSelect
 										ref={categoryDictRef}
-										width={160}
+										style={DATA.headItemWidth}
 										dictTypeCode={DictTypeCodes.CodeType}
 										v-model={DATA.query.category}
 										placeholder="类别"
 									/>
 									<DictSelect
 										ref={stateDictRef}
-										width={160}
+										style={DATA.headItemWidth}
 										dictTypeCode={DictTypeCodes.CodeState}
 										v-model={DATA.query.category}
 										placeholder="状态"
@@ -136,7 +140,7 @@ export default defineComponent({
 									<ElButton
 										type="primary"
 										icon={Plus}
-										v-permiss={getPermissKey(ViewFeature.add)}
+										v-permiss={getPermissKey(Features.add)}
 										onClick={() => {
 											onOpenDialog();
 										}}>
@@ -220,14 +224,14 @@ export default defineComponent({
 													text={true}
 													icon={Edit}
 													onClick={() => onOpenDialog(scope.row)}
-													v-permiss={getPermissKey(ViewFeature.edit)}>
+													v-permiss={getPermissKey(Features.edit)}>
 													编辑
 												</ElButton>
 												<ElButton
 													text={true}
 													icon={Delete}
 													onClick={() => onDelete(scope.row)}
-													v-permiss={getPermissKey(ViewFeature.del)}>
+													v-permiss={getPermissKey(Features.del)}>
 													删除
 												</ElButton>
 												<ElButton
@@ -236,7 +240,7 @@ export default defineComponent({
 													title="不要执行时间太长的程序"
 													disabled={!isPythonCode(scope.row.category)}
 													showOverflowTooltip
-													v-permiss={getPermissKey(ViewFeature.execute)}
+													v-permiss={getPermissKey(Features.execute)}
 													onClick={() => {
 														showLoading();
 														api

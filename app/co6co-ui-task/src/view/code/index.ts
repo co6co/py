@@ -1,9 +1,9 @@
 import { withInstall } from 'co6co';
 
-import dynamicTable, { ViewFeatures } from './src/dynamicTable';
+import dynamicTable, { Features } from './src/dynamicTable';
 
 export const DynamicTableView = withInstall(dynamicTable, {
-	features: ViewFeatures,
+	features: Features,
 });
 //export default UserTableView;
 
