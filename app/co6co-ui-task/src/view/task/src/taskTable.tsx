@@ -155,7 +155,9 @@ export default defineComponent({
 		const onDelete = (row: Item) => {
 			deleteSvc(row.id, row.name);
 		};
-
+		const allowSched = hasAuthority(getPermissKey(Features.sched));
+		const allowexecute = hasAuthority(getPermissKey(Features.execute));
+		const allowStop = hasAuthority(getPermissKey(Features.stop));
 		//:page reader
 		const rander = (): VNodeChild => {
 			return (
@@ -330,36 +332,45 @@ export default defineComponent({
 														dropdown: () => (
 															<div>
 																<ElDropdownMenu>
-																	<ElDropdownItem
-																		disabled={
-																			!(
-																				scope.row.state == 1 &&
-																				scope.row.execStatus == 0
-																			)
-																		}
-																		v-if={hasAuthority(
-																			getPermissKey(Features.sched)
-																		)}
-																		command="sched">
-																		调度
-																	</ElDropdownItem>
-																	<ElDropdownItem
-																		disabled={scope.row.execStatus == 0}
-																		v-if={hasAuthority(
-																			getPermissKey(Features.stop)
-																		)}
-																		command="stop">
-																		停止
-																	</ElDropdownItem>
-
-																	<ElDropdownItem
-																		title="不要执行时间太长的程序"
-																		v-if={hasAuthority(
-																			getPermissKey(Features.execute)
-																		)}
-																		command="once">
-																		执行
-																	</ElDropdownItem>
+																	{hasAuthority(
+																		getPermissKey(Features.sched)
+																	) ? (
+																		<ElDropdownItem
+																			style={{ display: 'none' }}
+																			disabled={
+																				!(
+																					scope.row.state == 1 &&
+																					scope.row.execStatus == 0
+																				)
+																			}
+																			command="sched">
+																			调度
+																		</ElDropdownItem>
+																	) : (
+																		<></>
+																	)}
+																	{hasAuthority(
+																		getPermissKey(Features.stop)
+																	) ? (
+																		<ElDropdownItem
+																			disabled={scope.row.execStatus == 0}
+																			command="stop">
+																			停止
+																		</ElDropdownItem>
+																	) : (
+																		<></>
+																	)}
+																	{hasAuthority(
+																		getPermissKey(Features.execute) ? (
+																			<ElDropdownItem
+																				title="不要执行时间太长的程序"
+																				command="once">
+																				执行
+																			</ElDropdownItem>
+																		) : (
+																			<></>
+																		)
+																	)}
 
 																	<ElDropdownItem
 																		title="下一次执行时间"
