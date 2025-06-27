@@ -1,0 +1,10 @@
+{
+    "web_setting": {
+        "port": 8989,
+        "host": "0.0.0.0",
+        "backlog": 2048,
+        "debug": "False",
+        "access_log": false,
+        "dev": false
+    }
+}
