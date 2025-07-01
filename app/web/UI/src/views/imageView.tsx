@@ -15,7 +15,7 @@ import {
 } from 'element-plus'
 import { Search } from '@element-plus/icons-vue'
 
-import { getBaseUrl, PageAllLayouts } from 'co6co'
+import { getBaseUrl, PageAllLayouts, hasAuthority } from 'co6co'
 import { TableView, TableViewInstance, image2Option } from 'co6co-right'
 import style from '@/assets/css/imageView.module.less'
 import * as api from '@/api/dev'

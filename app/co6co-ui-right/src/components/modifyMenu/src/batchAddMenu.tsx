@@ -72,6 +72,9 @@ export default defineComponent({
 		const menuStateData = useMenuState();
 		const diaglogForm = ref<DialogFormInstance>();
 		const FeaturesRef = ref();
+		const featureSelect = computed(() => {
+			return useFeatureSelect(FeaturesRef.value);
+		});
 		const DATA = reactive<
 			FormData<number, FormItem> & {
 				postData: Array<Item>;
@@ -118,9 +121,6 @@ export default defineComponent({
 			return true;
 		};
 
-		const featureSelect = computed(() => {
-			return useFeatureSelect(FeaturesRef.value);
-		});
 		const rules: FormRules = {
 			name: [{ required: true, message: '请输入菜单称', trigger: 'blur' }],
 			id: [{ required: true, message: '请选择父节点', trigger: 'blur' }],

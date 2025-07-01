@@ -24,10 +24,6 @@ const createPermissDirective = (pinia?: Pinia) => {
 	};
 	return { permissDirective, nonPermissDirective };
 };
-const hasAuthority = (key: string) => {
-	const store = getPermissStoreInstance();
-	if (key) return store.includes(key);
-	else return false;
-};
+ 
 export default createPermissDirective;
-export { hasAuthority, getPermissStoreInstance };
+export {  getPermissStoreInstance };

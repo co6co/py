@@ -33,11 +33,12 @@ export const useFeatureSelect = (pageFeature?: object) => {
 	pageFeature = pageFeature ?? ViewFeature;
 	Object.keys(pageFeature).forEach((key) => {
 		//console.log(key, ViewFeature[key as keyof typeof ViewFeature]);
+		const value = ViewFeatureDesc.getValue(key, pageFeature);
 		list.push({
 			uid: ++index,
-			key: key,
+			key: value,
 			label: ViewFeatureDesc.getDesc(key, pageFeature),
-			value: key,
+			value: value,
 		});
 	});
 

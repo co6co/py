@@ -13,13 +13,7 @@ import {
 } from 'element-plus';
 import { Search, Plus, Edit, Delete, ArrowDown } from '@element-plus/icons-vue';
 
-import {
-	FormOperation,
-	showLoading,
-	closeLoading,
-	IResponse,
-	hasAuthority,
-} from 'co6co';
+import { FormOperation, showLoading, closeLoading, IResponse } from 'co6co';
 import {
 	routeHook,
 	ViewFeature,
@@ -40,9 +34,10 @@ export const Features = {
 	add: ViewFeature.add,
 	edit: ViewFeature.edit,
 	del: ViewFeature.del,
-	sched: ViewFeature.sched,
-	stop: ViewFeature.stop,
-	execute: ViewFeature.execute,
+	taskSched: { value: ViewFeature.sched, text: '任务调度' },
+	//sched: ViewFeature.sched,
+	//stop: ViewFeature.stop,
+	//execute: ViewFeature.execute,
 };
 export default defineComponent({
 	setup(prop, ctx) {
@@ -155,9 +150,9 @@ export default defineComponent({
 		const onDelete = (row: Item) => {
 			deleteSvc(row.id, row.name);
 		};
-		const allowSched = hasAuthority(getPermissKey(Features.sched));
-		const allowexecute = hasAuthority(getPermissKey(Features.execute));
-		const allowStop = hasAuthority(getPermissKey(Features.stop));
+		//const allowSched = hasAuthority(getPermissKey(Features.sched));
+		//const allowexecute = hasAuthority(getPermissKey(Features.execute));
+		//const allowStop = hasAuthority(getPermissKey(Features.stop));
 		//:page reader
 		const rander = (): VNodeChild => {
 			return (
@@ -317,26 +312,24 @@ export default defineComponent({
 													v-permiss={getPermissKey(Features.del)}>
 													删除
 												</ElButton>
-												<ElDropdown
-													trigger="click"
-													onCommand={(cmd) => onCommand(cmd, scope.row)}>
-													{{
-														default: () => (
-															<ElButton type="primary" text>
-																更多
-																<ElIcon>
-																	<ArrowDown />
-																</ElIcon>
-															</ElButton>
-														),
-														dropdown: () => (
-															<div>
-																<ElDropdownMenu>
-																	{hasAuthority(
-																		getPermissKey(Features.sched)
-																	) ? (
+
+												{getPermissKey(Features.taskSched.value) ? (
+													<ElDropdown
+														trigger="click"
+														onCommand={(cmd) => onCommand(cmd, scope.row)}>
+														{{
+															default: () => (
+																<ElButton type="primary" text>
+																	更多
+																	<ElIcon>
+																		<ArrowDown />
+																	</ElIcon>
+																</ElButton>
+															),
+															dropdown: () => (
+																<div>
+																	<ElDropdownMenu>
 																		<ElDropdownItem
-																			style={{ display: 'none' }}
 																			disabled={
 																				!(
 																					scope.row.state == 1 &&
@@ -346,42 +339,32 @@ export default defineComponent({
 																			command="sched">
 																			调度
 																		</ElDropdownItem>
-																	) : (
-																		<></>
-																	)}
-																	{hasAuthority(
-																		getPermissKey(Features.stop)
-																	) ? (
+
 																		<ElDropdownItem
 																			disabled={scope.row.execStatus == 0}
 																			command="stop">
 																			停止
 																		</ElDropdownItem>
-																	) : (
-																		<></>
-																	)}
-																	{hasAuthority(
-																		getPermissKey(Features.execute) ? (
-																			<ElDropdownItem
-																				title="不要执行时间太长的程序"
-																				command="once">
-																				执行
-																			</ElDropdownItem>
-																		) : (
-																			<></>
-																		)
-																	)}
 
-																	<ElDropdownItem
-																		title="下一次执行时间"
-																		command="nextTime">
-																		下一次时间
-																	</ElDropdownItem>
-																</ElDropdownMenu>
-															</div>
-														),
-													}}
-												</ElDropdown>
+																		<ElDropdownItem
+																			title="不要执行时间太长的程序"
+																			command="once">
+																			执行
+																		</ElDropdownItem>
+
+																		<ElDropdownItem
+																			title="下一次执行时间"
+																			command="nextTime">
+																			下一次时间
+																		</ElDropdownItem>
+																	</ElDropdownMenu>
+																</div>
+															),
+														}}
+													</ElDropdown>
+												) : (
+													<></>
+												)}
 											</>
 										),
 									}}

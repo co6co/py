@@ -14,7 +14,8 @@
     "build-only": "vite build --mode pro",
     "type-check": "vue-tsc --build --force",
     "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix --ignore-path .gitignore",
-    "format": "prettier --write src/"
+    "format": "prettier --write src/",
+    "clean": "node cleanup.js"
   },
   "dependencies": {
     "@amap/amap-jsapi-loader": "^1.0.1",
@@ -24,9 +25,9 @@
     "@vue/compiler-sfc": "^3.4.33",
     "@vue/runtime-core": "^3.4.33",
     "axios": "^1.6.7",
-    "co6co": "^0.1.32",
-    "co6co-right": "^0.0.41",
-    "co6co-task": "^0.0.2",
+    "co6co": "^0.2.0",
+    "co6co-right": "^0.1.0",
+    "co6co-task": "^0.1.0",
     "codemirror": "^6.0.1",
     "element-plus": "^2.5.3",
     "js-cookie": "^3.0.5",

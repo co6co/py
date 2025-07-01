@@ -29,8 +29,9 @@ npm install --registry=http://registry.npm.taobao.org/ isomorphic-streams
 npm install --registry=https://registry.npmjs.org/ co6co
 
 ```
-co6co-ui==0.1.32
-co6co-right==0.0.42
+co6co-ui==0.2.0
+co6co-right==0.1.0
+co6co-task==0.1.0
 co6co-wx==0.0.2
 
 

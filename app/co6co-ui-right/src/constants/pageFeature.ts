@@ -66,6 +66,26 @@ export const ViewFeatureDesc = {
 	stop: '停止',
 	execute: '执行',
 	/**
+	 * {get:"get",add:"add" sched:{value:"sched",text:"调度表"}}
+	 * @param feature 对象
+	 * @param field 字段名，
+	 * @param subField 子字段名
+	 * @returns
+	 */
+	_getFiedValue: function (feature: object, field: string, subField?: string) {
+		//使用自定义属性描述
+		if (
+			feature.hasOwnProperty(field) &&
+			typeof feature[field] == 'object' &&
+			feature[field].hasOwnProperty(subField)
+		)
+			return feature[field][subField];
+		//使用本对象描述
+		if (this.hasOwnProperty(field)) return this[field];
+		//使用 穿入值
+		return field;
+	},
+	/**
 	 *
 	 * @param field 字段名称
 	 * @param feature 所有字段 {get:"get",add:"add" sched:{value:"sched",text:"调度表"}}
@@ -73,15 +93,10 @@ export const ViewFeatureDesc = {
 	 */
 	getDesc: function (field: string, feature: object) {
 		//使用自定义属性描述
-		if (
-			feature.hasOwnProperty(field) &&
-			typeof feature[field] == 'object' &&
-			feature[field].hasOwnProperty('text')
-		)
-			return feature[field]['text'];
-		//使用本对象描述
-		if (this.hasOwnProperty(field)) return this[field];
-		//使用 穿入值
-		return field;
+		return this._getFiedValue(feature, field, 'text');
+	},
+	getValue: function (field: string, feature: object) {
+		//使用自定义属性描述
+		return this._getFiedValue(feature, field, 'value');
 	},
 };
