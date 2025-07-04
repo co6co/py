@@ -2,7 +2,7 @@
   "name": "co6co-task",
   "moduleName": "task",
   "private": false,
-  "version": "0.1.0",
+  "version": "0.1.1",
   "type": "module",
   "files": [
     "dist"
@@ -51,7 +51,6 @@
     "element-plus": "^2.7.6",
     "js-cookie": "^3.0.5",
     "json-bigint": "^1.0.0",
-    "p-limit": "^6.2.0",
     "pinia": "^2.1.7",
     "vue-router": "^4.4.0",
     "@codemirror/theme-one-dark": "^6.1.2",
