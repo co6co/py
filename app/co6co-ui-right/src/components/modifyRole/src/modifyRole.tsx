@@ -131,14 +131,14 @@ export default defineComponent({
 							<ElFormItem label="名称" prop="name">
 								<ElInput
 									v-model={DATA.fromData.name}
-									placeholder="用户组名称"></ElInput>
+									placeholder="角色名称"></ElInput>
 							</ElFormItem>
 						</ElCol>
 						<ElCol span={12}>
 							<ElFormItem label="代码" prop="code">
 								<ElInput
 									v-model={DATA.fromData.code}
-									placeholder="用户组代码"></ElInput>
+									placeholder="角色代码"></ElInput>
 							</ElFormItem>
 						</ElCol>
 					</ElRow>

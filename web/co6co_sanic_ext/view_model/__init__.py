@@ -29,7 +29,7 @@ class BaseView(HTTPMethodView):
     视图基类： 约定 增删改查，其他未约定方法可根据实际情况具体使用
     views.POST  : --> query list
     views.PUT   :---> Add 
-    view.PUT    :---> Edit
+    view.PATCH    :---> Edit
     view.DELETE :---> del
     """
     """

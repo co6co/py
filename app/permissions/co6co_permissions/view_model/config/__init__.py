@@ -16,6 +16,7 @@ from ..aop import exist, ObjectExistRoute
 from ...model.filters.config_filter import Filter
 from ...model.pos.other import sysConfigPO
 from ..aop.config_aop import ConfigEntry
+from ...services .configCache import ConfigCache
 
 
 class ConfigView(AuthMethodView):
@@ -35,6 +36,26 @@ class ConfigView(AuthMethodView):
             .filter(sysConfigPO.code.__eq__(code))
         )
         return await self.query_mapping(request, select, oneRecord=True)
+
+
+class ConfigByCacheView(AuthMethodView):
+    """
+    通过代码获取配置
+    """
+    routePath = "/Cache/<code:str>"
+
+    async def get(self, request: Request, code: str):
+        """ 
+        获取配置
+        code: 配置代码
+
+        return str,配置值
+        """
+        cache = ConfigCache(request)
+        config = cache.getConfig(code)
+        if not config:
+            config = await cache .queryConfig(code)
+        return Result.success(config)
 
 
 class ExistView(AuthMethodView):

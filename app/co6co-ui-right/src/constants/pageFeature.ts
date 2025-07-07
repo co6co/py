@@ -81,8 +81,8 @@ export const ViewFeatureDesc = {
 		)
 			return feature[field][subField];
 		//使用本对象描述
-		if (this.hasOwnProperty(field)) return this[field];
-		//使用 穿入值
+		if (this.hasOwnProperty(field) && subField == 'text') return this[field];
+		//使用
 		return field;
 	},
 	/**
