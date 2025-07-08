@@ -1,2 +1,0 @@
-视频格式检测：
-https://gpac.github.io/mp4box.js/test/filereader.html

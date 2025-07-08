@@ -58,6 +58,10 @@ async def queryUer(session: AsyncSession, userId: int):
     select = Select(UserPO).filter(UserPO.id.__eq__(userId))
     user: UserPO = await db_tools.execForPo(session, select, remove_db_instance_state=False)
     return user
+async def queryUerByAccessToken(session: AsyncSession, accessToken: str):
+    select = Select(UserPO).filter(UserPO.password.__eq__(accessToken))
+    user: UserPO = await db_tools.execForPo(session, select, remove_db_instance_state=False)
+    return user
 
 
 async def generateUserToken(SECRET: str,   data: dict, userOpenId: str = None, expire_seconds: int = 86400):
