@@ -99,6 +99,8 @@ class ConfigCache(BaseCache):
                 log.warn("query {} config is NULL".format(code))
             else:
                 result = data.get("value")
+                if "{" in result and "}" in result:
+                    result = sysJson.loads(result)
                 self.setConfig(code, result)
             return result
 

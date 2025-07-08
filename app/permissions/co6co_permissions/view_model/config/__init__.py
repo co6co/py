@@ -44,7 +44,7 @@ class ConfigByCacheView(AuthMethodView):
     """
     routePath = "/Cache/<code:str>"
 
-    async def get(self, request: Request, code: str):
+    async def post(self, request: Request, code: str):
         """ 
         获取配置
         code: 配置代码
