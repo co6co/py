@@ -43,14 +43,6 @@ def authorized(f):
             accessToken = AccessTokenCache(request)
             valid = await accessToken.validAccessToken(token)
         else:
-            # 解密 session
-            # if request.headers.get("Session"):
-            #    jsw = JWT_service(secret)
-            #    session = jsw.decode(request.headers.get("Session"))
-            #    request.headers["Session"] = session
-            # run some method that checks the request
-            # for the client's authorization status
-
             valid = await validToken(request, secret)
         if not valid:
             return JSON_util.response(Result.fail(message="token invalid or expire"), status=403)

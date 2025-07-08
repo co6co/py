@@ -16,6 +16,7 @@ from co6co_web_db.view_model import get_one
 from ..model.pos.right import UserPO, RolePO, UserRolePO, AccountPO
 from co6co.utils.tool_util import to_underscore
 import uuid
+from ..model.enum import user_state
 
 
 def getSecret(request: Result):
@@ -58,8 +59,10 @@ async def queryUer(session: AsyncSession, userId: int):
     select = Select(UserPO).filter(UserPO.id.__eq__(userId))
     user: UserPO = await db_tools.execForPo(session, select, remove_db_instance_state=False)
     return user
+
+
 async def queryUerByAccessToken(session: AsyncSession, accessToken: str):
-    select = Select(UserPO).filter(UserPO.password.__eq__(accessToken))
+    select = Select(UserPO).filter(UserPO.password.__eq__(accessToken), UserPO.state.in_([user_state.enabled]))
     user: UserPO = await db_tools.execForPo(session, select, remove_db_instance_state=False)
     return user
 
