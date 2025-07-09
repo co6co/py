@@ -10,30 +10,14 @@ from ...model.pos.right import UserPO, UserRolePO, UserGroupRolePO, menuPO, Menu
 from multiprocessing.managers import DictProxy
 from co6co_web_db .services.cacheManage import CacheManage
 from co6co.utils import log
-from ...services import getCurrentUserId
+from ...services.baseCache import BaseCache
 
 
-class AuthonCacheManage(CacheManage):
-    request: Request
+class AuthonCacheManage(BaseCache):
 
     def __init__(self, request: Request) -> None:
-        self.request = request
-        super().__init__(request.app)
+        super().__init__(request)
         pass
-
-    @property
-    def userId(self) -> None:
-        """
-        当前用户ID
-        """
-        return getCurrentUserId(self.request)
-
-    @property
-    def session(self) -> None:
-        """
-        当前用户ID
-        """
-        return CacheManage.session(self.request)
 
     @property
     def _currentRoleKey(self):

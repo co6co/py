@@ -28,13 +28,15 @@ def getSecret(request: Result):
 
 def getCurrentUserId(request: Request):
     if "current_user" in request.ctx.__dict__.keys():
-        return request.ctx.current_user["id"]
+        userId = int(request.ctx.current_user["id"])
+        return userId
     return None
 
 
 def getCurrentUserName(request: Request):
     if "current_user" in request.ctx.__dict__.keys():
-        return request.ctx.current_user["userName"]
+        userName = str(request.ctx.current_user["userName"])
+        return userName
     return None
 
 

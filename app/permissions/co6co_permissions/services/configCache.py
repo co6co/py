@@ -85,7 +85,7 @@ class ConfigCache(BaseCache):
         查询当前用户的所拥有的角色
         结果放置在cache中
         """
-        callable = DbCallable(ConfigCache.session(self.request))
+        callable = DbCallable(self.session)
 
         async def exe(session) -> str | None:
             select = (
@@ -99,8 +99,13 @@ class ConfigCache(BaseCache):
                 log.warn("query {} config is NULL".format(code))
             else:
                 result = data.get("value")
+                # 配置的是否时json字符串
                 if "{" in result and "}" in result:
-                    result = sysJson.loads(result)
+                    try:
+                        result = sysJson.loads(result)
+                    except:
+                        log.err("load json config error:{},check config key :{}".format(result, code))
+                        result = None
                 self.setConfig(code, result)
             return result
 

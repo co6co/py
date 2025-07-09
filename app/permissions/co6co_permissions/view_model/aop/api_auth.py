@@ -39,10 +39,10 @@ def authorized(f):
         token = request.token
         valid = False
         # 使用 accessToken 认证
-        if '.' not in token:
+        if token and '.' not in token:
             accessToken = AccessTokenCache(request)
             valid = await accessToken.validAccessToken(token)
-        else:
+        elif token:
             valid = await validToken(request, secret)
         if not valid:
             return JSON_util.response(Result.fail(message="token invalid or expire"), status=403)

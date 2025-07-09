@@ -55,7 +55,9 @@ class ConfigByCacheView(AuthMethodView):
         config = cache.getConfig(code)
         if not config:
             config = await cache .queryConfig(code)
-        return Result.success(config)
+        if config is None:
+            return self.response_json(Result.fail(message="未能获取配置，请检查是否有配置项'{}',或检查配置的json对象是否正确".format(code)))
+        return self.response_json(Result.success(config))
 
 
 class ExistView(AuthMethodView):

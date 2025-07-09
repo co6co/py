@@ -125,7 +125,7 @@ class BaseMethodView(BaseView):
             if result != None:
                 return result
             else:
-                return JSON_util.response(Result.fail(message=f"更新失败"))
+                return Result.fail(message=f"更新失败")
         except Exception as e:
             return self.response_error0(request, e)
 
@@ -145,7 +145,7 @@ class BaseMethodView(BaseView):
                     result = Result.success(db_tools.list2Dict(result))
                     return JSON_util.response(result)
         except Exception as e:
-            return self.response_error0(request, e)
+            return self.response_error(request, e)
 
     async def _query(self, request: Request, select: Select, isPO: bool = True, remove_db_instance: bool = True, param: Dict | List | Tuple = None):
         """
