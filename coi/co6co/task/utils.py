@@ -1,5 +1,6 @@
 import time
 from functools import wraps
+import random
 
 
 def clock(func):
@@ -14,6 +15,40 @@ def clock(func):
             result = func(*args, **kwargs)  # 调用原始函数并获取返回值
             return result
     return wrapper
+
+
+def exponential_backoff(retry_count: int, base_delay=1, max_delay=30, showMess: bool = True):
+    """
+    指数退避算法，等待时间 = base_delay * (2^retry_count)
+
+    参数:
+    - retry_count: 当前重试次数 (从0开始)
+    - base_delay: 基础等待时间 (秒)
+    - max_delay: 最大等待时间 (秒)
+    """
+    # 计算指数退避时间
+    delay = base_delay * (2 ** retry_count)
+    # 添加随机抖动，避免多个客户端同时重试
+    jitter = random.uniform(0, 1)
+    delay = min(delay + jitter, max_delay)
+    if showMess:
+        print(f"第 {retry_count+1} 次重试，等待 {delay:.2f} 秒...")
+    time.sleep(delay)
+
+
+def linear_backoff(retry_count: int, base_delay: int = 1, max_delay=10, showMess: bool = True):
+    """
+    线性退避算法，等待时间 = base_delay * retry_count
+
+    参数:
+    - retry_count: 当前重试次数 (从0开始)
+    - base_delay: 基础等待时间 (秒)
+    - max_delay: 最大等待时间 (秒)
+    """
+    delay = min(base_delay * (retry_count + 1), max_delay)
+    if showMess:
+        print(f"第 {retry_count+1} 次重试，等待 {delay} 秒...")
+    time.sleep(delay)
 
 
 class Timer:
