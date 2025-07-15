@@ -46,6 +46,12 @@ class CacheManage:
             return self.cache[key]
         return None
 
+    def get(self, key: str, default: any = None):
+        """
+        获取数据缓存
+        """
+        return self.cache.get(key, default)
+
     def exist(self, key: str):
         """
         是否存在
