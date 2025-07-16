@@ -21,10 +21,8 @@ class BaseCache(CacheManage):
     request = Request
 
     def __init__(self, request: Request) -> None:
-
         self.request = request
         super().__init__(request.app)
-        self._session: AsyncSession = None
 
     @property
     def userId(self):
@@ -33,16 +31,6 @@ class BaseCache(CacheManage):
         """
         # 微信认证中 userid可能未挂在上去
         return getCurrentUserId(self.request)
-
-    @property
-    def session(self):
-        """
-        当前用户ID
-        """
-        if self._session is None:
-            self._session = self.dbservice.createAsyncSession()
-        return self._session
-        # return CacheManage.session(self.request)
 
 
 class AccessTokenCache(BaseCache):

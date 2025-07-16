@@ -102,7 +102,7 @@ export default defineComponent({
 		watch(
 			[() => DATA.fromData.parentId, () => DATA.fromData.category],
 			(newVal) => {
-				if (newVal && newVal[0]) {
+				if (newVal && newVal[0] && newVal[1] == MenuCateCategory.VIEW) {
 					DATA.fromData.methods = [];
 					get_one_svc(newVal[0]).then((res) => {
 						Object.assign(DATA.parentItem, res.data);

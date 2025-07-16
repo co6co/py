@@ -24,7 +24,9 @@ export const ViewFeatures = {
 	add: ViewFeature.add,
 	edit: ViewFeature.edit,
 	del: ViewFeature.del,
+	view: ViewFeature.view,
 };
+import { moduleName } from '@/constants';
 export default defineComponent({
 	name: 'DictTypeView',
 	setup(prop, ctx) {
@@ -75,9 +77,9 @@ export default defineComponent({
 			onSearch();
 		});
 		//:特殊
-		const { subViewPath } = useViewData('DictView');
+		const { viewPath } = useViewData('DictView', moduleName);
 		const getsubViewPath = (dictTypeId: number) => {
-			return replaceRouteParams(subViewPath.value, {
+			return replaceRouteParams(viewPath.value, {
 				id: dictTypeId.toString(),
 			});
 		};

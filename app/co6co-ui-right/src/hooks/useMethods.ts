@@ -41,7 +41,6 @@ export const useFeatureSelect = (pageFeature?: object) => {
 			value: value,
 		});
 	});
-
 	const selectData = ref<IEnumSelect[]>(list);
 	const getName = (value?: number) => {
 		if (value) return selectData.value.find((m) => m.value == value)?.label;

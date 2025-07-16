@@ -55,3 +55,4 @@ export enum DictShowCategory {
 
 export * from './api';
 export * from './pageFeature';
+export { moduleName, version } from '../../package.json';

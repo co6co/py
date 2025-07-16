@@ -14,11 +14,30 @@ class CacheManage:
 
     @staticmethod
     def session(request: Request) -> AsyncSession:
+        """
+        从Request中获取Session
+        """
         request.app.ctx.session
         return request.ctx.session
 
-    def __init__(self, app: Sanic) -> None:
-        self.app = app
+    @property
+    def dbservice(self) -> db_service:
+        return self.app.ctx.service
+
+    @property
+    def session(self):
+        """
+        创建Session 
+        请自行管理
+        """
+        if self._session is None:
+            self._session = self.dbservice.createAsyncSession()
+        return self._session
+        # return CacheManage.session(self.request)
+
+    def __init__(self, app: Sanic = None) -> None:
+        self.app = app if app else CacheManage.getApp()
+        self._session: AsyncSession = None
         pass
 
     @property
@@ -27,10 +46,6 @@ class CacheManage:
         缓存
         """
         return self.app.shared_ctx.cache
-
-    @property
-    def dbservice(self) -> db_service:
-        return self.app.ctx.service
 
     def setCache(self, key: str, value: any):
         """

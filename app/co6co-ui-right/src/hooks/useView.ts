@@ -16,23 +16,19 @@ import { MenuCateCategory } from '@/hooks/useMenuSelect';
  * 获取子视图Path
  * @param mainViewName 必须再 views 中
  */
-export const useViewData = (
-	viewName: string,
-	getMainViewPath?: (string) => string
-) => {
-	const subViewPath = ref('');
+export const useViewData = (viewName: string, moduleName: string) => {
+	const viewPath = ref('');
 	const viewDataRef = ref<RouteItem>();
 	const { queryRouteItem } = useRouteData();
-	if (!getMainViewPath) getMainViewPath = getViewPath;
-	const componentName = getMainViewPath(viewName);
+	const componentName = getViewPath(viewName, moduleName);
 	const routeItem = queryRouteItem((d) => {
 		return d.component == componentName;
 	});
 	if (routeItem) {
-		subViewPath.value = routeItem.url;
+		viewPath.value = routeItem.url;
 		viewDataRef.value = routeItem;
 	}
-	return { subViewPath, viewDataRef, replaceRouteParams };
+	return { viewPath, viewDataRef, replaceRouteParams };
 };
 
 export const goToPath = (

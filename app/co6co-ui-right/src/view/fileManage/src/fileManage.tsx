@@ -51,6 +51,7 @@ import {
 import { ConfigCodes } from '@/constants/config';
 import { useConfig } from '@/hooks/useConfig';
 import { useKeyUp } from '@/hooks/useKey';
+import { moduleName } from '@/constants';
 import { useViewData, goToNameRoute } from '@/hooks/useView';
 import { useRouter } from 'vue-router';
 export const ViewFeatures = {
@@ -214,7 +215,7 @@ export default defineComponent({
 		};
 
 		//2. 预览
-		const { viewDataRef } = useViewData('PreviewView');
+		const { viewDataRef } = useViewData('PreviewView', moduleName);
 		const router = useRouter();
 		const onPreview = (_: number, row: Item) => {
 			try {
