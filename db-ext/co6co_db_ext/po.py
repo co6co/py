@@ -3,6 +3,7 @@ from sqlalchemy import func, MetaData, INTEGER, Column, ForeignKey, String, BigI
 from sqlalchemy.orm import DeclarativeBase, declarative_base, relationship, QueryPropertyDescriptor, Query
 from co6co.utils.tool_util import to_camelcase
 from datetime import datetime
+from typing import Optional
 # 与属性库实体相关，所有实体集成 BasePO类
 
 metadata = MetaData()
@@ -22,18 +23,28 @@ class BasePO(DeclarativeBase):
 
     def to_dict2(self):
         return {to_camelcase(c.name): getattr(self, to_camelcase(c.name), None) for c in self.__table__.columns}
-
+    @property
+    def sqlItem(self):
+        """
+        1. 完整的sql语句
+        Insert(xxPo).values(**self.sqlItem)
+        2. sql与参数分开
+        sql=Update(xxPO).where(xxPO.id == id) 
+        db_tools.execSQL(session, sql, sql.sqlItem)
+        """
+        return {k: v for k, v in self.__dict__.items() if not k.startswith('_')} 
+    
     def update(self, po: DeclarativeBase):
         pass
 
-    def add_assignment(self,  userId: None):
+    def add_assignment(self,  userId: Optional[int] = None):
         if isinstance(self, UserTimeStampedModelPO):
             self.createTime = datetime.now()
             self.createUser = userId
         elif isinstance(self, TimeStampedModelPO):
             self.createTime = datetime.now()
 
-    def edit_assignment(self,   userId: None):
+    def edit_assignment(self,   userId: Optional[int] = None):
         if isinstance(self, UserTimeStampedModelPO):
             self.updateTime = datetime.now()
             self.updateUser = userId

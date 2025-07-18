@@ -175,12 +175,13 @@ class db_tools:
         else:
             return None
 
-    async def execSQL(session: AsyncSession, sql: Update | Insert | Delete, sqlParam: Dict | List | Tuple = None) -> int:
+    async def execSQL(session: AsyncSession, sql: Update | Insert | Delete, sqlParam: Dict | List | Tuple = None):
         """
         执行简单SQL语句
         """
         data: CursorResult = await session.execute(sql, sqlParam)
-        return data.rowcount
+        result:int=data.rowcount
+        return result
 
 
 '''
