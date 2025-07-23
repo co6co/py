@@ -180,7 +180,7 @@ class db_tools:
         执行简单SQL语句
         """
         data: CursorResult = await session.execute(sql, sqlParam)
-        result:int=data.rowcount
+        result: int = data.rowcount
         return result
 
 
@@ -198,6 +198,20 @@ class DbCallable:
         self.session = session
 
     async def __call__(self, func: Callable[[AsyncSession], Any]):
+        """
+        with self.session, self.session.begin():
+            这会创建一个显式的事务块
+            在 with 块内的所有操作会在同一个事务中执行
+            当代码块正常执行完毕，事务会自动提交
+            如果发生异常，事务会自动回滚
+            这是 SQLAlchemy 推荐的显式事务处理方式
+
+        with self.session:
+            仅表示获取会话的上下文管理
+            不会自动创建事务，除非在会话配置中设置了 autocommit=False(默认值)
+            在这种模式下，需要手动调用 session.commit() 或 session.rollback()
+            如果没有显式提交，会话关闭时可能会导致事务回滚
+        """
         async with self.session, self.session.begin():
             if func != None:
                 return await func(self.session)
