@@ -1,8 +1,12 @@
+from sanic import Sanic
 import services.tasks.devCapImg as custom
 from co6co_task.service import CustomTask, CuntomCronTrigger
 
 ccc = CuntomCronTrigger.resolvecron("0 0 12 * * 2 *")
 print(ccc)
+
+app = Sanic()
+app.prepare(debug=False)
 
 subclasses = CustomTask.get_all_subclasses()
 for subclass in subclasses:
