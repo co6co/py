@@ -1,7 +1,7 @@
 import { defineComponent, VNodeChild, PropType, computed } from 'vue'
 import { ref, reactive, onMounted } from 'vue'
-import { ElTag, ElButton, ElInput, ElTableColumn, ElButtonGroup, ElMessageBox } from 'element-plus'
-import { Search, Plus, Edit, Delete } from '@element-plus/icons-vue'
+import { ElTag, ElButton, ElInput, ElTableColumn, ElButtonGroup, ElMessageBox, ElLink, ElIcon, ElRow } from 'element-plus'
+import { Search, Plus, Edit, Delete, View, ArrowDown, MoreFilled } from '@element-plus/icons-vue'
 
 import { FormOperation, IResponse, EnumSelect, IEnumSelect, PageLayouts } from 'co6co'
 import {
@@ -18,8 +18,16 @@ import {
 } from 'co6co-right'
 
 import Diaglog, { type Item } from '@/components/dev/modifyDev'
+import ImgViewDialog from './imgViewDialog'
 
 import * as api from '@/api/dev'
+
+export const features = {
+  add: ViewFeature.add,
+  edit: ViewFeature.edit,
+  del: ViewFeature.del,
+  downCheckResult: { text: "下载检测结果", value: "downCheckResult" }
+}
 export default defineComponent({
   props: {
     dataApi: {
@@ -50,17 +58,20 @@ export default defineComponent({
       name?: string
       code?: string
       category?: number
+      ip?: string
+      checkDesc?: string
     }
     const DATA = reactive<{
       title?: string
       query: IQueryItem
       currentItem?: Item
       headItemWidth: { width: string }
+      queryMoreOption: boolean,
     }>({
       query: {},
-      headItemWidth: { width: '180px' }
+      headItemWidth: { width: '180px' },
+      queryMoreOption: false
     })
-
     //:use
     const { getPermissKey } = routeHook.usePermission()
 
@@ -69,10 +80,23 @@ export default defineComponent({
     const viewRef = ref<TableViewInstance>()
     const diaglogRef = ref<InstanceType<typeof Diaglog>>()
     const statueInstanceRef = ref<StateSelectInstance>()
+
+    const imgViewDialogRef = ref<InstanceType<typeof ImgViewDialog>>()
     const onOpenDialog = (row?: Item) => {
       DATA.title = row ? `编辑[${row?.name}]` : '增加'
       DATA.currentItem = row
       diaglogRef.value?.openDialog(row ? FormOperation.edit : FormOperation.add, row)
+    }
+    const imgPath = ref("")
+    const onImageOpenDialog = (row?: Item) => {
+      if (row?.checkImgPath) {
+        imgPath.value = row?.checkImgPath
+        imgViewDialogRef.value?.openDialog(row.name)
+      }
+      else {
+        imgPath.value = ""
+        ElMessageBox.alert("未找到设备巡检的图片路径")
+      }
     }
     const onSearch = () => {
       viewRef.value?.search()
@@ -135,13 +159,15 @@ export default defineComponent({
                     placeholder="设备名称"
                     class="handle-input"
                   />
+
                   <ElInput
                     style={DATA.headItemWidth}
                     clearable
-                    v-model={DATA.query.code}
-                    placeholder="设备代码"
+                    v-model={DATA.query.ip}
+                    placeholder="设备IP地址"
                     class="handle-input"
                   />
+
                   <EnumSelect
                     style={DATA.headItemWidth}
                     data={DeviceCategory.value}
@@ -154,6 +180,11 @@ export default defineComponent({
                     v-model={DATA.query.state}
                     placeholder="状态"
                   />
+
+                  <ElLink type="primary" onClick={() => { DATA.queryMoreOption = !DATA.queryMoreOption }}>
+                    <ElIcon size={20}><MoreFilled /></ElIcon>
+                  </ElLink>
+
                   <ElButton type="primary" icon={Search} onClick={onSearch}>
                     搜索
                   </ElButton>
@@ -171,19 +202,45 @@ export default defineComponent({
                   ) : (
                     <></>
                   )}
-                  {prop.allowImport ? (
-                    <ElButtonGroup style="margin-left:10px">
-                      <Download authon title="下载模板" url={api.getResourceUrl()} text={false} />
-                      <UploadFile
-                        accept=".xlsx,.xls"
-                        onSuccess={onSuccess}
-                        uploadApi={api.upload_template}
-                      />
-                    </ElButtonGroup>
-                  ) : (
-                    <></>
-                  )}
+
+                  <Download v-permiss={features.downCheckResult.value} authon title="下载检测结果" url={api.getCheckDataUrl()} text={false} />
                 </div>
+                {DATA.queryMoreOption ? (<ElRow>
+                  <div class="handle-box">
+                    <div class="formItem">
+                      <ElInput
+                        style={DATA.headItemWidth}
+                        clearable
+                        v-model={DATA.query.code}
+                        placeholder="设备代码"
+                        class="handle-input"
+                      />
+                      <ElInput
+                        style={DATA.headItemWidth}
+                        clearable
+                        v-model={DATA.query.checkDesc}
+                        placeholder="检测状态"
+                        class="handle-input"
+                      />
+                      {prop.allowImport ? (
+                        <ElButtonGroup style="margin-left:10px">
+                          <Download authon title="下载模板" url={api.getResourceUrl()} text={false} />
+                          <UploadFile
+                            text="上传数据"
+                            accept=".xlsx,.xls"
+                            onSuccess={onSuccess}
+                            uploadApi={api.upload_template}
+                          />
+                        </ElButtonGroup>
+                      ) : (
+                        <>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                </ElRow>) : <></>}
+
+
               </>
             ),
             default: () => (
@@ -193,21 +250,29 @@ export default defineComponent({
                     default: (scope: tableScope) => viewRef.value?.rowIndex(scope.$index)
                   }}
                 </ElTableColumn>
-                <ElTableColumn
-                  label="编号"
-                  prop="code"
-                  align="center"
-                  width={180}
-                  sortable="custom"
-                  showOverflowTooltip={true}
-                />
+
                 <ElTableColumn
                   label="名称"
                   prop="name"
                   align="center"
                   sortable="custom"
+                  width={180}
                   showOverflowTooltip={true}
                 />
+                <ElTableColumn
+                  label="状态"
+                  prop="state"
+                  sortable="custom"
+                  align="center"
+                  sortable="custom"
+                  showOverflowTooltip={true}
+                >
+                  {{
+                    default: (scope: { row: Item }) => (
+                      <ElTag type={getTagType(scope.row.state)}>{getName(scope.row.state)}</ElTag>
+                    )
+                  }}
+                </ElTableColumn>
                 <ElTableColumn
                   label="设备类型"
                   prop="category"
@@ -231,6 +296,46 @@ export default defineComponent({
                   showOverflowTooltip={true}
                 />
                 <ElTableColumn
+                  label="检测结果"
+                  prop="checkDesc"
+                  align="left"
+                  sortable="custom"
+                  width={120}
+                  showOverflowTooltip={true}
+                />
+                <ElTableColumn
+                  label="检测时间"
+                  prop="checkTime"
+                  align="center"
+                  sortable="custom"
+                  width={160}
+                  showOverflowTooltip={true}
+                />
+                <ElTableColumn
+                  label="设备厂家"
+                  prop="vender"
+                  align="center"
+                  sortable="custom"
+                  width={120}
+                  showOverflowTooltip={true}
+                />
+                <ElTableColumn
+                  label="代码"
+                  prop="code"
+                  align="center"
+                  width={180}
+                  sortable="custom"
+                  showOverflowTooltip={true}
+                />
+                <ElTableColumn
+                  label="序列号"
+                  prop="serialNumber"
+                  align="center"
+                  sortable="custom"
+                  width={120}
+                  showOverflowTooltip={true}
+                />
+                <ElTableColumn
                   label="经纬度"
                   width="160"
                   prop="lat"
@@ -244,19 +349,7 @@ export default defineComponent({
                     )
                   }}
                 </ElTableColumn>
-                <ElTableColumn
-                  label="状态"
-                  prop="state"
-                  sortable="custom"
-                  align="center"
-                  showOverflowTooltip={true}
-                >
-                  {{
-                    default: (scope: { row: Item }) => (
-                      <ElTag type={getTagType(scope.row.state)}>{getName(scope.row.state)}</ElTag>
-                    )
-                  }}
-                </ElTableColumn>
+
 
                 <ElTableColumn
                   prop="createTime"
@@ -273,7 +366,7 @@ export default defineComponent({
                   show-overflow-tooltip={true}
                 />
                 {prop.hasOpertion ? (
-                  <ElTableColumn label="操作" width={320} align="center" fixed="right">
+                  <ElTableColumn label="操作" width={320} align="left" fixed="right">
                     {{
                       default: (scope: tableScope<Item>) => (
                         <>
@@ -293,18 +386,34 @@ export default defineComponent({
                           >
                             删除
                           </ElButton>
+                          {
+                             scope.row.category < 100 ? (
+                              <ElButton
+                                text={true}
+                                icon={View}
+                                onClick={() => onImageOpenDialog(scope.row)}
+                              >
+                                查看图片
+                              </ElButton>
+                            ) : (
+                              <></>
+                            )
+
+                          }
+
                         </>
                       )
                     }}
                   </ElTableColumn>
                 ) : (
-                  <> </>
+                  <></>
                 )}
               </>
             ),
             footer: () => (
               <>
                 <Diaglog ref={diaglogRef} title={DATA.title} onSaved={onRefesh} />
+                <ImgViewDialog ref={imgViewDialogRef} path={imgPath.value} />
               </>
             )
           }}

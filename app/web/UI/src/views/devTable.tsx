@@ -1,13 +1,9 @@
-import { defineComponent, onMounted, VNodeChild } from 'vue'
-import { ViewFeature, routeHook } from 'co6co-right'
+import { defineComponent, VNodeChild,onMounted } from 'vue'
+import { routeHook } from 'co6co-right'
 
-import DevTable from '@/components/dev/devTable'
-import * as api from '@/api/dev'
-export const features = {
-  add: ViewFeature.add,
-  edit: ViewFeature.edit,
-  del: ViewFeature.del
-}
+import DevTable ,{features}from '@/components/dev/devTable'
+import * as api from '@/api/dev' 
+export {features}
 export default defineComponent({
   setup(prop, ctx) {
     const { getPermissKey } = routeHook.usePermission()
@@ -17,7 +13,7 @@ export default defineComponent({
     })
     //:page reader
     const rander = (): VNodeChild => {
-      return <DevTable dataApi={api.get_table_svc} allowImport hasOpertion></DevTable>
+      return <DevTable dataApi={api.get_table_svc} allowImport hasOpertion /> 
     }
     return rander
   } //end setup

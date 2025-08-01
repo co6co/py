@@ -1,6 +1,7 @@
 from __future__ import annotations
 from co6co.enums import Base_Enum, Base_EC_Enum
 from co6co.utils import DATA
+from datetime import datetime
 
 
 class User_category(Base_Enum):
@@ -26,17 +27,48 @@ class TaskStatue(Base_Enum):
 
 
 class DeviceCategory(Base_EC_Enum):
+    monitor = 'monitor', "监控设备", 0
     # 卡口
-    Pass = 'pass', "卡口设备", 0
+    Flow = 'flow', "流量设备", 10
     # 电警
-    Ele = 'ele', "电警设备", 1
+    Warn = 'Warn', "警戒设备", 11
+    # 一体机 有两个摄像头
+    ParkAndPass = "ParkAndPass", "一体机", 12
+    storage = "storage", "录像机", 100,
+    server = "server", "服务器", 101,
 
-    # 违停身边
-    Park = 'park', "违停设备", 2
-    # 一体机
-    ParkAndPass = 'parkAndPass', "一体机设备", 3
-    monitor = 'monitor', "监控", 4
-    # 一体机
-    other = 'other', "其他设备", 9
+    @staticmethod
+    def getMonitor():
+        return [
+            DeviceCategory.monitor,
+            DeviceCategory.Flow,
+            DeviceCategory.Warn,
+            DeviceCategory.ParkAndPass,
+        ]
 
+    def hasVideo(self):
+        """
+        是路口设备
+        """
+        return self in DeviceCategory.getMonitor()
+
+    def isNetworkDev(self):
+        """
+        是网络设备
+        """
+        return True
+
+
+class DeviceCheckState(Base_EC_Enum):
+    normal = 'normal', "正常", 0
+    networkError = 'networkError', "网络异常", 1
+    videoError = 'videoError', "视频异常", 2
+    abnormal = 'abnormal', "位置异常", 100
+
+
+class DeviceVender(Base_EC_Enum):
+    Uniview = 'UNIVIEW', "宇视", 1
+    Hikvision = 'HIKVISION', "海康威视", 2
+    Dahua = 'DAHUA', "大华", 3
+    TPLink = 'TPLINK', "天润", 4
     

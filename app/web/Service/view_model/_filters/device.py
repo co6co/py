@@ -10,13 +10,14 @@ from sqlalchemy import func, or_, and_, Select
 
 class Filter(absFilterItems):
     """
-    违法代码 filter
+    设备 filter
     """
     name: str = None
     code: str = None
     state: int = None
     ip: str = None
     category: int = None
+    checkDesc: str = None
 
     def __init__(self):
         super().__init__(DevicePO)
@@ -25,6 +26,7 @@ class Filter(absFilterItems):
         self.state = None
         self.ip = None
         self.category = None
+        self.checkDesc = None
 
     def filter(self) -> list:
         """
@@ -41,6 +43,8 @@ class Filter(absFilterItems):
             filters_arr.append(DevicePO.state.__eq__(self.state))
         if self.checkFieldValue(self.category):
             filters_arr.append(DevicePO.category.__eq__(self.category))
+        if self.checkFieldValue(self.checkDesc):
+            filters_arr.append(DevicePO.checkDesc.like(f"%{self.checkDesc}%"))
         return filters_arr
 
     def getDefaultOrderBy(self) -> Tuple[InstrumentedAttribute]:

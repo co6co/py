@@ -27,6 +27,9 @@ export const dev_category_svc = (): Promise<IResponse<Array<IEnumSelect>>> => {
 export const getResourceUrl = () => {
   return `${getBaseUrl()}${base_URL}/import`
 }
+export const getCheckDataUrl = () => {
+  return `${getBaseUrl()}${base_URL}/downCheckData`
+}
 export const img_folder_select_svc = (): Promise<IResponse<Array<string>>> => {
   return request.get(`${base_img_URL}`)
 }

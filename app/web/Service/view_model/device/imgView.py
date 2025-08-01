@@ -1,4 +1,6 @@
 
+import mimetypes
+from pathlib import Path
 from sanic.response import text, file, raw, json
 from sanic.exceptions import NotFound
 from sanic import Request
@@ -121,6 +123,51 @@ class PreView(Views):
             return file(filePath)
         else:
             return NotFound("图片不存在")
+
+
+class DeviceCheckImage(AuthMethodView):
+    routePath = "/imgpreview"
+
+    async def get(self, request: Request):
+        """
+        获取图片
+        """
+        # 获取请求参数
+        dic = self.usable_args(request)
+        img_path: str = dic.get("path", None)
+        # 检查路径参数是否存在
+        if not img_path:
+            return raw("图片路径参数 'path' 缺失", 500)
+
+        # 处理路径，移除开头的斜杠（如果存在）
+        if img_path.startswith('/'):
+            img_path = img_path[1:]
+
+        # 获取图片根目录
+        root = DeviceCuptureImage.getCapImgRootCache()
+        if not root:
+            return raw("根路径未找到，请稍后重试", 500)
+
+        # 构建完整路径
+        root_path = Path(root)
+        full_path = root_path / img_path
+
+        # 检查文件是否存在且是文件
+        if not full_path.exists():
+            return raw(f"图片不存在: {full_path}", 404)
+        if not full_path.is_file():
+            return raw(f"路径 {full_path}不是文件", 404)
+
+        # 自动检测MIME类型
+        mime_type, _ = mimetypes.guess_type(str(full_path))
+        if not mime_type:
+            mime_type = "application/octet-stream"  # 默认二进制类型
+
+        # 返回文件响应
+        return await file(
+            full_path,
+            mime_type=mime_type
+        )
 
 
 class DeleteFolderViews(Views):

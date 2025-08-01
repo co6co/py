@@ -1,4 +1,5 @@
 
+
 from sanic.response import text, file, raw, json
 from sanic import Request
 from co6co_sanic_ext.utils import JSON_util
@@ -13,6 +14,7 @@ from view_model._filters.device import Filter
 from co6co_permissions.view_model.aop import exist, ObjectExistRoute
 
 import pandas as pd
+from co6co_permissions.model.enum import dict_state
 from co6co.utils import log
 from io import BytesIO
 from datetime import datetime
@@ -21,6 +23,7 @@ from model.enum import DeviceCategory
 from co6co.utils import try2int
 from typing import TypedDict
 from view_model import ImportView
+from services.tasks.devCapImg import DeviceCuptureImage
 
 
 class columnsMap(TypedDict):
@@ -91,16 +94,37 @@ class Views(AuthMethodView):
 
 
 class columnsMap:
-    def __init__(self, codeIndex: int, categoryIndex: int, nameIndex: int, ipIndex: int, lngIndex: int, latIndex: int, stateIndex: int, userNameIndex: int, passwordIndex: int):
+    def __init__(self, codeIndex: int, categoryIndex: int, nameIndex: int, ipIndex: int, venderIndex: int, lngIndex: int, latIndex: int, stateIndex: int, userNameIndex: int, passwordIndex: int):
         self.codeIndex = codeIndex
         self.categoryIndex = categoryIndex
         self.nameIndex = nameIndex
         self.ipIndex = ipIndex
+        self.venderIndex = venderIndex
         self.lngIndex = lngIndex
         self.latIndex = latIndex
         self.stateIndex = stateIndex
         self.userNameIndex = userNameIndex
         self.passwordIndex = passwordIndex
+
+
+class columnsCheckTableMap:
+
+    def __init__(self, codeIndex: int,
+                 nameIndex: int,
+                 categoryIndex: int,
+                 ipIndex: int,
+                 venderIndex: int,
+                 checkStateIndex: int,
+                 checkDescIndex: int,
+                 checkTimeIndex: int):
+        self.codeIndex = codeIndex
+        self.nameIndex = nameIndex
+        self.categoryIndex = categoryIndex
+        self.ipIndex = ipIndex
+        self.venderIndex = venderIndex
+        self.checkStateIndex = checkStateIndex
+        self.checkDescIndex = checkDescIndex
+        self.checkTimeIndex = checkTimeIndex
 
 
 class View(AuthMethodView):
@@ -123,7 +147,93 @@ class View(AuthMethodView):
         return await self.remove(request, pk, DevicePO)
 
 
+class DeviceDownView(ImportView):
+    """
+    下载【导出】检测结果
+    """
+    routePath = "/downCheckData"
+
+    def __init__(self):
+        sheet_name = "设备列表"
+        formatted_time = datetime.now().strftime("%Y-%m-%S_%H_%M_%S")
+        super().__init__(sheet_name, f"检测结果__{formatted_time}.xlsx")
+        self._columns = None  # 防止重复调用columns() 时执行太多
+
+    def columns(self):
+        if self._columns:
+            return self._columns
+
+        code = "设备编码"
+        name = "名称"
+        category = f"设备类型"
+        ip = "IP地址"
+        vender = "厂商"
+        checkState = "检测状态"
+        checkDesc = "检测说明"
+        checkTime = "检测时间"
+        columns = [code,  name, category, ip, vender, checkState, checkTime, checkDesc, ]
+        col_type_mapping = {
+            code: "codeIndex",
+            name: "nameIndex",
+            category: "categoryIndex",
+            ip: "ipIndex",
+            vender: "venderIndex",
+            checkState: "checkStateIndex",
+            checkDesc: "checkDescIndex",
+            checkTime: "checkTimeIndex",
+        }
+        col_dict = {col_type_mapping[col]: idx for idx, col in enumerate(columns) if col in columns}
+
+        # 动态生成 TypedDict
+        # ColMap = TypedDict('ColMap', {v: int for v in col_dict.values()})
+        # colmap = ColMap(**col_dict)
+        self.columnsMap = columnsCheckTableMap(**col_dict)
+        return columns
+
+    async def _get_before(self, request: Request):
+        """
+        下载设备检测结果
+        """
+        select = (
+            Select(DevicePO.code, DevicePO.name, DevicePO.category, DevicePO.ip, DevicePO.vender, DevicePO.checkState, DevicePO.checkDesc, DevicePO.checkTime)
+            .filter(DevicePO.state == dict_state.enabled.val)
+            .order_by(DevicePO.checkState.asc())
+        )
+        result = await self._query(request, select,   isPO=False)
+        result = self._handler_output(result)
+        return result
+
+    def _handler_output(self,  itemList: list[list]):
+        """
+        导出数据
+        """
+        if itemList and len(itemList) > 0:
+            try:
+                result = []
+                columns = self.columns()
+                colMap = self.columnsMap
+                for item in itemList:
+                    result.append({
+                        columns[colMap.codeIndex]: item.get("code"),
+                        columns[colMap.nameIndex]: item.get("name"),
+                        columns[colMap.categoryIndex]: DeviceCategory.val2enum(item.get("category")).label,
+                        columns[colMap.ipIndex]:  item.get("ip"),
+                        columns[colMap.venderIndex]:  item.get("vender"),
+                        columns[colMap.checkStateIndex]:  item.get("checkState"),
+                        columns[colMap.checkDescIndex]:  item.get("checkDesc"),
+                        columns[colMap.checkTimeIndex]:  item.get("checkTime")
+
+                    })
+                return result
+            except Exception as e:
+                log.err(f"处理数据库数据to excell 的映射失败，{e}")
+        return None
+
+
 class DeviceImportView(ImportView):
+    """
+    导入设备
+    """
 
     def __init__(self):
         sheet_name = "设备列表"
@@ -139,12 +249,15 @@ class DeviceImportView(ImportView):
         state = "状态(1:启用 0:禁用)"
         username = "用户名（可空）"
         password = "密码（可空）"
-        columns = [code, category, name, ip, lng, lat, state, username, password]
+        vender = "厂商"
+
+        columns = [code, category, name, ip, vender, lng, lat, state, username, password]
         col_type_mapping = {
             code: "codeIndex",
             category: "categoryIndex",
             name: "nameIndex",
             ip: "ipIndex",
+            vender: "venderIndex",
             lng: "lngIndex",
             lat: "latIndex",
             state: "stateIndex",
@@ -152,6 +265,7 @@ class DeviceImportView(ImportView):
             password: "passwordIndex"
         }
         col_dict = {col_type_mapping[col]: idx for idx, col in enumerate(columns) if col in columns}
+
         # 动态生成 TypedDict
         # ColMap = TypedDict('ColMap', {v: int for v in col_dict.values()})
         # colmap = ColMap(**col_dict)
@@ -179,6 +293,7 @@ class DeviceImportView(ImportView):
                 category = try2int(item[colMap.categoryIndex])
                 name = str(item[colMap.nameIndex])
                 ip = self.paraserIP(item[colMap.ipIndex])
+                vender = str(item[colMap.venderIndex])
                 lng = str(item[colMap.lngIndex])
                 lat = str(item[colMap.latIndex])
                 state = try2int(item[colMap.stateIndex], 1)
@@ -188,41 +303,28 @@ class DeviceImportView(ImportView):
                     msg = f"IP地址{ip}格式错误"
                     return -1
                 exist = await db_tools.exist(dbSession, DevicePO.ip.__eq__(ip), column=DevicePO.id)
+                updateData = {
+                    DevicePO.code: code,
+                    DevicePO.category: category,
+                    DevicePO.name: name,
+                    DevicePO.lng: lng,
+                    DevicePO.lat: lat,
+                    DevicePO.state: state,
+                    DevicePO.userName: username,
+                    DevicePO.passwd: password,
+                    DevicePO.updateTime: datetime.now(),
+                    DevicePO.updateUser: userId,
+                    DevicePO.vender: vender
+                }
                 if exist:
                     # print(f"设备{ip}已存在", exist)
-                    updateSml = Update(DevicePO).filter(DevicePO.ip.__eq__(ip)).values(
-                        {
-                            DevicePO.code: code,
-                            DevicePO.category: category,
-                            DevicePO.name: name,
-                            DevicePO.lng: lng,
-                            DevicePO.lat: lat,
-                            DevicePO.state: state,
-                            DevicePO.userName: username,
-                            DevicePO.passwd: password,
-                            DevicePO.updateTime: datetime.now(),
-                            DevicePO.updateUser: userId
-                        }
-                    )
+                    updateSml = Update(DevicePO).filter(DevicePO.ip.__eq__(ip)).values(updateData)
                     result = await db_tools.execSQL(dbSession, updateSml)
                     if result > 0:
                         return 2
                 else:
-                    InsertSml = Insert(DevicePO).values(
-                        {
-                            DevicePO.code: code,
-                            DevicePO.name: name,
-                            DevicePO.category: category,
-                            DevicePO.ip: ip,
-                            DevicePO.lng: lng,
-                            DevicePO.lat: lat,
-                            DevicePO.state: state,
-                            DevicePO.userName: username,
-                            DevicePO.passwd: password,
-                            DevicePO.createTime: datetime.now(),
-                            DevicePO.createUser: userId
-                        }
-                    )
+                    updateData.update({DevicePO.ip: ip})
+                    InsertSml = Insert(DevicePO).values(updateData)
                     result = await db_tools.execSQL(dbSession, InsertSml)
                     if result > 0:
                         return 1

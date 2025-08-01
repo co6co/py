@@ -37,9 +37,11 @@ import {
 
 import * as api from '@/api/dev'
 
+
 export interface Item extends FormItemBase {
   id: number
   name: string
+  serialNumber?:string
   category: number
   code: string
   ip: string
@@ -47,7 +49,12 @@ export interface Item extends FormItemBase {
   lng: string
   userName: string
   passwd: string
-  state: number
+  state: number,
+  checkState?:string,
+  checkDesc?:string,
+  checkTime?:string
+  checkImgPath?:string
+  vender?:string 
 }
 
 //Omit、Pick、Partial、Required
