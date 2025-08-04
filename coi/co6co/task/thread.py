@@ -2,76 +2,84 @@ import asyncio
 from threading import Thread
 from time import sleep, ctime
 from co6co.utils import log
-from functools import partial
-from types import FunctionType
-from typing import Callable
+from functools import partial 
+from typing import Callable,Awaitable,Any, TypeVar 
 from co6co.utils import isCallable
-
-
+_T = TypeVar("_T")
+# 2. 自定义事件循环设置
+def create_event_loop():
+    """创建并配置自定义事件循环"""
+    # 创建新的事件循环  
+    custom_loop = asyncio.new_event_loop()
+    #print(f"创建自定义事件循环: {custom_loop} (ID: {id(custom_loop)})")
+    
+    # 将自定义循环设置为当前线程的默认循环
+    asyncio.set_event_loop(custom_loop)
+    return custom_loop
 class ThreadEvent:
     """
-    线程Event loop
-    Run Event Loop in different thread.
-
-    ## 因某些原因写了该类
-    ## 1. asyncio.run 在 没有正在运行的事件循环 的情况下运行协程的
-        ## wx_user_dict:list[dict]=asyncio.run(bll.get_subscribe_alarm_user(config.appid))
-        ## alarm= alarm_bll(app)
-        ## po:bizAlarmTypePO=asyncio.run(alarm.get_alram_type_desc(po.alarmType))
-        ## 2. 正在运行的事件循环
-        ## This event loop is already running
-        ## import nest_asyncio
-        ## loop = asyncio.get_event_loop()
-        ## wx_user_dict:list[dict]=loop.run_until_complete(bll.get_subscribe_alarm_user(config.appid))
-
-        ## 3. 创建任务
-        ## task=asyncio.create_task(bll.get_subscribe_alarm_user(config.appid))
-        ## wx_user_dict:list[dict]=asyncio.run(task)
-        ## 4.底层使用
-        ## asyncio.ensure_future(coro())
-        ## 5.
+    线程 Event loop
+    提供一个线程，执行任务
+    Run Event Loop in different thread. 
     """
     @property
     def loop(self):
-        return self._loop
+        return self._loop 
 
-    bck: FunctionType = None
-
-    def __init__(self, threadName: str = None, quitBck: FunctionType = None):
-        self._loop = asyncio.new_event_loop()
-        # log.warn(f"ThreadEventLoop:{id(self._loop)}")
+    def __init__(self, threadName: str = None, quitBck: Callable[[],None] = None):  
+        self._loop= create_event_loop()
+        self._loopStopBck = quitBck   
+        self.closed=False
         Thread(target=self._start_background, daemon=True, name=threadName) .start()
-        self.bck = quitBck
+        
 
-    def _start_background(self):
-        asyncio.set_event_loop(self.loop)
-        self._loop.run_forever()
-        if self.bck != None and isCallable(self.bck):
-            self.bck()
+    def _start_background(self):  
+        self.loop.run_forever()
+        if self._loopStopBck != None and isCallable(self._loopStopBck):
+            self._loopStopBck()
 
-    def runTask(self, tastFun, *args, **kwargs):
-        # log.warn(f"ThreadEventLoop22:{id(self._loop)}")
-        task = asyncio.run_coroutine_threadsafe(tastFun(*args, **kwargs), loop=self._loop)
+    def runTask(self, tastFun:Callable[..., Awaitable[Any]], *args, **kwargs):  
+        task = asyncio.run_coroutine_threadsafe(tastFun(*args, **kwargs), loop=self.loop)
         return task.result()
+    def run(self, fun:Callable[..., Any],bck:Callable[[asyncio.Handle],None]=None, *args, **kwargs ): 
+        """
+        执行普通方法
+
+        :param fun: 普通方法
+        :param bck: 回调方法,为取消任务提供handle
+                                        handle.cancel() 
+                                        handle.cancelled()#返回 True 表示回调已被取消
+                                        handle.done()#返回 True 表示回调已执行或已取消
+                                        handle.callback #获取原始回调函数
+                                        handle.args #获取传递给回调的位置参数
+        :param args: 普通方法参数
+        :param kwargs: 普通方法参数
+        :return: None
+        """
+        #fun,*args,**kwargs 
+        handle =self.loop.call_soon_threadsafe(partial(fun,*args,**kwargs))
+        if bck and isCallable(bck):
+            bck(handle) 
+            
 
     def _shutdown(self):
-        self._loop.stop()
-        # print("running:", self._loop.is_running()) #True
-        # print("closed.", self._loop.is_closed())   #False
+        if self._loop.is_running():
+            self.closed=True
+            self._loop.stop() 
+            self._loop.close()
 
     def close(self):
+        # 执行一个普通函数
         self._loop.call_soon_threadsafe(partial(self._shutdown))
 
     def __del__(self):
-        self._loop.close()
-        # log.warn("closed")
-        # print("running:", self._loop.is_running()) #False
-        # print("closed.", self._loop.is_closed())   #True
+        if not self.closed:
+            self.close() 
 
 
 class EventLoop:
     """
-    数据库操作
+    数据库操作 【对 ThreadEvent 简单封装】
     定义异步方法
     运行 result=run(异步方法,arg)
 
@@ -100,7 +108,7 @@ class EventLoop:
 
 class Executing:
     """
-    线程 自己执行自己退出
+    创建线程，以新的 look 执行一个 异步方法
     """
     _starting: bool = None
 
@@ -110,38 +118,33 @@ class Executing:
 
     @property
     def runing(self):
-        return self._starting
-
-    bck: FunctionType = None
-    args = None
-    kvgs = None
-
-    def __init__(self, threadName: str, func,   *args, **kvgs):
+        return self._starting 
+    def __init__(self, threadName: str, func:Callable[...,Awaitable[Any]],*args, **kvgs):
         '''
         threadName: 线程名
         func: 执行的方法 async   :Callable[[str], str]
         args:  func 参数
         kvgs: func 参数
-        '''
-        self._loop = asyncio.new_event_loop()
+        ''' 
         self._isCallClose = False
         self.threadName = threadName
-        self.bck = func
+        self.taskFunc = func
         self.args = args
         self.kvgs = kvgs
         Thread(target=self._start_background, daemon=True, name=threadName) .start()
 
-        def _start_background(self):
-            try:
-                asyncio.set_event_loop(self.loop)
-                log.log("线程'{}->{}'运行...".format(self.threadName, id(self.loop)))
-                self.loop.run_until_complete(self.bck(*self.args, **self.kvgs))
-                # await self.bck(*self.args,**self.kvgs)
-            except Exception as e:
-                log.warn("线程'{}->{}'执行出错:{}".format(self.threadName, id(self.loop), e))
-            finally:
-                log.log("线程'{}->{}'结束.".format(self.threadName, id(self.loop)))
-                self.loop.close()
+    def _start_background(self):
+        try: 
+            self._loop =create_event_loop() 
+            log.log("线程'{}->{}'运行...".format(self.threadName, id(self.loop)))
+            self._starting =True
+            self.loop.run_until_complete(self.taskFunc(*self.args, **self.kvgs)) 
+        except Exception as e:
+            log.warn("线程'{}->{}'执行出错:{}".format(self.threadName, id(self.loop), e))
+        finally:
+            log.log("线程'{}->{}'结束.".format(self.threadName, id(self.loop)))
+            self._starting =False
+            self.loop.close()
 
 
 class TaskManage:
@@ -153,13 +156,10 @@ class TaskManage:
 
     @property
     def runing(self):
-        return self._starting
-
-    bck: FunctionType = None
-
+        return self._starting 
     def __init__(self, threadName: str = None):
         self._loop = asyncio.new_event_loop()
-        self._isCallClose = False
+        self._loopClosed=False 
         self.threadName = threadName
         Thread(target=self._start_background, daemon=True, name=threadName) .start()
 
@@ -171,15 +171,18 @@ class TaskManage:
         log.log("线程'{}->{}'结束.".format(self.threadName, id(self.loop)))
         self._starting = False
 
-    def runTask(self, tastFun, callBck, *args, **kwargs):
+    def runTask(self, tastFun:Callable[...,Awaitable[Any]], callBck:Callable[[asyncio.Future[_T]], Any]=None, *args, **kwargs):
         """
-        不能回调 调用 close 因为还在执行中.
+        param tastFun: 异步方法
+        param callBck: 回调方法 [执行结果]，默认None,将直接返回tastFun执行的结果
+        param args: tastFun异步方法参数
+        param kwargs: tastFun异步方法参数
         """
         # log.warn(f"ThreadEventLoop22:{id(self._loop)}")
         # run_coroutine_threadsafe 从非事件循环线程向事件循环线程提交协程任务
         task = asyncio.run_coroutine_threadsafe(tastFun(*args, **kwargs), loop=self._loop)
         # .result() 方法等待协程的结果，或者使用 .add_done_callback() 添加回调来处理结果。
-        if callBck != None:
+        if callBck:
             task.add_done_callback(callBck)
         else:
             return task.result()
@@ -197,8 +200,8 @@ class TaskManage:
 
     def close(self):
         self._loop.call_soon_threadsafe(self._loop.close)
-        self._isCallClose = True
+        self._loopClosed=  True
 
     def __del__(self):
-        if not self._isCallClose:
+        if not self._loopClosed :
             self._loop.close()

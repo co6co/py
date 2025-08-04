@@ -57,6 +57,15 @@ class db_service:
         return create_engine(url, **setting)
 
     def createAsyncEngine(self, url, **kwargs) -> AsyncEngine:
+        """
+        创建异步引擎
+
+        如果如果要使用新的 new_event_loop
+        在调用该该方法的位置创建：
+            custom_loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(custom_loop)
+        create_async_engine 会自动使用当前event_loop来创建
+        """
         setting = {
             "pool_pre_ping": self.settings.get("pool_pre_ping"),
             "echo": True if type(self.settings.get("echo")) != bool else self.settings.get("echo"),
@@ -111,6 +120,25 @@ class db_service:
         pass
 
     def __init__(self, config: dict, engineUrl: str = None) -> None:
+        """
+        如果需使用新event_loop
+
+        请使用
+        async def main():
+            current_loop = asyncio.get_event_loop()
+            print(f"主函数中使用的事件循环: {current_loop} (ID: {id(current_loop)})")
+            db=db_service(...)
+            ....
+
+        loop=create_event_loop()
+        try:
+            loop.run_until_complete(main())
+        except:
+            pass
+        finally:
+            loop.close()
+        """
+
         self.settings = self.default_settings.copy()
         if engineUrl == None:
             self.settings .update(config)

@@ -2,7 +2,6 @@ import time
 from functools import wraps
 import random
 
-
 def clock(func):
     """
     装饰器函数，用于计算函数的执行时间
