@@ -1,71 +1,46 @@
-import asyncio
 from co6co.utils import log
-from sqlalchemy.ext.asyncio import AsyncSession, AsyncConnection, AsyncEngine
-from co6co_db_ext.db_session import db_service
-from typing import List
-import asyncio
-from sanic import Sanic
+from sqlalchemy.ext.asyncio import AsyncSession
+from .db_session import db_service, connectSetting
 from co6co.task.thread import ThreadEvent
 
 
-class DbSession:
-    """
-    创建 Session 
-    """
-    session: AsyncSession = None
-    engine: AsyncEngine = None
+class dbBll:
+    def __init__(self, *,  db_settings: connectSetting = {}) -> None:
+        self.t = ThreadEvent()
+        if not db_settings:
+            raise Exception("db_settings,参数不能为空")
 
-    def __init__(self, db_settings: dict) -> None:
-        _service = db_service(db_settings)
+        self.db_settings = db_settings
+        self.session = None
+        self.service = None
+        self.t.runTask(self.create_db)
+        self.closed = False
+
+    async def create_db(self):
+        # current_loop = asyncio.get_event_loop()
+        # print(f"主函数中使用的事件循环: {current_loop} (ID: {id(current_loop)}),{id(self.t.loop)}")
+        _service: db_service = db_service(self.db_settings)
         self.session: AsyncSession = _service.async_session_factory()
-        self.engine = _service.engine
-        '''
-        service:db_service=app.ctx.service
-        self.session:AsyncSession=service.async_session_factory()
-        '''
-        # log.warn(f"..创建session。。")
-        pass
-
-    def __del__(self) -> None:
-        if self.session:
-            asyncio.run(self.session.close)
-        # log.info(f"{self}...关闭session")
-
-    def __repr__(self) -> str:
-        return f'{self.__class__}'
-
-
-class BaseBll(DbSession):
-    """
-    数据库操作
-    定义异步方法
-    运行 result=run(异步方法,arg) 
-    """
-
-    _eventLoop: ThreadEvent
-
-    def __init__(self, db_settings: dict) -> None:
-        self._eventLoop = ThreadEvent()
-        super().__init__(db_settings)
+        self.service = _service
 
     def run(self, task, *args, **argkv):
-        data = self._eventLoop.runTask(task, *args, **argkv)
+        data = self.t.runTask(task, *args, **argkv)
         return data
 
-    def __del__(self) -> None:
-        if self.session:
-            self.run(self.session.close)
-            '''
-            conn: AsyncConnection = self.run(self.session.connection) 
-            self.run( conn.commit)
-            log.warn("关闭连接",conn._proxied.__hash__())
-            if not conn.closed: 
-                self.run(conn.close)
-            log.warn("关闭连接{}", conn.closed)
-            '''
-            # 不关闭 engine 会报 connect 关闭异常的错误
-            # 就算关闭连接也不行
-            self.run(self.engine.dispose)
+    def close(self):
+        self.closed = True
+        self.t.runTask(self.session.close)
+        self.t.runTask(self.service.engine.dispose)
+        self.t.close()
 
-        self._eventLoop.close()
-        # if self.session: await self.session.close()
+    def __str__(self):
+        return f'{self.__class__}'
+
+    def __del__(self) -> None:
+        try:
+            if not self.closed:
+                self.t.run(self.close)
+
+        except Exception as e:
+            log.warn("__del___ error", e)
+            pass

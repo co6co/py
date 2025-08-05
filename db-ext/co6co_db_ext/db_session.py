@@ -13,14 +13,26 @@ from sqlalchemy.orm import selectinload
 import asyncio
 import time
 import typing
-from typing import TypeVar
+from typing import TypeVar, TypedDict
 from co6co.utils import log
 from co6co_db_ext.po import BasePO
 from sqlalchemy.pool import NullPool
+from co6co.task.thread import ThreadEvent
+
+
+class connectSetting(TypedDict):
+    DB_HOST: str
+    DB_NAME: str
+    DB_USER: str
+    DB_PASSWORD: str
+    echo: bool
+    pool_size: int
+    max_overflow: int
+    pool_pre_ping: bool
 
 
 class db_service:
-    default_settings: dict = {
+    default_settings: connectSetting = {
         'DB_HOST': 'localhost',
         'DB_NAME': '',
         'DB_USER': 'root',
@@ -119,7 +131,7 @@ class db_service:
         self.base_model_session_ctx = ContextVar("session")
         pass
 
-    def __init__(self, config: dict, engineUrl: str = None) -> None:
+    def __init__(self, config: connectSetting, engineUrl: str = None) -> None:
         """
         如果需使用新event_loop
 
@@ -141,7 +153,7 @@ class db_service:
 
         self.settings = self.default_settings.copy()
         if engineUrl == None:
-            self.settings .update(config)
+            self.settings.update(config)
             engineUrl = "mysql+aiomysql://{}:{}@{}/{}".format(self.settings['DB_USER'], self.settings['DB_PASSWORD'], self.settings['DB_HOST'], self.settings['DB_NAME'])
         self.url = engineUrl
         self._createEngine(engineUrl)

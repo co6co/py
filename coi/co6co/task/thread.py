@@ -2,20 +2,24 @@ import asyncio
 from threading import Thread
 from time import sleep, ctime
 from co6co.utils import log
-from functools import partial 
-from typing import Callable,Awaitable,Any, TypeVar 
+from functools import partial
+from typing import Callable, Awaitable, Any, TypeVar
 from co6co.utils import isCallable
 _T = TypeVar("_T")
 # 2. 自定义事件循环设置
+
+
 def create_event_loop():
     """创建并配置自定义事件循环"""
-    # 创建新的事件循环  
+    # 创建新的事件循环
     custom_loop = asyncio.new_event_loop()
-    #print(f"创建自定义事件循环: {custom_loop} (ID: {id(custom_loop)})")
-    
+    # print(f"创建自定义事件循环: {custom_loop} (ID: {id(custom_loop)})")
+
     # 将自定义循环设置为当前线程的默认循环
     asyncio.set_event_loop(custom_loop)
     return custom_loop
+
+
 class ThreadEvent:
     """
     线程 Event loop
@@ -24,24 +28,24 @@ class ThreadEvent:
     """
     @property
     def loop(self):
-        return self._loop 
+        return self._loop
 
-    def __init__(self, threadName: str = None, quitBck: Callable[[],None] = None):  
-        self._loop= create_event_loop()
-        self._loopStopBck = quitBck   
-        self.closed=False
+    def __init__(self, threadName: str = None, quitBck: Callable[[], None] = None):
+        self._loop = create_event_loop()
+        self._loopStopBck = quitBck
+        self.closed = False
         Thread(target=self._start_background, daemon=True, name=threadName) .start()
-        
 
-    def _start_background(self):  
+    def _start_background(self):
         self.loop.run_forever()
         if self._loopStopBck != None and isCallable(self._loopStopBck):
             self._loopStopBck()
 
-    def runTask(self, tastFun:Callable[..., Awaitable[Any]], *args, **kwargs):  
+    def runTask(self, tastFun: Callable[..., Awaitable[Any]], *args, **kwargs):
         task = asyncio.run_coroutine_threadsafe(tastFun(*args, **kwargs), loop=self.loop)
         return task.result()
-    def run(self, fun:Callable[..., Any],bck:Callable[[asyncio.Handle],None]=None, *args, **kwargs ): 
+
+    def run(self, fun: Callable[..., Any], bck: Callable[[asyncio.Handle], None] = None, *args, **kwargs):
         """
         执行普通方法
 
@@ -56,25 +60,25 @@ class ThreadEvent:
         :param kwargs: 普通方法参数
         :return: None
         """
-        #fun,*args,**kwargs 
-        handle =self.loop.call_soon_threadsafe(partial(fun,*args,**kwargs))
+        # fun,*args,**kwargs
+        handle = self.loop.call_soon_threadsafe(partial(fun, *args, **kwargs))
         if bck and isCallable(bck):
-            bck(handle) 
-            
+            bck(handle)
 
     def _shutdown(self):
-        if self._loop.is_running():
-            self.closed=True
-            self._loop.stop() 
-            self._loop.close()
+        # self._loop.close() -> self._loop.is_running=false
+        if not self.closed and self._loop.is_running():
+            self.closed = True
+            self._loop.stop()
 
     def close(self):
         # 执行一个普通函数
         self._loop.call_soon_threadsafe(partial(self._shutdown))
 
     def __del__(self):
-        if not self.closed:
-            self.close() 
+        #
+        if self._loop.is_running():
+            self._loop.close()
 
 
 class EventLoop:
@@ -118,14 +122,15 @@ class Executing:
 
     @property
     def runing(self):
-        return self._starting 
-    def __init__(self, threadName: str, func:Callable[...,Awaitable[Any]],*args, **kvgs):
+        return self._starting
+
+    def __init__(self, threadName: str, func: Callable[..., Awaitable[Any]], *args, **kvgs):
         '''
         threadName: 线程名
         func: 执行的方法 async   :Callable[[str], str]
         args:  func 参数
         kvgs: func 参数
-        ''' 
+        '''
         self._isCallClose = False
         self.threadName = threadName
         self.taskFunc = func
@@ -134,16 +139,16 @@ class Executing:
         Thread(target=self._start_background, daemon=True, name=threadName) .start()
 
     def _start_background(self):
-        try: 
-            self._loop =create_event_loop() 
+        try:
+            self._loop = create_event_loop()
             log.log("线程'{}->{}'运行...".format(self.threadName, id(self.loop)))
-            self._starting =True
-            self.loop.run_until_complete(self.taskFunc(*self.args, **self.kvgs)) 
+            self._starting = True
+            self.loop.run_until_complete(self.taskFunc(*self.args, **self.kvgs))
         except Exception as e:
             log.warn("线程'{}->{}'执行出错:{}".format(self.threadName, id(self.loop), e))
         finally:
             log.log("线程'{}->{}'结束.".format(self.threadName, id(self.loop)))
-            self._starting =False
+            self._starting = False
             self.loop.close()
 
 
@@ -156,10 +161,11 @@ class TaskManage:
 
     @property
     def runing(self):
-        return self._starting 
+        return self._starting
+
     def __init__(self, threadName: str = None):
         self._loop = asyncio.new_event_loop()
-        self._loopClosed=False 
+        self._loopClosed = False
         self.threadName = threadName
         Thread(target=self._start_background, daemon=True, name=threadName) .start()
 
@@ -171,7 +177,7 @@ class TaskManage:
         log.log("线程'{}->{}'结束.".format(self.threadName, id(self.loop)))
         self._starting = False
 
-    def runTask(self, tastFun:Callable[...,Awaitable[Any]], callBck:Callable[[asyncio.Future[_T]], Any]=None, *args, **kwargs):
+    def runTask(self, tastFun: Callable[..., Awaitable[Any]], callBck: Callable[[asyncio.Future[_T]], Any] = None, *args, **kwargs):
         """
         param tastFun: 异步方法
         param callBck: 回调方法 [执行结果]，默认None,将直接返回tastFun执行的结果
@@ -200,8 +206,8 @@ class TaskManage:
 
     def close(self):
         self._loop.call_soon_threadsafe(self._loop.close)
-        self._loopClosed=  True
+        self._loopClosed = True
 
     def __del__(self):
-        if not self._loopClosed :
+        if not self._loopClosed:
             self._loop.close()

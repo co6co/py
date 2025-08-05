@@ -18,7 +18,8 @@ import typing
 from sanic.log import logger
 from sanic import Blueprint, Request
 from typing import TypeVar
-from co6co_db_ext.db_session import db_service
+from co6co_db_ext.db_session import db_service,  connectSetting
+from co6co_db_ext.session import dbBll
 import multiprocessing
 
 
@@ -73,3 +74,11 @@ def injectDbSessionFactory(app: Sanic, settings: dict = {}, engineUrl: str = Non
             except Exception as e:
                 logger.err(e)
                 # logger.error("close DbSession。Error")
+
+
+class BaseBll(dbBll):
+    def __init__(self, *,  db_settings: connectSetting = {}, app: Sanic = None) -> None:
+        if not db_settings:
+            app = app or Sanic.get_app()
+            db_settings = app.config.db_settings
+        super().__init__(db_settings=db_settings)

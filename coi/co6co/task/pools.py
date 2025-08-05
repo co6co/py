@@ -4,6 +4,7 @@ import queue
 import asyncio
 import threading
 from typing import Callable, Tuple, Any
+import asyncio
 
 
 async def timeout_async(timeout, func, *args, **kwargs):
@@ -77,3 +78,21 @@ class limitThreadPoolExecutor(ThreadPoolExecutor):
         super().__init__(max_workers, thread_name_prefix)
         # 不甚至将时无限队列长度
         self._work_queue = queue.Queue(self._max_workers * 2)  # 设置队列大小
+
+    async def async_task(self, sync_task: Callable[..., Any], *args, **kwargs):
+        """
+        使用 loop执行
+        @parm sync_task 执行同步方法
+        @... sync_task 需要的参数 
+        
+        # 运行事件循环 
+        loop.run_until_complete(self.async_task(task,1,2,3,k=1)) 
+        # 关闭线程池
+        self.shutdown()
+        
+       
+        """
+        loop: asyncio.AbstractEventLoop = asyncio.get_event_loop()
+        # 将同步函数提交到线程池，由事件循环管理
+        result = await loop.run_in_executor(self, sync_task, *args, **kwargs)
+        return result
