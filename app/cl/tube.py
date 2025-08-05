@@ -1,3 +1,4 @@
+
 import requests
 from requests.adapters import HTTPAdapter
 from urllib3.util import Retry
@@ -8,7 +9,7 @@ from pytubefix.cli import on_progress, display_progress_bar
 from pytubefix import Playlist, request
 from pytubefix.streams import logger
 from co6co import getByteUnit
-from co6co.utils import convert_size
+from co6co.utils import convert_size,log
 from typing import List
 from co6co.task.pools import limitThreadPoolExecutor
 from concurrent.futures import Future
@@ -25,13 +26,14 @@ proxys = {"http": "http://127.0.0.1:10809", "https": "http://127.0.0.1:10809"}
 
 def stream(url,
            timeout=socket._GLOBAL_DEFAULT_TIMEOUT,
-           max_retries=0):
+           max_retries=0,downloaded:int=0,file_size:int=0):
     """Read the response in chunks.
     :param str url: The URL to perform the GET request for.
     :rtype: Iterable[bytes]
     """
-    file_size: int = request. default_range_size  # fake filesize to start
-    downloaded = 0
+    if not file_size:
+        file_size: int = request.default_range_size  # fake filesize to start 
+    log.warn(f"文件大小：{downloaded}/{file_size}")
     while downloaded < file_size:
         stop_pos = min(downloaded + request. default_range_size, file_size) - 1
         range_header = f"bytes={downloaded}-{stop_pos}"
@@ -89,10 +91,8 @@ def stream(url,
     return  # pylint: disable=R1711
 
 
-request.stream = stream
-
-
-def StreamDownload(self,
+request.stream = stream 
+def StreamDownload(self:Stream,
                    output_path: Optional[str] = None,
                    filename: Optional[str] = None,
                    filename_prefix: Optional[str] = None,
@@ -101,7 +101,7 @@ def StreamDownload(self,
                    max_retries: Optional[int] = 0,
                    mp3: bool = False,
                    remove_problematic_character: str = None) -> str:
-
+    print("00000")
     if remove_problematic_character:
         filename = self.title.replace(remove_problematic_character, "")
 
@@ -116,28 +116,29 @@ def StreamDownload(self,
         output_path=output_path,
         filename_prefix=filename_prefix,
     )
-    # 获取本地文件已存在的大小
-    existing_size = 0
-    if self.exists_at_path(file_path):
-        logger.debug(f'file {file_path} already exists, skipping')
-        self.on_complete(file_path)
-        return file_path
-
-    existing_size = os.path.getsize(file_path)
-    logger.debug(f"本地文件已存在，大小为 {existing_size} 字节")
+    # 获取本地文件已存在的大小 
+    #if self.exists_at_path(file_path):
+    #    logger.debug(f'file {file_path} already exists, skipping')
+    #    self.on_complete(file_path)
+    #    return file_path
+    existing_size=0
+    if os.path.exists(file_path):
+        existing_size = os.path.getsize(file_path)
+    print(f"文件大小为 {existing_size}/{self.filesize } 字节" )
     # 计算剩余需要下载的字节数
-    bytes_remaining = self.filesize - existing_size if self.filesize else None
-    # print("文件大小",bytes_remaining)
-
+    bytes_remaining = self.filesize - existing_size if self.filesize else None 
     with open(file_path, "ab") as fh:
         try:
             if existing_size:
-                self.on_progress(existing_size, fh, bytes_remaining)
+                data=bytes()
+                # 不写入字节
+                self.on_progress(data, fh, bytes_remaining) 
             for chunk in request.stream(
                 self.url,
                 timeout=timeout,
                 max_retries=max_retries,
-                downloaded=existing_size
+                downloaded=existing_size ,
+                file_size=self.filesize
             ):
                 # reduce the (bytes) remainder by the length of the chunk.
                 bytes_remaining -= len(chunk)
@@ -205,119 +206,8 @@ def getInt(tip, default=-1):
     except:
         return default
 
-
-def download_with_resume(stream: Stream, output_path=None, filename=None):
-    file_size = stream.filesize
-    if output_path is None:
-        output_path = os.getcwd()
-    if filename is None:
-        filename = stream.default_filename
-    # stream.title
-    # stream.mime_type
-    print("下载文件名：", filename)
-    file_path = os.path.join(output_path, filename)
-    temp_file = file_path + '.part'
-
-    # 检查是否有临时文件（即是否有未完成的下载）
-    downloaded = 0
-    if os.path.exists(temp_file):
-        downloaded = os.path.getsize(temp_file)
-        if downloaded < file_size:
-            print(f"从 {downloaded} 字节开始继续下载...")
-        else:
-            # 如果临时文件大小等于或大于文件总大小，删除临时文件重新下载
-            os.remove(temp_file)
-            downloaded = 0
-
-    # 如果已经下载完成，直接返回
-    if downloaded == file_size:
-        if os.path.exists(temp_file):
-            os.rename(temp_file, file_path)
-        print(f"文件已下载完成: {file_path}")
-        return file_path
-
-    # 开始下载或继续下载
-    headers = {'Range': f'bytes={downloaded}-'} if downloaded else {}
-
-    with requests.get(stream.url, headers=headers, stream=True) as r:
-        r.raise_for_status()
-        mode = 'ab' if downloaded else 'wb'
-        with open(temp_file, mode) as f:
-            for chunk in r.iter_content(chunk_size=8192):
-                f.write(chunk)
-
-    # 下载完成后，将临时文件重命名为最终文件名
-    os.rename(temp_file, file_path)
-    print(f"下载完成: {file_path}")
-    return file_path
-
-
-class ResumableStream(Stream):
-    def create(stream: Stream, yt: YouTube):
-        stream = ResumableStream(stream_dict=stream.__dict__, monostate=stream._monostate)
-        return stream
-
-    def __init__(self, stream, monostate, chunk_size=8192):
-        super().__init__(stream, monostate)
-        self.chunk_size = chunk_size
-
-    def set_chunk_size(self, size):
-        """设置下载块大小
-        Args:
-            size: 新的块大小（字节）
-        """
-        self.chunk_size = size
-
-    def download(self, output_path=None, filename=None, skip_existing=True):
-        file_size = self.filesize
-
-        if output_path is None:
-            output_path = os.getcwd()
-        if filename is None:
-            filename = self.default_filename
-
-        file_path = os.path.join(output_path, filename)
-        temp_file = file_path + '.part'
-
-        # 检查是否有临时文件（即是否有未完成的下载）
-        downloaded = 0
-        if os.path.exists(temp_file):
-            downloaded = os.path.getsize(temp_file)
-            if downloaded < file_size:
-                print(f"从 {downloaded} 字节开始继续下载...")
-            else:
-                # 如果临时文件大小等于或大于文件总大小，删除临时文件重新下载
-                os.remove(temp_file)
-                downloaded = 0
-
-        # 如果已经下载完成，直接返回
-        if downloaded == file_size:
-            if os.path.exists(temp_file):
-                os.rename(temp_file, file_path)
-            print(f"文件已下载完成: {file_path}")
-            return file_path
-
-         # 开始下载或继续下载
-        headers = {'Range': f'bytes={downloaded}-'} if downloaded else {}
-        try:
-            with requests.get(self.url, headers=headers, proxies=proxys, stream=True, timeout=10) as r:
-                r.raise_for_status()
-                mode = 'ab' if downloaded else 'wb'
-                with open(temp_file, mode) as f:
-                    # 使用自定义块大小进行下载
-                    for chunk in r.iter_content(chunk_size=self.chunk_size):
-                        if chunk:  # 过滤掉空块
-                            f.write(chunk)
-        except Exception as e:
-            print(f"下载过程中发生错误: {e}")
-            return None
-
-        # 下载完成后，将临时文件重命名为最终文件名
-        os.rename(temp_file, file_path)
-        print(f"下载完成: {file_path} (块大小: {self.chunk_size} 字节)")
-        return file_path
-
-
+ 
+ 
 class DownLoad:
     streams: List[Stream] = None
     captions: List[Caption] = None
@@ -382,17 +272,20 @@ class DownLoad:
     def _downloadVideo(self, itag: int):
         """
         下载视频或音频
-        """
-
+        """ 
         checkedList = [i for i in self.youtTube.streams.all() if i.itag == itag]
         for stream in checkedList:
-            # self.youtTube.fmt_streams
-            # stream_dict= self.youtTube.streams.get_highest_resolution().stream_dict
-            # ResumableStream(stream.to_dict)
-            stream.download = StreamDownload.__get__(stream, Stream)  # 绑定方法到实例
-            filePath = stream.download(output_path=self.downloadFolder, filename_prefix=itag, max_retries=100, timeout=600, skip_existing=False)
-            # filePath=download_with_resume(stream,self.downloadFolder)
-            print(f"{self.title},保存到{filePath}")
+            try:
+                # self.youtTube.fmt_streams
+                # stream_dict= self.youtTube.streams.get_highest_resolution().stream_dict 
+                stream.download = StreamDownload.__get__(stream, Stream)  # 绑定方法到实例
+                filePath = stream.download(output_path=self.downloadFolder, filename_prefix=itag, max_retries=100, timeout=600, skip_existing=False)
+                 
+                print(f"{self.title},保存到{filePath}")
+            except Exception as e:
+                print("下载异常", e) 
+                log.err("ddd",e)
+            
 
     def _downLoadHighestResolution(self):
         """
@@ -404,6 +297,7 @@ class DownLoad:
             stream.download(output_path=self.downloadFolder, skip_existing=False)
         except Exception as e:
             print("下载异常", e)
+            log.err("ddd",e)
             raise e
 
     def printCaption(self):
