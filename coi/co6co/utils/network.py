@@ -3,6 +3,8 @@ import socket
 import struct
 import time
 import select
+import subprocess
+import platform
 
 
 def check_port(host, port) -> tuple[bool, str]:
@@ -93,8 +95,10 @@ def ping_host(host: str, timeout: int = 2, count: int = 2):
         bool: 主机可达返回True,否则返回False
     """
     try:
-        # 创建原始套接字
+        
         with socket.socket(socket.AF_INET, socket.SOCK_RAW, socket.IPPROTO_ICMP) as my_socket:
+            # 设置超时
+            my_socket.settimeout(timeout)
             # 获取主机IP
             try:
                 host_ip = socket.gethostbyname(host)
@@ -148,5 +152,31 @@ def ping_host(host: str, timeout: int = 2, count: int = 2):
             return False
 
     except socket.error:
+        print(f"套接字错误: {e}")
+        if "permission denied" in str(e).lower() or "权限" in str(e):
+            print("需要管理员权限才能运行此程序")
         # 处理权限错误等
-        return False
+        return False        
+
+
+def ping(ip_address, count=4):
+    """
+     ping指定的IP地址
+    
+    参数:
+        ip_address (str): 要ping的IP地址
+        count (int): ping的次数，默认4次
+        
+    返回:
+        tuple: (是否成功, 输出结果)
+    """
+    # 根据操作系统确定ping命令的参数
+    param = '-n' if platform.system().lower() == 'windows' else '-c' 
+    # 构建ping命令
+    command = ['ping', param, str(count), ip_address] 
+    try:
+        # 执行ping命令
+        output = subprocess.check_output(command, stderr=subprocess.STDOUT, universal_newlines=True)
+        return (True, output)
+    except subprocess.CalledProcessError as e:
+        return (False, e.output)

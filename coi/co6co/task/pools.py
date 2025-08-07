@@ -1,10 +1,10 @@
 
 from concurrent.futures import ThreadPoolExecutor
+import netrc
 import queue
 import asyncio
 import threading
-from typing import Callable, Tuple, Any
-import asyncio
+from typing import Callable, Tuple, Any,List 
 
 
 async def timeout_async(timeout, func, *args, **kwargs):
@@ -67,6 +67,10 @@ class limitThreadPoolExecutor(ThreadPoolExecutor):
     """
     限制进程池队列长度（默认队列长度无限）
     防止内存爆满的问题
+    //2025-08-07
+    //todo 任务中存在 ping + db +event_loop 会卡死未找到原因！
+    // 可下面类 ThreadPool 替代
+
 
     # .shutdown(wait=True)
     # True  =>会阻塞主线程，直到 task 任务完成
@@ -96,3 +100,54 @@ class limitThreadPoolExecutor(ThreadPoolExecutor):
         # 将同步函数提交到线程池，由事件循环管理
         result = await loop.run_in_executor(self, sync_task, *args, **kwargs)
         return result
+
+class ThreadPool:
+    """
+    线程池
+    使用示例
+    def task(num):
+        print(f"任务 {num} 开始执行")
+        time.sleep(1)
+        print(f"任务 {num} 执行完毕")
+        
+    pool = ThreadPool(max_workers=3)
+    for i in range(5):
+        # n=i 来 "冻结" 当前的 i 值，而不是让 lambda 函数在执行时才去查找 i 变量（此时可能已被修改）
+        pool.submit(lambda n=i: task(n)) 
+    pool.join()
+    """
+    def __init__(self, max_workers:int=4):
+        if not max_workers or max_workers<=0:
+            raise ValueError("max_workers must be greater than 0") 
+        self.max_workers = max_workers
+        self.task_queue = queue.Queue(max_workers)
+        self.workers:List[ threading.Thread] = []
+        self._create_workers()
+    
+    def _create_workers(self):
+        for _ in range(self.max_workers):
+            worker = threading.Thread(target=self._worker)
+            worker.daemon = True
+            worker.start()
+            self.workers.append(worker)
+    
+    def _worker(self):
+        while True:
+            task = self.task_queue.get()
+            if task is None:
+                break
+            try:
+                task()
+            finally:
+                self.task_queue.task_done()
+    
+    def submit(self, task):
+        self.task_queue.put(task)
+    
+    def join(self):
+        self.task_queue.join()
+        # 发送终止信号
+        for _ in range(self.max_workers):
+            self.task_queue.put(None)
+        for worker in self.workers:
+            worker.join()

@@ -14,4 +14,9 @@
   - 执行增加超时
 0.1.2
   - 升级 基础模块
+      co6co>=0.0.33
+      co6co.sanic-ext==0.0.13
+      co6co.db-ext==0.0.17
+      co6co.web-db==0.0.18
+      co6co.permissions==0.1.0
 ```
