@@ -10,7 +10,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.sql import text
 from co6co_db_ext.db_utils import db_tools 
 class DemoPO(BasePO): 
-    __tablename__ = "demo"
+    __tablename__ = "demo2"
     id = Column("id", Integer, comment="主键",  autoincrement=True, primary_key=True)
     name = Column("name", String(64),  comment="名称") 
     code = Column("code", String(64),  comment="编码")
@@ -49,9 +49,8 @@ def updateDb(name,code,age):
 
 
 def main():
-    with ThreadPoolExecutor(4, "插入更新数据") as executor:
-        for i in range(650,680,3):
-
+    with ThreadPoolExecutor(1, "插入更新数据") as executor:
+        for i in range(650,680,3): 
             print("index->",i)
             future0=executor.submit(updateDb,"test"+str(i),"123_"+str(i),18+i)
             updated0,result0=future0.result() 
