@@ -9,7 +9,8 @@ from co6co_db_ext.session import dbBll
 
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.sql import text
-from co6co_db_ext.db_utils import db_tools 
+#from co6co_db_ext.db_utils import db_tools 
+from db_utils import db_tools
 from co6co.utils import log 
 
 class DemoPO(BasePO): 
@@ -41,7 +42,7 @@ async def update(session:AsyncSession, name,code,age):
     except Exception as e:
         print("error,update,",e)
 def createDB():
-    bll=dbBll(db_settings={"DB_HOST":"localhost","DB_PORT":3306,"DB_USER":"root","DB_PASSWORD":"mysql123456","DB_NAME":"test","echo":False})
+    bll=dbBll(db_settings={"DB_HOST":"localhost","DB_PORT":3306,"DB_USER":"root","DB_PASSWORD":"mysql123456","DB_NAME":"test","echo":True}) 
     return bll 
 def updateDb(name,code,pingResult):
     bll=createDB()
@@ -56,9 +57,10 @@ def updateDb(name,code,pingResult):
 def check(ip:str): 
     return ping_host(ip)
 def check2(name,code):
-    import time
-    time.sleep(5)
-    return True,1
+    #import time
+    #time.sleep(5)
+    #return True,1
+    result=ping_host(name) 
     updated0, result0=updateDb(name,code,result)  
     log.succ(f"{name}{'更新' if updated0 else '插入'} 影响行数：{result0}")
     return updated0, result0
@@ -78,7 +80,9 @@ def result2(f: Future):
         print(f"执行任务发生错误: {f.exception()}")
     else:  
         result = f.result()  
-        log.succ(result)
+        name=f.name 
+        updated0, result0=result 
+        log.succ(f"{name}{'更新' if updated0 else '插入'} 影响行数：{result0}")
 
  
     
@@ -92,12 +96,19 @@ def poolWork(item:dict):
     
 def main():
     bll=createDB() 
+    bll.service.sync_init_tables()
     list=bll.run(db_tools.execForMappings,bll.session,text("select * from demo")) 
+    print(list,len(list))
+    if not list:
+        ips=[f'192.168.1.{i}' for i in range(1,255)]
+        for index, ip in enumerate( ips):
+            list.append({"name":ip,"code":index,"id":index})  
+    bll.run(bll.session.commit) 
     bll.close() 
     #
     # //todo  需要解决 limitThreadPoolExecutor 使用 bllDb + ping 卡死问题
     #
-    with ThreadPoolExecutor(2, "thread_pool") as executor :   
+    with ThreadPoolExecutor(1, "thread_pool") as executor :   
         
         #results=list(executor.map(check2,list))
         #print("所有结果：", results)
@@ -111,9 +122,9 @@ def main():
             future0=executor.submit(check2,name,code )
             future0.code=code
             future0.name=name
-            #future0.add_done_callback(result2)
-            updated0,result0=future0.result() 
-            print(f"{"更新" if updated0 else "插入"} 影响行数：",result0) 
+            future0.add_done_callback(result2)
+            #updated0,result0=future0.result() 
+            #print(f"{"更新" if updated0 else "插入"} 影响行数：",result0) 
     #pool=ThreadPool(max_workers=20)
     #for item in list:   
     #    item:dict=item  
