@@ -4,7 +4,9 @@ import netrc
 import queue
 import asyncio
 import threading
-from typing import Callable, Tuple, Any,List 
+from typing import Callable, Tuple, Any,List ,TypeVar
+
+RT = TypeVar('RT')
 
 
 async def timeout_async(timeout, func, *args, **kwargs):
@@ -83,23 +85,24 @@ class limitThreadPoolExecutor(ThreadPoolExecutor):
         # 不甚至将时无限队列长度
         self._work_queue = queue.Queue(self._max_workers * 2)  # 设置队列大小
 
-    async def async_task(self, sync_task: Callable[..., Any], *args, **kwargs):
+    def async_task(self, sync_task: Callable[..., RT],  *args,loop:asyncio.AbstractEventLoop=None):
+
         """
         使用 loop执行
+
         @parm sync_task 执行同步方法
+            同一个sync_task 不能执行有多种IO的操作,遇到的情况[网络,数据库出现卡死情况]
+ 
         @... sync_task 需要的参数 
         
         # 运行事件循环 
         loop.run_until_complete(self.async_task(task,1,2,3,k=1)) 
         # 关闭线程池
-        self.shutdown()
-        
-       
+        self.shutdown() 
         """
         loop: asyncio.AbstractEventLoop = asyncio.get_event_loop()
         # 将同步函数提交到线程池，由事件循环管理
-        result = await loop.run_in_executor(self, sync_task, *args, **kwargs)
-        return result
+        return loop.run_in_executor(self, sync_task, *args ) 
 
 class ThreadPool:
     """

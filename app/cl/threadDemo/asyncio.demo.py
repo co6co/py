@@ -10,7 +10,7 @@ from sqlalchemy.sql import text
 from db_utils import db_tools
 from co6co.utils import log
 from co6co_db_ext.po import BasePO
-from sqlalchemy import Integer , Column,  String, DateTime
+from sqlalchemy import Integer , Column,  String, DateTime, column
 class DemoPO(BasePO): 
     __tablename__ = "demo2"
     id = Column("id", Integer, comment="主键",  autoincrement=True, primary_key=True)
@@ -26,7 +26,8 @@ def blocking_ping(ip: str) -> bool:
 # 异步的 update 函数（与原代码相同）
 async def update(session: AsyncSession, name, ip, age):
     try:
-        exist = await db_tools.exist(session, DemoPO.ip.__eq__(ip))
+        exist = await db_tools.exist(session, DemoPO.ip.__eq__(ip),column=DemoPO.id)
+
         if exist:
             result = await db_tools.execSQL(
                 session, 
@@ -65,8 +66,11 @@ def upload_sync(name: str, ip: str, age: int) -> tuple:
         return result
     finally:
         bll.close()
-
-
+def checkAll(name: str, ip: str, age: int):
+    ping_result=blocking_ping(ip)
+    db_age = age if ping_result else 28 
+    db_task= upload_sync(name, ip, db_age)
+    return db_task
 
 # 异步主函数
 async def main():
@@ -83,16 +87,8 @@ async def main():
             ip = f"192.168.1.{i}"
             name = f"test{i}" 
             age = 18 + i
-            print("ip->",ip)
-            # 使用线程池执行阻塞的 ping 操作
-            ping_task = loop.run_in_executor(executor, blocking_ping, ip)
-            ping_result = await ping_task
-            log.info(f"Ping {ip}: {ping_result}") 
-            # 根据 ping 结果决定数据库操作的年龄值
-            db_age = 18 if ping_result else 28
-
-            # 使用线程池执行阻塞的数据库操作
-            db_task = loop.run_in_executor(executor, upload_sync, name, ip, db_age)
+            print("ip->",ip ,"...") 
+            db_task=executor.async_task(checkAll,name, ip, age) 
             tasks.append(db_task)
 
         # 等待所有数据库操作完成
