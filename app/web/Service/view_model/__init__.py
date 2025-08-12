@@ -21,7 +21,6 @@ class ImportView(AuthMethodView, AbsImport):
     def columns(self):
         columns = []
         raise OverflowError("子类必须实现columns方法")
-        return columns
 
     async def head(self, request: Request):
         """
@@ -29,12 +28,22 @@ class ImportView(AuthMethodView, AbsImport):
         """
         return await self.response_head(self.template_length, self.templateFileName)
 
+    async def _get_before(self, request: Request):
+        """
+        获取前处理
+
+        需要子类实现 
+        """
+        return None
+
     async def get(self, request: Request):
         """
         获取模板文件
         """
         try:
-            binary_data = self.template()
+            data = await self._get_before(request)
+
+            binary_data = self.template(data)
             headers = {
                 "Content-Disposition": f'attachment; filename="{self.templateFileName}"'
             }

@@ -4,7 +4,6 @@ from sanic import Request
 from co6co_sanic_ext.model.res.result import Result
 from co6co_permissions.view_model.base_view import BaseMethodView
 
-
 import requests
 from sqlalchemy.sql import Select, Delete
 from co6co_permissions.model.pos.other import sysConfigPO

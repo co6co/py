@@ -4,7 +4,9 @@ from co6co.utils import log, try_except
 import os
 from model.pos.tables import DevicePO
 import cv2
-from co6co_permissions.services.bllConfig import config_bll, BaseBll, config_bll2
+from co6co_permissions.services.bllConfig import config_bll
+from co6co_db_ext .session import dbBll
+from co6co_web_db.services.db_service import BaseBll
 from co6co_db_ext.db_utils import QueryListCallable, db_tools
 from co6co.utils import log
 from co6co_permissions.model.enum import dict_state
@@ -14,7 +16,7 @@ from co6co.utils import getDateFolder
 from pathlib import Path
 from co6co_sanic_ext import sanics
 from urllib.parse import quote
-from co6co.task.pools import limitThreadPoolExecutor,  ThreadPoolExecutor
+from co6co.task.pools import limitThreadPoolExecutor, ThreadPool
 from concurrent.futures import Future
 from co6co.task.utils import Timer
 import time
@@ -23,8 +25,6 @@ from co6co.utils import network
 from datetime import datetime
 from co6co_web_db.services.cacheManage import CacheManage
 from sqlalchemy.ext.asyncio import AsyncSession
-
-import asyncio
 
 
 class TableEntry(TypedDict):
@@ -77,12 +77,16 @@ class DeviceCuptureImage(ICustomTask):
         cache = CacheManage()
         return cache.get(DeviceCuptureImage.root_cache_key)
 
+    def createDbBll(self):
+        #db_settings = {"DB_HOST": "localhost", "DB_PORT": 3306, "DB_USER": "root", "DB_PASSWORD": "mysql123456", "DB_NAME": "dggy_db", "echo": True}
+        # return config_bll(db_settings=db_settings) 
+        return BaseBll( )
+
     def __init__(self):
-        # self.loop = asyncio.new_event_loop()
         super().__init__()
-        # userName, password, root, date = DeviceCuptureImage.queryConfig()
-        # self.root = root
-        # DeviceCuptureImage.setCapImgRootCache(root)
+        userName, password, root, date = DeviceCuptureImage.queryConfig()
+        self.root = root
+        DeviceCuptureImage.setCapImgRootCache(root)
         self._deviceCount = 0
 
     def getSubPath(self, filePath: str):
@@ -112,25 +116,27 @@ class DeviceCuptureImage(ICustomTask):
             return []
 
     async def update_state_to_db_task(self, session: AsyncSession, ip: str, checkState: DeviceCheckState, stateDesc: str = None, imgPath: str = None):
-        if not stateDesc:
-            stateDesc = checkState.label
-
-        async with session, session.begin():
-            result = await db_tools.execSQL(
-                session,
-                Update(DevicePO).where(DevicePO.ip == ip).values(checkState=checkState.val, checkDesc=stateDesc, checkImgPath=imgPath, checkTime=datetime.now())
-            )
-            log.info(f"更新设备{ip}状态为{checkState.val}- {stateDesc},影响行数:{result}")
-        pass
+        try:
+            if not stateDesc:
+                stateDesc = checkState.label
+            async with session, session.begin():
+                result = await db_tools.execSQL(
+                    session,
+                    Update(DevicePO).where(DevicePO.ip == ip).values(checkState=checkState.val, checkDesc=stateDesc, checkImgPath=imgPath, checkTime=datetime.now())
+                )
+                log.info(f"更新设备{ip}状态为{checkState.val}- {stateDesc},影响行数:{result}")
+        except Exception as e:
+            log.err(f"更新状态异常：{ip}", e)
 
     def update_state_to_db(self, ip: str, checkState: DeviceCheckState, stateDesc: str = None, imgPath: str = None):
         try:
-            bll = config_bll()
+            bll = self.createDbBll()
             bll.run(self.update_state_to_db_task, bll.session, ip, checkState, stateDesc, imgPath)
         except Exception as e:
-            log.err("更新设备状态失败", e)
+            log.err(f"更新设备{ip}状态失败", e)
         finally:
-            bll.close_sync()
+            bll.close()
+            #log.succ(ip, "update_state_to_db_task关bll连接", str(bll.closed))
 
     @staticmethod
     def queryConfig(bll: config_bll = None):
@@ -141,6 +147,7 @@ class DeviceCuptureImage(ICustomTask):
                 bll = config_bll()
 
             deviceConfig: dict | None = bll.run(bll.query_config_value, "device_config", True)
+            
             userName = "admin"
             password = "password"
             root = "D:\\temp"
@@ -165,25 +172,22 @@ class DeviceCuptureImage(ICustomTask):
             return userName, password, root, dateFolder
         finally:
             if needClose:
-                bll.close_sync()
+                bll.close()
 
     def queryAllDevice(self) -> Tuple[List[TableEntry], str, str, str]:
-        """
-        try: 
-            bll = BaseBllQuery({'host': 'localhost', "port": 3306, 'db': 'dggy_db', 'user': 'root', 'password': 'mysql123456', 'echo': True, 'pool_size': 1, 'max_overflow': 1})
-
-            result = bll.run_query(self.queryTable(bll.session))
-            bll.close()
-            return result
+       
+        try:
+            bll = config_bll()
+            userName, password, root, date = DeviceCuptureImage.queryConfig(bll) 
+            result = bll.run(self.queryTable, bll.session) 
+           
+            return result, userName, password, root, date
         except Exception as e:
-            log.err("DDDDDD", e)
-        """
-        bll = config_bll()
-        log.warn("查询配置...")
-        userName, password, root, date = DeviceCuptureImage.queryConfig(bll)
-        log.warn("查询设备...")
-        result = bll.run(self.queryTable, bll.session)
-        return result, userName, password, root, date
+            log.err("查询设备失败", e)
+            raise Exception("查询配置或查询设备出错")
+        finally:
+            bll.close()
+
 
     def check_network(self, ip: str):
         """
@@ -198,7 +202,6 @@ class DeviceCuptureImage(ICustomTask):
         """
         检测tcp端口是否打开
         """
-
         result, msg = network.check_port(ip, port)
         if not result:
             log.warn(f"{ip}:{port} 网络不通或{port}端口未打开,error msg: {msg}")
@@ -332,105 +335,7 @@ class DeviceCuptureImage(ICustomTask):
             result.append((video_path, output_image_path))
         return result
 
-    @try_except
-    def main_sync(self):
-        """
-        同步执行
-        """
-        deviceList, userName, pwd, root, date = self.queryAllDevice()
-        self.subFolder = date
-        self.root = root
-        DeviceCuptureImage.setCapImgRootCache(root)
-        # print(deviceList, userName, pwd)
-        timeer = Timer(f"{self.name}:{time.time()}", showMsg=False)
-        log.warn(f"{self.name}开始...", len(deviceList))
-        timeer.start()
-
-        # 遍历设备列表
-        deviceCount = 0
-        deviceLen = len(deviceList)
-
-        for device in deviceList:
-            try:
-                deviceCount += 1
-                newUser = device['userName'] or userName
-                newPwd = device['passwd'] or pwd
-                category = device['category'] or 0
-                ip = device['ip']
-                deviceName = device['name']
-                vender = device['vender']
-                deviceCategory: DeviceCategory = DeviceCategory.val2enum(category)
-                log.succ(f"{deviceCount}/{deviceLen}->{deviceCategory},{deviceCategory.val},{deviceCategory.hasVideo()}")
-                if deviceCategory.hasVideo():
-                    rtspList = self.getRtspAddress(deviceCategory, ip, newUser, newPwd, deviceName, vender)
-                    if not rtspList or len(rtspList) == 0:
-                        log.warn(f"{vender},{deviceName, }{ip}没有视频地址！")
-                        self.check_all(ip, None, None, None)
-                        continue
-                    for video_path, output_image_path in rtspList:
-                        self.check_all(ip,   video_path=video_path, output_image_path=output_image_path)
-                else:
-                    self.check_all(ip,  None)
-
-            except Exception as e:
-                log.err("ERR", e)
-            finally:
-                log.succ(f"{deviceCount}/{deviceLen}->完成.{ip}")
-
-        timeer.stop()
-        log.succ(f"{timeer.activity_name}完成, 耗时->{timeer.elapsed}秒", )
-
-    @try_except
-    def main_base(self):
-        deviceList, userName, pwd, root, date = self.queryAllDevice()
-        self.subFolder = date
-        self.root = root
-        DeviceCuptureImage.setCapImgRootCache(root)
-        # print(deviceList, userName, pwd)
-        timeer = Timer(f"{self.name}:{time.time()}", showMsg=False)
-        log.warn(f"{self.name}开始...", len(deviceList))
-        deviceCount = 0
-        deviceLen = len(deviceList)
-        self._deviceCount = len(deviceList)
-        with ThreadPoolExecutor(max_workers=3) as executor:
-            timeer.start()
-            for device in deviceList:
-                try:
-                    deviceCount += 1
-                    if self.isQuit and not executor._shutdown:
-                        # log.warn("关闭线程池,不再接收新任务...,等等正在执行的任务完成...")
-                        executor.shutdown(False, cancel_futures=True)
-                        break
-                    newUser = device['userName'] or userName
-                    newPwd = device['passwd'] or pwd
-                    category = device['category'] or 0
-                    ip = device['ip']
-                    deviceName = device['name']
-                    vender = device['vender']
-                    deviceCategory: DeviceCategory = DeviceCategory.val2enum(category)
-                    log.succ(f"{deviceCount}/{deviceLen}->{deviceCategory},{deviceCategory.val},{deviceCategory.hasVideo()}")
-                    if deviceCategory.hasVideo():
-                        rtspList = self.getRtspAddress(deviceCategory, ip, newUser, newPwd, deviceName, vender)
-                        if not rtspList or len(rtspList) == 0:
-                            # log.warn(f"{vender},{deviceName, }{ip}没有视频地址！")
-                            executor.submit(self.check_all, ip, None, None, None)
-
-                            continue
-                        for video_path, output_image_path in rtspList:
-                            executor.submit(self.check_all, ip, 554, video_path, output_image_path)
-                    else:
-                        executor.submit(self.check_all, ip, None, None, None)
-                except Exception as e:
-                    log.err("ERR", e)
-                finally:
-                    log.succ(f"{deviceCount}/{deviceLen}->完成.{ip}")
-            while self._deviceCount > 0:
-                # 等等检测完成
-                time.sleep(5)
-            timeer.stop()
-            log.succ(f"{timeer.activity_name}完成 ,耗时->{timeer.elapsed}秒", )
-        return "检测异步进行中."
-
+     
     @try_except
     def main_ext(self):
         deviceList, userName, pwd, root, date = self.queryAllDevice()
@@ -451,8 +356,9 @@ class DeviceCuptureImage(ICustomTask):
             f.ip = ip
             f.savePath = output_image_path
             f.add_done_callback(self.result)
-        with limitThreadPoolExecutor(max_workers=4, thread_name_prefix="capture_pj") as executor:
+        print("开始检测...")
 
+        with limitThreadPoolExecutor(max_workers=4, thread_name_prefix="capture_pj") as executor:
             for device in deviceList:
                 try:
                     deviceCount += 1
@@ -497,5 +403,63 @@ class DeviceCuptureImage(ICustomTask):
         timeer.stop()
         log.succ(f"{timeer.activity_name}完成,提前结束—>{beforeShow},耗时->{timeer.elapsed}秒", )
 
+    
+    @try_except
+    def main_test(self): 
+        deviceList, userName, pwd, root, date = self.queryAllDevice()
+        self.subFolder = date
+        self.root = root
+        DeviceCuptureImage.setCapImgRootCache(root) 
+        timeer = Timer(f"{self.name}:{time.time()}", showMsg=False)
+        log.warn(f"{self.name}开始...", len(deviceList))
+        timeer.start()
+        # 遍历设备列表
+        deviceCount = 0
+        deviceLen = len(deviceList)
+        self._deviceCount = deviceLen
+        pool = ThreadPool(10)
+        for device in deviceList:
+            try:
+                deviceCount += 1
+                newUser = device['userName'] or userName
+                newPwd = device['passwd'] or pwd
+                category = device['category'] or 0
+                ip = device['ip']
+                deviceName = device['name']
+                vender = device['vender']
+                if self.isQuit:
+                    break
+                deviceCategory: DeviceCategory = DeviceCategory.val2enum(category)
+                log.succ(f"{deviceCount}/{deviceLen}->{deviceCategory},{deviceCategory.val},{deviceCategory.hasVideo()}")
+                if deviceCategory.hasVideo():
+                    rtspList = self.getRtspAddress(deviceCategory, ip, newUser, newPwd, deviceName, vender)
+                    if not rtspList or len(rtspList) == 0:
+                        log.warn(f"{vender},{deviceName, }{ip}没有视频地址！")
+                        pool.submit(lambda p={
+                            "ip": ip,
+                            "port": None
+                        }: self.check_all(**p))
+                        continue
+                    for video_path, output_image_path in rtspList:
+                        pool.submit(lambda p={
+                            "ip": ip,
+                            "video_path": video_path,
+                            "output_image_path": output_image_path
+                        }: self.check_all(**p))
+
+                else:
+                    pool.submit(lambda p={
+                        "ip": ip,
+                        "port": None
+                    }: self.check_all(**p))
+
+            except Exception as e:
+                log.warn(f"处理：{ip}出现错误")
+        pool.join()
+
     def main(self):
-        self.main_base()
+        self.main_test()
+        log.succ("devCapImg Exit")
+
+    def __del__(self) -> None:
+        log.info("devCapImg quited")
