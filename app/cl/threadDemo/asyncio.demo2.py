@@ -3,13 +3,16 @@ import asyncio
 import time
 from sqlalchemy.ext.asyncio import  AsyncSession  
 from co6co_db_ext.session import dbBll
+from sqlalchemy.orm import session
 from db_utils import db_tools
 from co6co.utils.network import ping_host
 from sqlalchemy.sql import text
 from sqlalchemy import Integer , Column,  String, DateTime 
 from co6co .utils import log
 from co6co_db_ext.po import BasePO 
-import threading
+from co6co.task.pools import run_async_tasks
+import asyncio
+
 
 class DemoPO(BasePO): 
     __tablename__ = "demo2"
@@ -23,7 +26,8 @@ class DemoPO(BasePO):
 async def async_ping(ip: str) -> bool: 
     return ping_host(ip)  
 
-lock =threading.Lock()  # 创建锁对象
+#lock = threading.Lock()  # 创建锁对象
+lock = asyncio.Lock()  # 创建锁对象 
 # 异步的 update 函数（与原代码相同）
 async def update(session: AsyncSession, name, ip, age):
     """
@@ -32,36 +36,30 @@ async def update(session: AsyncSession, name, ip, age):
         This session is provisioning a new connection; concurrent operations are not permitted
     2. 不能使用session, with lock  卡死
 
-    """
-
+    """ 
     try:
         #bll=createDb()
         #session=bll.session 
         log.warn("操作 ",ip,'...') 
-        #with lock:
-        while True:
-            if lock.acquire_lock(blocking=True,timeout= 10): 
-                log.warn("进入锁..ed")
-                exist = await db_tools.exist(session, DemoPO.ip.__eq__(ip),column=DemoPO.id) 
-                if exist:
-                    result = await db_tools.execSQL(
-                        session, 
-                        text("update demo2 set name=:name,age=:age where ip=:ip"),
-                        {"name": name, "ip": ip, "age": age}
-                    )
-                else:
-                    result = await db_tools.execSQL(
-                        session, 
-                        text("insert into demo2 (name,ip,age) values (:name,:ip,:age)"),
-                        {"name": name, "ip": ip, "age": age}
-                    )
-                print("11")
-                await session.commit()
-                lock.release_lock() 
-                return exist, result 
+        async with lock:  
+            log.warn("进入锁..ed")
+            exist = await db_tools.exist(session, DemoPO.ip.__eq__(ip),column=DemoPO.id) 
+            if exist:
+                result = await db_tools.execSQL(
+                    session, 
+                    text("update demo2 set name=:name,age=:age where ip=:ip"),
+                    {"name": name, "ip": ip, "age": age}
+                )
             else:
-                log.warn("进入锁..失败") 
-                time.sleep(1)
+                result = await db_tools.execSQL(
+                    session, 
+                    text("insert into demo2 (name,ip,age) values (:name,:ip,:age)"),
+                    {"name": name, "ip": ip, "age": age}
+                )
+            print("11")
+            await session.commit() 
+            return exist, result 
+             
 
     except Exception as e:
         print("error,update,", e)
@@ -94,14 +92,13 @@ async def main():
     """
     tasks = []
     bll=createDb()
-    for i in range(1, 4):
+    for i in range(1, 5):
         ip = f"192.168.1.{i}"
         name = f"test{i}"  
         # 异步 ping
         print("ping",ip,'...')
         ping_result = await async_ping(ip)
-        print("ping",ip,ping_result)
-
+        print("ping",ip,ping_result) 
         age = 18 if ping_result else 28 
         # 异步数据库操作
         tasks.append(update(bll.session,name, ip, age))
@@ -117,5 +114,29 @@ async def main():
     bll.close()
     print("关闭session....")
 
+async def tempTask(item:dict):
+    session,name,ip,age =item.values() 
+    ping_result = await async_ping(ip)
+    print("ping",ip,ping_result) 
+    age = 18 if ping_result else 28  
+    return await update(session,name, ip, age)
+
+async def main2():  
+    bll=createDb()
+    try:
+        params=[{"session":bll.session,"name": f"test{i}","ip":f"192.168.1.{i}","age":18  } for i in range(1,5)] 
+        results = await run_async_tasks(params,tempTask) 
+        for i, (updated, result) in enumerate(results):
+            log.succ(f"任务 {i+1}: {'更新' if updated else '插入'} 影响行数: {result}")
+    finally:
+        bll.close() 
 if __name__ == '__main__':
+    #asyncio.run() 会自动创建新的事件循环，并在函数结束后销毁，因此在其外部创建的锁会失效。
     asyncio.run(main())
+    # main 和 main2 是等效的 
+    print(" 开始执行main2...") 
+    
+    # 锁被  <asyncio.locks.Lock object at 0x0000025C4DCBF260 [locked]> is bound to a different event loop
+    # 需要 重新创建
+    lock = asyncio.Lock()  
+    asyncio.run(main2())

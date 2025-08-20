@@ -263,8 +263,7 @@ export default defineComponent({
                   label="状态"
                   prop="state"
                   sortable="custom"
-                  align="center"
-                  sortable="custom"
+                  align="center" 
                   showOverflowTooltip={true}
                 >
                   {{

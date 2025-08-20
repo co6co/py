@@ -70,6 +70,8 @@
     增加 ping_host 方法
 0.0.33
     优化 thread event_loop
+0.0.34
+    增加 pools 增加 run_async_tasks 方法
 ```
 
 # 安装

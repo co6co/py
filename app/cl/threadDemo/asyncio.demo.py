@@ -27,7 +27,6 @@ def blocking_ping(ip: str) -> bool:
 async def update(session: AsyncSession, name, ip, age):
     try:
         exist = await db_tools.exist(session, DemoPO.ip.__eq__(ip),column=DemoPO.id)
-
         if exist:
             result = await db_tools.execSQL(
                 session, 
@@ -79,8 +78,7 @@ async def main():
     bll.close()
 
     # 创建线程池
-    with ThreadPoolExecutor(max_workers=1) as executor:
-        loop = asyncio.get_running_loop() 
+    with ThreadPoolExecutor(max_workers=1) as executor: 
         tasks = [] 
         # 创建多个任务
         for i in range(1, 10):

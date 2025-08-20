@@ -117,9 +117,10 @@ const handleCommand = (command: string) => {
   cursor: pointer;
 }
 .header .logo {
-  float: left;
-  width: 250px;
+  float: left; 
   line-height: 70px;
+  font-size: 90%;
+  font-weight: bold; 
 }
 .header .version {
   font-size: 60%;
