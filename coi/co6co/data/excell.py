@@ -60,10 +60,10 @@ class AbsImport(ABC):
         print("处理错误")
         pass
 
-    def template(self):
+    def template(self,data:any=None):
         # 假设模板文件名为 template.xlsx，放在当前目录下
         columns = self. columns()
-        df = pd.DataFrame(columns=columns)
+        df = pd.DataFrame(data,columns=columns)
         # 设置适应内容宽度
         pd.set_option('display.max_colwidth', None)
         output = BytesIO()

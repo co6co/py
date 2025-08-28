@@ -236,7 +236,8 @@ class DeviceCuptureImage(ICustomTask):
             if video_path and output_image_path:
                 res, code, msg = self.check_video_by_cap_image(ip, video_path, output_image_path)
                 if res:
-                    self.update_state_to_db(ip, DeviceCheckState.normal, imgPath=msg)
+                    imgPath=self.getSubPath(output_image_path)
+                    self.update_state_to_db(ip, DeviceCheckState.normal, imgPath=imgPath)
                     # log.info(f"截图成功'{video_path}'-->{msg}")
                 else:
                     self.update_state_to_db(ip, DeviceCheckState.videoError, f"网络正常,[{code}]")
@@ -272,15 +273,15 @@ class DeviceCuptureImage(ICustomTask):
                 ret, buffer = cv2.imencode('.jpg', frame)
                 with open(output_image_path, 'wb') as f:
                     f.write(buffer)
-                self.update_state_to_db(ip, DeviceCheckState.normal, imgPath=self.getSubPath(output_image_path))
-                return True, 0, self.getSubPath(output_image_path)
+                #self.update_state_to_db(ip, DeviceCheckState.normal, imgPath=self.getSubPath(output_image_path))
+                return True, 0, "成功"
             else:
                 code += 1
-                self.update_state_to_db(ip, DeviceCheckState.videoError, "读取视频帧失败")
+                #self.update_state_to_db(ip, DeviceCheckState.videoError, "读取视频帧失败")
                 return False, code, "读取视频帧失败"
         except Exception as e:
             code += 1
-            self.update_state_to_db(ip, DeviceCheckState.videoError, f"读取视频异常：{str(e)}")
+            #self.update_state_to_db(ip, DeviceCheckState.videoError, f"读取视频异常：{str(e)}")
             return False, code, "出现ERROR"
         finally:
             # 释放资源
@@ -312,7 +313,7 @@ class DeviceCuptureImage(ICustomTask):
                 video_path = f"rtsp://{userName}:{pwd}@{ip}:554/Streaming/Channels/1"
                 video_path_2 = f"rtsp://{userName}:{pwd}@{ip}:554/Streaming/Channels/2"
                 output_image_path_2 = path/f"{deviceName}_{ip}_2.jpg"
-                result.append((video_path, output_image_path), (video_path_2, output_image_path_2))
+                result.append(  (video_path_2, output_image_path_2)) 
             else:
                 video_path = f"rtsp://{userName}:{pwd}@{ip}:554/Streaming/Channels/1"
 
@@ -330,6 +331,7 @@ class DeviceCuptureImage(ICustomTask):
             pass
 
         elif v.val == DeviceVender.TPLink.val:
+            video_path = f"rtsp://{userName}:{pwd}@{ip}:554/stream1"
             pass
         if video_path:
             result.append((video_path, output_image_path))
