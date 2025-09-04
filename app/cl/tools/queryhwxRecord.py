@@ -300,9 +300,7 @@ class BoxService:
             raise AssertionError(f"请求失败，状态码: {response.status_code}，响应内容: {response.text[:100]}")
 
 
-_dev_api = Blueprint("Box_API")
-
-
+_dev_api = Blueprint("Box_API") 
 class recordParm:
     ip: str
     user_name: str
@@ -310,8 +308,7 @@ class recordParm:
     channel_id: int
     start_time: str
     record_sec: int
-
-
+    
 class BoxView(BaseView):
 
     routePath = "/getRecordInfo"
