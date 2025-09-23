@@ -187,8 +187,9 @@ if __name__ == "__main__":
     try:
         ssq = SSQHistory() 
         # 获取页面上所有期号的结果
-        print("\n正在获取页面结果...")
         isFirst=input("是否仅获取第一页,否获取全部数据？(y/n)")
+        print("\n正在获取页面结果...")
+        
         all_results = ssq.get_all_pages(onlyFirst=isFirst.startswith('y'))
         if all_results:
             print(f"共找到{len(all_results)}期结果")

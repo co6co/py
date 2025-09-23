@@ -85,6 +85,7 @@ def run_stun_server(bind_ip='0.0.0.0', bind_port=3478):
             # 发送响应回客户端
             sock.sendto(response, client_addr)
             print(f"已向 {client_addr} 发送响应")
+
         except socket.timeout:
             # print("[超时] 等待服务器响应超时")
             pass
