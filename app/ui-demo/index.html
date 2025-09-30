@@ -1,0 +1,29 @@
+<html>
+    <head>
+        <title>
+            测试
+        </title>
+        <style>
+            .container {
+                /*在小屏幕上，宽度是 90%，但最小不会低于 320px在超大屏幕上，宽度也是 90%，但最大不会超过 1200px*/
+                width: clamp(320px, 90%, 1200px);
+                margin: 0 auto;
+                background-color: #c27373;
+                padding: 20px;
+            }
+            .title { 
+                /* clamp (最小值,首选值，最大值)
+                1.5rem 约等于 24px */
+                font-weight: 700;
+                font-size: clamp(1.5rem, 5vw, 3rem);
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <h1 class="title">
+                测试
+            </h1>
+        </div>
+    </body>
+</html>
