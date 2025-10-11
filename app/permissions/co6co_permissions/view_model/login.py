@@ -13,7 +13,7 @@ from co6co.utils import log
 
 from co6co_web_db.view_model import get_one
 from ..model.pos.right import UserPO
-from .aop.login_log import loginLog
+from .aop.login_log import loginLog, verifyCode
 from ..services import getSecret, generatePageToken
 from ..model.enum import user_state
 from datetime import datetime
@@ -22,7 +22,7 @@ from ..services.configCache import get_user_config
 
 class login_view(BaseMethodView):
     routePath = "/login"
-
+    @verifyCode
     @loginLog
     async def post(self, request: Request):
         """
@@ -39,14 +39,15 @@ class login_view(BaseMethodView):
             status = [user_state.enabled.val, user_state.locked.val]
             select = Select(UserPO).filter(UserPO.userName.__eq__(where.userName), UserPO.state.in_(status))
             user: UserPO = await get_one(request, select)
-
-            verifyCode = request.json.get("verifyCode", "")
             _, sessionDict = self.get_Session(request)
+            """
+            verifyCode = request.json.get("verifyCode", "")
             memCode = sessionDict.pop("verifyCode")
 
             # // todo 为什么 应用 重启后 session 还在
             if verifyCode == "" or memCode != verifyCode:
                 return JSON_util.response(Result.fail(message="验证码不能为空!"))
+            """
             if user != None:
                 lockTime: datetime | None = user.lockTime
                 if lockTime == None:
@@ -88,7 +89,8 @@ class login_view(BaseMethodView):
                 updateSml = Update(UserPO).filter(UserPO.id.__eq__(user.id)).values(
                     {
                         UserPO.state: user_state.locked.val if isLock == 1 else user_state.enabled.val,
-                        UserPO.lockTime: datetime.now() if isLock == 1 else None}
+                        UserPO.lockTime: datetime.now() if isLock == 1 else None
+                    }
                 )
                 result = await db_tools.execSQL(session, updateSml)
                 await session.commit()

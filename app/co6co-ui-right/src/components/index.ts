@@ -17,4 +17,5 @@ export * from './txtView';
 export * from './fileDropdown';
 export * from './dragUploader';
 export * from './dragVerify';
+export * from './captcha'; 
 export * from './uploadFile';

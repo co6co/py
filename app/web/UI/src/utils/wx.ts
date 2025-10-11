@@ -64,6 +64,8 @@ export const getUrlPath = () => {
 const redirectUrl = () => {
   showNotify({ type: 'warning', message: `跳转...` })
   const vite_config_redirect_uri = import.meta.env.VITE_WX_redirect_uri
+  //console.info('vite_config_redirect_uri：', vite_config_redirect_uri)
+  //const scope = wxSnsApiCategory.snsapi_userinfo
   const scope = wxSnsApiCategory.snsapi_userinfo
   // 需要对 # 进行编码
   const backUrl = encodeURIComponent(`${getPathAndQuery()}`)

@@ -26,7 +26,7 @@
     "@vue/runtime-core": "^3.4.33",
     "axios": "^1.6.7",
     "co6co": "^0.2.0",
-    "co6co-right": "^0.1.0",
+    "co6co-right": "^0.1.4",
     "co6co-task": "^0.1.0",
     "codemirror": "^6.0.1",
     "element-plus": "^2.5.3",

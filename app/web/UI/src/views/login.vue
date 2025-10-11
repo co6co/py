@@ -1,5 +1,6 @@
 <template>
-  <div class="login-wrap">
+  <div class="login-wrap" :style="{'background-image':bgImg}">
+    
     <div class="ms-login">
       <div class="ms-title">{{ systeminfo.name }}</div>
       <el-form :model="DATA" :rules="rules" ref="login" label-width="0px" class="ms-content">
@@ -22,8 +23,9 @@
             </template>
           </el-input>
         </el-form-item>
-        <el-form-item prop="verify">
-          <DragVerify :height="30" v-model="DATA.verify" :onVerifySuccess="onVerifySuccess" />
+        <el-form-item prop="verify"> 
+          <DragVerify v-if="systeminfo.verifyType == 0" :height="30" v-model="DATA.verify" :onVerifySuccess="onVerifySuccess" />
+          <Captcha v-else v-model="DATA.verify" ref="captchaRef"  />
         </el-form-item>
         <div class="login-btn">
           <el-button type="primary" @click="submitForm(login)">登录</el-button>
@@ -35,13 +37,13 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive } from 'vue'
+import { ref, reactive ,computed} from 'vue'
 import { ElMessage } from 'element-plus'
 import { Lock, User } from '@element-plus/icons-vue'
 
 import { isDebug } from '../utils'
 import { useTagsStore } from '../store/tags'
-import { userSvc, registerRoute, DragVerify } from 'co6co-right'
+import { userSvc, registerRoute, DragVerify ,Captcha,CaptchaInstance} from 'co6co-right'
 import {
   storeAuthonInfo,
   showLoading,
@@ -52,6 +54,7 @@ import {
 import type { FormInstance, FormRules } from 'element-plus'
 import useSystem from '../hooks/useSystem'
 import { getPublicURL } from '../utils'
+import {vuePath} from '@/api/app/ui'
 
 interface LoginInfo {
   username: string
@@ -59,6 +62,7 @@ interface LoginInfo {
   verify: string
 }
 let message = ref('')
+const captchaRef = ref<CaptchaInstance>()
 const DATA = reactive<LoginInfo>({
   username: '',
   password: '',
@@ -77,7 +81,7 @@ const rules: FormRules = {
   verify: [
     {
       required: true,
-      message: '请拖动滑块验证' + isMobileBrowser(),
+      message: '请输入验证码',
       trigger: 'blur',
       validator(rule, value, callback, source, options) {
         if (DATA.verify) {
@@ -92,6 +96,9 @@ const rules: FormRules = {
 }
 
 const { systeminfo } = useSystem()
+const bgImg = computed(() => {
+  return `url(${vuePath + systeminfo.value.loginBgUrl})`
+})
 const login = ref<FormInstance>()
 const submitForm = (formEl: FormInstance | undefined) => {
   if (!formEl) return
@@ -114,7 +121,8 @@ const submitForm = (formEl: FormInstance | undefined) => {
         })
         .catch((e) => {
           DATA.verify = ''
-          ElMessage.error(`登录出错：${e.message}`)
+          captchaRef.value?.refreshCaptcha()
+          ElMessage.error(`登录出错：${e.message}`) 
         })
         .finally(() => {
           closeLoading()
@@ -125,7 +133,6 @@ const submitForm = (formEl: FormInstance | undefined) => {
     }
   })
 }
-
 const tags = useTagsStore()
 tags.clearTags()
 </script>
@@ -135,7 +142,7 @@ tags.clearTags()
   position: relative;
   width: 100%;
   height: 100%;
-  background-image: url(../assets/img/login-bg_01.jpg);
+  /*background-image: url('../assets/img/login-bg_01.jpg');*/
   background-size: 100%;
 }
 .ms-title {

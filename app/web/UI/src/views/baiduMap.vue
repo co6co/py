@@ -1,5 +1,5 @@
 <template>
-  <div class="container-layout c-container">
+  <div class="container-layout">
     <el-container>
       <el-header
         ><span style="position: absolute; left: 0; top: 0"
