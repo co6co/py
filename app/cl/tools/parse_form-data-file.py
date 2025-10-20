@@ -1,13 +1,16 @@
 # 未完成 
 import os
 from typing import Dict, List, Union
-from multipart import parse_form_data # pip install python-multipart
+from multipart import parse_form_data,MultipartPart # pip install python-multipart,MultipartPart
 from io import BytesIO
 import json
 from io import BytesIO
 import os
 from multipart import MultipartParser
 import cgi  # 用于辅助函数
+from typing import Tuple, Any
+
+
 
 def safe_filename(filename):
     """生成安全的文件名"""
@@ -20,6 +23,31 @@ def safe_filename(filename):
     filename = "".join(c if c.isalnum() or c in '._-' else '_' for c in filename)
     return filename
 
+def parser_multipart_body(data:bytes, content_type:str) -> Tuple[Dict[str, tuple | Any], Dict[str, MultipartPart]]:
+        """
+        解析内容: multipart/form-data; boundary=------------------------XXXXX,
+        的内容
+        """
+        env = {
+            "REQUEST_METHOD": "POST",
+            "CONTENT_LENGTH": len(data),
+            "CONTENT_TYPE": content_type,
+            "wsgi.input": BytesIO(data)
+        }
+      
+        data, file = parse_form_data(env)
+        print("in",data,file,len(data))
+        data_result = {}
+        # log.info(data.__dict__)
+        for key in data.__dict__.get("dict"):
+            value = data.__dict__.get("dict").get(key)
+            if len(value) == 1:
+                data_result.update({key: value[0]})
+            else:
+                data_result.update({key: value})
+        print(data_result,file)
+
+        return data_result, file
 def parse_multipart_data(environ, content_length, charset='utf-8'):
     """
     完整的 multipart 数据解析函数
@@ -43,8 +71,7 @@ def parse_multipart_data(environ, content_length, charset='utf-8'):
     
     try:
         # 创建解析器
-        parser = MultipartParser(stream, boundary, content_length, charset=charset)
-        
+        parser = MultipartParser(stream, boundary, content_length, charset=charset) 
         for part in parser:
             field_name = part.field_name or f"field_{id(part)}"
             
@@ -90,8 +117,9 @@ def parse_multipart_from_file(file_path: str, content_type: str) -> Dict:
         解析结果字典
     """
     with open(file_path, 'rb') as f:
-        data = f.read() 
-    return parse_multipart_data(data, content_type)
+        data = f.read()  
+    return parser_multipart_body(data, content_type)
+    #return parse_multipart_data(data, content_type)
 
 def save_extracted_files(parsed_data: Dict, output_dir: str = './output'):
     """
@@ -102,8 +130,7 @@ def save_extracted_files(parsed_data: Dict, output_dir: str = './output'):
         output_dir: 输出目录
     """
     if not os.path.exists(output_dir):
-        os.makedirs(output_dir)
-    
+        os.makedirs(output_dir) 
     for field_name, file_info in parsed_data['files'].items():
         filename = file_info['filename'] or f'{field_name}.bin'
         output_path = os.path.join(output_dir, filename)
@@ -169,7 +196,7 @@ def demo2():
     # 示例2: 从文件解析
     # 如果你的multipart数据保存在文件中，可以这样使用：
     filePath=input("输入multipart数据文件路径:")
-    parsed_from_file = parse_multipart_from_file(filePath, 'multipart/form-data; boundary=your-boundary')
+    parsed_from_file = parse_multipart_from_file(filePath, 'multipart/form-data; boundary=--------------------------88def566461b568c')
     print("=== 解析结果 ===",parsed_from_file)
     save_extracted_files(parsed_from_file)
 
