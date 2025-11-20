@@ -29,7 +29,7 @@ async def get_config(request: Request, code: str, *, useDist=False, default: any
             result = default
         return result
     except Exception as e:
-        log.error("获取配置失败:{},使用默认配置：{}".format(e, default))
+        log.err("获取配置失败:{},使用默认配置：{}".format(e, default), e)
         return default
 
 

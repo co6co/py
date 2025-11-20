@@ -71,8 +71,8 @@ for epoch in range(100):
         optim.zero_grad() # 清空优化器梯度
         l.backward() # 反向传播计算梯度
         optim.step() # 根据梯度更新模型参数
-    if epoch%10==0:
-        print(f"训练步骤{epoch},损失值:{l.item()}")
+    if (epoch+1)%10==0:
+        print(f"训练步骤{epoch+1},损失值:{l.item()}")
 
 # 使用网络对输入数据X进行预测
 predict=net(torch.tensor(X,dtype=torch.float32))
