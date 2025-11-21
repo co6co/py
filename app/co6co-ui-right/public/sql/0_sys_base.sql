@@ -172,6 +172,7 @@ CREATE TABLE `sys_user` (
 -- ----------------------------
 -- Records of sys_user
 -- ----------------------------
+-- admin12345
 INSERT INTO `sys_user` (`id`,`user_name`,`category`,`user_pwd`,`user_salt`,`user_group_id`,`state`,`avatar`,`remark`,`create_time`,`create_user`,`update_time`,`update_user`) VALUES ('1', 'admin', null, 'f06c1e39faa53c20e2f22d2bbb067a04', 'abcd', '1', '0', null, 'd', '2024-05-09 13:54:18', null, '2024-05-09 13:54:18', '1');
 
 

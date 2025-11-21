@@ -22,6 +22,7 @@ from ..services.configCache import get_user_config
 
 class login_view(BaseMethodView):
     routePath = "/login"
+
     @verifyCode
     @loginLog
     async def post(self, request: Request):
@@ -61,7 +62,7 @@ class login_view(BaseMethodView):
                 if user.password == user.encrypt(where.password):
                     tokenData = await generatePageToken(getSecret(request), user, userOpenId=user.userGroupId)
                     # 让日志能获得用户信息
-                    log.warn("用户状态", user.state)
+                    # log.warn("用户状态", user.state)
                     if user.state == user_state.locked.val:
                         isLock = 0
 

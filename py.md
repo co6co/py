@@ -15,7 +15,7 @@ co6co.web_session=0.0.1
 co6co.sanic-ext==0.0.13
 co6co.db-ext==0.0.17
 co6co.web-db==0.0.18
-co6co.permissions==0.1.1
+co6co.permissions==0.1.2
 co6co.task==0.1.2 
 
 ```

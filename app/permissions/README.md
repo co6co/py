@@ -11,4 +11,6 @@
         co6co.web-db==0.0.18
 0.1.1
     captchaVerify
+0.1.2
+    修复已知bug
 ```
