@@ -16,6 +16,7 @@ year: 年	month: 月	day: 日	temp_2: 前天最高温度	temp_1: 昨天最高温
 '''
 file    =".\\data\\005.weather.csv"
 df=pd.read_csv(file)
+print(df.head())
 labels=np.array(df['actual']) # 实际最高温度
 df=df.drop('actual', axis=1) # 删除actual列
 features_list=list(df.columns) # 列名列表
@@ -50,7 +51,7 @@ optimizer=torch.optim.Adam(my_nn.parameters(), lr=0.001)
 
 # 6. 训练神经网络模型
 losses=[] # 存储损失值的列表
-for i in range(500):
+for i in range(100):
     # 用于存储每批数据的损失值
     batch_loss=[]
     # 遍历输入特征，按照批次大写进行分割
@@ -99,7 +100,7 @@ for i in range(500):
 matplotlib.rc('font',family='SimHei')
 plt.figure(figsize=(12,6),dpi=160)
 # 真实值曲线 蓝色
-plt.plot(true_data['date'], true_data['actual'], label='真实值', color='blue', alpha=0.5,marker='B+')
+plt.plot(true_data['date'], true_data['actual'], label='真实值', color='blue', alpha=0.5)#,marker='B+'
 plt.plot(predictions_data['date'], predictions_data['prediction'], label='预测值', color='red', alpha=0.5,marker='o')
 plt.xticks(rotation=30,size=15) # x 轴刻度旋转30度，大小15
 plt.ylim(0,25) # y 轴范围 0-25
