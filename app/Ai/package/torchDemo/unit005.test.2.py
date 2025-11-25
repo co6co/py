@@ -9,3 +9,4 @@ scaler=MinMaxScaler()
 normalized_data=scaler.fit_transform(data)
 print("原始数据:",data)
 print("归一化后的数据:",normalized_data)
+
