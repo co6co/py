@@ -13,3 +13,4 @@
 /**/*.tgz
 /**/*.build/
 /**/*.dist/
+/**/data/tmp/

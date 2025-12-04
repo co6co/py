@@ -30,7 +30,11 @@ if __name__ == "__main__":
     # 可以使用不同的NTP服务器，如'ntp.tencent.com'、'time.nist.gov'等
     # ntp_info = get_ntp_time('ntp.aliyun.com')
     # ntp_info = get_ntp_time('pool.ntp.org')
-    ntp_info = get_ntp_time('10.100.100.250')
+    import argparse
+    parser = argparse.ArgumentParser(description="ntp service.")
+    parser.add_argument('-n', '--ntp_server', type=str, default='ntp.aliyun.com', help='NTP server address')
+    args = parser.parse_args()
+    ntp_info = get_ntp_time(args.ntp_server)
 
     if ntp_info:
         print(f"NTP服务器: {ntp_info['ntp_server']}")

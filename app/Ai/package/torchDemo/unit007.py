@@ -133,11 +133,13 @@ def train_model(epoch,train_dataloader,test_dataLoader):
             best_loss=test_loss
             best_model=copy(model)
         else:
-            epoch_cnt+=1
+            epoch_cnt+=1 
         if epoch_cnt>=early_stop:
             # 保存最佳模型的状态字典
             torch.save(best_model.state_dict(),model_statue_path)
             break
+    if epoch_cnt<early_stop:# 
+        torch.save(best_model.state_dict(),model_statue_path)
 
 
 
@@ -216,10 +218,17 @@ if __name__ == "__main__":
     optimizer=torch.optim.Adam(model.parameters(),lr=0.001)
     # 训练模型
     train_model(epoch,train_dataloader,test_dataloader)
-    p,y,test_loss=test_model(test_dataloader)
     # 对预测值进行处理
-    pred=[ele*(GD.close_max-GD.close_min)+GD.close_min for ele in p]
-    data=[ele*(GD.close_max-GD.close_min)+GD.close_min for ele in y] 
+    p,y,test_loss=test_model(test_dataloader) 
+    #- numpy.float64 类型的浮点数- 但 ele 不是一个数值，而是一个 序列  
+    #pred=[ele*(GD.close_max-GD.close_min)+GD.close_min for ele in p]
+    #data=[ele*(GD.close_max-GD.close_min)+GD.close_min for ele in y] 
+    #二维列表展平为一维列表
+    #pred=[num*(GD.close_max-GD.close_min)+GD.close_min for sublist in p for num in sublist]
+    #data=[num*(GD.close_max-GD.close_min)+GD.close_min for sublist in y for num in sublist]
+    #更简洁的方式
+    pred=[num*(GD.close_max-GD.close_min)+GD.close_min for num in sum(p, [])]
+    data=[num*(GD.close_max-GD.close_min)+GD.close_min for num in sum(y, [])]
     # 绘制图像
     plot_img(data,pred)
 
