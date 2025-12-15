@@ -99,4 +99,4 @@ with torch.no_grad(): # 禁用梯度计算，以进行测试
         total+=labels.size(0)#累计总预测数量total，通过 labels.size(0) 获取标签的数量
         correct+=(predicted==labels).sum().item() # 累计正确预测的数量correct，通过比较标签和预测结果，使用sum().item() 将张量转换为整数
 accuracy=correct/total
-print(f"Accuracy 测试集准确率:{accuracy*100:.2f}")
+print(f"Accuracy 测试集准确率:{accuracy*100:.2f}") 
