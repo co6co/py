@@ -112,4 +112,4 @@ ax.xaxis.set_major_locator(x_major_locator) # 设置x轴主刻度定位器
 ax.yaxis.set_major_locator(y_major_locator) # 设置y轴主刻度定位器
 plt.legend(fontsize=15) # 显示图例，字体大小15
 plt.ylabel('日最高温度',size=15) # y 轴标签，大小15
-plt.show() 
+plt.show()

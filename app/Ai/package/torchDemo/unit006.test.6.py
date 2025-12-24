@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt #绘制模块，用于绘制图标
 matplotlib.rcParams['font.sans-serif']=['SimHei'] #设置字体，支持中文
 
 # 1. 准备建模数据
-x=torch.unsqueeze( torch.linspace(-1,1,500),dim=1)
+x=torch.unsqueeze(torch.linspace(-1,1,500),dim=1)
 y=x.pow(3) # x^3
 
 #2. 设置超参数

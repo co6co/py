@@ -4,7 +4,6 @@
 import torch
 import torch.nn as nn
 
-
 # 定义一个简单的神经网络
 class SimpleNet(nn.Module):
     def init(self):
@@ -31,7 +30,6 @@ inputs=torch.randn(100,10)
 targets=torch.randn(100,1)
 
 # 训练网络，记录不同优化器的性能
-
 for name,optimizer in optimizers.items():
     net.train()  # 将网络设置为训练模式
 
@@ -47,4 +45,4 @@ for name,optimizer in optimizers.items():
 
 
 ## 通过这个联系，你不仅能学会如何使用PyTorch中的不同优化器，还能直观地看到不同优化器对不同模型训练的影响，
-# 也可以进一步分析不同优化器的性能差异，并讨论可能的原因
+#  也可以进一步分析不同优化器的性能差异，并讨论可能的原因

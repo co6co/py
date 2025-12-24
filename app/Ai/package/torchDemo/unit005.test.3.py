@@ -16,7 +16,6 @@ correlations=df.corr().abs()
 print("相关系数矩阵:", correlations)
 features=correlations[correlations['C']>0.5].index.tolist()
 # 特征提取（以PCA为例）
-
 pca=PCA(n_components=2)
 df_pca=pca.fit_transform(df)
 # 特征缩放

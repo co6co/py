@@ -49,7 +49,7 @@ print("使用不使用无偏估算方差:",result)
 x=torch.tensor(3.1415926)
 result=torch.floor(x) # 向下取整
 print("torch.floor(x) 向下取整:",result)
-result=torch.ceil(x)  # 向上取整
+result=torch.ceil(x) # 向上取整
 print("torch.ceil(x) 向上取整:",result)
 result=torch.round(x) # 四舍五入
 print("torch.round(x) 四舍五入:",result)

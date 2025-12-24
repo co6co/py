@@ -2,8 +2,8 @@
 # 损失函数的作用
 import torch
 import torch.nn as nn
-# 创建随机张量
 
+# 创建随机张量
 predictions=torch.randn([10,10])  # 10 个有样本，每个样本有10个类别
 targets=torch.randint(0,10,(10,))  # 10 个样本的目标类别，范围0~9，假设是分类任务
 # 均方差损失

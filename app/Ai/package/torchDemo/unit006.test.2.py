@@ -18,7 +18,7 @@ def plot_tanh():
     y=tanh(x) # 计算y轴数据，即Tanh值
 
     # 绘制图像
-    plt.plot(x,y )
+    plt.plot(x,y)
     plt.title("Tanh f(x)=(e^x-e^(-x))/(e^x+e^(-x))")
     plt.xlabel("x")
     plt.ylabel("f(x)")

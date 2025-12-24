@@ -11,6 +11,5 @@ vis.scatter(
     opts=dict(
         title='带文本散点图',
         textlabels=['Label%d' % i for i in range(6)],
-        
     )
 )  

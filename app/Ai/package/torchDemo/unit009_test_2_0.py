@@ -41,7 +41,6 @@ class MyDataset(torch.utils.data.Dataset):
 
 
 if __name__=='__main__':
-    
     img=cv2.imread('/data/'+'/last/50.jpg',0)
     img=cv2.resize(img,(16,16))
     img2=img/255

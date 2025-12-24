@@ -4,7 +4,6 @@
 from pickle import FALSE
 import torch
 # 1. L1损失函数
-
 # 定义一个L1损失函数，计算输入和目标之间的平均绝对误差
 loss=torch.nn.L1Loss(reduction='sum') # none,mean,sum
 input=torch.tensor([1.0,2.0,3.0,4.0])
