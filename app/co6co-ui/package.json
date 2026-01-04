@@ -2,7 +2,7 @@
   "name": "co6co",
   "moduleName": "co6co",
   "private": false,
-  "version": "0.2.0",
+  "version": "0.2.1",
   "type": "module",
   "files": [
     "dist"
@@ -56,4 +56,5 @@
     "pinia": "^2.1.7",
     "vue-router": "^4.4.0"
   }
-}
+} 
+ 

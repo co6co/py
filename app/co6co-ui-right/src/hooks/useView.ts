@@ -15,14 +15,25 @@ import { MenuCateCategory } from '@/hooks/useMenuSelect';
 /**
  * 获取子视图Path
  * @param mainViewName 必须再 views 中
+ * @param moduleName 模块名,不是getViewPath 所在模块必须提供模块名，主模块使用 ".."  作为模块名
  */
-export const useViewData = (viewName: string, moduleName: string) => {
+export const useViewData = (viewName: string, moduleName?: string) => {
 	const viewPath = ref('');
 	const viewDataRef = ref<RouteItem>();
 	const { queryRouteItem } = useRouteData();
-	const componentName = getViewPath(viewName, moduleName);
+	let componentName = ""
+	if (moduleName)
+		componentName = getViewPath(viewName, moduleName); 
+	else
+		componentName = getViewPath(viewName); 
 	const routeItem = queryRouteItem((d) => {
-		return d.component == componentName;
+		//return componentName==d.component; //主模块没有后缀
+		if(!d.component){
+			return false
+		}
+		
+		return d.component.indexOf(componentName)>-1;
+		//return componentName.includes(d.component);
 	});
 	if (routeItem) {
 		viewPath.value = routeItem.url;
