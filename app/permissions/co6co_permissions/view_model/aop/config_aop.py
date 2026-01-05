@@ -1,7 +1,7 @@
 
 from functools import wraps
 from sanic import Blueprint, Sanic
-from co6co.utils import log
+from co6co.utils import log, getParamValue
 from sanic.request import Request
 from ...services.configCache import ConfigCache
 
@@ -16,7 +16,7 @@ def ConfigEntry(f):
             if isinstance(arg, Request):
                 cacheManage = ConfigCache(arg)
                 break
-        code = kwargs.get("code", None)
+        code = getParamValue(f,"code",args,kwargs) 
         value = await f(*args, **kwargs)
         if code != None and "SYS_CONFIG" in code:
             if cacheManage != None:

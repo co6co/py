@@ -23,7 +23,7 @@
             </template>
           </el-input>
         </el-form-item>
-        <el-form-item prop="verify"> 
+        <el-form-item prop="verify">
           <DragVerify v-if="systeminfo.verifyType == 0" :height="30" v-model="DATA.verify" :onVerifySuccess="onVerifySuccess" />
           <Captcha v-else v-model="DATA.verify" ref="captchaRef"  />
         </el-form-item>
@@ -41,8 +41,6 @@ import { ref, reactive ,computed} from 'vue'
 import { ElMessage } from 'element-plus'
 import { Lock, User } from '@element-plus/icons-vue'
 
-import { isDebug } from '../utils'
-import { useTagsStore } from '../store/tags'
 import { userSvc, registerRoute, DragVerify ,Captcha,CaptchaInstance} from 'co6co-right'
 import {
   storeAuthonInfo,
@@ -52,9 +50,11 @@ import {
   getStoreInstance
 } from 'co6co'
 import type { FormInstance, FormRules } from 'element-plus'
-import useSystem from '../hooks/useSystem'
-import { getPublicURL } from '../utils'
+import useSystem from '@/hooks/useSystem'
 import {vuePath} from '@/api/app/ui'
+
+import { isDebug,getPublicURL } from '@/utils'
+import { useTagsStore } from '@/store/tags'
 
 interface LoginInfo {
   username: string

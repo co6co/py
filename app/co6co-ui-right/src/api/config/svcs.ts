@@ -20,3 +20,11 @@ export interface IConfig {
 export const get_config_svc = (code: string): Promise<IResponse<IConfig>> => {
 	return createServiceInstance().get(`${base_URL}/${code}`);
 };
+/**
+ * 获取UI配置
+ * @returns 配置不需要认证
+ */
+export const get_ui_config_svc = ( ): Promise<IResponse<Record<string, any>>> => {
+	return createServiceInstance(5000,false).post(`${base_URL}/ui`);
+	
+};

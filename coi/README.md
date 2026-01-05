@@ -72,7 +72,7 @@
     优化 thread event_loop
 0.0.34
     增加 pools 增加 run_async_tasks 方法
-0.0.35 未发布
+0.0.35 2026-01-05
 	bug 修复
 ```
 

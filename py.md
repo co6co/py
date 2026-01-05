@@ -10,12 +10,12 @@ pip install -i https://pypi.org/simple/ some-package
 pip install --upgrade --no-deps co6co --index-url https://pypi.org/simple/
 # python 最新版本
 ```
-co6co==0.0.33
+co6co==0.0.35
 co6co.web_session=0.0.1
 co6co.sanic-ext==0.0.13
 co6co.db-ext==0.0.17
 co6co.web-db==0.0.18
-co6co.permissions==0.1.2
+co6co.permissions==0.1.3
 co6co.task==0.1.2 
 
 ```

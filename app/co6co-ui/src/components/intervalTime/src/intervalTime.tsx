@@ -63,7 +63,10 @@ export default defineComponent({
 		};
 		// onMounted(() => {})
 		onUnmounted(() => {
-			if (timer) clearInterval(timer);
+			if (timer) {
+				clearInterval(timer);
+				timer = null;
+			}
 		});
 
 		const reader = () => {

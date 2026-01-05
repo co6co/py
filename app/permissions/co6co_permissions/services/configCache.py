@@ -84,6 +84,17 @@ class ConfigCache(BaseCache):
         """
         return "{}_{}".format(self.configKeyPrefix, code)
 
+    def _convertValue(self, value: str) -> str | dict:
+        """
+        转换配置值
+        """
+        if "{" in value and "}" in value:
+            try:
+                value = sysJson.loads(value)
+            except:
+                log.err("load json config error:{},check config key :{}".format(value, code))
+                value = None
+        return value
     async def queryConfig(self, code: str) -> str | None:
         """
         查询当前用户的所拥有的角色
@@ -104,12 +115,7 @@ class ConfigCache(BaseCache):
             else:
                 result = data.get("value")
                 # 配置的是否时json字符串
-                if "{" in result and "}" in result:
-                    try:
-                        result = sysJson.loads(result)
-                    except:
-                        log.err("load json config error:{},check config key :{}".format(result, code))
-                        result = None
+                result=self._convertValue(result)
                 self.setConfig(code, result)
             return result
 
@@ -117,7 +123,8 @@ class ConfigCache(BaseCache):
 
     def setConfig(self, code: str, value: str):
         if code != None:
-            self.setCache(self.getKey(code), value)
+            result=self._convertValue(value)
+            self.setCache(self.getKey(code), result)
 
     def getConfig(self, code: str) -> str | None:
         if code != None:

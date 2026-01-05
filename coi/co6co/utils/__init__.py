@@ -14,7 +14,26 @@ from typing import IO, Iterable, Callable, Tuple, Generator, List
 from .log import warn
 from functools import wraps
 
-
+def getParamValue(func,paramName:str,args:list=[],kwargs:dict={}):
+    """
+    获取参数值
+    """ 
+    if paramName==None or paramName=="":
+        return None
+    value=None
+    if paramName in kwargs:
+        value = kwargs[paramName]
+    else:
+        sig = inspect.signature(func)
+        param_names = list(sig.parameters.keys())
+        # 从位置参数中获取paramName
+        # 遍历参数名，查找paramName参数的位置
+        if paramName in param_names:
+            param_index = param_names.index(paramName)
+            # 确保位置参数数量足够，并且该位置的参数不是self/cls
+            if len(args) > param_index and param_names[param_index] == paramName:
+                value = args[param_index]
+    return value
 def try_except(func):
     @wraps(func)
     def wrapper(*args, **kwargs):

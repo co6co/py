@@ -49,24 +49,34 @@ const useStore = defineStore('co6co_store', {
 		},
 
 		setRouter(router: Router) {
-			this.Config[routerKey] = router;
+			// 路由对象不应该被响应式化
+			this.Config[routerKey] = markRaw(router);
 		},
 		clearConfig() {
 			this.Config = {};
 		},
 		setViews(views: ViewObjects) {
-			Object.keys(views).forEach((key) => {
-				this.ViewObject[key] = views[key];
+			// 清空现有视图并设置新视图
+			this.ViewObject = {};
+			Object.entries(views).forEach(([key, view]) => {
+				this.ViewObject[key] = markRaw(view);
 			});
 		},
-		appendView(key: string, view: any) {
-			// Vue received a Component that was made a reactive object. This can lead to unnecessary performance overhead and should be avoided by marking the component with `markRaw` or using `shallowRef` instead of `ref
+		
+		appendView(key: string, view: ViewComponent) {
+			// 确保组件不被响应式化
 			this.ViewObject[key] = markRaw(view);
 		},
 		appendViews(model: string, views: ViewObjects) {
-			Object.keys(views).forEach((key) => {
+			// 确保model是有效的字符串
+			if (typeof model !== 'string' || !model.trim()) {
+				console.warn('Invalid model name provided to appendViews');
+				return;
+			}
+			
+			Object.entries(views).forEach(([key, view]) => {
 				const path = getViewPath(key, model);
-				this.appendView(path, markRaw(views[key]));
+				this.appendView(path, view);
 			});
 		},
 		clearView() {
