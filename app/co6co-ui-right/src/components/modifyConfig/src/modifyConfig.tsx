@@ -64,13 +64,10 @@ export default defineComponent({
 		saved: (data: any) => true,
 	},
 	setup(prop, ctx) {
-		const { loadData, selectData } = useDictTypeSelect();
-
-		const diaglogForm = ref<DialogFormInstance>();
-
+		const { loadData, selectData } = useDictTypeSelect(); 
+		const diaglogForm = ref<DialogFormInstance>(); 
 		const DATA = reactive<FormData<number, FormItem>>({
-			operation: FormOperation.add,
-
+			operation: FormOperation.add, 
 			id: 0,
 			fromData: {
 				name: '',
@@ -100,13 +97,14 @@ export default defineComponent({
 					DATA.fromData.sysFlag = Flag.N;
 					DATA.fromData.dictFlag = Flag.N;
 					DATA.fromData.value = '';
-					DATA.fromData.remark = '';
-
+					DATA.fromData.remark = ''; 
 					break;
 				case FormOperation.edit:
 					if (!item) return false;
 					DATA.id = item.id;
-					Object.assign(DATA.fromData, item);
+					// 解构赋值排除不需要的属性，只复制FormItem中定义的属性
+					const { id, createUser, updateUser, createTime, updateTime, ...rest } = item;
+					Object.assign(DATA.fromData, rest);
 					//可以在这里写一些use 获取其他的数据
 					//从后台获取的数据有系统标识，是有些数据就不允许更改
 					editData.sysFlag = item.sysFlag;

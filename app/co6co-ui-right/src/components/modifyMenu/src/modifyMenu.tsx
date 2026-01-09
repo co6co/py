@@ -146,7 +146,9 @@ export default defineComponent({
 				case FormOperation.edit:
 					if (!item) return false;
 					DATA.id = item.id;
-					Object.assign(DATA.fromData, item);
+					// 解构赋值排除不需要的属性，只复制FormItem中定义的属性
+					const { id, createUser, updateUser, createTime, updateTime, ...rest } = item;
+					Object.assign(DATA.fromData, rest);
 					if (DATA.fromData.category == MenuCateCategory.API) {
 						DATA.fromData.methods =
 							item.methods && (item.methods as string)

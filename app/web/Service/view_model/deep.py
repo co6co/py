@@ -191,7 +191,7 @@ class SgView(_dbView):
         value:  0 关机                      0 成功，-1 失败
                 1 开机                      0 成功，-1 失败
                 2 强制重启                  0 成功，-1 失败
-                11 查询状态                 1 电脑开机，0 电脑关机
+                11 查询状态                 1 电脑开机,0 电脑关机
                 14 强制关机                 0 成功，-1 失败
                 25 重启                     0 成功，-1 失败
 
@@ -246,12 +246,14 @@ class TmView(_dbView):
         """
         获取标准值
 
-        json:{   'sessionId': '9802c885-3a63-4f44-96e0-54c03bd68e00', 
+        json:{
+            'sessionId': '9802c885-3a63-4f44-96e0-54c03bd68e00', 
             'utterance': '关闭电脑', 
             'requestData': {}, 'botId': 158095, 'domainId': 87154, 'skillId': 110255, 'skillName': '智能 助手', 
             'intentId': 186451, 'intentName': 'custom_close', 
             'slotEntities': [
-                {'intentParameterId': 138981, 'intentParameterName': 'deviceName', 'originalValue': '电脑', 'standardValue': 'home_PC', 'liveTime': 0, 'createTimeStamp': 1741833828738, 'slotName': 'deviceName:switch', 'slotValue': 'home_PC'}], 
+                {'intentParameterId': 138981, 'intentParameterName': 'deviceName', 'originalValue': '电脑', 'standardValue': 'home_PC', 'liveTime': 0, 'createTimeStamp': 1741833828738, 'slotName': 'deviceName:switch', 'slotValue': 'home_PC'}
+            ], 
             'requestId': '20250313104348694-1440851220', 'device': {}, 'skillSession': {'skillSessionId': '1b67b7ee-85e8-43e9-94c2-29f4456c84f6', 'newSession': True}, 'context': {'system': {'apiAccessToken': ''}}}
         """
         entities = request.json.get("slotEntities")
@@ -263,7 +265,7 @@ class TmView(_dbView):
          value: 0 关机 
                 1 开机 
                 2 强制重启 
-                11 查询状态 1 电脑开机，0 电脑关机 
+                11 查询状态 1 电脑开机,0 电脑关机 
                 14 强制关机 
                 25 重启   
         """

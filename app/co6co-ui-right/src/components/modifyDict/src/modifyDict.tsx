@@ -86,7 +86,9 @@ export default defineComponent({
 					if (!item) return false;
 					DATA.id = item.id;
 					DATA.fromData.dictTypeId = dictTypeId;
-					Object.assign(DATA.fromData, item);
+					// 解构赋值排除不需要的属性，只复制FormItem中定义的属性
+					const { id, createUser, updateUser, createTime, updateTime, ...rest } = item;
+					Object.assign(DATA.fromData, rest);
 					//可以在这里写一些use 获取其他的数据
 					break;
 			}

@@ -92,8 +92,8 @@ class ConfigCache(BaseCache):
             try:
                 value = sysJson.loads(value)
             except:
-                log.err("load json config error:{},check config key :{}".format(value, code))
-                value = None
+                log.err("load json config error:{}".format(value))
+                raise Exception("load json config error,check value  :{}".format(value)) 
         return value
     async def queryConfig(self, code: str) -> str | None:
         """
