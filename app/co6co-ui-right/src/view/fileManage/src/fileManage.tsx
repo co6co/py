@@ -57,8 +57,13 @@ import { useRouter } from 'vue-router';
 export const ViewFeatures = {
 	upload: ViewFeature.upload,
 	del: ViewFeature.del,
+	new: {
+		value: 'new',
+		text: "新建文件夹"
+	},
 	rename: ViewFeature.settingName,
 	view: ViewFeature.view,
+	download: ViewFeature.download
 };
 export default defineComponent({
 	name: 'FileManageView',
@@ -341,14 +346,14 @@ export default defineComponent({
 											<ElButton
 												style="flex:0 0"
 												icon={UploadFilled}
-												v-permiss={getPermissKey(ViewFeature.upload)}
+												v-permiss={getPermissKey(ViewFeatures.upload)}
 												onClick={() => onOpenDialog()}
 												v-slots={{ default: () => '上传' }}
 											/>
 											<ElButton
 												style="flex:0 0"
 												icon={CirclePlus}
-												v-permiss={getPermissKey(ViewFeature.add)}
+												v-permiss={ViewFeatures.new.value}
 												onClick={() => onNewFolder()}
 												v-slots={{ default: () => '新建文件夹' }}
 											/>
@@ -356,7 +361,7 @@ export default defineComponent({
 												<ElButton
 													type="danger"
 													icon={Delete}
-													v-permiss={getPermissKey(ViewFeature.del)}
+													v-permiss={getPermissKey(ViewFeatures.del)}
 													onClick={onBatchDel}>
 													删除选中
 												</ElButton>
@@ -460,7 +465,7 @@ export default defineComponent({
 															scope.row.path,
 															scope.row.isFile
 														)}
-														v-permiss={getPermissKey(ViewFeature.download)}
+														v-permiss={getPermissKey(ViewFeatures.download)}
 													/>
 
 													<ElButton
