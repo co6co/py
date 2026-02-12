@@ -34,6 +34,23 @@ export default (option: { mode: string }) => {
           index: path.resolve(__dirname, 'index.html')
           //home: path.resolve(__dirname, 'home0.html'),
           //home: path.resolve(__dirname, 'home.html')
+        },
+        output: {
+          chunkFileNames: 'static/js/[name]-[hash].js',
+          entryFileNames: 'static/js/[name]-[hash].js',
+          assetFileNames: (assetInfo) => {
+            const fileName = assetInfo.name!//|| assetInfo.fileName
+            const { name, ext } = path.parse(fileName)
+            const imgsExt = ['.png', '.jpg', '.jpeg', '.gif', '.svg']
+            if (ext === '.css') {
+              return `static/css/${name}-[hash]${ext}`
+
+            } else if (imgsExt.includes(ext)) {
+              return `static/img/${name}-[hash]${ext}`
+            } else {
+              return `static/${ext.replace('.', '')}/${name}-[hash]${ext}`
+            }
+          }
         }
         /*
         input: {

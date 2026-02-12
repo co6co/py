@@ -93,7 +93,7 @@ const handleCommand = (command: string) => {
       router.push('/user')
       break
     case 'log':
-      console.info(dialogRef)
+      //console.info(dialogRef)
       dialogRef.value?.openDialog()
   }
 }
