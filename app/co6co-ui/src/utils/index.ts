@@ -10,3 +10,4 @@ export * from './eleExtend';
 export * from './map';
 export * from './vueUtilts';
 export * from './http';
+export * from './LRUCache';

@@ -6,5 +6,4 @@ export default Associated;
 
 import transfer from './src/transfer';
 export const Transfer = withInstall(transfer);
-
 export * from './src';

@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LRUCache测试</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .test-result {
+            margin: 10px 0;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .pass {
+            background-color: #d4edda;
+            border-color: #c3e6cb;
+            color: #155724;
+        }
+        .fail {
+            background-color: #f8d7da;
+            border-color: #f5c6cb;
+            color: #721c24;
+        }
+    </style>
+</head>
+<body>
+    <h1>LRUCache测试</h1>
+    <div id="test-results"></div>
+
+    <script type="module">
+        import LRUCache from './src/utils/LRUCache.ts';
+
+        function addResult(message, passed) {
+            const div = document.createElement('div');
+            div.className = `test-result ${passed ? 'pass' : 'fail'}`;
+            div.textContent = message;
+            document.getElementById('test-results').appendChild(div);
+        }
+
+        function testLRUCache() {
+            console.log('开始测试LRUCache...');
+            
+            // 测试1: 基本功能和属性
+            addResult('测试1: 基本功能和属性', true);
+            const cache = new LRUCache(3);
+            addResult(`初始容量: ${cache.capacity} (预期: 3)`, cache.capacity === 3);
+            addResult(`初始大小: ${cache.size} (预期: 0)`, cache.size === 0);
+            
+            // 测试2: 添加元素
+            addResult('\n测试2: 添加元素', true);
+            cache.put('a', 1);
+            cache.put('b', 2);
+            cache.put('c', 3);
+            addResult(`添加3个元素后大小: ${cache.size} (预期: 3)`, cache.size === 3);
+            
+            // 测试3: 访问元素
+            addResult('\n测试3: 访问元素', true);
+            const getA = cache.get('a');
+            const getB = cache.get('b');
+            const getC = cache.get('c');
+            addResult(`获取a: ${getA} (预期: 1)`, getA === 1);
+            addResult(`获取b: ${getB} (预期: 2)`, getB === 2);
+            addResult(`获取c: ${getC} (预期: 3)`, getC === 3);
+            
+            // 测试4: 超出容量
+            addResult('\n测试4: 超出容量', true);
+            cache.put('d', 4);
+            addResult(`添加第4个元素后大小: ${cache.size} (预期: 3)`, cache.size === 3);
+            addResult(`是否存在a: ${cache.has('a')} (预期: false)`, !cache.has('a'));
+            addResult(`是否存在d: ${cache.has('d')} (预期: true)`, cache.has('d'));
+            
+            // 测试5: 更新元素
+            addResult('\n测试5: 更新元素', true);
+            cache.put('b', 22);
+            const updatedB = cache.get('b');
+            addResult(`更新b后获取b: ${updatedB} (预期: 22)`, updatedB === 22);
+            addResult(`更新后大小: ${cache.size} (预期: 3)`, cache.size === 3);
+            
+            // 测试6: 边界情况
+            addResult('\n测试6: 边界情况', true);
+            const emptyCache = new LRUCache(0);
+            addResult(`容量为0的缓存大小: ${emptyCache.size} (预期: 0)`, emptyCache.size === 0);
+            emptyCache.put('test', 'value');
+            addResult(`向容量为0的缓存添加元素后大小: ${emptyCache.size} (预期: 0)`, emptyCache.size === 0);
+            
+            addResult('\n所有测试完成！', true);
+        }
+
+        // 运行测试
+        testLRUCache();
+    </script>
+</body>
+</html>

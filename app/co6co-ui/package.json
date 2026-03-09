@@ -2,7 +2,7 @@
   "name": "co6co",
   "moduleName": "co6co",
   "private": false,
-  "version": "0.2.1",
+  "version": "0.2.2",
   "type": "module",
   "files": [
     "dist"
@@ -27,8 +27,11 @@
   },
   "scripts": {
     "devNothing": "vite",
+    "test": "for /r test %f in (*.test.ts) do npx tsx %f",
+    "test:win": "for /r test %f in (*.test.ts) do npx tsx %f",
+    "test:unix": "find test -name '*.test.ts' -exec npx tsx {} ';' ",
     "build:old": "tsc && vite build",
-    "build": "vite build",
+    "build": "npm test && vite build",
     "types": "tsc -p tsconfig.types.json",
     "published": "npm publish --access public"
   },
@@ -41,6 +44,7 @@
     "install": "^0.13.0",
     "less": "^4.2.0",
     "path": "^0.12.7",
+    "ts-node": "^10.9.2",
     "type-fest": "^4.20.1",
     "typescript": "^5.4.5",
     "vite": "^5.2.10",
@@ -56,5 +60,4 @@
     "pinia": "^2.1.7",
     "vue-router": "^4.4.0"
   }
-} 
- 
+}
