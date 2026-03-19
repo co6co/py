@@ -11,7 +11,7 @@ from co6co_db_ext.db_utils import QueryListCallable, db_tools
 from co6co.utils import log
 from co6co_permissions.model.enum import dict_state
 from sqlalchemy.sql import Select, Update
-from typing import List, Tuple, TypedDict
+from typing import List, Tuple, TypedDict,Optional
 from co6co.utils import getDateFolder
 from pathlib import Path
 from co6co_sanic_ext import sanics
@@ -38,6 +38,11 @@ class TableEntry(TypedDict):
 
 
 def mask_rtsp_credentials(rtsp_url: str):
+    """
+    隐藏rtsp地址的用户名和密码
+    :param rtsp_url: rtsp地址
+    :return: 隐藏后的rtsp地址
+    """
     # 查找"//"的位置
     double_slash_index = rtsp_url.find("//")
     if double_slash_index == -1:
@@ -48,8 +53,7 @@ def mask_rtsp_credentials(rtsp_url: str):
     if at_index == -1:
         return rtsp_url  # 不包含"@"，直接返回原URL
 
-    # 替换"//"和"@"之间的内容为"*"
-
+    # 替换"//"和"@"之间的内容为"*" 
     userPwd = rtsp_url[double_slash_index + 2:at_index]
     at_index2 = userPwd.find(":")
     mask = ""
@@ -61,6 +65,91 @@ def mask_rtsp_credentials(rtsp_url: str):
         mask = userPwd+"@"
     return rtsp_url[:double_slash_index + 2] + mask + rtsp_url[at_index+1:]
 
+def getRtspAddress(category: DeviceCategory, ip, userName, pwd,vender: str): 
+    """
+    获取设备rtsp地址列表
+    :param category: 设备类型
+    :param ip: 设备ip
+    :param userName: 用户名
+    :param pwd: 密码
+    :param vender: 厂商: 空或者‘’表示默认海康监控
+    :return: rtsp地址列表
+    """
+    dvender = DeviceVender.key2enum(vender.upper()) if vender else DeviceVender.Hikvision 
+    result = [] 
+    if dvender==None:  
+        return result
+    video_path = None 
+    if dvender == DeviceVender.Hikvision:
+    # 一体机有两个通道
+        if category == DeviceCategory.ParkAndPass:
+            video_path = f"rtsp://{userName}:{pwd}@{ip}:554/Streaming/Channels/1"
+            video_path_2 = f"rtsp://{userName}:{pwd}@{ip}:554/Streaming/Channels/2" 
+            result.append(video_path_2) 
+        else:
+            video_path = f"rtsp://{userName}:{pwd}@{ip}:554/Streaming/Channels/1"
+
+    elif dvender.val == DeviceVender.Uniview.val:
+        # /media/video1     主码流
+        # /media/video2     辅码流
+        video_path = f"rtsp://{userName}:{pwd}@{ip}:554/media/video1"
+        pass
+    elif dvender.val == DeviceVender.Dahua.val:
+        # rtsp://192.168.2.235:554/cam/realmonitor?channel=1&subtype=0&unicast=true&proto=Onvif
+        # <channel>是摄像头通道编号，这里是 “1”，表示第一通道。
+        # <subtype>表示子流类型，“0” 表示主码流，“1” 表示子码流，此处 “0” 代表主码流。
+        # video_path = f"rtsp://{userName}:{pwd}@{ip}:554/cam/realmonitor?channel=1&subtype=0"
+        video_path = f"rtsp://{userName}:{pwd}@{ip}:554/cam/realmonitor?channel=1&subtype=0"
+        pass
+
+    elif dvender.val == DeviceVender.TPLink.val:
+        video_path = f"rtsp://{userName}:{pwd}@{ip}:554/stream1"
+        pass
+    if video_path:
+        result.insert(0,video_path)
+    return result
+
+def cap_image(video_path:str,output_image_path:str):
+    """
+    抓图设备流图片
+    :param video_path: 视频流地址
+    :param output_image_path: 输出图片路径
+    :
+    :return:  是否成功, 状态码,  信息 
+    :return:  Tuple[bool, int, str ]
+    """
+    code = 1500
+    cap=None
+    # 视频文件路径
+    try:
+        log.info(f"从{video_path}获取图片...:")
+        # 打开视频文件
+        cap = cv2.VideoCapture(video_path)
+        # 宇视 和 大华 都不能用 isOpened 判断
+        # if not cap.isOpened():
+        #    return False, code, f"无法打开{video_path},可能设备不支持"
+        # 读取一帧
+        ret, frame = cap.read()
+        if ret:
+            # 将中文路径转换为字节类型
+            # result = cv2.imwrite(output_image_path, frame)
+            ret, buffer = cv2.imencode('.jpg', frame)
+            with open(output_image_path, 'wb') as f:
+                f.write(buffer)
+            #self.update_state_to_db(ip, DeviceCheckState.normal, imgPath=self.getSubPath(output_image_path))
+            return True, 0, "成功"
+        else:
+            code += 1
+            #self.update_state_to_db(ip, DeviceCheckState.videoError, "读取视频帧失败")
+            return False, code, "读取视频帧失败"
+    except Exception as e:
+        code += 1
+        #self.update_state_to_db(ip, DeviceCheckState.videoError, f"读取视频异常：{str(e)}")
+        return False, code, "出现ERROR"
+    finally:
+        # 释放资源
+        if cap:
+            cap.release()
 
 class DeviceCuptureImage(ICustomTask):
     name = "抓图设备流图片"
@@ -255,38 +344,9 @@ class DeviceCuptureImage(ICustomTask):
         从视频文件中捕获一帧并保存为图片。
         :param video_path: 视频文件路径。
         :param output_image_path: 输出图片文件路径（不能包含中文路径）。
-        """
-        code = 1500
-        # 视频文件路径
-        try:
-            log.info(f"从{ip}获取图片...:")
-            # 打开视频文件
-            cap = cv2.VideoCapture(video_path)
-            # 宇视 和 大华 都不能用 isOpened 判断
-            # if not cap.isOpened():
-            #    return False, code, f"无法打开{video_path},可能设备不支持"
-            # 读取一帧
-            ret, frame = cap.read()
-            if ret:
-                # 将中文路径转换为字节类型
-                # result = cv2.imwrite(output_image_path, frame)
-                ret, buffer = cv2.imencode('.jpg', frame)
-                with open(output_image_path, 'wb') as f:
-                    f.write(buffer)
-                #self.update_state_to_db(ip, DeviceCheckState.normal, imgPath=self.getSubPath(output_image_path))
-                return True, 0, "成功"
-            else:
-                code += 1
-                #self.update_state_to_db(ip, DeviceCheckState.videoError, "读取视频帧失败")
-                return False, code, "读取视频帧失败"
-        except Exception as e:
-            code += 1
-            #self.update_state_to_db(ip, DeviceCheckState.videoError, f"读取视频异常：{str(e)}")
-            return False, code, "出现ERROR"
-        finally:
-            # 释放资源
-            if cap:
-                cap.release()
+        """ 
+        log.info(f"从{ip}获取图片...:") 
+        cap_image(video_path, output_image_path)
 
     def result(self, f: Future):
         try:
@@ -303,40 +363,12 @@ class DeviceCuptureImage(ICustomTask):
             return []
         path = Path(self.root) / self.subFolder
         path.exists() or os.makedirs(path)
-        output_image_path = path/f"{deviceName}_{ip}.jpg"
-        v: DeviceVender = DeviceVender.key2enum(vender.upper()) if vender else DeviceVender.Hikvision
-        result = []
-        video_path = None
-        if v.val == DeviceVender.Hikvision.val:
-           # 一体机有两个通道
-            if category == DeviceCategory.ParkAndPass:
-                video_path = f"rtsp://{userName}:{pwd}@{ip}:554/Streaming/Channels/1"
-                video_path_2 = f"rtsp://{userName}:{pwd}@{ip}:554/Streaming/Channels/2"
-                output_image_path_2 = path/f"{deviceName}_{ip}_2.jpg"
-                result.append(  (video_path_2, output_image_path_2)) 
-            else:
-                video_path = f"rtsp://{userName}:{pwd}@{ip}:554/Streaming/Channels/1"
-
-        elif v.val == DeviceVender.Uniview.val:
-            # /media/video1     主码流
-            # /media/video2     辅码流
-            video_path = f"rtsp://{userName}:{pwd}@{ip}:554/media/video1"
-            pass
-        elif v.val == DeviceVender.Dahua.val:
-            # rtsp://192.168.2.235:554/cam/realmonitor?channel=1&subtype=0&unicast=true&proto=Onvif
-            # <channel>是摄像头通道编号，这里是 “1”，表示第一通道。
-            # <subtype>表示子流类型，“0” 表示主码流，“1” 表示子码流，此处 “0” 代表主码流。
-            # video_path = f"rtsp://{userName}:{pwd}@{ip}:554/cam/realmonitor?channel=1&subtype=0"
-            video_path = f"rtsp://{userName}:{pwd}@{ip}:554/cam/realmonitor?channel=1&subtype=0"
-            pass
-
-        elif v.val == DeviceVender.TPLink.val:
-            video_path = f"rtsp://{userName}:{pwd}@{ip}:554/stream1"
-            pass
-        if video_path:
-            result.append((video_path, output_image_path))
-        return result
-
+        output_image_path = path/f"{deviceName}_{ip}" 
+        result=getRtspAddress(category, ip, userName, pwd,vender) 
+        if len(result)>0:
+            paths=[f"{output_image_path}_{i}.jpg" for i in range(len(result))]
+            return list( zip(result, paths))
+        return result 
      
     @try_except
     def main_ext(self):

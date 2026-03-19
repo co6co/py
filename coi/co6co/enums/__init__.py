@@ -1,21 +1,24 @@
 from enum import Enum, unique
 # from abc import ABC, abstractclassmethod  抽象
-from typing import List, Dict, Literal
+from operator import attrgetter
+from typing import Generic, List, Dict, Literal,Type,Optional ,TypeVar,Generator,Any
 
-from co6co import T
-
+from co6co import K, V,T 
+E = TypeVar('E', bound='Base_Enum')
+# class Base_Enum2 (Enum,Generic[K,T]):pass
+# Base_Enum2Init=Base_Enum2[str,int]
 
 @unique  # 帮助检查 保证没有重复值
-class Base_Enum (Enum):
+class Base_Enum (Enum ):
     """
     枚举[key, val]
     name:才是真正的Key,环境保证它的唯一性
     key: 为人为设置由用户保证它的唯一性
     """
-    key: T
-    val: T
+    #key: K
+    #val: V
 
-    def __new__(cls, key: T, value: T):
+    def __new__(cls, key: K, value: V):
         _value = len(cls.__members__) + 1  # 为每个成员分配一个递增的整数值
         obj = object.__new__(cls)
         obj.key = key
@@ -29,7 +32,7 @@ class Base_Enum (Enum):
         return status
 
     @classmethod
-    def key2enum(cls, key):
+    def key2enum(cls: Type[E], key: K) -> Optional[E]:
         """
         key 转枚举 
         """
@@ -39,7 +42,7 @@ class Base_Enum (Enum):
         return None
 
     @classmethod
-    def name2enum(cls, name: str):
+    def name2enum(cls: Type[E], name: str) -> Optional[E]:
         """
         name 转枚举 
         """
@@ -49,7 +52,7 @@ class Base_Enum (Enum):
         return None
 
     @classmethod
-    def val2enum(cls, val):
+    def val2enum(cls: Type[E], val: V) -> Optional[E]:
         """
         val 转枚举 
         """
@@ -59,7 +62,7 @@ class Base_Enum (Enum):
         return None
 
     @classmethod
-    def value2enum(cls, value: int):
+    def value2enum(cls: Type[E], value: int) -> Optional[E]:
         """
         val 转枚举 
         """
@@ -69,7 +72,7 @@ class Base_Enum (Enum):
         return None
 
     @classmethod
-    def generator(cls):
+    def generator(cls: Type[E])->Generator[E,Any,None] : 
         for _, v in cls.__members__.items():
             yield v
 
@@ -82,7 +85,7 @@ class Base_Enum (Enum):
         return cls._to_str(attr)
 
     @classmethod
-    def value_of(cls, name: str, ignoreError: False):
+    def value_of(cls: Type[E], name: str, ignoreError: bool=True) -> Optional[E]:
         """
         枚举的字符串 转枚举
         demo(Base_Enum):
@@ -106,20 +109,22 @@ class Base_Enum (Enum):
 
 
 @unique
-class Base_EC_Enum(Base_Enum):
+class Base_EC_Enum(Base_Enum ):
     """
     枚举[key:英文 ,label:中文 ,val:数字] 
     """
-    key: T
+    key: K
     label: T
-    val: T
+    val: V
 
-    def __new__(cls, key: T, label: T, value: T):
-        _value = len(cls.__members__) + 1  # 为每个成员分配一个递增的整数值
+    def __new__(cls, key: K, label: T, value: V): 
         obj = object.__new__(cls)
+        #obj = super().__new__( key,value) 
+        #obj.__init__(key,value)  # 调用初始化方法
         obj.key = key
         obj.label = label
         obj.val = value  # value 为元组 (en_name,cn_name,val)
+        _value = len(cls.__members__) + 1  # 为每个成员分配一个递增的整数值
         obj._value_ = _value  # 设置枚举成员的值
         return obj
 

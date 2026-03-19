@@ -1,0 +1,77 @@
+"""
+运行测试 python -m unittest tests/test_example.py
+"""
+import unittest  # 内置
+
+from view_model.tools.data import toDesc, Padding
+from services.tasks.devCapImg import DeviceCuptureImage
+
+from unittest.mock import patch
+@patch("module.function")
+def test_with_mock(mock_function):
+    """测试使用mock的函数"""
+    mock_function.return_value = "mocked"
+    result = mock_function()
+    assert result == "mocked"
+class TestDataUtils(unittest.TestCase):
+    """测试数据处理工具"""
+    
+    def test_toDesc(self):
+        """测试toDesc函数"""
+        # 测试正常情况
+        result = toDesc("zx_10_0_7_6")
+        self.assertEqual(result.select, 10)
+        self.assertEqual(result.dan, 0)
+        self.assertEqual(result.z, "7")
+        self.assertEqual(result.b, "6")
+        
+        # 测试边界情况
+        result = toDesc("zx_5_2_3_4")
+        self.assertEqual(result.select, 3)  # 5-2=3
+        self.assertEqual(result.dan, 2)
+    
+    def test_padding(self):
+        """测试Padding函数"""
+        # 测试基本功能
+        lst = [1, 2, 3]
+        arr = [[1, 2], [3, 4], [5, 6]]
+        result = Padding(lst, arr)
+        self.assertIsInstance(result, list)
+        # 这里需要根据实际的Padding函数实现来编写具体的断言
+
+class TestDeviceCuptureImage(unittest.TestCase):
+    """测试设备截图功能"""
+    
+    def test_check_network(self):
+        """测试网络检查功能"""
+        # 测试本地回环地址
+        device = DeviceCuptureImage()
+        result = device.check_network("127.0.0.1")
+        self.assertTrue(result)
+        
+        # 测试不存在的地址
+        result = device.check_network("192.168.99.99")
+        self.assertFalse(result)
+
+if __name__ == '__main__':
+    unittest.main()
+
+# pytest风格的测试
+def test_toDesc_pytest():
+    """pytest风格的测试toDesc函数"""
+    result = toDesc("zx_10_0_7_6")
+    assert result.select == 10
+    assert result.dan == 0
+    assert result.z == "7"
+    assert result.b == "6"
+
+def test_check_network_pytest():
+    """pytest风格的测试网络检查功能"""
+    device = DeviceCuptureImage()
+    # 测试本地回环地址
+    result = device.check_network("127.0.0.1")
+    assert result is True
+    
+    # 测试不存在的地址
+    result = device.check_network("192.168.99.99")
+    assert result is False
