@@ -68,12 +68,13 @@ def videoUrls()->list:
     """ 
     ip="192.168.1.64"
     pwd="admin123"
+    port=554
     '''
-    data= [DeviceCategory.monitor,ip,"admin",pwd,DeviceVender.Hikvision.key]
-    data= [DeviceCategory.monitor,ip,"admin",pwd,DeviceVender.TPLink.key]
-    data= [DeviceCategory.monitor,ip,"admin",pwd,DeviceVender.Uniview.key]
+    data= [DeviceCategory.monitor,ip,"admin",pwd,DeviceVender.Hikvision.key,port]
+    data= [DeviceCategory.monitor,ip,"admin",pwd,DeviceVender.TPLink.key,port]   
+    data= [DeviceCategory.monitor,ip,"admin",pwd,DeviceVender.Uniview.key,port]
     '''
-    data= [DeviceCategory.monitor,ip,"admin",pwd,DeviceVender.Dahua.key]
+    data= [DeviceCategory.monitor,ip,"admin",pwd,DeviceVender.Dahua.key,port]
     return getRtspAddress(*data)
 
 def test_image(videoUrls ): 

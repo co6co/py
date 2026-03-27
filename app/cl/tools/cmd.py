@@ -11,3 +11,4 @@ with open("./dist/pwdgen.txt","r") as f:
             print("成功==>",item)
             break
          
+d

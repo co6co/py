@@ -65,7 +65,7 @@ def mask_rtsp_credentials(rtsp_url: str):
         mask = userPwd+"@"
     return rtsp_url[:double_slash_index + 2] + mask + rtsp_url[at_index+1:]
 
-def getRtspAddress(category: DeviceCategory, ip, userName, pwd,vender: str): 
+def getRtspAddress(category: DeviceCategory, ip, userName, pwd,vender: str,port:int=554): 
     """
     获取设备rtsp地址列表
     :param category: 设备类型
@@ -83,27 +83,27 @@ def getRtspAddress(category: DeviceCategory, ip, userName, pwd,vender: str):
     if dvender == DeviceVender.Hikvision:
     # 一体机有两个通道
         if category == DeviceCategory.ParkAndPass:
-            video_path = f"rtsp://{userName}:{pwd}@{ip}:554/Streaming/Channels/1"
-            video_path_2 = f"rtsp://{userName}:{pwd}@{ip}:554/Streaming/Channels/2" 
+            video_path = f"rtsp://{userName}:{pwd}@{ip}:{port}/Streaming/Channels/1"
+            video_path_2 = f"rtsp://{userName}:{pwd}@{ip}:{port}/Streaming/Channels/2" 
             result.append(video_path_2) 
         else:
-            video_path = f"rtsp://{userName}:{pwd}@{ip}:554/Streaming/Channels/1"
+            video_path = f"rtsp://{userName}:{pwd}@{ip}:{port}/Streaming/Channels/1"
 
     elif dvender.val == DeviceVender.Uniview.val:
         # /media/video1     主码流
         # /media/video2     辅码流
-        video_path = f"rtsp://{userName}:{pwd}@{ip}:554/media/video1"
+        video_path = f"rtsp://{userName}:{pwd}@{ip}:{port}/media/video1"
         pass
     elif dvender.val == DeviceVender.Dahua.val:
         # rtsp://192.168.2.235:554/cam/realmonitor?channel=1&subtype=0&unicast=true&proto=Onvif
         # <channel>是摄像头通道编号，这里是 “1”，表示第一通道。
         # <subtype>表示子流类型，“0” 表示主码流，“1” 表示子码流，此处 “0” 代表主码流。
         # video_path = f"rtsp://{userName}:{pwd}@{ip}:554/cam/realmonitor?channel=1&subtype=0"
-        video_path = f"rtsp://{userName}:{pwd}@{ip}:554/cam/realmonitor?channel=1&subtype=0"
+        video_path = f"rtsp://{userName}:{pwd}@{ip}:{port}/cam/realmonitor?channel=1&subtype=0"
         pass
 
     elif dvender.val == DeviceVender.TPLink.val:
-        video_path = f"rtsp://{userName}:{pwd}@{ip}:554/stream1"
+        video_path = f"rtsp://{userName}:{pwd}@{ip}:{port}/stream1"
         pass
     if video_path:
         result.insert(0,video_path)
@@ -124,11 +124,14 @@ def cap_image(video_path:str,output_image_path:str):
     try:
         log.info(f"从{video_path}获取图片...:")
         # 打开视频文件
-        cap = cv2.VideoCapture(video_path)
+        cap = cv2.VideoCapture( ) #cap = cv2.VideoCapture(video_path)
+        opened=cap.open(video_path, cv2.CAP_FFMPEG)  # 或者使用其他API，如cv2.CAP_ANY
+        print('opened:',opened)
+         
         # 宇视 和 大华 都不能用 isOpened 判断
         # if not cap.isOpened():
         #    return False, code, f"无法打开{video_path},可能设备不支持"
-        # 读取一帧
+        # 读取一帧 
         ret, frame = cap.read()
         if ret:
             # 将中文路径转换为字节类型
