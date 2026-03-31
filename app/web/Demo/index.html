@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>RTSP to Web (ffmpeg.wasm)</title>
+    <!--<script src="https://unpkg.com/@ffmpeg/ffmpeg@0.12.4/dist/ffmpeg.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.12.15/dist/umd/ffmpeg.min.js"></script>
+    -->
+    <script src="./ffmpeg.min.js"></script>
+    <style>
+        body { font-family: sans-serif; margin: 20px; }
+        #videoCanvas { border: 1px solid #ccc; background: #000; }
+        .controls { margin: 10px 0; }
+        input { width: 400px; padding: 5px; }
+        button { padding: 8px 15px; margin-left: 10px; }
+    </style>
+</head>
+<body>
+    <h2>RTSP 流播放器 (ffmpeg.wasm)</h2>
+    <div class="controls">
+        <label>RTSP URL: </label>
+        <!-- 替换为您自己的RTSP测试地址 -->
+        <input type="text" id="rtspUrl" value="rtsp://admin:123456@192.168.1.64/stream1" placeholder="例如: rtsp://admin:password@192.168.1.100:554/stream1">
+        <button id="connectBtn">连接/开始</button>
+        <button id="disconnectBtn" disabled>断开/停止</button>
+        <div>状态: <span id="status">就绪</span></div>
+    </div>
+    <canvas id="videoCanvas" width="640" height="480"></canvas>
+
+    <script>
+        // 检查FFmpeg是否加载成功
+        if (typeof window.FFmpeg === 'undefined') {
+            console.error('FFmpeg库未加载，请检查CDN链接');
+            document.getElementById('status').textContent = '错误: FFmpeg库加载失败';
+        } else {
+            console.log('FFmpeg库加载成功:', window.FFmpeg);
+        }
+        
+        // 如果上述CDN不可用，可以尝试使用备用CDN
+        // 备用方案：动态加载ffmpeg库
+        async function loadFFmpeg() {
+            if (typeof window.FFmpeg === 'undefined') {
+                // 从CDN动态加载
+                const script = document.createElement('script');
+                script.src = 'https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.12.6/dist/ffmpeg.min.js';
+                script.onload = function() {
+                    console.log('FFmpeg动态加载成功');
+                    initApp();
+                };
+                script.onerror = function() {
+                    console.error('FFmpeg动态加载失败');
+                    document.getElementById('status').textContent = '错误: FFmpeg库加载失败，请检查网络';
+                };
+                document.head.appendChild(script);
+            } else {
+                initApp();
+            }
+        }
+
+
+         // 初始化应用程序
+        async function initApp() {
+            const { createFFmpeg, fetchFile } = window.FFmpeg || {};
+            if (!createFFmpeg) {
+                document.getElementById('status').textContent = '错误: FFmpeg库初始化失败';
+                return;
+            }
+            
+            // 您的应用程序代码从这里开始...
+            console.log('FFmpeg库可用:', { createFFmpeg, fetchFile });
+            
+            let ffmpeg = null;
+            let socket = null;
+            let isPlaying = false;
+            const canvas = document.getElementById('videoCanvas');
+            const ctx = canvas.getContext('2d');
+            
+            // 初始化 ffmpeg.wasm
+            async function initFFmpeg() {
+                if (ffmpeg && ffmpeg.isLoaded()) return;
+                
+                try {
+                    ffmpeg = createFFmpeg({ 
+                        log: true,
+                        corePath: 'https://unpkg.com/@ffmpeg/core@0.11.0/dist/ffmpeg-core.js',
+                        wasmPath: 'https://unpkg.com/@ffmpeg/core@0.11.0/dist/ffmpeg-core.wasm'
+                    });
+                    
+                    await ffmpeg.load();
+                    console.log('ffmpeg.wasm 加载完成');
+                    return true;
+                } catch (error) {
+                    console.error('ffmpeg.wasm 加载失败:', error);
+                    return false;
+                }
+            }
+            
+            // ... 其他函数代码 ...
+        }
+        const { createFFmpeg, fetchFile } = FFmpeg;
+        let ffmpeg = null;
+        let socket = null;
+        let isPlaying = false;
+        const canvas = document.getElementById('videoCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // 初始化 ffmpeg.wasm
+        async function initFFmpeg() {
+            if (ffmpeg && ffmpeg.loaded) return;
+            ffmpeg = createFFmpeg({ log: false });
+            await ffmpeg.load();
+            console.log('ffmpeg.wasm 加载完成');
+        }
+
+        // 连接 WebSocket 并开始解码播放
+        async function connectAndPlay() {
+            if (isPlaying) return;
+            const rtspUrl = document.getElementById('rtspUrl').value.trim();
+            if (!rtspUrl) {
+                alert('请输入 RTSP URL');
+                return;
+            }
+            setStatus('正在初始化 ffmpeg.wasm...');
+            await initFFmpeg();
+
+            // 1. 构建 WebSocket 连接地址
+            const wsUrl = `ws://${window.location.hostname}:8000/ws/stream?url=${encodeURIComponent(rtspUrl)}`;
+            socket = new WebSocket(wsUrl);
+            setStatus('正在连接视频流...');
+
+            socket.binaryType = 'arraybuffer'; // 接收二进制数据
+            const videoChunks = [];
+
+            socket.onopen = () => {
+                console.log('WebSocket 连接已建立');
+                setStatus('连接已建立，正在接收数据...');
+                isPlaying = true;
+                updateButtons();
+            };
+
+            socket.onmessage = async (event) => {
+                if (!isPlaying) return;
+                // 2. 接收到后端传来的 MP4 数据块
+                const chunk = new Uint8Array(event.data);
+                videoChunks.push(chunk);
+                setStatus(`正在接收数据... (${videoChunks.length} 个数据包)`);
+
+                // 可选：可以积累一定量的数据或定时解码，这里为了低延迟，每个包都尝试解码
+                // 但注意：过于频繁的解码调用可能影响性能。这里采用简单的积累后解码。
+                if (videoChunks.length >= 5) { // 积累5个包解码一次，平衡延迟和性能
+                    await decodeAndDisplay(videoChunks);
+                    videoChunks.length = 0; // 清空已处理的块
+                }
+            };
+
+            socket.onerror = (error) => {
+                console.error('WebSocket 错误:', error);
+                setStatus('连接错误');
+                cleanup();
+            };
+
+            socket.onclose = () => {
+                console.log('WebSocket 连接关闭');
+                if (isPlaying) {
+                    setStatus('连接意外断开');
+                }
+                cleanup();
+            };
+        }
+
+        // 使用 ffmpeg.wasm 解码 MP4 数据并渲染到 Canvas
+        async function decodeAndDisplay(chunks) {
+            if (!ffmpeg || !isPlaying) return;
+            try {
+                // 3. 将二进制数据合并并传递给 ffmpeg.wasm
+                const totalLength = chunks.reduce((acc, chunk) => acc + chunk.length, 0);
+                const concatenated = new Uint8Array(totalLength);
+                let offset = 0;
+                for (const chunk of chunks) {
+                    concatenated.set(chunk, offset);
+                    offset += chunk.length;
+                }
+
+                // 将数据作为虚拟文件写入 ffmpeg.wasm 的内存文件系统
+                ffmpeg.FS('writeFile', 'input.mp4', concatenated);
+
+                // 4. 使用 ffmpeg 解码 MP4 并输出为 RGB 图像
+                // 注意：此解码过程在浏览器主线程进行，复杂视频流可能导致卡顿。
+                // 对于生产环境，应考虑使用 WebWorker 在后台线程运行 ffmpeg。
+                await ffmpeg.run(
+                    '-i', 'input.mp4',
+                    '-vf', 'scale=640:480', // 缩放至画布尺寸
+                    '-f', 'rawvideo',
+                    '-pix_fmt', 'rgba',
+                    'output.rgba'
+                );
+
+                // 5. 读取解码后的 RGBA 数据并绘制到 Canvas
+                const data = ffmpeg.FS('readFile', 'output.rgba');
+                const imageData = new ImageData(new Uint8ClampedArray(data.buffer), 640, 480);
+                ctx.putImageData(imageData, 0, 0);
+
+                setStatus('播放中...');
+                // 清理临时文件
+                ffmpeg.FS('unlink', 'input.mp4');
+                ffmpeg.FS('unlink', 'output.rgba');
+
+            } catch (err) {
+                console.error('解码/渲染失败:', err);
+                setStatus('解码出错');
+            }
+        }
+
+        // 断开连接并清理资源
+        function disconnect() {
+            if (!isPlaying) return;
+            isPlaying = false;
+            if (socket && socket.readyState === WebSocket.OPEN) {
+                socket.close();
+            }
+            cleanup();
+            setStatus('已停止');
+        }
+
+        function cleanup() {
+            isPlaying = false;
+            socket = null;
+            updateButtons();
+            ctx.clearRect(0, 0, canvas.width, canvas.height); // 清空画布
+        }
+
+        function setStatus(text) {
+            document.getElementById('status').textContent = text;
+        }
+
+        function updateButtons() {
+            document.getElementById('connectBtn').disabled = isPlaying;
+            document.getElementById('disconnectBtn').disabled = !isPlaying;
+        }
+
+        // 事件监听
+        document.getElementById('connectBtn').addEventListener('click', connectAndPlay);
+        document.getElementById('disconnectBtn').addEventListener('click', disconnect);
+
+        // 页面关闭前断开连接
+        window.addEventListener('beforeunload', disconnect);
+    </script>
+</body>
+</html>
