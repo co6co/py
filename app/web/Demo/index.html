@@ -31,7 +31,8 @@
         // 检查FFmpeg是否加载成功
         if (typeof window.FFmpeg === 'undefined') {
             console.error('FFmpeg库未加载，请检查CDN链接');
-            document.getElementById('status').textContent = '错误: FFmpeg库加载失败';
+            
+            setStatus('错误: FFmpeg库加载失败');
         } else {
             console.log('FFmpeg库加载成功:', window.FFmpeg);
         }
@@ -97,6 +98,10 @@
             
             // ... 其他函数代码 ...
         }
+
+        // 页面加载完成后初始化
+        window.addEventListener('DOMContentLoaded', loadFFmpeg);
+        
         const { createFFmpeg, fetchFile } = FFmpeg;
         let ffmpeg = null;
         let socket = null;
