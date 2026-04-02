@@ -19,4 +19,7 @@
       co6co.db-ext==0.0.17
       co6co.web-db==0.0.18
       co6co.permissions==0.1.0
+0.1.3 2026-4-2 未提交
+  service 模块
+  co6co>=0.0.36
 ```

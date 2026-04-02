@@ -115,7 +115,7 @@ class schedView(_codeView, AuthMethodView):
         result = Result.success()
         if not sourceCode:
             try:
-                task = custom.get_task(data)
+                task = custom.ICustomTask.createInstance(data)
                 isTimeout, _ = timeout(secounds, task.main)
                 log.warn("执行成功", isTimeout)
             except Exception as e:

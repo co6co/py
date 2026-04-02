@@ -1,4 +1,5 @@
-from app2 import read_rtsp_stream
+from model.services import RTSPService
+
 import pytest,asyncio
 
 # pip install pytest-asyncio
@@ -11,8 +12,9 @@ def key():
 
 @pytest.mark.asyncio
 async def test_read_data(rtsp_url,key): 
-    gen=read_rtsp_stream(rtsp_url,key)
+    service=RTSPService()
+    gen=  service.read_rtsp_stream(rtsp_url,key)
     assert gen!=None
     print(gen,"123456")
-    async for data in read_rtsp_stream(rtsp_url,key):
+    async for data in gen:
         print(data) 

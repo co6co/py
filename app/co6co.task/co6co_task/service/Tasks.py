@@ -23,7 +23,7 @@ class HandlerCommand(ABC):
     def __init__(self, successor: HandlerCommand = None, taskMgr: TasksMgr = None):
         self.successor = successor
         taskMgr = taskMgr or successor.taskMgr
-        self.scheduler = taskMgr. scheduler if taskMgr else None
+        self.scheduler = taskMgr.scheduler if taskMgr else None
         self.taskMgr: TasksMgr = taskMgr
 
     def handle_request(self,  data: DATA, conn: PipeConnection):
@@ -40,7 +40,7 @@ class HandlerCommand(ABC):
         stop = None
         if not sourceCode:
             code = self. data.sourceForm
-            task = custom.get_task(code)
+            task = custom.ICustomTask.createInstance(code)
             if task:
                 sourceCode = task.main
                 stop = task.stop
@@ -198,7 +198,7 @@ class UnknownHandler(HandlerCommand):
         return True
 
 
-class TasksMgr(BaseBll, sanics.Worker):
+class TasksMgr(sanics.Worker):
     """
     任务管理器
     需要使用 sanics.Worker 通讯方式
@@ -213,11 +213,13 @@ class TasksMgr(BaseBll, sanics.Worker):
         return worker
 
     def __init__(self, app: Sanic, event: asyncio.Event, conn: PipeConnection):
-        BaseBll.__init__(self, app=app)
+        # BaseBll.__init__(self, app=app)
+        self.bll = BaseBll(app=app)
+        self.session = self.bll.session
         sanics.Worker.__init__(self, event, conn)
         # super(sanics.Worker, self).__init__(event, conn)
         app.ctx.taskMgr = self
-        self.scheduler = Scheduler()
+        self.scheduler: Scheduler = Scheduler()
         self.handlerChain = ExistHandler(StartHandler(ModifyHandler(RemoveHandler(GetNextRunTimeHandler(UnknownHandler(taskMgr=self))))))
 
     @try_except
@@ -277,6 +279,23 @@ class TasksMgr(BaseBll, sanics.Worker):
             log.err("执行 ERROR", e)
             return None
 
+    def addTaskByCode(self, code: str, cron: str):
+        task = custom.ICustomTask.createInstance(code)
+        if task:
+            self.scheduler.addTask(code, task.main, cron, task.stop)
+        else:
+            log.warn("任务在代码中，未找到：{}".format(code))
+        return task is not None
+
+    def addTaskBySourceCode(self, code: str, sourceCode: str, cron: str):
+        if self. scheduler.checkCode(sourceCode, cron):
+            self. scheduler.addTask(code, sourceCode, cron)
+            return True
+        else:
+
+            log.warn("检查代码失败：{}".format(code))
+            return False
+
     def _startTimeTask(self):
         """
         运行在数据库中的代码任务
@@ -289,28 +308,19 @@ class TasksMgr(BaseBll, sanics.Worker):
         faile = []
         for po in taskArr:
             code = po.get("code")
-            category = po.get("category")
+            category = po.get("category")  # 0 代码任务，1 表任务[代码在数据表中需要编译后才能运行]
             cron = po.get("cron")
             sourceCode = po.get("sourceCode")
             item = po.get("data")  # 代码Id，或者 类code属性
             log.info("加载任务:{}...".format(code))
             if category == 0:
-                # log.warn("任务在代码中，加找到加载下个模块：{}".format(code))
-                task = custom. get_task(item)
-                if task:
-                    self.scheduler.addTask(code, task.main, cron, task.stop)
-                    success.append(code)
-                else:
-                    faile.append(code)
+                result = self.addTaskByCode(code,  cron)
+                success.append(code) if result else faile.append(code)
                 continue
             # 任务在表中，已经关联表读取完成
-            if self. scheduler.checkCode(sourceCode, cron):
-                self. scheduler.addTask(code, sourceCode, cron)
-                success.append(code)
-                continue
-            else:
-                faile.append(code)
-                log.warn("检查代码失败：{}".format(code))
+            result = self.addTaskBySourceCode(code, sourceCode, cron)
+            success.append(code) if result else faile.append(code)
+
         log.warn("加载任务完成,预加载：{}共加载,{}个任务".format(len(taskArr), self.scheduler.task_total))
         succ_result = 0
         fall_result = 0
@@ -336,3 +346,17 @@ class TasksMgr(BaseBll, sanics.Worker):
         self.scheduler.stop()
         log.warn("状态更新,成功->{}".format(result))
         log.info("等待其他任务退出..")
+
+
+class svcMgr(sanics.Worker):
+    @staticmethod
+    def create_instance(app: Sanic, envent: asyncio.Event, conn: PipeConnection):
+        """
+        初始化"
+        """
+        worker = svcMgr(app, envent, conn)
+        return worker
+
+    def __init__(self, app: Sanic, event: asyncio.Event, conn: PipeConnection):
+        sanics.Worker.__init__(self, event, conn)
+        app.ctx.svcMgr = self

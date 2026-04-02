@@ -1,27 +1,37 @@
+from co6co_task.service.CustomTask import ICustomTask
+from co6co_task.model.enum import Category
 import asyncio
-import subprocess 
- 
-class RTSPService:
-    def __init__(self): 
+import subprocess
+from co6co.utils import log, try_except
+
+
+class RespStreamTask(ICustomTask):
+    name = "流服务"
+    code = "RTSP_STREAM"
+    category = Category.SERVICE
+
+    def __init__(self):
+        super().__init__()
         self._active_processes = {}
-    async def exec_ipconfig(self ):
-        process =None
+
+    async def exec_ipconfig(self):
+        process = None
         try:
-            process =  await asyncio.create_subprocess_exec(
-                *['ipconfig','/all'],
+            process = await asyncio.create_subprocess_exec(
+                *['ipconfig', '/all'],
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE
             )
             while True:
                 data = await asyncio.wait_for(
-                            process.stdout.read(),
-                            timeout=2.0
-                        )
+                    process.stdout.read(),
+                    timeout=2.0
+                )
                 if not data:
                     break
-                yield data 
+                yield data
         except Exception as e:
-            print(f"[ERROR] 执行异常: {e}")  
+            print(f"[ERROR] 执行异常: {e}")
             raise e
         finally:
             # 清理资源
@@ -30,10 +40,9 @@ class RTSPService:
                     process.terminate()
                     await asyncio.wait_for(process.wait(), timeout=5)
                 except:
-                    pass 
+                    pass
 
-
-    async def read_rtsp_stream(self,rtsp_url: str,key:str): 
+    async def read_rtsp_stream(self, rtsp_url: str, key: str):
         # RTSP参数配置
         ffmpeg_cmd = [
             'ffmpeg.exe',
@@ -55,48 +64,49 @@ class RTSPService:
             'pipe:1'                          # 输出到stdout
         ]
         print(f"[INFO] 开始RTSP流: {rtsp_url}")
-        process=None
-        try: 
+        process = None
+        try:
             process = await asyncio.create_subprocess_exec(
                 *ffmpeg_cmd,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE
-            )  
+            )
             print(f"[INFO] 1111111111111111")
             self._active_processes[key] = process
             # 单独处理stderr（避免阻塞）
+
             async def read_stderr():
                 while True:
                     line = await process.stderr.readline()
                     if not line:
                         break
-                    # 可选：记录错误日志 
+                    # 可选：记录错误日志
                     print(f"[FFmpeg Error] {line.decode().strip()}")
             print(f"[INFO] 222222222222222222")
             stderr_task = asyncio.create_task(read_stderr())
             print(f"[INFO] 333333333333333333")
-        
+
             # 读取并发送视频数据
             chunk_size = 64 * 1024  # 64KB块
             while True:
                 try:
                     print(f"[INFO] read data")
                     data = await asyncio.wait_for(
-                        process.stdout.read(chunk_size), 
+                        process.stdout.read(chunk_size),
                         timeout=2.0
                     )
-                    
+
                     if not data:
                         print(f"[INFO] FFmpeg输出结束")
-                        break 
+                        break
                     else:
                         yield data
-                except Exception as e: 
-                    print(f"[ERROR] 读取数据异常: {e}")  
+                except Exception as e:
+                    print(f"[ERROR] 读取数据异常: {e}")
                     continue
 
         except Exception as e:
-            print(f"[ERROR] 流异常: {e}")  
+            print(f"[ERROR] 流异常: {e}")
         finally:
             # 清理资源
             if process:
@@ -105,14 +115,13 @@ class RTSPService:
                     await asyncio.wait_for(process.wait(), timeout=5)
                 except:
                     pass
-            
+
             if key in self._active_processes:
                 del self._active_processes[key]
-            
-            print(f"[INFO] 清理完成: {rtsp_url}") 
-     
 
-    def stop(self,ws_key):
+            print(f"[INFO] 清理完成: {rtsp_url}")
+
+    def stop(self, ws_key):
         """清理FFmpeg进程"""
         if ws_key in self._active_processes:
             process = self._active_processes[ws_key]
@@ -123,6 +132,12 @@ class RTSPService:
                 except:
                     process.kill()
             del self._active_processes[ws_key]
+
+    @try_except
+    def main(self):
+        self
+        pass
+
     def __del__(self):
         for key in self._active_processes.keys():
-            self.stop(key)   
+            self.stop(key)

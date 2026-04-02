@@ -5,6 +5,11 @@ from co6co.enums import Base_Enum
 from co6co.utils import DATA
 
 
+class Category(Base_Enum):
+    TASK = "task", 0
+    SERVICE = "service", 1
+
+
 class CommandCategory(Base_Enum):
     """
     操作类别

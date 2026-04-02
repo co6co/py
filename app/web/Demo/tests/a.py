@@ -1,5 +1,6 @@
 import asyncio,json
 from typing import AsyncGenerator
+from model.services import RTSPService
 
 # 示例 1: 基础的异步生成器
 async def get_data() -> AsyncGenerator[str, None]:
@@ -67,12 +68,21 @@ async def get_rtsp_stream_data(rtsp_url: str) -> AsyncGenerator[bytes, None]:
         if process and process.returncode is None:
             process.terminate()
             await process.wait()
+async def async_generator():
+    for i in range(5):
+        await asyncio.sleep(0.5)  # 模拟异步操作
+        yield i
 
-
+async def generator_expression():
+    agen = (x * 2 async for x in async_generator())
+    async for item in agen:
+        print(item)  # 0, 2, 4, 6, 8
 
 if __name__ == "__main__":
-    async def test():
-        async for data in get_rtsp_stream_data("rtsp://admin:lanbo12345@192.168.3.1/media/video1"):
+   
+    async def test(): 
+        test2= get_rtsp_stream_data("rtsp://admin:lanbo12345@192.168.3.1/media/video1")
+        async for data in test2:
             print(data)
     asyncio.run(test())
    
