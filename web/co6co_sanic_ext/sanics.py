@@ -26,8 +26,27 @@ import os
 import argparse
 
 
-class Worker(ABC):
+class IWorker(ABC):
+    @abstractmethod
+    def start(self):
+        """
+        处理数据
+        抽象方法
+        """
+        pass
+
+    @abstractmethod
+    def stop(self):
+        """
+        退出
+        """
+        pass
+
+
+class Worker(IWorker):
     """
+    可能不在使用了
+
     在主进程中增加一个工作进程，处理某些任务
     主进程与自进程进行通信
     child_conn.send()
@@ -75,7 +94,10 @@ class Worker(ABC):
                 if self.isQuit:
                     log.warn("worker thread quit by quit_event")
                     break
+                log.info("准备worker wait for data...")
                 data = self.conn.recv()   # 接收数据
+                log.info("worker recv", data)
+
                 if self.handler:
                     self.handler(data, self.conn)
 
@@ -172,24 +194,9 @@ def _create_App(name: str = "__mp_main__", configFile: str | Dict = None, apiIni
         raise
 
 
-def startApp(configFile: str | Dict, apiInit: Callable[[Sanic, Dict], None], worker_loader: Callable[[Sanic, asyncio.Event, PipeConnection], Worker] = None):
-    """
-    __main__     --> primary
-    __mp_main__  --> multiprocessing
-    """
-
-    # all_param = {**locals()}
-    event = asyncio.Event()
-    parent_conn, child_conn = Pipe()
-    args = {"parent_conn": parent_conn, "child_conn": child_conn}
-    loader = AppLoader(factory=partial(_create_App, configFile=configFile, apiInit=apiInit, **args))
-    app = loader.load()
-    setting: dict = app.config.web_setting
-    app.prepare(**setting)
-    appendData(app, quit_event=event)
-    worker = None
-    if worker_loader:
-        worker = worker_loader(app, event, parent_conn)
+def _handler_additional_loader(app: Sanic, event: asyncio.Event, parent_conn: PipeConnection, child_conn: PipeConnection, worker: IWorker):
+    if not worker:
+        return
 
     @try_except
     @app.main_process_start
@@ -203,12 +210,34 @@ def startApp(configFile: str | Dict, apiInit: Callable[[Sanic, Dict], None], wor
     def stop_app(app, loop):
         log.warn("stop_app.")
         event.set()  # 设置事件，通知其他协程
-        child_conn.close()
+        child_conn.close()  # 当父通道关闭，子通道尝试从主通道读取数据时，会抛出 EOFError（当读取时）
+        parent_conn.close()
         if worker:
             worker.stop()
         # 关闭数据库连接
     # 没有 primary serve 调用loader创建一个个
-    Sanic.serve(primary=app, app_loader=loader)
+
+
+def startApp(configFile: str | Dict, appInit: Callable[[Sanic, Dict], None], loader: Callable[[Sanic, asyncio.Event, PipeConnection], IWorker] = None):
+    """
+    __main__     --> primary
+    __mp_main__  --> multiprocessing
+    """
+
+    # all_param = {**locals()}
+    event = asyncio.Event()
+
+    parent_conn, child_conn = Pipe()
+    args = {"parent_conn": parent_conn, "child_conn": child_conn}
+    appLoader = AppLoader(factory=partial(_create_App, configFile=configFile, apiInit=appInit, **args))
+    app = appLoader.load()
+    setting: dict = app.config.web_setting
+    app.prepare(**setting)
+    appendData(app, quit_event=event)
+    if loader:
+        worker = loader(app, event, parent_conn)
+        _handler_additional_loader(app, event, parent_conn, child_conn, worker)
+    Sanic.serve(primary=app, app_loader=appLoader)
 
 
 def getConfigFilder(mainFilePath: str):

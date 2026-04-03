@@ -126,7 +126,7 @@ class StartHandler(HandlerCommand):
                 return
             if not self._taskisExist():
                 result, message = self.scheduler.addTask(self.taskCode, sourceCode, self. data.cron, stop)
-                fall_result = self.taskMgr.run(self.taskMgr.update_status, [self.taskCode], 1)
+                fall_result = self.taskMgr.bll.run(self.taskMgr.update_status, [self.taskCode], 1)
             else:
                 result = False
                 message = f"任务{self.taskCode}，已存在"
@@ -170,11 +170,11 @@ class RemoveHandler(HandlerCommand):
             if not self._taskisExist():
                 result = False
                 message = f"任务{self.taskCode}，不存在!"
-                fall_result = self.taskMgr.run(self.taskMgr.update_status, [self. taskCode], 0)
+                fall_result = self.taskMgr.bll.run(self.taskMgr.update_status, [self. taskCode], 0)
             else:
                 result = self.scheduler.removeTask(self. taskCode)
                 if result:
-                    fall_result = self.taskMgr.run(self.taskMgr.update_status, [self. taskCode], 0)
+                    fall_result = self.taskMgr.bll.run(self.taskMgr.update_status, [self. taskCode], 0)
                     log.warn(f"任务{self.taskCode}，删除成功，更新状态：{fall_result}")
                     message = f"任务{self.taskCode}，删除成功"
                 else:
@@ -300,7 +300,7 @@ class TasksMgr(sanics.Worker):
         """
         运行在数据库中的代码任务
         """
-        taskArr = self.run(self.getData)
+        taskArr = self.bll.run(self.getData)
         # data = asyncio.run(self.getData())
         # result = asyncio.run(self.check_session_closed())
         # log.warn(data)
@@ -326,10 +326,10 @@ class TasksMgr(sanics.Worker):
         fall_result = 0
         if len(success) > 0:
             print(*success)
-            succ_result = self.run(self.update_status, success, 1)
+            succ_result = self.bll.run(self.update_status, success, 1)
         if len(faile) > 0:
-            fall_result = self.run(self.update_status, faile, 0)
-        exeStatue = self.run(self.update_status__2)
+            fall_result = self.bll.run(self.update_status, faile, 0)
+        exeStatue = self.bll.run(self.update_status__2)
         log.warn("状态更新,成功->{},失败->{},意外的状态：{}".format(succ_result, fall_result, exeStatue))
 
     def start(self):
@@ -342,7 +342,7 @@ class TasksMgr(sanics.Worker):
 
     def stop(self):
         super().stop()
-        result = self.run(self.update_status)
+        result = self.bll.run(self.update_status)
         self.scheduler.stop()
         log.warn("状态更新,成功->{}".format(result))
         log.info("等待其他任务退出..")

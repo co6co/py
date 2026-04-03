@@ -33,6 +33,9 @@
     1. 新增： getconfig for win package
 0.0.13 2025-05-28
     1. bug
+0.0.14 2026-04-03
+    1. 优化： 优化 Worker 类
+
 ```
 
 webSocket 测试地址

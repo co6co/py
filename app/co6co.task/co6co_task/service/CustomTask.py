@@ -6,7 +6,7 @@ from typing import overload, List, Tuple
 from co6co.utils import log
 from typing import TypeVar
 
-from model.enum import Category
+from ..model.enum import Category
 T = TypeVar('T', bound='ICustomTask')
 
 
@@ -35,7 +35,7 @@ class ICustomTask(ABC):
         self._isQuit = True
         pass
 
-    @staticmethod
+    @classmethod
     def createInstance(cls: T, code: str) -> T:
         """获取code子类的实例"
         """
@@ -85,7 +85,7 @@ class ICustomService(ABC):
         self._isQuit = True
         pass
 
-    @staticmethod
+    @classmethod
     def createInstance(cls, code: str):
         """获取code子类的实例"
         """

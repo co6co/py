@@ -1,22 +1,23 @@
 from enum import Enum, unique
 # from abc import ABC, abstractclassmethod  抽象
 from operator import attrgetter
-from typing import Generic, List, Dict, Literal,Type,Optional ,TypeVar,Generator,Any
+from typing import Generic, List, Dict, Literal, Type, Optional, TypeVar, Generator, Any
 
-from co6co import K, V,T 
+from co6co import K, V, T
 E = TypeVar('E', bound='Base_Enum')
 # class Base_Enum2 (Enum,Generic[K,T]):pass
 # Base_Enum2Init=Base_Enum2[str,int]
 
+
 @unique  # 帮助检查 保证没有重复值
-class Base_Enum (Enum ):
+class Base_Enum (Enum):
     """
     枚举[key, val]
     name:才是真正的Key,环境保证它的唯一性
     key: 为人为设置由用户保证它的唯一性
     """
-    #key: K
-    #val: V
+    # key: K
+    # val: V
 
     def __new__(cls, key: K, value: V):
         _value = len(cls.__members__) + 1  # 为每个成员分配一个递增的整数值
@@ -72,7 +73,7 @@ class Base_Enum (Enum ):
         return None
 
     @classmethod
-    def generator(cls: Type[E])->Generator[E,Any,None] : 
+    def generator(cls: Type[E]) -> Generator[E, Any, None]:
         for _, v in cls.__members__.items():
             yield v
 
@@ -85,7 +86,7 @@ class Base_Enum (Enum ):
         return cls._to_str(attr)
 
     @classmethod
-    def value_of(cls: Type[E], name: str, ignoreError: bool=True) -> Optional[E]:
+    def value_of(cls: Type[E], name: str, ignoreError: bool = True) -> Optional[E]:
         """
         枚举的字符串 转枚举
         demo(Base_Enum):
@@ -109,7 +110,7 @@ class Base_Enum (Enum ):
 
 
 @unique
-class Base_EC_Enum(Base_Enum ):
+class Base_EC_Enum(Base_Enum):
     """
     枚举[key:英文 ,label:中文 ,val:数字] 
     """
@@ -117,10 +118,10 @@ class Base_EC_Enum(Base_Enum ):
     label: T
     val: V
 
-    def __new__(cls, key: K, label: T, value: V): 
+    def __new__(cls, key: K, label: T, value: V):
         obj = object.__new__(cls)
-        #obj = super().__new__( key,value) 
-        #obj.__init__(key,value)  # 调用初始化方法
+        # obj = super().__new__( key,value)
+        # obj.__init__(key,value)  # 调用初始化方法
         obj.key = key
         obj.label = label
         obj.val = value  # value 为元组 (en_name,cn_name,val)
