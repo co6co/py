@@ -11,6 +11,12 @@ def pipeData():
 
 
 class StartEventDispatcher(EventHandler):
+    def __init__(self, *serviceTypes: str):
+        if len(serviceTypes) == 0:
+            serviceTypes = ["start_task"]
+        self.serviceType = serviceTypes
+        super().__init__()
+
     def handle(self, event: Event) -> Event:
         if self.is_supported(event.event_type):  # EventType.TASK
             if event.event_type == "start_task":
@@ -31,33 +37,38 @@ class StartEventDispatcher(EventHandler):
 
     @property
     def supported_events(self):
-        return ["start_task", "start_result"]
+        return self.serviceType
 
 
 def test_hander_class():
-    handler = StartEventDispatcher()
-    assert handler.key == f"{handler.__module__}.StartEventDispatcher"
+    handler = StartEventDispatcher('start_task', 'start_result')
+    assert handler.name == "StartEventDispatcher"
+    # assert handler.key == f"{handler.__module__}.StartEventDispatcher"
     assert handler.is_supported("start_task") == True
     assert handler.is_supported("start_result") == True
     assert handler.is_supported("error") == False
 
 
-def test_test_event_dispatcher():
+def test_event_dispatcher():
     s = EventDispatcher()
-    e1 = StartEventDispatcher()
-    e2 = StartEventDispatcher()
-    e3 = StartEventDispatcher()
+    e1 = StartEventDispatcher("start_task")
+    e2 = StartEventDispatcher("start_result")
+    e3 = StartEventDispatcher("error")
+    e4 = StartEventDispatcher("error")
 
-    s.register_handler("1", e1)
-    s.register_handler("2", e2)
-    s.register_handler("3", e3)
-    s.register_handler("4", e3)
-    s.unregister_handler("2", e2)
-    assert "2" not in s.handlers and '1' in s.handlers and '3' in s.handlers
-    s.clear_handlers('1')
-    assert '1' not in s.handlers and '3' in s.handlers
+    s.register_handler(e1)
+    s.register_handler(e2)
+    s.register_handler(e3)
+    s.register_handler(e4)
+    s.unregister_handler(e2)
+    assert e2.supported_events[0] not in s.handlers
+    assert e1.supported_events[0] in s.handlers and e3.supported_events[0] in s.handlers
+
+    s.clear_handlers('error')
+    print(s.handlers)
+    assert 'error' not in s.handlers and 'start_task' in s.handlers
     s.clear_handlers()
-    assert '3' not in s.handlers
+    assert 'start_task' not in s.handlers
 
 
 def test_event_dispatcher(pipeData):

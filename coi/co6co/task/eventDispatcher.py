@@ -10,6 +10,7 @@ import threading
 from abc import ABC, abstractmethod
 from ..enums import Base_Enum
 from typing import TypeVar, Optional, Type
+from ..utils import log
 
 
 class EventType(Base_Enum):
@@ -59,9 +60,28 @@ class Event:
             timestamp=data["timestamp"]
         )
 
+    @staticmethod
+    def create(self, event_type: EventType | str | int, sosurce: str, data: Any):
+        """创建事件对象"""
+        return Event(
+            event_type=event_type,
+            data=data,
+            source=sosurce,
+            timestamp=time.time()
+        )
+
 
 class EventHandler(ABC):
     """事件处理器基类"""
+
+    def __init__(self, name: str = None):
+        self.name = name or self.__class__.__name__
+        self.process: EventDispatcherProcess = None
+
+    def send(self, event: Event):
+        """发送事件"""
+        if self.process is not None:
+            self.process.send(event)
 
     @abstractmethod
     def handle(self, event: Event) -> Optional[Event]:
@@ -82,6 +102,10 @@ class EventHandler(ABC):
         """检查是否支持处理该事件类型"""
         return event_type in self.supported_events
 
+    def create_event(self, event_type: EventType | str | int, data: Any) -> Event:
+        """创建事件对象"""
+        return Event.create(event_type, self.name, data)
+
 
 T = TypeVar('T', bound='EventHandler')
 
@@ -99,7 +123,7 @@ class TaskHandler(EventHandler):
             return Event(
                 event_type=EventType.RESULT,
                 data=result,
-                source="task_handler",
+                source=self.name,
                 timestamp=time.time()
             )
         return None
@@ -119,7 +143,7 @@ class ErrorHandler(EventHandler):
             return Event(
                 event_type=EventType.RESULT,
                 data=f"错误已处理: {event.data}",
-                source="error_handler",
+                source=self.name,
                 timestamp=time.time()
             )
         return None
@@ -133,15 +157,15 @@ class EventDispatcher:
     """事件分发器"""
 
     def __init__(self):
-        self.handlers: Dict[EventType, list[EventHandler]] = {}
+        self.handlers: Dict[EventType | str | int, list[EventHandler]] = {}
+        self.name = self.__class__.__name__
 
-    def register_handler(self, event_type: EventType, handler: EventHandler):
+    def register_handler(self,   handler: EventHandler):
         """注册事件处理器"""
-        if event_type not in self.handlers:
-            self.handlers[event_type] = []
-        self.handlers[event_type].append(handler)
+        for event_type in handler.supported_events:
+            self.handlers[event_type] = [handler] if self.handlers[event_type] == None else self.handlers[event_type].append(handler)
 
-    def unregister_handler(self, event_type: EventType, handler: EventHandler) -> None:
+    def unregister_handler(self, event_type: EventType | str | int, handler: EventHandler) -> None:
         """移除事件处理器"""
         if event_type in self.handlers:
             try:
@@ -151,6 +175,11 @@ class EventDispatcher:
             # 如果列表为空，删除这个事件类型
             if not self.handlers[event_type]:
                 del self.handlers[event_type]
+
+    def unregister_handlers(self, handler: EventHandler) -> None:
+        """移除所有事件处理器"""
+        for event_type in handler.supported_events:
+            self.unregister_handler(event_type, handler)
 
     def clear_handlers(self, event_type: EventType = None) -> None:
         """清除事件处理器
@@ -176,10 +205,12 @@ class EventDispatcher:
                     error_event = Event(
                         event_type=EventType.ERROR,
                         data=str(e),
-                        source="event_dispatcher",
+                        source=self.name,
                         timestamp=time.time()
                     )
                     responses.append(error_event)
+        else:
+            log.warn(f"未注册事件类型: {event.event_type}")
         return responses
 
 
@@ -209,13 +240,21 @@ class EventDispatcherProcess:
             return
         self.handler_classes.extend(handler_claszes)
 
-    def append_handler(self, event_type: EventType | str | int, handler:  T):
+    def append_handler(self,   handler:  T):
         """注册单个自定义事件处理器类"""
-        self.dispatcher.register_handler(event_type, handler)
+        handler.process = self
+        self.dispatcher.register_handler(handler)
 
     def remove_handler(self, event_type: EventType | str | int, handler:  T):
         """移除单个自定义事件处理器类"""
+
         self.dispatcher.unregister_handler(event_type, handler)
+        handler.process = None
+
+    def remove_handlers(self, handler:  T):
+        """移除所有自定义事件处理器类"""
+        self.dispatcher.unregister_handlers(handler)
+        handler.process = None
 
     def clear_handlers(self):
         """清除所有通过对象注册的事件处理器"""
@@ -259,18 +298,19 @@ class EventDispatcherProcess:
         # 创建事件分发器
 
         # 注册默认处理器
-        self.dispatcher .register_handler(EventType.TASK, TaskHandler())
-        self.dispatcher .register_handler(EventType.ERROR, ErrorHandler())
+        self.dispatcher .register_handler(TaskHandler())
+        self.dispatcher .register_handler(ErrorHandler())
 
         # 注册自定义处理器
         if self.handler_classes:
             for handler_class in self.handler_classes:
-                handler = handler_class()
+                handler: EventHandler = handler_class()
+                handler.process = self
 
                 # 根据处理器支持的事件类型注册
                 if hasattr(handler, 'supported_events'):
                     for event_type in handler.supported_events:
-                        self.dispatcher .register_handler(event_type, handler)
+                        self.dispatcher .register_handler(handler)
 
         worker_id = self.worker_id
         # 心跳处理器
@@ -290,7 +330,7 @@ class EventDispatcherProcess:
             def supported_events(self):
                 return [EventType.HEARTBEAT]
 
-        self.dispatcher .register_handler(EventType.HEARTBEAT, HeartbeatHandler())
+        self.dispatcher.register_handler(HeartbeatHandler())
         # 主循环
         while True:
             try:

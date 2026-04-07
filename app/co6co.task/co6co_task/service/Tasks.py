@@ -24,7 +24,7 @@ class HandlerCommand(ABC):
         self.successor = successor
         taskMgr = taskMgr or successor.taskMgr
         self.scheduler = taskMgr.scheduler if taskMgr else None
-        self.taskMgr: TasksMgr = taskMgr
+        self.taskMgr:TasksMgr = taskMgr
 
     def handle_request(self,  data: DATA, conn: PipeConnection):
         self.command: CommandCategory = data.command

@@ -3,7 +3,7 @@ import asyncio
 import subprocess
 import signal
 import sys,os,datetime
-from sanic import Sanic
+from sanic import Sanic,Request
 #from sanic.worker import GatheredTask
 from sanic.response import html
 #from sanic.websocket import WebSocketCommonProtocol

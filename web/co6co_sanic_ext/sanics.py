@@ -24,7 +24,7 @@ import threading
 import multiprocessing
 import os
 import argparse
-
+from co6co.task.eventDispatcher import EventDispatcherProcess
 
 class IWorker(ABC):
     @abstractmethod
@@ -194,14 +194,13 @@ def _create_App(name: str = "__mp_main__", configFile: str | Dict = None, apiIni
         raise
 
 
-def _handler_additional_loader(app: Sanic, event: asyncio.Event, parent_conn: PipeConnection, child_conn: PipeConnection, worker: IWorker):
-    if not worker:
-        return
-
+def _handler_additional_loader(app: Sanic, event: asyncio.Event, parent_conn: PipeConnection, child_conn: PipeConnection, worker: IWorker,process:EventDispatcherProcess):
+    
     @try_except
     @app.main_process_start
     def start_app(app, loop):
         log.info("start_app...")
+        process.start()
         if worker:
             worker.start()
 
@@ -214,6 +213,7 @@ def _handler_additional_loader(app: Sanic, event: asyncio.Event, parent_conn: Pi
         parent_conn.close()
         if worker:
             worker.stop()
+        process.stop()
         # 关闭数据库连接
     # 没有 primary serve 调用loader创建一个个
 
@@ -228,7 +228,8 @@ def startApp(configFile: str | Dict, appInit: Callable[[Sanic, Dict], None], loa
     event = asyncio.Event()
 
     parent_conn, child_conn = Pipe()
-    args = {"parent_conn": parent_conn, "child_conn": child_conn}
+    process=EventDispatcherProcess(child_conn,"api_worker")
+    args = {"parent_conn": parent_conn, "child_conn": child_conn,"event_process":process}
     appLoader = AppLoader(factory=partial(_create_App, configFile=configFile, apiInit=appInit, **args))
     app = appLoader.load()
     setting: dict = app.config.web_setting
@@ -236,7 +237,7 @@ def startApp(configFile: str | Dict, appInit: Callable[[Sanic, Dict], None], loa
     appendData(app, quit_event=event)
     if loader:
         worker = loader(app, event, parent_conn)
-        _handler_additional_loader(app, event, parent_conn, child_conn, worker)
+        _handler_additional_loader(app, event, parent_conn, child_conn, worker,process)
     Sanic.serve(primary=app, app_loader=appLoader)
 
 

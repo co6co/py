@@ -20,6 +20,7 @@ class ModelBase(Generic[T]):
 
 
 tt = ModelBase[int]
+
 print(type(tt))
 # tt.get_a() 不能调用 get_a
 
