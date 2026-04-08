@@ -10,6 +10,10 @@ from cacheout import Cache
 import time
 from co6co_task.service.RouterService import dynamicRouter
 from co6co_task.service.Tasks import TasksMgr
+from co6co_task.service.Services import Service
+from co6co_task.service.handler.task_handler import TaskManager
+from services.rtspService import RtspService
+import asyncio
 
 
 def appendRoute(app: Sanic):
@@ -55,12 +59,23 @@ def init(app: Sanic, _: dict):
     session.init(app)
 
 
-def main(config: dict):
-    sanics.startApp(config, init, TasksMgr.create_instance)
-    log.succ("***,main", __file__) # 子进程不执行
-
-
-
+def createService(app:Sanic,event , conn ):
+    try:
+        worker=Service(app,event,conn)
+        loop=asyncio.new_event_loop()
+        handler=RtspService(loop)
+        worker.event_process.append_handler(handler) 
+        #worker=TaskManager(app)
+        print("createService ed")
+        return worker
+    except Exception as e:
+        log.err("createService失败", e)
+  
+    
+def main(config: dict): 
+    #sanics.startApp(config, init, TasksMgr.create_instance)
+    sanics.startApp(config, init, createService)
+    log.succ("***,main", __file__) # 子进程不执行 
 if __name__ == "__main__":
     # print("__file__", __file__)
     # current_file_path = os.path.abspath(__file__)

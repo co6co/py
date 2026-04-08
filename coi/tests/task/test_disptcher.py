@@ -1,7 +1,10 @@
-from co6co.task.eventDispatcher import EventDispatcherProcess, Event, EventType, EventHandler, EventDispatcher
+
 import pytest
 import time
 from multiprocessing import Pipe, Process
+import os,sys 
+sys.path.insert(0,os.getcwd()) 
+from co6co.task.eventDispatcher import EventDispatcherProcess, Event, EventType, EventHandler, EventDispatcher
 
 
 @pytest.fixture
@@ -43,7 +46,8 @@ class StartEventDispatcher(EventHandler):
 def test_hander_class():
     handler = StartEventDispatcher('start_task', 'start_result')
     assert handler.name == "StartEventDispatcher"
-    # assert handler.key == f"{handler.__module__}.StartEventDispatcher"
+    assert handler.key == f"{handler.__module__}.StartEventDispatcher"
+    
     assert handler.is_supported("start_task") == True
     assert handler.is_supported("start_result") == True
     assert handler.is_supported("error") == False
@@ -61,6 +65,12 @@ def test_event_dispatcher():
     s.register_handler(e3)
     s.register_handler(e4)
     s.unregister_handler(e2)
+
+    assert s.exist(e1.key) == True
+    assert s.exist(e2.key) == False
+    assert s.get_handler(e1.key) == e1
+    assert s.get_handler(e2.key) == None
+    assert s.get_handler(e3.key) == e3
     assert e2.supported_events[0] not in s.handlers
     assert e1.supported_events[0] in s.handlers and e3.supported_events[0] in s.handlers
 

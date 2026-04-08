@@ -1,4 +1,6 @@
 from __future__ import annotations
+from sanic.config import Config
+from types import SimpleNamespace
 from sanic.blueprint_group import BlueprintGroup
 from sanic import Sanic, utils, Blueprint
 from sanic import Sanic, utils, Blueprint
@@ -120,6 +122,13 @@ def appendData(app: Sanic, **kwargs):
     """
     追加数据到app.ctx中
     """
+    child_conn=kwargs.get("child_conn")
+    if child_conn: 
+        process=EventDispatcherProcess(child_conn,"api_worker") 
+        app.ctx.event_process=process 
+        process.start() 
+    else:
+        log.warn("append app.ctx error","child_conn is None")
     for key, value in kwargs.items():
         setattr(app.ctx, key, value)
 
@@ -155,7 +164,8 @@ def _create_App(name: str = "__mp_main__", configFile: str | Dict = None, apiIni
     app.config.web_setting --> 配置信息
     """
     try:
-        app = Sanic(name)
+        #log.warn("startApp1111111111111111111111")
+        app = Sanic[Config, SimpleNamespace](name)
         data = locals()
         appendData(app, **kwargs)
 
@@ -194,13 +204,14 @@ def _create_App(name: str = "__mp_main__", configFile: str | Dict = None, apiIni
         raise
 
 
-def _handler_additional_loader(app: Sanic, event: asyncio.Event, parent_conn: PipeConnection, child_conn: PipeConnection, worker: IWorker,process:EventDispatcherProcess):
+def _handler_additional_loader(app: Sanic, event: asyncio.Event, parent_conn: PipeConnection, child_conn: PipeConnection, worker: IWorker,process:EventDispatcherProcess=None):
     
     @try_except
     @app.main_process_start
     def start_app(app, loop):
         log.info("start_app...")
-        process.start()
+        if process:
+            process.start()
         if worker:
             worker.start()
 
@@ -213,7 +224,8 @@ def _handler_additional_loader(app: Sanic, event: asyncio.Event, parent_conn: Pi
         parent_conn.close()
         if worker:
             worker.stop()
-        process.stop()
+        if process:
+            process.stop()
         # 关闭数据库连接
     # 没有 primary serve 调用loader创建一个个
 
@@ -225,19 +237,20 @@ def startApp(configFile: str | Dict, appInit: Callable[[Sanic, Dict], None], loa
     """
 
     # all_param = {**locals()}
-    event = asyncio.Event()
-
+    #log.warn("startApp000000000000000")
+    event = asyncio.Event() 
     parent_conn, child_conn = Pipe()
-    process=EventDispatcherProcess(child_conn,"api_worker")
-    args = {"parent_conn": parent_conn, "child_conn": child_conn,"event_process":process}
+    #process=EventDispatcherProcess(child_conn,"api_worker")
+    args = {"parent_conn": parent_conn, "child_conn": child_conn }
     appLoader = AppLoader(factory=partial(_create_App, configFile=configFile, apiInit=appInit, **args))
     app = appLoader.load()
+    #log.warn("startApp222222222222222222")
     setting: dict = app.config.web_setting
     app.prepare(**setting)
     appendData(app, quit_event=event)
     if loader:
         worker = loader(app, event, parent_conn)
-        _handler_additional_loader(app, event, parent_conn, child_conn, worker,process)
+        _handler_additional_loader(app, event, parent_conn, child_conn, worker)
     Sanic.serve(primary=app, app_loader=appLoader)
 
 

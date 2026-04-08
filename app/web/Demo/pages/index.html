@@ -1,44 +1,46 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
+	<head>
+		<title>RTSP流播放器</title>
+		<link rel="stylesheet" href="/static/css/index.css" />
+	</head>
+	<body>
+		<div class="container">
+			<div class="header">
+				<h1>🔴 RTSP流播放器</h1>
+				<p>通过WebSocket和ffmpeg.wasm实现实时视频流播放</p>
+			</div>
 
-<head>
-    <title>RTSP流播放器</title>
-     <link rel="stylesheet" href="/static/css/index.css">
-</head> 
-<body>
-    <div class="container">
-        <div class="header">
-            <h1>🔴 RTSP流播放器</h1>
-            <p>通过WebSocket和ffmpeg.wasm实现实时视频流播放</p>
-        </div>
+			<div class="control-panel">
+				<h3>RTSP流配置</h3>
+				<div>
+					<input
+						type="text"
+						id="rtspUrl"
+						value="rtsp://wowzaec2demo.streamlock.net/vod/mp4:BigBuckBunny_115k.mp4"
+						placeholder="输入RTSP流地址" />
+					<input type="text" id="wsUrl" value="" placeholder="输入RTSP流地址" />
+					<button id="connectBtn">连接</button>
+					<button id="disconnectBtn" disabled>断开</button>
+				</div>
+				<div style="margin-top: 10px">
+					<button id="testBtn1">测试流1 (Big Buck Bunny)</button>
+					<button id="testBtn2">测试流2 (海洋公园)</button>
+				</div>
+			</div>
 
-        <div class="control-panel">
-            <h3>RTSP流配置</h3>
-            <div>
-                <input type="text" id="rtspUrl" value="rtsp://wowzaec2demo.streamlock.net/vod/mp4:BigBuckBunny_115k.mp4"
-                    placeholder="输入RTSP流地址">
-                <button id="connectBtn">连接</button>
-                <button id="disconnectBtn" disabled>断开</button>
-            </div>
-            <div style="margin-top: 10px;">
-                <button id="testBtn1">测试流1 (Big Buck Bunny)</button>
-                <button id="testBtn2">测试流2 (海洋公园)</button>
-            </div>
-        </div>
+			<div class="video-container">
+				<canvas id="videoCanvas" width="640" height="480"></canvas>
+			</div>
 
-        <div class="video-container">
-            <canvas id="videoCanvas" width="640" height="480"></canvas>
-        </div>
+			<div class="status">
+				<h4>状态信息</h4>
+				<div id="status">准备就绪...</div>
+				<div id="stats" style="margin-top: 10px"></div>
+			</div>
+		</div>
 
-        <div class="status">
-            <h4>状态信息</h4>
-            <div id="status">准备就绪...</div>
-            <div id="stats" style="margin-top: 10px;"></div>
-        </div>
-    </div>
-
-    <!-- ffmpeg.wasm核心库 -->
-    <script type="module" src="/static/js/main.js"></script>
-</body>
-
+		<!-- ffmpeg.wasm核心库 -->
+		<script type="module" src="/static/js/main.js"></script>
+	</body>
 </html>

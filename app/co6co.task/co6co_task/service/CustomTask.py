@@ -49,56 +49,6 @@ class ICustomTask(ABC):
         return None
 
 
-class ICustomService(ABC):
-    name = "抽象服务"
-    code = "ICustomService"
-
-    def __init__(self):
-        super().__init__()
-        self._isQuit = False
-        self._running = False
-        self.name = self.__class__.name
-        self.code = self.__class__.code
-
-    @property
-    def running(self) -> bool:
-        return self._running
-
-    @property
-    def isQuit(self) -> bool:
-        """
-        抽象类方法不改变 _running 的状态，由子类实现
-        """
-        return self._isQuit
-
-    @abstractmethod
-    def main(self):
-        pass
-
-    def start(self):
-        if self._running:
-            log.warn(f"{self.name}已经在运行中")
-            return
-        self.main()
-
-    def stop(self):
-        self._isQuit = True
-        pass
-
-    @classmethod
-    def createInstance(cls, code: str):
-        """获取code子类的实例"
-        """
-        class_arr = get_all_subclasses(cls)
-        for c in class_arr:
-            if c.code == code:
-                try:
-                    return c()
-                except Exception as e:
-                    log.err(f"实例化'{c}'失败", e)
-        return None
-
-
 def get_all_subclasses(cls=ICustomTask):
     """
     获取所有子类的列表

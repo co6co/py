@@ -96,7 +96,8 @@ class ffService:
                     continue
 
         except Exception as e:
-            print(f"[ERROR] 流异常: {e}")  
+            print(f"[ERROR] 流生产器异常: {e}")  
+            raise e
         finally:
             # 清理资源
             if process:

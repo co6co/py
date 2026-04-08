@@ -8,20 +8,22 @@ from .. import Scheduler
 from ..CustomTask import ICustomTask
 from co6co_web_db.services.db_service import BaseBll
 from co6co_db_ext.db_utils import db_tools
-from ..model.pos.tables import DynamicCodePO, SysTaskPO
+from ...model.pos.tables import DynamicCodePO, SysTaskPO
 from co6co_permissions.model.enum import dict_state
 from sqlalchemy.sql import Select, Update
-from typing import List, Tuple 
+from typing import List, Tuple
+
 
 class BaseTaskHandler(EventHandler):
     """任务处理器基类"""
+
     def __init__(self, app: Sanic):
         self.app = app
         self.scheduler = Scheduler()
         self.bll = BaseBll(app=app)
         self.session = self.bll.session
-    
-    def getSourceCode(self, data: dict) -> Tuple[str | callable, callable | None]:
+
+    def getSourceCode(self, data: dict):
         sourceCode = data.get('sourceCode')
         stop = None
         if not sourceCode:
@@ -34,10 +36,10 @@ class BaseTaskHandler(EventHandler):
             message = f"任务{data.get('code')}，未找到任务"
             return None, message
         return sourceCode, stop
-    
+
     def taskisExist(self, taskCode: str) -> bool:
         return self.scheduler.exist(taskCode)
-    
+
     def update_status(self, codeList: List[str] = None, status: int = 0) -> int:
         """
         更新状态
@@ -61,6 +63,7 @@ class BaseTaskHandler(EventHandler):
 
 class ExistHandler(BaseTaskHandler):
     """存在任务处理类"""
+
     def handle(self, event: Event) -> Optional[Event]:
         if self.is_supported(event.event_type):
             try:
@@ -81,7 +84,7 @@ class ExistHandler(BaseTaskHandler):
                     source=self.name,
                     timestamp=time.time()
                 )
-    
+
     @property
     def supported_events(self):
         return ['task_exist']
@@ -89,6 +92,7 @@ class ExistHandler(BaseTaskHandler):
 
 class StartHandler(BaseTaskHandler):
     """启动任务处理类"""
+
     def handle(self, event: Event) -> Optional[Event]:
         if self.is_supported(event.event_type):
             try:
@@ -123,7 +127,7 @@ class StartHandler(BaseTaskHandler):
                     source=self.name,
                     timestamp=time.time()
                 )
-    
+
     @property
     def supported_events(self):
         return ['task_start']
@@ -131,6 +135,7 @@ class StartHandler(BaseTaskHandler):
 
 class ModifyHandler(BaseTaskHandler):
     """修改任务处理类"""
+
     def handle(self, event: Event) -> Optional[Event]:
         if self.is_supported(event.event_type):
             try:
@@ -164,7 +169,7 @@ class ModifyHandler(BaseTaskHandler):
                     source=self.name,
                     timestamp=time.time()
                 )
-    
+
     @property
     def supported_events(self):
         return ['task_modify']
@@ -172,6 +177,7 @@ class ModifyHandler(BaseTaskHandler):
 
 class RemoveHandler(BaseTaskHandler):
     """删除任务处理类"""
+
     def handle(self, event: Event) -> Optional[Event]:
         if self.is_supported(event.event_type):
             try:
@@ -203,7 +209,7 @@ class RemoveHandler(BaseTaskHandler):
                     source=self.name,
                     timestamp=time.time()
                 )
-    
+
     @property
     def supported_events(self):
         return ['task_remove', 'task_stop']
@@ -211,6 +217,7 @@ class RemoveHandler(BaseTaskHandler):
 
 class GetNextRunTimeHandler(BaseTaskHandler):
     """获取下一次运行时间处理类"""
+
     def handle(self, event: Event) -> Optional[Event]:
         if self.is_supported(event.event_type):
             try:
@@ -241,7 +248,7 @@ class GetNextRunTimeHandler(BaseTaskHandler):
                     source=self.name,
                     timestamp=time.time()
                 )
-    
+
     @property
     def supported_events(self):
         return ['task_get_next_time']
@@ -249,6 +256,7 @@ class GetNextRunTimeHandler(BaseTaskHandler):
 
 class UnknownHandler(BaseTaskHandler):
     """未知命令处理类"""
+
     def handle(self, event: Event) -> Optional[Event]:
         message = f"未处理命令{event.event_type}"
         log.warn(f"未处理命令{event.event_type},{event.data.get('code')}")
@@ -258,7 +266,7 @@ class UnknownHandler(BaseTaskHandler):
             source=self.name,
             timestamp=time.time()
         )
-    
+
     @property
     def supported_events(self):
         return ['*']  # 支持所有事件
@@ -266,12 +274,13 @@ class UnknownHandler(BaseTaskHandler):
 
 class TaskManager(IWorker):
     """任务管理器"""
+
     def __init__(self, app: Sanic):
         self.app = app
         self.scheduler = Scheduler()
         self.bll = BaseBll(app=app)
         self.session = self.bll.session
-    
+
     async def getData(self):
         """
         获取源码
@@ -288,7 +297,7 @@ class TaskManager(IWorker):
         except Exception as e:
             log.err("执行 ERROR", e)
             return []
-    
+
     def addTaskByCode(self, code: str, cron: str):
         task = ICustomTask.createInstance(code)
         if task:
@@ -296,7 +305,7 @@ class TaskManager(IWorker):
         else:
             log.warn("任务在代码中，未找到：{}".format(code))
         return task is not None
-    
+
     def addTaskBySourceCode(self, code: str, sourceCode: str, cron: str):
         if self.scheduler.checkCode(sourceCode, cron):
             self.scheduler.addTask(code, sourceCode, cron)
@@ -304,7 +313,7 @@ class TaskManager(IWorker):
         else:
             log.warn("检查代码失败：{}".format(code))
             return False
-    
+
     def startTimeTask(self):
         """
         运行在数据库中的代码任务
@@ -317,7 +326,7 @@ class TaskManager(IWorker):
             category = po.get("category")  # 0 代码任务，1 表任务[代码在数据表中需要编译后才能运行]
             cron = po.get("cron")
             sourceCode = po.get("sourceCode")
-            log.info("加载任务:{}}...".format(code))
+            log.info("加载任务:{}...".format(code))
             if category == 0:
                 result = self.addTaskByCode(code, cron)
                 success.append(code) if result else faile.append(code)
@@ -325,7 +334,7 @@ class TaskManager(IWorker):
             # 任务在表中，已经关联表读取完成
             result = self.addTaskBySourceCode(code, sourceCode, cron)
             success.append(code) if result else faile.append(code)
-        
+
         log.warn("加载任务完成,预加载：{}共加载,{}个任务".format(len(taskArr), self.scheduler.task_total))
         succ_result = 0
         fall_result = 0
@@ -336,7 +345,7 @@ class TaskManager(IWorker):
             fall_result = self.bll.run(self.update_status, faile, 0)
         exeStatue = self.bll.run(self.update_status__2)
         log.warn("状态更新,成功->{},失败->{},意外的状态：{}".format(succ_result, fall_result, exeStatue))
-    
+
     def update_status(self, codeList: List[str] = None, status: int = 0) -> int:
         """
         更新状态
@@ -356,7 +365,7 @@ class TaskManager(IWorker):
         except Exception as e:
             log.err("执行 ERROR", e)
             return None
-    
+
     async def update_status__2(self):
         """
         意外状态更新
@@ -367,13 +376,13 @@ class TaskManager(IWorker):
         log.info("更新状态不正确的任务：{}【应该为0】".format(result2))
         await self.session.commit()
         return result2
-    
+
     def start(self):
         """
         启动任务
         """
         self.startTimeTask()
-    
+
     def stop(self):
         """
         停止任务
@@ -382,4 +391,3 @@ class TaskManager(IWorker):
         self.scheduler.stop()
         log.warn("状态更新,成功->{}".format(result))
         log.info("等待其他任务退出..")
- 
