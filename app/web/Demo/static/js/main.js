@@ -37,6 +37,9 @@ class RTSPPlayer {
 			document.getElementById('rtspUrl').value =
 				'rtsp://admin:123456@192.168.1.100:554/stream1';
 		});
+		document.getElementById('sendBtn').addEventListener('click', () => {
+			this.sendMessage();
+		});
 	}
 
 	async initFFmpeg() {
@@ -162,7 +165,6 @@ class RTSPPlayer {
 		}
 
 		this.chunkBuffer = []; // 清空缓冲区
-
 		try {
 			// 写入文件
 			await this.ffmpeg.writeFile('input.mp4', mergedData);
@@ -215,7 +217,15 @@ class RTSPPlayer {
 
 		renderLoop();
 	}
-
+	sendMessage() {
+		const message = document.getElementById('message').value.trim();
+		if (!message) {
+			alert('请输入要发送的消息');
+			return;
+		}
+		this.socket.send(message);
+		this.updateButtons();
+	}
 	disconnect() {
 		if (!this.isPlaying) return;
 
@@ -223,6 +233,7 @@ class RTSPPlayer {
 		this.setStatus('正在断开连接...');
 
 		if (this.socket && this.socket.readyState === WebSocket.OPEN) {
+			this.socket.send('close');
 			this.socket.close();
 		}
 
@@ -247,9 +258,11 @@ class RTSPPlayer {
 	updateButtons() {
 		const connectBtn = document.getElementById('connectBtn');
 		const disconnectBtn = document.getElementById('disconnectBtn');
+		const sendBtn = document.getElementById('sendBtn');
 
 		connectBtn.disabled = this.isPlaying;
 		disconnectBtn.disabled = !this.isPlaying;
+		sendBtn.disabled = !this.isPlaying;
 	}
 }
 

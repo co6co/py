@@ -9,10 +9,10 @@ _T = TypeVar("_T")
 # 2. 自定义事件循环设置
 
 
-def create_event_loop():
+def create_event_loop(loop=None):
     """创建并配置自定义事件循环"""
     # 创建新的事件循环
-    custom_loop = asyncio.new_event_loop()
+    custom_loop =loop or asyncio.new_event_loop()
     # print(f"创建自定义事件循环: {custom_loop} (ID: {id(custom_loop)})")
 
     # 将自定义循环设置为当前线程的默认循环
@@ -30,8 +30,8 @@ class ThreadEvent:
     def loop(self):
         return self._loop
 
-    def __init__(self, threadName: str = None, quitBck: Callable[[], None] = None):
-        self._loop = create_event_loop()
+    def __init__(self, threadName: str = None, quitBck: Callable[[], None] = None,loop:asyncio.AbstractEventLoop=None):
+        self._loop = create_event_loop(loop)
         self._loopStopBck = quitBck
         self.closed = False
         Thread(target=self._start_background, daemon=True, name=threadName) .start()
@@ -91,8 +91,8 @@ class EventLoop:
     _eventLoop: ThreadEvent
     _closed: bool = None
 
-    def __init__(self) -> None:
-        self._eventLoop = ThreadEvent()
+    def __init__(self,loop:asyncio.AbstractEventLoop=None) -> None:
+        self._eventLoop = ThreadEvent(loop)
         self._closed = False
 
     def run(self, task, *args, **argkv):
@@ -163,19 +163,27 @@ class TaskManage:
     def runing(self):
         return self._starting
 
-    def __init__(self, threadName: str = None):
-        self._loop = asyncio.new_event_loop()
+    def __init__(self, threadName: str = None,event_loop:asyncio.AbstractEventLoop=None,closeEventLoop:bool=True):
+        self._loop = event_loop or asyncio.new_event_loop()
         self._loopClosed = False
         self.threadName = threadName
-        Thread(target=self._start_background, daemon=True, name=threadName) .start()
+        self._starting=False
+        self.isCloseEventLoop=closeEventLoop
+        Thread(target=self._start_event_loop, daemon=True, name=threadName) .start()
 
-    def _start_background(self):
-        asyncio.set_event_loop(self.loop)
-        log.log("线程'{}->{}'运行...".format(self.threadName, id(self.loop)))
-        self._starting = True
-        self._loop.run_forever()
-        log.log("线程'{}->{}'结束.".format(self.threadName, id(self.loop)))
-        self._starting = False
+    def _start_event_loop(self):
+        try:
+            asyncio.set_event_loop(self.loop) 
+            log.log("线程'{}->{}'运行...".format(self.threadName, id(self.loop)))
+            self._starting = True
+            self._loop.run_forever()
+            log.log("线程'{}->{}'结束.".format(self.threadName, id(self.loop)))
+            
+        finally:
+            self._starting = False
+            if self.isCloseEventLoop:
+                self.close()
+
 
     def runTask(self, tastFun: Callable[..., Awaitable[Any]], callBck: Callable[[asyncio.Future[_T]], Any] = None, *args, **kwargs):
         """
@@ -186,6 +194,7 @@ class TaskManage:
         """
         # log.warn(f"ThreadEventLoop22:{id(self._loop)}")
         # run_coroutine_threadsafe 从非事件循环线程向事件循环线程提交协程任务
+        # # 在线程安全的方式下添加任务
         task = asyncio.run_coroutine_threadsafe(tastFun(*args, **kwargs), loop=self._loop)
         # .result() 方法等待协程的结果，或者使用 .add_done_callback() 添加回调来处理结果。
         if callBck:
@@ -205,7 +214,8 @@ class TaskManage:
         self._loop.call_soon_threadsafe(self._stop)
 
     def close(self):
-        self._loop.call_soon_threadsafe(self._loop.close)
+        #self._loop.call_soon_threadsafe(self._loop.close)
+        self._loop.close()
         self._loopClosed = True
 
     def __del__(self):

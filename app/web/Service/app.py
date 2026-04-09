@@ -62,8 +62,8 @@ def init(app: Sanic, _: dict):
 def createService(app:Sanic,event , conn ):
     try:
         worker=Service(app,event,conn)
-        loop=asyncio.new_event_loop()
-        handler=RtspService(loop)
+       
+        handler=RtspService( )
         worker.event_process.append_handler(handler) 
         #worker=TaskManager(app)
         print("createService ed")

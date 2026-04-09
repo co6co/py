@@ -4,9 +4,10 @@
         "port": 8888,
         "host": "0.0.0.0",
         "backlog": 2048,
-        "debug": "False",
+        "debug": false,
         "access_log": false,
         "dev": false
+        
     },
     "db_settings": {
         "DB_HOST": "localhost",

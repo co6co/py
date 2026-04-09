@@ -1,9 +1,12 @@
 import asyncio
 import subprocess 
- 
+from co6co.utils import log
+
 class ffService:
     def __init__(self): 
         self._active_processes = {}
+        self._loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(self._loop)
     async def exec_ipconfig(self ):
         process =None
         try:
@@ -56,13 +59,13 @@ class ffService:
         ]
         print(f"[INFO] 开始RTSP流: {rtsp_url}")
         process=None
-        try: 
+      
+        try:   
             process = await asyncio.create_subprocess_exec(
                 *ffmpeg_cmd,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE
-            )  
-            print(f"[INFO] 1111111111111111")
+            )   
             self._active_processes[key] = process
             # 单独处理stderr（避免阻塞）
             async def read_stderr():
@@ -71,11 +74,8 @@ class ffService:
                     if not line:
                         break
                     # 可选：记录错误日志 
-                    print(f"[FFmpeg Error] {line.decode().strip()}")
-            print(f"[INFO] 222222222222222222")
-            stderr_task = asyncio.create_task(read_stderr())
-            print(f"[INFO] 333333333333333333")
-        
+                    print(f"[FFmpeg Error] {line.decode().strip()}") 
+            stderr_task = asyncio.create_task(read_stderr())  
             # 读取并发送视频数据
             chunk_size = 64 * 1024  # 64KB块
             while True:
@@ -97,6 +97,7 @@ class ffService:
 
         except Exception as e:
             print(f"[ERROR] 流生产器异常: {e}")  
+            log.err(f"[ERROR] 流生产器异常: {e}")  
             raise e
         finally:
             # 清理资源
@@ -109,21 +110,26 @@ class ffService:
             
             if key in self._active_processes:
                 del self._active_processes[key]
+                loop.close()
             
             print(f"[INFO] 清理完成: {rtsp_url}") 
      
 
     def stop(self,ws_key):
         """清理FFmpeg进程"""
+        print(f"[INFO] 清理FFmpeg进程: {ws_key},{self._active_processes}")
         if ws_key in self._active_processes:
             process = self._active_processes[ws_key]
+            print(f"[INFO] 收到 停止  清理FFmpeg进程: {ws_key}")
             if process and process.returncode is None:
                 try:
+                    print(f"[INFO] 调用 process.terminate(): {ws_key}")
                     process.terminate()
                     process.wait(timeout=3)
                 except:
                     process.kill()
             del self._active_processes[ws_key]
+        self._loop.close()
     def __del__(self):
         for key in self._active_processes.keys():
             self.stop(key)   

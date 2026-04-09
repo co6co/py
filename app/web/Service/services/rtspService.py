@@ -6,13 +6,15 @@ from services.ff_service import ffService
 import asyncio
 from typing import Optional
 from sanic.server.websockets.impl import WebsocketImplProtocol as WebSocketCommonProtocol
-
-
+from co6co.task.thread import TaskManage
+from co6co.utils import log 
+import base64
 class RtspService(EventHandler):
-    def __init__(self,event:asyncio.BaseEventLoop):
+    def __init__(self ):
         super().__init__()
-        self.ffService = ffService()
-        self.event=event
+        self.ffService = ffService() 
+        self.taskMgr=TaskManage(threadName="rtspStreamTask")
+        
      
     def _stop_stream(self,key:str): 
         try:
@@ -22,32 +24,34 @@ class RtspService(EventHandler):
             print(f"[ERROR] 停止流失败: {e}")
             return self.create_event("RTSP.SERVICE.STOP.RESULT",{"key":key,"success":False})
          
-    async def _start_get_data(self,key:str,rtsp_url:str):
-        #async for data in self.ffService.read_rtsp_stream(rtsp_url,key): 
-        async for data in self.ffService.exec_ipconfig( ): 
-           
-            self.send(self.create_event("RTSP.STREAM.DATA",{"key":key,"data2":rtsp_url})) 
+    async def _start_get_data(self,key:str,rtsp_url:str): 
+        async for data in self.ffService.read_rtsp_stream(rtsp_url,key): 
+        #async for data in self.ffService.exec_ipconfig( ): 
+            data="你好123456".encode('utf-8')
+            print("ffServiceData,",key,len(data))
+            # 发送数据到客户端 
 
-    def _start_thread(self,key:str,rtsp_url:str):  
-        data=self.create_event("RTSP.STREAM.DATA",{"key":key,"data":rtsp_url.encode()})
-        data=data.to_dict()
-        print("发送数据:",data)
-        def worker(key, rtsp_url):
-            loop =self.event# asyncio.new_event_loop()
-            asyncio.set_event_loop(loop)
-            loop.run_until_complete(self._start_get_data(key, rtsp_url))
-            print(f"[INFO] 流: {key} 结束，关闭事件循环")
-            loop.close()
-        Thread(target=worker, args=(key, rtsp_url)).start()  
-        #asyncio.run(self._start_get_data(key, rtsp_url))
+            base64_data = base64.b64encode(data) 
+            ev=self.create_event("RTSP.STREAM.DATA",{"key":key,"data": base64_data}) 
+            #ev = self.create_event("RTSP.STREAM.DATA",{"key":key,"rtsp_url":rtsp_url})
+            #print("发送数据:",ev.to_dict()) 
+            try:
+                self.send(ev) 
+            except Exception as e:
+                print(f"[ERROR] 发送数据失败: {e}")
+
+    def _start_stream_task(self,key:str,rtsp_url:str):   
+        self.taskMgr.runTask(self._start_get_data,lambda x:print(f"[INFO] 流任务: {key} 结束，执行结果：{x.result}"),key, rtsp_url)
+       
 
     def handle(self, event: Event) -> Optional[Event]:
         if event.event_type == "RTSP.SERVICE.START":
+            key=event.data["key"]
+            url=event.data["rtsp_url"]
             try:
-                self._start_thread(event.data["key"],event.data["rtsp_url"]) 
+                self._start_stream_task(key,url) 
             except Exception as e:
-                print(f"[ERROR] 启动流失败: {e}")
-            print("1111111111",event.data["key"])
+                print(f"[ERROR] 启动{key}{url}流失败: {e}") 
         elif event.event_type == "RTSP.SERVICE.STOP":
             self._stop_stream(event.data["key"])
         return None
@@ -72,10 +76,13 @@ class RtspServiceClient(EventHandler):
     
     def handle(self, event: Event) -> Optional[Event]:
         key=event.data["key"]
+        #log.warn(f"{key}处理事件: {event.to_dict()}")
         ws:WebSocketCommonProtocol=self.k_ws[key]
-        if event.event_type == "RTSP.STREAM.DATA": 
-            data=event.data["data"] 
-            ws.send(data)
+        if event.event_type == "RTSP.STREAM.DATA":  
+            base64_data= event.data.get('data')
+            data = base64.b64decode(base64_data) 
+            log.info(f"{key}处理数据: {type( data)}{len(data)}") 
+            #ws.send(data)
         elif event.event_type == "RTSP.SERVICE.STOP.RESULT": 
             del self.k_ws[key]
             ws.close()

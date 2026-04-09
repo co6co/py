@@ -11,6 +11,8 @@ from abc import ABC, abstractmethod
 from ..enums import Base_Enum
 from typing import TypeVar, Optional, Type
 from ..utils import log
+import pickle ,struct
+
 
 
 class EventType(Base_Enum):
@@ -217,13 +219,14 @@ class EventDispatcher:
                     if response:
                         responses.append(response)
                 except Exception as e:
-                    error_event = Event(
-                        event_type=EventType.ERROR,
-                        data=str(e),
-                        source=self.name,
-                        timestamp=time.time()
-                    )
-                    responses.append(error_event)
+                    log.warn(f"事件处理器{handler.key}处理事件{event.data}失败: {e}")
+                    #error_event = Event(
+                    #    event_type=EventType.ERROR,
+                    #    data=str(e),
+                    #    source=self.name,
+                    #    timestamp=time.time()
+                    #)
+                    #responses.append(error_event)
         else:
             log.warn(f"未注册事件类型: {event.event_type}")
         return responses
@@ -242,6 +245,7 @@ class EventDispatcherProcess:
         self.worker_id = worker_id
         self.handler_classes = [] 
         self.dispatcher =  EventDispatcher()
+        self.chuck_size=4096
 
     @property
     def is_running(self):
@@ -305,8 +309,15 @@ class EventDispatcherProcess:
 
     def send(self, event: Event):
         """发送事件到主进程"""
-        # 这里可以实现发送事件到主进程的逻辑，例如通过管道或队列
-        self.conn.send(event.to_dict())
+        try:
+            # 这里可以实现发送事件到主进程的逻辑，例如通过管道或队列
+            data=pickle.dumps(event)
+            size = len(data)
+            self.conn.send(struct.pack('>I', size))
+            for i in range(0,size,self.chuck_size):
+                self.conn.send(data[i:i+self.chuck_size])
+        except Exception as e:
+            log.err(f"发送事件到主进程失败: {e}",e)
 
     def _worker(self):
         # 创建事件分发器
@@ -326,7 +337,7 @@ class EventDispatcherProcess:
                     for event_type in handler.supported_events:
                         self.dispatcher .register_handler(handler)
 
-        worker_id = self.worker_id
+        
         # 心跳处理器
         '''
         class HeartbeatHandler(EventHandler):
@@ -352,30 +363,38 @@ class EventDispatcherProcess:
                 if self.isQuit:
                     print(f"[Worker {self.worker_id}] 收到退出信号")
                     break
-                event_dict = self.conn.recv()
-                event = Event.from_dict(event_dict)
+                data = self.conn.recv()
+                size = struct.unpack('>I', data[:4])[0]
+                data = data[4:]
+                while len(data) < size:
+                    data += self.conn.recv()
+               
+                event=pickle.loads(data)
+                if isinstance(event,Dict):
+                    #log.info(type(event),event)
+                    event =Event.from_dict(event)
                 if event.event_type == EventType.SHUTDOWN:
                     print(f"[Worker {self.worker_id}] 收到关闭事件")
                     break
 
                 # 分发事件
-                responses = self.dispatcher .dispatch(event)
+                responses = self.dispatcher.dispatch(event)
                 # 发送所有响应
-                for response in responses:
-                    self.conn.send(response.to_dict())
-
+                for response in responses: 
+                    self.send(response.to_dict())
+ 
             except EOFError:
                 print(f"[Worker {self.worker_id}] 连接中断")
                 break
-            except Exception as e:
-                print(f"[Worker {self.worker_id}] 错误: {e}")
-                error_event = Event(
-                    event_type=EventType.ERROR,
-                    data=str(e),
-                    source=f"worker_{self.worker_id}",
-                    timestamp=time.time()
-                )
-                self.conn.send(error_event.to_dict())
+            except Exception as e: 
+                log.err(f"[Worker {self.worker_id}] 错误: {e}",e)
+                #error_event = Event(
+                #    event_type=EventType.ERROR,
+                #    data=str(e),
+                #    source=f"worker_{self.worker_id}",
+                #    timestamp=time.time()
+                #)
+                #self.send(error_event.to_dict())
 
         print(f"[Worker {self.worker_id}] 退出")
         # self.conn.close()
