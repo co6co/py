@@ -151,7 +151,7 @@ def ping_host(host: str, timeout: int = 2, count: int = 2):
             # 所有尝试都失败
             return False
 
-    except socket.error:
+    except socket.error as e:
         print(f"套接字错误: {e}")
         if "permission denied" in str(e).lower() or "权限" in str(e):
             print("需要管理员权限才能运行此程序")

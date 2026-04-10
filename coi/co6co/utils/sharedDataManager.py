@@ -9,6 +9,7 @@ class SharedDataManager:
         self.manager = multiprocessing.Manager()
         self.shared_dict = self.manager.dict()
         self.shared_list = self.manager.list()
+    
         self.lock = self.manager.Lock()
     
     def worker(self, worker_id):

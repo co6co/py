@@ -13,8 +13,10 @@ from websockets.legacy.protocol import WebSocketCommonProtocol
 from sanic.server.websockets.impl import WebsocketImplProtocol as WebSocketCommonProtocol
 from model.services import RTSPService
 from model.apphelp import read_file_content, get_file_path
-from model.utils import get_client_ip, check_connection_alive
+from model.utils import get_client_ip, check_connection_alive 
 from co6co.utils import try_except, log
+from co6co.task.thread import TaskManage
+
 
 app = Sanic("RTSP_WebSocket_Proxy")
 
@@ -36,9 +38,8 @@ async def stream_rtsp_to_ws(ws: WebSocketCommonProtocol, rtsp_url: str, ws_key: 
     """从RTSP拉流并通过WebSocket转发"""
     try:
         print(f"++++++++++++++++++++开始拉流: {rtsp_url}")
-        async for data in rtsService.read_rtsp_stream(rtsp_url, ws_key):
-            # async for data in rtsService.exec_ipconfig():
-            print("发送数据", len(data))
+        async for data in rtsService.read_rtsp_stream(rtsp_url, ws_key): 
+            log.succ(f"发送数据: {len(data)}")
             isOpen = await check_connection_alive()
             if isOpen:
                 print("ws opend...", len(data))
@@ -46,12 +47,47 @@ async def stream_rtsp_to_ws(ws: WebSocketCommonProtocol, rtsp_url: str, ws_key: 
             else:
                 break
     except Exception as e:
+        log.err("error stream_rtsp_to_ws",e)
         print(f"[ERROR] stream_rtsp_to_ws: {e}")
 
 # @app.listener('before_server_start')
 # async def setup_background_tasks(app, loop):
 #    """设置后台任务管理器"""
 #    app.ctx.background_tasks = {}
+@app.websocket('/ws/stream2')
+async def websocket_stream2(request, ws: WebSocketCommonProtocol):
+    """WebSocket流端点"""
+    rtsp_url = request.args.get('url')
+    print(rtsp_url)
+    if not rtsp_url:
+        await ws.close(reason="需要RTSP URL参数")
+        return
+
+    # 创建唯一标识符
+    import uuid
+    ws_key = str(uuid.uuid4()) 
+    try:
+        # 启动流任务
+        thread_task = TaskManage()
+        thread_task.runTask(stream_rtsp_to_ws,lambda x:log.info(f"stream_rtsp_to_ws: {x}"), ws, rtsp_url, ws_key)
+        while True:
+            message = await ws.recv()
+            if message == "close": 
+                thread_task.stop()
+                break
+            else:
+                print(f"[INFO] 收到消息: {message}")
+            # 可以处理其他控制消息
+            # 例如: 暂停、恢复、改变参数等
+
+    except Exception as e:
+        print(f"[INFO] 连接断开: {e}")
+    finally: 
+        thread_task.stop()
+        try:
+            thread_task.close()
+        except asyncio.CancelledError:
+            pass 
 
 
 @app.websocket('/ws/stream')
@@ -65,8 +101,7 @@ async def websocket_stream(request, ws: WebSocketCommonProtocol):
 
     # 创建唯一标识符
     import uuid
-    ws_key = str(uuid.uuid4())
-
+    ws_key = str(uuid.uuid4()) 
     try:
         # 启动流任务
         task = stream_rtsp_to_ws(ws, rtsp_url, ws_key)
@@ -110,8 +145,7 @@ async def index(request):
 
 def signal_handler(sig, frame):
     """优雅关闭"""
-    print("\n[INFO] 收到关闭信号，清理资源...")
-    del rtsService
+    print("\n[INFO] 收到关闭信号，清理资源...") 
     sys.exit(0)
 
 
