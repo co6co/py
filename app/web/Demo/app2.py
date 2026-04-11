@@ -15,8 +15,8 @@ from model.services import RTSPService
 from model.apphelp import read_file_content, get_file_path
 from model.utils import get_client_ip, check_connection_alive 
 from co6co.utils import try_except, log
-from co6co.task.thread import TaskManage
-
+from co6co.task.thread import TaskManage,create_event_loop
+import threading
 
 app = Sanic("RTSP_WebSocket_Proxy")
 
@@ -32,17 +32,16 @@ app.config.WEBSOCKET_PING_TIMEOUT = 20
 
 
 rtsService = RTSPService()
+LOOP=create_event_loop()
 
-
-async def stream_rtsp_to_ws(ws: WebSocketCommonProtocol, rtsp_url: str, ws_key: str):
+async def stream_rtsp_to_ws( rtsp_url: str, ws_key: str,ws: WebSocketCommonProtocol=None):
     """从RTSP拉流并通过WebSocket转发"""
     try:
         print(f"++++++++++++++++++++开始拉流: {rtsp_url}")
         async for data in rtsService.read_rtsp_stream(rtsp_url, ws_key): 
-            log.succ(f"发送数据: {len(data)}")
-            isOpen = await check_connection_alive()
-            if isOpen:
-                print("ws opend...", len(data))
+            log.succ(f"发送数据: {len(data)}") 
+            isOpen = await check_connection_alive(ws)
+            if isOpen: 
                 await ws.send(data)
             else:
                 break
@@ -50,46 +49,18 @@ async def stream_rtsp_to_ws(ws: WebSocketCommonProtocol, rtsp_url: str, ws_key: 
         log.err("error stream_rtsp_to_ws",e)
         print(f"[ERROR] stream_rtsp_to_ws: {e}")
 
-# @app.listener('before_server_start')
-# async def setup_background_tasks(app, loop):
-#    """设置后台任务管理器"""
-#    app.ctx.background_tasks = {}
-@app.websocket('/ws/stream2')
-async def websocket_stream2(request, ws: WebSocketCommonProtocol):
-    """WebSocket流端点"""
-    rtsp_url = request.args.get('url')
-    print(rtsp_url)
-    if not rtsp_url:
-        await ws.close(reason="需要RTSP URL参数")
-        return
+def demo(LOOP:asyncio.AbstractEventLoop ,  rtsp_url, ws_key,ws: WebSocketCommonProtocol=None):
+    #新线程里没有自动创建的 event loop 
+    #LOOP=asyncio.get_event_loop() 
+    LOOP.create_task(stream_rtsp_to_ws(  rtsp_url, ws_key,ws)) 
+    LOOP.run_forever()  # 必须启动事件循环
+    pass
+def createThread(ws: WebSocketCommonProtocol,  rtsp_url, ws_key): 
+    thread=threading.Thread(target=demo,args=(LOOP,  rtsp_url, ws_key,ws,) )
+    thread.start()
+    return LOOP
 
-    # 创建唯一标识符
-    import uuid
-    ws_key = str(uuid.uuid4()) 
-    try:
-        # 启动流任务
-        thread_task = TaskManage()
-        thread_task.runTask(stream_rtsp_to_ws,lambda x:log.info(f"stream_rtsp_to_ws: {x}"), ws, rtsp_url, ws_key)
-        while True:
-            message = await ws.recv()
-            if message == "close": 
-                thread_task.stop()
-                break
-            else:
-                print(f"[INFO] 收到消息: {message}")
-            # 可以处理其他控制消息
-            # 例如: 暂停、恢复、改变参数等
-
-    except Exception as e:
-        print(f"[INFO] 连接断开: {e}")
-    finally: 
-        thread_task.stop()
-        try:
-            thread_task.close()
-        except asyncio.CancelledError:
-            pass 
-
-
+ 
 @app.websocket('/ws/stream')
 async def websocket_stream(request, ws: WebSocketCommonProtocol):
     """WebSocket流端点"""
@@ -104,37 +75,34 @@ async def websocket_stream(request, ws: WebSocketCommonProtocol):
     ws_key = str(uuid.uuid4()) 
     try:
         # 启动流任务
-        task = stream_rtsp_to_ws(ws, rtsp_url, ws_key)
-        stream_task = asyncio.ensure_future(task)
-        # stream_task = asyncio.create_task(task)   # 直接使用 asyncio.create_task()可能与 Sanic 的任务管理冲突 导致子进程不工作
-        # stream_task = app.add_task(task)
-        # stream_task = asyncio.ensure_future(task)
-        # app.ctx.background_tasks[ws_key] = task
-        # 保持连接活跃
+       
+        #log.start_mark("demo 线程")
+        #thread_task=createThread(ws, rtsp_url, ws_key)
+        #log.end_mark("demo 线程")
+        thread_task = TaskManage(event_loop=LOOP,closeEventLoop= False)
+        thread_task.runTask(stream_rtsp_to_ws,lambda x:log.info(f"stream_rtsp_to_ws: {x}"), rtsp_url, ws_key,ws)
         while True:
+            log.warn("准备接受websocket 消息...")
             message = await ws.recv()
-            if message == "close":
-                print(f"[INFO] 收到关闭指令")
-                stream_task.cancel()
+            log.warn("接受websocket 消息.")
+            if message == "close": 
+                thread_task.stop()
                 break
+            else:
+                print(f"[INFO] 收到消息: {message}")
             # 可以处理其他控制消息
             # 例如: 暂停、恢复、改变参数等
 
     except Exception as e:
         print(f"[INFO] 连接断开: {e}")
-    finally:
-        # 取消任务并清理
-        # task = app.ctx.background_tasks.pop(ws_key, None)
-        stream_task.cancel()
+    finally: 
+        thread_task.stop()
         try:
-            await stream_task
-        except asyncio.CancelledError:
+            #thread_task.close()
             pass
-
-        rtsService.stop(ws_key)
-        print(f"[INFO] 连接清理完成: {ws_key}")
-
-
+        except asyncio.CancelledError:
+            pass 
+  
 @app.route('/')
 async def index(request):
     """主页面 - 从文件读取HTML"""

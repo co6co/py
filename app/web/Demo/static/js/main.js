@@ -163,24 +163,23 @@ class RTSPPlayer {
 			mergedData.set(chunk, offset);
 			offset += chunk.length;
 		}
-
+		//console.info(mergedData)
 		this.chunkBuffer = []; // 清空缓冲区
 		try {
+			/*
 			// 写入文件
 			await this.ffmpeg.writeFile('input.mp4', mergedData);
 
 			// 使用ffmpeg解码
+			// 爆内存
 			await this.ffmpeg.exec([
-				'-i',
-				'input.mp4',
-				'-vf',
-				'fps=15,scale=640:480',
-				'-f',
-				'rawvideo',
-				'-pix_fmt',
-				'rgba',
+				'-i','input.mp4',
+				'-vf','fps=15,scale=640:480',
+				'-f','rawvideo',
+				'-pix_fmt','rgba',
 				'output.rgba',
 			]);
+			 
 
 			// 读取解码后的数据
 			const rgbaData = await this.ffmpeg.readFile('output.rgba');
@@ -191,6 +190,30 @@ class RTSPPlayer {
 			// 清理临时文件
 			await this.ffmpeg.deleteFile('input.mp4');
 			await this.ffmpeg.deleteFile('output.rgba');
+
+*/
+
+
+			// 清理旧文件，防止内存残留
+			//await this.ffmpeg.FS('unlink', 'input.mp4').catch(() => {});
+			//await this.ffmpeg.FS('unlink', 'frame_%04d.png').catch(() => {});
+			await this.ffmpeg.deleteFile('input.mp4');
+			await this.ffmpeg.deleteFile('output.rgba');
+
+			// 写入输入视频
+			await this.ffmpeg.writeFile('input.mp4', this.mergedData);
+
+			// ✅ 安全命令：输出 PNG 序列
+			await this.ffmpeg.exec([
+				'-i', 'input.mp4',
+				'-vf', 'fps=15,scale=640:480',
+				'-f', 'image2',
+				'-pix_fmt', 'rgba',
+				'frame_%04d.png'
+			]);
+
+			// 读取第一帧示例
+			await this.ffmpeg.readFile('frame_0001.png');
 		} catch (error) {
 			console.warn('解码错误:', error);
 			// 如果解码失败，跳过这些数据继续

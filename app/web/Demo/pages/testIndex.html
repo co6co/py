@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Sanic WS 测试</title>
+</head>
+
+<body>
+    <h1>WebSocket 测试</h1>
+    <input type="text" id="msg" placeholder="输入消息">
+    <button onclick="sendMsg()">发送</button>
+    <div id="log"></div>
+
+    <script>
+        // 连接后端 WS
+        const socket = new WebSocket("ws://" + location.host + "/ws"); 
+      
+        socket.onopen = () => console.log("客户端：连接已打开");
+        socket.onerror = (err) => console.error("客户端错误：", err);
+        socket.onmessage = (msg) =>log(msg.data);
+        socket.onclose = (e) => console.log("关闭码：", e.code, "原因：", e.reason);
+        function sendMsg() {
+            let msg = document.getElementById("msg").value;
+            socket.send(msg);
+        }
+
+        function log(text) {
+            console.log("收到消息：", text),
+            document.getElementById("log").innerHTML += "<p>" + text + "</p>";
+        }
+    </script>
+</body>
+
+</html>

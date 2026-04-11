@@ -62,7 +62,7 @@ class RTSPService:
                 continue
             
 
-    async def read_rtsp_stream(self, rtsp_url: str, key: str,read_out_stream=None,read_err_stream=None):
+    async def read_rtsp_stream(self, rtsp_url: str, key: str ):
         """
         在多线程环境中，如果你在非主线程中使用asyncio，需要确保在该线程中有一个事件循环，并且异步函数在这个事件循环中运行
         
@@ -74,7 +74,7 @@ class RTSPService:
         """
         # RTSP参数配置
         ffmpeg_cmd = [
-            "ffmpeg.exe",
+            "E:/Tools/VXL/ffmpeg/bin/ffmpeg.exe",
             "-rtsp_transport",
             "tcp",  # 使用TCP传输
             "-i",
