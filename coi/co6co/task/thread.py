@@ -219,5 +219,5 @@ class TaskManage:
         self._loopClosed = True
 
     def __del__(self):
-        if not self._loopClosed:
+        if not self._loopClosed and   self.isCloseEventLoop:
             self._loop.close()
