@@ -1,7 +1,7 @@
 import  os,sys
 import argparse
  
-def main(args):
+def jk_sw_acl(args):
     mac_port_map = {}
     with open(args.source, 'r', encoding=args.encoding) as f:
         # 初始化字典来存储 MAC 地址和端口的映射
@@ -25,11 +25,18 @@ def main(args):
             for i,mac in enumerate(mac_list):
                 f.write(f"rule {i+1} permit {mac} 0000.0000.0000 any any\n")
             f.write("exit\n")
+def main(args):
+    if args.type == 1:
+        jk_sw_acl(args)
+    else:
+        parser.error("Invalid type")
+    
 if __name__=="__main__":
     parser = argparse.ArgumentParser(description="Text Tool")
     parser.add_argument('-s', "--source", type=str, help="Input file path")
     parser.add_argument('-e', "--encoding", type=str, default="utf-8", help="源文件编码")
-    parser.add_argument('-o', "--output", type=str,   default="./output/output.txt", help="Output file path")
+    parser.add_argument('-o', "--output", type=str,   default="./dist/output/output.txt", help="Output file path")
+    parser.add_argument('-t', "--type", type=int,   default="1", help="1:JK Switch ACL")
     parser.add_argument('-oe', "--output_encoding", type=str, default="utf-8", help="输出文件编码")
     args = parser.parse_args() 
     if not args.source:
