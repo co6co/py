@@ -1,0 +1,20 @@
+<!doctype html>
+<html>
+	<title>使用Data URL（简单但效率低）</title>
+	<body>
+		<img id="frame" width="640" height="480" />
+		<script>
+			let frame = document.getElementById('frame');
+			let ws = new WebSocket('ws://localhost:8765');
+
+			ws.onmessage = function (event) {
+				let message = JSON.parse(event.data);
+
+				if (message.type === 'video') {
+					// 假设是JPEG格式的帧
+					frame.src = 'data:image/jpeg;base64,' + message.data;
+				}
+			};
+		</script>
+	</body>
+</html>

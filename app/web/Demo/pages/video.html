@@ -1,0 +1,212 @@
+<!doctype html>
+<html>
+	<head>
+		<title>WebSocket视频流</title>
+	</head>
+	<body>
+		<input
+			type="text"
+			id="rtspUrl"
+			value="rtsp://admin:123456@192.168.3.17/media/video1"
+			placeholder="输入RTSP流地址" />
+
+		<video id="videoElement" controls autoplay></video>
+		<button id="connectBtn">连接</button>
+		<script>
+			class WebSocketVideoPlayer {
+				constructor(url, videoElement) {
+					this.ws = new WebSocket(url);
+					this.videoElement = videoElement;
+					this.mediaSource = new MediaSource();
+					this.sourceBuffer = null;
+					this.videoQueue = [];
+					this.isAppending = false;
+					this.codec = 'avc1.42E01E'; // 默认H.264 codec
+
+					this.init();
+				}
+
+				init() {
+					// 设置二进制类型
+					this.ws.binaryType = 'arraybuffer';
+
+					// 设置视频源
+					this.videoElement.src = URL.createObjectURL(this.mediaSource);
+
+					this.mediaSource.addEventListener('sourceopen', () => {
+						this.setupSourceBuffer();
+					});
+
+					this.setupWebSocket();
+				}
+
+				setupWebSocket() {
+					this.ws.onopen = () => {
+						console.log('WebSocket连接已建立');
+					};
+
+					this.ws.onmessage = (event) => {
+						this.handleMessage(event.data);
+					};
+
+					this.ws.onclose = () => {
+						console.log('WebSocket连接关闭');
+					};
+
+					this.ws.onerror = (error) => {
+						console.error('WebSocket错误:', error);
+					};
+				}
+
+				setupSourceBuffer() {
+					try {
+						// 根据服务器配置的codec创建SourceBuffer
+						const mimeCodec = `video/mp4; codecs="${this.codec}"`;
+
+						if (!MediaSource.isTypeSupported(mimeCodec)) {
+							console.error('不支持的codec:', mimeCodec);
+							return;
+						}
+
+						this.sourceBuffer = this.mediaSource.addSourceBuffer(mimeCodec);
+						this.sourceBuffer.mode = 'sequence'; // 使用sequence模式
+
+						this.sourceBuffer.addEventListener('updateend', () => {
+							this.isAppending = false;
+							this.processQueue();
+						});
+
+						this.sourceBuffer.addEventListener('error', (e) => {
+							console.error('SourceBuffer错误:', e);
+						});
+					} catch (error) {
+						console.error('创建SourceBuffer失败:', error);
+					}
+				}
+
+				handleMessage(data) {
+					try {
+						// 解析消息
+						let message;
+
+						if (typeof data === 'string') {
+							// JSON消息
+							message = JSON.parse(data);
+
+							if (message.type === 'config') {
+								this.handleConfig(message);
+								return;
+							}
+
+							if (message.type === 'frame' && message.data) {
+								// 从Base64解码
+								this.queueFrame(
+									this.base64ToArrayBuffer(message.data),
+									message,
+								);
+							}
+						} else if (data instanceof ArrayBuffer) {
+							// 二进制帧数据
+							this.queueFrame(data);
+						}
+					} catch (error) {
+						console.error('处理消息失败:', error);
+					}
+				}
+
+				handleConfig(config) {
+					console.log('收到配置:', config);
+					this.codec = config.codec === 'h264' ? 'avc1.42E01E' : config.codec;
+
+					// 重新设置SourceBuffer
+					if (this.mediaSource.readyState === 'open' && this.sourceBuffer) {
+						this.sourceBuffer.abort();
+						this.mediaSource.removeSourceBuffer(this.sourceBuffer);
+						this.setupSourceBuffer();
+					}
+				}
+
+				queueFrame(frameData, metadata = {}) {
+					this.videoQueue.push({
+						data: frameData,
+						metadata: metadata,
+					});
+
+					this.processQueue();
+				}
+
+				processQueue() {
+					if (
+						!this.sourceBuffer ||
+						this.isAppending ||
+						this.videoQueue.length === 0
+					) {
+						return;
+					}
+
+					if (this.mediaSource.readyState !== 'open') {
+						return;
+					}
+
+					const frame = this.videoQueue.shift();
+					this.isAppending = true;
+
+					try {
+						// 将原始H.264数据转换为fMP4段
+						const mp4Segment = this.h264ToMp4Segment(
+							frame.data,
+							frame.metadata,
+						);
+
+						if (mp4Segment) {
+							this.sourceBuffer.appendBuffer(mp4Segment);
+						} else {
+							this.isAppending = false;
+							this.processQueue();
+						}
+					} catch (error) {
+						console.error('添加buffer失败:', error);
+						this.isAppending = false;
+						this.processQueue();
+					}
+				}
+
+				h264ToMp4Segment(h264Data, metadata) {
+					// 简化版：这里需要使用mux.js等库将H.264转换为fMP4
+					// 为了简单，我们假设已经是MP4格式
+					return h264Data;
+				}
+
+				base64ToArrayBuffer(base64) {
+					const binaryString = atob(base64);
+					const bytes = new Uint8Array(binaryString.length);
+					for (let i = 0; i < binaryString.length; i++) {
+						bytes[i] = binaryString.charCodeAt(i);
+					}
+					return bytes.buffer;
+				}
+
+				destroy() {
+					if (this.ws) {
+						this.ws.close();
+					}
+					if (this.mediaSource && this.mediaSource.readyState === 'open') {
+						this.mediaSource.endOfStream();
+					}
+				}
+			}
+
+			// 使用示例
+			const connectBtn = document.getElementById('connectBtn');
+			connectBtn.addEventListener('click', () => {
+				const streamUrl = document.getElementById('rtspUrl').value;
+				const wsUrl2 = `ws://${window.location.host}/ws/stream`;
+				const wsUrl = `${wsUrl2}?url=${streamUrl}`;
+				const player = new WebSocketVideoPlayer(
+					wsUrl,
+					document.getElementById('videoElement'),
+				);
+			});
+		</script>
+	</body>
+</html>

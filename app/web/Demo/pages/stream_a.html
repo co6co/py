@@ -1,0 +1,38 @@
+<!doctype html>
+<html>
+	<body>
+		<canvas id="videoCanvas" width="640" height="480"></canvas>
+
+		<script>
+			let canvas = document.getElementById('videoCanvas');
+			let ctx = canvas.getContext('2d');
+
+			// 假设你通过WebSocket接收数据
+			let ws = new WebSocket('ws://localhost:8765');
+			ws.onmessage = async function (event) {
+				let message = JSON.parse(event.data);
+
+				if (message.type === 'video') {
+					// 将base64数据转为ArrayBuffer
+					let binary = atob(message.data);
+					let bytes = new Uint8Array(binary.length);
+					for (let i = 0; i < binary.length; i++) {
+						bytes[i] = binary.charCodeAt(i);
+					}
+
+					// 创建Blob并生成URL
+					let blob = new Blob([bytes], { type: 'image/jpeg' }); // 根据实际格式调整
+					let url = URL.createObjectURL(blob);
+
+					// 绘制到Canvas
+					let img = new Image();
+					img.onload = function () {
+						ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+						URL.revokeObjectURL(url);
+					};
+					img.src = url;
+				}
+			};
+		</script>
+	</body>
+</html>

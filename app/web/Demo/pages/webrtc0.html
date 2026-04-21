@@ -1,0 +1,552 @@
+<!doctype html>
+<html>
+	<head>
+		<title>WebRTC RTSP Stream</title>
+		<style>
+			* {
+				margin: 0;
+				padding: 0;
+				box-sizing: border-box;
+			}
+
+			body {
+				font-family: Arial, sans-serif;
+				background: #f0f0f0;
+				padding: 20px;
+			}
+
+			.container {
+				max-width: 1200px;
+				margin: 0 auto;
+			}
+
+			.header {
+				text-align: center;
+				margin-bottom: 20px;
+			}
+
+			.video-container {
+				position: relative;
+				background: #000;
+				border-radius: 8px;
+				overflow: hidden;
+				margin-bottom: 20px;
+			}
+
+			video {
+				width: 100%;
+				height: auto;
+				display: block;
+			}
+
+			.controls {
+				display: flex;
+				gap: 10px;
+				justify-content: center;
+				margin-bottom: 20px;
+			}
+
+			button {
+				padding: 10px 20px;
+				background: #007bff;
+				color: white;
+				border: none;
+				border-radius: 4px;
+				cursor: pointer;
+				font-size: 16px;
+			}
+
+			button:hover {
+				background: #0056b3;
+			}
+
+			button:disabled {
+				background: #6c757d;
+				cursor: not-allowed;
+			}
+
+			.stats {
+				background: white;
+				padding: 15px;
+				border-radius: 8px;
+				margin-top: 20px;
+			}
+
+			.status {
+				margin-top: 10px;
+				padding: 10px;
+				border-radius: 4px;
+			}
+
+			.connected {
+				background: #d4edda;
+				color: #155724;
+			}
+
+			.disconnected {
+				background: #f8d7da;
+				color: #721c24;
+			}
+
+			.connecting {
+				background: #fff3cd;
+				color: #856404;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="container">
+			<div class="header">
+				<h1>RTSP 实时监控系统</h1>
+				<div class="server-info">
+					<div id="serverStats"></div>
+					<div class="camera-selector">
+						<label for="cameraSelect">选择摄像头: </label>
+						<select id="cameraSelect"></select>
+					</div>
+				</div>
+			</div>
+
+			<div class="controls">
+				<button id="connectBtn" onclick="connect()">连接</button>
+				<button id="disconnectBtn" onclick="disconnect()" disabled>断开</button>
+				<button onclick="takeSnapshot()">截图</button>
+				<button onclick="toggleFullscreen()">全屏</button>
+				<button onclick="toggleStats()">显示统计</button>
+			</div>
+
+			<div class="video-grid" id="videoGrid">
+				<div class="video-container">
+					<video id="videoElement" autoplay playsinline></video>
+					<div class="video-info">
+						<span id="cameraName">未连接</span>
+						<span id="connectionStatus" class="status disconnected">离线</span>
+					</div>
+				</div>
+			</div>
+
+			<div class="stats-panel" id="statsPanel" style="display: none">
+				<h3>连接统计</h3>
+				<div id="connectionStats"></div>
+			</div>
+		</div>
+
+		<script>
+			// 全局变量
+			let peerConnection = null;
+			let ws = null;
+			let selectedCamera = 'camera1';
+			let statsInterval = null;
+			let heartbeatInterval = null;
+
+			// 页面加载完成
+			window.addEventListener('load', async () => {
+				// 加载摄像头列表
+				await loadCameras();
+
+				// 自动连接
+				// connect();
+			});
+
+			// 加载摄像头列表
+			async function loadCameras() {
+				try {
+					const response = await fetch('/cameras');
+					const data = await response.json();
+
+					const select = document.getElementById('cameraSelect');
+					select.innerHTML = '';
+
+					data.cameras.forEach((camera) => {
+						const option = document.createElement('option');
+						option.value = camera.id;
+						option.textContent = `${camera.id} (${camera.url})`;
+						select.appendChild(option);
+					});
+
+					// 选择变化事件
+					select.addEventListener('change', (e) => {
+						selectedCamera = e.target.value;
+						document.getElementById('cameraName').textContent = selectedCamera;
+
+						// 如果已连接，重新连接
+						if (
+							peerConnection &&
+							peerConnection.connectionState === 'connected'
+						) {
+							disconnect();
+							setTimeout(connect, 1000);
+						}
+					});
+
+					if (data.cameras.length > 0) {
+						selectedCamera = data.cameras[0].id;
+						select.value = selectedCamera;
+						document.getElementById('cameraName').textContent = selectedCamera;
+					}
+				} catch (error) {
+					console.error('Failed to load cameras:', error);
+				}
+			}
+
+			// 连接视频流
+			async function connect() {
+				try {
+					// 先断开之前的连接
+					if (ws) {
+						ws.close();
+					}
+					if (peerConnection) {
+						peerConnection.close();
+					}
+
+					// 获取摄像头选择
+					const cameraSelect = document.getElementById('cameraSelect');
+					selectedCamera = cameraSelect.value;
+
+					// 重置重连计数器
+					resetReconnectAttempts();
+
+					updateStatus('正在连接信令服务器...', 'connecting');
+
+					// 创建 WebSocket 连接
+					const protocol =
+						window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+					const wsUrl = `${protocol}//${window.location.host}/ws`;
+					ws = new WebSocket(wsUrl);
+
+					ws.onopen = async () => {
+						updateStatus('创建 WebRTC 连接...', 'connecting');
+
+						// 创建 PeerConnection
+						const config = {
+							iceServers: [
+								{ urls: 'stun:stun.l.google.com:19302' },
+								{ urls: 'stun:stun1.l.google.com:19302' },
+								{ urls: 'stun:stun2.l.google.com:19302' },
+							],
+							iceTransportPolicy: 'all',
+							iceCandidatePoolSize: 10,
+						};
+
+						try {
+							peerConnection = new RTCPeerConnection(config);
+
+							// 设置事件处理
+							setupPeerConnectionEvents();
+
+							// 创建 Offer
+							const offer = await peerConnection.createOffer({
+								offerToReceiveVideo: true,
+								offerToReceiveAudio: false,
+							});
+
+							await peerConnection.setLocalDescription(offer);
+
+							// 发送 Offer
+							ws.send(
+								JSON.stringify({
+									type: 'offer',
+									sdp: offer.sdp,
+									camera_id: selectedCamera,
+								}),
+							);
+
+							updateStatus('等待服务器响应...', 'connecting');
+
+							// 开始心跳
+							startHeartbeat();
+						} catch (error) {
+							console.error('WebRTC connection error:', error);
+							updateStatus(`WebRTC 连接失败: ${error.message}`, 'error');
+							if (ws) {
+								ws.close();
+							}
+						}
+					};
+
+					ws.onmessage = async (event) => {
+						try {
+							const message = JSON.parse(event.data);
+
+							switch (message.type) {
+								case 'answer':
+									if (peerConnection) {
+										await peerConnection.setRemoteDescription(
+											new RTCSessionDescription({
+												type: 'answer',
+												sdp: message.sdp,
+											}),
+										);
+										updateStatus('已连接', 'connected');
+									}
+									break;
+
+								case 'candidate':
+									if (peerConnection && message.candidate) {
+										await peerConnection.addIceCandidate(message.candidate);
+									}
+									break;
+
+								case 'error':
+									updateStatus(`错误: ${message.message}`, 'error');
+									disconnect();
+									break;
+
+								case 'pong':
+									// 心跳响应
+									break;
+							}
+						} catch (error) {
+							console.error('WebSocket message error:', error);
+							updateStatus('消息处理错误', 'error');
+						}
+					};
+
+					ws.onerror = (error) => {
+						console.error('WebSocket error:', error);
+						updateStatus('WebSocket 连接错误', 'error');
+					};
+
+					ws.onclose = (event) => {
+						if (event.code !== 1000) {
+							updateStatus(`连接异常关闭: ${event.code}`, 'error');
+						} else {
+							updateStatus('连接已关闭', 'disconnected');
+						}
+						if (heartbeatInterval) {
+							clearInterval(heartbeatInterval);
+							heartbeatInterval = null;
+						}
+					};
+				} catch (error) {
+					console.error('Connect error:', error);
+					updateStatus(`连接失败: ${error.message}`, 'error');
+				}
+			}
+
+			// 断开连接
+			function disconnect() {
+				updateStatus('正在断开...', 'connecting');
+
+				if (ws) {
+					ws.send(JSON.stringify({ type: 'bye' }));
+					setTimeout(() => ws.close(), 100);
+					ws = null;
+				}
+
+				if (peerConnection) {
+					peerConnection.close();
+					peerConnection = null;
+				}
+
+				if (statsInterval) {
+					clearInterval(statsInterval);
+					statsInterval = null;
+				}
+
+				if (heartbeatInterval) {
+					clearInterval(heartbeatInterval);
+					heartbeatInterval = null;
+				}
+
+				const videoElement = document.getElementById('videoElement');
+				if (videoElement.srcObject) {
+					videoElement.srcObject.getTracks().forEach((track) => track.stop());
+					videoElement.srcObject = null;
+				}
+
+				updateStatus('已断开', 'disconnected');
+				updateButtons(false);
+			}
+
+			// 设置 PeerConnection 事件
+			function setupPeerConnectionEvents() {
+				if (!peerConnection) return;
+
+				// ICE 候选
+				peerConnection.onicecandidate = (event) => {
+					if (event.candidate && ws && ws.readyState === WebSocket.OPEN) {
+						ws.send(
+							JSON.stringify({
+								type: 'candidate',
+								candidate: {
+									candidate: event.candidate.candidate,
+									sdpMid: event.candidate.sdpMid,
+									sdpMLineIndex: event.candidate.sdpMLineIndex,
+								},
+							}),
+						);
+					}
+				};
+
+				// 连接状态
+				peerConnection.onconnectionstatechange = () => {
+					if (!peerConnection) return;
+
+					const state = peerConnection.connectionState;
+					console.log('Connection state:', state);
+
+					switch (state) {
+						case 'connected':
+							updateStatus('已连接', 'connected');
+							startStatsCollection();
+							break;
+						case 'disconnected':
+						case 'failed':
+						case 'closed':
+							updateStatus('连接断开', 'disconnected');
+							break;
+					}
+				};
+
+				// 视频流
+				peerConnection.ontrack = (event) => {
+					console.log('Received video track');
+					const videoElement = document.getElementById('videoElement');
+					videoElement.srcObject = event.streams[0];
+
+					// 自动播放
+					videoElement.play().catch((e) => {
+						console.error('Autoplay failed:', e);
+					});
+				};
+			}
+
+			// 开始心跳检测
+			function startHeartbeat() {
+				if (heartbeatInterval) {
+					clearInterval(heartbeatInterval);
+				}
+
+				heartbeatInterval = setInterval(() => {
+					if (ws && ws.readyState === WebSocket.OPEN) {
+						ws.send(JSON.stringify({ type: 'ping' }));
+					}
+				}, 30000); // 30秒一次
+			}
+
+			// 开始收集统计信息
+			function startStatsCollection() {
+				if (statsInterval) {
+					clearInterval(statsInterval);
+				}
+
+				statsInterval = setInterval(async () => {
+					if (!peerConnection) return;
+
+					try {
+						const stats = await peerConnection.getStats();
+						let statsHtml = '';
+
+						stats.forEach((report) => {
+							if (
+								report.type === 'inbound-rtp' &&
+								report.mediaType === 'video'
+							) {
+								statsHtml = `
+                                <p><strong>视频统计:</strong></p>
+                                <p>分辨率: ${report.frameWidth || 0}×${report.frameHeight || 0}</p>
+                                <p>帧率: ${report.framesPerSecond || 0} fps</p>
+                                <p>比特率: ${Math.round((report.bytesReceived * 8) / 1024)} kbps</p>
+                                <p>丢包率: ${report.packetsLost ? ((report.packetsLost / (report.packetsReceived || 1)) * 100).toFixed(2) : 0}%</p>
+                                <p>延迟: ${report.jitter ? (report.jitter * 1000).toFixed(2) : 0} ms</p>
+                            `;
+							}
+						});
+
+						document.getElementById('connectionStats').innerHTML = statsHtml;
+					} catch (e) {
+						console.warn('Failed to get stats:', e);
+					}
+				}, 5000);
+			}
+
+			// 更新状态显示
+			function updateStatus(text, status) {
+				const statusElement = document.getElementById('connectionStatus');
+				statusElement.textContent = text;
+				statusElement.className = 'status ' + status;
+
+				// 更新按钮状态
+				const isConnected = status === 'connected';
+				updateButtons(isConnected);
+			}
+
+			// 更新按钮状态
+			function updateButtons(isConnected) {
+				document.getElementById('connectBtn').disabled = isConnected;
+				document.getElementById('disconnectBtn').disabled = !isConnected;
+			}
+
+			// 截图功能
+			function takeSnapshot() {
+				const video = document.getElementById('videoElement');
+				if (!video.srcObject) return;
+
+				const canvas = document.createElement('canvas');
+				canvas.width = video.videoWidth;
+				canvas.height = video.videoHeight;
+
+				const ctx = canvas.getContext('2d');
+				ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+				// 下载图片
+				const link = document.createElement('a');
+				link.download = `snapshot_${selectedCamera}_${Date.now()}.png`;
+				link.href = canvas.toDataURL('image/png');
+				link.click();
+			}
+
+			// 切换全屏
+			function toggleFullscreen() {
+				const videoContainer = document.querySelector('.video-container');
+				if (!document.fullscreenElement) {
+					videoContainer.requestFullscreen().catch((err) => {
+						console.error('Fullscreen error:', err);
+					});
+				} else {
+					document.exitFullscreen();
+				}
+			}
+
+			// 切换统计面板
+			function toggleStats() {
+				const panel = document.getElementById('statsPanel');
+				panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+			}
+
+			// 页面卸载时清理
+			window.addEventListener('beforeunload', () => {
+				disconnect();
+			});
+
+			// 重连相关变量
+			let reconnectAttempts = 0;
+			const maxReconnectAttempts = 5;
+			const initialReconnectDelay = 5000;
+
+			// 定期检查连接
+			setInterval(() => {
+				if (ws && ws.readyState === WebSocket.CLOSED && reconnectAttempts < maxReconnectAttempts) {
+					const delay = initialReconnectDelay * Math.pow(2, reconnectAttempts);
+					console.log(`WebSocket disconnected, reconnecting in ${delay}ms... (${reconnectAttempts + 1}/${maxReconnectAttempts})`);
+					setTimeout(() => {
+						connect();
+						reconnectAttempts++;
+					}, delay);
+				} else if (reconnectAttempts >= maxReconnectAttempts) {
+					console.log('Max reconnect attempts reached, stopping');
+				}
+			}, 5000);
+
+			// 重置重连计数器
+			function resetReconnectAttempts() {
+				reconnectAttempts = 0;
+			}
+
+			// 初始状态
+			updateStatus('准备连接', 'disconnected');
+		</script>
+	</body>
+</html>

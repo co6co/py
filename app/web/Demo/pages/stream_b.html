@@ -1,0 +1,50 @@
+<!doctype html>
+<html>
+	<title>H.264/MP4流,用MediaSource Extensions</title>
+	<body>
+		<video id="videoPlayer" controls width="640" height="480"></video>
+
+		<script>
+			let video = document.getElementById('videoPlayer');
+			let mediaSource = new MediaSource();
+
+			video.src = URL.createObjectURL(mediaSource);
+			let sourceBuffer;
+
+			mediaSource.addEventListener('sourceopen', function () {
+				sourceBuffer = mediaSource.addSourceBuffer(
+					'video/mp4; codecs="avc1.42E01E"',
+				);
+
+				// 连接WebSocket
+				let ws = new WebSocket('ws://localhost:8765');
+				let buffer = [];
+
+				ws.onmessage = function (event) {
+					let message = JSON.parse(event.data);
+
+					if (message.type === 'video') {
+						// 将base64数据转为ArrayBuffer
+						let binary = atob(message.data);
+						let bytes = new Uint8Array(binary.length);
+						for (let i = 0; i < binary.length; i++) {
+							bytes[i] = binary.charCodeAt(i);
+						}
+
+						buffer.push(bytes);
+
+						if (!sourceBuffer.updating) {
+							sourceBuffer.appendBuffer(buffer.shift());
+						}
+					}
+				};
+
+				sourceBuffer.addEventListener('updateend', function () {
+					if (buffer.length) {
+						sourceBuffer.appendBuffer(buffer.shift());
+					}
+				});
+			});
+		</script>
+	</body>
+</html>

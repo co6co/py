@@ -1,0 +1,358 @@
+<!doctype html>
+<html>
+	<head>
+		<title>WebRTC RTSP Stream</title>
+		<style>
+			* {
+				margin: 0;
+				padding: 0;
+				box-sizing: border-box;
+			}
+
+			body {
+				font-family: Arial, sans-serif;
+				background: #f0f0f0;
+				padding: 20px;
+			}
+
+			.container {
+				max-width: 1200px;
+				margin: 0 auto;
+			}
+
+			.header {
+				text-align: center;
+				margin-bottom: 20px;
+			}
+
+			.video-container {
+				position: relative;
+				background: #000;
+				border-radius: 8px;
+				overflow: hidden;
+				margin-bottom: 20px;
+			}
+
+			video {
+				width: 100%;
+				height: auto;
+				display: block;
+			}
+
+			.controls {
+				display: flex;
+				gap: 10px;
+				justify-content: center;
+				margin-bottom: 20px;
+			}
+
+			button {
+				padding: 10px 20px;
+				background: #007bff;
+				color: white;
+				border: none;
+				border-radius: 4px;
+				cursor: pointer;
+				font-size: 16px;
+			}
+
+			button:hover {
+				background: #0056b3;
+			}
+
+			button:disabled {
+				background: #6c757d;
+				cursor: not-allowed;
+			}
+
+			.stats {
+				background: white;
+				padding: 15px;
+				border-radius: 8px;
+				margin-top: 20px;
+			}
+
+			.status {
+				margin-top: 10px;
+				padding: 10px;
+				border-radius: 4px;
+			}
+
+			.connected {
+				background: #d4edda;
+				color: #155724;
+			}
+
+			.disconnected {
+				background: #f8d7da;
+				color: #721c24;
+			}
+
+			.connecting {
+				background: #fff3cd;
+				color: #856404;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="container">
+			<div class="header">
+				<h1>RTSP实时视频流 (WebRTC)</h1>
+			</div>
+
+			<div class="controls">
+				<button id="startBtn" onclick="startStream()">开始播放</button>
+				<button id="stopBtn" onclick="stopStream()" disabled>停止播放</button>
+				<button id="fullscreenBtn" onclick="toggleFullscreen()">全屏</button>
+			</div>
+
+			<div class="video-container">
+				<video id="videoElement" autoplay playsinline></video>
+			</div>
+
+			<div class="stats">
+				<h3>连接状态</h3>
+				<div id="status" class="status disconnected">未连接</div>
+
+				<h3>统计信息</h3>
+				<div id="stats"></div>
+			</div>
+		</div>
+
+		<script>
+			// 配置
+			const config = {
+				iceServers: [
+					{
+						urls: 'stun:stun.l.google.com:19302',
+					},
+					{
+						urls: 'stun:stun1.l.google.com:19302',
+					},
+				],
+				iceCandidatePoolSize: 10,
+			};
+
+			// 全局变量
+			let peerConnection = null;
+			let ws = null;
+			let statsInterval = null;
+			const videoElement = document.getElementById('videoElement');
+			const statusElement = document.getElementById('status');
+			const statsElement = document.getElementById('stats');
+
+			// 更新状态显示
+			function updateStatus(status, isConnected = false) {
+				statusElement.textContent = status;
+				statusElement.className =
+					'status ' + (isConnected ? 'connected' : 'disconnected');
+
+				if (status.includes('连接中')) {
+					statusElement.className = 'status connecting';
+				}
+			}
+
+			// 更新按钮状态
+			function updateButtons(isStreaming) {
+				document.getElementById('startBtn').disabled = isStreaming;
+				document.getElementById('stopBtn').disabled = !isStreaming;
+			}
+
+			// 开始视频流
+			async function startStream() {
+				try {
+					updateStatus('正在连接信令服务器...', false);
+
+					// 创建PeerConnection
+					peerConnection = new RTCPeerConnection(config);
+
+					// 创建WebSocket连接
+					const s = window.location.host;
+					ws = new WebSocket(`ws://${s}/ws`);
+
+					ws.onopen = () => {
+						updateStatus('信令服务器连接成功', false);
+					};
+
+					ws.onclose = () => {
+						updateStatus('信令服务器断开连接', false);
+					};
+
+					ws.onerror = (error) => {
+						console.error('WebSocket错误:', error);
+						updateStatus('信令服务器连接失败', false);
+					};
+
+					ws.onmessage = async (event) => {
+						const message = JSON.parse(event.data);
+
+						if (message.type === 'answer') {
+							// 设置远端描述
+							await peerConnection.setRemoteDescription(
+								new RTCSessionDescription({
+									type: 'answer',
+									sdp: message.sdp,
+								}),
+							);
+							updateStatus('已连接到视频流', true);
+						} else if (message.candidate) {
+							// 添加ICE候选
+							try {
+								await peerConnection.addIceCandidate(message.candidate);
+							} catch (e) {
+								console.warn('无法添加ICE候选:', e);
+							}
+						}
+					};
+
+					// 监听ICE候选
+					peerConnection.onicecandidate = (event) => {
+						if (event.candidate) {
+							ws.send(
+								JSON.stringify({
+									type: 'candidate',
+									candidate: {
+										candidate: event.candidate.candidate,
+										sdpMid: event.candidate.sdpMid,
+										sdpMLineIndex: event.candidate.sdpMLineIndex,
+									},
+								}),
+							);
+						}
+					};
+					// 监听连接状态变化
+					peerConnection.onconnectionstatechange = () => {
+						console.log('连接状态:', peerConnection.connectionState);
+						if (peerConnection.connectionState === 'connected') {
+							updateStatus('已连接到视频流', true);
+						} else if (
+							peerConnection.connectionState === 'disconnected' ||
+							peerConnection.connectionState === 'failed' ||
+							peerConnection.connectionState === 'closed'
+						) {
+							updateStatus('连接断开', false);
+							stopStream();
+						}
+					};
+
+					// 监听轨道
+					peerConnection.ontrack = (event) => {
+						console.log('收到视频轨道');
+						videoElement.srcObject = event.streams[0];
+					};
+
+					// 创建Offer
+					const offer = await peerConnection.createOffer({
+						offerToReceiveVideo: true,
+						offerToReceiveAudio: false,
+					});
+
+					await peerConnection.setLocalDescription(offer);
+
+					// 发送Offer到信令服务器
+					ws.send(
+						JSON.stringify({
+							type: 'offer',
+							sdp: offer.sdp,
+						}),
+					);
+
+					updateButtons(true);
+
+					// 开始收集统计信息
+					startStatsCollection();
+				} catch (error) {
+					console.error('启动视频流失败:', error);
+					updateStatus('启动失败: ' + error.message, false);
+					stopStream();
+				}
+			}
+
+			// 停止视频流
+			async function stopStream() {
+				if (statsInterval) {
+					clearInterval(statsInterval);
+					statsInterval = null;
+				}
+
+				if (peerConnection) {
+					peerConnection.close();
+					peerConnection = null;
+				}
+
+				if (ws) {
+					ws.close();
+					ws = null;
+				}
+
+				if (videoElement.srcObject) {
+					videoElement.srcObject.getTracks().forEach((track) => track.stop());
+					videoElement.srcObject = null;
+				}
+
+				updateStatus('已停止', false);
+				updateButtons(false);
+				statsElement.innerHTML = '';
+			}
+
+			// 开始收集统计信息
+			function startStatsCollection() {
+				statsInterval = setInterval(async () => {
+					if (!peerConnection) return;
+
+					try {
+						const stats = await peerConnection.getStats();
+						let statsHtml = '';
+
+						stats.forEach((report) => {
+							if (
+								report.type === 'inbound-rtp' &&
+								report.mediaType === 'video'
+							) {
+								statsHtml += `
+                                <p>分辨率: ${report.frameWidth || 0}x${report.frameHeight || 0}</p>
+                                <p>帧率: ${report.framesPerSecond || 0} fps</p>
+                                <p>比特率: ${Math.round((report.bytesReceived * 8) / 1000)} kbps</p>
+                                <p>丢包率: ${report.packetsLost ? ((report.packetsLost / report.packetsReceived) * 100).toFixed(2) : 0}%</p>
+                            `;
+							}
+						});
+
+						statsElement.innerHTML = statsHtml;
+					} catch (e) {
+						console.warn('获取统计信息失败:', e);
+					}
+				}, 1000);
+			}
+
+			// 切换全屏
+			function toggleFullscreen() {
+				if (!document.fullscreenElement) {
+					videoElement.requestFullscreen().catch((err) => {
+						console.error(`全屏失败: ${err.message}`);
+					});
+				} else {
+					document.exitFullscreen();
+				}
+			}
+
+			// 页面卸载时清理资源
+			window.addEventListener('beforeunload', stopStream);
+
+			// 自动重连
+			setInterval(() => {
+				if (
+					peerConnection &&
+					peerConnection.connectionState === 'disconnected'
+				) {
+					console.log('检测到断开连接，尝试重连...');
+					stopStream();
+					startStream();
+				}
+			}, 5000);
+
+			// 初始化
+			updateStatus('点击"开始播放"启动视频流', false);
+		</script>
+	</body>
+</html>

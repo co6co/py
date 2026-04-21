@@ -81,7 +81,7 @@ async def generator_expression():
 if __name__ == "__main__":
    
     async def test(): 
-        test2= get_rtsp_stream_data("rtsp://admin:lanbo12345@192.168.3.1/media/video1")
+        test2= get_rtsp_stream_data("rtsp://admin:123456@192.168.3.1/media/video1")
         async for data in test2:
             print(data)
     asyncio.run(test())

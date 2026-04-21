@@ -1,0 +1,453 @@
+<!doctype html>
+<html lang="zh-CN">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>RTSP流播放器</title>
+		<style>
+			body {
+				font-family: Arial, sans-serif;
+				margin: 20px;
+				background-color: #f5f5f5;
+			}
+
+			.container {
+				max-width: 1200px;
+				margin: 0 auto;
+				background: white;
+				padding: 20px;
+				border-radius: 8px;
+				box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+			}
+
+			h1 {
+				color: #333;
+				text-align: center;
+			}
+
+			.input-group {
+				margin-bottom: 15px;
+			}
+
+			label {
+				display: block;
+				margin-bottom: 5px;
+				font-weight: bold;
+				color: #555;
+			}
+
+			input[type='text'] {
+				width: 100%;
+				padding: 10px;
+				border: 1px solid #ddd;
+				border-radius: 4px;
+				font-size: 16px;
+				box-sizing: border-box;
+			}
+
+			.button-group {
+				display: flex;
+				gap: 10px;
+				margin-bottom: 15px;
+				flex-wrap: wrap;
+			}
+
+			button {
+				padding: 10px 20px;
+				border: none;
+				border-radius: 4px;
+				font-size: 16px;
+				cursor: pointer;
+				transition: background-color 0.3s;
+			}
+
+			#connectBtn {
+				background-color: #4caf50;
+				color: white;
+			}
+
+			#connectBtn:hover:not(:disabled) {
+				background-color: #45a049;
+			}
+
+			#disconnectBtn {
+				background-color: #f44336;
+				color: white;
+			}
+
+			#disconnectBtn:hover:not(:disabled) {
+				background-color: #da190b;
+			}
+
+			.test-btn {
+				background-color: #2196f3;
+				color: white;
+			}
+
+			.test-btn:hover {
+				background-color: #0b7dda;
+			}
+
+			button:disabled {
+				background-color: #cccccc;
+				cursor: not-allowed;
+			}
+
+			.status {
+				padding: 10px;
+				margin: 10px 0;
+				background-color: #e8f5e8;
+				border-left: 4px solid #4caf50;
+				border-radius: 4px;
+			}
+
+			.stats {
+				padding: 10px;
+				margin: 10px 0;
+				background-color: #f0f0f0;
+				border-radius: 4px;
+			}
+
+			.video-container {
+				margin: 20px 0;
+				text-align: center;
+			}
+
+			canvas {
+				max-width: 100%;
+				height: auto;
+				border: 1px solid #ddd;
+				border-radius: 4px;
+				background-color: #000;
+			}
+
+			.footer {
+				margin-top: 20px;
+				text-align: center;
+				color: #666;
+				font-size: 14px;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="container">
+			<h1>RTSP流播放器</h1>
+
+			<div class="input-group">
+				<label for="rtspUrl">RTSP URL:</label>
+				<input
+					type="text"
+					id="rtspUrl"
+					placeholder="输入RTSP流地址"
+					value="rtsp://admin:123456@192.168.3.17/media/video1" />
+			</div>
+
+			<div class="input-group">
+				<label for="wsUrl">WebSocket服务器:</label>
+				<input type="text" id="wsUrl" placeholder="WebSocket服务器地址" />
+			</div>
+
+			<div class="button-group">
+				<button id="connectBtn">连接</button>
+				<button id="disconnectBtn" disabled>断开连接</button>
+				<button id="testBtn1" class="test-btn">测试流1</button>
+				<button id="testBtn2" class="test-btn">测试流2</button>
+			</div>
+
+			<div id="status" class="status">状态: 等待连接</div>
+			<div id="stats" class="stats">统计信息: 无</div>
+
+			<div class="video-container">
+				<canvas id="videoCanvas" width="640" height="480"></canvas>
+			</div>
+
+			<div class="footer">
+				<p>RTSP流播放器 - 通过WebSocket接收视频流</p>
+			</div>
+		</div>
+
+		<script>
+			class RTSPPlayer {
+				constructor() {
+					this.socket = null;
+					this.isPlaying = false;
+					this.frameCount = 0;
+					this.startTime = null;
+					this.messageQueue = [];
+
+					// DOM元素
+					this.canvas = document.getElementById('videoCanvas');
+					this.ctx = this.canvas.getContext('2d');
+					this.statusEl = document.getElementById('status');
+					this.statsEl = document.getElementById('stats');
+					this.wsUrlEl = document.getElementById('wsUrl');
+					this.wsUrlEl.value = `ws://localhost:8765`;
+
+					// 事件绑定
+					this.bindEvents();
+				}
+
+				bindEvents() {
+					document
+						.getElementById('connectBtn')
+						.addEventListener('click', () => this.connect());
+					document
+						.getElementById('disconnectBtn')
+						.addEventListener('click', () => this.disconnect());
+					document.getElementById('testBtn1').addEventListener('click', () => {
+						document.getElementById('rtspUrl').value =
+							'rtsp://wowzaec2demo.streamlock.net/vod/mp4:BigBuckBunny_115k.mp4';
+					});
+					document.getElementById('testBtn2').addEventListener('click', () => {
+						document.getElementById('rtspUrl').value =
+							'rtsp://admin:123456@192.168.1.100:554/stream1';
+					});
+				}
+
+				async connect() {
+					if (this.isPlaying) {
+						return;
+					}
+
+					const rtspUrl = document.getElementById('rtspUrl').value.trim();
+					if (!rtspUrl) {
+						alert('请输入RTSP URL');
+						return;
+					}
+
+					this.setStatus('正在连接WebSocket...');
+
+					try {
+						// 构建WebSocket URL
+						const streamUrl = encodeURIComponent(rtspUrl);
+						const wsUrl = `${this.wsUrlEl.value}?url=${streamUrl}`;
+						this.socket = new WebSocket(wsUrl);
+						this.socket.binaryType = 'arraybuffer';
+
+						this.socket.onopen = () => {
+							this.isPlaying = true;
+							this.startTime = Date.now();
+							this.frameCount = 0;
+							this.messageQueue = [];
+							this.setStatus('已连接，正在接收流数据...');
+							this.updateButtons();
+						};
+
+						this.socket.onmessage = async (event) => {
+							if (!this.isPlaying) return;
+
+							try {
+								// 尝试解析JSON消息
+								if (typeof event.data === 'string') {
+									const message = JSON.parse(event.data);
+									await this.handleMessage(message);
+								}
+								// 处理二进制数据
+								else if (event.data instanceof ArrayBuffer) {
+									await this.handleBinaryData(event.data);
+								}
+							} catch (error) {
+								console.warn('处理消息失败:', error);
+							}
+						};
+
+						this.socket.onerror = (error) => {
+							console.error('WebSocket错误:', error);
+							this.setStatus('连接错误');
+							this.disconnect();
+						};
+
+						this.socket.onclose = () => {
+							console.log('WebSocket连接关闭');
+							this.disconnect();
+						};
+					} catch (error) {
+						this.setStatus(`连接失败: ${error.message}`);
+						console.error('连接错误:', error);
+					}
+				}
+
+				async handleMessage(message) {
+					const messageType = message.type;
+
+					switch (messageType) {
+						case 'config':
+							console.log('收到配置:', message);
+							this.setStatus(`已连接 - 编码: ${message.codec || '未知'}`);
+							break;
+
+						case 'frame':
+						case 'video':
+							await this.handleFrameMessage(message);
+							break;
+
+						case 'welcome':
+							this.setStatus(message.message || '连接成功');
+							break;
+
+						case 'pong':
+							console.log('收到心跳响应');
+							break;
+
+						default:
+							console.log('收到未知消息类型:', messageType);
+					}
+				}
+
+				async handleFrameMessage(frameData) {
+					this.frameCount++;
+
+					// 更新时间戳
+					const now = Date.now();
+
+					// 计算统计信息
+					if (this.frameCount % 10 === 0) {
+						const elapsed = (now - this.startTime) / 1000;
+						const fps = (this.frameCount / elapsed).toFixed(1);
+						this.setStats(`FPS: ${fps} | 帧数: ${this.frameCount}`);
+					}
+
+					// 如果有图片数据，尝试显示
+					if (frameData.data && typeof frameData.data === 'string') {
+						await this.displayBase64Image(frameData.data);
+					}
+				}
+
+				async handleBinaryData(arrayBuffer) {
+					this.frameCount++;
+
+					// 更新时间戳
+					const now = Date.now();
+
+					// 计算统计信息
+					if (this.frameCount % 10 === 0) {
+						const elapsed = (now - this.startTime) / 1000;
+						const fps = (this.frameCount / elapsed).toFixed(1);
+						this.setStats(`FPS: ${fps} | 帧数: ${this.frameCount}`);
+					}
+
+					// 尝试将二进制数据转换为Base64并显示
+					try {
+						const binaryString = String.fromCharCode.apply(
+							null,
+							new Uint8Array(arrayBuffer),
+						);
+						const base64 = btoa(binaryString);
+						await this.displayBase64Image(`data:image/jpeg;base64,${base64}`);
+					} catch (error) {
+						console.warn('无法处理二进制数据:', error);
+					}
+				}
+
+				displayBase64Image(base64Data) {
+					return new Promise((resolve) => {
+						const img = new Image();
+						/*
+						img.onload = () => {
+							// 清除画布
+							this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
+							// 计算缩放比例
+							const scaleX = this.canvas.width / img.width;
+							const scaleY = this.canvas.height / img.height;
+							const scale = Math.min(scaleX, scaleY);
+
+							// 计算居中位置
+							const x = (this.canvas.width - img.width * scale) / 2;
+							const y = (this.canvas.height - img.height * scale) / 2;
+
+							// 绘制图片
+							this.ctx.drawImage(
+								img,
+								x,
+								y,
+								img.width * scale,
+								img.height * scale,
+							);
+							resolve();
+						};
+
+						img.onerror = (e) => {
+							console.warn('图片加载失败', e);
+							resolve();
+						};
+
+						// 设置图片源
+					
+						if (base64Data.startsWith('data:')) {
+							img.src = base64Data;
+						} else {
+							img.src = `data:image/jpeg;base64,${base64Data}`;
+						}*/
+						let binary = atob(base64Data);
+						let bytes = new Uint8Array(binary.length);
+						for (let i = 0; i < binary.length; i++) {
+							bytes[i] = binary.charCodeAt(i);
+						}
+						let blob = new Blob([bytes], { type: 'image/jpeg' });
+						let url = URL.createObjectURL(blob);
+						img.onload = function () {
+							ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+							URL.revokeObjectURL(url);
+						};
+						img.onerror = (e) => {
+							console.warn('图片加载失败', e);
+							resolve();
+						};
+						img.src = url;
+					});
+				}
+
+				disconnect() {
+					if (!this.isPlaying) return;
+
+					this.isPlaying = false;
+					this.setStatus('正在断开连接...');
+
+					if (this.socket) {
+						if (this.socket.readyState === WebSocket.OPEN) {
+							this.socket.close(1000, '用户断开连接');
+						}
+						this.socket = null;
+					}
+
+					this.updateButtons();
+
+					// 清理canvas
+					this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+					this.setStatus('已断开连接');
+					this.setStats('');
+				}
+
+				setStatus(message) {
+					this.statusEl.textContent = `状态: ${message}`;
+				}
+
+				setStats(info) {
+					this.statsEl.textContent = info;
+				}
+
+				updateButtons() {
+					const connectBtn = document.getElementById('connectBtn');
+					const disconnectBtn = document.getElementById('disconnectBtn');
+
+					connectBtn.disabled = this.isPlaying;
+					disconnectBtn.disabled = !this.isPlaying;
+				}
+			}
+
+			// 页面加载完成后初始化
+			window.addEventListener('DOMContentLoaded', () => {
+				const player = new RTSPPlayer();
+				window.player = player; // 调试用
+
+				// 页面关闭前断开连接
+				window.addEventListener('beforeunload', () => {
+					player.disconnect();
+				});
+
+				console.log('RTSP播放器已初始化');
+			});
+		</script>
+	</body>
+</html>

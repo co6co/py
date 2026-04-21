@@ -16,10 +16,10 @@ class RTSPService:
             stdout, stderr = await process.communicate()
             err = stderr.decode('gbk')
             if err:
-                log.err(f"ipconfig error: {err}") 
-            yield stdout 
+                log.err(f"ipconfig error: {err}")
+            yield stdout
 
-            #while True:
+            # while True:
             #    data = await asyncio.wait_for(process.stdout.read(), timeout=2.0)
             #    if not data:
             #        break
@@ -36,12 +36,11 @@ class RTSPService:
                 except:
                     pass
 
-
-    async def read_out_stream(self,stdout: asyncio.StreamReader,chunk_size:int=64*1024): 
+    async def read_out_stream(self, stdout: asyncio.StreamReader, chunk_size: int = 64*1024):
         while True:
-            try: 
+            try:
                 data = await asyncio.wait_for(stdout.read(chunk_size), timeout=10)
-                if not data: 
+                if not data:
                     log.info("输出结束.")
                     break
                 else:
@@ -49,24 +48,41 @@ class RTSPService:
             except Exception as e:
                 log.err(f"读取数据异常: {e}")
                 continue
-    async def read_err_stream(self,stderr: asyncio.StreamReader,err_title:str="error"): 
+
+    async def read_err_stream(self, stderr: asyncio.StreamReader, err_title: str = "error"):
         while True:
-            try:  
+            try:
                 line = await stderr.readline()
                 if not line:
                     break
                 # 可选：记录错误日志
-                log.warn(f"{err_title}\t{line.decode().strip()}") 
+                log.warn(f"{err_title}\t{line.decode().strip()}")
             except Exception as e:
                 log.err(f"{err_title}读取数据异常: {e}")
                 break
         log.succ("read_err_stream_quit")
-            
 
-    async def read_rtsp_stream(self, rtsp_url: str, key: str ):
+    def hander_frame(self, frame: bytes):
+
+        # 寻找H.264起始码 0x00000001
+        const startCode = Buffer.from ([0x00, 0x00, 0x00, 0x01])
+        const startIndex = data.indexOf(startCode)
+
+        if (startIndex != = -1) {
+            return {
+                data: data,
+                isKeyFrame: this.isKeyFrame(data),
+                timestamp: Date.now(),
+                sequence: this.frameSequence++
+            }
+        }
+
+        return null
+
+    async def read_rtsp_stream(self, rtsp_url: str, key: str):
         """
         在多线程环境中，如果你在非主线程中使用asyncio，需要确保在该线程中有一个事件循环，并且异步函数在这个事件循环中运行
-        
+
         假设我们在一个单独的线程中运行一个事件循环，然后在该事件循环中运行异步函数来创建子进程。
         步骤： 
         在新线程中创建事件循环。 
@@ -75,11 +91,12 @@ class RTSPService:
         """
         # RTSP参数配置
         ffmpeg_cmd = [
-            "E:/Tools/VXL/ffmpeg/bin/ffmpeg.exe",
+            # "E:/Tools/VXL/ffmpeg/bin/ffmpeg.exe",
+            "ffmpeg.exe",
             "-rtsp_transport", "tcp",  # 使用TCP传输
-            "-i",rtsp_url,  # RTSP源 
+            "-i", rtsp_url,  # RTSP源
             "-movflags", "frag_keyframe+empty_moov+default_base_moof+omit_tfhd_offset",
-            "-c:v", "libx264",  # 视频编码
+
             "-preset", "ultrafast",  # 快速编码
             "-tune", "zerolatency",  # 零延迟
             "-b:v", "1000k",  # 比特率
@@ -89,19 +106,37 @@ class RTSPService:
             "-g", "10",  # 关键帧间隔
             "-reset_timestamps",  "1",  # 重置时间戳
             "-vf", "fps=15,scale=640:480",  # 帧率和缩放
+            # "-f", "mp4",  # 输出格式
+            # '-f', 'mpegts',  # 输出格式
             "-f", "flv",  # 输出格式
-            "-c:a","aac", "-ar","44100", # flv 格式不支持 rate 8000 及 mp3 格式
+            "-c:v", "libx264",  # 视频编码
+            # "-c:a", "aac", "-ar", "44100",  # flv 格式不支持 rate 8000 及 mp3 格式
+            "pipe:1",  # 输出到stdout
+        ]
+
+        ffmpeg_cmd = [
+            "ffmpeg.exe",
+            "-rtsp_transport", "tcp",  # 使用TCP传输
+            "-i", rtsp_url,  # RTSP源
+            '-c:v', 'libx264',
+            '-preset', 'ultrafast',
+            '-tune', 'zerolatency',
+            '-g', '50',
+            '-f', 'h264',
+            '-c:a', 'aac',
+            '-b:a', '128k',
+            # '-f', 'adts',
             "pipe:1",  # 输出到stdout
         ]
         print(f"[INFO] 开始RTSP流: {rtsp_url},{' '.join(ffmpeg_cmd)}")
         process = None
-        try:  
+        try:
             process = await asyncio.create_subprocess_exec(
                 *ffmpeg_cmd, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
-            ) 
-            self._active_processes[key] = process  
+            )
+            self._active_processes[key] = process
             # 如果能执行完成 使用下面
-            ##stdout, stderr =await process.communicate()
+            # stdout, stderr =await process.communicate()
             # 无限流或者很多
             # 同时读取stdout和stderr
             '''
@@ -120,26 +155,26 @@ class RTSPService:
             ) 
             # 等待进程结束
             #await process.wait() e_task(process.wait())
-            ''' 
-            stderr_task = asyncio.create_task(self.read_err_stream(process.stderr,err_title="FFmpeg Error"))  
-            # 读取并发送视频数据 
-            chunk_size = 64 * 1024  # 64KB块 
+            '''
+            stderr_task = asyncio.create_task(self.read_err_stream(process.stderr, err_title="FFmpeg Error"))
+            # 读取并发送视频数据
+            chunk_size = 64 * 1024  # 64KB块
             while True:
-                try: 
-                 
-                    #data = await asyncio.wait_for(process.stdout.read(chunk_size), timeout=2.0)
-                    data = await asyncio.wait_for( process.stdout.read(chunk_size) , timeout=2.0)
-                    if not data: 
+                try:
+
+                    # data = await asyncio.wait_for(process.stdout.read(chunk_size), timeout=2.0)
+                    data = await asyncio.wait_for(process.stdout.read(chunk_size), timeout=2.0)
+                    if not data:
                         log.warn("4"*10)
                         log.info("输出结束.")
                         break
                     else:
-                        yield data 
+                        yield data
                 except Exception as e:
                     log.err(f"读取数据异常: {e}")
-                    continue  
+                    continue
         except Exception as e:
-            log.err(f"[ERROR] 获取流异常: {e}",e)
+            log.err(f"[ERROR] 获取流异常: {e}", e)
             raise e
         finally:
             # 清理资源
@@ -151,7 +186,7 @@ class RTSPService:
                     await asyncio.wait_for(process.wait(), timeout=5)
                     log.info(f"FFmpeg进程退出: {key}")
                 except Exception as e:
-                    log.warn(f"[INFO] 终止FFmpeg进程异常: {key}",e)
+                    log.warn(f"[INFO] 终止FFmpeg进程异常: {key}", e)
                     pass
 
             if key in self._active_processes:

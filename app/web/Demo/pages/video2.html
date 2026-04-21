@@ -1,0 +1,245 @@
+<!doctype html>
+<html>
+	<head>
+		<title>RTSP WebSocket 播放器</title>
+		<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+		<style>
+			body {
+				margin: 0;
+				padding: 20px;
+				font-family: Arial, sans-serif;
+			}
+			.container {
+				max-width: 1200px;
+				margin: 0 auto;
+			}
+			.video-container {
+				margin: 20px 0;
+			}
+			video {
+				width: 100%;
+				max-height: 80vh;
+				background: #000;
+			}
+			.controls {
+				margin: 10px 0;
+			}
+			button {
+				margin: 5px;
+				padding: 10px 20px;
+				font-size: 16px;
+			}
+			.status {
+				padding: 10px;
+				background: #f0f0f0;
+				border-radius: 5px;
+				margin: 10px 0;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="container">
+			<h1>RTSP WebSocket 播放器</h1>
+
+			<div class="controls">
+				<button id="connectBtn">连接</button>
+				<button id="disconnectBtn" disabled>断开</button>
+				<button id="requestKeyframe" disabled>请求关键帧</button>
+				<input
+					type="text"
+					id="wsUrl"
+					value="ws://localhost:8765"
+					style="width: 300px; padding: 8px" />
+			</div>
+
+			<div class="status" id="status">状态: 未连接</div>
+
+			<div class="video-container">
+				<video id="videoPlayer" controls></video>
+			</div>
+
+			<div id="stats"></div>
+		</div>
+
+		<script>
+			class WebSocketVideoPlayer {
+				constructor() {
+					this.ws = null;
+					this.mediaSource = null;
+					this.sourceBuffer = null;
+					this.videoQueue = [];
+					this.isAppending = false;
+					this.frameCount = 0;
+					this.startTime = null;
+					this.reconnectAttempts = 0;
+					this.maxReconnectAttempts = 5;
+					this.reconnectDelay = 1000;
+				}
+
+				async connect(wsUrl) {
+					try {
+						this.updateStatus('正在连接...');
+						this.ws = new WebSocket(wsUrl);
+
+						this.ws.binaryType = 'arraybuffer';
+
+						this.ws.onopen = () => this.onWebSocketOpen();
+						this.ws.onmessage = (event) => this.onWebSocketMessage(event);
+						this.ws.onclose = () => this.onWebSocketClose();
+						this.ws.onerror = (error) => this.onWebSocketError(error);
+					} catch (error) {
+						this.updateStatus('连接失败: ' + error.message);
+					}
+				}
+
+				onWebSocketOpen() {
+					this.updateStatus('连接成功');
+					this.startTime = Date.now();
+					this.reconnectAttempts = 0;
+					document.getElementById('connectBtn').disabled = true;
+					document.getElementById('disconnectBtn').disabled = false;
+					document.getElementById('requestKeyframe').disabled = false;
+				}
+
+				async onWebSocketMessage(event) {
+					try {
+						const message = JSON.parse(event.data);
+
+						switch (message.type) {
+							case 'welcome':
+								console.log('收到欢迎消息:', message);
+								break;
+
+							case 'config':
+								this.handleConfig(message);
+								break;
+
+							case 'frame':
+							case 'video':
+								await this.handleVideoFrame(message);
+								break;
+
+							case 'pong':
+								console.log('收到pong响应');
+								break;
+
+							default:
+								console.log('收到未知消息类型:', message.type);
+						}
+					} catch (error) {
+						console.error('处理消息失败:', error);
+					}
+				}
+
+				handleConfig(config) {
+					console.log('收到配置:', config);
+					this.updateStatus(
+						`已连接 - 编码: ${config.codec}, ${config.width}x${config.height}`,
+					);
+				}
+
+				async handleVideoFrame(frameData) {
+					this.frameCount++;
+
+					// 更新统计信息
+					if (this.frameCount % 30 === 0) {
+						this.updateStats();
+					}
+
+					// 将base64数据转换为ArrayBuffer
+					const binaryString = atob(frameData.data);
+					const bytes = new Uint8Array(binaryString.length);
+					for (let i = 0; i < binaryString.length; i++) {
+						bytes[i] = binaryString.charCodeAt(i);
+					}
+
+					// 这里可以处理视频数据
+					// 注意：需要将H.264数据转换为浏览器可播放的格式
+					// 可以使用MSE (Media Source Extensions) 或 WebCodecs API
+					console.log(
+						`收到帧 #${frameData.sequence}, 关键帧: ${frameData.is_key_frame}`,
+					);
+				}
+
+				updateStats() {
+					const elapsed = (Date.now() - this.startTime) / 1000;
+					const fps = this.frameCount / elapsed;
+
+					const statsDiv = document.getElementById('stats');
+					statsDiv.innerHTML = `
+                    <h3>统计信息</h3>
+                    <p>运行时间: ${elapsed.toFixed(1)}秒</p>
+                    <p>总帧数: ${this.frameCount}</p>
+                    <p>平均FPS: ${fps.toFixed(1)}</p>
+                `;
+				}
+
+				updateStatus(message) {
+					document.getElementById('status').textContent = '状态: ' + message;
+				}
+
+				onWebSocketClose() {
+					this.updateStatus('连接关闭');
+					document.getElementById('connectBtn').disabled = false;
+					document.getElementById('disconnectBtn').disabled = true;
+					document.getElementById('requestKeyframe').disabled = true;
+
+					// 尝试重连
+					if (this.reconnectAttempts < this.maxReconnectAttempts) {
+						this.reconnectAttempts++;
+						this.updateStatus(
+							`连接断开，${this.reconnectDelay / 1000}秒后重试 (${this.reconnectAttempts}/${this.maxReconnectAttempts})`,
+						);
+
+						setTimeout(() => {
+							const wsUrl = document.getElementById('wsUrl').value;
+							this.connect(wsUrl);
+						}, this.reconnectDelay);
+					}
+				}
+
+				onWebSocketError(error) {
+					this.updateStatus('连接错误: ' + error.message);
+				}
+
+				disconnect() {
+					if (this.ws) {
+						this.ws.close();
+						this.ws = null;
+					}
+					this.updateStatus('已断开连接');
+				}
+
+				requestKeyframe() {
+					if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+						this.ws.send(
+							JSON.stringify({
+								type: 'request_keyframe',
+								timestamp: Date.now(),
+							}),
+						);
+					}
+				}
+			}
+
+			// 初始化播放器
+			const player = new WebSocketVideoPlayer();
+
+			// 绑定按钮事件
+			document.getElementById('connectBtn').addEventListener('click', () => {
+				const wsUrl = document.getElementById('wsUrl').value;
+				player.connect(wsUrl);
+			});
+
+			document.getElementById('disconnectBtn').addEventListener('click', () => {
+				player.disconnect();
+			});
+
+			document
+				.getElementById('requestKeyframe')
+				.addEventListener('click', () => {
+					player.requestKeyframe();
+				});
+		</script>
+	</body>
+</html>
