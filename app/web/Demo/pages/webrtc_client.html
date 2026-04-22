@@ -1,0 +1,1324 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebRTC 视频通话</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        header {
+            background: linear-gradient(to right, #4A00E0, #8E2DE2);
+            color: white;
+            padding: 20px 30px;
+            text-align: center;
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            opacity: 0.9;
+            font-weight: 300;
+        }
+        
+        .status-bar {
+            background-color: #f8f9fa;
+            padding: 15px 30px;
+            border-bottom: 1px solid #e9ecef;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .status {
+            font-weight: 500;
+        }
+        
+        .status.connected {
+            color: #28a745;
+        }
+        
+        .status.disconnected {
+            color: #dc3545;
+        }
+        
+        .connection-info {
+            display: flex;
+            gap: 20px;
+        }
+        
+        .info-item {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .info-label {
+            font-size: 0.8rem;
+            color: #6c757d;
+        }
+        
+        .info-value {
+            font-weight: 600;
+        }
+        
+        .main-content {
+            display: flex;
+            min-height: 500px;
+        }
+        
+        .video-container {
+            flex: 1;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        .video-wrapper {
+            position: relative;
+            border-radius: 10px;
+            overflow: hidden;
+            background-color: #000;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        video {
+            width: 100%;
+            height: auto;
+            display: block;
+            background-color: #000;
+        }
+        
+        .video-label {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            background-color: rgba(0,0,0,0.7);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 0.9rem;
+        }
+        
+        .video-controls {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            display: flex;
+            gap: 10px;
+        }
+        
+        .btn-small {
+            padding: 5px 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: all 0.2s;
+        }
+        
+        .btn-small:hover {
+            transform: translateY(-2px);
+        }
+        
+        .controls {
+            padding: 20px 30px;
+            background-color: #f8f9fa;
+            border-top: 1px solid #e9ecef;
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(to right, #4A00E0, #8E2DE2);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 7px 14px rgba(74, 0, 224, 0.2);
+        }
+        
+        .btn-success {
+            background-color: #28a745;
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background-color: #218838;
+            transform: translateY(-2px);
+        }
+        
+        .btn-danger {
+            background-color: #dc3545;
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background-color: #c82333;
+            transform: translateY(-2px);
+        }
+        
+        .btn-warning {
+            background-color: #ffc107;
+            color: #212529;
+        }
+        
+        .btn-warning:hover {
+            background-color: #e0a800;
+            transform: translateY(-2px);
+        }
+        
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+        
+        .stats-panel {
+            width: 300px;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-left: 1px solid #e9ecef;
+            overflow-y: auto;
+        }
+        
+        .panel-title {
+            font-size: 1.2rem;
+            margin-bottom: 15px;
+            color: #495057;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #4A00E0;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 10px;
+        }
+        
+        .stat-item {
+            background-color: white;
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid #dee2e6;
+        }
+        
+        .stat-label {
+            font-size: 0.85rem;
+            color: #6c757d;
+            margin-bottom: 5px;
+        }
+        
+        .stat-value {
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+        
+        .log-container {
+            margin-top: 20px;
+        }
+        
+        .log-title {
+            font-size: 1rem;
+            margin-bottom: 10px;
+            color: #495057;
+        }
+        
+        .log-box {
+            height: 200px;
+            background-color: #212529;
+            color: #20c997;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 0.8rem;
+            line-height: 1.4;
+        }
+        
+        .log-entry {
+            margin-bottom: 5px;
+            padding-bottom: 5px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .log-time {
+            color: #6c757d;
+        }
+        
+        .log-message {
+            color: #20c997;
+        }
+        
+        .log-error {
+            color: #dc3545;
+        }
+        
+        .log-success {
+            color: #28a745;
+        }
+        
+        .log-warning {
+            color: #ffc107;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal-content {
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+        }
+        
+        .modal-title {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            color: #4A00E0;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+        
+        input, select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+        }
+        
+        .modal-buttons {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .ice-state {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 5px;
+        }
+        
+        .ice-new { background-color: #6c757d; }
+        .ice-checking { background-color: #ffc107; }
+        .ice-connected { background-color: #28a745; }
+        .ice-completed { background-color: #20c997; }
+        .ice-failed { background-color: #dc3545; }
+        .ice-disconnected { background-color: #fd7e14; }
+        .ice-closed { background-color: #6c757d; }
+        
+        @media (max-width: 768px) {
+            .main-content {
+                flex-direction: column;
+            }
+            
+            .stats-panel {
+                width: 100%;
+                border-left: none;
+                border-top: 1px solid #e9ecef;
+            }
+            
+            .connection-info {
+                flex-direction: column;
+                gap: 5px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>WebRTC 视频通话</h1>
+            <p class="subtitle">基于 WebRTC 的实时视频通信应用</p>
+        </header>
+        
+        <div class="status-bar">
+            <div>
+                <span class="status disconnected" id="connectionStatus">未连接</span>
+            </div>
+            <div class="connection-info">
+                <div class="info-item">
+                    <span class="info-label">ICE 状态</span>
+                    <span class="info-value">
+                        <span class="ice-state ice-closed" id="iceStateIcon"></span>
+                        <span id="iceState">closed</span>
+                    </span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">信令状态</span>
+                    <span class="info-value" id="signalingState">stable</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">连接状态</span>
+                    <span class="info-value" id="peerConnectionState">new</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="main-content">
+            <div class="video-container">
+                <div class="video-wrapper">
+                    <video id="localVideo" autoplay muted playsinline></video>
+                    <div class="video-label">本地视频</div>
+                    <div class="video-controls">
+                        <button id="toggleVideo" class="btn-small btn-primary">关视频</button>
+                        <button id="toggleAudio" class="btn-small btn-primary">关音频</button>
+                    </div>
+                </div>
+                
+                <div class="video-wrapper">
+                    <video id="remoteVideo" autoplay playsinline></video>
+                    <div class="video-label">远程视频</div>
+                </div>
+            </div>
+            
+            <div class="stats-panel">
+                <h3 class="panel-title">连接统计</h3>
+                <div class="stats-grid" id="statsGrid">
+                    <!-- 统计信息将在这里动态生成 -->
+                </div>
+                
+                <div class="log-container">
+                    <h3 class="log-title">事件日志</h3>
+                    <div class="log-box" id="logBox">
+                        <!-- 日志将在这里动态生成 -->
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="controls">
+            <button id="connectBtn" class="btn btn-primary">
+                <span>连接信令服务器</span>
+            </button>
+            <button id="startCallBtn" class="btn btn-success" disabled>
+                <span>开始通话</span>
+            </button>
+            <button id="answerCallBtn" class="btn btn-warning" disabled>
+                <span>接听通话</span>
+            </button>
+            <button id="hangupBtn" class="btn btn-danger" disabled>
+                <span>挂断通话</span>
+            </button>
+            <button id="settingsBtn" class="btn">
+                <span>设置</span>
+            </button>
+        </div>
+    </div>
+    
+    <!-- 设置模态框 -->
+    <div class="modal" id="settingsModal">
+        <div class="modal-content">
+            <h3 class="modal-title">设置</h3>
+            
+            <div class="form-group">
+                <label for="signalingServer">信令服务器地址</label>
+                <input type="text" id="signalingServer" value="ws://localhost:8765">
+            </div>
+            
+            <div class="form-group">
+                <label for="roomId">房间号</label>
+                <input type="text" id="roomId" value="default-room">
+            </div>
+            
+            <div class="form-group">
+                <label for="peerId">您的ID</label>
+                <input type="text" id="peerId" value="user_" placeholder="不填写将自动生成">
+            </div>
+            
+            <div class="form-group">
+                <label for="videoSource">视频源</label>
+                <select id="videoSource">
+                    <option value="user">摄像头</option>
+                    <option value="screen">屏幕共享</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="audioSource">音频源</label>
+                <select id="audioSource">
+                    <option value="mic">麦克风</option>
+                    <option value="none">无音频</option>
+                </select>
+            </div>
+            
+            <div class="modal-buttons">
+                <button id="cancelSettings" class="btn">取消</button>
+                <button id="saveSettings" class="btn btn-primary">保存</button>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // WebRTC 客户端主类
+        class WebRTCClient {
+            constructor() {
+                // 配置
+                this.config = {
+                    signalingServer: 'ws://localhost:8765',
+                    roomId: 'default-room',
+                    peerId: 'user_' + Math.random().toString(36).substr(2, 9),
+                    videoSource: 'user',
+                    audioSource: 'mic',
+                    iceServers: [
+                        { urls: 'stun:stun.l.google.com:19302' },
+                        { urls: 'stun:stun1.l.google.com:19302' }
+                    ]
+                };
+                
+                // WebRTC 组件
+                this.peerConnection = null;
+                this.localStream = null;
+                this.dataChannel = null;
+                
+                // 信令服务器
+                this.websocket = null;
+                this.isConnected = false;
+                
+                // 状态
+                this.isCaller = false;
+                this.isInCall = false;
+                this.remotePeerId = null;
+                
+                // 统计
+                this.statsInterval = null;
+                
+                // 初始化
+                this.init();
+            }
+            
+            init() {
+                // 从 localStorage 加载配置
+                this.loadConfig();
+                
+                // 绑定事件
+                this.bindEvents();
+                
+                // 更新 UI
+                this.updateUI();
+                
+                // 添加初始日志
+                this.log('WebRTC 客户端已初始化', 'info');
+            }
+            
+            bindEvents() {
+                // 按钮事件
+                document.getElementById('connectBtn').addEventListener('click', () => this.toggleConnection());
+                document.getElementById('startCallBtn').addEventListener('click', () => this.startCall());
+                document.getElementById('answerCallBtn').addEventListener('click', () => this.answerCall());
+                document.getElementById('hangupBtn').addEventListener('click', () => this.hangup());
+                document.getElementById('settingsBtn').addEventListener('click', () => this.showSettings());
+                document.getElementById('saveSettings').addEventListener('click', () => this.saveSettings());
+                document.getElementById('cancelSettings').addEventListener('click', () => this.hideSettings());
+                
+                // 视频控制
+                document.getElementById('toggleVideo').addEventListener('click', () => this.toggleVideo());
+                document.getElementById('toggleAudio').addEventListener('click', () => this.toggleAudio());
+                
+                // 模态框点击外部关闭
+                document.getElementById('settingsModal').addEventListener('click', (e) => {
+                    if (e.target.id === 'settingsModal') this.hideSettings();
+                });
+                
+                // 窗口关闭前清理
+                window.addEventListener('beforeunload', () => this.cleanup());
+            }
+            
+            async toggleConnection() {
+                if (this.isConnected) {
+                    await this.disconnect();
+                } else {
+                    await this.connect();
+                }
+            }
+            
+            async connect() {
+                try {
+                    this.log('正在连接到信令服务器...', 'info');
+                    
+                    // 创建 WebSocket 连接
+                    this.websocket = new WebSocket(this.config.signalingServer);
+                    
+                    // WebSocket 事件处理
+                    this.websocket.onopen = () => this.onSignalingOpen();
+                    this.websocket.onmessage = (event) => this.onSignalingMessage(event);
+                    this.websocket.onclose = () => this.onSignalingClose();
+                    this.websocket.onerror = (error) => this.onSignalingError(error);
+                    
+                } catch (error) {
+                    this.log('连接失败: ' + error.message, 'error');
+                    this.updateStatus('连接失败', 'disconnected');
+                }
+            }
+            
+            onSignalingOpen() {
+                this.isConnected = true;
+                this.log('信令服务器连接成功', 'success');
+                this.updateStatus('已连接', 'connected');
+                
+                // 注册到信令服务器
+                this.sendSignalingMessage({
+                    type: 'register',
+                    peerId: this.config.peerId,
+                    roomId: this.config.roomId
+                });
+                
+                // 更新按钮状态
+                this.updateUI();
+            }
+            
+            onSignalingMessage(event) {
+                try {
+                    const message = JSON.parse(event.data);
+                    this.log(`收到消息: ${message.type}`, 'info');
+                    
+                    switch (message.type) {
+                        case 'welcome':
+                            this.handleWelcome(message);
+                            break;
+                        case 'offer':
+                            this.handleOffer(message);
+                            break;
+                        case 'answer':
+                            this.handleAnswer(message);
+                            break;
+                        case 'ice-candidate':
+                            this.handleIceCandidate(message);
+                            break;
+                        case 'peer-list':
+                            this.handlePeerList(message);
+                            break;
+                        case 'call-request':
+                            this.handleCallRequest(message);
+                            break;
+                        case 'call-accepted':
+                            this.handleCallAccepted(message);
+                            break;
+                        case 'call-rejected':
+                            this.handleCallRejected(message);
+                            break;
+                        case 'hangup':
+                            this.handleHangup(message);
+                            break;
+                        case 'error':
+                            this.handleError(message);
+                            break;
+                    }
+                } catch (error) {
+                    this.log('消息处理错误: ' + error.message, 'error');
+                }
+            }
+            
+            onSignalingClose() {
+                this.isConnected = false;
+                this.log('信令服务器连接已关闭', 'warning');
+                this.updateStatus('未连接', 'disconnected');
+                this.cleanup();
+                this.updateUI();
+            }
+            
+            onSignalingError(error) {
+                this.log('信令服务器错误: ' + error.message, 'error');
+            }
+            
+            sendSignalingMessage(message) {
+                if (this.websocket && this.websocket.readyState === WebSocket.OPEN) {
+                    this.websocket.send(JSON.stringify(message));
+                    this.log(`发送消息: ${message.type}`, 'info');
+                } else {
+                    this.log('无法发送消息: WebSocket 未连接', 'error');
+                }
+            }
+            
+            async startCall() {
+                try {
+                    this.log('开始建立通话...', 'info');
+                    this.isCaller = true;
+                    
+                    // 获取本地媒体流
+                    await this.getLocalStream();
+                    
+                    // 创建 PeerConnection
+                    this.createPeerConnection();
+                    
+                    // 添加本地轨道
+                    this.addLocalTracks();
+                    
+                    // 创建数据通道
+                    this.createDataChannel();
+                    
+                    // 创建并发送 Offer
+                    const offer = await this.peerConnection.createOffer();
+                    await this.peerConnection.setLocalDescription(offer);
+                    
+                    // 发送 Offer 到对端
+                    this.sendSignalingMessage({
+                        type: 'offer',
+                        sdp: offer.sdp,
+                        from: this.config.peerId,
+                        to: this.remotePeerId
+                    });
+                    
+                    this.log('Offer 已发送', 'success');
+                    this.updateUI();
+                    
+                } catch (error) {
+                    this.log('创建通话失败: ' + error.message, 'error');
+                }
+            }
+            
+            async answerCall() {
+                try {
+                    this.log('接听通话...', 'info');
+                    this.isCaller = false;
+                    
+                    // 获取本地媒体流
+                    await this.getLocalStream();
+                    
+                    // 创建 PeerConnection
+                    this.createPeerConnection();
+                    
+                    // 添加本地轨道
+                    this.addLocalTracks();
+                    
+                    // 创建数据通道
+                    this.createDataChannel();
+                    
+                    // 创建并发送 Answer
+                    const answer = await this.peerConnection.createAnswer();
+                    await this.peerConnection.setLocalDescription(answer);
+                    
+                    // 发送 Answer 到对端
+                    this.sendSignalingMessage({
+                        type: 'answer',
+                        sdp: answer.sdp,
+                        from: this.config.peerId,
+                        to: this.remotePeerId
+                    });
+                    
+                    this.log('Answer 已发送', 'success');
+                    this.isInCall = true;
+                    this.updateUI();
+                    
+                } catch (error) {
+                    this.log('接听通话失败: ' + error.message, 'error');
+                }
+            }
+            
+            async handleOffer(message) {
+                this.log(`收到来自 ${message.from} 的 Offer`, 'info');
+                this.remotePeerId = message.from;
+                
+                // 显示接听对话框
+                if (confirm(`收到来自 ${message.from} 的通话请求，是否接听？`)) {
+                    // 创建 PeerConnection
+                    this.createPeerConnection();
+                    
+                    // 设置远程描述
+                    await this.peerConnection.setRemoteDescription(
+                        new RTCSessionDescription({ type: 'offer', sdp: message.sdp })
+                    );
+                    
+                    // 获取本地媒体流
+                    await this.getLocalStream();
+                    
+                    // 添加本地轨道
+                    this.addLocalTracks();
+                    
+                    // 创建数据通道
+                    this.createDataChannel();
+                    
+                    // 创建并发送 Answer
+                    const answer = await this.peerConnection.createAnswer();
+                    await this.peerConnection.setLocalDescription(answer);
+                    
+                    // 发送 Answer
+                    this.sendSignalingMessage({
+                        type: 'answer',
+                        sdp: answer.sdp,
+                        from: this.config.peerId,
+                        to: this.remotePeerId
+                    });
+                    
+                    this.log('已接听通话', 'success');
+                    this.isInCall = true;
+                    this.updateUI();
+                    
+                } else {
+                    // 拒绝通话
+                    this.sendSignalingMessage({
+                        type: 'call-rejected',
+                        from: this.config.peerId,
+                        to: this.remotePeerId
+                    });
+                    this.log('已拒绝通话', 'warning');
+                }
+            }
+            
+            async handleAnswer(message) {
+                this.log(`收到来自 ${message.from} 的 Answer`, 'info');
+                
+                // 设置远程描述
+                await this.peerConnection.setRemoteDescription(
+                    new RTCSessionDescription({ type: 'answer', sdp: message.sdp })
+                );
+                
+                this.isInCall = true;
+                this.updateUI();
+            }
+            
+            async handleIceCandidate(message) {
+                if (this.peerConnection) {
+                    try {
+                        await this.peerConnection.addIceCandidate(
+                            new RTCIceCandidate(message.candidate)
+                        );
+                        this.log('添加 ICE 候选成功', 'info');
+                    } catch (error) {
+                        this.log('添加 ICE 候选失败: ' + error.message, 'error');
+                    }
+                }
+            }
+            
+            async getLocalStream() {
+                try {
+                    const constraints = {
+                        audio: this.config.audioSource === 'mic',
+                        video: this.config.videoSource === 'screen' 
+                            ? { mediaSource: 'screen' }
+                            : { width: 1280, height: 720, frameRate: 30 }
+                    };
+                    
+                    if (this.config.videoSource === 'screen') {
+                        // 屏幕共享
+                        this.localStream = await navigator.mediaDevices.getDisplayMedia(constraints);
+                    } else {
+                        // 摄像头
+                        this.localStream = await navigator.mediaDevices.getUserMedia(constraints);
+                    }
+                    
+                    // 显示本地视频
+                    const localVideo = document.getElementById('localVideo');
+                    localVideo.srcObject = this.localStream;
+                    
+                    this.log('本地媒体流获取成功', 'success');
+                    
+                } catch (error) {
+                    this.log('获取本地媒体流失败: ' + error.message, 'error');
+                    throw error;
+                }
+            }
+            
+            createPeerConnection() {
+                try {
+                    // 关闭现有的连接
+                    if (this.peerConnection) {
+                        this.peerConnection.close();
+                    }
+                    
+                    // 创建新的 PeerConnection
+                    this.peerConnection = new RTCPeerConnection({
+                        iceServers: this.config.iceServers
+                    });
+                    
+                    // 设置事件监听器
+                    this.setupPeerConnectionListeners();
+                    
+                    this.log('PeerConnection 创建成功', 'success');
+                    
+                } catch (error) {
+                    this.log('创建 PeerConnection 失败: ' + error.message, 'error');
+                    throw error;
+                }
+            }
+            
+            setupPeerConnectionListeners() {
+                // ICE 候选事件
+                this.peerConnection.onicecandidate = (event) => {
+                    if (event.candidate) {
+                        this.sendSignalingMessage({
+                            type: 'ice-candidate',
+                            candidate: event.candidate,
+                            from: this.config.peerId,
+                            to: this.remotePeerId
+                        });
+                    }
+                };
+                
+                // ICE 连接状态变化
+                this.peerConnection.oniceconnectionstatechange = () => {
+                    const state = this.peerConnection.iceConnectionState;
+                    this.updateIceState(state);
+                    this.log(`ICE 连接状态: ${state}`, 'info');
+                    
+                    if (state === 'connected' || state === 'completed') {
+                        this.log('P2P 连接已建立', 'success');
+                        this.startStats();
+                    } else if (state === 'failed' || state === 'disconnected' || state === 'closed') {
+                        this.log('P2P 连接断开', 'warning');
+                        this.stopStats();
+                    }
+                };
+                
+                // 信令状态变化
+                this.peerConnection.onsignalingstatechange = () => {
+                    const state = this.peerConnection.signalingState;
+                    document.getElementById('signalingState').textContent = state;
+                };
+                
+                // 连接状态变化
+                this.peerConnection.onconnectionstatechange = () => {
+                    const state = this.peerConnection.connectionState;
+                    document.getElementById('peerConnectionState').textContent = state;
+                };
+                
+                // 轨道事件
+                this.peerConnection.ontrack = (event) => {
+                    this.log('收到远程轨道', 'success');
+                    const remoteVideo = document.getElementById('remoteVideo');
+                    if (remoteVideo.srcObject !== event.streams[0]) {
+                        remoteVideo.srcObject = event.streams[0];
+                    }
+                };
+                
+                // 数据通道事件
+                this.peerConnection.ondatachannel = (event) => {
+                    this.log('收到数据通道', 'info');
+                    this.setupDataChannel(event.channel);
+                };
+            }
+            
+            addLocalTracks() {
+                if (this.localStream) {
+                    this.localStream.getTracks().forEach(track => {
+                        this.peerConnection.addTrack(track, this.localStream);
+                    });
+                }
+            }
+            
+            createDataChannel() {
+                try {
+                    this.dataChannel = this.peerConnection.createDataChannel('chat');
+                    this.setupDataChannel(this.dataChannel);
+                    this.log('数据通道创建成功', 'success');
+                } catch (error) {
+                    this.log('创建数据通道失败: ' + error.message, 'error');
+                }
+            }
+            
+            setupDataChannel(channel) {
+                this.dataChannel = channel;
+                
+                channel.onopen = () => {
+                    this.log('数据通道已打开', 'success');
+                };
+                
+                channel.onclose = () => {
+                    this.log('数据通道已关闭', 'warning');
+                };
+                
+                channel.onmessage = (event) => {
+                    this.log(`收到消息: ${event.data}`, 'info');
+                };
+                
+                channel.onerror = (error) => {
+                    this.log('数据通道错误: ' + error.message, 'error');
+                };
+            }
+            
+            sendMessage(message) {
+                if (this.dataChannel && this.dataChannel.readyState === 'open') {
+                    this.dataChannel.send(message);
+                    this.log(`发送消息: ${message}`, 'info');
+                } else {
+                    this.log('无法发送消息: 数据通道未打开', 'warning');
+                }
+            }
+            
+            async hangup() {
+                this.log('挂断通话...', 'warning');
+                
+                // 发送挂断消息
+                if (this.remotePeerId) {
+                    this.sendSignalingMessage({
+                        type: 'hangup',
+                        from: this.config.peerId,
+                        to: this.remotePeerId
+                    });
+                }
+                
+                // 清理资源
+                await this.cleanup();
+                
+                this.log('通话已结束', 'info');
+                this.updateUI();
+            }
+            
+            async cleanup() {
+                // 停止统计
+                this.stopStats();
+                
+                // 关闭 PeerConnection
+                if (this.peerConnection) {
+                    this.peerConnection.close();
+                    this.peerConnection = null;
+                }
+                
+                // 停止本地媒体流
+                if (this.localStream) {
+                    this.localStream.getTracks().forEach(track => track.stop());
+                    this.localStream = null;
+                    
+                    // 清除视频元素
+                    document.getElementById('localVideo').srcObject = null;
+                    document.getElementById('remoteVideo').srcObject = null;
+                }
+                
+                // 重置状态
+                this.isCaller = false;
+                this.isInCall = false;
+                this.remotePeerId = null;
+                this.dataChannel = null;
+                
+                // 更新状态显示
+                this.updateIceState('closed');
+                document.getElementById('signalingState').textContent = 'stable';
+                document.getElementById('peerConnectionState').textContent = 'new';
+                
+                // 清除统计
+                this.clearStats();
+            }
+            
+            async disconnect() {
+                this.log('正在断开连接...', 'info');
+                
+                // 清理 WebRTC
+                await this.cleanup();
+                
+                // 关闭 WebSocket
+                if (this.websocket) {
+                    this.websocket.close();
+                    this.websocket = null;
+                }
+                
+                this.isConnected = false;
+                this.updateStatus('未连接', 'disconnected');
+                this.updateUI();
+            }
+            
+            toggleVideo() {
+                if (this.localStream) {
+                    const videoTrack = this.localStream.getVideoTracks()[0];
+                    if (videoTrack) {
+                        videoTrack.enabled = !videoTrack.enabled;
+                        const button = document.getElementById('toggleVideo');
+                        button.textContent = videoTrack.enabled ? '关视频' : '开视频';
+                        this.log(`视频已 ${videoTrack.enabled ? '开启' : '关闭'}`, 'info');
+                    }
+                }
+            }
+            
+            toggleAudio() {
+                if (this.localStream) {
+                    const audioTrack = this.localStream.getAudioTracks()[0];
+                    if (audioTrack) {
+                        audioTrack.enabled = !audioTrack.enabled;
+                        const button = document.getElementById('toggleAudio');
+                        button.textContent = audioTrack.enabled ? '关音频' : '开音频';
+                        this.log(`音频已 ${audioTrack.enabled ? '开启' : '关闭'}`, 'info');
+                    }
+                }
+            }
+            
+            updateIceState(state) {
+                const stateElement = document.getElementById('iceState');
+                const iconElement = document.getElementById('iceStateIcon');
+                
+                stateElement.textContent = state;
+                iconElement.className = 'ice-state ice-' + state;
+            }
+            
+            updateStatus(text, className) {
+                const statusElement = document.getElementById('connectionStatus');
+                statusElement.textContent = text;
+                statusElement.className = 'status ' + className;
+            }
+            
+            updateUI() {
+                const connectBtn = document.getElementById('connectBtn');
+                const startCallBtn = document.getElementById('startCallBtn');
+                const answerCallBtn = document.getElementById('answerCallBtn');
+                const hangupBtn = document.getElementById('hangupBtn');
+                
+                // 更新连接按钮
+                connectBtn.textContent = this.isConnected ? '断开连接' : '连接信令';
+                connectBtn.disabled = false;
+                
+                // 更新通话按钮
+                startCallBtn.disabled = !this.isConnected || this.isInCall;
+                answerCallBtn.disabled = !this.isConnected || this.isInCall;
+                hangupBtn.disabled = !this.isInCall;
+            }
+            
+            showSettings() {
+                // 填充当前设置
+                document.getElementById('signalingServer').value = this.config.signalingServer;
+                document.getElementById('roomId').value = this.config.roomId;
+                document.getElementById('peerId').value = this.config.peerId;
+                document.getElementById('videoSource').value = this.config.videoSource;
+                document.getElementById('audioSource').value = this.config.audioSource;
+                
+                // 显示模态框
+                document.getElementById('settingsModal').style.display = 'flex';
+            }
+            
+            hideSettings() {
+                document.getElementById('settingsModal').style.display = 'none';
+            }
+            
+            saveSettings() {
+                this.config.signalingServer = document.getElementById('signalingServer').value;
+                this.config.roomId = document.getElementById('roomId').value;
+                
+                const peerId = document.getElementById('peerId').value.trim();
+                if (peerId) {
+                    this.config.peerId = peerId;
+                }
+                
+                this.config.videoSource = document.getElementById('videoSource').value;
+                this.config.audioSource = document.getElementById('audioSource').value;
+                
+                // 保存到 localStorage
+                localStorage.setItem('webrtc-config', JSON.stringify(this.config));
+                
+                this.hideSettings();
+                this.log('设置已保存', 'success');
+            }
+            
+            loadConfig() {
+                const savedConfig = localStorage.getItem('webrtc-config');
+                if (savedConfig) {
+                    try {
+                        const config = JSON.parse(savedConfig);
+                        this.config = { ...this.config, ...config };
+                        this.log('配置已加载', 'info');
+                    } catch (error) {
+                        this.log('加载配置失败: ' + error.message, 'error');
+                    }
+                }
+            }
+            
+            log(message, type = 'info') {
+                const logBox = document.getElementById('logBox');
+                const time = new Date().toLocaleTimeString();
+                
+                const logEntry = document.createElement('div');
+                logEntry.className = 'log-entry';
+                logEntry.innerHTML = `
+                    <span class="log-time">[${time}]</span>
+                    <span class="log-${type}"> ${message}</span>
+                `;
+                
+                logBox.appendChild(logEntry);
+                logBox.scrollTop = logBox.scrollHeight;
+            }
+            
+            async startStats() {
+                this.stopStats();
+                
+                this.statsInterval = setInterval(async () => {
+                    if (this.peerConnection && this.isInCall) {
+                        await this.updateStats();
+                    }
+                }, 1000);
+            }
+            
+            stopStats() {
+                if (this.statsInterval) {
+                    clearInterval(this.statsInterval);
+                    this.statsInterval = null;
+                }
+            }
+            
+            async updateStats() {
+                try {
+                    const stats = await this.peerConnection.getStats();
+                    const statsGrid = document.getElementById('statsGrid');
+                    
+                    // 清空现有统计
+                    statsGrid.innerHTML = '';
+                    
+                    // 收集统计信息
+                    const statsData = {
+                        '视频发送': { bitrate: 0, packets: 0, frameRate: 0 },
+                        '视频接收': { bitrate: 0, packets: 0, frameRate: 0 },
+                        '音频发送': { bitrate: 0, packets: 0 },
+                        '音频接收': { bitrate: 0, packets: 0 },
+                        'RTT': { value: 0 }
+                    };
+                    
+                    stats.forEach(report => {
+                        if (report.type === 'outbound-rtp' && report.kind === 'video') {
+                            statsData['视频发送'].bitrate = (report.bytesSent * 8 / 1024).toFixed(1);
+                            statsData['视频发送'].packets = report.packetsSent;
+                            statsData['视频发送'].frameRate = report.framesPerSecond || 0;
+                        } else if (report.type === 'inbound-rtp' && report.kind === 'video') {
+                            statsData['视频接收'].bitrate = (report.bytesReceived * 8 / 1024).toFixed(1);
+                            statsData['视频接收'].packets = report.packetsReceived;
+                            statsData['视频接收'].frameRate = report.framesPerSecond || 0;
+                        } else if (report.type === 'outbound-rtp' && report.kind === 'audio') {
+                            statsData['音频发送'].bitrate = (report.bytesSent * 8 / 1024).toFixed(1);
+                            statsData['音频发送'].packets = report.packetsSent;
+                        } else if (report.type === 'inbound-rtp' && report.kind === 'audio') {
+                            statsData['音频接收'].bitrate = (report.bytesReceived * 8 / 1024).toFixed(1);
+                            statsData['音频接收'].packets = report.packetsReceived;
+                        } else if (report.type === 'candidate-pair' && report.nominated) {
+                            statsData['RTT'].value = report.currentRoundTripTime ? 
+                                (report.currentRoundTripTime * 1000).toFixed(0) : 0;
+                        }
+                    });
+                    
+                    // 生成统计显示
+                    for (const [key, data] of Object.entries(statsData)) {
+                        const statItem = document.createElement('div');
+                        statItem.className = 'stat-item';
+                        
+                        let valueHtml = '';
+                        if (key.includes('视频') || key.includes('音频')) {
+                            valueHtml = `
+                                <div>${data.bitrate} kbps</div>
+                                <div>${data.packets} 包</div>
+                                ${data.frameRate ? `<div>${data.frameRate} fps</div>` : ''}
+                            `;
+                        } else {
+                            valueHtml = `<div>${data.value} ms</div>`;
+                        }
+                        
+                        statItem.innerHTML = `
+                            <div class="stat-label">${key}</div>
+                            <div class="stat-value">${valueHtml}</div>
+                        `;
+                        
+                        statsGrid.appendChild(statItem);
+                    }
+                    
+                } catch (error) {
+                    // 统计获取失败时不显示错误
+                }
+            }
+            
+            clearStats() {
+                const statsGrid = document.getElementById('statsGrid');
+                statsGrid.innerHTML = '';
+            }
+            
+            // 消息处理辅助方法
+            handleWelcome(message) {
+                this.log(`欢迎加入房间: ${message.roomId}`, 'success');
+            }
+            
+            handlePeerList(message) {
+                this.log(`房间中有 ${message.peers.length} 个用户`, 'info');
+            }
+            
+            handleCallRequest(message) {
+                this.remotePeerId = message.from;
+                this.log(`收到来自 ${message.from} 的通话请求`, 'info');
+            }
+            
+            handleCallAccepted(message) {
+                this.log(`${message.from} 已接受通话`, 'success');
+            }
+            
+            handleCallRejected(message) {
+                this.log(`${message.from} 拒绝了通话`, 'warning');
+                this.cleanup();
+            }
+            
+            handleHangup(message) {
+                this.log(`${message.from} 已挂断通话`, 'warning');
+                this.cleanup();
+            }
+            
+            handleError(message) {
+                this.log(`错误: ${message.message}`, 'error');
+            }
+        }
+        
+        // 页面加载完成后初始化客户端
+        document.addEventListener('DOMContentLoaded', () => {
+            // 创建 WebRTC 客户端实例
+            window.webrtcClient = new WebRTCClient();
+            
+            // 添加一些示例日志
+            window.webrtcClient.log('页面加载完成，点击"连接信令服务器"开始', 'info');
+            window.webrtcClient.log('确保信令服务器运行在 ws://localhost:8765', 'warning');
+        });
+    </script>
+</body>
+</html>

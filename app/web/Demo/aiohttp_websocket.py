@@ -3,6 +3,7 @@ import asyncio
 import json
 from aiohttp import web
 import logging
+from model.apphelp import get_config
 
 # 配置日志
 logging.basicConfig(level=logging.INFO)
@@ -10,8 +11,6 @@ logger = logging.getLogger(__name__)
 
 # 存储所有连接的客户端
 connected_clients = set()
-
-
 async def websocket_handler(request):
     """WebSocket处理器"""
     ws = web.WebSocketResponse()
@@ -358,14 +357,16 @@ if __name__ == '__main__':
             allow_headers="*",
         )
     })
-
+    config=get_config()
+    port=config.get("port")
+    
     # 为所有路由启用CORS
     for route in list(app.router.routes()):
         cors.add(route)
 
-    logger.info("启动WebSocket服务器: http://0.0.0.0:8901")
-    logger.info("测试页面: http://localhost:8901")
-    logger.info("WebSocket端点: ws://localhost:8901/ws")
-    logger.info("状态接口: http://localhost:8901/stats")
+    logger.info(f"启动WebSocket服务器: http://0.0.0.0:{port}")
+    logger.info(f"测试页面: http://localhost:{port}")
+    logger.info(f"WebSocket端点: ws://localhost:{port}/ws")
+    logger.info(f"状态接口: http://localhost:{port}/stats")
 
-    web.run_app(app, host='0.0.0.0', port=8902, access_log=None)
+    web.run_app(app, host='0.0.0.0', port=port, access_log=None)

@@ -1,6 +1,7 @@
 import asyncio,json
 from typing import AsyncGenerator
 from model.services import RTSPService
+from model.apphelp import get_config
 
 # 示例 1: 基础的异步生成器
 async def get_data() -> AsyncGenerator[str, None]:
@@ -81,7 +82,9 @@ async def generator_expression():
 if __name__ == "__main__":
    
     async def test(): 
-        test2= get_rtsp_stream_data("rtsp://admin:123456@192.168.3.1/media/video1")
+        config=get_config()
+        url=config.get("rtsp_url")
+        test2= get_rtsp_stream_data(url)
         async for data in test2:
             print(data)
     asyncio.run(test())

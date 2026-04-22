@@ -7,8 +7,8 @@
 			let canvas = document.getElementById('videoCanvas');
 			let ctx = canvas.getContext('2d');
 
-			// 假设你通过WebSocket接收数据
-			let ws = new WebSocket('ws://localhost:8765');
+			// 假设你通过WebSocket接收数据 
+			const ws = new WebSocket("ws://" + location.host ); 
 			ws.onmessage = async function (event) {
 				let message = JSON.parse(event.data);
 

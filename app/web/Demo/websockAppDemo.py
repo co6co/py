@@ -18,7 +18,7 @@ from model.utils import get_client_ip, check_connection_alive
 
 from sanic.server.websockets.impl import WebsocketImplProtocol as WebSocketCommonProtocol
 
-from model.apphelp import read_file_content,get_file_path 
+from model.apphelp import read_file_content,get_file_path ,get_config
 
 # 创建 Sanic 应用
 app = Sanic("WebSocketDemo")
@@ -474,11 +474,13 @@ if __name__ == '__main__':
     # 创建静态目录
     import os
     os.makedirs('static/js', exist_ok=True)
+    config=get_config()
+    port=config.get("port")
     
     # 运行服务器
     app.run(
         host="0.0.0.0",
-        port=8800,
+        port=port,
         debug=True,
         access_log=True,
         auto_reload=True

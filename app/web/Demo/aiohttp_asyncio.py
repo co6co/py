@@ -20,7 +20,7 @@ from dataclasses import dataclass
 import uuid
 from datetime import datetime
 from aiohttp.web_request import Request
-from model.apphelp import read_file_content, get_file_path
+from model.apphelp import read_file_content, get_file_path,get_config
 from co6co.utils import log
 # 配置
 logging.basicConfig(
@@ -28,14 +28,11 @@ logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 )
 logger = logging.getLogger("webrtc-server")
+config=get_config()
+devict=config.get("devices")
 
 # RTSP 流配置
-STREAMS = {
-    "camera1": "rtsp://admin:123456@192.168.3.1/media/video",
-    "camera2": "rtsp://admin:123456@192.168.3.2/media/video",
-    # 添加更多摄像头
-}
-
+STREAMS = config["devices"]  
 
 @dataclass
 class ClientInfo:
@@ -327,7 +324,7 @@ if __name__ == "__main__":
     web.run_app(
         app,
         host="0.0.0.0",
-        port=8801,
+        port=config.get("port"),
         access_log=None,  # 禁用访问日志
         shutdown_timeout=5
     )

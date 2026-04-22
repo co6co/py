@@ -3,12 +3,14 @@ from model.services import RTSPService
 from co6co.utils import log
 from co6co.task.thread import create_event_loop
 import threading
+from model.apphelp import get_config
+
+config=get_config()
+url=config.get("rtsp_url")
 
 async def test():
     service = RTSPService()
-    test2 = service.read_rtsp_stream(
-        "rtsp://admin:bwk68240175@anhctxz.com:65019/stream1", "123"
-    )
+    test2 = service.read_rtsp_stream(  url, "123" )
 
     # test2= service.exec_ipconfig()
     ff = 0
@@ -39,5 +41,8 @@ def test2():
     
 if __name__ == "__main__":
     #asyncio.run(test())
+    config=asyncio.run(get_config())
+    print(config)
+
     test2()
     print("done")

@@ -9,9 +9,11 @@ from aiortc import RTCPeerConnection, RTCSessionDescription, RTCIceCandidate
 from aiortc.contrib.media import MediaPlayer, MediaRelay
 import uuid
 
-from model.apphelp import read_file_content, get_file_path
+from model.apphelp import read_file_content, get_file_path,get_config
+config=get_config()
+url=config.get("rtsp_url")
 # 配置
-RTSP_URL = "rtsp://admin:123456@192.168.3.17/media/video"
+RTSP_URL = url
 
 # 日志
 logging.basicConfig(level=logging.INFO)
@@ -19,12 +21,9 @@ logger = logging.getLogger("webrtc-signal")
 
 # 存储PeerConnection
 pcs = {}
-
-
 class WebRTCStreamer:
     def __init__(self):
-        self.relay = MediaRelay()
-
+        self.relay = MediaRelay() 
     async def get_video_track(self):
         """获取视频轨道"""
         # 使用MediaPlayer播放RTSP流
@@ -140,4 +139,4 @@ if __name__ == "__main__":
         cors.add(route)
 
     app.on_shutdown.append(on_shutdown)
-    web.run_app(app, host="0.0.0.0", port=8901)
+    web.run_app(app, host="0.0.0.0", port=config.get("port"))

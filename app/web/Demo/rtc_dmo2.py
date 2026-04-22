@@ -6,6 +6,8 @@ from aiortc.contrib.media import MediaPlayer, MediaRecorder
 from aiortc.rtcrtpsender import RTCRtpSender
 import json
 import argparse
+from model.apphelp import get_config 
+import signal
 import logging
 async def simple_record_rtsp(rtsp_url, output_file, duration=30):
     """
@@ -67,10 +69,11 @@ async def simple_record_rtsp(rtsp_url, output_file, duration=30):
     print(f"录制完成！文件保存为: {output_file}")
 
 if __name__ == "__main__":
-     
+    config=get_config()
+    url=config.get("rtsp_url")
     async def test_simple():
          await simple_record_rtsp(
-             rtsp_url="rtsp://admin:123456@192.168.3.1/media/video",
+             rtsp_url=url,
              output_file="output.mp4",
              duration=10
          )

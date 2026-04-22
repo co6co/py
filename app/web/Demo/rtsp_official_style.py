@@ -6,6 +6,7 @@ import sys
 from aiortc import RTCPeerConnection, RTCSessionDescription
 from aiortc.contrib.media import MediaPlayer, MediaRecorder
 from aiortc.rtcrtpsender import RTCRtpSender
+from model.apphelp import get_config  
 
 async def run(pc, player, recorder, duration=10):
     """
@@ -33,7 +34,9 @@ async def run(pc, player, recorder, duration=10):
 
 async def official_style_record():
     """官方示例风格的录制"""
-    rtsp_url = "rtsp://admin:123456@192.168.3.1/media/video"
+    config=get_config()
+    url=config.get("rtsp_url")
+    rtsp_url = url
     output_file = "official_output.mp4"
     duration = 10
     

@@ -1,11 +1,14 @@
 from model.services import RTSPService
 
 import pytest,asyncio
+from model.apphelp import get_config
 
 # pip install pytest-asyncio
 @pytest.fixture #提供测试所需的预设数据、环境或资源
 def rtsp_url():
-    return "rtsp://admin:123456@192.168.3.1/media/video1"
+    config=get_config()
+    url=config.get("rtsp_url")
+    return url
 @pytest.fixture #提供测试所需的预设数据、环境或资源
 def key():
     return "test_key"

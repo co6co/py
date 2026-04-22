@@ -6,7 +6,8 @@
 
 		<script>
 			let img = document.getElementById('videoStream');
-			let ws = new WebSocket('ws://localhost:8765');
+			 
+			const ws = new WebSocket("ws://" + location.host ); 
 			ws.onmessage = function (event) {
 				let message = JSON.parse(event.data);
 				if (message.type === 'video') {

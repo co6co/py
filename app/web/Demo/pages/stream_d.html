@@ -4,12 +4,10 @@
 	<body>
 		<img id="frame" width="640" height="480" />
 		<script>
-			let frame = document.getElementById('frame');
-			let ws = new WebSocket('ws://localhost:8765');
-
+			let frame = document.getElementById('frame'); 
+			const ws = new WebSocket("ws://" + location.host );  
 			ws.onmessage = function (event) {
-				let message = JSON.parse(event.data);
-
+				let message = JSON.parse(event.data); 
 				if (message.type === 'video') {
 					// 假设是JPEG格式的帧
 					frame.src = 'data:image/jpeg;base64,' + message.data;

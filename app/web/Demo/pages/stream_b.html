@@ -17,7 +17,8 @@
 				);
 
 				// 连接WebSocket
-				let ws = new WebSocket('ws://localhost:8765');
+				 
+				const ws = new WebSocket("ws://" + location.host ); 
 				let buffer = [];
 
 				ws.onmessage = function (event) {

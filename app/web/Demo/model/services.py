@@ -62,22 +62,7 @@ class RTSPService:
                 break
         log.succ("read_err_stream_quit")
 
-    def hander_frame(self, frame: bytes):
-
-        # 寻找H.264起始码 0x00000001
-        const startCode = Buffer.from ([0x00, 0x00, 0x00, 0x01])
-        const startIndex = data.indexOf(startCode)
-
-        if (startIndex != = -1) {
-            return {
-                data: data,
-                isKeyFrame: this.isKeyFrame(data),
-                timestamp: Date.now(),
-                sequence: this.frameSequence++
-            }
-        }
-
-        return null
+     
 
     async def read_rtsp_stream(self, rtsp_url: str, key: str):
         """

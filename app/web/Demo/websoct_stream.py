@@ -6,6 +6,8 @@ from typing import Set
 import subprocess
 import websockets
 from websockets.server import WebSocketServerProtocol
+from model.apphelp import get_config
+
 
 
 class SimpleRTSPtoWebSocket:
@@ -138,16 +140,17 @@ class SimpleRTSPtoWebSocket:
 async def main_simple():
     """简化版主函数"""
     # RTSP URL示例: rtsp://admin:password@192.168.1.100:554/stream1
-    import argparse
-
-    parser = argparse.ArgumentParser(description="RTSP流处理服务器")
-    parser.add_argument("--rtsp_url", type=str, help="RTSP流URL")
-    args = parser.parse_args()
-
-    rtsp_url = args.rtsp_url
-    server = SimpleRTSPtoWebSocket(rtsp_url, port=8765)
+    
+    config=get_config()
+    port=config.get("port")
+    rtsp_url=config.get("rtsp_url")
+    #import argparse
+    #parser = argparse.ArgumentParser(description="RTSP流处理服务器")
+    #parser.add_argument("--rtsp_url", type=str, help="RTSP流URL")
+    #args = parser.parse_args() 
+    server = SimpleRTSPtoWebSocket(rtsp_url, port=port)
     await server.start()
 
 
-# 如果要运行，取消下面的注释
-asyncio.run(main_simple())
+if __name__ == '__main__':
+    asyncio.run(main_simple()) 

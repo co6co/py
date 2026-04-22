@@ -5,7 +5,9 @@ from sanic import Sanic, Request
 from sanic.response import html 
 from model.apphelp import read_file_content, get_file_path 
 from co6co.utils import try_except, log 
+from model.apphelp import get_config
 app = Sanic("RTSP_WebSocket_Proxy")
+ 
  
   
 @app.route('/')
@@ -29,9 +31,11 @@ if __name__ == '__main__':
     signal.signal(signal.SIGINT, signal_handler)
     signal.signal(signal.SIGTERM, signal_handler) 
     # 运行服务器
+    config=get_config()
+    port=config.get("port")
     app.run(
         host="0.0.0.0",
-        port=8801,
+        port=port,
         debug=False,
         access_log=False,
         auto_reload=False

@@ -6,6 +6,7 @@ from sanic import Sanic
 from sanic.response import json as sanic_json
 #from sanic.websocket import WebSocketCommonProtocol
 from websockets.legacy.protocol import WebSocketCommonProtocol
+from model.apphelp import get_config
 
 app = Sanic("RTSPtoWebSocketProxy")
 
@@ -101,4 +102,6 @@ async def feed(request, ws):
         print(f"[INFO] 连接资源清理完成 for {rtsp_url}")
 
 if __name__ == '__main__':
-    app.run(host="0.0.0.0", port=8000, debug=False, access_log=False)
+    config=get_config()
+    port=config.get("port")
+    app.run(host="0.0.0.0", port=port, debug=False, access_log=False)

@@ -12,7 +12,7 @@ from sanic.response import html
 from websockets.legacy.protocol import WebSocketCommonProtocol
 from sanic.server.websockets.impl import WebsocketImplProtocol as WebSocketCommonProtocol
 from model.services import RTSPService
-from model.apphelp import read_file_content, get_file_path
+from model.apphelp import read_file_content, get_file_path,get_config
 from model.utils import get_client_ip, check_connection_alive
 from co6co.utils import try_except, log
 from co6co.task.thread import TaskManage, create_event_loop
@@ -152,9 +152,11 @@ def signal_handler(sig, frame):
 
 
 if __name__ == '__main__':
-
+    config=get_config()
+    port=config.get("port")
+    url=config.get("rtsp_url")
     # async def test():
-    #    async for data in read_rtsp_stream("rtsp://admin:123456@192.168.3.1/media/video1","test_key"):
+    #    async for data in read_rtsp_stream(url,"test_key"):
     #        print(data)
     # asyncio.run(test())
     # 注册信号处理器
@@ -168,7 +170,7 @@ if __name__ == '__main__':
     # 运行服务器
     app.run(
         host="0.0.0.0",
-        port=8801,
+        port=port,
         debug=False,
         access_log=False,
         auto_reload=False
