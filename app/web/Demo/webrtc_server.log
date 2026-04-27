@@ -1,0 +1,484 @@
+2026-04-27 14:12:31,458 - INFO - 信令服务器运行在 http://localhost:8801
+2026-04-27 14:12:31,458 - INFO - WebSocket 端点：ws://localhost:8801/ws
+2026-04-27 14:12:31,458 - INFO - 状态端点：http://localhost:8801/status
+2026-04-27 14:12:31,458 - INFO - 房间管理已启用
+2026-04-27 14:12:36,189 - INFO - 127.0.0.1 [27/Apr/2026:14:12:36 +0800] "GET / HTTP/1.1" 403 174 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-04-27 14:12:36,249 - INFO - 127.0.0.1 [27/Apr/2026:14:12:36 +0800] "GET /favicon.ico HTTP/1.1" 404 172 "http://localhost:8801/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-04-27 14:12:37,594 - INFO - 127.0.0.1 [27/Apr/2026:14:12:37 +0800] "GET / HTTP/1.1" 403 174 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-04-27 14:12:48,430 - INFO - 信令服务器运行在 http://localhost:8801
+2026-04-27 14:12:48,430 - INFO - WebSocket 端点：ws://localhost:8801/ws
+2026-04-27 14:12:48,430 - INFO - 状态端点：http://localhost:8801/status
+2026-04-27 14:12:48,431 - INFO - 房间管理已启用
+2026-04-27 14:12:56,753 - INFO - 127.0.0.1 [27/Apr/2026:14:12:56 +0800] "GET / HTTP/1.1" 403 174 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-04-27 14:13:34,344 - INFO - 127.0.0.1 [27/Apr/2026:14:13:34 +0800] "GET /status HTTP/1.1" 200 275 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-04-27 14:13:40,029 - INFO - 127.0.0.1 [27/Apr/2026:14:13:40 +0800] "GET / HTTP/1.1" 403 174 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-04-27 14:13:52,366 - INFO - 127.0.0.1 [27/Apr/2026:14:13:52 +0800] "GET /webrtc_client HTTP/1.1" 404 172 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-04-27 14:13:53,413 - INFO - 127.0.0.1 [27/Apr/2026:14:13:53 +0800] "GET /webrtc_client HTTP/1.1" 404 172 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-04-27 14:13:55,859 - INFO - 127.0.0.1 [27/Apr/2026:14:13:55 +0800] "GET /webrtc_client.html HTTP/1.1" 200 239 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-04-27 14:13:59,930 - INFO - 新的客户端连接
+2026-04-27 14:13:59,932 - INFO - 客户端注册成功：user_ygau5ogxv, 房间：default-room, 房间人数：1
+2026-04-27 14:14:16,610 - INFO - 客户端断开连接：user_ygau5ogxv
+2026-04-27 14:14:16,610 - INFO - 127.0.0.1 [27/Apr/2026:14:13:59 +0800] "GET /ws HTTP/1.1" 101 0 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-04-27 14:14:17,734 - INFO - 新的客户端连接
+2026-04-27 14:14:17,737 - INFO - 客户端注册成功：user_ygau5ogxv, 房间：default-room, 房间人数：1
+2026-04-27 14:14:57,481 - INFO - 127.0.0.1 [27/Apr/2026:14:14:57 +0800] "GET /webrtc_client.html HTTP/1.1" 200 239 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-04-27 14:15:03,139 - INFO - 127.0.0.1 [27/Apr/2026:14:15:03 +0800] "GET /webrtc_client.html HTTP/1.1" 304 179 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-04-27 14:15:04,942 - INFO - 127.0.0.1 [27/Apr/2026:14:15:04 +0800] "GET /webrtc_client.html HTTP/1.1" 304 179 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-04-27 14:15:13,893 - INFO - 新的客户端连接
+2026-04-27 14:15:13,896 - INFO - 客户端注册成功：user_ve2z9834p, 房间：default-room, 房间人数：2
+2026-04-27 14:17:42,082 - INFO - 用户 user_ygau5ogxv 离开房间 default-room, 剩余人数：1
+2026-04-27 14:17:42,095 - INFO - 客户端断开连接：user_ygau5ogxv
+2026-04-27 14:17:42,096 - INFO - 127.0.0.1 [27/Apr/2026:14:14:17 +0800] "GET /ws HTTP/1.1" 101 0 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-04-27 14:17:56,442 - INFO - 客户端断开连接：user_ve2z9834p
+2026-04-27 14:17:56,464 - INFO - 127.0.0.1 [27/Apr/2026:14:15:13 +0800] "GET /ws HTTP/1.1" 101 0 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-04-27 14:17:59,453 - INFO - 127.0.0.1 [27/Apr/2026:14:17:59 +0800] "GET /webrtc_client.html HTTP/1.1" 200 239 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36 Edg/147.0.0.0"
+2026-04-27 14:17:59,648 - INFO - 127.0.0.1 [27/Apr/2026:14:17:59 +0800] "GET /favicon.ico HTTP/1.1" 404 172 "http://localhost:8801/webrtc_client.html" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36 Edg/147.0.0.0"
+2026-04-27 14:18:08,935 - INFO - 新的客户端连接
+2026-04-27 14:18:08,937 - INFO - 客户端注册成功：user_9w0bwmpfr, 房间：default-room, 房间人数：1
+2026-04-27 14:18:27,287 - INFO - 新的客户端连接
+2026-04-27 14:18:27,290 - INFO - 客户端注册成功：user_ygau5ogxv, 房间：default-room, 房间人数：2
+2026-04-27 14:25:25,100 - INFO - 用户 user_ygau5ogxv 离开房间 default-room, 剩余人数：1
+2026-04-27 14:25:25,101 - INFO - 客户端断开连接：user_ygau5ogxv
+2026-04-27 14:25:25,101 - INFO - 客户端断开连接：user_9w0bwmpfr
+2026-04-27 14:25:27,111 - INFO - 信令服务器运行在 http://localhost:8801
+2026-04-27 14:25:27,115 - INFO - WebSocket 端点：ws://localhost:8801/ws
+2026-04-27 14:25:27,118 - INFO - 状态端点：http://localhost:8801/status
+2026-04-27 14:25:27,120 - INFO - 房间管理已启用
+2026-04-27 14:25:32,700 - INFO - 127.0.0.1 [27/Apr/2026:14:25:32 +0800] "GET /webrtc_client.html HTTP/1.1" 200 239 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-04-27 14:25:34,582 - INFO - 新的客户端连接
+2026-04-27 14:25:34,585 - INFO - 客户端注册成功：user_ygau5ogxv, 房间：default-room, 房间人数：1
+2026-04-27 14:25:45,409 - INFO - 新的客户端连接
+2026-04-27 14:25:45,411 - INFO - 客户端注册成功：user_9w0bwmpfr, 房间：default-room, 房间人数：2
+2026-04-27 14:28:32,511 - INFO - 192.168.1.150 [27/Apr/2026:14:28:32 +0800] "GET / HTTP/1.1" 403 174 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-04-27 14:28:32,768 - INFO - 192.168.1.150 [27/Apr/2026:14:28:32 +0800] "GET /favicon.ico HTTP/1.1" 404 172 "http://192.168.1.150:8801/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-04-27 14:28:42,179 - INFO - 192.168.1.150 [27/Apr/2026:14:28:42 +0800] "GET /webrtc_client.html HTTP/1.1" 200 239 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-04-27 14:28:44,844 - INFO - 新的客户端连接
+2026-04-27 14:28:44,853 - INFO - 客户端注册成功：user_9uvm2yrbv, 房间：default-room, 房间人数：3
+2026-04-27 14:28:56,007 - INFO - 用户 user_ygau5ogxv 离开房间 default-room, 剩余人数：2
+2026-04-27 14:28:56,010 - INFO - 客户端断开连接：user_ygau5ogxv
+2026-04-27 14:28:56,012 - INFO - 127.0.0.1 [27/Apr/2026:14:25:34 +0800] "GET /ws HTTP/1.1" 101 0 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-04-27 14:28:56,891 - INFO - 192.168.1.150 [27/Apr/2026:14:28:56 +0800] "GET /webrtc_client.html HTTP/1.1" 304 179 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-04-27 14:28:56,897 - INFO - 用户 user_9uvm2yrbv 离开房间 default-room, 剩余人数：1
+2026-04-27 14:28:56,902 - INFO - 客户端断开连接：user_9uvm2yrbv
+2026-04-27 14:28:56,905 - INFO - 192.168.1.150 [27/Apr/2026:14:28:44 +0800] "GET /ws HTTP/1.1" 101 0 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-04-27 14:29:02,387 - INFO - 新的客户端连接
+2026-04-27 14:29:02,399 - INFO - 客户端注册成功：user_hl0ol26wn, 房间：default-room, 房间人数：2
+2026-04-27 14:31:40,020 - INFO - 用户 user_hl0ol26wn 离开房间 default-room, 剩余人数：1
+2026-04-27 14:31:40,020 - INFO - 客户端断开连接：user_hl0ol26wn
+2026-04-27 14:31:40,021 - INFO - 192.168.1.150 [27/Apr/2026:14:29:02 +0800] "GET /ws HTTP/1.1" 101 0 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-04-27 14:31:43,583 - INFO - 192.168.1.150 [27/Apr/2026:14:31:43 +0800] "GET /webrtc_client.html HTTP/1.1" 304 179 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-04-27 14:34:57,593 - INFO - 客户端断开连接：user_9w0bwmpfr
+2026-04-27 14:34:57,597 - INFO - 127.0.0.1 [27/Apr/2026:14:25:45 +0800] "GET /ws HTTP/1.1" 101 0 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36 Edg/147.0.0.0"
+2026-04-27 14:50:16,247 - INFO - 信令服务器运行在 http://localhost:8801
+2026-04-27 14:50:16,247 - INFO - WebSocket 端点：ws://localhost:8801/ws
+2026-04-27 14:50:16,248 - INFO - 状态端点：http://localhost:8801/status
+2026-04-27 14:50:16,248 - INFO - 房间管理已启用
+2026-04-27 14:51:42,568 - INFO - WebSocket 端点: wss://localhost:8801/ws
+2026-04-27 14:51:42,569 - INFO - 状态端点: https://localhost:8801/status
+2026-04-27 14:51:42,569 - INFO - 房间管理已启用
+2026-04-27 14:52:00,328 - INFO - 192.168.1.150 [27/Apr/2026:14:52:00 +0800] "UNKNOWN / HTTP/1.0" 400 226 "-" "-"
+2026-04-27 14:52:00,330 - INFO - 192.168.1.150 [27/Apr/2026:14:52:00 +0800] "UNKNOWN / HTTP/1.0" 400 226 "-" "-"
+2026-04-27 14:52:15,950 - INFO - 192.168.1.150 [27/Apr/2026:14:52:15 +0800] "UNKNOWN / HTTP/1.0" 400 226 "-" "-"
+2026-04-27 14:52:15,959 - INFO - 192.168.1.150 [27/Apr/2026:14:52:15 +0800] "UNKNOWN / HTTP/1.0" 400 226 "-" "-"
+2026-04-27 14:52:18,545 - INFO - 192.168.1.150 [27/Apr/2026:14:52:18 +0800] "UNKNOWN / HTTP/1.0" 400 226 "-" "-"
+2026-04-27 14:52:18,547 - INFO - 192.168.1.150 [27/Apr/2026:14:52:18 +0800] "UNKNOWN / HTTP/1.0" 400 226 "-" "-"
+2026-04-27 14:52:43,122 - INFO - WebSocket 端点: wss://localhost:8801/ws
+2026-04-27 14:52:43,123 - INFO - 状态端点: https://localhost:8801/status
+2026-04-27 14:52:43,123 - INFO - 房间管理已启用
+2026-04-27 14:52:50,029 - INFO - 192.168.1.150 [27/Apr/2026:14:52:50 +0800] "UNKNOWN / HTTP/1.0" 400 226 "-" "-"
+2026-04-27 14:52:50,032 - INFO - 192.168.1.150 [27/Apr/2026:14:52:50 +0800] "UNKNOWN / HTTP/1.0" 400 226 "-" "-"
+2026-04-27 14:55:42,036 - INFO - WebSocket 端点: wss://localhost:8801/ws
+2026-04-27 14:55:42,036 - INFO - 状态端点: https://localhost:8801/status
+2026-04-27 14:55:42,036 - INFO - 房间管理已启用
+2026-04-27 14:55:48,142 - INFO - 192.168.1.150 [27/Apr/2026:14:55:48 +0800] "UNKNOWN / HTTP/1.0" 400 218 "-" "-"
+2026-04-27 14:55:48,145 - INFO - 192.168.1.150 [27/Apr/2026:14:55:48 +0800] "UNKNOWN / HTTP/1.0" 400 218 "-" "-"
+2026-04-27 14:56:01,584 - INFO - 127.0.0.1 [27/Apr/2026:14:56:01 +0800] "UNKNOWN / HTTP/1.0" 400 226 "-" "-"
+2026-04-27 14:56:01,851 - INFO - 127.0.0.1 [27/Apr/2026:14:56:01 +0800] "UNKNOWN / HTTP/1.0" 400 226 "-" "-"
+2026-04-27 14:56:01,899 - INFO - 127.0.0.1 [27/Apr/2026:14:56:01 +0800] "UNKNOWN / HTTP/1.0" 400 226 "-" "-"
+2026-04-27 14:56:02,163 - INFO - 127.0.0.1 [27/Apr/2026:14:56:02 +0800] "UNKNOWN / HTTP/1.0" 400 226 "-" "-"
+2026-04-27 14:56:07,251 - INFO - 127.0.0.1 [27/Apr/2026:14:56:07 +0800] "GET /status HTTP/1.1" 200 275 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-04-27 14:56:07,451 - INFO - 127.0.0.1 [27/Apr/2026:14:56:07 +0800] "GET /favicon.ico HTTP/1.1" 404 172 "http://localhost:8801/status" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-04-27 14:57:44,368 - INFO - WebSocket 端点: wss://localhost:8801/ws
+2026-04-27 14:57:44,369 - INFO - 状态端点: https://localhost:8801/status
+2026-04-27 14:57:44,369 - INFO - 房间管理已启用
+2026-04-27 14:58:03,072 - INFO - 127.0.0.1 [27/Apr/2026:14:58:03 +0800] "GET /status HTTP/1.1" 200 275 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-04-27 14:58:03,276 - INFO - 127.0.0.1 [27/Apr/2026:14:58:03 +0800] "GET /favicon.ico HTTP/1.1" 404 172 "https://localhost:8801/status" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-04-27 14:58:10,851 - INFO - 192.168.1.150 [27/Apr/2026:14:58:10 +0800] "GET /webrtc_client.html HTTP/1.1" 200 239 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-04-27 14:58:11,246 - INFO - 192.168.1.150 [27/Apr/2026:14:58:11 +0800] "GET /favicon.ico HTTP/1.1" 404 172 "https://192.168.1.150:8801/webrtc_client.html" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-04-27 14:58:26,708 - INFO - 127.0.0.1 [27/Apr/2026:14:58:26 +0800] "GET /webrtc_client.html HTTP/1.1" 200 239 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-04-27 15:00:25,314 - INFO - 127.0.0.1 [27/Apr/2026:15:00:25 +0800] "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 172 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-04-27 15:00:28,770 - INFO - 127.0.0.1 [27/Apr/2026:15:00:28 +0800] "GET /webrtc_client.html HTTP/1.1" 200 239 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-04-27 15:00:28,783 - INFO - 127.0.0.1 [27/Apr/2026:15:00:28 +0800] "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 172 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-04-27 15:00:45,964 - INFO - 127.0.0.1 [27/Apr/2026:15:00:45 +0800] "GET /webrtc_client.html HTTP/1.1" 200 239 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-04-27 15:00:46,012 - INFO - 127.0.0.1 [27/Apr/2026:15:00:45 +0800] "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 172 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-04-27 15:00:46,826 - INFO - 127.0.0.1 [27/Apr/2026:15:00:46 +0800] "GET /favicon.ico HTTP/1.1" 404 172 "https://localhost:8801/webrtc_client.html" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-04-27 15:04:06,015 - INFO - WebSocket 端点: wss://localhost:8801/ws
+2026-04-27 15:04:06,016 - INFO - 状态端点: https://localhost:8801/status
+2026-04-27 15:04:06,016 - INFO - 房间管理已启用
+2026-04-27 15:04:22,708 - INFO - 127.0.0.1 [27/Apr/2026:15:04:22 +0800] "GET /webrtc_client.html HTTP/1.1" 200 239 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-04-27 15:04:22,823 - INFO - 127.0.0.1 [27/Apr/2026:15:04:22 +0800] "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 172 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-04-27 15:04:28,410 - INFO - 新的客户端连接
+2026-04-27 15:04:28,414 - INFO - 客户端注册成功：user_1sxojn27a, 房间：default-room, 房间人数：1
+2026-04-27 15:04:34,560 - INFO - 127.0.0.1 [27/Apr/2026:15:04:34 +0800] "GET /webrtc_client.html HTTP/1.1" 200 239 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-04-27 15:04:37,461 - INFO - 新的客户端连接
+2026-04-27 15:04:37,464 - INFO - 客户端注册成功：user_s7zr0gu9y, 房间：default-room, 房间人数：2
+2026-04-27 15:08:19,441 - INFO - 192.168.1.144 [27/Apr/2026:15:08:19 +0800] "GET /webrtc_client.html HTTP/1.1" 200 239 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-04-27 15:08:20,207 - INFO - 192.168.1.144 [27/Apr/2026:15:08:20 +0800] "GET /favicon.ico HTTP/1.1" 404 172 "https://192.168.1.150:8801/webrtc_client.html" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-04-27 15:08:23,119 - INFO - 新的客户端连接
+2026-04-27 15:08:23,123 - INFO - 客户端注册成功：user_def03ti3o, 房间：default-room, 房间人数：3
+2026-04-27 15:08:48,994 - INFO - 用户 user_1sxojn27a 离开房间 default-room, 剩余人数：2
+2026-04-27 15:08:48,995 - INFO - 客户端断开连接：user_1sxojn27a
+2026-04-27 15:08:48,995 - INFO - 127.0.0.1 [27/Apr/2026:15:04:28 +0800] "GET /ws HTTP/1.1" 101 0 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-04-27 15:11:26,090 - INFO - 192.168.1.16 [27/Apr/2026:15:11:26 +0800] "GET / HTTP/1.1" 403 174 "-" "Mozilla/5.0 (X11; Windows) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.5790.168 Safari/537.36 HeyTapBrowser/40.10.12.1"
+2026-04-27 15:11:26,484 - INFO - 192.168.1.16 [27/Apr/2026:15:11:26 +0800] "GET /favicon.ico HTTP/1.1" 404 172 "https://192.168.1.150:8801/" "Mozilla/5.0 (X11; Windows) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.5790.168 Safari/537.36 HeyTapBrowser/40.10.12.1"
+2026-04-27 15:11:34,385 - INFO - 192.168.1.16 [27/Apr/2026:15:11:34 +0800] "GET /web HTTP/1.1" 404 172 "-" "Mozilla/5.0 (X11; Windows) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.5790.168 Safari/537.36 HeyTapBrowser/40.10.12.1"
+2026-04-27 15:11:49,107 - INFO - 192.168.1.16 [27/Apr/2026:15:11:49 +0800] "GET /webrtc_client.html HTTP/1.1" 200 239 "-" "Mozilla/5.0 (X11; Windows) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.5790.168 Safari/537.36 HeyTapBrowser/40.10.12.1"
+2026-04-27 15:11:49,446 - INFO - 192.168.1.16 [27/Apr/2026:15:11:49 +0800] "GET /favicon.ico HTTP/1.1" 404 172 "https://192.168.1.150:8801/webrtc_client.html" "Mozilla/5.0 (X11; Windows) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.5790.168 Safari/537.36 HeyTapBrowser/40.10.12.1"
+2026-04-27 15:12:01,671 - INFO - 新的客户端连接
+2026-04-27 15:12:01,695 - INFO - 客户端注册成功：user_f61vkmfqu, 房间：default-room, 房间人数：3
+2026-04-27 15:12:47,022 - INFO - 192.168.1.144 [27/Apr/2026:15:12:47 +0800] "GET /favicon.ico HTTP/1.1" 404 172 "https://192.168.1.150:8801/webrtc_client.html" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-04-27 15:20:01,502 - INFO - 127.0.0.1 [27/Apr/2026:15:20:01 +0800] "GET /webrtc_client.html HTTP/1.1" 200 239 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-04-27 15:20:01,508 - INFO - 用户 user_s7zr0gu9y 离开房间 default-room, 剩余人数：2
+2026-04-27 15:20:01,510 - INFO - 客户端断开连接：user_s7zr0gu9y
+2026-04-27 15:20:01,515 - INFO - 127.0.0.1 [27/Apr/2026:15:04:37 +0800] "GET /ws HTTP/1.1" 101 0 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-04-27 15:20:13,262 - INFO - 192.168.1.150 [27/Apr/2026:15:20:13 +0800] "GET /webrtc_client.html HTTP/1.1" 200 239 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-04-27 15:20:13,673 - INFO - 192.168.1.150 [27/Apr/2026:15:20:13 +0800] "GET /favicon.ico HTTP/1.1" 404 172 "https://192.168.1.150:8801/webrtc_client.html" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-04-27 15:20:15,894 - INFO - 新的客户端连接
+2026-04-27 15:20:15,898 - INFO - 客户端注册成功：user_s1fmfhswv, 房间：default-room, 房间人数：3
+2026-04-27 15:23:30,503 - INFO - 192.168.1.150 [27/Apr/2026:15:23:30 +0800] "GET /webrtc_client.html HTTP/1.1" 200 239 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-04-27 15:23:30,523 - INFO - 用户 user_s1fmfhswv 离开房间 default-room, 剩余人数：2
+2026-04-27 15:23:30,576 - INFO - 客户端断开连接：user_s1fmfhswv
+2026-04-27 15:23:30,579 - INFO - 192.168.1.150 [27/Apr/2026:15:20:15 +0800] "GET /ws HTTP/1.1" 101 0 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-04-27 15:23:33,283 - INFO - 新的客户端连接
+2026-04-27 15:23:33,286 - INFO - 客户端注册成功：user_s1fmfhswv, 房间：default-room, 房间人数：3
+2026-04-27 15:23:47,051 - INFO - 192.168.1.16 [27/Apr/2026:15:23:47 +0800] "GET /webrtc_client.html HTTP/1.1" 200 239 "-" "Mozilla/5.0 (X11; Windows) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.5790.168 Safari/537.36 HeyTapBrowser/40.10.12.1"
+2026-04-27 15:23:47,440 - INFO - 192.168.1.16 [27/Apr/2026:15:23:47 +0800] "GET /favicon.ico HTTP/1.1" 404 172 "https://192.168.1.150:8801/webrtc_client.html" "Mozilla/5.0 (X11; Windows) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.5790.168 Safari/537.36 HeyTapBrowser/40.10.12.1"
+2026-04-27 15:23:56,078 - INFO - 新的客户端连接
+2026-04-27 15:24:09,391 - INFO - 用户 user_def03ti3o 离开房间 default-room, 剩余人数：2
+2026-04-27 15:24:09,391 - INFO - 客户端断开连接：user_def03ti3o
+2026-04-27 15:24:09,392 - INFO - 用户 user_f61vkmfqu 离开房间 default-room, 剩余人数：1
+2026-04-27 15:24:09,392 - INFO - 客户端断开连接：user_f61vkmfqu
+2026-04-27 15:24:09,393 - INFO - 客户端断开连接：user_s1fmfhswv
+2026-04-27 15:24:11,854 - INFO - WebSocket 端点: wss://localhost:8801/ws
+2026-04-27 15:24:11,854 - INFO - 状态端点: https://localhost:8801/status
+2026-04-27 15:24:11,854 - INFO - 房间管理已启用
+2026-04-27 15:24:13,930 - INFO - 新的客户端连接
+2026-04-27 15:24:24,654 - INFO - 新的客户端连接
+2026-04-27 15:24:30,651 - INFO - 新的客户端连接
+2026-04-27 15:24:35,004 - INFO - 192.168.1.150 [27/Apr/2026:15:24:34 +0800] "GET /webrtc_client.html HTTP/1.1" 200 239 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-04-27 15:24:48,636 - INFO - WebSocket 端点: wss://localhost:8801/ws
+2026-04-27 15:24:48,636 - INFO - 状态端点: https://localhost:8801/status
+2026-04-27 15:24:48,637 - INFO - 房间管理已启用
+2026-04-27 15:24:56,416 - INFO - 192.168.1.150 [27/Apr/2026:15:24:56 +0800] "GET /webrtc_client.html HTTP/1.1" 200 239 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-04-27 15:24:57,944 - INFO - 新的客户端连接
+2026-04-27 15:24:57,948 - INFO - 客户端注册成功：user_s1fmfhswv, 房间：default-room, 房间人数：1
+2026-04-27 15:25:02,785 - INFO - 192.168.1.16 [27/Apr/2026:15:25:02 +0800] "GET /webrtc_client.html HTTP/1.1" 200 239 "-" "Mozilla/5.0 (X11; Windows) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.5790.168 Safari/537.36 HeyTapBrowser/40.10.12.1"
+2026-04-27 15:25:09,135 - INFO - 192.168.1.16 [27/Apr/2026:15:25:09 +0800] "GET /favicon.ico HTTP/1.1" 404 172 "https://192.168.1.150:8801/webrtc_client.html" "Mozilla/5.0 (X11; Windows) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.5790.168 Safari/537.36 HeyTapBrowser/40.10.12.1"
+2026-04-27 15:25:10,855 - INFO - 新的客户端连接
+2026-04-27 15:25:11,400 - INFO - 192.168.1.16 [27/Apr/2026:15:25:11 +0800] "GET /webrtc_client.html HTTP/1.1" 200 239 "-" "Mozilla/5.0 (X11; Windows) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.5790.168 Safari/537.36 HeyTapBrowser/40.10.12.1"
+2026-04-27 15:25:11,672 - INFO - 192.168.1.16 [27/Apr/2026:15:25:11 +0800] "GET /favicon.ico HTTP/1.1" 404 172 "https://192.168.1.150:8801/webrtc_client.html" "Mozilla/5.0 (X11; Windows) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.5790.168 Safari/537.36 HeyTapBrowser/40.10.12.1"
+2026-04-27 15:25:23,466 - INFO - 新的客户端连接
+2026-04-27 15:25:23,480 - INFO - 客户端注册成功：user_0inumezzn, 房间：default-room, 房间人数：2
+2026-04-27 15:25:45,616 - INFO - 客户端注册成功：user_0qyemxorq, 房间：default-room, 房间人数：3
+2026-04-27 15:26:04,009 - INFO - 192.168.1.150 [27/Apr/2026:15:26:04 +0800] "GET /favicon.ico HTTP/1.1" 404 172 "https://192.168.1.150:8801/webrtc_client.html" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-04-27 15:26:45,571 - INFO - 新的客户端连接
+2026-04-27 15:26:45,589 - INFO - 客户端注册成功：user_def03ti3o, 房间：default-room, 房间人数：4
+2026-04-27 15:27:07,149 - INFO - 192.168.1.150 [27/Apr/2026:15:27:07 +0800] "GET /webrtc_client.html HTTP/1.1" 200 239 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-04-27 15:27:07,164 - INFO - 用户 user_s1fmfhswv 离开房间 default-room, 剩余人数：3
+2026-04-27 15:27:07,171 - INFO - 客户端断开连接：user_s1fmfhswv
+2026-04-27 15:27:07,172 - INFO - 192.168.1.150 [27/Apr/2026:15:24:57 +0800] "GET /ws HTTP/1.1" 101 0 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-04-27 15:27:09,147 - INFO - 新的客户端连接
+2026-04-27 15:27:09,152 - INFO - 客户端注册成功：user_s1fmfhswv, 房间：default-room, 房间人数：4
+2026-04-27 15:28:32,107 - INFO - 用户 user_0inumezzn 离开房间 default-room, 剩余人数：3
+2026-04-27 15:28:32,109 - INFO - 客户端断开连接：user_0inumezzn
+2026-04-27 15:28:32,110 - INFO - 用户 user_def03ti3o 离开房间 default-room, 剩余人数：2
+2026-04-27 15:28:32,110 - INFO - 客户端断开连接：user_def03ti3o
+2026-04-27 15:28:32,111 - INFO - 用户 user_s1fmfhswv 离开房间 default-room, 剩余人数：1
+2026-04-27 15:28:32,112 - INFO - 客户端断开连接：user_s1fmfhswv
+2026-04-27 15:28:32,113 - INFO - 客户端断开连接：user_0qyemxorq
+2026-04-27 15:28:56,016 - INFO - WebSocket 端点: wss://localhost:8801/ws
+2026-04-27 15:28:56,016 - INFO - 状态端点: https://localhost:8801/status
+2026-04-27 15:28:56,017 - INFO - 房间管理已启用
+2026-04-27 15:28:56,238 - INFO - 192.168.1.150 [27/Apr/2026:15:28:56 +0800] "GET /webrtc_client.html HTTP/1.1" 200 239 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-04-27 15:29:00,798 - INFO - 192.168.1.150 [27/Apr/2026:15:29:00 +0800] "GET /webrtc_client.html HTTP/1.1" 200 239 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-04-27 15:29:02,342 - INFO - 新的客户端连接
+2026-04-27 15:29:02,345 - INFO - 客户端注册成功：user_s1fmfhswv, 房间：default-room, 房间人数：1
+2026-04-27 15:29:03,547 - INFO - 192.168.1.144 [27/Apr/2026:15:29:03 +0800] "GET /webrtc_client.html HTTP/1.1" 200 239 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-04-27 15:29:06,395 - INFO - 192.168.1.144 [27/Apr/2026:15:29:06 +0800] "GET /webrtc_client.html HTTP/1.1" 200 239 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-04-27 15:29:08,742 - INFO - 192.168.1.144 [27/Apr/2026:15:29:08 +0800] "GET /webrtc_client.html HTTP/1.1" 200 239 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-04-27 15:29:10,609 - INFO - 新的客户端连接
+2026-04-27 15:29:10,613 - INFO - 客户端注册成功：user_def03ti3o, 房间：default-room, 房间人数：2
+2026-04-27 15:35:50,347 - INFO - 192.168.1.150 [27/Apr/2026:15:35:50 +0800] "GET /webrtc_client.html HTTP/1.1" 200 239 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-04-27 15:35:50,363 - INFO - 用户 user_s1fmfhswv 离开房间 default-room, 剩余人数：1
+2026-04-27 15:35:50,382 - INFO - 客户端断开连接：user_s1fmfhswv
+2026-04-27 15:35:50,384 - INFO - 192.168.1.150 [27/Apr/2026:15:29:02 +0800] "GET /ws HTTP/1.1" 101 0 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-04-27 15:35:58,848 - INFO - 192.168.1.144 [27/Apr/2026:15:35:58 +0800] "GET /webrtc_client.html HTTP/1.1" 200 239 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-04-27 15:35:58,858 - INFO - 客户端断开连接：user_def03ti3o
+2026-04-27 15:35:58,858 - INFO - 192.168.1.144 [27/Apr/2026:15:29:10 +0800] "GET /ws HTTP/1.1" 101 0 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-04-27 15:36:02,560 - INFO - 新的客户端连接
+2026-04-27 15:36:02,570 - INFO - 客户端注册成功：user_def03ti3o, 房间：default-room, 房间人数：1
+2026-04-27 15:36:07,202 - INFO - 新的客户端连接
+2026-04-27 15:36:07,205 - INFO - 客户端注册成功：user_s1fmfhswv, 房间：default-room, 房间人数：2
+2026-04-27 15:37:50,036 - INFO - 192.168.1.150 [27/Apr/2026:15:37:50 +0800] "GET /webrtc_client.html HTTP/1.1" 200 239 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-04-27 15:37:50,052 - INFO - 用户 user_s1fmfhswv 离开房间 default-room, 剩余人数：1
+2026-04-27 15:37:50,056 - INFO - 客户端断开连接：user_s1fmfhswv
+2026-04-27 15:37:50,058 - INFO - 192.168.1.150 [27/Apr/2026:15:36:07 +0800] "GET /ws HTTP/1.1" 101 0 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-04-27 15:37:52,140 - INFO - 192.168.1.144 [27/Apr/2026:15:37:52 +0800] "GET /webrtc_client.html HTTP/1.1" 200 239 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-04-27 15:37:52,152 - INFO - 客户端断开连接：user_def03ti3o
+2026-04-27 15:37:52,153 - INFO - 192.168.1.144 [27/Apr/2026:15:36:02 +0800] "GET /ws HTTP/1.1" 101 0 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-04-27 15:37:54,217 - INFO - 新的客户端连接
+2026-04-27 15:37:54,219 - INFO - 客户端注册成功：user_s1fmfhswv, 房间：default-room, 房间人数：1
+2026-04-27 15:37:57,047 - INFO - 192.168.1.144 [27/Apr/2026:15:37:57 +0800] "GET /webrtc_client.html HTTP/1.1" 200 239 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-04-27 15:38:00,373 - INFO - 新的客户端连接
+2026-04-27 15:38:00,377 - INFO - 客户端注册成功：user_def03ti3o, 房间：default-room, 房间人数：2
+2026-04-27 15:41:48,249 - INFO - 192.168.1.150 [27/Apr/2026:15:41:48 +0800] "GET /webrtc_client.html HTTP/1.1" 200 239 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-04-27 15:41:48,267 - INFO - 用户 user_s1fmfhswv 离开房间 default-room, 剩余人数：1
+2026-04-27 15:41:48,297 - INFO - 客户端断开连接：user_s1fmfhswv
+2026-04-27 15:41:48,297 - INFO - 192.168.1.150 [27/Apr/2026:15:37:54 +0800] "GET /ws HTTP/1.1" 101 0 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-04-27 15:41:51,889 - INFO - 新的客户端连接
+2026-04-27 15:41:51,891 - INFO - 客户端注册成功：user_s1fmfhswv, 房间：default-room, 房间人数：2
+2026-04-27 15:46:53,613 - INFO - 192.168.1.150 [27/Apr/2026:15:46:53 +0800] "GET /webrtc_client.html HTTP/1.1" 200 239 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-04-27 15:46:53,623 - INFO - 用户 user_s1fmfhswv 离开房间 default-room, 剩余人数：1
+2026-04-27 15:46:53,639 - INFO - 客户端断开连接：user_s1fmfhswv
+2026-04-27 15:46:53,650 - INFO - 192.168.1.150 [27/Apr/2026:15:41:51 +0800] "GET /ws HTTP/1.1" 101 0 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-04-27 15:46:56,708 - INFO - 新的客户端连接
+2026-04-27 15:46:56,710 - INFO - 客户端注册成功：user_s1fmfhswv, 房间：default-room, 房间人数：2
+2026-04-27 15:47:04,732 - INFO - 192.168.1.144 [27/Apr/2026:15:47:04 +0800] "GET /webrtc_client.html HTTP/1.1" 200 239 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-04-27 15:47:04,743 - INFO - 用户 user_def03ti3o 离开房间 default-room, 剩余人数：1
+2026-04-27 15:47:04,743 - INFO - 客户端断开连接：user_def03ti3o
+2026-04-27 15:47:04,744 - INFO - 192.168.1.144 [27/Apr/2026:15:38:00 +0800] "GET /ws HTTP/1.1" 101 0 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-04-27 15:47:07,762 - INFO - 新的客户端连接
+2026-04-27 15:47:07,765 - INFO - 客户端注册成功：user_def03ti3o, 房间：default-room, 房间人数：2
+2026-04-27 15:53:56,748 - INFO - 192.168.1.150 [27/Apr/2026:15:53:56 +0800] "GET /webrtc_client.html HTTP/1.1" 200 239 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-04-27 15:53:56,774 - INFO - 用户 user_s1fmfhswv 离开房间 default-room, 剩余人数：1
+2026-04-27 15:53:56,807 - INFO - 客户端断开连接：user_s1fmfhswv
+2026-04-27 15:53:56,814 - INFO - 192.168.1.150 [27/Apr/2026:15:46:56 +0800] "GET /ws HTTP/1.1" 101 0 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-04-27 15:53:58,312 - INFO - 新的客户端连接
+2026-04-27 15:53:58,315 - INFO - 客户端注册成功：user_s1fmfhswv, 房间：default-room, 房间人数：2
+2026-04-27 15:54:08,012 - INFO - 192.168.1.144 [27/Apr/2026:15:54:08 +0800] "GET /webrtc_client.html HTTP/1.1" 200 239 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-04-27 15:54:08,021 - INFO - 用户 user_def03ti3o 离开房间 default-room, 剩余人数：1
+2026-04-27 15:54:08,026 - INFO - 客户端断开连接：user_def03ti3o
+2026-04-27 15:54:08,026 - INFO - 192.168.1.144 [27/Apr/2026:15:47:07 +0800] "GET /ws HTTP/1.1" 101 0 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-04-27 15:54:08,426 - INFO - 192.168.1.144 [27/Apr/2026:15:54:08 +0800] "GET /favicon.ico HTTP/1.1" 404 172 "https://192.168.1.150:8801/webrtc_client.html" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-04-27 15:54:13,790 - INFO - 新的客户端连接
+2026-04-27 15:54:13,794 - INFO - 客户端注册成功：user_def03ti3o, 房间：default-room, 房间人数：2
+2026-04-27 15:54:38,087 - INFO - 192.168.1.144 [27/Apr/2026:15:54:38 +0800] "GET /webrtc_client.html HTTP/1.1" 200 239 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-04-27 15:54:38,105 - INFO - 用户 user_def03ti3o 离开房间 default-room, 剩余人数：1
+2026-04-27 15:54:38,106 - INFO - 客户端断开连接：user_def03ti3o
+2026-04-27 15:54:38,107 - INFO - 192.168.1.144 [27/Apr/2026:15:54:13 +0800] "GET /ws HTTP/1.1" 101 0 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-04-27 15:54:41,793 - INFO - 新的客户端连接
+2026-04-27 15:54:41,796 - INFO - 客户端注册成功：user_def03ti3o, 房间：default-room, 房间人数：2
+2026-04-27 15:57:18,302 - INFO - 用户 user_s1fmfhswv 离开房间 default-room, 剩余人数：1
+2026-04-27 15:57:18,302 - INFO - 客户端断开连接：user_s1fmfhswv
+2026-04-27 15:57:18,303 - INFO - 客户端断开连接：user_def03ti3o
+2026-04-27 15:57:19,907 - INFO - WebSocket 端点: wss://localhost:8801/ws
+2026-04-27 15:57:19,907 - INFO - 状态端点: https://localhost:8801/status
+2026-04-27 15:57:19,907 - INFO - 房间管理已启用
+2026-04-27 15:57:24,350 - INFO - 192.168.1.144 [27/Apr/2026:15:57:24 +0800] "GET /webrtc_client.html HTTP/1.1" 200 239 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-04-27 15:57:27,435 - INFO - 新的客户端连接
+2026-04-27 15:57:27,458 - INFO - 客户端注册成功：user_s1fmfhswv, 房间：default-room, 房间人数：1
+2026-04-27 15:57:33,947 - INFO - 新的客户端连接
+2026-04-27 15:57:33,951 - INFO - 客户端注册成功：user_def03ti3o, 房间：default-room, 房间人数：2
+2026-04-27 15:58:13,285 - INFO - 用户 user_s1fmfhswv 离开房间 default-room, 剩余人数：1
+2026-04-27 15:58:13,286 - INFO - 客户端断开连接：user_s1fmfhswv
+2026-04-27 15:58:13,286 - INFO - 192.168.1.150 [27/Apr/2026:15:57:27 +0800] "GET /ws HTTP/1.1" 101 0 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-04-27 15:58:14,316 - INFO - 新的客户端连接
+2026-04-27 15:58:14,379 - INFO - 客户端注册成功：user_s1fmfhswv, 房间：default-room, 房间人数：2
+2026-04-27 16:16:06,142 - INFO - 用户 user_s1fmfhswv 离开房间 default-room, 剩余人数：1
+2026-04-27 16:16:06,142 - INFO - 客户端断开连接：user_s1fmfhswv
+2026-04-27 16:16:06,144 - INFO - 192.168.1.150 [27/Apr/2026:15:58:14 +0800] "GET /ws HTTP/1.1" 101 0 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-04-27 16:16:07,273 - INFO - 192.168.1.150 [27/Apr/2026:16:16:07 +0800] "GET /webrtc_client.html HTTP/1.1" 200 239 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-04-27 16:16:09,311 - INFO - 新的客户端连接
+2026-04-27 16:16:09,323 - INFO - 客户端注册成功：user_s1fmfhswv, 房间：default-room, 房间人数：2
+2026-04-27 16:18:27,704 - INFO - 192.168.1.150 [27/Apr/2026:16:18:27 +0800] "GET /webrtc_client.html HTTP/1.1" 200 239 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-04-27 16:18:27,722 - INFO - 用户 user_s1fmfhswv 离开房间 default-room, 剩余人数：1
+2026-04-27 16:18:27,741 - INFO - 客户端断开连接：user_s1fmfhswv
+2026-04-27 16:18:27,741 - INFO - 192.168.1.150 [27/Apr/2026:16:16:09 +0800] "GET /ws HTTP/1.1" 101 0 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-04-27 16:18:30,785 - INFO - 新的客户端连接
+2026-04-27 16:18:30,788 - INFO - 客户端注册成功：user_s1fmfhswv, 房间：default-room, 房间人数：2
+2026-04-27 16:18:37,773 - INFO - 192.168.1.150 [27/Apr/2026:16:18:37 +0800] "GET /webrtc_client.html HTTP/1.1" 200 239 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-04-27 16:18:37,787 - INFO - 用户 user_s1fmfhswv 离开房间 default-room, 剩余人数：1
+2026-04-27 16:18:37,799 - INFO - 客户端断开连接：user_s1fmfhswv
+2026-04-27 16:18:37,805 - INFO - 192.168.1.150 [27/Apr/2026:16:18:30 +0800] "GET /ws HTTP/1.1" 101 0 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-04-27 16:18:46,872 - INFO - 192.168.1.150 [27/Apr/2026:16:18:46 +0800] "GET /webrtc_client.html HTTP/1.1" 200 239 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-04-27 16:18:48,270 - INFO - 新的客户端连接
+2026-04-27 16:18:48,274 - INFO - 客户端注册成功：user_s1fmfhswv, 房间：default-room, 房间人数：2
+2026-04-27 16:20:14,991 - INFO - 192.168.1.150 [27/Apr/2026:16:20:14 +0800] "GET /webrtc_client.html HTTP/1.1" 200 239 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-04-27 16:20:15,005 - INFO - 用户 user_s1fmfhswv 离开房间 default-room, 剩余人数：1
+2026-04-27 16:20:15,039 - INFO - 客户端断开连接：user_s1fmfhswv
+2026-04-27 16:20:15,044 - INFO - 192.168.1.150 [27/Apr/2026:16:18:48 +0800] "GET /ws HTTP/1.1" 101 0 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-04-27 16:20:17,041 - INFO - 新的客户端连接
+2026-04-27 16:20:17,043 - INFO - 客户端注册成功：user_s1fmfhswv, 房间：default-room, 房间人数：2
+2026-04-27 16:25:45,843 - INFO - 用户 user_s1fmfhswv 离开房间 default-room, 剩余人数：1
+2026-04-27 16:25:45,846 - INFO - 客户端断开连接：user_s1fmfhswv
+2026-04-27 16:25:45,847 - INFO - 192.168.1.150 [27/Apr/2026:16:20:17 +0800] "GET /ws HTTP/1.1" 101 0 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-04-27 16:25:46,473 - INFO - 192.168.1.150 [27/Apr/2026:16:25:46 +0800] "GET /webrtc_client.html HTTP/1.1" 200 239 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-04-27 16:25:58,024 - INFO - 192.168.1.144 [27/Apr/2026:16:25:58 +0800] "GET /webrtc_client.html HTTP/1.1" 200 239 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-04-27 16:25:58,032 - INFO - 客户端断开连接：user_def03ti3o
+2026-04-27 16:25:58,033 - INFO - 192.168.1.144 [27/Apr/2026:15:57:33 +0800] "GET /ws HTTP/1.1" 101 0 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-04-27 16:26:12,332 - INFO - WebSocket 端点: wss://localhost:8801/ws
+2026-04-27 16:26:12,332 - INFO - 状态端点: https://localhost:8801/status
+2026-04-27 16:26:12,333 - INFO - 房间管理已启用
+2026-04-27 16:26:16,385 - INFO - 192.168.1.150 [27/Apr/2026:16:26:16 +0800] "GET /webrtc_client.html HTTP/1.1" 200 239 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-04-27 16:26:26,501 - INFO - 192.168.1.150 [27/Apr/2026:16:26:26 +0800] "GET /webrtc_client.html HTTP/1.1" 200 239 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-04-27 16:27:02,667 - INFO - 192.168.1.150 [27/Apr/2026:16:27:02 +0800] "GET /webrtc_client.html HTTP/1.1" 200 239 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-04-27 16:27:44,126 - INFO - 192.168.1.150 [27/Apr/2026:16:27:44 +0800] "GET /webrtc_client.html HTTP/1.1" 200 239 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-04-27 16:27:57,288 - INFO - 新的客户端连接
+2026-04-27 16:27:57,291 - INFO - 客户端注册成功：user_s1fmfhswv, 房间：default-room, 房间人数：1
+2026-04-27 16:28:04,425 - INFO - 192.168.1.144 [27/Apr/2026:16:28:04 +0800] "GET /webrtc_client.html HTTP/1.1" 200 239 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-04-27 16:28:07,177 - INFO - 新的客户端连接
+2026-04-27 16:28:07,180 - INFO - 客户端注册成功：user_def03ti3o, 房间：default-room, 房间人数：2
+2026-04-27 16:32:59,799 - INFO - 192.168.1.150 [27/Apr/2026:16:32:59 +0800] "GET /webrtc_client.html HTTP/1.1" 200 239 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-04-27 16:32:59,821 - INFO - 用户 user_s1fmfhswv 离开房间 default-room, 剩余人数：1
+2026-04-27 16:32:59,850 - INFO - 客户端断开连接：user_s1fmfhswv
+2026-04-27 16:32:59,925 - INFO - 192.168.1.150 [27/Apr/2026:16:27:57 +0800] "GET /ws HTTP/1.1" 101 0 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-04-27 16:33:05,797 - INFO - 新的客户端连接
+2026-04-27 16:33:05,801 - INFO - 客户端注册成功：user_s1fmfhswv, 房间：default-room, 房间人数：2
+2026-04-27 16:33:46,285 - INFO - 192.168.1.144 [27/Apr/2026:16:33:46 +0800] "GET /webrtc_client.html HTTP/1.1" 200 239 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-04-27 16:33:46,295 - INFO - 用户 user_def03ti3o 离开房间 default-room, 剩余人数：1
+2026-04-27 16:33:46,295 - INFO - 客户端断开连接：user_def03ti3o
+2026-04-27 16:33:46,296 - INFO - 192.168.1.144 [27/Apr/2026:16:28:07 +0800] "GET /ws HTTP/1.1" 101 0 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-04-27 16:33:50,665 - INFO - 192.168.1.150 [27/Apr/2026:16:33:50 +0800] "GET /webrtc_client.html HTTP/1.1" 200 239 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-04-27 16:33:50,677 - INFO - 客户端断开连接：user_s1fmfhswv
+2026-04-27 16:33:50,702 - INFO - 192.168.1.150 [27/Apr/2026:16:33:05 +0800] "GET /ws HTTP/1.1" 101 0 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-04-27 16:33:51,842 - INFO - 新的客户端连接
+2026-04-27 16:33:51,845 - INFO - 客户端注册成功：user_s1fmfhswv, 房间：default-room, 房间人数：1
+2026-04-27 16:33:54,482 - INFO - 新的客户端连接
+2026-04-27 16:33:54,486 - INFO - 客户端注册成功：user_def03ti3o, 房间：default-room, 房间人数：2
+2026-04-27 16:43:57,620 - INFO - 192.168.1.150 [27/Apr/2026:16:43:57 +0800] "GET /webrtc_client.html HTTP/1.1" 200 239 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-04-27 16:43:57,647 - INFO - 用户 user_s1fmfhswv 离开房间 default-room, 剩余人数：1
+2026-04-27 16:43:57,671 - INFO - 客户端断开连接：user_s1fmfhswv
+2026-04-27 16:43:57,672 - INFO - 192.168.1.150 [27/Apr/2026:16:33:51 +0800] "GET /ws HTTP/1.1" 101 0 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-04-27 16:43:59,353 - INFO - 新的客户端连接
+2026-04-27 16:43:59,356 - INFO - 客户端注册成功：user_s1fmfhswv, 房间：default-room, 房间人数：2
+2026-04-27 16:44:13,375 - INFO - 192.168.1.144 [27/Apr/2026:16:44:13 +0800] "GET /webrtc_client.html HTTP/1.1" 200 239 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-04-27 16:44:13,382 - INFO - 用户 user_def03ti3o 离开房间 default-room, 剩余人数：1
+2026-04-27 16:44:13,388 - INFO - 客户端断开连接：user_def03ti3o
+2026-04-27 16:44:13,389 - INFO - 192.168.1.144 [27/Apr/2026:16:33:54 +0800] "GET /ws HTTP/1.1" 101 0 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-04-27 16:44:14,561 - INFO - 192.168.1.144 [27/Apr/2026:16:44:14 +0800] "GET /webrtc_client.html HTTP/1.1" 200 239 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-04-27 16:44:16,627 - INFO - 新的客户端连接
+2026-04-27 16:44:16,631 - INFO - 客户端注册成功：user_def03ti3o, 房间：default-room, 房间人数：2
+2026-04-27 16:46:58,458 - INFO - 192.168.1.150 [27/Apr/2026:16:46:58 +0800] "GET /webrtc_client.html HTTP/1.1" 200 239 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-04-27 16:46:58,481 - INFO - 用户 user_s1fmfhswv 离开房间 default-room, 剩余人数：1
+2026-04-27 16:46:58,483 - INFO - 客户端断开连接：user_s1fmfhswv
+2026-04-27 16:46:58,520 - INFO - 192.168.1.150 [27/Apr/2026:16:43:59 +0800] "GET /ws HTTP/1.1" 101 0 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-04-27 16:47:00,439 - INFO - 192.168.1.144 [27/Apr/2026:16:47:00 +0800] "GET /webrtc_client.html HTTP/1.1" 200 239 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-04-27 16:47:00,444 - INFO - 客户端断开连接：user_def03ti3o
+2026-04-27 16:47:00,444 - INFO - 192.168.1.144 [27/Apr/2026:16:44:16 +0800] "GET /ws HTTP/1.1" 101 0 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-04-27 16:47:06,777 - INFO - 新的客户端连接
+2026-04-27 16:47:06,781 - INFO - 客户端注册成功：user_def03ti3o, 房间：default-room, 房间人数：1
+2026-04-27 16:47:10,720 - INFO - 新的客户端连接
+2026-04-27 16:47:10,723 - INFO - 客户端注册成功：user_s1fmfhswv, 房间：default-room, 房间人数：2
+2026-04-27 16:47:38,846 - INFO - 192.168.1.144 [27/Apr/2026:16:47:38 +0800] "GET /webrtc_client.html HTTP/1.1" 200 239 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-04-27 16:47:38,858 - INFO - 用户 user_def03ti3o 离开房间 default-room, 剩余人数：1
+2026-04-27 16:47:38,859 - INFO - 客户端断开连接：user_def03ti3o
+2026-04-27 16:47:38,859 - INFO - 192.168.1.144 [27/Apr/2026:16:47:06 +0800] "GET /ws HTTP/1.1" 101 0 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-04-27 16:47:40,517 - INFO - 192.168.1.150 [27/Apr/2026:16:47:40 +0800] "GET /webrtc_client.html HTTP/1.1" 200 239 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-04-27 16:47:40,529 - INFO - 客户端断开连接：user_s1fmfhswv
+2026-04-27 16:47:40,559 - INFO - 192.168.1.150 [27/Apr/2026:16:47:10 +0800] "GET /ws HTTP/1.1" 101 0 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-04-27 16:49:37,938 - INFO - 192.168.1.150 [27/Apr/2026:16:49:37 +0800] "GET /webrtc_client.html HTTP/1.1" 200 239 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-04-27 16:49:39,128 - INFO - 新的客户端连接
+2026-04-27 16:49:39,182 - INFO - 客户端注册成功：user_s1fmfhswv, 房间：default-room, 房间人数：1
+2026-04-27 16:49:40,499 - INFO - 192.168.1.144 [27/Apr/2026:16:49:40 +0800] "GET /webrtc_client.html HTTP/1.1" 200 239 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-04-27 16:49:43,052 - INFO - 新的客户端连接
+2026-04-27 16:49:43,056 - INFO - 客户端注册成功：user_def03ti3o, 房间：default-room, 房间人数：2
+2026-04-27 16:50:23,633 - INFO - 192.168.1.144 [27/Apr/2026:16:50:23 +0800] "GET /webrtc_client.html HTTP/1.1" 200 239 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-04-27 16:50:23,642 - INFO - 用户 user_def03ti3o 离开房间 default-room, 剩余人数：1
+2026-04-27 16:50:23,642 - INFO - 客户端断开连接：user_def03ti3o
+2026-04-27 16:50:23,643 - INFO - 192.168.1.144 [27/Apr/2026:16:49:43 +0800] "GET /ws HTTP/1.1" 101 0 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-04-27 16:51:56,757 - INFO - 192.168.1.150 [27/Apr/2026:16:51:56 +0800] "GET /webrtc_client.html HTTP/1.1" 200 239 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-04-27 16:51:56,772 - INFO - 客户端断开连接：user_s1fmfhswv
+2026-04-27 16:51:56,773 - INFO - 192.168.1.150 [27/Apr/2026:16:49:39 +0800] "GET /ws HTTP/1.1" 101 0 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-04-27 16:51:58,103 - INFO - 新的客户端连接
+2026-04-27 16:51:58,108 - INFO - 客户端注册成功：user_s1fmfhswv, 房间：default-room, 房间人数：1
+2026-04-27 16:52:00,487 - INFO - 192.168.1.144 [27/Apr/2026:16:52:00 +0800] "GET /webrtc_client.html HTTP/1.1" 200 239 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-04-27 16:52:02,860 - INFO - 新的客户端连接
+2026-04-27 16:52:02,864 - INFO - 客户端注册成功：user_def03ti3o, 房间：default-room, 房间人数：2
+2026-04-27 16:52:19,032 - INFO - 192.168.1.144 [27/Apr/2026:16:52:19 +0800] "GET /webrtc_client.html HTTP/1.1" 200 239 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-04-27 16:52:19,041 - INFO - 用户 user_def03ti3o 离开房间 default-room, 剩余人数：1
+2026-04-27 16:52:19,042 - INFO - 客户端断开连接：user_def03ti3o
+2026-04-27 16:52:19,043 - INFO - 192.168.1.144 [27/Apr/2026:16:52:02 +0800] "GET /ws HTTP/1.1" 101 0 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-04-27 16:57:03,001 - INFO - 192.168.1.150 [27/Apr/2026:16:57:03 +0800] "GET /webrtc_client.html HTTP/1.1" 200 239 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-04-27 16:57:03,013 - INFO - 客户端断开连接：user_s1fmfhswv
+2026-04-27 16:57:03,017 - INFO - 192.168.1.150 [27/Apr/2026:16:51:58 +0800] "GET /ws HTTP/1.1" 101 0 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-04-27 16:57:05,053 - INFO - 新的客户端连接
+2026-04-27 16:57:05,056 - INFO - 客户端注册成功：user_s1fmfhswv, 房间：default-room, 房间人数：1
+2026-04-27 16:57:09,177 - INFO - 192.168.1.144 [27/Apr/2026:16:57:09 +0800] "GET /webrtc_client.html HTTP/1.1" 200 239 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-04-27 16:57:11,775 - INFO - 新的客户端连接
+2026-04-27 16:57:11,778 - INFO - 客户端注册成功：user_def03ti3o, 房间：default-room, 房间人数：2
+2026-04-27 16:58:55,773 - INFO - 192.168.1.150 [27/Apr/2026:16:58:55 +0800] "GET /webrtc_client.html HTTP/1.1" 200 239 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-04-27 16:58:55,789 - INFO - 用户 user_s1fmfhswv 离开房间 default-room, 剩余人数：1
+2026-04-27 16:58:55,799 - INFO - 客户端断开连接：user_s1fmfhswv
+2026-04-27 16:58:55,818 - INFO - 192.168.1.150 [27/Apr/2026:16:57:05 +0800] "GET /ws HTTP/1.1" 101 0 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-04-27 16:58:57,657 - INFO - 新的客户端连接
+2026-04-27 16:58:57,660 - INFO - 客户端注册成功：user_s1fmfhswv, 房间：default-room, 房间人数：2
+2026-04-27 16:58:58,703 - INFO - 192.168.1.144 [27/Apr/2026:16:58:58 +0800] "GET /webrtc_client.html HTTP/1.1" 200 239 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-04-27 16:58:58,710 - INFO - 用户 user_def03ti3o 离开房间 default-room, 剩余人数：1
+2026-04-27 16:58:58,711 - INFO - 客户端断开连接：user_def03ti3o
+2026-04-27 16:58:58,712 - INFO - 192.168.1.144 [27/Apr/2026:16:57:11 +0800] "GET /ws HTTP/1.1" 101 0 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-04-27 16:59:02,420 - INFO - 新的客户端连接
+2026-04-27 16:59:02,423 - INFO - 客户端注册成功：user_def03ti3o, 房间：default-room, 房间人数：2
+2026-04-27 16:59:29,641 - INFO - 192.168.1.144 [27/Apr/2026:16:59:29 +0800] "GET /webrtc_client.html HTTP/1.1" 200 239 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-04-27 16:59:29,664 - INFO - 用户 user_def03ti3o 离开房间 default-room, 剩余人数：1
+2026-04-27 16:59:29,666 - INFO - 客户端断开连接：user_def03ti3o
+2026-04-27 16:59:29,666 - INFO - 192.168.1.144 [27/Apr/2026:16:59:02 +0800] "GET /ws HTTP/1.1" 101 0 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-04-27 16:59:49,402 - INFO - 192.168.1.150 [27/Apr/2026:16:59:49 +0800] "GET /webrtc_client.html HTTP/1.1" 200 239 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-04-27 16:59:49,425 - INFO - 客户端断开连接：user_s1fmfhswv
+2026-04-27 16:59:49,432 - INFO - 192.168.1.150 [27/Apr/2026:16:58:57 +0800] "GET /ws HTTP/1.1" 101 0 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-04-27 16:59:50,477 - INFO - 新的客户端连接
+2026-04-27 16:59:50,489 - INFO - 客户端注册成功：user_s1fmfhswv, 房间：default-room, 房间人数：1
+2026-04-27 16:59:53,378 - INFO - 192.168.1.144 [27/Apr/2026:16:59:53 +0800] "GET /webrtc_client.html HTTP/1.1" 200 239 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-04-27 16:59:55,832 - INFO - 新的客户端连接
+2026-04-27 16:59:55,835 - INFO - 客户端注册成功：user_def03ti3o, 房间：default-room, 房间人数：2
+2026-04-27 17:11:51,877 - INFO - 192.168.1.150 [27/Apr/2026:17:11:51 +0800] "GET /webrtc_client.html HTTP/1.1" 200 239 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-04-27 17:11:51,891 - INFO - 用户 user_s1fmfhswv 离开房间 default-room, 剩余人数：1
+2026-04-27 17:11:51,893 - INFO - 客户端断开连接：user_s1fmfhswv
+2026-04-27 17:11:51,916 - INFO - 192.168.1.150 [27/Apr/2026:16:59:50 +0800] "GET /ws HTTP/1.1" 101 0 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-04-27 17:11:53,281 - INFO - 新的客户端连接
+2026-04-27 17:11:53,292 - INFO - 客户端注册成功：user_s1fmfhswv, 房间：default-room, 房间人数：2
+2026-04-27 17:11:59,429 - INFO - 192.168.1.144 [27/Apr/2026:17:11:59 +0800] "GET /webrtc_client.html HTTP/1.1" 200 239 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-04-27 17:11:59,438 - INFO - 用户 user_def03ti3o 离开房间 default-room, 剩余人数：1
+2026-04-27 17:11:59,438 - INFO - 客户端断开连接：user_def03ti3o
+2026-04-27 17:11:59,439 - INFO - 192.168.1.144 [27/Apr/2026:16:59:55 +0800] "GET /ws HTTP/1.1" 101 0 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-04-27 17:12:01,700 - INFO - 新的客户端连接
+2026-04-27 17:12:01,725 - INFO - 客户端注册成功：user_def03ti3o, 房间：default-room, 房间人数：2
+2026-04-27 17:12:27,103 - INFO - 用户 user_def03ti3o 离开房间 default-room, 剩余人数：1
+2026-04-27 17:12:27,104 - INFO - 客户端断开连接：user_def03ti3o
+2026-04-27 17:12:27,105 - INFO - 192.168.1.144 [27/Apr/2026:17:12:01 +0800] "GET /ws HTTP/1.1" 101 0 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-04-27 17:18:08,287 - INFO - 192.168.1.150 [27/Apr/2026:17:18:08 +0800] "GET /webrtc_client.html HTTP/1.1" 200 239 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-04-27 17:18:08,302 - INFO - 客户端断开连接：user_s1fmfhswv
+2026-04-27 17:18:08,334 - INFO - 192.168.1.150 [27/Apr/2026:17:11:53 +0800] "GET /ws HTTP/1.1" 101 0 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-04-27 17:18:09,861 - INFO - 新的客户端连接
+2026-04-27 17:18:09,864 - INFO - 客户端注册成功：user_s1fmfhswv, 房间：default-room, 房间人数：1
+2026-04-27 17:18:24,023 - INFO - 192.168.1.144 [27/Apr/2026:17:18:24 +0800] "GET /webrtc_client.html HTTP/1.1" 200 239 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-04-27 17:18:24,700 - INFO - 192.168.1.144 [27/Apr/2026:17:18:24 +0800] "GET /favicon.ico HTTP/1.1" 404 172 "https://192.168.1.150:8801/webrtc_client.html" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-04-27 17:18:27,273 - INFO - 新的客户端连接
+2026-04-27 17:18:27,277 - INFO - 客户端注册成功：user_def03ti3o, 房间：default-room, 房间人数：2
+2026-04-27 17:19:30,863 - INFO - 192.168.1.150 [27/Apr/2026:17:19:30 +0800] "GET /webrtc_client.html HTTP/1.1" 200 239 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-04-27 17:19:30,877 - INFO - 用户 user_s1fmfhswv 离开房间 default-room, 剩余人数：1
+2026-04-27 17:19:30,913 - INFO - 客户端断开连接：user_s1fmfhswv
+2026-04-27 17:19:30,916 - INFO - 192.168.1.150 [27/Apr/2026:17:18:09 +0800] "GET /ws HTTP/1.1" 101 0 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-04-27 17:19:33,042 - INFO - 192.168.1.150 [27/Apr/2026:17:19:33 +0800] "GET /webrtc_client.html HTTP/1.1" 200 239 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-04-27 17:19:33,536 - INFO - 新的客户端连接
+2026-04-27 17:19:33,543 - INFO - 客户端注册成功：user_s1fmfhswv, 房间：default-room, 房间人数：2
+2026-04-27 17:19:37,490 - INFO - 192.168.1.144 [27/Apr/2026:17:19:37 +0800] "GET /webrtc_client.html HTTP/1.1" 200 239 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-04-27 17:19:37,499 - INFO - 用户 user_def03ti3o 离开房间 default-room, 剩余人数：1
+2026-04-27 17:19:37,499 - INFO - 客户端断开连接：user_def03ti3o
+2026-04-27 17:19:37,500 - INFO - 192.168.1.144 [27/Apr/2026:17:18:27 +0800] "GET /ws HTTP/1.1" 101 0 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-04-27 17:19:40,540 - INFO - 新的客户端连接
+2026-04-27 17:19:40,544 - INFO - 客户端注册成功：user_def03ti3o, 房间：default-room, 房间人数：2
+2026-04-27 17:21:36,839 - INFO - 192.168.1.150 [27/Apr/2026:17:21:36 +0800] "GET /webrtc_client.html HTTP/1.1" 200 239 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-04-27 17:21:36,851 - INFO - 用户 user_s1fmfhswv 离开房间 default-room, 剩余人数：1
+2026-04-27 17:21:36,873 - INFO - 客户端断开连接：user_s1fmfhswv
+2026-04-27 17:21:36,912 - INFO - 192.168.1.150 [27/Apr/2026:17:19:33 +0800] "GET /ws HTTP/1.1" 101 0 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-04-27 17:21:38,331 - INFO - 新的客户端连接
+2026-04-27 17:21:38,334 - INFO - 客户端注册成功：user_s1fmfhswv, 房间：default-room, 房间人数：2
+2026-04-27 17:21:39,610 - INFO - 192.168.1.144 [27/Apr/2026:17:21:39 +0800] "GET /webrtc_client.html HTTP/1.1" 200 239 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-04-27 17:21:39,618 - INFO - 用户 user_def03ti3o 离开房间 default-room, 剩余人数：1
+2026-04-27 17:21:39,619 - INFO - 客户端断开连接：user_def03ti3o
+2026-04-27 17:21:39,620 - INFO - 192.168.1.144 [27/Apr/2026:17:19:40 +0800] "GET /ws HTTP/1.1" 101 0 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-04-27 17:21:43,392 - INFO - 新的客户端连接
+2026-04-27 17:21:43,396 - INFO - 客户端注册成功：user_def03ti3o, 房间：default-room, 房间人数：2
+2026-04-27 17:24:00,824 - INFO - 用户 user_def03ti3o 离开房间 default-room, 剩余人数：1
+2026-04-27 17:24:00,824 - INFO - 客户端断开连接：user_def03ti3o
+2026-04-27 17:24:00,825 - INFO - 192.168.1.144 [27/Apr/2026:17:21:43 +0800] "GET /ws HTTP/1.1" 101 0 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"

@@ -17,7 +17,7 @@ class DDNSService:
     def __init__(self):
         self.db_file = Path(CONFIG["DB_FILE"])
         self.records = {}  # 结构: { "域名": {"ip": "x.x.x.x", "update_time": 时间戳} }
-        self.load_data()  # 启动时加载历史数据
+        self.load_data()   # 启动时加载历史数据
 
     def load_data(self):
         """从文件加载 DDNS 记录"""
@@ -25,7 +25,8 @@ class DDNSService:
             try:
                 with open(self.db_file, "r", encoding="utf-8") as f:
                     self.records = json.load(f)
-            except:
+            except Exception as e:
+                print(f"加载 DDNS 记录时出错: {e}")
                 self.records = {}
 
     def save_data(self):
@@ -51,6 +52,7 @@ class DDNSService:
 ddns_service = DDNSService()
 
 # ==================== 路由处理 ====================
+# 未经测试，主要需要要测试 ddns 客户端，请求使用那些参数和路径 
 async def handle_update(request):
     """
     设备上报 IP 接口

@@ -1,0 +1,8 @@
+# WebRTC 信令服务器依赖
+
+# HTTP 和 WebSocket 服务器
+aiohttp>=3.8.0
+
+# 注意：aiohttp 已包含 WebSocket 支持，不需要额外的 websockets 包
+# 如果需要使用独立的 websockets 库，可以取消以下注释
+# websockets>=10.0

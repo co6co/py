@@ -1,8 +1,22 @@
 import asyncio
 import json
 import os
+import logging
+from datetime import datetime
 from aiohttp import web
+import ssl
 from websockets.server import WebSocketServerProtocol 
+
+# 配置日志
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.StreamHandler(),
+        logging.FileHandler('webrtc_server.log', encoding='utf-8')
+    ]
+)
+logger = logging.getLogger(__name__)
 
 class SignalingServer:
     def __init__(self, port=8765):
@@ -10,30 +24,85 @@ class SignalingServer:
         self.clients = {}  # peerId -> {ws, roomId}
         self.rooms = {}    # roomId -> Set of peerIds
         self.websocket = None
+        self.ssl=False
+    def use_ssl(self, cert, key):
+        self.cert = cert
+        self.key = key
+        self.ssl = True
+    def create_ssl_context(self):
+         # 配置 SSL 上下文
+        if not self.ssl:
+            return None
+        ssl_context = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
+        ssl_context.load_cert_chain(self.cert, self.key )
+        return ssl_context
 
-    async def start(self):
-        app = web.Application()
+    async def print_info(self):
+        http="http"
+        ws="ws"
+        if self.ssl:
+            http="https"
+            ws="wss"  
+        logger.info(f"WebSocket 端点: {ws}://localhost:{self.port}/ws")
+        logger.info(f"状态端点: {http}://localhost:{self.port}/status")
+        logger.info(f"房间管理已启用")
+         
+    async def route_handler(self,app:web.Application):
         app.add_routes([
             web.get('/ws', self.websocket_handler),
+            web.get('/status', self.status_handler),
+            web.get('/api/rooms', self.rooms_handler),
             web.static('/', os.path.join(os.path.dirname(__file__), 'pages')),
         ])
-        
+
+    async def start(self):
+        app = web.Application() 
+        await self.route_handler(app) 
         runner = web.AppRunner(app)
         await runner.setup()
-        site = web.TCPSite(runner, '0.0.0.0', self.port)
+        site = web.TCPSite(runner, '0.0.0.0', self.port,ssl_context=self.create_ssl_context())
         await site.start()
-        
-        print(f"信令服务器运行在 http://localhost:{self.port}")
-        print(f"WebSocket 端点: ws://localhost:{self.port}/ws")
-        
+        await self.print_info() 
         # 保持服务器运行
         await asyncio.Future()
+
+    async def status_handler(self, request):
+        '''返回服务器状态信息'''
+        status = {
+            "status": "running",
+            "timestamp": datetime.now().isoformat(),
+            "clients_count": len(self.clients),
+            "rooms_count": len(self.rooms),
+            "rooms": {
+                room_id: {
+                    "peer_count": len(peers),
+                    "peers": list(peers)
+                }
+                for room_id, peers in self.rooms.items()
+            }
+        }
+        return web.json_response(status)
+
+    async def rooms_handler(self, request):
+        '''返回所有房间信息'''
+        rooms_info = []
+        for room_id, peers in self.rooms.items():
+            rooms_info.append({
+                "room_id": room_id,
+                "peer_count": len(peers),
+                "peers": list(peers)
+            })
+        
+        return web.json_response({
+            "total_rooms": len(rooms_info),
+            "rooms": rooms_info
+        })
 
     async def websocket_handler(self, request):
         ws = web.WebSocketResponse()
         await ws.prepare(request)
         
-        print("新的客户端连接")
+        logger.info("新的客户端连接")
         peer_id = None
 
         try:
@@ -42,10 +111,24 @@ class SignalingServer:
                     try:
                         data = json.loads(msg.data)
                         peer_id = await self.handle_message(ws, data, peer_id)
-                    except json.JSONDecodeError:
-                        print(f"消息解析错误: {msg.data}")
+                    except json.JSONDecodeError as e:
+                        logger.error(f"消息解析错误：{msg.data}, 错误：{e}")
+                        await self.send_to(ws, {
+                            "type": "error",
+                            "message": "消息格式错误"
+                        })
+                    except Exception as e:
+                        logger.error(f"处理消息时发生错误：{e}")
+                        await self.send_to(ws, {
+                            "type": "error",
+                            "message": f"处理消息失败：{str(e)}"
+                        })
+                elif msg.type == web.WSMsgType.BINARY:
+                    logger.warning("收到二进制消息，当前不支持")
                 elif msg.type == web.WSMsgType.ERROR:
-                    print(f"WebSocket 错误: {ws.exception()}")
+                    logger.error(f"WebSocket 错误：{ws.exception()}")
+        except Exception as e:
+            logger.error(f"WebSocket 连接异常：{e}")
         finally:
             if peer_id:
                 await self.handle_disconnect(ws, peer_id)
@@ -71,8 +154,10 @@ class SignalingServer:
             await self.handle_call_rejected(data)
         elif msg_type == "hangup":
             await self.handle_hangup(data)
+        elif msg_type == "get-peer-list":
+            await self.handle_get_peer_list(ws, data)
         else:
-            print(f"未知消息类型: {msg_type}")
+            print(f"未知消息类型：{msg_type}")
         return peer_id
 
     async def handle_register(self, ws, data: dict):
@@ -108,7 +193,7 @@ class SignalingServer:
             "peerId": peer_id
         })
 
-        print(f"客户端注册: {peer_id}, 房间: {room_id}")
+        logger.info(f"客户端注册成功：{peer_id}, 房间：{room_id}, 房间人数：{len(self.rooms[room_id])}")
         return peer_id
 
     async def handle_offer(self, data: dict):
@@ -173,6 +258,25 @@ class SignalingServer:
             "from": from_peer
         })
 
+    async def handle_get_peer_list(self, ws, data: dict):
+        '''
+        获取房间中的用户列表
+        '''
+        room_id = data.get("roomId")
+        peer_id = data.get("peerId")
+        
+        if not room_id:
+            client_info = self.clients.get(peer_id)
+            if client_info:
+                room_id = client_info.get("roomId")
+        
+        if room_id and room_id in self.rooms:
+            peers = list(self.rooms[room_id])
+            await self.send_to(ws, {
+                "type": "peer-list",
+                "peers": peers
+            })
+
     async def handle_disconnect(self, ws: WebSocketServerProtocol, peer_id: str):
         disconnected_peer_id = peer_id
         disconnected_room_id = self.clients.get(peer_id, {}).get("roomId")
@@ -191,8 +295,9 @@ class SignalingServer:
                     "type": "peer-left",
                     "peerId": disconnected_peer_id
                 })
+                logger.info(f"用户 {disconnected_peer_id} 离开房间 {disconnected_room_id}, 剩余人数：{len(room)}")
 
-        print(f"客户端断开: {disconnected_peer_id}")
+        logger.info(f"客户端断开连接：{disconnected_peer_id}")
 
     async def forward_to_peer(self, peer_id: str, message: dict):
         if peer_id in self.clients:
@@ -225,4 +330,6 @@ if __name__ == "__main__":
     config = get_config()
     port = config.get("port")  
     server = SignalingServer(port)   
+    if config.get("ssl"):
+        server.use_ssl(config.get("cert"), config.get("key"))
     asyncio.run(server.start())

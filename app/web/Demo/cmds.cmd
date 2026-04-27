@@ -1,0 +1,1 @@
+openssl req -x509 -newkey rsa:4096 -keyout H:\Work\Projects\html\py\app\web\Demo\dist\cert\key.pem -out H:\Work\Projects\html\py\app\web\Demo\dist\cert\cert.pem -sha256 -days 365 -nodes -subj "/C=CN/ST=Beijing/L=Beijing/O=Test/CN=192.168.1.150:8801"

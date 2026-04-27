@@ -14,9 +14,7 @@ def check_network_by_ping(host="8.8.8.8", count=2, timeout=2):
         timeout: 超时时间（秒）
     """
     param = "-n" if platform.system().lower() == "windows" else "-c"
-
     command = ["ping", param, str(count), "-w", str(timeout), host]
-
     try:
         # 执行ping命令
         output = subprocess.run(
