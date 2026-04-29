@@ -13,7 +13,7 @@ logging.basicConfig(
     format='%(asctime)s - %(levelname)s - %(message)s',
     handlers=[
         logging.StreamHandler(),
-        logging.FileHandler('webrtc_server.log', encoding='utf-8')
+        logging.FileHandler('./dist/logs/webrtc_server.log', encoding='utf-8')
     ]
 )
 logger = logging.getLogger(__name__)
