@@ -128,10 +128,7 @@ class WebRTCStreamManager:
 
 # 创建管理器实例
 stream_manager = WebRTCStreamManager()
-
 # 路由处理器
-
-
 async def index(request: Request):
     """主页面 - 从文件读取HTML"""
 

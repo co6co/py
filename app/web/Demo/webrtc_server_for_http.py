@@ -6,7 +6,7 @@ from datetime import datetime
 from aiohttp import web
 import ssl
 from websockets.server import WebSocketServerProtocol 
-
+from model.aiohttp_server import aio_http_server_base
 # 配置日志
 logging.basicConfig(
     level=logging.INFO,
@@ -18,25 +18,14 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-class SignalingServer:
-    def __init__(self, port=8765):
-        self.port = port
+class SignalingServer(aio_http_server_base):
+    def __init__(self, port=8765): 
         self.clients = {}  # peerId -> {ws, roomId}
         self.rooms = {}    # roomId -> Set of peerIds
-        self.websocket = None
-        self.ssl=False
-    def use_ssl(self, cert, key):
-        self.cert = cert
-        self.key = key
-        self.ssl = True
-    def create_ssl_context(self):
-         # 配置 SSL 上下文
-        if not self.ssl:
-            return None
-        ssl_context = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
-        ssl_context.load_cert_chain(self.cert, self.key )
-        return ssl_context
-
+        self.websocket = None 
+        super().__init__(port)
+    
+     
     async def print_info(self):
         http="http"
         ws="ws"
@@ -53,18 +42,7 @@ class SignalingServer:
             web.get('/status', self.status_handler),
             web.get('/api/rooms', self.rooms_handler),
             web.static('/', os.path.join(os.path.dirname(__file__), 'pages')),
-        ])
-
-    async def start(self):
-        app = web.Application() 
-        await self.route_handler(app) 
-        runner = web.AppRunner(app)
-        await runner.setup()
-        site = web.TCPSite(runner, '0.0.0.0', self.port,ssl_context=self.create_ssl_context())
-        await site.start()
-        await self.print_info() 
-        # 保持服务器运行
-        await asyncio.Future()
+        ]) 
 
     async def status_handler(self, request):
         '''返回服务器状态信息'''
