@@ -3,7 +3,7 @@ from sqlalchemy.ext.asyncio import create_async_engine, AsyncEngine
 from contextvars import ContextVar
 
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import scoped_session, sessionmaker
+from sqlalchemy.orm import scoped_session, sessionmaker, Session
 
 # from model.pos.DbModelPo import User, Process
 
@@ -13,7 +13,7 @@ from sqlalchemy.orm import selectinload
 import asyncio
 import time
 import typing
-from typing import TypeVar, TypedDict
+from typing import TypeVar, TypedDict, Type, Callable
 from co6co.utils import log
 from co6co_db_ext.po import BasePO
 from sqlalchemy.pool import NullPool
@@ -68,7 +68,7 @@ class db_service:
         setting.update(kwargs)
         return create_engine(url, **setting)
 
-    def createAsyncEngine(self, url, **kwargs) -> AsyncEngine:
+    def createAsyncEngine(self, url, **kwargs):
         """
         创建异步引擎
 
@@ -87,7 +87,7 @@ class db_service:
         setting.update(kwargs)
         return create_async_engine(url, **setting)
 
-    def _session_factory(self, engine: Engine = None, **kv) -> AsyncSession:
+    def _session_factory(self, engine: Engine = None, **kv):
         if engine == None:
             engine = self.createEngine(self.url)
         default = {
@@ -95,27 +95,38 @@ class db_service:
             "autocommit": False,
         }
         default.update(kv)
-        factory = sessionmaker(bind=self.engine,  **default)
+        factory = sessionmaker(bind=self.engine, class_=Session,   **default)
         return factory
 
-    def _async_session_factory(self, engine: AsyncEngine = None, **kv) -> AsyncSession:
+    def _async_session_factory(self, engine: AsyncEngine = None, **kv) -> Callable[[], AsyncSession]:
+        """
+        return AsyncSession 类
+        """
         if engine == None:
             engine = self.createAsyncEngine(self.url)
         default = {
             "expire_on_commit": False,
-            "class_": AsyncSession,
         }
         default.update(kv)
-        factory = sessionmaker(engine, **default)
+        # #常见标注Type[AsyncSession]
+        # 更准确  Callable[[], AsyncSession]
+        factory = sessionmaker(engine, class_=AsyncSession, **default)
         return factory
 
-    def createSession(self, engine: AsyncEngine = None, **kv) -> scoped_session:
+    def createSession(self, engine: AsyncEngine = None, **kv):
         factory = self._session_factory(engine, **kv)
         return scoped_session(factory)
 
-    def createAsyncSession(self, engine: AsyncEngine = None, **kv) -> AsyncSession:
+    def createAsyncSession(self, engine: AsyncEngine = None, **kv):
         factory = self._async_session_factory(engine, **kv)
         return factory()
+
+    @property
+    def Session(self):
+        """
+        创建AsyncSession 类
+        """
+        return self._async_session_factory()
 
     def _createEngine(self, url: str):
         self.useAsync = True
