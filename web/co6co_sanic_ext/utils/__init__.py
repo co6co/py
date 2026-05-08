@@ -2,7 +2,8 @@ import datetime
 from typing import Any, Dict
 from sanic.response import json as res_json
 import json as sys_json
-
+# 核心功能以移动至 co6co 的 JSON_util 模块中 
+# 与 sanic.response 关联的功能需要再实现
 
 class JSON_util(sys_json.JSONEncoder):
     @classmethod
@@ -25,7 +26,7 @@ class JSON_util(sys_json.JSONEncoder):
         elif hasattr(obj, "__dict__"):
             return obj.__dict__
         return None
-
+    @staticmethod
     def response(res: any, jsonEncoder: sys_json.JSONEncoder = None, **kwargs):
         if jsonEncoder == None:
             # JSON_util(ensure_ascii=False)
