@@ -6,6 +6,13 @@ import inspect
 
 def get_current_function_name():
     return inspect.currentframe().f_back.f_code.co_name
+def is_coroutine_fun(fun):
+    '''是否为协程'''
+    return inspect.iscoroutinefunction(fun)
+def is_asyncgen(fun):
+    '''是否为异步生成器'''
+    return inspect.isasyncgenfunction(fun):
+    
 
 
 def to_camelcase(name: str) -> str:

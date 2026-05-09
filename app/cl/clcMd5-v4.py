@@ -4,6 +4,7 @@ from co6co.utils import hash, log
 from co6co.utils import find_files, convert_size,  convert_to_bytes, split_value_unit
 import sqlite3 as db3
 import argparse
+from pathlib import Path
 from typing import Callable, Dict, List
 import tempfile
 from co6co.task import ThreadTask
@@ -166,9 +167,10 @@ def show(conn: db3.Connection, cursor: db3.Cursor, *, md5: str, size: str, query
     size_index = field_names.index('file_size')
     for c in cursor:
         temp_list = list(c)
-        temp_list[index] = temp_list[index].replace("\\", "/").replace("//", "/")
+        # temp_list[index] = temp_list[index].replace("\\", "/").replace("//", "/")
+        temp_list[index] = Path(temp_list[index])
         temp_list[size_index] = convert_size(temp_list[size_index])
-        print(temp_list)
+        print(*temp_list)
 
     # print(sql)
 
