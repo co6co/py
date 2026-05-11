@@ -1,12 +1,15 @@
 from enum import Enum, unique
 # from abc import ABC, abstractclassmethod  抽象
 from operator import attrgetter
-from typing import Generic, List, Dict, Literal, Type, Optional, TypeVar, Generator, Any
+from typing import Generic, TypeAlias, List, Dict, Literal, Type, Optional, TypeVar, Generator, Any
 
 from co6co import K, V, T
 E = TypeVar('E', bound='Base_Enum')
 # class Base_Enum2 (Enum,Generic[K,T]):pass
 # Base_Enum2Init=Base_Enum2[str,int]
+
+BASE_ENUM_ATTR_NAME_TYPE: TypeAlias = Literal["name", "key", "val"]
+BASE_CN_ENUM_ATTR_NAME_TYPE: TypeAlias = Literal["name", "key", "val", "label"]
 
 
 @unique  # 帮助检查 保证没有重复值
@@ -78,12 +81,13 @@ class Base_Enum (Enum):
             yield v
 
     @classmethod
-    def _to_str(cls, attr) -> str:
-        return ",".join([f"{i.val}:{getattr(i, attr)}" for i in cls])
+    def _to_str(cls, after_attr: BASE_ENUM_ATTR_NAME_TYPE, front_attr: BASE_ENUM_ATTR_NAME_TYPE = 'val') -> str:
+
+        return ",".join([f"{getattr(i, front_attr)}:{getattr(i, after_attr)}" for i in cls])
 
     @classmethod
-    def to_str(cls, attr: Literal["key", "name"]) -> str:
-        return cls._to_str(attr)
+    def to_str(cls, after_attr: BASE_ENUM_ATTR_NAME_TYPE, front_attr: BASE_ENUM_ATTR_NAME_TYPE = 'val') -> str:
+        return cls._to_str(after_attr, front_attr)
 
     @classmethod
     def value_of(cls: Type[E], name: str, ignoreError: bool = True) -> Optional[E]:
@@ -135,8 +139,8 @@ class Base_EC_Enum(Base_Enum):
         return status
 
     @classmethod
-    def to_str(cls, attr: Literal["key", "name", 'label']) -> str:
-        return cls._to_str(attr)
+    def to_str(cls, after_attr: BASE_CN_ENUM_ATTR_NAME_TYPE, front_attr: BASE_CN_ENUM_ATTR_NAME_TYPE = 'val') -> str:
+        return cls._to_str(after_attr, front_attr)
 
     @classmethod
     def to_labels_str(cls) -> str:

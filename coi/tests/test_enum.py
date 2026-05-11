@@ -1,5 +1,5 @@
 
-from co6co.enums import Base_EC_Enum
+from co6co.enums import Base_Enum, Base_EC_Enum
 import pytest
 from enum import Enum
 
@@ -10,10 +10,25 @@ class Color(Enum):
     BLUE = 3
 
 
+class Color2(Base_Enum):
+    RED = 'red', 1
+    GREEN = 'green', 2
+    BLUE = 'blue', 3
+
+
 class DemoEnum(Base_EC_Enum):
     A = "a", "LA", 88
     B = ("b", "LB", 99)
     C = "c", "LC", 100
+
+
+def test_to_str():
+    print("颜色", Color2.to_str("key", "name"))
+    print(Color2.to_str("name", 'key'))
+
+    print("颜色", DemoEnum.to_str("key", "name"))
+    print(DemoEnum.to_str("label", 'name'))
+    print(DemoEnum.to_labels_str())
 
 
 def test_rawenum():
