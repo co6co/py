@@ -1,40 +1,39 @@
-from .db_filter import absFilterItems
 from sqlalchemy.ext.asyncio import AsyncSession
+from .po import BasePO, TimeStampedModelPO, UserTimeStampedModelPO, CreateUserStampedModelPO
+from .db_filter import absFilterItems
 from .db_utils import db_tools,  DbCallable, QueryOneCallable, UpdateOneCallable, QueryListCallable, QueryPagedByFilterCallable
 from sqlalchemy import Select, Column, Integer, String, Update, Delete, Insert
-from co6co.data.result import Result,Page_Result
 from typing import Callable, Any, Dict , List ,Tuple
-from co6co.utils import log
 from functools import wraps
-from sanic.views import HTTPMethodView  # 基于类的视图
-from sanic import Request
+ 
+from co6co.data.result import Result,Page_Result
+from co6co.utils import log, getDateFolder
+
 from co6co_db_ext.db_utils import db_tools, QueryPagedByFilterCallable
 from co6co_db_ext.db_filter import absFilterItems
 from co6co_db_ext.db_operations import DbPagedOperations, DbOperations, InstrumentedAttribute
-from co6co_sanic_ext.model.res.result import Page_Result
-from co6co_sanic_ext.utils import JSON_util
+
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import scoped_session
 from typing import TypeVar, Dict, List, Any, Tuple, Optional, Callable
-from co6co_sanic_ext.model.res.result import Result, Page_Result
+
 
 from io import BytesIO
-from co6co_web_db.utils import DbJSONEncoder
 from sqlalchemy.sql.elements import ColumnElement
 from sqlalchemy.orm.attributes import InstrumentedAttribute
 
 from sqlalchemy import Select, Column, Integer, String, Update, Delete, Insert
-from co6co_sanic_ext .view_model import BaseView
-from co6co_db_ext.po import BasePO, TimeStampedModelPO, UserTimeStampedModelPO, CreateUserStampedModelPO
 from datetime import datetime
 from co6co.utils.tool_util import list_to_tree, get_current_function_name
-from co6co_db_ext.db_utils import db_tools,  DbCallable, QueryOneCallable, UpdateOneCallable, QueryListCallable, QueryPagedByFilterCallable
 
-from co6co_web_session.base import SessionDict
+
+
 from multiprocessing.managers import DictProxy
 
+ 
+# 2. 定义泛型：限定必须是 BasePO 的子类
+POType = TypeVar("POType", bound=BasePO)
 
-from co6co.utils import log, getDateFolder
 
 class actuator:
     def __init__(self, session: AsyncSession, filterItem: absFilterItems):
@@ -99,7 +98,7 @@ class actuator:
                     result = Result.success(db_tools.list2Dict(result))
                     return  result
         except Exception as e:
-            return   Result.fail(message=f"查询失败{e}")
+            return  Result.fail(message=f"查询失败{e}")
 
     async def _query(self,  select: Select, isPO: bool = True, remove_db_instance: bool = True, param: Dict | List | Tuple = None):
         """
@@ -112,11 +111,11 @@ class actuator:
             result = db_tools.list2Dict(data)
             return result
         except Exception as e:
-            log.error(f"查询失败{e}")
+            log.err(f"查询失败{e}")
         except Exception as e:
             return None
 
-    async def exist(self,    *filters: ColumnElement[bool], column: InstrumentedAttribute = "*"):
+    async def exist(self,  *filters: ColumnElement[bool], column: InstrumentedAttribute = "*"):
         """
         查看对象是否操作
         """
@@ -147,7 +146,7 @@ class actuator:
                 return  []
             return treeList
         except Exception as e:
-            log.error(f"查询失败{e}",e) 
+            log.err(f"查询失败{e}",e) 
 
     async def query_page(self,  isPO: bool = True, remove_db_instance=True):
         """
@@ -156,11 +155,11 @@ class actuator:
          
         try:
             query = QueryPagedByFilterCallable(self.session)
-            total, result = await query(self.filterItem, isPO, remove_db_instance)
+            total, result = await query(self.filter, isPO, remove_db_instance)
             pageList = Page_Result.success(result, total=total)
-            return JSON_util.response(pageList)
+            return pageList
         except Exception as e:
-            log.error(f"查询失败{e}",e)
+            log.err(f"查询失败{e}",e)
             return None
 
     async def execSqls(self,  *sml: Update | Delete | Insert, callBck=None, smlParamList: List[Dict | Tuple | List] = None):
@@ -182,70 +181,67 @@ class actuator:
                     return await callBck(*result)
             except Exception as e:
                 await session.rollback()
-                log.error(f"执行SQL失败{sql} {e}",e)
+                log.err(f"执行SQL失败{sql} {e}",e)
                 return None
 
         return await callable(exec)
 
-    async def batchAdd(self,  poList: List[BasePO],   userId=None, beforeFun: Callable[[BasePO, AsyncSession, Request], None | Any] = None, afterFun: Callable[[List[BasePO], AsyncSession, Request], None] = None):
+    async def batchAdd(self,  poList: List[BasePO],   userId=None, checkFun:Callable[[POType,AsyncSession], Any]  =None, afterFun: Callable[[List[BasePO], AsyncSession,Any], Result] = None):
         try:
 
             async def exec(session: AsyncSession):
                 for po in poList:
                     po.add_assignment(userId)
-                    if beforeFun != None:
-                        result = await beforeFun(po, session)
-                        if result != None:
-                            await session.rollback()
-                            return result
+                    result=None
+                    if checkFun != None:
+                        result = await checkFun(po, session)
+                       
                 session.add_all(poList)
                 if afterFun != None:
                     session.flush()
-                    await afterFun(poList, session)
+                    await afterFun(poList, session,result)
                 return True
 
             callable = DbCallable(self.session)
             return await callable(exec)
         except Exception as e:
-            log.error(f"批量增加失败{e}",e)
+            log.err(f"批量增加失败{e}",e)
             return None
 
-    async def add(self,  po: BasePO, json2Po: bool = True, userId=None, beforeFun: Callable[[BasePO, AsyncSession], None | Any] = None, afterFun: Callable[[BasePO, AsyncSession], None] = None):
+    async def add(self,  po: BasePO, json2Po: bool = True, userId=None,  checkFun:Callable[[POType,AsyncSession], Any]  =None, afterFun: Callable[[BasePO, AsyncSession,Any], Result] = None):
         """
         增加 
 
         request: Request, 
         po: BasePO,      #实体类对象 
         userId=None, # 用户ID
-        beforeFun(po, session, request),    # 执行一些其他操作，返回值将直接返回客户端，回滚数据库操作
-        afterFun(po, session, request),     # 可在实体中获取 自增id
+        beforeFun(po, session ),    # 执行一些其他操作，返回值将直接返回客户端，回滚数据库操作
+        afterFun(po, session ),     # 可在实体中获取 自增id
 
-        return JSONResponse
+        return Result
         """
         try:
-            if json2Po:
-                po.__dict__.update(request.json)
-
+             
             async def exec(session: AsyncSession):
                 po.add_assignment(userId)
-
-                if beforeFun != None:
-                    result = await beforeFun(po, session, request)
-                    if result != None:
-                        await session.rollback()
-                        return result
+                result=None
+                if checkFun != None:
+                    result = await checkFun(po, session ) 
                 session.add(po)
+                result=Result.success()
                 if afterFun != None:
                     session.flush()
-                    await afterFun(po, session, request)
-                return JSON_util.response(Result.success())
+                    result= await afterFun(po, session,result )
+                return result
 
             callable = DbCallable(self.session)
             return await callable(exec)
         except Exception as e:
-            return self.response_error(request, e)
+            log.err(f"执行add err {e}",e)
+            return Result.fail(message=f"增加失败{e}")
+            
 
-    async def edit(self, request: Request, pkOrSelect:  int | str | Select, poType: TypeVar, po: Optional[BasePO] = None, userId=None, fun=None, json2Po: bool = True):
+    async def edit(self,  select:   Select,  po: POType , userId=None, fun:Callable[[POType,POType, AsyncSession],Result]=None, json2Po: bool = True):
         """
         编辑
 
@@ -254,71 +250,60 @@ class actuator:
         poType: TypeVar,  # 实体类型
         po:BasePO    ,    # None:根据传入的 poType创建,用 request.json赋值
         userId=None, # 用户ID
-        fun=None,    # 执行一些其他操作，返回值将直接返回客户端并且回滚数据库操作
+        fun=None,    # 执行一些其他操作， (oldPO,po,session)
+                     # 返回值将直接返回客户端并且回滚数据库操作
         json2Po:bool # 根据 请求的json 转换的对象更新 实体对象，在 fun 之前执行
 
         return JSONResponse
         """
-        try:
-            if po == None:
-                po = poType()
-                po.__dict__.update(request.json)
-            call = DbCallable(self.session)
-
+        try: 
+            call = DbCallable(self.session) 
             async def exec(session: AsyncSession):
-                oldPo: BasePO = None
-                if isinstance(pkOrSelect, Select):
-                    oldPo = await db_tools.execForPo(session, pkOrSelect, remove_db_instance_state=False)
-                else:
-                    oldPo: BasePO = await session.get_one(poType, pkOrSelect)
+                oldPo:BasePO = await db_tools.execForPo(session, select, remove_db_instance_state=False)
+                #oldPo: BasePO = await session.get_one(POType, pkOrSelect)
                 if oldPo == None:
-                    return JSON_util.response(Result.fail(message=f"未查到‘{pk}’对应的信息!"))
+                    return   Result.fail(message=f"未对应的信息!")
                 oldPo.edit_assignment(userId)
                 if json2Po:
                     oldPo.update(po)
-                if fun != None:
-                    result = await fun(oldPo, po, session, request)
-                    if result != None:
-                        await session.rollback()
-                        return result
-                return JSON_util.response(Result.success())
+                if fun :
+                    return await fun(oldPo, po, session )
+                     
+                return  Result.success()
             return await call(exec)
         except Exception as e:
-            return self.response_error(request, e)
+            log.err(f"执行edit失败{e}",e)
 
-    async def remove(self, request: Request, pk: any, poType: TypeVar,  beforeFun=None, afterFun=None):
+    async def remove(self,  pk: any, poType: POType,  checkFun:Callable[[POType,AsyncSession], Any]  =None  , afterFun:Callable[[POType,AsyncSession,Any], Result]=None):
         """
         删除 
 
         request: Request, 
         pk: any,      #主键值
         poType: TypeVar # 实体类型
-        beforeFun(oldPo, session),    # 执行一些其他操作，返回值将直接返回客户端，回滚数据库操作
-        afterFun(oldPo, session, request),     # 返回值将直接返回客户端，回滚数据库操作
-
-        return JSONResponse
+        checkFun(oldPo, session),    # 执行一些其他操作，返回值将直接返回客户端，回滚数据库操作
+                    返回值 Result 返回
+                    返回   其他   回滚
+                    返回   None   继续
+        @afterFun afterFun(oldPo, session, await checkFun())   
+        return Result
         """
+        
         try:
             async with self.session as session, session.begin():
                 oldPo: BasePO = await session.get_one(poType, pk)
                 if oldPo == None:
-                    return JSON_util.response(Result.fail(message=f"未找到‘{pk}’对应的信息!"))
-                if beforeFun != None:
-                    result = await beforeFun(oldPo, session)
-                    if result != None:
-                        await session.rollback()
-                        return result
-                await session.delete(oldPo)
+                    return Result.fail(message=f"未找到‘{pk}’对应的信息!")
+                result=None
+                if checkFun != None:
+                    result = await checkFun(oldPo, session) 
+                await session.delete(oldPo) 
                 if afterFun != None:
-                    result = await afterFun(oldPo, session, request)
-                    if isinstance(result, Result):
-                        return JSON_util.response(result)
-                    elif result != None:
-                        await session.rollback()
-                        return result
-                return JSON_util.response(Result.success())
+                    return await afterFun(oldPo, session ,result) 
+                return Result.success()
         except Exception as e:
             await session.rollback()
-            return self.response_error(request, e)
+            log.err(f"执行remove失败{e}",e)
+            
 
 	
