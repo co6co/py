@@ -80,7 +80,7 @@
     优化事件DispatcherProcess 类
 0.0.38 2026-05-08
     增加 DictNamespace 类型
-0.1.0 未发布
+0.1.0
     JSONEncoder 
 	Result
 	

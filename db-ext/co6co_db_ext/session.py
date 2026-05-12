@@ -2,8 +2,40 @@ from co6co.utils import log
 from sqlalchemy.ext.asyncio import AsyncSession
 from .db_session import db_service, connectSetting
 from co6co.task.thread import ThreadEvent
+import functools
+from contextlib import asynccontextmanager
+  
 
+class session_context:
+    """
+    会话上下文管理器
+    async with SessionContext(session)() as session: 
+        ....
+    """ 
+    def __init__(self, session: AsyncSession):
+        self.session = session
+    
+    @asynccontextmanager
+    async def __call__(self):
+        """使实例可直接作为上下文管理器使用"""
+        async with self.session as session, session.begin():
+            yield session
+def transactional(func):
+    """
+    事务装饰器
 
+    示例：
+    @transactional
+    async def your_method(session,select):
+        result = await session.execute(select)
+        ...
+        return result
+    """
+    @functools.wraps(func)
+    async def wrapper(self, *args, **kwargs):
+        async with self.session as session, session.begin():
+            return await func(self, session, *args, **kwargs)
+    return wrapper
 class dbBll:
     def __init__(self, *,  db_settings: connectSetting = {}) -> None:
         self.t = ThreadEvent()

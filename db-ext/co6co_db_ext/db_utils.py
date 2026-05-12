@@ -1,22 +1,17 @@
 
 
-from typing import TypeVar, Tuple, List, Dict, Any, Union, Iterator, Callable
+from typing import   Tuple, List, Dict, Any,   Iterator, Callable
 from sqlalchemy.engine.row import Row, RowMapping
 from .po import BasePO
 from co6co.utils import log
-
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import Select, Update, Insert, Delete
-from sqlalchemy.future import select
-from sqlalchemy import and_
-from sqlalchemy import func, text
+from sqlalchemy import Select, Update, Insert, Delete  
 from sqlalchemy.sql.elements import ColumnElement
-from sqlalchemy.orm.attributes import InstrumentedAttribute
-from sqlalchemy.engine.result import ChunkedIteratorResult
-from sqlalchemy.engine.cursor import CursorResult
+from sqlalchemy.orm.attributes import InstrumentedAttribute 
 
 from .db_filter import absFilterItems
-
+from .actuator import Actuator
+from .session import session_context
 
 class db_tools:
     """
@@ -28,99 +23,55 @@ class db_tools:
     2.
     [dict(zip(a._fields,a))  for a in  executeResult]
     """
-    __po_has_field__: str = "_sa_instance_state"
+    @staticmethod
+    def remove_db_instance_state(poInstance_or_poList: Iterator | Any) -> List[Dict] | Dict: 
+        return Actuator.remove_db_instance_state(poInstance_or_poList)
 
     @staticmethod
-    def remove_db_instance_state(poInstance_or_poList: Iterator | Any) -> List[Dict] | Dict:
-        if hasattr(poInstance_or_poList, "__iter__"):
-            result = [dict(filter(lambda k: k[0] != db_tools.__po_has_field__,
-                           a1.__dict__.items())) for a1 in poInstance_or_poList]
-            for r in result:
-                for r1 in r:
-                    value = r.get(r1)
-                    if (isinstance(value, BasePO)):
-                        dic = db_tools.remove_db_instance_state(value)
-                        r.update({r1: dic})
-            return result
-        # and hasattr (poInstance_or_poList,"__dict__")
-        elif hasattr(poInstance_or_poList, "__dict__"):
-            return dict(filter(lambda k: k[0] != db_tools.__po_has_field__, poInstance_or_poList.__dict__.items()))
-        else:
-            return poInstance_or_poList
+    def row2dict(row: Row) -> Dict: 
+        return Actuator.row2dict(row)
 
     @staticmethod
-    def row2dict(row: Row) -> Dict:
-        """
-        xxxxPO.id.label("xxx_id") 为数据取别名
-        出现重名覆盖
-        """
-        d: dict = {}
-        for i in range(0, len(row)):
-            c = row[i]
-            if hasattr(c, db_tools.__po_has_field__):
-                dc = db_tools.remove_db_instance_state(c)
-                d.update(dc)
-            else:
-                key = row._fields[i]
-                '''
-                j=1 
-                while key in d.keys():
-                    key=f"{ row._fields[i]}_{str(j )}"
-                    j+=1
-                '''
-                d.update({key: c})
-        return d
-
-    @staticmethod
-    def one2Dict(fetchone: Row | RowMapping) -> Dict:
+    def one2Dict(fetchone: Row | RowMapping|dict) -> Dict:
         """
         Row:        execute.fetchmany() | execute.fetchone()
         RowMapping: execute.mappings().fetchall()|execute.mappings().fetchone()  
         """
-        if type(fetchone) == Row:
-            return dict(zip(fetchone._fields, fetchone))
-        elif type(fetchone) == RowMapping:
-            return dict(fetchone)
-        elif type(fetchone) == dict:
-            return fetchone
-        log.warn(f"未知类型：‘{type(fetchone)}’,直接返回")
-        return fetchone
+        return Actuator.one2Dict(fetchone)
 
     @staticmethod
-    def list2Dict(list: List[Row | RowMapping]) -> List[dict]:
-        return [db_tools.one2Dict(a) for a in list]
+    def list2Dict(list: List[Row | RowMapping]) -> List[dict]: 
+        return Actuator.list2Dict(list)
 
+    '''
     def mapping(executeResult: any) -> List[dict]:
         """
         不在使用
         """
         # sqlalchemy.engine.result.ChunkedIteratorResult
         return [dict(zip(a._fields, a)) for a in executeResult]
-
+    '''
     async def execSelect(session: AsyncSession, select: Select, params: Dict | List | Tuple = None) -> int | None:
         """
         执行查询语句
         @return: int | None
         """
-        exec = await session.execute(select, params)
-        return exec.scalar()
+        actuator= Actuator(session)
+        return await actuator.execute(select, params) 
 
     async def count(session: AsyncSession, *filters: ColumnElement[bool], column: InstrumentedAttribute = "*") -> int:
         """
         count
         """
-        sql = select(func.count(column)).filter(and_(*filters))
-        return await db_tools.execSelect(session, sql)
+        actuator= Actuator(session)
+        return await actuator.count( *filters,column=column) 
 
     async def exist(session: AsyncSession, *filters: ColumnElement[bool], column: InstrumentedAttribute = "*") -> bool:
         """
         exist
         """
-        count = await db_tools.count(session, *filters, column=column)
-        if count > 0:
-            return True
-        else:
-            return False
+        actuator= Actuator(session)
+        return await actuator.exist( *filters,column=column) 
 
     async def execForMappings(session: AsyncSession, select: Select, queryOne: bool = False, params: Dict | Tuple | List = None):
         """
@@ -128,15 +79,11 @@ class db_tools:
         select:Select 
 
         return list
-        """
-
-        executer = await session.execute(select, params)
+        """ 
+        actuator= Actuator(session)
         if queryOne:
-            result = executer.mappings().fetchone()
-            return db_tools.one2Dict(result)
-        else:
-            result = executer.mappings().all()
-            return db_tools.list2Dict(result)
+            return await actuator.query_one_mappings(select, params) 
+        return await actuator.query_all_mappings(select, params)  
 
     async def execForPos(session: AsyncSession, select: Select, remove_db_instance_state: bool = True, params: Dict | List | Tuple = None):
         """
@@ -146,12 +93,10 @@ class db_tools:
 
         return list
         """
-
-        exec: ChunkedIteratorResult = await session.execute(select, params)
+        actuator= Actuator(session)
         if remove_db_instance_state:
-            return db_tools.remove_db_instance_state(exec.scalars().fetchall())
-        else:
-            return exec.scalars().fetchall()
+            return await actuator.query_all_entity_mappings(select, params) 
+        return await actuator.query_all_entity(select, params)   
 
     async def execForPo(session: AsyncSession, select: Select, remove_db_instance_state: bool = True, params: Dict | List | Tuple = None):
         """
@@ -161,27 +106,18 @@ class db_tools:
 
         return PO|None
         """
-        exec: ChunkedIteratorResult = await session.execute(select, params)
-        # user: UserPO = result.scalar()
-        data = exec.fetchone()
-        # 返回的是元组
-        one = None
-        if data != None:
-            one = data[0]
-            if remove_db_instance_state:
-                return db_tools.remove_db_instance_state(one)
-            else:
-                return one
-        else:
-            return None
+        actuator= Actuator(session)
+        if remove_db_instance_state:
+            return await actuator.query_one_entity_mapping(select, params) 
+        return await actuator.query_one_entity(select, params)   
+         
 
     async def execSQL(session: AsyncSession, sql: Update | Insert | Delete, sqlParam: Dict | List | Tuple = None):
         """
         执行简单SQL语句
         """
-        data: CursorResult = await session.execute(sql, sqlParam)
-        result: int = data.rowcount
-        return result
+        actuator= Actuator(session)
+        return  await actuator.execSQL(sql, sqlParam) 
 
 
 '''
@@ -212,40 +148,33 @@ class DbCallable:
             在这种模式下，需要手动调用 session.commit() 或 session.rollback()
             如果没有显式提交，会话关闭时可能会导致事务回滚
         """
-        async with self.session, self.session.begin():
-            if func != None:
-                return await func(self.session)
+        _context=session_context(self.session)
+        async with _context.transactional_session() as session:
+        #async with self.session, self.session.begin():
+            if func is not None: 
+                try:
+                    actuator= Actuator(session)
+                    return await func(actuator)
+                except Exception as e:
+                    #await actuator.session.rollback() # 是否需要回滚
+                    log.err(f"执行'DBCallable'异常:{e}",e)
+                    raise
 
 
 class QueryOneCallable(DbCallable):
     async def __call__(self, select: Select, isPO: bool = True, param: Dict | List | Tuple = None):
-        async def exec(session: AsyncSession):
-            exec = await session.execute(select, param)
+        async def exec(actuator: Actuator): 
             if isPO:
-                data = exec.fetchone()
-                # 返回的是元组
-                if data != None:
-                    return data[0]
-                else:
-                    return None
+                return await actuator.query_one_entity(select, param) 
             else:
-                data = exec.mappings().fetchone()
-                if data == None:
-                    return None
-                result = db_tools.one2Dict(data)
-                return result
+                return await actuator.query_one_mappings(select, param)  
         return await super().__call__(exec)
 
 
 class InsertCallable(DbCallable):
     async def __call__(self, *po: BasePO):
-        async def exec(session: AsyncSession):
-            try:
-                session.add_all(po)
-            except Exception as e:
-                await session.rollback()
-                log.warn("执行'InsertOneCallable'异常", e)
-                raise
+        async def exec(actuator: Actuator):
+             actuator.add_all(po)  
         return await super().__call__(exec)
 
 
@@ -256,36 +185,24 @@ class UpdateOneCallable(DbCallable):
         editFn: (session,po)->Any|None   返回:None  ->回滚,
                                             :Any   -> 函数返回值
         """
-        async def exec(session: AsyncSession):
-            try:
-                exec = await session.execute(queryOneSelect, param)
-                data = exec.fetchone()
-                # 返回的是元组
-                one = None
-                if data != None:
-                    one = data[0]
-                else:
-                    one = None
-                if editFn != None:
-                    result = await editFn(session, one)
-                    if result == None:
-                        await session.rollback()
-                    return result
-            except Exception as e:
-                await session.rollback()
-                log.warn("执行'UpdateOneCallable'异常", e)
-                raise
+        async def exec(actuator: Actuator): 
+            one = await actuator.query_one_entity(queryOneSelect, param)
+            if editFn is not None:
+                result = await editFn( actuator.session, one)
+                if result is None:
+                    await actuator.session.rollback()
+                return result
 
         return await super().__call__(exec)
 
 
 class QueryListCallable(DbCallable):
     async def __call__(self, select: Select, isPO: bool = True, remove_db_instance=True, param: Dict | List | Tuple = None):
-        async def exec(session: AsyncSession):
+        async def exec(actuator: Actuator):
             if isPO:
-                result = await db_tools.execForPos(session, select, remove_db_instance, params=param)
+                result=actuator.query_all_entity_mappings(select,param) if remove_db_instance else await actuator.query_all_entity(select, param)
             else:
-                result = await db_tools.execForMappings(session, select, params=param)
+                result=await actuator.query_all_entity_mappings(select,param)
             return result
         # return await super(QueryListCallable,self).__call__(exec) #// 2.x 写法
         return await super().__call__(exec)
@@ -293,13 +210,12 @@ class QueryListCallable(DbCallable):
 
 class QueryPagedCallable(DbCallable):
     async def __call__(self, countSelect: Select, select: Select, isPO: bool = True, remove_db_instance=True, param: Dict | List | Tuple = None) -> Tuple[int, List[dict]]:
-        async def exec(session: AsyncSession):
-            total = await db_tools.execSelect(session, countSelect, param)
+        async def exec(actuator: Actuator):
+            total =   await actuator.execute(countSelect, param) 
             if isPO:
-                result = await db_tools.execForPos(session, select, remove_db_instance, param)
+                result=actuator.query_all_entity_mappings(select,param) if remove_db_instance else await actuator.query_all_entity(select, param)
             else:
-                result = await db_tools.execForMappings(session, select, param)
-
+                result=await actuator.query_all_entity_mappings(select,param) 
             return total, result
         return await super().__call__(exec)
 

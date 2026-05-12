@@ -11,13 +11,13 @@ from sqlalchemy import select, create_engine, Engine
 from sqlalchemy.orm import selectinload
 
 import asyncio
-import time
-import typing
+import time 
 from typing import TypeVar, TypedDict, Type, Callable
-from co6co.utils import log
-from co6co_db_ext.po import BasePO
 from sqlalchemy.pool import NullPool
+from co6co.utils import log
 from co6co.task.thread import ThreadEvent
+from .po import BasePO
+
 
 
 class connectSetting(TypedDict):
@@ -60,7 +60,7 @@ class db_service:
     def createEngine(self, url, **kwargs) -> Engine:
         setting = {
             "ping": self.settings.get("pool_pre_ping"),
-            "echo": True if type(self.settings.get("echo")) != bool else self.settings.get("echo"),
+            "echo": True if isinstance(self.settings.get("echo"),bool)  else self.settings.get("echo"),
             "pool_size": self.settings.get("pool_size"),
             "max_overflow": self.settings.get("max_overflow"),
             "poolclass": NullPool
@@ -80,7 +80,7 @@ class db_service:
         """
         setting = {
             "pool_pre_ping": self.settings.get("pool_pre_ping"),
-            "echo": True if type(self.settings.get("echo")) != bool else self.settings.get("echo"),
+            "echo": True if isinstance(self.settings.get("echo"),bool) else self.settings.get("echo"),
             "pool_size": self.settings.get("pool_size"),
             "max_overflow": self.settings.get("max_overflow")
         }
@@ -88,7 +88,7 @@ class db_service:
         return create_async_engine(url, **setting)
 
     def _session_factory(self, engine: Engine = None, **kv):
-        if engine == None:
+        if engine is None:
             engine = self.createEngine(self.url)
         default = {
             "autoflush": False,
@@ -102,7 +102,7 @@ class db_service:
         """
         return AsyncSession 类
         """
-        if engine == None:
+        if engine is None:
             engine = self.createAsyncEngine(self.url)
         default = {
             "expire_on_commit": False,
@@ -163,7 +163,7 @@ class db_service:
         """
 
         self.settings = self.default_settings.copy()
-        if engineUrl == None:
+        if engineUrl is None:
             self.settings.update(config)
             engineUrl = "mysql+aiomysql://{}:{}@{}/{}".format(self.settings['DB_USER'], self.settings['DB_PASSWORD'], self.settings['DB_HOST'], self.settings['DB_NAME'])
         self.url = engineUrl

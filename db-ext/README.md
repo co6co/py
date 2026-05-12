@@ -34,7 +34,8 @@ db_session.py  72 z
     增加dbBll类，移除session中的DbSession、BaseBll类
 0.0.18
     优化功能
-
+0.1.0
+    优化功能
 
 
 ```

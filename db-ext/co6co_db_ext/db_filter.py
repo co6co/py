@@ -14,10 +14,8 @@ class absFilterItems(ABC, Page_param):
 	listSelectFields: List[InstrumentedAttribute]=None# 使用该数据 dictor
 	po_type:TypeVar=None
 	def __init__(self,po:TypeVar) -> None:
-		super().__init__() 
-
-		self.po_type=po # 与排序相关
-		 
+		super().__init__()  
+		self.po_type=po # 与排序相关 
 		pass
 
 	@property
@@ -71,17 +69,22 @@ class absFilterItems(ABC, Page_param):
 		//todo 功能未实现
 		"""
 		orderList= self._getOrderby()
-		if len(orderList)==0: return self.getDefaultOrderBy() 
-		else: return [ self. po_type.__dict__[key].desc() if it[key] and it[key].lower()=="desc" else  self. po_type.__dict__[key].asc() for it in orderList for key in it.keys() if key in self.po_type.__dict__]
+		if len(orderList)==0:
+			return self.getDefaultOrderBy() 
+		else:
+			return [ self. po_type.__dict__[key].desc() if it[key] and it[key].lower()=="desc" else  self. po_type.__dict__[key].asc() for it in orderList for key in it.keys() if key in self.po_type.__dict__]
 	
 	def checkFieldValue(self,fielValue:Any)->bool:
-		if type(fielValue) == str and fielValue:return True
-		if type(fielValue) == int :return True
-		if type(fielValue) == bool :return True
+		if isinstance(fielValue,str) and fielValue:
+			return True
+		if isinstance(fielValue,int):
+			return True
+		if isinstance(fielValue,bool):
+			return True
 		return False
 	 
 	def create_List_select(self):
-		if self.listSelectFields !=None and len(self.listSelectFields)>0: 
+		if self.listSelectFields is not None and len(self.listSelectFields)>0: 
 			select=(
 				Select(*self.listSelectFields)#.join(device.deviceCategoryPO,isouter=True)
 				.filter(and_(*self.filter()))  
