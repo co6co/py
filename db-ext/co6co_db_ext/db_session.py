@@ -11,13 +11,13 @@ from sqlalchemy import select, create_engine, Engine
 from sqlalchemy.orm import selectinload
 
 import asyncio
-import time 
+import time
 from typing import TypeVar, TypedDict, Type, Callable
 from sqlalchemy.pool import NullPool
 from co6co.utils import log
 from co6co.task.thread import ThreadEvent
+from co6co.data import DictNamespace
 from .po import BasePO
-
 
 
 class connectSetting(TypedDict):
@@ -29,21 +29,34 @@ class connectSetting(TypedDict):
     pool_size: int
     max_overflow: int
     pool_pre_ping: bool
+    # 不支持示例方法
+    #def from_(self, data: DictNamespace):
+    #    for k in self.keys():
+    #        self[k] = data.get(k)
+    @staticmethod
+    def from_(instance:TypedDict, data: DictNamespace):
+        for k in instance.keys():
+            instance[k] = data.get(k)
+    @classmethod
+    def create_default(cls, data: DictNamespace = None):
+        instance = cls(
+            DB_HOST="localhost",
+            DB_NAME="",
+            DB_USER="root",
+            DB_PASSWORD="",
+            echo=True,
+            pool_size=20,
+            max_overflow=10,
+            pool_pre_ping=True,  # 执行sql语句前悲观地检查db是否可用
+            # 'pool_recycle':1800 #超时时间 单位s
+        )
+        if data is not None:
+            connectSetting.from_(instance, data)
+        return instance
 
 
 class db_service:
-    default_settings: connectSetting = {
-        'DB_HOST': 'localhost',
-        'DB_NAME': '',
-        'DB_USER': 'root',
-        'DB_PASSWORD': '',
-        'echo': True,
-        'pool_size': 20,
-        'max_overflow': 10,
-        'pool_pre_ping': True,  # 执行sql语句前悲观地检查db是否可用
-        # 'pool_recycle':1800 #超时时间 单位s
-
-    }
+    default_settings: connectSetting = connectSetting.create_default()
     settings = {}
     session: scoped_session  # 同步连接
 
@@ -60,10 +73,12 @@ class db_service:
     def createEngine(self, url, **kwargs) -> Engine:
         setting = {
             "ping": self.settings.get("pool_pre_ping"),
-            "echo": True if isinstance(self.settings.get("echo"),bool)  else self.settings.get("echo"),
+            "echo": True
+            if isinstance(self.settings.get("echo"), bool)
+            else self.settings.get("echo"),
             "pool_size": self.settings.get("pool_size"),
             "max_overflow": self.settings.get("max_overflow"),
-            "poolclass": NullPool
+            "poolclass": NullPool,
         }
         setting.update(kwargs)
         return create_engine(url, **setting)
@@ -80,9 +95,11 @@ class db_service:
         """
         setting = {
             "pool_pre_ping": self.settings.get("pool_pre_ping"),
-            "echo": True if isinstance(self.settings.get("echo"),bool) else self.settings.get("echo"),
+            "echo": True
+            if isinstance(self.settings.get("echo"), bool)
+            else self.settings.get("echo"),
             "pool_size": self.settings.get("pool_size"),
-            "max_overflow": self.settings.get("max_overflow")
+            "max_overflow": self.settings.get("max_overflow"),
         }
         setting.update(kwargs)
         return create_async_engine(url, **setting)
@@ -95,10 +112,12 @@ class db_service:
             "autocommit": False,
         }
         default.update(kv)
-        factory = sessionmaker(bind=self.engine, class_=Session,   **default)
+        factory = sessionmaker(bind=self.engine, class_=Session, **default)
         return factory
 
-    def _async_session_factory(self, engine: AsyncEngine = None, **kv) -> Callable[[], AsyncSession]:
+    def _async_session_factory(
+        self, engine: AsyncEngine = None, **kv
+    ) -> Callable[[], AsyncSession]:
         """
         return AsyncSession 类
         """
@@ -165,7 +184,12 @@ class db_service:
         self.settings = self.default_settings.copy()
         if engineUrl is None:
             self.settings.update(config)
-            engineUrl = "mysql+aiomysql://{}:{}@{}/{}".format(self.settings['DB_USER'], self.settings['DB_PASSWORD'], self.settings['DB_HOST'], self.settings['DB_NAME'])
+            engineUrl = "mysql+aiomysql://{}:{}@{}/{}".format(
+                self.settings["DB_USER"],
+                self.settings["DB_PASSWORD"],
+                self.settings["DB_HOST"],
+                self.settings["DB_NAME"],
+            )
         self.url = engineUrl
         self._createEngine(engineUrl)
         pass
@@ -182,7 +206,7 @@ class db_service:
 
     def sync_init_tables(self):
         retryTime = 0
-        while (True):
+        while True:
             try:
                 if retryTime < 8:
                     retryTime += 1
@@ -190,5 +214,5 @@ class db_service:
                 break
             except Exception as e:
                 log.warn(f"同步数据表失败{e}!")
-                log.info(f"{retryTime*5}s后重试...")
-                time.sleep(retryTime*5)
+                log.info(f"{retryTime * 5}s后重试...")
+                time.sleep(retryTime * 5)

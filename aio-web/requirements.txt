@@ -1,2 +1,3 @@
-co6co>=0.0.37
+co6co>=0.1.0
+co6co_db_ext>=0.1.0
 aiohttp>=3.13.0

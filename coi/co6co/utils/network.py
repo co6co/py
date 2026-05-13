@@ -5,6 +5,9 @@ import time
 import select
 import subprocess
 import platform
+import asyncio
+import re
+from typing import Type,TypeVar
 
 
 def check_port(host, port) -> tuple[bool, str]:
@@ -180,3 +183,53 @@ def ping(ip_address, count=4):
         return (True, output)
     except subprocess.CalledProcessError as e:
         return (False, e.output)
+T = TypeVar("T", float, bool)
+async def async_ping( host: str, timeout: int = 2, count: int = 2,resultType:Type[float|bool]=float)  :
+        """
+        异步 ping 命令
+
+        results = await asyncio.gather(*tasks) 
+        for host, alive in zip(hosts, results):
+            print(f"{host:15} -> {'UP' if alive else 'DOWN'}")
+        """
+        system = platform.system().lower()
+        param = "-n" if system == "windows" else "-c"
+        timeout_param = "-w" if system == "windows" else "-W"
+
+        cmd = [
+            "ping",
+            param,
+            str(count),
+            timeout_param,
+            str(timeout),
+            host,
+        ]
+
+        proc = await asyncio.create_subprocess_exec(
+            *cmd, 
+            stdout=asyncio.subprocess.DEVNULL if resultType is bool else asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.DEVNULL,
+        )
+        
+        if resultType is float: 
+            stdout, _ = await proc.communicate() 
+            result=-1.0
+            text =stdout.decode("gbk", errors="ignore") if "windows" in system else  stdout.decode(errors="ignore")  
+            if "windows" in system:
+                # Windows: Minimum = 1ms, Maximum = 2ms, Average = 1ms
+                match = re.search(r"[Average|平均]\s*=\s*(\d+)ms",text)
+                if match:
+                    result= float(match.group(1)) 
+            else:
+                # Linux/Mac: rtt min/avg/max/mdev = 1.234/2.345/3.456/0.123 ms
+                match = re.search(r"rtt.*?=\s*[\d.]+\/([\d.]+)\/[\d.]+\/[\d.]+",  text)
+                if match:
+                    result= float(match.group(1)) 
+            if match:
+                result= float(match.group(1))
+            if result==0.0:
+                result=0.1
+            return result
+         
+        await proc.wait()
+        return proc.returncode == 0

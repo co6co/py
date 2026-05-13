@@ -62,9 +62,9 @@ def get(url, timeout: int | tuple | None = None, proxy: str | dict = None, heade
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36"
         # 'User-Agent':'BaiduSipder'
     }
-    if header_dict != None:
+    if header_dict is not None:
         headers.update(header_dict)
-    if timeout == None:
+    if timeout is None:
         timeout = (5, 15)
     resp = requests.get(url, headers=headers, timeout=timeout,
                         allow_redirects=True, proxies=proxies, verify=verify)
