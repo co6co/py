@@ -28,9 +28,9 @@ async def createOrUpdateAccount(session: AsyncSession, wx_user: wxUser, accountS
             .options(joinedload(WxUserPO.accountPO))
             .filter(AccountPO.accountName == wx_user.openid, AccountPO.category == Account_category.wx.val)
         )
-        po: WxUserPO = await opt._get_one(select, False)
-        if po != None:
-            if accountStatus != None:
+        po: WxUserPO|None = await opt._get_one(select, False)
+        if po is not None:
+            if accountStatus is not None:
                 a: AccountPO = po.accountPO
                 a.status = accountStatus
             wx_user.to(po)
@@ -41,7 +41,7 @@ async def createOrUpdateAccount(session: AsyncSession, wx_user: wxUser, accountS
 
             # 用戶組
             userGroupPO: UserGroupPO = await opt.get_one(UserGroupPO, UserGroupPO.code == User_Group.wx_user.name)
-            if userGroupPO == None:
+            if userGroupPO is None:
                 raise Exception(f"数据库中未找到相关用户组{User_Group.wx_user.name}")
             u_po.userGroupPO = userGroupPO
 

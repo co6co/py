@@ -50,6 +50,6 @@ def crate_wx_cliet_by_config(config: WechatConfig) -> WeChatClient:
     """
     print(config.appid, config.appSecret)
     client = ManagewechatClients.sigleInstance.get(config.appid)
-    if client == None:
+    if client is None:
         client = ManagewechatClients.sigleInstance.addClient(config)
     return client
