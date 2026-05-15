@@ -35,5 +35,19 @@ __all__ = [
     "QueryPagedByFilterCallable",
 ] 
 '''
+ 
+import pkgutil
+import importlib
+
+def auto_import_models(*package_names):
+    """
+    自动导入 models所在的 BasePO
+    该方法不适合大项目
+    """
+    for package_name in package_names: 
+        package = importlib.import_module(package_name)
+        for _, module_name, _ in pkgutil.iter_modules(package.__path__):
+            importlib.import_module(f"{package_name}.{module_name}")
+        
 __version_info = (0, 1,0)
 __version__ = ".".join([str(x) for x in __version_info])

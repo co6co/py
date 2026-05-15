@@ -18,7 +18,7 @@ from co6co.utils import log
 from co6co.task.thread import ThreadEvent
 from co6co.data import DictNamespace
 from .po import BasePO
-
+from . import auto_import_models
 
 class connectSetting(TypedDict):
     DB_HOST: str
@@ -204,7 +204,8 @@ class db_service:
         else:
             BasePO.metadata.create_all(bind=self.engine)
 
-    def sync_init_tables(self):
+    def sync_init_tables(self,*models):
+        auto_import_models(*models)
         retryTime = 0
         while True:
             try:

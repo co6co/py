@@ -33,7 +33,7 @@ class resourcePO(TimeStampedModelPO):
 
 class userResourcePO(TimeStampedModelPO):
     """
-    用户资源资源
+    用户资源
     """
     __tablename__ = "user_resource"
     id = Column("id", BigInteger, comment="主键", autoincrement=True, primary_key=True)

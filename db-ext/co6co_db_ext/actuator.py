@@ -1,3 +1,4 @@
+from __future__ import annotations
 from .po import BasePO 
 from .db_filter import absFilterItems
 
@@ -8,7 +9,7 @@ from sqlalchemy.engine.cursor import CursorResult
 from sqlalchemy.engine.row import Row, RowMapping
 from sqlalchemy.orm import Mapper
 
-from typing import Callable, Any, Dict , List ,Tuple
+from typing import Callable, Any, Dict , List ,Tuple,Awaitable
 from functools import wraps
  
 from co6co.data.result import Result,Page_Result
@@ -26,6 +27,12 @@ from typing import TypeVar, Iterator,Dict, List, Any, Tuple, Optional, Callable
 
 # 定义泛型：限定必须是 BasePO 的子类
 POType = TypeVar("POType", bound=BasePO) 
+class OperationType:
+    INSERT = "INSERT"
+    UPDATE = "UPDATE"
+    DELETE = "DELETE" 
+
+
 
 class Actuator:
     
@@ -219,10 +226,7 @@ class Actuator:
 
     def add_all(self, *pos: BasePO):
         self.session.add_all(pos)
-     
-  
-   
-
+        
     async def query_tree(self,select: Select, rootValue: any = None, pid_field: str = "pid", id_field: str = "id",   param: Dict | List | Tuple = None):
         """
         执行查询: tree列表 
@@ -278,7 +282,8 @@ class Actuator:
             log.err(f"批量增加失败{e}",e)
             return None
 
-    async def add(self,  po: BasePO,  userId=None,  checkFun:Callable[[POType,AsyncSession], Any]  =None, afterFun: Callable[[BasePO, AsyncSession,Any], Result] = None):
+     
+    async def add(self,  option:OperationOption):
         """
         增加 
 
@@ -291,52 +296,57 @@ class Actuator:
         return Result
         """
         try: 
-            po.add_assignment(userId)
-            result=None
-            if checkFun is not None:
-                result = await checkFun(po, self. session ) 
-            self.session.add(po)
-            result=Result.success()
-            if afterFun is not  None:
+            if option.poType is None and option.po is None:
+                return Result.fail(message="实体对象不能为空")
+            if option.json is None:
+                return Result.fail(message="json 不能为空")
+            po=option.po if option.po is not None else option.poType(**option.json) 
+            po.add_assignment(option.userId)
+            if option.beforeFun is not None:
+                result=await option.beforeFun(po, self)
+                if result is not None:
+                    return result
+            await self.session. add(po)
+            if option.afterFun is not None:
                 self.session.flush()
-                result= await afterFun(po, self.session,result )
-            return result 
+                result=await option.afterFun(po, self)
+                if result is not None:
+                    return result
+            return Result.success()
         except Exception as e:
             log.err(f"执行add err {e}",e)
             return Result.fail(message=f"增加失败{e}")
             
 
-    async def edit(self,  select:Select,  newPO: POType , userId=None, fun:Callable[[POType,POType, AsyncSession],Result]=None, json2Po: bool = True):
+    async def edit(self, option:OperationOption):
         """
         编辑 
-        pk: any,          # 主键
-        poType: TypeVar,  # 实体类型
-        newPO:BasePO    ,    #  newPo 更新到 oldPO
-        userId=None, # 用户ID
-        fun=None,    # 执行一些其他操作， (oldPO,po,session)
-                     # 返回值将直接返回客户端并且回滚数据库操作
-        json2Po:bool # 根据 请求的json 转换的对象更新 实体对象，在 fun 之前执行
-
-        return JSONResponse
+        option.select 和 option.po 优先使用 select
         """
-        try:  
-            oldPo:BasePO = await self.query_one_entity( select ) 
+        try:
+            if option.select is None and option.po is None:
+                return Result.fail(message="未能找到实体对象") 
+            if option.json is None:
+                return Result.fail(message="json 不能为空")
+            oldPo:Optional[BasePO] =   await self.query_one_entity( option.select )  if option.select is not None else option.po
             if oldPo is  None:
-                return   Result.fail(message=f"未找到‘{select}’对应的信息!")
-            oldPo.edit_assignment(userId)
-            if json2Po:
+                return   Result.fail(message=f"未找到‘{option.select}’对应的信息!")
+            oldPo.edit_assignment(option.userId)
+            newPO=option.poType(**option.json)
+            if option.json is not None: 
                 oldPo.update(newPO)
-            if fun :
-                return await fun(oldPo, newPO,self. session ) 
+            if option.beforeFun :
+                return await option.beforeFun (oldPo, newPO,self ) 
             return  Result.success()
             
         except Exception as e:
             log.err(f"执行edit失败{e}",e)
-    async def delete(self,po:POType):
-        await  self.session.delete(po) 
-        pass
+            return  Result.fail(message=f"编辑失败{e}")
 
-    async def remove(self,  pk: any, poType: POType,  checkFun:Callable[[POType,AsyncSession],Optional[bool|Result]]  =None  , afterFun:Callable[[POType,AsyncSession], Result]=None):
+    async def delete(self,po:POType):
+        await  self.session.delete(po)  
+
+    async def remove(self,option:OperationOption):
         """
         删除 
 
@@ -351,24 +361,91 @@ class Actuator:
         return Result
         """ 
         try: 
-            oldPo: BasePO = await self. session.get_one(poType, pk)
+            oldPo: Optional[BasePO] =None
+            while True:
+                if option.po is not None:
+                    oldPo=option.po 
+                    break
+                if option.select  is not None  and option.poType is not None:
+                    oldPo: BasePO = await self.query_one_entity(option.poType, option.select)
+                    break 
+                if option.pk  is not None and option.poType is not None:
+                    oldPo: BasePO = await self.query_one_entity(option.poType, option.pk)
+                    break  
             if oldPo is None:
-                return Result.fail(message=f"未找到‘{pk}’对应的信息!")
+                return Result.fail(message="未能找到实体对象或主键值") 
             result=None
-            if checkFun is not None:
-                result = await checkFun(oldPo, self.session) 
+            if option.beforeFun is not None:
+                result = await option.beforeFun(oldPo, self) 
             if isinstance(result, Result):
                 return result
             elif isinstance(result, bool) and result:
-                await  self.delete(oldPo)  
-                if afterFun is not None:
-                    return await afterFun(oldPo, self.session )
+                await  self.delete(oldPo)
+                self.session.flush()
+                if option.afterFun is not None:
+                    return await option.afterFun(oldPo, self )
             else:
-                return Result.fail(result,f"删除失败:checkFun 返回结果类型{type( checkFun)},{result}") 
+                return Result.fail(result,"删除失败beforeFun 返回结果类型bool,且为False") 
             return Result.success()
         except Exception as e:
             await self.session.rollback()
             log.err(f"执行remove失败{e}",e)
             
-
+      
+    async def operation(self, option:OperationOption):
+        """
+        执行操作
+        """ 
+        if option.type == OperationType.INSERT:
+            return await self.add(option) 
+        if option.type == OperationType.UPDATE:
+            return await self.edit(option) 
+        if option.type == OperationType.DELETE:
+            return await self.remove(option) 
+        if option.type == OperationType.QUERY:
+            return await self.query(option) 
+        
 	
+class OperationOption:
+    def __init__(self):
+        self.type:OperationType = OperationType.INSERT
+        self.json: Optional[Dict]=None
+        self.filter: Optional[absFilterItems]=None
+        self.poType:  Optional[POType]=None
+        self.po: Optional[ BasePO]=None
+        self.userId: Optional[int]=None
+        self.beforeFun:Callable[[BasePO, Actuator], Awaitable[Result]]=None
+        self.afterFun:Callable[[BasePO, Actuator], Awaitable[Result]]=None
+        self.select: Optional[Select]=None
+        self.pk: Optional[Any]=None
+    @staticmethod
+    def create_add(cls,json:Dict,*, po:BasePO=None, poType:POType=None,  userId:int=None, beforeFun:Callable[[BasePO, Actuator], Awaitable[Result]]=None, afterFun:Callable[[BasePO, Actuator], Awaitable[Result]]=None):
+        option=cls()
+        option.type=OperationType.INSERT
+        option.poType=poType
+        option.po=po
+        option.json=json
+        option.userId=userId
+        option.beforeFun=beforeFun
+        option.afterFun=afterFun
+    def create_edit(cls,json:Dict,poType:POType,*,select:Select=None,  po:BasePO=None,   userId:int=None, beforeFun:Callable[[BasePO, Actuator], Awaitable[Result]]=None):
+        option=cls()
+        option.type=OperationType.UPDATE
+        option.poType=poType
+        option.po=po
+        option.select=select
+        option.json=json
+        option.userId=userId
+        option.beforeFun=beforeFun
+    def create_del(cls,*,select:Select=None,pk:Any,po:BasePO=None, poType:POType,checkFun:Callable[[BasePO,Actuator],Optional[bool|Result]]  =None, afterFun:Callable[[BasePO,Actuator], Result]=None):
+        option=cls()
+        option.type=OperationType.DELETE
+        option.pk=pk
+
+        option.poType=poType
+        option.select=select
+
+        option.po=po
+        option.beforeFun=checkFun
+        option.afterFun=afterFun
+        return option 

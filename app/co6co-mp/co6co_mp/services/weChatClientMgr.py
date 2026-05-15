@@ -56,7 +56,7 @@ class ManagewechatClients:
         return WeChatClient
         """
         if config.appid not in self.maps:
-            if session_storage == None:
+            if session_storage is None:
                 session_storage = MemoryStorage()
             wechat_client = WeChatClient(
                 config.appid, config.appSecret, session=session_storage)
