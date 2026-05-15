@@ -367,11 +367,12 @@ class Actuator:
                     oldPo=option.po 
                     break
                 if option.select  is not None  and option.poType is not None:
-                    oldPo: BasePO = await self.query_one_entity(option.poType, option.select)
+                    oldPo  = await self.query_one_entity(option.poType, option.select)
                     break 
                 if option.pk  is not None and option.poType is not None:
-                    oldPo: BasePO = await self.query_one_entity(option.poType, option.pk)
-                    break  
+                    oldPo  = await self.query_one_entity(option.poType, option.pk)
+                    break 
+                break
             if oldPo is None:
                 return Result.fail(message="未能找到实体对象或主键值") 
             result=None
@@ -418,7 +419,7 @@ class OperationOption:
         self.afterFun:Callable[[BasePO, Actuator], Awaitable[Result]]=None
         self.select: Optional[Select]=None
         self.pk: Optional[Any]=None
-    @staticmethod
+    @classmethod
     def create_add(cls,json:Dict,*, po:BasePO=None, poType:POType=None,  userId:int=None, beforeFun:Callable[[BasePO, Actuator], Awaitable[Result]]=None, afterFun:Callable[[BasePO, Actuator], Awaitable[Result]]=None):
         option=cls()
         option.type=OperationType.INSERT
@@ -428,6 +429,8 @@ class OperationOption:
         option.userId=userId
         option.beforeFun=beforeFun
         option.afterFun=afterFun
+        return option
+    @classmethod
     def create_edit(cls,json:Dict,poType:POType,*,select:Select=None,  po:BasePO=None,   userId:int=None, beforeFun:Callable[[BasePO, Actuator], Awaitable[Result]]=None):
         option=cls()
         option.type=OperationType.UPDATE
@@ -437,6 +440,8 @@ class OperationOption:
         option.json=json
         option.userId=userId
         option.beforeFun=beforeFun
+        return option
+    @classmethod
     def create_del(cls,*,select:Select=None,pk:Any,po:BasePO=None, poType:POType,checkFun:Callable[[BasePO,Actuator],Optional[bool|Result]]  =None, afterFun:Callable[[BasePO,Actuator], Result]=None):
         option=cls()
         option.type=OperationType.DELETE
@@ -449,3 +454,4 @@ class OperationOption:
         option.beforeFun=checkFun
         option.afterFun=afterFun
         return option 
+
