@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <!--dns 预解析，后面就直接使用缓存-->
+    <link rel="dns-prefetch" href="https://www.coffee.com">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+      
+        .container,
+        .container2,
+        .container3 {
+            display: flex;
+            background-color: #ccc;
+            margin-top: 10px;
+            --item-with : 58px
+        }
+
+        .container {
+            height: 300px;
+        }
+
+        .container .item {
+            margin: auto;
+        }
+
+        .item {
+            background-color: rgb(168, 94, 94);
+            border: 4px rgb(196, 12, 12) double;
+            width: var(--item-with);
+            height: var(--item-with);
+            text-align: center;
+            align-content: center;
+            box-sizing: border-box;
+        }
+
+        .container2 {
+            display: flex;
+            background-color: #ccc;
+        }
+
+        .item:nth-child(3n+1) {
+            background-color: rgb(42, 172, 122);
+            border-color: rgb(9, 235, 178)
+        }
+
+        .item:nth-child(3n+2) {
+            background-color: rgb(172, 163, 42);
+            border-color: rgb(220, 235, 7)
+        }
+
+        .container3 {
+            flex-wrap: wrap;
+            /*  gap: 10px;上下左右间距统一 */
+        }
+
+        .container3 .item {
+            --n: 7;
+            --space: calc(100% / var(--n) - var(--item-with));
+            --m: calc(var(--space) / 2);
+            margin: 10px var(--m);
+            flex: none;
+        }
+    </style>
+</head>
+
+<body>
+    <div>
+        <h2>弹性盒子居中</h2>
+        <h4>设置子项margin:auto，吃掉剩余空间</h4>
+        <div class="container">
+            <div class="item"></div>
+        </div>
+        <div class="container2">
+            <div class="item"></div>
+            <div class="item"></div>
+            <div class="item" style="margin: auto;"></div>
+            <div class="item"></div>
+        </div>
+        <div class="container3">
+            <div class="item">1</div>
+            <div class="item">2</div>
+            <div class="item">3</div>
+            <div class="item">4</div>
+            <div class="item">5</div>
+            <div class="item">6</div>
+            <div class="item">7</div>
+            <div class="item">8</div>
+            <div class="item">9</div>
+            <div class="item">10</div>
+            <div class="item">11</div>
+            <div class="item">12</div>
+            <div class="item">13</div>
+            <div class="item">14</div>
+            <div class="item">15</div>
+            <div class="item">16</div>
+            <div class="item">17</div>
+            <div class="item">18</div>
+            <div class="item">19</div>
+            <div class="item">20</div>
+            <div class="item">21</div>
+            <div class="item">22</div>
+            <div class="item">23</div>
+            <div class="item">24</div>
+            <div class="item">25</div>
+            <div class="item">26</div>
+            <div class="item">27</div>
+            <div class="item">28</div>
+            <div class="item">29</div>
+            <div class="item">30</div>
+            <div class="item">31</div>
+            <div class="item">32</div>
+
+        </div>
+    </div>
+</body>
+
+</html>
