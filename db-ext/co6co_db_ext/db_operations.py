@@ -148,7 +148,8 @@ class DbOperations:
 	
 	async def get_list(self,selectColumnOrPo:Tuple[InstrumentedAttribute]|TypeVar, *filters:ColumnElement[bool],remove_instance_state:bool=True): 
 		isTule,sml=self.create_select(selectColumnOrPo,*filters)
-		if isTule:return await self._get_tuple(sml)
+		if isTule:
+			return await self._get_tuple(sml)
 		return await self._get_list(sml,remove_instance_state)
 	
 	async def count(self,*filters:ColumnElement[bool],column:InstrumentedAttribute="*" )->int:
@@ -187,7 +188,7 @@ class DbOperations:
 			query.options(joinedload(*joinArr)) 
 		if  len (filters)>0:			
 			query.filter(and_(*filters))
-		if param !=None: 
+		if param is not None: 
 			limit=param.limit
 			offset=param.offset
 			query.limit(limit).offset(offset)
@@ -252,30 +253,7 @@ class DbPagedOperations(DbOperations):
 		根据 absFilterItems 获取符合条件的条数
 		"""
 		filters=self.filter_items.filter()
-		return await self.count(*filters,field)
-		#return await self._get_scalar(select(func.count(field)).filter(and_(*filters)))
-		'''
-		execute =await self.db_session.execute(select(func.count(field)).filter(and_(*filters)))  
-		total= execute.scalar()   '''
-		
-		'''from co6co.utils import log
-		#当选取整个对象的时候，都要用 scalars 方法，否则返回的是一个包含一个对象的 tuple 
-		bts=await self.db_session.execute(select(ProcessPO.id,ProcessPO.boatName,ProcessPO.flowStatus).filter(and_(*filters)).limit(3))
-	 
-		log.succ(f"-----{type(bts)}\n{dir(bts)}") 
-		for b in bts.fetchall():
-			print(b)  
-
-		filters=self.filter_items.filter( )
-		orderBy=self.filter_items.getOrderBy() 
-		data=await self.db_session.execute(select(ProcessPO).filter(and_(*filters)).offset(self.filter_items. get_db_page_index()).limit(3).order_by(*orderBy))
-		log.succ(f"-----{type(data)}\n{dir(data)}")
-		for b in data:
-			print(b.tuple)  
-
-		one=await self.db_session.get_one(ProcessPO,ident=2884) 
-		print(one) ''' 
-		return total
+		return await self.count(*filters,field) 
 	
 	async def get_paged (self ,selectColumnOrPo:Tuple[InstrumentedAttribute]|TypeVar=None,remove_instance_state:bool=True)-> List[dict]:
 		"""

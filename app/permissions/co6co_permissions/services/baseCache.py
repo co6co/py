@@ -19,7 +19,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 class BaseCache(CacheManage):
 
     request = Request
-
     def __init__(self, request: Request) -> None:
         self.request = request
         super().__init__(request.app)
@@ -56,7 +55,7 @@ class AccessTokenCache(BaseCache):
         # user: UserPO = await db_tools.execForPo(self._session, select, remove_db_instance_state=False)
         async with self.session:  # , self.session.begin() begin会开启事务
             user: UserPO = await queryUerByAccessToken(self._session, token)
-            if user == None:
+            if user is  None:
                 log.warn("query {} accessToken is NULL".format(token))
                 return False
             else:

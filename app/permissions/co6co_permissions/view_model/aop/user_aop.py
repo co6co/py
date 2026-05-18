@@ -1,6 +1,5 @@
 
 from functools import wraps
-from sanic import Blueprint, Sanic
 from co6co.utils import log
 from sanic.request import Request
 from ...services.baseCache import AccessTokenCache
@@ -22,7 +21,7 @@ def AccessTokenChange(f: Callable[[Request, str], dict]):
         token = kwargs.get("token", None)
         value = await f(*args, **kwargs)
         if value:
-            if cacheManage != None:
+            if cacheManage is not None:
                 value = await f(*args, **kwargs)
                 cacheManage.setCache(token, value)
             else:

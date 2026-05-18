@@ -84,8 +84,7 @@ def menuChanged(f):
             if isinstance(a, Request):
                 cacheManage = AuthonCacheManage(a)
                 cacheManage.setMenuDataInvalid()
-        response = await f(*args, **kwargs)
-        return response
+        return await f(*args, **kwargs)
 
     return decorated_function
 

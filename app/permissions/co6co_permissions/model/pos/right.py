@@ -50,7 +50,7 @@ class UserPO(UserTimeStampedModelPO):
         加密密码
         不保存到属性
         """
-        if password != None:
+        if password is not None:
             return hash.md5(self.salt+password)
         return hash.md5(self.salt+self.password)
 

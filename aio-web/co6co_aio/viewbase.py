@@ -3,8 +3,7 @@ import aiohttp.web as web
 from co6co.utils.json_util import   JSONEncoder
 from co6co.data.result import Result, Page_Result  
 from co6co_db_ext.db_session import db_service
-from co6co_db_ext.actuator import Actuator  
- 
+from co6co_db_ext.actuator import Actuator
 
 class ViewBase(web.View):
     route = "/api/v0" 
@@ -38,3 +37,25 @@ class ViewBase(web.View):
             status=status,
             dumps=JSONEncoder.dumps,
         ) 
+
+class ViewBaseAuth(ViewBase):
+    
+    """
+    认证视图模型
+    """
+    class UserData:
+        """
+        认证数据
+        """
+        def __init__(self, userData:dict):
+            self._userData = userData
+            self.userId = userData["userId"]
+            self.userName = userData["userName"]
+            self.role = userData["role"] 
+    route = "/api/v0/auth"
+    def __init__(self, request, actuator:Actuator, userData:dict):
+        self._userData = userData
+        super().__init__(request, actuator)
+    @property
+    def userData(self):
+        return self.UserData(self._userData)

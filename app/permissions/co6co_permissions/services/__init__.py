@@ -1,4 +1,5 @@
 
+from operator import not_
 from co6co_web_db.view_model import BaseMethodView
 
 from sanic.response import text
@@ -76,7 +77,7 @@ async def generateUserToken(SECRET: str,   data: dict, userOpenId: str = None, e
     userOpenId: role 放置
     expire_seconds: 过期时间,前端使用
     """
-    if data != None:
+    if data is not None:
         token = await createToken(SECRET, data, expire_seconds)
         return {"token": token, "expireSeconds": expire_seconds,   "role": userOpenId}
     else:

@@ -139,7 +139,7 @@ class Actuator:
         return False
 
     async def _execute(self, select: Select|Update| Delete| Insert, params: Dict[str, Any] = None):
-         exec: ChunkedIteratorResult = await self.session.execute(select, params) 
+         exec: ChunkedIteratorResult|CursorResult = await self.session.execute(select, params) 
          return exec 
     
     async def execSQL(self, sql: Update | Insert | Delete, params: Dict | List | Tuple = None):
@@ -155,9 +155,16 @@ class Actuator:
     async def execute(self, select: Select|Update| Delete| Insert, params: Dict[str, Any] = None):
         """
         执行sql
+        
         返回影响的行数，或者一个对象 
+        @example
+        execute(Select(po.id,po.name).where(po.id==1))->id|None 
+        execute(Select(po).where(po.id==1))->po|None
+        execute(Update(po).where(po.id==1).values(name="new"))->影响的行数
         """
         exec = await self._execute(select, params)
+        if isinstance(exec, CursorResult):
+            return exec.rowcount
         return exec.scalar() 
     async def count(self,  *filters: ColumnElement[bool], column: InstrumentedAttribute = "*") -> int:
         """

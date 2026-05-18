@@ -7,8 +7,7 @@ from co6co_sanic_ext.model.res.result import Result
 from ...services import getCurrentUserId
 import inspect
 
-ObjectExistRoute = "/exist/<code:str>/<pk:int>"
-
+ObjectExistRoute = "/exist/<code:str>/<pk:int>" 
 
 def exist(isExist: bool = True, tableName="用户", name: str = "xxx"):
     if isExist:
