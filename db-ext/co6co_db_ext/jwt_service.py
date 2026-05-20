@@ -3,7 +3,14 @@ import jwt
 from datetime import datetime,timezone, timedelta
 from typing import Any
 from co6co.utils import log
+from dataclasses import dataclass
 
+@dataclass(init=False)
+class PageToken:
+    token: str
+    role: str
+    expireSeconds:int
+    refreshToken: str 
 
 class JwtService:
     def __init__(self, secret: str, issuer: str = "JWT+SERVICE") -> None:
@@ -44,6 +51,20 @@ class JwtService:
         except Exception as e:
             log.warn("校验失败:", e)
             return None
+    def create_token(self, data: dict,refreshData:dict, expire_seconds: int = 86400, k:int=3, **kvarg):
+        """
+        kvarg: 其他参数,直接以明文方式增加到字典中
+        生成登录token和刷新token
+        """
+        token = self.encode(data, expire_seconds)
+        token2 = self.encode(refreshData, k*expire_seconds)
+        result={}
+        accessToken=  {"token": token, "expireSeconds": expire_seconds} 
+        refreshToken= {"token": token2, "expireSeconds": k*expire_seconds } 
+        result.update(kvarg)
+        
+        result.update({"accessToken":accessToken, "refreshToken":  refreshToken})
+        return result
 
 
 async def createToken(SECRET: str, data: dict, expire_seconds: int = 86400):
@@ -74,4 +95,5 @@ def decodeToken(token: str|None, SECRET: str):
     if result is None or 'data' not in result:
         return None
     return result["data"] 
- 
+
+

@@ -7,12 +7,15 @@ from co6co_db_ext.actuator import Actuator
 
 class ViewBase(web.View):
     route = "/api/v0" 
-    def __init__(self, request, actuator:Actuator):
+    def __init__(self, request: web.Request, actuator:Actuator):
         self._session = actuator.session
         self._actuator = actuator
         self.db: db_service = request.app.db
         super().__init__(request)
-
+        self._jwt:JwtService=request.app.jwtService 
+    @property
+    def jwtService(self):
+        return self._jwt
     @property
     def Session(self):
         """

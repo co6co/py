@@ -13,6 +13,8 @@ from typing import List
 from co6co_db_ext.db_session import db_service,connectSetting
 import json
 from dataclasses import dataclass 
+from co6co_db_ext.jwt_service import JwtService
+
 T = TypeVar("T",bound='http_server_base')
 
 @dataclass(init=False)
@@ -22,6 +24,7 @@ class webConfig:
     ssl: bool
     cert: str
     key: str
+    jwt_secret: str
 
     def post_init(self, config: DictNamespace):
         self.port = config.port
@@ -29,6 +32,7 @@ class webConfig:
         self.ssl = config.ssl
         self.cert = config.cert
         self.key = config.key
+        self.jwt_secret = config.jwt_secret
         
 
 
@@ -36,8 +40,11 @@ async def _appStart(app: web.Application):
     """应用启动时的初始化操作"""
     config = app.config 
     db_config=http_server_base.get_db_config(config)
+    web_config=http_server_base.get_web_config(config)
     db = db_service(db_config)
     app.db = db
+    jwt= JwtService(web_config.jwt_secret)
+    app.jwtService = jwt 
     pass
 
 def init_db(configFilePath:str):
@@ -70,17 +77,25 @@ class http_server_base(metaclass=abc.ABCMeta):
         return configs,web_config,db_config
     
     @staticmethod
-    def get_web_config(configs:dict): 
-        setting = configs.get("web_setting", {})
-        web_config = webConfig()
-        web_config.post_init(DictNamespace(**setting)) 
-        return web_config
+    def get_web_config(configs:dict):
+        try: 
+            setting = configs.get("web_setting", {})
+            web_config = webConfig()
+            web_config.post_init(DictNamespace(**setting)) 
+            return web_config
+        except Exception as e:
+            log.err(f"web_setting error:{setting}",e)
+            raise e
     @staticmethod
-    def get_db_config(configs:dict): 
-        setting = configs.get("db_settings", {})
-        data=DictNamespace(**setting) 
-        _config = connectSetting.create_default(data) 
-        return _config
+    def get_db_config(configs:dict):
+        try:
+            setting = configs.get("db_settings", {})
+            data=DictNamespace(**setting) 
+            _config = connectSetting.create_default(data) 
+            return _config
+        except Exception as e:
+            log.err(f"db_settings error:{setting}",e)
+            raise e
         
     @classmethod
     def _create_server(cls ,configFile:str,*, middlewares: List[Middleware] = [],

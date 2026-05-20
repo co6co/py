@@ -76,3 +76,4 @@ async def setCurrentUser(request: Request, data: dict):
     """
     request.ctx.current_user = data
     return True
+
