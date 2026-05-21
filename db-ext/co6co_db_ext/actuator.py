@@ -313,7 +313,7 @@ class Actuator:
                 result=await option.beforeFun(po, self)
                 if result is not None:
                     return result
-            await self.session. add(po)
+            self.session.add(po)
             if option.afterFun is not None:
                 self.session.flush()
                 result=await option.afterFun(po, self)

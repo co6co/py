@@ -4,7 +4,7 @@ import ssl
 import asyncio
 import os
 from aiohttp.typedefs import Middleware
-from typing import Iterable,TypeVar
+from typing import Iterable,TypeVar,cast,Optional
 import abc
 from co6co.utils import log
 from co6co.utils.json_util import JSONEncoder
@@ -35,16 +35,57 @@ class webConfig:
         self.jwt_secret = config.jwt_secret
         
 
+@dataclass
+class AppConfig:
+    raw: dict
+    web: Optional[webConfig] = None
+    db: Optional[connectSetting] = None
+
+    @staticmethod
+    def get_config(config_file: str, *,use_web_config:bool=True,use_db_config:bool=True):
+        appConfig=AppConfig({})
+        try:
+            with open(config_file, "r", encoding="utf-8") as f: 
+                appConfig.raw =json.load(f)
+        except FileNotFoundError:
+            raise RuntimeError(f"配置文件不存在: {config_file}")
+        except json.JSONDecodeError as e:
+            raise RuntimeError(f"配置文件 JSON 解析失败: {e}")  
+        if use_web_config:
+            appConfig.web = AppConfig.get_web_config(appConfig.raw)
+        if use_db_config: 
+            appConfig.db = AppConfig.get_db_config(appConfig.raw)
+        return appConfig
+    
+    @staticmethod
+    def get_web_config(configs:dict):
+        try: 
+            setting = configs.get("web_setting", {})
+            web_config = webConfig()
+            web_config.post_init(DictNamespace(**setting)) 
+            return web_config
+        except Exception as e:
+            log.err(f"web_setting error:{setting}",e)
+            raise e
+    @staticmethod
+    def get_db_config(configs:dict):
+        try:
+            setting = configs.get("db_settings", {})
+            data=DictNamespace(**setting) 
+            _config = connectSetting.create_default(data) 
+            return _config
+        except Exception as e:
+            log.err(f"db_settings error:{setting}",e)
+            raise e
 
 async def _appStart(app: web.Application):
     """应用启动时的初始化操作"""
-    config = app.config 
-    db_config=http_server_base.get_db_config(config)
-    web_config=http_server_base.get_web_config(config)
-    db = db_service(db_config)
+    config  =  cast(AppConfig, app.config) 
+    db = db_service(config.db)
     app.db = db
-    jwt= JwtService(web_config.jwt_secret)
+    jwt= JwtService(config.web.jwt_secret)
     app.jwtService = jwt 
+    log.warn("所有配置",config)
     pass
 
 def init_db(configFilePath:str):
@@ -69,58 +110,30 @@ class http_server_base(metaclass=abc.ABCMeta):
         self.key = None
         self._app = web.Application(middlewares=middlewares, **kvargs) 
 
-    @staticmethod
-    def get_config(configFile: str):
-        configs= json.load(open(configFile, "r",encoding="utf-8"))
-        web_config = http_server_base.get_web_config(configs)
-        db_config = http_server_base.get_db_config(configs) 
-        return configs,web_config,db_config
-    
-    @staticmethod
-    def get_web_config(configs:dict):
-        try: 
-            setting = configs.get("web_setting", {})
-            web_config = webConfig()
-            web_config.post_init(DictNamespace(**setting)) 
-            return web_config
-        except Exception as e:
-            log.err(f"web_setting error:{setting}",e)
-            raise e
-    @staticmethod
-    def get_db_config(configs:dict):
-        try:
-            setting = configs.get("db_settings", {})
-            data=DictNamespace(**setting) 
-            _config = connectSetting.create_default(data) 
-            return _config
-        except Exception as e:
-            log.err(f"db_settings error:{setting}",e)
-            raise e
-        
     @classmethod
     def _create_server(cls ,configFile:str,*, middlewares: List[Middleware] = [],
         client_max_size: int = 1024 * 1024 * 100,
         **kvargs):
-        config,web_config,db_config = cls.get_config(configFile) 
+        appConfig= AppConfig.get_config(configFile) 
         instance= cls(middlewares=middlewares,client_max_size=client_max_size,**kvargs) 
-        instance.app.config = config  
-        if web_config.ssl:
-            instance.use_ssl(web_config.cert, web_config.key)
+        instance.app.config = appConfig  
+        if appConfig.web.ssl:
+            instance.use_ssl( appConfig.web.cert,  appConfig.web.key)
         instance.app.on_startup.append(_appStart)
         instance.app.on_shutdown.append(_appShutdown)
-        return instance,config,web_config,db_config
+        return instance,appConfig
     @classmethod
     def create_server(cls ,configFile:str,*, middlewares: List[Middleware] = [],
         client_max_size: int = 1024 * 1024 * 100,
         **kvargs):
-        instance,_,_,_ = cls._create_server(configFile, middlewares=middlewares, client_max_size=client_max_size, **kvargs)
+        instance,_ = cls._create_server(configFile, middlewares=middlewares, client_max_size=client_max_size, **kvargs)
         return instance
 
     @classmethod
     def start_server(cls ,configFile:str,*, middlewares: List[Middleware] = [],client_max_size: int = 1024 * 1024 * 100,
         **kvargs):
-        instance,_,web_config,_ = cls._create_server(configFile, middlewares=middlewares, client_max_size=client_max_size, **kvargs)
-        asyncio.run(instance.start(web_config.host,web_config.port)) 
+        instance,appConfig  = cls._create_server(configFile, middlewares=middlewares, client_max_size=client_max_size, **kvargs)
+        asyncio.run(instance.start(appConfig.web.host,appConfig.web.port)) 
 
     @property
     def app(self):
