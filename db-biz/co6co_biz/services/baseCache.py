@@ -13,8 +13,7 @@ from ..services import queryUerByAccessToken
 from sqlalchemy.ext.asyncio import AsyncSession
 
 
-class BaseCache(CacheManage):
-
+class BaseCache(CacheManage): 
     request = Request
     def __init__(self, request: Request) -> None:
         self.request = request
@@ -50,7 +49,7 @@ class AccessTokenCache(BaseCache):
 
         # select = Select(UserPO).filter(UserPO.password.__eq__(token), UserPO.state.in_([user_state.enabled]))
         # user: UserPO = await db_tools.execForPo(self._session, select, remove_db_instance_state=False)
-        async with self.session:  # , self.session.begin() begin会开启事务
+        async with self.session:  # , self.session.begin() #begin会开启事务
             user: UserPO = await queryUerByAccessToken(self._session, token)
             if user is  None:
                 log.warn("query {} accessToken is NULL".format(token))

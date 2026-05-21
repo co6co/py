@@ -1,11 +1,7 @@
-
 from operator import not_
 from co6co_web_db.view_model import BaseMethodView
 
-from sanic.response import text
-from sanic import Request
-from co6co_sanic_ext.utils import JSON_util
-from co6co_sanic_ext.model.res.result import Result
+from co6co_sanic_ext.utils import JSON_util 
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from sqlalchemy.sql import Select, Delete
@@ -13,18 +9,13 @@ from co6co_db_ext.db_utils import db_tools
 from co6co_web_db.services.jwt_service import createToken, decodeToken
 from co6co.utils import log
 
-from co6co_web_db.view_model import get_one
+
 from ..model.pos.right import UserPO, RolePO, UserRolePO, AccountPO
 from co6co.utils.tool_util import to_underscore
 import uuid
 from ..model.enum import user_state
 
-
-def getSecret(request: Result):
-    """
-    获取加密密钥
-    """
-    return request.app.config.SECRET
+ 
 
 
 def getCurrentUserId(request: Request):
