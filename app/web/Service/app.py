@@ -56,6 +56,7 @@ def init(app: Sanic, _: dict):
         pass
     app.blueprint(api)
     dynamicRouter.appendRoute(app)
+    #log.warn("Session",app.ctx.Session)
     session.init(app)
 
 

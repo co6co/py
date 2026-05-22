@@ -1,15 +1,31 @@
 
 from .memory import MemorySessionImp
-from .base import IBaseSession
+from .base import IBaseSession,SessionDict
+from sanic import Sanic, Request
 
 
 class Session:
-
+    @staticmethod
+    def mount_session(app: Sanic, sessionImp: IBaseSession = MemorySessionImp()):
+        """
+        初始化 session
+        """
+        session: Session = Session(app, sessionImp)
+        return session
+    @staticmethod 
+    def getSession(request:Request):  
+        sDict:SessionDict = request.ctx.Session
+        session:Session = request.app.ctx.extensions['Session']
+        return session, sDict
     def __init__(self, app=None, interface: IBaseSession = None):
         self.interface = None
         if app:
-            self.init_app(app, interface)
+            self.init_app(app, interface) 
 
+    def get_session(self,request:Request): 
+        session:Session = request.app.ctx.extensions['Session']
+        sDict:SessionDict = request.ctx[self.interface .session_name]
+        return session, sDict
     @property
     def expiry(self):
         """

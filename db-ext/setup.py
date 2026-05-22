@@ -55,7 +55,7 @@ setup(
     include_package_data=True, zip_safe=True,
     setup_requires=[ ], ## 构建时依赖 过时 且行为不稳定。
     # 依赖哪些模块 
-    install_requires=["co6co>=0.0.38","co6co","aiomysql","SQLAlchemy"], # 运行时依赖
+    install_requires=["co6co>=0.1.1","aiomysql","SQLAlchemy"], # 运行时依赖
     # package_dir= {'utils':'src/log','main_package':'main'},#告诉Distutils哪些目录下的文件被映射到哪个源码
     author='co6co',
     author_email='co6co@qq.com',

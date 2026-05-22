@@ -32,10 +32,8 @@ db_session.py  72 z
 	优化
 0.0.17
     增加dbBll类，移除session中的DbSession、BaseBll类
-0.0.18
-    优化功能
-0.1.0
-    优化功能
+0.1.0 2026-05-22
+    增加 actuator，jwt_service
 
 
 ```

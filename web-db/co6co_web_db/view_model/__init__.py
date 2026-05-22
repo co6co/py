@@ -313,7 +313,7 @@ class BaseMethodView(BaseView):
                 else:
                     oldPo: BasePO = await session.get_one(poType, pkOrSelect)
                 if oldPo == None:
-                    return JSON_util.response(Result.fail(message=f"未查到‘{pk}’对应的信息!"))
+                    return JSON_util.response(Result.fail(message=f"未查到‘{pkOrSelect}’对应的信息!"))
                 oldPo.edit_assignment(userId)
                 if json2Po:
                     oldPo.update(po)

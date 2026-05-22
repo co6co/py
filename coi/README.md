@@ -83,6 +83,8 @@
 0.1.0
     JSONEncoder 
 	Result
+0.1.1
+	不知道改了什么，包hash不一样，只能发布
 	
 ```
 
