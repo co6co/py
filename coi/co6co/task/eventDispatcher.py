@@ -1,7 +1,11 @@
 import multiprocessing
 import time
 from multiprocessing import Process, Pipe
-from multiprocessing.connection import PipeConnection
+try:
+    from multiprocessing.connection import PipeConnection
+except ImportError:
+    # linux 
+    from multiprocessing.connection import Connection as PipeConnection
 from typing import Dict, Any, Callable, Optional
 from enum import Enum
 import json

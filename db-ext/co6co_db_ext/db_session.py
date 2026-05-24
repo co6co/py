@@ -1,3 +1,4 @@
+from __future__ import annotations 
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncEngine
 
 from contextvars import ContextVar
@@ -19,6 +20,7 @@ from co6co.task.thread import ThreadEvent
 from co6co.data import DictNamespace
 from .po import BasePO
 from . import auto_import_models
+import json
 
 class connectSetting(TypedDict):
     DB_HOST: str
@@ -34,7 +36,7 @@ class connectSetting(TypedDict):
     #    for k in self.keys():
     #        self[k] = data.get(k)
     @staticmethod
-    def from_(instance:TypedDict, data: DictNamespace):
+    def from_(instance:connectSetting, data: DictNamespace):
         for k in instance.keys():
             instance[k] = data.get(k)
     @classmethod
@@ -53,13 +55,29 @@ class connectSetting(TypedDict):
         if data is not None:
             connectSetting.from_(instance, data)
         return instance
+    
+    @staticmethod
+    def create_from_config(config_file: str,  database_key:str="db_settings"):
+        raw:dict={}
+        try:
+            with open(config_file, "r", encoding="utf-8") as f: 
+                raw =json.load(f)
+        except FileNotFoundError:
+            raise RuntimeError(f"配置文件不存在: {config_file}")
+        except json.JSONDecodeError as e:
+            raise RuntimeError(f"配置文件 JSON 解析失败: {e}")
+        db_settings = raw.get(database_key, {})
+        print(db_settings)
+        if not db_settings:
+            raise RuntimeError(f"配置文件中没有 {database_key} 配置")
+        instance=connectSetting.create_default()
+        connectSetting.from_(instance, DictNamespace(**db_settings))
+        return instance
 
 
 class db_service:
-    default_settings: connectSetting = connectSetting.create_default()
-    settings = {}
-    session: scoped_session  # 同步连接
-
+    default_settings= connectSetting.create_default() 
+    session: scoped_session  # 同步连接 
     async_session_factory: sessionmaker  # 异步连接
     """
     AsyncSession 工厂函数
@@ -68,14 +86,11 @@ class db_service:
     """
     useAsync: bool
     poolSize: int = None
-    poolSize: int = None
 
     def createEngine(self, url, **kwargs) -> Engine:
         setting = {
             "ping": self.settings.get("pool_pre_ping"),
-            "echo": True
-            if isinstance(self.settings.get("echo"), bool)
-            else self.settings.get("echo"),
+            "echo": True if isinstance(self.settings.get("echo"), bool) else self.settings.get("echo"),
             "pool_size": self.settings.get("pool_size"),
             "max_overflow": self.settings.get("max_overflow"),
             "poolclass": NullPool,

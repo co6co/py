@@ -6,7 +6,7 @@ from sanic import Sanic, Request
 
 class Session:
     @staticmethod
-    def mount_session(app: Sanic, sessionImp: IBaseSession = MemorySessionImp()):
+    def setup(app: Sanic, sessionImp: IBaseSession = MemorySessionImp()):
         """
         初始化 session
         """
@@ -23,9 +23,9 @@ class Session:
             self.init_app(app, interface) 
 
     def get_session(self,request:Request): 
-        session:Session = request.app.ctx.extensions['Session']
-        sDict:SessionDict = request.ctx[self.interface .session_name]
-        return session, sDict
+        sDict:SessionDict = request.ctx[self.interface .option.session_name]
+        #session:Session = request.app.ctx.extensions['Session']
+        return self, sDict
     @property
     def expiry(self):
         """
@@ -38,7 +38,7 @@ class Session:
         if not hasattr(app.ctx, "extensions"):
             app.ctx.extensions = {}
 
-        app.ctx.extensions[self.interface.session_name] = self  # session_name defaults to 'session'
+        app.ctx.extensions[self.interface.option.session_name] = self  # session_name defaults to 'session'
 
         # @app.middleware('request')
         async def add_session_to_request(request):

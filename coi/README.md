@@ -85,6 +85,8 @@
 	Result
 0.1.1
 	不知道改了什么，包hash不一样，只能发布
+0.1.2
+	linx  无 PipeConnection bug
 	
 ```
 

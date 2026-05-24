@@ -21,6 +21,11 @@ from co6co.utils.source import compile_source
 import inspect
 from multiprocessing import Pipe
 from multiprocessing.connection import PipeConnection
+try:
+    from multiprocessing.connection import PipeConnection
+except ImportError:
+    # linux 
+    from multiprocessing.connection import Connection as PipeConnection
 import asyncio
 import threading
 import multiprocessing

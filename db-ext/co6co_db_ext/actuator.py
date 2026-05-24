@@ -1,4 +1,5 @@
 from __future__ import annotations
+ 
 from .po import BasePO 
 from .db_filter import absFilterItems
 
@@ -14,13 +15,13 @@ from functools import wraps
  
 from co6co.data.result import Result,Page_Result
 from co6co.utils import log 
-from co6co.utils.tool_util import list_to_tree 
+from co6co.utils.tool_util import list_to_tree,get_current_function_name
   
 from sqlalchemy import func, text,and_
 from sqlalchemy.sql.elements import ColumnElement
 from sqlalchemy.orm.attributes import InstrumentedAttribute 
 
-from typing import TypeVar, Iterator,Dict, List, Any, Tuple, Optional, Callable
+from typing import TypeVar, Iterator,Dict, List, Any, Tuple, Optional, Callable 
 
  
 
@@ -33,9 +34,18 @@ class OperationType:
     DELETE = "DELETE" 
 
 
+def errorLog( module: str, method: str,errorCode: str,e:Exception):
+    log.err(f"执行出错所属模块:{module}.{method} Error,错误码:{errorCode}",e)
 
 class Actuator:
-    
+    def _error0(self,e: Exception):
+        """
+        响应错误 message
+        """ 
+        #debug()
+        errorCode =hex(e.__hash__()) 
+        errorLog( self.__class__, get_current_function_name(),errorCode,e)
+        return Result.fail(message=f"执行不成功，{errorCode}")
     def __init__(self, session: AsyncSession):
         """
             # 查询1：选择特定列 返回元组
@@ -118,7 +128,7 @@ class Actuator:
     @staticmethod
     def list2Dict(list: List[Row | RowMapping]) -> List[dict]:
         return [Actuator.one2Dict(a) for a in list]
-
+    @staticmethod
     def select_result_strategy(stmt: Select):
         """
         根据 Select 类型返回推荐的取值方式
@@ -131,6 +141,7 @@ class Actuator:
             return "scalar" 
         # 多列
         return "mappings"
+    @staticmethod
     def is_entity_select(stmt):
         """判断 Select 是否查询 ORM 实体"""
         for col in stmt._raw_columns:
@@ -258,8 +269,8 @@ class Actuator:
         分页查询
         """ 
         try:
-            filter.count_select, filter.list_select 
-            total =   await self.execute(filter.count_select ) 
+            #filter.count_select, filter.list_select 
+            total  = await self.execute(filter.count_select) 
             if self.is_entity_select( filter.list_select ): 
                 result=self.query_all_entity_mappings(filter.list_select ) 
             else:
@@ -267,7 +278,7 @@ class Actuator:
             return total, result 
         except Exception as e:
             log.err(f"查询失败{e}",e)
-            return None
+            return None, None
 
      
     async def batchAdd(self,  poList: List[BasePO],   userId=None, checkFun:Callable[[POType,AsyncSession], Any]  =None, afterFun: Callable[[List[BasePO], AsyncSession,Any], Result] = None):
@@ -373,11 +384,11 @@ class Actuator:
                 if option.po is not None:
                     oldPo=option.po 
                     break
-                if option.select  is not None  and option.poType is not None:
-                    oldPo  = await self.query_one_entity(option.poType, option.select)
+                if option.select  is not None :
+                    oldPo  = await self.query_one_entity( option.select)
                     break 
-                if option.pk  is not None and option.poType is not None:
-                    oldPo  = await self.query_one_entity(option.poType, option.pk)
+                if option.pk  is not None and option.poType is not None: 
+                    oldPo  = await self. session.get_one(option.poType, option.pk) 
                     break 
                 break
             if oldPo is None:
@@ -397,7 +408,7 @@ class Actuator:
             return Result.success()
         except Exception as e:
             await self.session.rollback()
-            log.err(f"执行remove失败{e}",e)
+            return self._error0(e)
             
       
     async def operation(self, option:OperationOption):
@@ -449,7 +460,7 @@ class OperationOption:
         option.beforeFun=beforeFun
         return option
     @classmethod
-    def create_del(cls,*,select:Select=None,pk:Any,po:BasePO=None, poType:POType,checkFun:Callable[[BasePO,Actuator],Optional[bool|Result]]  =None, afterFun:Callable[[BasePO,Actuator], Result]=None):
+    def create_del(cls,*,select:Select=None,pk:Any=None,po:BasePO=None, poType:POType=None,checkFun:Callable[[BasePO,Actuator],Optional[bool|Result]]  =None, afterFun:Callable[[BasePO,Actuator], Result]=None):
         option=cls()
         option.type=OperationType.DELETE
         option.pk=pk

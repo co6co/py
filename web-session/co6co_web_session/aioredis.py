@@ -1,4 +1,4 @@
-from .base import IBaseSession
+from .base import IBaseSession, session_option
 
 try:
     import aioredis
@@ -10,12 +10,7 @@ class AIORedisSessionImp(IBaseSession):
     def __init__(
         self,
         redis,
-        expiry: int = 2592000,
-        head_name: str = "session",
-        prefix: str = "session:",
-        samesite: str = None,
-        session_name: str = "Session",
-        secure: bool = False,
+        options: session_option = None
     ):
         """Initializes a session interface backed by Redis.
 
@@ -53,25 +48,20 @@ class AIORedisSessionImp(IBaseSession):
                 Adds the `Secure` flag to the session cookie.
         """
         if aioredis is None:
-            raise RuntimeError("Please install aioredis: pip install sanic_session[aioredis]")
+            raise RuntimeError(
+                "Please install aioredis: pip install sanic_session[aioredis]")
 
         self.redis = redis
 
         super().__init__(
-            expiry=expiry,
-            prefix=prefix,
-            head_name=head_name,
-
-            samesite=samesite,
-            session_name=session_name,
-            secure=secure,
+            options
         )
 
     async def _get_value(self, prefix, sid):
-        return await self.redis.get(self.prefix + sid)
+        return await self.redis.get(self.option.prefix + sid)
 
     async def _delete_key(self, key):
         await self.redis.delete(key)
 
     async def _set_value(self, key, data):
-        await self.redis.setex(key, self.expiry, data)
+        await self.redis.setex(key, self.option.expiry, data)

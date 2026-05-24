@@ -1,0 +1,12 @@
+{ 
+    "db_settings": {
+        "DB_HOST": "localhost",
+        "DB_NAME": "test_db",
+        "DB_USER": "root",
+        "DB_PASSWORD": "mysql123456",
+        "echo": false,
+        "pool_size": 20,
+        "max_overflow": 1,
+        "pool_pre_ping": true
+    } 
+}

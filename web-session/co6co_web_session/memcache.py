@@ -1,6 +1,6 @@
 import warnings
 
-from .base import IBaseSession
+from .base import IBaseSession, session_option
 
 try:
     import aiomcache
@@ -12,15 +12,7 @@ class MemcacheSessionImp(IBaseSession):
     def __init__(
         self,
         memcache_connection,
-        domain: str = None,
-        expiry: int = 2592000,
-        httponly: bool = True,
-        cookie_name: str = "session",
-        prefix: str = "session:",
-        sessioncookie: bool = False,
-        samesite: str = None,
-        session_name: str = "Session",
-        secure: bool = False,
+        option: session_option = None
     ):
         """Initializes the interface for storing client sessions in memcache.
         Requires a client object establised with `asyncio_memcache`.
@@ -60,28 +52,22 @@ class MemcacheSessionImp(IBaseSession):
                 Adds the `Secure` flag to the session cookie.
         """
         if aiomcache is None:
-            raise RuntimeError("Please install aiomcache: pip install " "sanic_session[aiomcache]")
+            raise RuntimeError(
+                "Please install aiomcache: pip install " "sanic_session[aiomcache]")
 
         self.memcache_connection = memcache_connection
-
-        if expiry > 2592000:
+        if option is None:
+            option = session_option.crate_use_header()
+        if option. expiry > 2592000:
             warnings.warn("Memcache has a maximum 30-day cache limit")
-            expiry = 0
+            option. expiry = 0
 
         super().__init__(
-            expiry=expiry,
-            prefix=prefix,
-            cookie_name=cookie_name,
-            domain=domain,
-            httponly=httponly,
-            sessioncookie=sessioncookie,
-            samesite=samesite,
-            session_name=session_name,
-            secure=secure,
+            option
         )
 
     async def _get_value(self, prefix, sid):
-        key = (self.prefix + sid).encode()
+        key = (self.option.prefix + sid).encode()
         value = await self.memcache_connection.get(key)
         return value.decode() if value else None
 
@@ -89,4 +75,4 @@ class MemcacheSessionImp(IBaseSession):
         return await self.memcache_connection.delete(key.encode())
 
     async def _set_value(self, key, data):
-        return await self.memcache_connection.set(key.encode(), data.encode(), exptime=self.expiry)
+        return await self.memcache_connection.set(key.encode(), data.encode(), exptime=self.option.expiry)

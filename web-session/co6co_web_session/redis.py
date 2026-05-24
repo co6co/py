@@ -1,5 +1,5 @@
 from typing import Callable
-from co6co_web_session.base import IBaseSession
+from co6co_web_session.base import IBaseSession,session_option
 
 try:
     import asyncio_redis
@@ -11,15 +11,8 @@ class RedisSessionImp(IBaseSession):
     def __init__(
         self,
         redis_getter: Callable,
-        domain: str = None,
-        expiry: int = 2592000,
-        httponly: bool = True,
-        head_anme: str = "session",
-        prefix: str = "session:",
-        sessioncookie: bool = False,
-        samesite: str = None,
-        session_name: str = "Session",
-        secure: bool = False,
+        option:session_option=None
+
     ):
         """Initializes a session interface backed by Redis.
 
@@ -63,15 +56,9 @@ class RedisSessionImp(IBaseSession):
             raise RuntimeError("Please install asyncio_redis: pip install sanic_session[redis]")
 
         self.redis_getter = redis_getter
-
-        super().__init__(
-            expiry=expiry,
-            prefix=prefix,
-            head_anme=head_anme,
-            samesite=samesite,
-            session_name=session_name,
-            secure=secure,
-        )
+        if option is None:
+            option=session_option.crate_use_header()
+        super().__init__(  option )
 
     async def _get_value(self, prefix, key):
         redis_connection = await self.redis_getter()
@@ -83,4 +70,4 @@ class RedisSessionImp(IBaseSession):
 
     async def _set_value(self, key, data):
         redis_connection = await self.redis_getter()
-        await redis_connection.setex(key, self.expiry, data)
+        await redis_connection.setex(key, self.option.expiry, data)

@@ -9,6 +9,19 @@ pip install -i https://pypi.tuna.tsinghua.edu.cn/simple some-package
 pip install -i https://pypi.org/simple/ some-package
 pip install --upgrade --no-deps co6co --index-url https://pypi.org/simple/
 # python 最新版本
+
+    Python 3.12+
+    from multiprocessing.connection import PipeConnection
+	
+
+numpy 只能用 1.x 版本 cv 用到
+
+# 先强制安装兼容的 greenlet 预编译版
+pip install greenlet==3.2.5 --only-binary :all:
+
+# 再安装你需要的 SQLAlchemy
+pip install SQLAlchemy==2.0.28
+
 ```
 co6co==0.0.37
 co6co.web_session=0.0.1

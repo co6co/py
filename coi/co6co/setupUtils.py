@@ -37,10 +37,7 @@ def get_classifiers():
     classifiers = [
         "Development Status :: 5 - Production/Stable",  # 处于稳定生产阶段
         "Intended Audience :: Developers",  # 标用户是开发者
-        "License :: OSI Approved :: MIT License",  # 采用 MIT 许可证
-        "Programming Language :: Python :: 3",  # 项目支持 Python 3
-        "Programming Language :: Python :: 3.10",
-        "Programming Language :: Python :: 3.11",
+        "License :: OSI Approved :: MIT License",  # 采用 MIT 许可证 
         "Programming Language :: Python :: 3.12",
         "Operating System :: OS Independent",  # 可以在任意操作系统上运行
     ]

@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
 import warnings
-from .base import IBaseSession
+from .base import IBaseSession,session_option
 
 try:
     from sanic_motor import BaseModel
@@ -29,14 +29,7 @@ class MongoDBSessionImp(IBaseSession):
         self,
         app,
         coll: str = "session",
-        domain: str = None,
-        expiry: int = 30 * 24 * 60 * 60,
-        httponly: bool = True,
-        hand_name: str = "session",
-        sessioncookie: bool = False,
-        samesite: str = None,
-        session_name: str = "Session",
-        secure: bool = False,
+        option:session_option=None
     ):
         """Initializes the interface for storing client sessions in MongoDB.
 
@@ -76,11 +69,11 @@ class MongoDBSessionImp(IBaseSession):
         """
         if _SessionModel is None:
             raise RuntimeError("Please install Mongo dependencies: " "pip install sanic_session[mongo]")
-
+        if option is None:
+            option=session_option.crate_use_header()
         # prefix not needed for mongodb as mongodb uses uuid4 natively
-        prefix = ""
-
-        if httponly is not True:
+        option.prefix = "" 
+        if option.httponly is not True:
             warnings.warn(
                 """
                 httponly default arg has changed.
@@ -91,14 +84,7 @@ class MongoDBSessionImp(IBaseSession):
                 DeprecationWarning,
             )
 
-        super().__init__(
-            expiry=expiry,
-            prefix=prefix,
-            hand_name=hand_name,
-            samesite=samesite,
-            session_name=session_name,
-            secure=secure,
-        )
+        super().__init__( option )
 
         # set collection name
         _SessionModel.__coll__ = coll
@@ -125,5 +111,5 @@ class MongoDBSessionImp(IBaseSession):
         await _SessionModel.delete_one({"sid": key})
 
     async def _set_value(self, key, data):
-        expiry = datetime.utcnow() + timedelta(seconds=self.expiry)
+        expiry = datetime.utcnow() + timedelta(seconds=self.option.expiry)
         await _SessionModel.replace_one({"sid": key}, {"sid": key, "expiry": expiry, "data": data}, upsert=True)
