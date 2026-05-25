@@ -1,5 +1,8 @@
-from typing import Any, Dict, Optional, Iterator, Tuple, List
+from typing import Any, Dict, Generator,TypeVar, Iterator, Tuple, List
 # from types import SimpleNamespace # 不支持 data['name'] 及 data.get("name") 这类访问方式
+
+T = TypeVar("T")
+
 
 
 class DictNamespace:
@@ -131,3 +134,32 @@ class DictNamespace:
         if not isinstance(other, DictNamespace):
             return False
         return self.to_dict() == other.to_dict()
+
+def fibonacci():
+    """无限斐波那契数列生成器"""
+    a, b = 0, 1
+    while True:
+        yield a
+        a, b = b, a + b
+def primes_fast():
+    """
+    素数生成器 
+    速度更快 
+    埃拉托色尼筛法思想 + 生成器
+    """
+    composites = {}
+    n = 2
+    while True:
+        if n not in composites:
+            yield n
+            composites[n * n] = [n]
+        else:
+            for p in composites[n]:
+                composites.setdefault(p + n, []).append(p)
+            del composites[n]
+        n += 1
+
+def take(gen: Generator[T, None, None], n: int) -> Generator[T, None, None]:
+    """从生成器中取前 n 个"""
+    for _ in range(n):
+        yield next(gen)
