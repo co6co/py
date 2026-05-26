@@ -1,4 +1,22 @@
 from co6co.data import fibonacci, take, primes_fast
+
+#  T = TypeVar("T", int, str) # T 为 int 或者 str
+#  T = TypeVar("T") # T 为任何类型
+#  T = TypeVar("T", bound=A) # T 为A或A的子类
+#  X = TypeVar("AType", bound=A) # 建议 X 和 AType 命名一致
+'''
+def process(obj: T) -> T:
+    return obj
+def create_one(self, cls:Type[T]):
+    return cls()
+class Container:
+    def __init__(self, value: T):
+        self.value = value
+
+    def get(self) -> T:
+        return self.value
+'''
+
 def test_fibonacci(): 
     print(list(take(fibonacci(), 9)))
     assert list(take(fibonacci(), 10)) == [0, 1, 1, 2, 3, 5, 8, 13, 21, 34]
