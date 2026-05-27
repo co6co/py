@@ -13,6 +13,22 @@ class PageToken:
     refreshToken: str 
 
 class JwtService:
+    """
+    设计目标：
+    让服务器“无状态地知道你是谁、有什么权限，但数据不能太多否则数据太多影响存储”
+    与session不同，session是有状态的，session，客户端只存储ID，服务的需要保存相关数据
+    
+    1. Refresh Token 绝不能​ 放 localStorage
+    2. 必须放在 HttpOnly Cookie 中，
+        Set-Cookie: refresh_token=xxxx; HttpOnly; Secure; SameSite=Strict
+    3. 常见的刷新token设计方案：
+    {
+      "uid": 10086,
+      "deviceId": "abc123",
+      "userAgent": "Chrome/Win",
+      "exp": 1700000000
+    }
+    """
     def __init__(self, secret: str, issuer: str = "JWT+SERVICE") -> None:
         """
         初始化 JWT 服务
