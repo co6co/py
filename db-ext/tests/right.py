@@ -55,8 +55,7 @@ class AccountPO(BasePO):
     updateTime= Column("update_time", DateTime,comment="修改时间") 
     updateUser= Column("update_user", BigInteger,comment="修改人")  
   
-    userPO=Relationship(UserPO,back_populates="accountPOs")
-    wxUserPO=Relationship("WxUserPO",back_populates="accountPO",uselist=False,passive_deletes=True) 
+    userPO=Relationship(UserPO,back_populates="accountPOs") 
     
 class UserGroupPO(BasePO):
     """
@@ -83,8 +82,7 @@ class RolePO(TimeStampedModelPO):
     name = Column("role_name",String(64) ,comment="角色名") 
     code = Column("role_code",String(64), unique=True) 
     
-    userPOs=Relationship("UserPO",secondary="sys_user_role",back_populates="rolePOs",passive_deletes=True)
-    permissionPOs=Relationship("permissionPO",secondary="sys_permission_role",back_populates="rolePOs",passive_deletes=True)
+    userPOs=Relationship("UserPO",secondary="sys_user_role",back_populates="rolePOs",passive_deletes=True) 
 
 class UserRolePO(UserTimeStampedModelPO):
     """

@@ -41,7 +41,7 @@ class absFilterItems(ABC, Page_param):
 			by=self.orderBy.split(",")
 			order=self.order.split(",")
 			if len(by)==len(order):
-				return [{b:o} for b in by for o in order if b and o]
+				return [{b:o} for b,o in zip(by,order) if b and o] 
 			else:
 				return [{b:order[0]} for b in by if b ]
 		elif self.orderBy:
@@ -58,7 +58,7 @@ class absFilterItems(ABC, Page_param):
 		获取排序规则
 		
 		"""
-		orderList= self._getOrderby()
+		orderList= self._getOrderby()  
 		if len(orderList)==0: return self.getDefaultOrderBy()
 		# () 获取的结果不能重复 取*
         # []  获取的结果能重复 取* 

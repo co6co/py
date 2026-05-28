@@ -7,7 +7,7 @@ from .right import *
  
 
 @pytest.fixture
-def db_service_param():
+async def db_service_param():
     # 获取当前文件所在目录
     current_dir = os.path.dirname(os.path.abspath(__file__))
 
@@ -21,5 +21,6 @@ def db_service_param():
     assert cfg.DB_USER is not None
     assert cfg.DB_PASSWORD is not None
     service = db_service(cfg)
-    service.sync_init_tables()
-    return cfg, service.Session,   Actuator(service.Session())
+    await service.init_tables()
+    #service.sync_init_tables()
+    return cfg, service.Session,Actuator(service.Session())

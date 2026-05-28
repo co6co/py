@@ -71,13 +71,13 @@ class Actuator:
     __po_has_field__: str = "_sa_instance_state" 
     @staticmethod
     def remove_db_instance_state(poInstance_or_poList: Iterator | Any) -> List[Dict] | Dict:
-        if hasattr(poInstance_or_poList, "__iter__"):
-            result = [dict(filter(lambda k: k[0] != Actuator.__po_has_field__,
-                           a1.__dict__.items())) for a1 in poInstance_or_poList]
+        if hasattr(poInstance_or_poList, "__iter__") and not isinstance(poInstance_or_poList, str):
+            
+            result = [dict(filter(lambda k: k[0] != Actuator.__po_has_field__, a1.__dict__.items())) for a1 in poInstance_or_poList] 
             for r in result:
                 for r1 in r:
                     value = r.get(r1)
-                    if (isinstance(value, BasePO)):
+                    if (hasattr(value, Actuator.__po_has_field__)):    #if (isinstance(value, BasePO)): 
                         dic = Actuator.remove_db_instance_state(value)
                         r.update({r1: dic})
             return result
@@ -95,19 +95,12 @@ class Actuator:
         """
         d: dict = {}
         for i in range(0, len(row)):
-            c = row[i]
-            if hasattr(c, Actuator.__po_has_field__):
-                dc = Actuator.remove_db_instance_state(c)
-                d.update(dc)
-            else:
-                key = row._fields[i]
-                '''
-                j=1 
-                while key in d.keys():
-                    key=f"{ row._fields[i]}_{str(j )}"
-                    j+=1
-                '''
-                d.update({key: c})
+            val = row[i]
+            key = row._fields[i]
+            if hasattr(val, Actuator.__po_has_field__):
+                dc = Actuator.remove_db_instance_state(val) 
+                val=dc
+            d.update({key: val})
         return d
 
     @staticmethod
