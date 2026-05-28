@@ -87,6 +87,9 @@
 	不知道改了什么，包hash不一样，只能发布
 0.1.2
 	linx  无 PipeConnection bug
+
+0.1.3 2026-05-28 未发布
+    优化 DataProperty 类
 	
 ```
 

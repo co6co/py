@@ -47,10 +47,14 @@ async def db_middleware(request: web.Request, handler):
             elif name == authonParam:
                 try:
                     authorization = request.headers.get(AuthonHeader)
+                    if not authorization or not authorization.startswith("Bearer "):
+                        return ViewBase.response_json(Result.fail("Missing or invalid token"), status=401)
+                        
+                    token = authorization.split(" ")[1] 
                     if request.app.jwtService is None:
                         raise Exception("jwtService is None")
                     jwt:JwtService = request.app.jwtService
-                    userData = jwt.decode(authorization)
+                    userData = jwt.decode(token)
                     kwargs[name] = userData
                 except Exception as e:
                     msg = f"请求认证过程中{request.method}{request.path}发生异常: {e}"

@@ -1,8 +1,7 @@
-from typing import Any, Dict, Generator,TypeVar, Iterator, Tuple, List
+from typing import Any, Dict, Generator, TypeVar, Iterator, Tuple, List
 # from types import SimpleNamespace # 不支持 data['name'] 及 data.get("name") 这类访问方式
 
 T = TypeVar("T")
-
 
 
 class DictNamespace:
@@ -78,7 +77,7 @@ class DictNamespace:
     def update(self, other: Dict = None, **kwargs) -> None:
         """更新字典，接受字典或关键字参数"""
         if other is not None:
-            if hasattr(other, 'items'):
+            if hasattr(other, "items"):
                 for key, value in other.items():
                     setattr(self, key, value)
             else:
@@ -92,7 +91,7 @@ class DictNamespace:
         for key in list(self.__dict__.keys()):
             delattr(self, key)
 
-    def copy(self) -> 'DictNamespace':
+    def copy(self) -> "DictNamespace":
         """浅拷贝"""
         new_obj = DictNamespace()
         new_obj.__dict__.update(self.__dict__)
@@ -100,7 +99,7 @@ class DictNamespace:
 
     def keys(self) -> List[str]:
         """返回所有键的列表（过滤掉私有属性）"""
-        return [key for key in self.__dict__.keys() if not key.startswith('_')]
+        return [key for key in self.__dict__.keys() if not key.startswith("_")]
 
     def values(self) -> List[Any]:
         """返回所有值的列表"""
@@ -120,13 +119,13 @@ class DictNamespace:
         return {key: getattr(self, key) for key in self.keys()}
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> 'DictNamespace':
+    def from_dict(cls, data: Dict[str, Any]) -> "DictNamespace":
         """从字典创建实例"""
         return cls(**data)
 
     def __repr__(self) -> str:
         """字符串表示"""
-        items = ', '.join(f'{k}={v!r}' for k, v in self.items())
+        items = ", ".join(f"{k}={v!r}" for k, v in self.items())
         return f"DictNamespace({items})"
 
     def __eq__(self, other: object) -> bool:
@@ -135,16 +134,50 @@ class DictNamespace:
             return False
         return self.to_dict() == other.to_dict()
 
+
+class DataProperty:
+    """
+    数据描述器
+    instance.attr_name= {key:value}
+    """ 
+    def __init__(self, key: str, attr_name: str = "userData"):
+        self.key = key
+        self.attr_name = attr_name
+
+    def __get__(self, instance, owner):
+        if instance is None:
+            return self
+        _data = getattr(instance, self.attr_name, {})
+        return _data.get(self.key)
+
+    def __set__(self, instance, value):
+        if not hasattr(instance, self.attr_name):
+            setattr(instance, self.attr_name, {})
+        user_data = getattr(instance, self.attr_name)
+        user_data[self.key] = value
+
+    def __delete__(self, instance):
+        """删除 userData 中的对应键"""
+        user_data = getattr(instance, self.attr_name, None)
+        if user_data and self.key in user_data:
+            del user_data[self.key]
+            # print(f"Deleted '{self.key}' from userData")
+        # else:
+        #    print(f"'{self.key}' not found in userData")
+
+
 def fibonacci():
     """无限斐波那契数列生成器"""
     a, b = 0, 1
     while True:
         yield a
         a, b = b, a + b
+
+
 def primes_fast():
     """
-    素数生成器 
-    速度更快 
+    素数生成器
+    速度更快
     埃拉托色尼筛法思想 + 生成器
     """
     composites = {}
@@ -158,6 +191,7 @@ def primes_fast():
                 composites.setdefault(p + n, []).append(p)
             del composites[n]
         n += 1
+
 
 def take(gen: Generator[T, None, None], n: int) -> Generator[T, None, None]:
     """从生成器中取前 n 个"""
