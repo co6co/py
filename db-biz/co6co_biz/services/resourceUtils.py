@@ -27,7 +27,7 @@ def showImage(wsUrl: str):
             # img = base64.b64decode(all)
             img = cv2.imdecode(np.frombuffer(
                 all, dtype='uint8'), cv2.IMREAD_COLOR)
-            if img == None:
+            if img is  None:
                 print("is None")
             else:  # 显示图像
                 cv2.imshow('WebSocket Image', img)
@@ -145,7 +145,7 @@ async def screenshot(videoPathOrStreamUrl: str, w: int = 208, h: int = 117, isFi
                 ret, jpeg = cv2.imencode('.jpg', fram)
                 return jpeg.tobytes()
             s = None
-            if type(fram) == np.ndarray:
+            if fram is not None and isinstance(fram, np.ndarray):
                 s = getTempFileName()
                 fram = resize_image(fram, w, h)
                 cv2.imwrite(s, fram)

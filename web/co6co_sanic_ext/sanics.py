@@ -21,17 +21,19 @@ from co6co.utils.source import compile_source
 import inspect
 from multiprocessing import Pipe
 from multiprocessing.connection import PipeConnection
+
 try:
     from multiprocessing.connection import PipeConnection
 except ImportError:
-    # linux 
+    # linux
     from multiprocessing.connection import Connection as PipeConnection
 import asyncio
 import threading
 import multiprocessing
 import os
 import argparse
-from co6co.task.eventDispatcher import EventDispatcherProcess
+# from co6co.task.eventDispatcher import EventDispatcherProcess
+
 
 class IWorker(ABC):
     @abstractmethod
@@ -66,7 +68,9 @@ class Worker(IWorker):
         self.envent = envent
 
         self.isQuit = False
-        self.thread = threading.Thread(target=self.worker, name="worker")  # , args=(conn,)
+        self.thread = threading.Thread(
+            target=self.worker, name="worker"
+        )  # , args=(conn,)
 
     # @property
     # def quit(self):
@@ -102,7 +106,7 @@ class Worker(IWorker):
                     log.warn("worker thread quit by quit_event")
                     break
                 log.info("准备worker wait for data...")
-                data = self.conn.recv()   # 接收数据
+                data = self.conn.recv()  # 接收数据
                 log.info("worker recv", data)
 
                 if self.handler:
@@ -127,13 +131,13 @@ def appendData(app: Sanic, **kwargs):
     """
     追加数据到app.ctx中
     """
-    child_conn=kwargs.get("child_conn")
-    if child_conn: 
-        process=EventDispatcherProcess(child_conn,"api_worker") 
-        app.ctx.event_process=process 
-        process.start() 
-    else:
-        log.warn("append app.ctx error","child_conn is None")
+    # child_conn=kwargs.get("child_conn")
+    # if child_conn:
+    #    process=EventDispatcherProcess(child_conn,"api_worker")
+    #    app.ctx.event_process=process
+    #    process.start()
+    # else:
+    #    log.warn("append app.ctx error","child_conn is None")
     for key, value in kwargs.items():
         setattr(app.ctx, key, value)
 
@@ -141,23 +145,37 @@ def appendData(app: Sanic, **kwargs):
 def parserConfig(configFile: str):
     """
     一般 会有
-    {  
+    {
       db_settings = {     }
       web_setting={}
     }
     """
-    default: dict = {"web_setting": {'port': 8084, "backlog": 1024, 'host': '0.0.0.0', 'debug': False, 'access_log': True,  'dev': False}}
+    default: dict = {
+        "web_setting": {
+            "port": 8084,
+            "backlog": 1024,
+            "host": "0.0.0.0",
+            "debug": False,
+            "access_log": True,
+            "dev": False,
+        }
+    }
     customConfig = None
-    if '.json' in configFile:
+    if ".json" in configFile:
         customConfig = File.File.readJsonFile(configFile)
     else:
         customConfig = utils.load_module_from_file_location(Path(configFile)).configs
-    if customConfig != None:
+    if customConfig is not None:
         default.update(customConfig)
     return default
 
 
-def _create_App(name: str = "__mp_main__", configFile: str | Dict = None, apiInit: Callable[[Sanic, Dict, Sanic | None],  None] = None,  **kwargs):
+def _create_App(
+    name: str = "__mp_main__",
+    configFile: str | Dict = None,
+    apiInit: Callable[[Sanic, Dict, Sanic | None], None] = None,
+    **kwargs,
+):
     """
     创建应用
     将 config 中的配置信息加载到app.config中
@@ -169,25 +187,25 @@ def _create_App(name: str = "__mp_main__", configFile: str | Dict = None, apiIni
     app.config.web_setting --> 配置信息
     """
     try:
-        #log.warn("startApp1111111111111111111111")
+        # log.warn("startApp1111111111111111111111")
         app = Sanic[Config, SimpleNamespace](name)
         data = locals()
         appendData(app, **kwargs)
 
         # primary = data.get("app", None)
         # app.ctx.mainApp = primary
-        if configFile == None:
+        if configFile is None:
             raise PermissionError("config")
-        if app.config != None:
-            if type(configFile) == dict:
+        if app.config is not None:
+            if isinstance(configFile, dict):
                 customConfig = configFile
             else:
                 customConfig = parserConfig(configFile)
-            if customConfig != None:
+            if customConfig is not None:
                 app.config.update(customConfig)
             # log.succ(f"app 配置信息：\n{app.config}")
 
-            if apiInit != None:
+            if apiInit is not None:
                 sig = inspect.signature(apiInit)
                 params = sig.parameters
                 all_param = [app, customConfig, data]
@@ -209,14 +227,20 @@ def _create_App(name: str = "__mp_main__", configFile: str | Dict = None, apiIni
         raise
 
 
-def _handler_additional_loader(app: Sanic, event: asyncio.Event, parent_conn: PipeConnection, child_conn: PipeConnection, worker: IWorker,process:EventDispatcherProcess=None):
-    
+def _handler_additional_loader(
+    app: Sanic,
+    event: asyncio.Event,
+    parent_conn: PipeConnection,
+    child_conn: PipeConnection,
+    worker: IWorker,
+):
+
     @try_except
     @app.main_process_start
     def start_app(app, loop):
         log.info("start_app...")
-        if process:
-            process.start()
+        # if process:
+        #    process.start()
         if worker:
             worker.start()
 
@@ -229,27 +253,34 @@ def _handler_additional_loader(app: Sanic, event: asyncio.Event, parent_conn: Pi
         parent_conn.close()
         if worker:
             worker.stop()
-        if process:
-            process.stop()
+        # if process:
+        #    process.stop()
         # 关闭数据库连接
+
     # 没有 primary serve 调用loader创建一个个
 
 
-def startApp(configFile: str | Dict, appInit: Callable[[Sanic, Dict], None], loader: Callable[[Sanic, asyncio.Event, PipeConnection], IWorker] = None):
+def startApp(
+    configFile: str | Dict,
+    appInit: Callable[[Sanic, Dict], None],
+    loader: Callable[[Sanic, asyncio.Event, PipeConnection], IWorker] = None,
+):
     """
     __main__     --> primary
     __mp_main__  --> multiprocessing
     """
 
     # all_param = {**locals()}
-    #log.warn("startApp000000000000000")
-    event = asyncio.Event() 
+    # log.warn("startApp000000000000000")
+    event = asyncio.Event()
     parent_conn, child_conn = Pipe()
-    #process=EventDispatcherProcess(child_conn,"api_worker")
-    args = {"parent_conn": parent_conn, "child_conn": child_conn }
-    appLoader = AppLoader(factory=partial(_create_App, configFile=configFile, apiInit=appInit, **args))
+    # process=EventDispatcherProcess(child_conn,"api_worker")
+    args = {"parent_conn": parent_conn, "child_conn": child_conn}
+    appLoader = AppLoader(
+        factory=partial(_create_App, configFile=configFile, apiInit=appInit, **args)
+    )
     app = appLoader.load()
-    #log.warn("startApp222222222222222222")
+    # log.warn("startApp222222222222222222")
     setting: dict = app.config.web_setting
     app.prepare(**setting)
     appendData(app, quit_event=event)
@@ -276,7 +307,9 @@ def getConfig(configFolder: str):
     defaultConfig = "{}/app_config.json".format(dir)
     configPath = os.path.abspath(defaultConfig)
     parser = argparse.ArgumentParser(description="System Service.")
-    parser.add_argument("-c", "--config", default=configPath, help="default:{}".format(configPath))
+    parser.add_argument(
+        "-c", "--config", default=configPath, help="default:{}".format(configPath)
+    )
     args = parser.parse_args()
     config = parserConfig(args.config)
     return config
@@ -293,6 +326,7 @@ class ViewManage:
         3. 在平台中修改某个功能时需要，删除改功能并重新挂在到蓝图中
         4. 在平台中增加某想功能，需要在蓝图中增加
     """
+
     viewDict: Dict[str, BaseView] = None
     app: App = None
     bluePrint: Blueprint = None
@@ -305,12 +339,18 @@ class ViewManage:
         """
         print("ddd")
 
-    def __init__(self,  app: Sanic) -> None:
+    def __init__(self, app: Sanic) -> None:
         super().__init__()
         self.viewDict = {}
         self.app = App(app)
 
-    def _createBlue(self, blueName: str, url_prefix: str, version: int | str | float | None = 1, *views: BaseView):
+    def _createBlue(
+        self,
+        blueName: str,
+        url_prefix: str,
+        version: int | str | float | None = 1,
+        *views: BaseView,
+    ):
         blue = Blueprint(blueName, url_prefix=url_prefix, version=version)
         add_routes(blue, *views)
         return blue
@@ -318,7 +358,13 @@ class ViewManage:
     def exist(self, blueName):
         return blueName in self.app.app.blueprints
 
-    def add(self, blueName: str, url_prefix: str, version: int | str | float | None = 1, *views: BaseView):
+    def add(
+        self,
+        blueName: str,
+        url_prefix: str,
+        version: int | str | float | None = 1,
+        *views: BaseView,
+    ):
         """
         BluePrint 名字不能与系统中存在的名字重复
         请求URL: /v{version}}/${url_prefix}/{BaseView.routePath}
@@ -326,11 +372,19 @@ class ViewManage:
         blue = self._createBlue(blueName, url_prefix, version, *views)
         self.app.app.blueprint(blue)
 
-    def _getUrls(self, url_prefix: str, version: int | str | float | None = 1, *views: BaseView):
+    def _getUrls(
+        self, url_prefix: str, version: int | str | float | None = 1, *views: BaseView
+    ):
         urls = ("/v{}{}{}".format(version, url_prefix, v.routePath) for v in views)
         return urls
 
-    def replace(self, blueName: str, url_prefix: str, version: int | str | float | None = 1, *views: BaseView):
+    def replace(
+        self,
+        blueName: str,
+        url_prefix: str,
+        version: int | str | float | None = 1,
+        *views: BaseView,
+    ):
         if self.exist(blueName):
             blue = self._createBlue(blueName, url_prefix, version, *views)
             urls = self._getUrls(url_prefix, version, *views)
@@ -349,7 +403,7 @@ class App:
     app: Sanic = None
 
     def __init__(self, app: Sanic = None) -> None:
-        if app == None:
+        if app is None:
             app = Sanic.get_app()
         self.app = app
         pass
@@ -384,7 +438,14 @@ class App:
         self.app.add_route(handler, uri, methods=methods)
 
     @staticmethod
-    def appendView(app: Sanic, *viewSource: str,  blueName: str = "user_append_View", url_prefix="api", version=1, ingoreView: List[str] = ["AuthMethodView", 'BaseMethodView']):
+    def appendView(
+        app: Sanic,
+        *viewSource: str,
+        blueName: str = "user_append_View",
+        url_prefix="api",
+        version=1,
+        ingoreView: List[str] = ["AuthMethodView", "BaseMethodView"],
+    ):
         """
         增加视图
         前置条件: 1. 视图名不能重名
@@ -401,7 +462,11 @@ class App:
                 for s in viewSource:
                     globals_vars = {}
                     compile_source(s, globals_vars)
-                    views: List[BaseView] = [globals_vars[i] for i in globals_vars if str(i).endswith("View") and i not in ingoreView]
+                    views: List[BaseView] = [
+                        globals_vars[i]
+                        for i in globals_vars
+                        if str(i).endswith("View") and i not in ingoreView
+                    ]
                     for v in views:
                         if v.__name__ in nameList:
                             log.warn("视图名称‘{}’重复".format(v.__name__))

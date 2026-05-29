@@ -10,7 +10,7 @@ from cacheout import Cache
 import time
 from co6co_task.service.RouterService import dynamicRouter
 from co6co_task.service.Tasks import TasksMgr
-from co6co_task.service.Services import Service
+#from co6co_task.service.Services import Service
 from co6co_task.service.handler.task_handler import TaskManager
 from services.rtspService import RtspService
 import asyncio
@@ -62,11 +62,8 @@ def init(app: Sanic, _: dict):
 
 def createService(app:Sanic,event , conn ):
     try:
-        worker=Service(app,event,conn)
-       
-        handler=RtspService( )
-        worker.event_process.append_handler(handler) 
-        #worker=TaskManager(app)
+        
+        worker=TaskManager(app)
         print("createService ed")
         return worker
     except Exception as e:
@@ -88,4 +85,5 @@ if __name__ == "__main__":
     # print("当前dir：", os.path.curdir)
     log.succ("##", __name__)
     config = sanics.getConfig(sanics.getConfigFilder(__file__))
+    log.warn(config)
     main(config)

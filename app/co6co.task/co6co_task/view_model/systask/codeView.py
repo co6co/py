@@ -6,13 +6,13 @@ from co6co_sanic_ext.model.res.result import Result
 from co6co_permissions.view_model.base_view import AuthMethodView
 from datetime import datetime
 from ...service import Scheduler, CuntomCronTrigger
-
+from typing import Optional
 
 class cronViews(AuthMethodView):
     routePath = "/cron/test"
 
-    async def _post(self, cron: str):
-        if cron == None:
+    async def _post(self, cron: Optional[str]  ):
+        if cron is None or cron == "":
             return Result.success(data=False, message="cron 必须填写")
         else:
             try:
@@ -53,7 +53,7 @@ class _codeView:
                 res = _e()
                 return Result.success(data=res)
             else:
-                return Result.fail(message="解析出错：{}".format(e))
+                return Result.fail(message="解析出错：{}".format(_e))
         except Exception as e:
             return Result.fail(message="执行出错：{}".format(e))
 

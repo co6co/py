@@ -200,9 +200,9 @@ class QueryListCallable(DbCallable):
     async def __call__(self, select: Select, isPO: bool = True, remove_db_instance=True, param: Dict | List | Tuple = None):
         async def exec(actuator: Actuator):
             if isPO:
-                result=actuator.query_all_entity_mappings(select,param) if remove_db_instance else await actuator.query_all_entity(select, param)
-            else:
-                result=await actuator.query_all_entity_mappings(select,param)
+                result=await actuator.query_all_entity_mappings(select,param) if remove_db_instance else await actuator.query_all_entity(select, param)
+            else: 
+                result=await actuator.query_all_mappings(select,param)
             return result
         # return await super(QueryListCallable,self).__call__(exec) #// 2.x 写法
         return await super().__call__(exec)
@@ -215,7 +215,7 @@ class QueryPagedCallable(DbCallable):
             if isPO:
                 result=actuator.query_all_entity_mappings(select,param) if remove_db_instance else await actuator.query_all_entity(select, param)
             else:
-                result=await actuator.query_all_entity_mappings(select,param) 
+                result=await actuator.query_all_mappings(select,param) 
             return total, result
         return await super().__call__(exec)
 

@@ -4,8 +4,10 @@ import asyncio
 from multiprocessing.connection import PipeConnection
 from co6co.task.eventDispatcher import EventDispatcher,EventDispatcherProcess
 from .handler.task_handler import TaskManager, ExistHandler,StartHandler,ModifyHandler,RemoveHandler,GetNextRunTimeHandler,UnknownHandler
+import warnings
 class Service(sanics.IWorker):
     """服务类,接受客户端的任务并处理"""
+    warnings.warn("init session is deprecated, please co6co_web_session.Session.mount_imp", DeprecationWarning)
     def __init__(self, app: Sanic, envent: asyncio.Event, conn: PipeConnection):
         self.app = app
         self.envent = envent

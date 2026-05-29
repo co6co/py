@@ -1,8 +1,0 @@
-<view class="container">
-  <text>用户名：{{userInfo.name}}</text>
-  {{userInfo.}}
-  <button bindtap="onTapItem" data-id="{{1001}}">登录</button>
-  <button bindtap="handleLogin">登录</button>
-  <button bindtap="on"></buton>
-  
-</view>

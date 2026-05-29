@@ -267,7 +267,7 @@ class TasksMgr(sanics.Worker):
         try:
             if codeList and len(codeList) == 0:
                 return 0
-            if codeList == None:
+            if codeList is None:
                 ccc = Update(SysTaskPO).where(SysTaskPO.state == dict_state.enabled.val).values({SysTaskPO.execStatus: status})
             else:
                 ccc = Update(SysTaskPO).where(SysTaskPO.state == dict_state.enabled.val, SysTaskPO.code.in_(codeList)).values({SysTaskPO.execStatus: status})
@@ -326,9 +326,9 @@ class TasksMgr(sanics.Worker):
         fall_result = 0
         if len(success) > 0:
             print(*success)
-            succ_result = self.bll.run(self.update_status, success, 1)
+            succ_result = self.update_status( success, 1)
         if len(faile) > 0:
-            fall_result = self.bll.run(self.update_status, faile, 0)
+            fall_result =  self.update_status( faile, 0)
         exeStatue = self.bll.run(self.update_status__2)
         log.warn("状态更新,成功->{},失败->{},意外的状态：{}".format(succ_result, fall_result, exeStatue))
 

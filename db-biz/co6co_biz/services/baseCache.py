@@ -10,29 +10,14 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from co6co_web_db.view_model import get_one
 from ..model.enum import user_state 
 from ..services import queryUerByAccessToken
-from sqlalchemy.ext.asyncio import AsyncSession
-
-
-class BaseCache(CacheManage): 
-    request = Request
-    def __init__(self, request: Request) -> None:
-        self.request = request
-        super().__init__(request.app)
-
-    @property
-    def userId(self):
-        """
-        当前用户ID
-        """
-        # 微信认证中 userid可能未挂在上去
-        return getCurrentUserId(self.request)
+from sqlalchemy.ext.asyncio import AsyncSession 
+ 
 
 
 class AccessTokenCache(BaseCache):
     """
     令牌缓存
-    """
-
+    """ 
     def __init__(self, request: Request) -> None:
         super().__init__(request)
 
@@ -47,8 +32,6 @@ class AccessTokenCache(BaseCache):
             await setCurrentUser(self.request, result)
             return True
 
-        # select = Select(UserPO).filter(UserPO.password.__eq__(token), UserPO.state.in_([user_state.enabled]))
-        # user: UserPO = await db_tools.execForPo(self._session, select, remove_db_instance_state=False)
         async with self.session:  # , self.session.begin() #begin会开启事务
             user: UserPO = await queryUerByAccessToken(self._session, token)
             if user is  None:

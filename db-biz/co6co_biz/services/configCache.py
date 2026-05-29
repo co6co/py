@@ -21,14 +21,14 @@ async def get_config(request: Request, code: str, *, useDist=False, default: any
             await cache.queryConfig(code)
             result = cache.getConfig(code)
         if result and useDist:
-            result = sysJson.loads(result) if type(result) == str else result
+            result = sysJson.loads(result) if isinstance(result, str) else result
             # 　如果default是dict,则合并，
             merge_dict = {}
             if default and isinstance(default, dict):
                 merge_dict.update(default)
             merge_dict.update(result)
             result = merge_dict
-        if result == None:
+        if result is None:
             log.warn("未找到'{}'的相关配置,使用默认配置：{}".format(code, default))
             result = default
         return result

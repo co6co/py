@@ -1,5 +1,6 @@
 
 from co6co_web_db .services.db_service import BaseBll
+
 from ..model.pos.other import sysConfigPO
 from sqlalchemy import Select
 from co6co_db_ext.db_utils import QueryOneCallable

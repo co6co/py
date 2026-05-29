@@ -12,6 +12,7 @@ import string
 from io import BytesIO
 from co6co.utils import log
 from ...configs.captcha import CaptchaConfig
+
 def generate_captcha():
     """生成验证码图片和验证码字符串"""
     try:

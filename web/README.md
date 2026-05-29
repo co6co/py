@@ -35,6 +35,8 @@
     1. bug
 0.0.14 2026-04-03
     1. 优化： 优化 Worker 类
+0.0.15 2026-05-29
+    1. 去除 EventDispatcherProcess 的通信方式
 
 ```
 

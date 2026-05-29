@@ -73,7 +73,10 @@ class Actuator:
     def remove_db_instance_state(poInstance_or_poList: Iterator | Any) -> List[Dict] | Dict:
         if hasattr(poInstance_or_poList, "__iter__") and not isinstance(poInstance_or_poList, str):
             
-            result = [dict(filter(lambda k: k[0] != Actuator.__po_has_field__, a1.__dict__.items())) for a1 in poInstance_or_poList] 
+            result = [dict(filter(lambda k: k[0] != Actuator.__po_has_field__,  a1.__dict__.items())) for a1 in poInstance_or_poList if hasattr(a1, "__dict__")] 
+            # 列表中存储的对象不能转换为字典
+            if len(result) == 0: 
+                return poInstance_or_poList 
             for r in result:
                 for r1 in r:
                     value = r.get(r1)

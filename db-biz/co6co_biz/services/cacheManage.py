@@ -1,20 +1,20 @@
-from multiprocessing.managers import DictProxy
-from co6co_db_ext.db_session import db_service
-from sqlalchemy.ext.asyncio import AsyncSession
 from multiprocessing import Manager
+from multiprocessing import shared_memory, Lock
+import pickle
+from co6co.utils import log
 
 
 class SharedCache:
     """
     跨进程通行
     读写加锁，执行缓慢
-    存对象是副本，嵌套修改不同步 
+    存对象是副本，嵌套修改不同步
     shared_dict['a']['b'] = 123  # 无效！不同步！
     需要取出来，修改完后， 再赋值回去
     tmp = shared_dict['a']
     tmp['b'] = 123
     shared_dict['a'] = tmp  # 重新赋值才同步
-    """
+    """ 
     def __init__(self):
         self.manager = Manager()
         self.cache = self.manager.dict()  # DictProxy
@@ -36,9 +36,6 @@ class SharedCache:
     def clear(self):
         self.cache.clear()
 
-from multiprocessing import Process, shared_memory, Lock
-import pickle
-
 
 class SharedMemoryCache:
     """
@@ -53,11 +50,12 @@ class SharedMemoryCache:
         p.start()
         p.join()
         print(cache.get("name"))  # 主进程也能读到！
-     """
-    def __init__(self, name="cache", size=1024*1024):
+    """
+
+    def __init__(self, name="cache", size=1024 * 1024):
         self.name = name
         self.size = size
-        self.lock = Lock() 
+        self.lock = Lock()
         try:
             self.shm = shared_memory.SharedMemory(name=name, create=True, size=size)
         except FileExistsError:
@@ -68,15 +66,17 @@ class SharedMemoryCache:
             data = pickle.dumps({key: value})
             if len(data) > self.size:
                 raise ValueError("数据太大，内存不足")
-            self.shm.buf[:len(data)] = data
+            self.shm.buf[: len(data)] = data
 
     def get(self, key, default=None):
         with self.lock:
             try:
-                data = bytes(self.shm.buf).rstrip(b'\x00')
+                data = bytes(self.shm.buf).rstrip(b"\x00")
                 cache = pickle.loads(data)
                 return cache.get(key, default)
-            except:
+            except pickle.PickleError as e:
+                log.error("pickle error: {}".format(e))
+
                 return default
 
     def close(self):
