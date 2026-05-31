@@ -8,6 +8,7 @@ from .right import *
 
 @pytest.fixture
 async def db_service_param():
+    print("db_service_param...................")
     # 获取当前文件所在目录
     current_dir = os.path.dirname(os.path.abspath(__file__))
 

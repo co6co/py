@@ -387,7 +387,7 @@ class TaskManager(IWorker):
         """
         停止任务
         """
-        result = self.bll.run(self.update_status)
+        result =self.update_status() # self.bll.run(self.update_status)
         self.scheduler.stop()
         log.warn("状态更新,成功->{}".format(result))
         log.info("等待其他任务退出..")

@@ -1,5 +1,3 @@
-from sympy import Rational, sqrt, simplify
-
 from decimal import Decimal, getcontext
 import math
 

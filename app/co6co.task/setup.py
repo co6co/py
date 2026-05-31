@@ -5,7 +5,7 @@ packageName, packages = setupUtils.package_name(__file__)
 long_description = setupUtils.readme_content(__file__)
 
 requires = [
-    "APScheduler>=3.10.4", "SQLAlchemy>=2.0.25", "co6co>=0.0.37", "co6co.sanic_ext>=0.0.14", "co6co.web-db>=0.0.14",
+    "APScheduler>=3.10.4","co6co>=0.1.3", "co6co.web-db>=0.0.19"
 ]
 setup(
     name=packageName,

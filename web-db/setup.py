@@ -35,13 +35,12 @@ setup(
     classifiers=["Programming Language :: Python :: 3", "Programming Language :: Python :: 3.6"],
     include_package_data=True, zip_safe=True,
     # 依赖哪些模块
-    install_requires=["co6co", "co6co.web-session>=0.0.1", "co6co.db-ext", "co6co.sanic-ext>=0.0.9", "multipart","sanic==23.6.0"],
+    install_requires=["co6co", "co6co.web-session>=0.0.3", "co6co.db-ext", "co6co.sanic-ext>=0.0.15", "multipart"],
     # package_dir= {'utils':'src/log','main_package':'main'},#告诉Distutils哪些目录下的文件被映射到哪个源码
     author='co6co',
     author_email='co6co@qq.com',
     url="http://github.com/co6co",
     data_file={
-        ('', "*.txt"),
         ('', "*.md"),
     },
     package_data={

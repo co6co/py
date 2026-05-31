@@ -78,6 +78,9 @@ def _checkVerifycode(request: Request):
             return False, "验证码错误！"
         return True, "验证成功！"
     # 方案2 验证码方法
+    memCode = sessionDict.get("captcha_code", None)
+    if not memCode:
+        return False, "验证码不存在！,刷新页面重试！"
     stored_code: str = sessionDict.pop("captcha_code", "")  # 使用pop移除会话中的验证码
     # log.warn("验证码",stored_code)
     stored_timestamp = sessionDict.pop("captcha_timestamp", 0)

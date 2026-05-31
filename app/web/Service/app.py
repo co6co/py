@@ -14,6 +14,7 @@ from co6co_task.service.Tasks import TasksMgr
 from co6co_task.service.handler.task_handler import TaskManager
 from services.rtspService import RtspService
 import asyncio
+from co6co_web_session import Session
 
 
 def appendRoute(app: Sanic):
@@ -56,8 +57,8 @@ def init(app: Sanic, _: dict):
         pass
     app.blueprint(api)
     dynamicRouter.appendRoute(app)
-    #log.warn("Session",app.ctx.Session)
-    session.init(app)
+    #log.warn("Session",app.ctx.Session) 
+    Session.setup(app)
 
 
 def createService(app:Sanic,event , conn ):

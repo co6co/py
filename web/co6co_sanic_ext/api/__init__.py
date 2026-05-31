@@ -1,13 +1,14 @@
 
-from sanic import Sanic, Blueprint, Request
-from ..view_model import BaseView
-from typing import Callable
+from sanic import Sanic, Blueprint, Request 
+from sanic.views import HTTPMethodView  # 基于类的视图
+from ..view_model import _baseView
+from typing import Callable,Type
 from sanic.server.websockets.impl import WebsocketImplProtocol as WebSocketCommonProtocol
-def add_routes(blue: Blueprint, *views: BaseView):
+def add_routes(blue: Blueprint, *views: Type[_baseView]):
     """
     增加路由
     """
-    for v in views:
+    for v in views: 
         blue.add_route(v.as_view(), v.routePath, name=v.__name__)
  
 def add_websocket_route(blue: Blueprint,hander:Callable[[Request, WebSocketCommonProtocol], None],routePath:str = None,**kwargs):

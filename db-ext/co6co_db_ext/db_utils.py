@@ -42,6 +42,16 @@ class db_tools:
     @staticmethod
     def list2Dict(list: List[Row | RowMapping]) -> List[dict]: 
         return Actuator.list2Dict(list)
+        
+    @staticmethod
+    def _get_actuator(session: AsyncSession|Actuator) -> Actuator:
+        if isinstance(session, AsyncSession):
+            actuator= Actuator(session )
+        elif isinstance(session, Actuator):
+            actuator =session
+        else:
+            raise ValueError("session must be AsyncSession or Actuator")
+        return actuator
 
     '''
     def mapping(executeResult: any) -> List[dict]:
@@ -51,41 +61,41 @@ class db_tools:
         # sqlalchemy.engine.result.ChunkedIteratorResult
         return [dict(zip(a._fields, a)) for a in executeResult]
     '''
-    async def execSelect(session: AsyncSession, select: Select, params: Dict | List | Tuple = None) -> int | None:
+    async def execSelect(session: AsyncSession|Actuator, select: Select, params: Dict | List | Tuple = None) -> int | None:
         """
         执行查询语句
         @return: int | None
         """
-        actuator= Actuator(session)
+        actuator=db_tools._get_actuator(session)
         return await actuator.execute(select, params) 
 
-    async def count(session: AsyncSession, *filters: ColumnElement[bool], column: InstrumentedAttribute = "*") -> int:
+    async def count(session: AsyncSession|Actuator, *filters: ColumnElement[bool], column: InstrumentedAttribute = "*") -> int:
         """
         count
         """
-        actuator= Actuator(session)
+        actuator=db_tools._get_actuator(session)
         return await actuator.count( *filters,column=column) 
 
-    async def exist(session: AsyncSession, *filters: ColumnElement[bool], column: InstrumentedAttribute = "*") -> bool:
+    async def exist(session: AsyncSession|Actuator, *filters: ColumnElement[bool], column: InstrumentedAttribute = "*") -> bool:
         """
         exist
         """
-        actuator= Actuator(session)
+        actuator=db_tools._get_actuator(session)
         return await actuator.exist( *filters,column=column) 
 
-    async def execForMappings(session: AsyncSession, select: Select, queryOne: bool = False, params: Dict | Tuple | List = None):
+    async def execForMappings(session: AsyncSession|Actuator, select: Select, queryOne: bool = False, params: Dict | Tuple | List = None):
         """
         session: AsyncSession
         select:Select 
 
         return list
         """ 
-        actuator= Actuator(session)
+        actuator=db_tools._get_actuator(session)
         if queryOne:
             return await actuator.query_one_mappings(select, params) 
         return await actuator.query_all_mappings(select, params)  
 
-    async def execForPos(session: AsyncSession, select: Select, remove_db_instance_state: bool = True, params: Dict | List | Tuple = None):
+    async def execForPos(session: AsyncSession|Actuator, select: Select, remove_db_instance_state: bool = True, params: Dict | List | Tuple = None):
         """
         session: AsyncSession
         select:Select
@@ -93,12 +103,12 @@ class db_tools:
 
         return list
         """
-        actuator= Actuator(session)
+        actuator=db_tools._get_actuator(session)
         if remove_db_instance_state:
             return await actuator.query_all_entity_mappings(select, params) 
         return await actuator.query_all_entity(select, params)   
 
-    async def execForPo(session: AsyncSession, select: Select, remove_db_instance_state: bool = True, params: Dict | List | Tuple = None):
+    async def execForPo(session: AsyncSession|Actuator, select: Select, remove_db_instance_state: bool = True, params: Dict | List | Tuple = None):
         """
         session: AsyncSession
         select:Select
@@ -106,17 +116,17 @@ class db_tools:
 
         return PO|None
         """
-        actuator= Actuator(session)
+        actuator=db_tools._get_actuator(session)
         if remove_db_instance_state:
             return await actuator.query_one_entity_mapping(select, params) 
         return await actuator.query_one_entity(select, params)   
          
 
-    async def execSQL(session: AsyncSession, sql: Update | Insert | Delete, sqlParam: Dict | List | Tuple = None):
+    async def execSQL(session: AsyncSession|Actuator, sql: Update | Insert | Delete, sqlParam: Dict | List | Tuple = None):
         """
         执行简单SQL语句
         """
-        actuator= Actuator(session)
+        actuator=db_tools._get_actuator(session)
         return  await actuator.execSQL(sql, sqlParam) 
 
 
@@ -133,7 +143,7 @@ class DbCallable:
     def __init__(self, session: AsyncSession):
         self.session = session
 
-    async def __call__(self, func: Callable[[AsyncSession], Any]):
+    async def __call__(self, func: Callable[[Actuator], Any]):
         """
         with self.session, self.session.begin():
             这会创建一个显式的事务块
@@ -148,8 +158,7 @@ class DbCallable:
             在这种模式下，需要手动调用 session.commit() 或 session.rollback()
             如果没有显式提交，会话关闭时可能会导致事务回滚
         """
-        _context=session_context(self.session)
-        async with _context.transactional_session() as session:
+        async with session_context(self.session)() as session:
         #async with self.session, self.session.begin():
             if func is not None: 
                 try:
@@ -174,7 +183,7 @@ class QueryOneCallable(DbCallable):
 class InsertCallable(DbCallable):
     async def __call__(self, *po: BasePO):
         async def exec(actuator: Actuator):
-             actuator.add_all(po)  
+             actuator.add_all(*po)  
         return await super().__call__(exec)
 
 

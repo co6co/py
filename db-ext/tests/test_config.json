@@ -7,6 +7,6 @@
         "echo": false,
         "pool_size": 20,
         "max_overflow": 1,
-        "pool_pre_ping": true
+        "pool_pre_ping": false
     } 
 }

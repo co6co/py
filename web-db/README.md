@@ -35,4 +35,8 @@
     优化
 0.0.18
     增加BaseBll
+0.0.19 未发布
+    1. 增加BaseDbView 基础类，尽快迁移 BaseMethodView类，将来可能废除
+    
+  
 ```
