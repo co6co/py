@@ -33,7 +33,7 @@ setup(
     long_description=long_description,
     long_description_content_type='text/markdown',
     classifiers=["Programming Language :: Python :: 3", "Programming Language :: Python :: 3.6"],
-    include_package_data=True, zip_safe=True,
+    include_package_data=False, zip_safe=True,
     # 依赖哪些模块
     install_requires=["co6co", "co6co.web-session>=0.0.3", "co6co.db-ext", "co6co.sanic-ext>=0.0.15", "multipart"],
     # package_dir= {'utils':'src/log','main_package':'main'},#告诉Distutils哪些目录下的文件被映射到哪个源码

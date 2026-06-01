@@ -67,16 +67,16 @@ class JwtService:
         except Exception as e:
             log.warn("校验失败:", e)
             return None
-    def create_token(self, data: dict,refreshData:dict, expire_seconds: int = 86400, k:int=3, **kvarg):
+    def create_token(self, data: dict,refreshData:dict, expire_seconds: int = 86400, refresh_expire_seconds: int=3*86400, **kvarg):
         """
         kvarg: 其他参数,直接以明文方式增加到字典中
         生成登录token和刷新token
         """
         token = self.encode(data, expire_seconds)
-        token2 = self.encode(refreshData, k*expire_seconds)
+        token2 = self.encode(refreshData, refresh_expire_seconds)
         result={}
         accessToken=  {"token": token, "expireSeconds": expire_seconds} 
-        refreshToken= {"token": token2, "expireSeconds": k*expire_seconds } 
+        refreshToken= {"token": token2, "expireSeconds":refresh_expire_seconds } 
         result.update(kvarg)
         
         result.update({"accessToken":accessToken, "refreshToken":  refreshToken})

@@ -246,7 +246,7 @@ def _handler_additional_loader(
 
     @try_except
     @app.main_process_stop
-    def stop_app(app, loop):
+    def stop_app(*args, **kwargs):
         log.warn("stop_app.")
         event.set()  # 设置事件，通知其他协程
         child_conn.close()  # 当父通道关闭，子通道尝试从主通道读取数据时，会抛出 EOFError（当读取时）

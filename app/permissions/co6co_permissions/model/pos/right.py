@@ -30,6 +30,7 @@ class UserPO(UserTimeStampedModelPO):
     accountPOs = Relationship("AccountPO", back_populates="userPO", uselist=True, passive_deletes=True)
     userGroupPO = Relationship("UserGroupPO", back_populates="userPOs")
     rolePOs = Relationship("RolePO", secondary="sys_user_role", back_populates="userPOs", passive_deletes=True)
+    version = Column("version", Integer, default=0, comment="版本号")
 
     def update(self, po: UserPO):
         self.userName = po.userName
@@ -37,6 +38,7 @@ class UserPO(UserTimeStampedModelPO):
         self.userGroupId = po.userGroupId
         self.state = po.state
         self.remark = po.remark
+        self.version += 1
 
     @staticmethod
     def generateSalt() -> str:
@@ -65,6 +67,17 @@ class UserPO(UserTimeStampedModelPO):
         jwt 保存内容
         """
         return {"id": self.id, "userName": self.userName, "group_id": self.userGroupId}
+
+    @property
+    def jwt_data(self):
+        return {"id": self.id, "user_name": self.userName, "group_id": self.userGroupId}
+    def from_jwt_data(self, jwt_data: dict):
+        self.id = jwt_data["id"]
+        self.userName = jwt_data["user_name"]
+        self.userGroupId = jwt_data["group_id"] if jwt_data["group_id"] is not None else None
+    
+    def crate_jwt_refresh_data(self,device:None=None,userAgent:None=None): 
+        return {"id": self.id,"deviceId": device,"userAgent": userAgent,"version": self.version}
 
 
 class AccountPO(UserTimeStampedModelPO):

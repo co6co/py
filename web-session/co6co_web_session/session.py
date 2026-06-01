@@ -12,6 +12,9 @@ class Session:
         """
         session: Session = Session(app, sessionImp)
         return session
+    @property
+    def expiry(self):
+        return self.interface.option.expiry if self.interface else None
     @staticmethod 
     def getSession(request:Request):  
         sDict:SessionDict = request.ctx.Session
@@ -26,12 +29,7 @@ class Session:
         sDict:SessionDict = request.ctx[self.interface .option.session_name]
         #session:Session = request.app.ctx.extensions['Session']
         return self, sDict
-    @property
-    def expiry(self):
-        """
-        session 过期时间
-        """
-        return self.interface.expiry if self.interface else None
+    
 
     def init_app(self, app, interface: IBaseSession):
         self.interface = interface or MemorySessionImp()

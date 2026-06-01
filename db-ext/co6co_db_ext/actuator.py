@@ -169,10 +169,14 @@ class Actuator:
         execute(Select(po).where(po.id==1))->po|None
         execute(Update(po).where(po.id==1).values(name="new"))->影响的行数
         """
-        exec = await self._execute(select, params)
-        if isinstance(exec, CursorResult):
-            return exec.rowcount
-        return exec.scalar() 
+        result = await self._execute(select, params)
+        #print(type(result))
+        if isinstance(result, CursorResult):
+            #return result.scalar() #1 select 1,2
+            #return result.scalars().fetchall() #[1]
+            #return result.all() #[(1,2)] 1 select 1,2
+            return result.rowcount
+        return result.scalar() 
     async def count(self,  *filters: ColumnElement[bool], column: InstrumentedAttribute = "*") -> int:
         """
         count
@@ -185,7 +189,7 @@ class Actuator:
         """
         是否操作
         """
-        count = await self .count(  *filters, column=column)
+        count = await self.count(  *filters, column=column)
         return count > 0 
     async def query_one_mappings(self, select: Select,   params: Dict | Tuple | List = None):
         """ 

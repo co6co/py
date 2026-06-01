@@ -73,8 +73,7 @@ class Views(AuthMethodView):
         树形 table数据
         tree 形状 table
         """
-        param = Filter()
-
+        param = Filter() 
         return await self.query_page(request, param)
 
     async def put(self, request: Request):

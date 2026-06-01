@@ -31,7 +31,7 @@ from multiprocessing.managers import DictProxy
 from co6co.utils import log, getDateFolder
 from ..model.params import associationParam
 # from api.auth import authorized
-
+from co6co.utils.modules import deprecated 
 
 def get_db_session(request: Request) -> AsyncSession | scoped_session:
     """
@@ -76,6 +76,13 @@ class BaseDbView(BaseClsView):
     def shared_cache(self) -> DictProxy:
         return self.app.shared_ctx.cache
 
+    @property
+    def actuator(self)  :
+        if hasattr(self, '_actuator'):
+            return self._actuator
+        self._actuator = Actuator( self.db_session )
+        return self._actuator
+     
     def response_error0(self, e: Exception):
         """
         响应错误 message

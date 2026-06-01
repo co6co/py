@@ -22,6 +22,7 @@ from co6co_web_session import Session
 from co6co_web_session.base import SessionDict
 from typing import Tuple
 from co6co.utils import tool_util as utils
+from co6co.utils.modules import deprecated
 
 
 class _baseView(HTTPMethodView):

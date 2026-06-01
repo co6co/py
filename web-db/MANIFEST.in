@@ -1,0 +1,3 @@
+# 排除自身（这一行最重要）
+exclude MANIFEST.in  
+recursive-exclude tests *

@@ -88,7 +88,7 @@
 0.1.2
 	linx  无 PipeConnection bug
 
-0.1.3 2026-05-28 未发布
+0.1.3
     优化 DataProperty 类
 	
 ```

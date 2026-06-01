@@ -222,7 +222,7 @@ class QueryPagedCallable(DbCallable):
         async def exec(actuator: Actuator):
             total =   await actuator.execute(countSelect, param) 
             if isPO:
-                result=actuator.query_all_entity_mappings(select,param) if remove_db_instance else await actuator.query_all_entity(select, param)
+                result=await actuator.query_all_entity_mappings(select,param) if remove_db_instance else await actuator.query_all_entity(select, param)
             else:
                 result=await actuator.query_all_mappings(select,param) 
             return total, result

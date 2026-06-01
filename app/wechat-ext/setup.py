@@ -14,7 +14,7 @@ setup(
     long_description=long_description,
     long_description_content_type='text/markdown',
     classifiers=classifiers,
-    include_package_data=True, zip_safe=True,
+    include_package_data=False, zip_safe=True,
     setup_requires=[ ], ## 构建时依赖 过时 且行为不稳定。
     # 依赖哪些模块 
     install_requires=["co6co>=0.1.0","wechatpy>=1.8.18"], # 运行时依赖

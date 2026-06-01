@@ -62,8 +62,7 @@ def init(app: Sanic, _: dict):
 
 
 def createService(app:Sanic,event , conn ):
-    try:
-        
+    try: 
         worker=TaskManager(app)
         print("createService ed")
         return worker

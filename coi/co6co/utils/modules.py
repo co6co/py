@@ -3,6 +3,39 @@ import inspect
 from types import ModuleType
 from typing import Dict, Callable
 
+import warnings 
+import functools
+
+def deprecated(reason=None):
+    def decorator(obj):
+        # 处理类
+        if isinstance(obj, type):
+            original_init = obj.__init__
+
+            @functools.wraps(original_init)
+            def new_init(self, *args, **kwargs):
+                warnings.warn(
+                    f"Class {obj.__name__} is deprecated{f': {reason}' if reason else ''}.",
+                    DeprecationWarning,
+                    stacklevel=2
+                )
+                original_init(self, *args, **kwargs)
+
+            obj.__init__ = new_init
+            return obj
+
+        # 处理函数
+        @functools.wraps(obj)
+        def wrapper(*args, **kwargs):
+            warnings.warn(
+                f"Function {obj.__name__} is deprecated{f': {reason}' if reason else ''}.",
+                DeprecationWarning,
+                stacklevel=2
+            )
+            return obj(*args, **kwargs)
+
+        return wrapper
+    return decorator
 
 class module:
     name: str

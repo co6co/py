@@ -45,7 +45,13 @@ class ui_tree_view(CtxMethodView):
             Select(UserGroupRolePO.roleId).filter(UserGroupRolePO.userGroupId == UserPO.userGroupId, UserPO.id == currentId)
         )
         # roleList=await self._query(request,queryRoleSml,isPO=False,param={"userId":1})
-        roleList = await self._query(request, userRolesSelect.union(userGroupRolesSelect), isPO=False)
+        queryRoleSelect =  userRolesSelect.union(userGroupRolesSelect)
+        #roleList=await self._query(request,queryRoleSml,isPO=False,param={"userId":1}) 
+        session=self.get_db_session(request) 
+        from co6co_db_ext.session import session_context
+        roleList=[]
+        async with session_context(session) () as session:#  为什么开启事务后 session 还能继续使用
+           roleList = await db_tools.execForMappings(session,queryRoleSelect ,queryOne=False) 
         #log.warn(roleList)
         roleList = [d.get("role_id") for d in roleList]
         select = (

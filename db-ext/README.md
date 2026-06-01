@@ -34,9 +34,10 @@ db_session.py  72 z
     增加dbBll类，移除session中的DbSession、BaseBll类
 0.1.0 2026-05-22
     增加 actuator，jwt_service
-0.1.1 2026-05-23 未发布
+0.1.1 2026-05-23
     修复已知BUG
-
+0.1.2 2026-06-01 未发布
+    修复已知BUG
 
 ```
 

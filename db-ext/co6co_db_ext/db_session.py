@@ -117,7 +117,8 @@ class db_service:
             "max_overflow": self.settings.get("max_overflow"),
         }
         setting.update(kwargs)
-        return create_async_engine(url, **setting)
+        print(url)
+        return create_async_engine(url, **setting) #,
 
     def _session_factory(self, engine: Engine = None, **kv):
         if engine is None:

@@ -5,7 +5,7 @@
         "DB_USER": "root",
         "DB_PASSWORD": "mysql123456",
         "echo": false,
-        "pool_size": 20,
+        "pool_size": 0,
         "max_overflow": 1,
         "pool_pre_ping": false
     } 
