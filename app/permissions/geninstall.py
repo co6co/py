@@ -13,8 +13,9 @@ with open('install.bat', 'w+', encoding='utf-8') as f:
     f.write("::设置编码为utf-8\n")
     f.write("chcp 65001\n") # 设置utf-8 编码
     f.write("echo 执行测试...\n")
-    f.write("python -m pytest tests/ -rA\n")
+    f.write("python -m pytest tests/ -rA\n") 
     f.write("echo 测试完成.\n")
+    f.write(f"pip index versions {package_name}\n")
     f.write(f"echo resetup and reinstall 重新新版本:{version},并准备安装...\n")
     f.write("pause\n")  
     s=f"python setup.py sdist & pip uninstall {package_name} & pip install dist\\{name}-{version}.tar.gz"

@@ -3,8 +3,9 @@ from sanic.views import HTTPMethodView  # 基于类的视图
 from sanic.request.form import File  # 基于类的视图
 from sanic import Request
 from sanic.response import json, raw, BaseHTTPResponse
-from co6co_sanic_ext.model.res.result import Result, Page_Result
-from co6co_sanic_ext.utils import JSON_util
+from co6co.data.result import Result, Page_Result
+
+from co6co.utils.json_util import JSONEncoder
 from typing import TypeVar, Dict, List, Any, Tuple
 import aiofiles
 import os
@@ -23,7 +24,7 @@ from co6co_web_session.base import SessionDict
 from typing import Tuple
 from co6co.utils import tool_util as utils
 from co6co.utils.modules import deprecated
-
+import json as sys_json
 
 class _baseView(HTTPMethodView):
     """
@@ -34,18 +35,18 @@ class _baseView(HTTPMethodView):
 
     def __init__(self, *class_args: any, **class_kwargs: any) -> None:
         super().__init__(*class_args, **class_kwargs)
-
-    def response_json(self, data: Result | Page_Result):
-        return JSON_util.response(data, ensure_ascii=False)
-
-    def is_integer(self, s: str | bytes | bytearray):
+    
+    def response_json(self, data: Result | Page_Result,status: int = 200): 
+        return json(sys_json.loads(JSONEncoder.dumps(data)), status=status)
+    @staticmethod
+    def is_integer( s: str | bytes | bytearray):
         try:
             int(s)
             return True
         except ValueError:
             return False
-
-    def get_Session(self, request: Request) -> Tuple[Session, SessionDict]:
+    @staticmethod
+    def get_Session( request: Request) -> Tuple[Session, SessionDict]:
         """
         获取 mem_session 
         """
@@ -53,7 +54,8 @@ class _baseView(HTTPMethodView):
         session = request.app.ctx.extensions['Session']
         return session, sDict
 
-    def choose(self, request: Request, kyes: list | tuple, valueNone: bool = False):
+    @staticmethod
+    def choose(request: Request, kyes: list | tuple, valueNone: bool = False):
         """
         选择dict 中 指定的key
         @param request 请求参数
@@ -61,8 +63,7 @@ class _baseView(HTTPMethodView):
         @param valueNone 当request.json key不存在时,返回{ ... ,key:None,...}
         """
         data = request.json
-        return utils.choose(data, kyes, valueNone)
-
+        return utils.choose(data, kyes, valueNone) 
     def createContentDisposition(self, fileName):
         """
         创建内容描述header
@@ -129,7 +130,8 @@ class _baseView(HTTPMethodView):
             fileName = os.path.basename(fullPath)
         return await self.response_head(size, fileName)
 
-    def parseRange(self, request: Request, *, filePath: str = None, fileSize: int = None):
+    @staticmethod
+    def parseRange( request: Request, *, filePath: str = None, fileSize: int = None):
         """
         解析 HTTP.HEADER.Range 参数
         @param request 请求参数
@@ -143,7 +145,7 @@ class _baseView(HTTPMethodView):
             raise ValueError(
                 "Exactly one of filePath or fileSize must be provided.")
 
-        if fileSize == None:
+        if fileSize is None:
             fileSize = os.path.getsize(filePath)
         range_header = request.headers.get('Range')
         if range_header:
@@ -159,7 +161,8 @@ class _baseView(HTTPMethodView):
             elif end is None or end >= fileSize:
                 end = fileSize - 1
         return start, end, fileSize
-
+        
+  
     async def get_file_partial(self, request: Request, filePath: str):
         if os.path.isfile(filePath):
             fileName = os.path.basename(filePath)
@@ -180,7 +183,8 @@ class _baseView(HTTPMethodView):
             data = f.read(size)
         return raw(data, status=206, headers=headers)
 
-    def usable_args(self, request: Request) -> dict:
+    @staticmethod
+    def usable_args( request: Request) -> dict:
         """
         去除列表
         request.args={name:['123'],groups:["a","b"]}
@@ -196,7 +200,8 @@ class _baseView(HTTPMethodView):
                 data_result.update({key: value})
         return data_result
 
-    async def save_body(self, request: Request, root: str):
+    @staticmethod
+    async def save_body( request: Request, root: str):
         # 保存上传的内容
         subDir = getDateFolder(format='%Y-%m-%d-%H-%M-%S')
         filePath = os.path.join(root, getDateFolder(), f"{subDir}.data")
@@ -207,8 +212,8 @@ class _baseView(HTTPMethodView):
         async with aiofiles.open(filePath, 'wb') as f:
             await f.write(request.body)
         # end 保存上传的内容
-
-    async def parser_multipart_body(self, request: Request) -> Tuple[Dict[str, tuple | Any], Dict[str, multipart.MultipartPart]]:
+    @staticmethod
+    async def parser_multipart_body(  request: Request) -> Tuple[Dict[str, tuple | Any], Dict[str, multipart.MultipartPart]]:
         """
         解析内容: multipart/form-data; boundary=------------------------XXXXX,
         的内容
@@ -243,13 +248,14 @@ class _baseView(HTTPMethodView):
             raise Exception("{} Exists".format(path))
         async with aiofiles.open(path, 'wb') as f:
             await f.write(file.body)
-
+            
+    
     async def _save_file(self, request: Request, *savePath: str, fileFieldName: str = None):
         """
         保存上传的文件
         """
         p_len = len(savePath)
-        if fileFieldName != None and p_len == 1:
+        if fileFieldName is not None and p_len == 1:
             file = request.files.get(fileFieldName)
             await self.save_file(file, *savePath)
         elif p_len == len(request.files):
@@ -280,6 +286,15 @@ class BaseClsView(_baseView):
         """
         return self._request
     @property
+    def match_info(self):
+        """url 模板参数"""
+        return self. request.match_info
+    @property
+    def json(self):
+        """json 参数"""
+        return self.request.json
+    
+    @property
     def config(self):
         """
         应用配置
@@ -293,7 +308,7 @@ class BaseClsView(_baseView):
         应用对象
         """
         return self.request.app
-
+    '''
     async def get(self):
         raise NotImplementedError(f"get '{self.routePath}' not implemented")
 
@@ -305,7 +320,7 @@ class BaseClsView(_baseView):
 
     async def delete(self):
         raise NotImplementedError(f"delete '{self.routePath}' not implemented")
-
+    '''
     @classmethod
     def as_view(cls, *class_args: any, **class_kwargs: any):
         """

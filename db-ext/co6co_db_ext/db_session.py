@@ -13,67 +13,12 @@ from sqlalchemy.orm import selectinload
 
 import asyncio
 import time
-from typing import TypeVar, TypedDict, Type, Callable
+from typing import  Callable
 from sqlalchemy.pool import NullPool
-from co6co.utils import log
-from co6co.task.thread import ThreadEvent
-from co6co.data import DictNamespace
+from co6co.utils import log 
 from .po import BasePO
-from . import auto_import_models
-import json
-
-class connectSetting(TypedDict):
-    DB_HOST: str
-    DB_NAME: str
-    DB_USER: str
-    DB_PASSWORD: str
-    echo: bool
-    pool_size: int
-    max_overflow: int
-    pool_pre_ping: bool
-    # 不支持示例方法
-    #def from_(self, data: DictNamespace):
-    #    for k in self.keys():
-    #        self[k] = data.get(k)
-    @staticmethod
-    def from_(instance:connectSetting, data: DictNamespace):
-        for k in instance.keys():
-            instance[k] = data.get(k)
-    @classmethod
-    def create_default(cls, data: DictNamespace = None):
-        instance = cls(
-            DB_HOST="localhost",
-            DB_NAME="",
-            DB_USER="root",
-            DB_PASSWORD="",
-            echo=True,
-            pool_size=20,
-            max_overflow=10,
-            pool_pre_ping=True,  # 执行sql语句前悲观地检查db是否可用
-            # 'pool_recycle':1800 #超时时间 单位s
-        )
-        if data is not None:
-            connectSetting.from_(instance, data)
-        return instance
-    
-    @staticmethod
-    def create_from_config(config_file: str,  database_key:str="db_settings"):
-        raw:dict={}
-        try:
-            with open(config_file, "r", encoding="utf-8") as f: 
-                raw =json.load(f)
-        except FileNotFoundError:
-            raise RuntimeError(f"配置文件不存在: {config_file}")
-        except json.JSONDecodeError as e:
-            raise RuntimeError(f"配置文件 JSON 解析失败: {e}")
-        db_settings = raw.get(database_key, {})
-        print(db_settings)
-        if not db_settings:
-            raise RuntimeError(f"配置文件中没有 {database_key} 配置")
-        instance=connectSetting.create_default()
-        connectSetting.from_(instance, DictNamespace(**db_settings))
-        return instance
-
+from . import auto_import_models 
+from .appconfig import connectSetting
 
 class db_service:
     default_settings= connectSetting.create_default() 

@@ -5,6 +5,7 @@ chcp 65001
 echo 执行测试...
 python -m pytest tests/ -rA
 echo 测试完成.
-echo resetup and reinstall 重新新版本:0.0.19,并准备安装...
+pip index versions co6co.web_db
+echo resetup and reinstall 重新新版本:0.0.20,并准备安装...
 pause
-python setup.py sdist & pip uninstall co6co.web_db & pip install dist\co6co_web_db-0.0.19.tar.gz
+python setup.py sdist & pip uninstall co6co.web_db & pip install dist\co6co_web_db-0.0.20.tar.gz

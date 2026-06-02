@@ -1,4 +1,4 @@
-from co6co_db_ext.db_session import connectSetting, DictNamespace
+from co6co_db_ext.appconfig import connectSetting, DictNamespace
 
 
 def test_connectSetting():

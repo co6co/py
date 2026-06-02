@@ -5,6 +5,7 @@ chcp 65001
 echo 执行测试...
 python -m pytest tests/ -rA
 echo 测试完成.
+pip index versions co6co.permissions
 echo resetup and reinstall 重新新版本:0.1.6,并准备安装...
 pause
 python setup.py sdist & pip uninstall co6co.permissions & pip install dist\co6co_permissions-0.1.6.tar.gz

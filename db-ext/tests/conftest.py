@@ -24,4 +24,7 @@ async def db_service_param():
     service = db_service(cfg)
     await service.init_tables()
     #service.sync_init_tables()
-    return cfg, service.Session,Actuator(service.Session())
+    actuator = Actuator(service.Session())
+    yield cfg, service.Session, actuator
+    # 清理：关闭 session
+    await actuator.session.close()

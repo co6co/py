@@ -66,7 +66,7 @@ class UserPO(UserTimeStampedModelPO):
         """
         jwt 保存内容
         """
-        return {"id": self.id, "userName": self.userName, "group_id": self.userGroupId}
+        return {"id": self.id, "user_name": self.userName, "group_id": self.userGroupId}
 
     @property
     def jwt_data(self):
@@ -87,10 +87,9 @@ class AccountPO(UserTimeStampedModelPO):
     """
     __tablename__ = "sys_account"
     uid = Column("uuid", String(36),  primary_key=True, default=uuid.uuid4())
-    userId = Column("user_id", ForeignKey("{}.{}".format(UserPO.__tablename__, UserPO.id.name), ondelete="CASCADE"), nullable=False, index=True, unique=True)
+    userId = Column("user_id", ForeignKey("{}.{}".format(UserPO.__tablename__, UserPO.id.name), ondelete="SET NULL"), nullable=True, index=True )
     accountName = Column("account_name", String(64), unique=True)
-    attachInfo = Column("attach_info", String(255),
-                        comment="有些信息需要存下来，才能配合账号使用")
+    attachInfo = Column("attach_info", String(255), comment="有些信息需要存下来，才能配合账号使用")
     category = Column("category", INTEGER)
     status = Column("status", String(16), comment="状态,根据账号类型，有不同得解释")
     userPO = Relationship(UserPO, back_populates="accountPOs")

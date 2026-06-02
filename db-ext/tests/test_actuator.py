@@ -3,7 +3,7 @@ from sqlalchemy.sql import Select
 from co6co_db_ext.actuator import Actuator
 import pytest
 from co6co_db_ext.db_session import db_service, connectSetting
-from .right import *
+from .right import UserPO, UserGroupPO,BasePO
 
 
 def get_actuator(db_service_param):

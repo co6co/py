@@ -123,7 +123,8 @@ CREATE TABLE `sys_user_role` (
 -- Records of sys_user_role
 -- ----------------------------
 INSERT INTO `sys_user_role` (`user_id`,`role_id`,`create_user`,`create_time`) VALUES ('1', '1', '1', '2024-05-07 15:20:57'); 
-
+INSERT INTO `sys_user_group` (`id`,`parent_id`,`name`,`code`,`order`,`create_user`,`update_user`,`create_time`,`update_time`) VALUES ('100', '0', '微信用户组', 'wx_bind_user_group', '3', '1', '1', '2024-04-29 09:53:45', '2024-04-29 14:08:34');
+INSERT INTO `sys_role` (`id`,`name`,`code`,`order`,`remark`,`create_time`,`update_time`) VALUES ('100', '默认微信用户角色', 'wx_bind_user_rule', '0', '微信小程序', '2024-04-29 15:43:07', null); 
 
 
 

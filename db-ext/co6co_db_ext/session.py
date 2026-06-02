@@ -33,8 +33,11 @@ def transactional(func):
     """
     @functools.wraps(func)
     async def wrapper(self, *args, **kwargs):
-        async with self.session as session, session.begin():
-            return await func(self, session, *args, **kwargs)
+        _session:AsyncSession = self.session if hasattr(self, "session")   else self.db_session
+        if _session is None:
+            raise Exception("session,参数不能为空")
+        async with _session as session, session.begin():
+            return await func(self, *args, **kwargs)
     return wrapper
 class dbBll:
     def __init__(self, *,  db_settings: connectSetting = {}) -> None:

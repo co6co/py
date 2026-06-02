@@ -18,6 +18,7 @@ async def test_start_two_transactions(db_service_param):
         print(await actuator.execute(text("select 2,3")))
         print(session.is_active, id(session))
         await session.commit()
+        await session.close()
 
 
 async def test_start_two_transactions2(db_service_param):

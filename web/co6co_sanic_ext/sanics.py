@@ -1,4 +1,5 @@
 from __future__ import annotations
+from csv import DictReader
 from sanic.config import Config
 from types import SimpleNamespace
 from sanic.blueprint_group import BlueprintGroup
@@ -142,7 +143,7 @@ def appendData(app: Sanic, **kwargs):
         setattr(app.ctx, key, value)
 
 
-def parserConfig(configFile: str):
+def parserConfig(configFile: str|dict):
     """
     一般 会有
     {
@@ -150,6 +151,8 @@ def parserConfig(configFile: str):
       web_setting={}
     }
     """
+    if isinstance(configFile, dict):
+        return configFile
     default: dict = {
         "web_setting": {
             "port": 8084,
@@ -191,16 +194,13 @@ def _create_App(
         app = Sanic[Config, SimpleNamespace](name)
         data = locals()
         appendData(app, **kwargs)
+        customConfig = parserConfig(configFile)
 
         # primary = data.get("app", None)
         # app.ctx.mainApp = primary
         if configFile is None:
             raise PermissionError("config")
-        if app.config is not None:
-            if isinstance(configFile, dict):
-                customConfig = configFile
-            else:
-                customConfig = parserConfig(configFile)
+        if app.config is not None: 
             if customConfig is not None:
                 app.config.update(customConfig)
             # log.succ(f"app 配置信息：\n{app.config}")

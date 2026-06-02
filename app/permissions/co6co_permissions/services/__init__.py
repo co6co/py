@@ -18,36 +18,37 @@ from ..model.pos.right import UserPO, RolePO, UserRolePO, AccountPO
 from co6co.utils.tool_util import to_underscore
 import uuid
 from ..model.enum import user_state
+from co6co.utils.modules import deprecated
 
-
+@deprecated("方法过期，代码迁移完后将删除")
 def getSecret(request: Result):
     """
     获取加密密钥
     """
     return request.app.config.SECRET
 
-
-def getCurrentUserId(request: Request):
+@deprecated("方法过期，代码迁移完后将删除")
+def getCurrentUserId(request: Request): 
     if "current_user" in request.ctx.__dict__.keys():
         userId = int(request.ctx.current_user["id"])
         return userId
     return None
 
-
+@deprecated("方法过期，代码迁移完后将删除")
 def getCurrentUserName(request: Request):
     if "current_user" in request.ctx.__dict__.keys():
-        userName = str(request.ctx.current_user["userName"])
+        userName = str(request.ctx.current_user["user_name"])
         return userName
     return None
 
-
+@deprecated("方法过期，代码迁移完后将删除")
 def getCtxData(user: UserPO):
     """
     通过user获取 dict 保存在 request.ctx.current_user 中 
     """
     return user.to_jwt_dict()
 
-
+@deprecated("方法过期，代码迁移完后将删除")
 async def generatePageToken(SECRET: str, user: UserPO, expire_seconds: int = 86400, **kvarg):
     """
     生成登录token和刷新token
@@ -57,19 +58,19 @@ async def generatePageToken(SECRET: str, user: UserPO, expire_seconds: int = 864
     tokenData.update({"refreshToken": refreshToken})
     return tokenData
 
-
+@deprecated("方法过期，代码迁移完后将删除")
 async def queryUer(session: AsyncSession, userId: int):
     select = Select(UserPO).filter(UserPO.id.__eq__(userId))
     user: UserPO = await db_tools.execForPo(session, select, remove_db_instance_state=False)
     return user
 
-
+@deprecated("方法过期，代码迁移完后将删除")
 async def queryUerByAccessToken(session: AsyncSession, accessToken: str):
     select = Select(UserPO).filter(UserPO.password.__eq__(accessToken), UserPO.state.in_([user_state.enabled]))
     user: UserPO = await db_tools.execForPo(session, select, remove_db_instance_state=False)
     return user
 
-
+@deprecated("方法过期，代码迁移完后将删除")
 async def generateUserToken(SECRET: str,   data: dict, userOpenId: str = None, expire_seconds: int = 86400):
     """
     SECRET:密钥 
@@ -83,7 +84,7 @@ async def generateUserToken(SECRET: str,   data: dict, userOpenId: str = None, e
     else:
         raise Exception("data can't is NUll! ")
 
-
+@deprecated("方法过期，代码迁移完后将删除")
 async def generateRefreshToken(SECRET: str, userId: any,  expire_seconds=30*86400):
     """
     创建刷新Token
@@ -92,7 +93,7 @@ async def generateRefreshToken(SECRET: str, userId: any,  expire_seconds=30*8640
     token = await generateCode(SECRET, userId,  expire_seconds)
     return {"token": token, "expireSeconds": expire_seconds}
 
-
+@deprecated("方法过期，代码迁移完后将删除")
 async def generateCode(SECRET: str, userId: any,  expire_seconds=180):
     """
     创建 code
@@ -101,7 +102,7 @@ async def generateCode(SECRET: str, userId: any,  expire_seconds=180):
     token = await createToken(SECRET, {"userId": userId}, expire_seconds)
     return token
 
-
+@deprecated("方法过期，代码迁移完后将删除")
 async def decodeCode(SECRET: str, codeToken: str):
     """
     创建 code
