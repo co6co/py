@@ -7,7 +7,7 @@ from co6co_db_ext.db_filter import absFilterItems
 from co6co_sanic_ext.utils import JSON_util
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import scoped_session
-from typing import TypeVar, Dict, List, Any, Tuple, Optional, Callable
+from typing import TypeVar,TypeAlias, Dict, List, Any, Tuple, Optional, Callable,Awaitable 
 from co6co.data.result import Result, Page_Result
  
 from sqlalchemy.sql.elements import ColumnElement
@@ -28,6 +28,10 @@ from ..model.params import associationParam
 from co6co.utils.modules import deprecated
 from co6co_db_ext.appconfig import AppConfig
 
+TypeOneFun:TypeAlias =  Callable[[BasePO,AsyncSession, Request], Awaitable[None | Any]]
+TypeTwoFun:TypeAlias =  Callable[[BasePO, BasePO,AsyncSession, Request], Awaitable[None | Any]]
+TypeListFun:TypeAlias =Callable[[List[BasePO], AsyncSession, Request], Awaitable[None | Any]]
+TypeCreateFun:TypeAlias =Callable[[AsyncSession, int|str ], Awaitable[BasePO]] 
 
 def get_db_session(request: Request) -> AsyncSession | scoped_session:
     """
@@ -229,11 +233,11 @@ class BaseDbClsView(BaseClsView):
             except Exception as e:
                 await actuator.session.rollback()
                 return self.response_error( e)
-
+        
         return await callable(exec)
 
-    async def batchAdd(self,   poList: List[BasePO], userId=None, beforeFun: Callable[[BasePO, AsyncSession, Request], None | Any] = None, afterFun: Callable[[List[BasePO], AsyncSession, Request], None] = None):
-        try: 
+    async def batchAdd(self,poList: List[BasePO], userId=None, beforeFun:TypeOneFun = None, afterFun:TypeListFun = None):
+        try:  
             async def exec(actuator: Actuator):
                 for po in poList:
                     po.add_assignment(userId)
@@ -253,7 +257,7 @@ class BaseDbClsView(BaseClsView):
         except Exception as e:
             return self.response_error( e)
 
-    async def add(self,   po: BasePO, json2Po: bool = True, userId=None, beforeFun: Callable[[BasePO, AsyncSession, Request], Any] = None, afterFun: Callable[[BasePO, AsyncSession, Request], None] = None):
+    async def add(self,   po: BasePO, json2Po: bool = True, userId=None, beforeFun: TypeOneFun = None, afterFun:TypeOneFun= None):
         """
         增加 
 
@@ -289,7 +293,7 @@ class BaseDbClsView(BaseClsView):
             return self.response_error( e)
 
 
-    async def edit(self,   pkOrSelect:  int | str | Select, poType: TypeVar, po: Optional[BasePO] = None, userId=None, fun:Callable[[BasePO, BasePO,AsyncSession, Request], Any] = None, json2Po: bool = True):
+    async def edit(self,   pkOrSelect:  int | str | Select, poType: TypeVar, po: Optional[BasePO] = None, userId=None, fun:TypeOneFun = None, json2Po: bool = True):
         """
         编辑
  
@@ -314,14 +318,14 @@ class BaseDbClsView(BaseClsView):
                     oldPo = await db_tools.execForPo(actuator.session, pkOrSelect, remove_db_instance_state=False)
                 else:
                     oldPo: BasePO = await actuator.session.get_one(poType, pkOrSelect)
-                if oldPo == None:
+                if oldPo is None:
                     return JSON_util.response(Result.fail(message=f"未查到‘{pkOrSelect}’对应的信息!"))
                 oldPo.edit_assignment(userId)
                 if json2Po:
                     oldPo.update(po)
-                if fun != None:
+                if fun is not None:
                     result = await fun(oldPo, po,actuator. session, self.request)
-                    if result != None:
+                    if result is not None:
                         await actuator.session.rollback()
                         return result
                 return JSON_util.response(Result.success())
@@ -329,7 +333,7 @@ class BaseDbClsView(BaseClsView):
         except Exception as e:
             return self.response_error( e)
 
-    async def remove(self,   pk: any, poType: TypeVar,  beforeFun:Callable[[BasePO,  AsyncSession, Request ],Any] = None , afterFunCallable[[BasePO,  AsyncSession, Request ], Any] = None):
+    async def remove(self,   pk: any, poType: TypeVar,  beforeFun:TypeOneFun = None , afterFun:TypeOneFun = None):
         """
         删除   
         pk: any,      #主键值
@@ -366,13 +370,13 @@ class BaseDbClsView(BaseClsView):
         param.__dict__.update(self.json)
         return param
         
-    async def save_association(self,currentUser: int, delSml: Delete, createPo: Callable[[AsyncSession, int|str ],BasePO] = None, param: associationParam = None,delSmlParam:dict|list):
+    async def save_association(self,currentUser: int, delSml: Delete, createPo: TypeCreateFun = None, param: associationParam = None,delSmlParam: Dict | List | Tuple = None):
         """
         保存关联菜单
         delSml:Delete 删除语句
-        createPo:(id)=>basePO
+        createPo:(session,id)=>basePO
         """ 
-        if param == None:
+        if param is None:
             param=self.get_associationParam()
         callable = DbCallable(self.db_session)
 
@@ -380,13 +384,13 @@ class BaseDbClsView(BaseClsView):
             try:
                 isChanged = False
                 # 移除
-                if (param.remove != None and len(param.remove) > 0):
+                if (param.remove is not None and len(param.remove) > 0):
                     # Delete(userGroupProjectPO).filter(userGroupProjectPO.projectId ==self.projectId, userGroupProjectPO.userGroupId .in_(bindparam("remove")))
                     result = await actuator .execSQL( delSml, delSmlParam)
                     if result > 0:
                         isChanged = True
                 # 增加
-                if (param.add != None and len(param.add) > 0):
+                if (param.add is not None and len(param.add) > 0):
                     addpoList = []
                     for id in param.add:
                         po: BasePO = await createPo(actuator.session, id)
@@ -498,11 +502,11 @@ class BaseMethodView(BaseView):
         view=BaseDbClsView(request)
         return await view.execSqls(  *sml , callBck, smlParamList) 
 
-    async def batchAdd(self, request: Request, poList: List[BasePO], userId=None, beforeFun: Callable[[BasePO, AsyncSession, Request], None | Any] = None, afterFun: Callable[[List[BasePO], AsyncSession, Request], None] = None):
+    async def batchAdd(self, request: Request, poList: List[BasePO], userId=None, beforeFun: TypeOneFun = None, afterFun: TypeListFun = None):
         view=BaseDbClsView(request)
         return await view.batchAdd(  poList , userId, beforeFun, afterFun) 
 
-    async def add(self, request: Request, po: BasePO, json2Po: bool = True, userId=None, beforeFun: Callable[[BasePO, AsyncSession, Request], None | Any] = None, afterFun: Callable[[BasePO, AsyncSession, Request], None] = None):
+    async def add(self, request: Request, po: BasePO, json2Po: bool = True, userId=None, beforeFun: TypeOneFun= None, afterFun: TypeOneFun = None):
         """
         增加 
 
@@ -519,7 +523,7 @@ class BaseMethodView(BaseView):
 
 
 
-    async def edit(self, request: Request, pkOrSelect:  int | str | Select, poType: TypeVar, po: Optional[BasePO] = None, userId=None, fun=None, json2Po: bool = True):
+    async def edit(self, request: Request, pkOrSelect:  int | str | Select, poType: TypeVar, po: Optional[BasePO] = None, userId=None, fun: TypeOneFun = None, json2Po: bool = True):
         """
         编辑
 
@@ -534,9 +538,10 @@ class BaseMethodView(BaseView):
         return JSONResponse
         """
         view=BaseDbClsView(request)
+
         return await view.edit(  pkOrSelect, poType, po, userId, fun, json2Po) 
 
-    async def remove(self,   pk: any, poType: TypeVar,  beforeFun = None , afterFun   = None):
+    async def remove(self, request: Request, pk: any, poType: TypeVar,  beforeFun: TypeOneFun = None , afterFun: TypeOneFun = None):
         """
         删除  
         request: Request, 
@@ -547,17 +552,17 @@ class BaseMethodView(BaseView):
 
         return JSONResponse
         """
-        view=BaseDbClsView(request)
+        view=BaseDbClsView( request)
         return await view.remove(  pk, poType, beforeFun, afterFun) 
 
-    async def save_association(self, request: Request, currentUser: int, delSml: Delete, createPo: any, param: associationParam = None, delSmlParam: Dict | List | Tuple = None):
+    async def save_association(self, request: Request, currentUser: int, delSml: Delete, createPo:TypeCreateFun, param: associationParam = None, delSmlParam: Dict | List | Tuple = None):
         """
         保存关联菜单
         delSml:Delete 删除语句
         createPo:(id)=>basePO
         """ 
         view=BaseDbClsView(request)
-        return await view.save_association(  currentUser, delSml, delSmlParam, param) 
+        return await view.save_association(  currentUser, delSml,createPo, delSmlParam, param) 
 
 
 """

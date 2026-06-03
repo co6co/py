@@ -2,20 +2,15 @@
 
 from co6co_sanic_ext.model.res.result import Result
 from co6co_sanic_ext.utils import JSON_util
-from ..model.enum import menu_type, menu_state, user_state
+from ..model.enum import menu_type, menu_state 
 from ..view_model.aop.api_auth import authorized
-from sanic import Sanic, Blueprint, Request
-from ..view_model.menu_view import menu_tree_view, menu_view, menus_view, menu_batch_view
+from sanic import  Blueprint, Request
+from ..view_model.menu_view import menu_tree_view, menu_view, menus_view, menu_batch_view,menu_exist_view
 
 from co6co_sanic_ext.api import add_routes
 
 menu_api = Blueprint("menu_API", url_prefix="/menu")
-add_routes(menu_api, menus_view, menu_tree_view, menu_view, menu_batch_view)
-'''
-menu_api.add_route(menus_view.as_view(),"/",name=menus_view.__name__) 
-menu_api.add_route(menu_tree_view.as_view(),"/tree",name=menu_tree_view.__name__) 
-menu_api.add_route(menu_view.as_view(),"/<pk:int>",name=menu_view.__name__) 
-'''
+add_routes(menu_api, menus_view, menu_tree_view, menu_view, menu_batch_view,menu_exist_view) 
 '''
 代码放置在 view_model 可能会出现循环引用问题
 '''

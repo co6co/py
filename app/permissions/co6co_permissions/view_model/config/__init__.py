@@ -12,7 +12,8 @@ from co6co_web_db.model.params import associationParam
 
 from datetime import datetime
 from ..base_view import AuthMethodView
-from ..aop import exist, ObjectExistRoute
+from ..biz_view import AbsExistView
+ 
 from ...model.filters.config_filter import Filter
 from ...model.pos.other import sysConfigPO
 from ..aop.config_aop import ConfigEntry
@@ -60,13 +61,14 @@ class ConfigByCacheView(AuthMethodView):
         return self.response_json(Result.success(config))
 
 
-class ExistView(AuthMethodView):
-    routePath = ObjectExistRoute
-
-    async def get(self, request: Request, code: str, pk: int = 0):
-        result = await self.exist(request, sysConfigPO.code == code, sysConfigPO.id != pk)
-        return exist(result, "配置code", code)
-
+ 
+class ExistView(AbsExistView):
+    @property
+    def column(self):
+        return sysConfigPO.id
+    @property 
+    def exist_condition(self)  :
+        return  sysConfigPO.code == self.param_code, sysConfigPO.id != self.param_pk 
 
 @ConfigEntry
 async def configValueChange(request: Request, code: str, value: str):

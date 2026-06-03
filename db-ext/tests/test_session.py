@@ -37,7 +37,7 @@ class TestTransactionalDecorator:
             session = MagicMock()
 
             @transactional
-            async def test_method(self, session, arg1):
+            async def test_method(self,   arg1):
                 return arg1
 
         mock_instance = MockClass()
@@ -51,6 +51,7 @@ class TestTransactionalDecorator:
         mock_instance.session.begin = MagicMock(return_value=mock_trans_manager)
 
         result = await mock_instance.test_method("test_arg")
+        
         assert result == "test_arg"
 
 

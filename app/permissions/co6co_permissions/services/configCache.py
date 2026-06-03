@@ -110,7 +110,7 @@ class ConfigCache(BaseCache):
             )
             data: dict | None = await db_tools.execForMappings(session, select, queryOne=True)
             result = None
-            if data == None:
+            if data is None:
                 log.warn("query {} config is NULL".format(code))
             else:
                 result = data.get("value")

@@ -11,61 +11,62 @@ from co6co_db_ext.db_utils import db_tools, DbCallable
 from co6co_web_db.model.params import associationParam
 
 from datetime import datetime
-from .base_view import AuthMethodView
-from .aop import exist, ObjectExistRoute
+from .base_view import AuthMethodView,AbsAuthClsView
+from .biz_view import AbsExistView,AbsAssociationView,AbsSelectView,AbsPkView,AbsQueryView,AbsAddView
+
 from ..model.pos.right import RolePO, MenuRolePO, UserRolePO, UserGroupRolePO, menuPO
 from ..model.filters.role_filter import role_filter
-from .aop.api_auth import userRoleChanged
+from .aop.api_auth import userRoleChanged 
+
+class roles_ass_exist_view(AbsExistView):
+    @property
+    def column(self):
+        return RolePO.id
+    @property 
+    def exist_condition(self)  :
+        return  RolePO.code == self.param_code, RolePO.id != self.param_pk 
 
 
-class roles_ass_exist_view(AuthMethodView):
-    routePath = ObjectExistRoute
-
-    async def get(self, request: Request, code: str, pk: int = 0):
-        result = await self.exist(request, RolePO.code == code,
-                                  RolePO.id != pk, column=RolePO.id)
-        return exist(result, "角色编码", code)
-
-
-class roles_ass_view(AuthMethodView):
+class roles_ass_view(AbsAssociationView):
     routePath = "/association/<roleId:int>"
-
-    async def post(self, request: Request, roleId: int):
-        """
-        获取角色关联菜单
-        """
+    @property
+    def is_tree(self):
+        return True 
+    @property 
+    def association_sql(self)->Select :
         subSelect = Select(MenuRolePO.menuId, MenuRolePO.roleId).filter(
-            MenuRolePO.roleId == roleId).subquery()
+            MenuRolePO.roleId == self.routeValue).subquery()
         select = (
             Select(menuPO.id, menuPO.name, menuPO.code, menuPO.parentId,
                    subSelect.c.roleId.label("associatedValue"))
             .outerjoin_from(menuPO, subSelect, onclause=subSelect.c.menuId == menuPO.id, full=False)
             .order_by(menuPO.parentId.asc())
         )
-        return await self.query_tree(request, select, rootValue=0, pid_field='parentId', id_field="id", isPO=False)
+        return select 
+    @property 
+    def delete_sql(self) -> Delete:
+        param = self.get_associationParam()
+        return  Delete(MenuRolePO).filter(MenuRolePO.roleId == self.routeValue, MenuRolePO.menuId .in_(param.remove))
+    async def create_association_po(self,session:AsyncSession,associationed_id:int,*args,**kwargs)  :
+        po = MenuRolePO()
+        po.menuId = associationed_id
+        po.roleId = self.routeValue
+        return po
 
     @userRoleChanged
-    async def put(self, request: Request, roleId: int):
-        """
-        保存角色关联菜单
-        """
-        param = associationParam()
-        param.__dict__.update(request.json)
-        userId = self.getUserId(request)
+    async def put(self):
+        return await super().put()
 
-        sml = (
-            Delete(MenuRolePO).filter(MenuRolePO.roleId == roleId, MenuRolePO.menuId .in_(param.remove))
-        )
+class roles_query_view(AbsQueryView[role_filter]):
+    """
+     table数据 
+    """
+    routePath = "/" # 未兼容UI
 
-        async def createPo(_, menuId: int):
-            po = MenuRolePO()
-            po.menuId = menuId
-            po.roleId = roleId
-            return po
-        return await self.save_association(request, userId, sml, createPo)
+    cls = role_filter
 
 
-class roles_view(AuthMethodView):
+class roles_view(AbsAuthClsView):
     async def get(self, request: Request):
         """
         树形选择下拉框数据
@@ -75,38 +76,23 @@ class roles_view(AuthMethodView):
             Select(RolePO.id, RolePO.name, RolePO.code)
             .order_by(RolePO.order.asc())
         )
-        return await self.query_list(request, select,  isPO=False)
-
-    async def post(self, request: Request):
-        """
-        table数据 
-        """
-        param = role_filter(request)
-        await param.init()
-        param.__dict__.update(request.json)
-        return await self.query_page(request, param)
-
-    async def put(self, request: Request):
+        return await self.query_list( select,  isPO=False)  
+    async def put(self ):
         """
         增加
         """
         po = RolePO()
-        userId = self.getUserId(request)
-
+        userId =self.userId 
         async def before(po: RolePO, session: AsyncSession, request):
             exist = await db_tools.exist(session,  RolePO.code.__eq__(po.code), column=RolePO.id)
             if exist:
                 return JSON_util.response(Result.fail(message=f"'{po.code}'已存在！"))
-        return await self.add(request, po, userId=userId, beforeFun=before)
-
-    def patch(self, request: Request):
-        return text("I am patch method")
+        return await self.add( po, userId=userId, beforeFun=before) 
 
 
-class role_view(AuthMethodView):
-    routePath = "/<pk:int>"
+class role_view(AbsPkView): 
 
-    async def put(self, request: Request, pk: int):
+    async def put(self ):
         """
         编辑
         """
@@ -115,9 +101,9 @@ class role_view(AuthMethodView):
             if exist:
                 return JSON_util.response(Result.fail(message=f"'{po.code}'已存在！"))
 
-        return await self.edit(request, pk, RolePO, userId=self.getUserId(request), fun=before)
+        return await self.edit( self.routeValue, RolePO, userId=self.userId, fun=before)
 
-    async def delete(self, request: Request, pk: int):
+    async def delete(self ):
         """
         删除
         """
@@ -132,4 +118,4 @@ class role_view(AuthMethodView):
             if count > 0:
                 return JSON_util.response(Result.fail(message=f"该'{po.name}'角色关联了‘{count}’个用户，不能删除！"))
 
-        return await self.remove(request, pk, RolePO, beforeFun=before)
+        return await self.remove( self.routeValue, RolePO, beforeFun=before)

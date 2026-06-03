@@ -80,6 +80,7 @@ def menuChanged(f):
     """
     @wraps(f)
     async def decorated_function(*args, **kwargs):
+        log.err("需要重写")
         for a in args:
             if isinstance(a, Request):
                 cacheManage = AuthonCacheManage(a)
@@ -96,8 +97,10 @@ def userRoleChanged(f):
     """
     @wraps(f)
     async def decorated_function(*args, **kwargs):
+        log.err("//该方法需要重写，请注意")
         for a in args:
             if isinstance(a, Request):
+                
                 cacheManage = AuthonCacheManage(a)
                 cacheManage.setRolesInvalid()
                 cacheManage.setMenuDataInvalid()

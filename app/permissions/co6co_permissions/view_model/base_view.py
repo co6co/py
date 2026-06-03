@@ -1,4 +1,4 @@
-from co6co_web_db.view_model import   BaseMethodView, Request, BaseDbClsView
+from co6co_web_db.view_model import BaseMethodView, Request, BaseDbClsView
 from .aop.api_auth import authorized, ctx
 
 from co6co_db_ext.db_operations import DbOperations
@@ -7,6 +7,7 @@ from ..services import getCurrentUserId, getCurrentUserName
 from ..model.pos.right import UserPO
 from typing import Optional
 from co6co_db_ext.jwt_service import JwtService
+
 
 class _view:
     def getUserId(self, request: Request):
@@ -30,7 +31,8 @@ class AuthMethodView(BaseMethodView, _view):
     """
     token 校验
     api 校验
-    """ 
+    """
+
     decorators = [authorized]
 
 
@@ -38,13 +40,20 @@ class AbsClsView(BaseDbClsView):
     """
     基础类视图
     """
+
     @property
     def jwtService(self) -> JwtService:
-        if not hasattr(self, "_jwtService") or self._jwtService is None: 
-            jwt_secret=self.app_config.raw.get("SECRET") 
+        if not hasattr(self, "_jwtService") or self._jwtService is None:
+            jwt_secret = self.app_config.raw.get("SECRET")
             self._jwtService = JwtService(jwt_secret)
-        return self._jwtService  
-    def create_token(self, user: Optional[UserPO], expire_seconds: int = 86400, refresh_expire_seconds: int=3*86400):
+        return self._jwtService
+
+    def create_token(
+        self,
+        user: Optional[UserPO],
+        expire_seconds: int = 86400,
+        refresh_expire_seconds: int = 3 * 86400,
+    ):
         """
         创建token
         :return: token
@@ -56,7 +65,7 @@ class AbsClsView(BaseDbClsView):
         else:
             userAgent = self.request.headers["User-Agent"]
             device = None
-            refresh_data = user.crate_jwt_refresh_data(device, userAgent) 
+            refresh_data = user.crate_jwt_refresh_data(device, userAgent)
             data = self.jwtService.create_token(
                 user.jwt_data,
                 refresh_data,
@@ -84,6 +93,7 @@ class AbsAuthClsView(AbsClsView):
             return self.request.ctx.current_user
         else:
             raise Exception("当前用户信息不存在")
+
     @property
     def userId(self):
         """
@@ -92,18 +102,21 @@ class AbsAuthClsView(AbsClsView):
         if self.current_user:
             userId = int(self.current_user["id"])
             return userId
+
     @property
     def userName(self):
         """
         获取用户ID
         """
-        
+
         userName = int(self.current_user["user_name"])
         return userName
+
     @property
     def groupId(self):
         """
         获取用户ID
-        """ 
+        """
         group_id = int(self.current_user["group_id"])
-        return group_id 
+        return group_id
+

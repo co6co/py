@@ -26,6 +26,5 @@ def AccessTokenChange(f: Callable[[Request, str], dict]):
                 cacheManage.setCache(token, value)
             else:
                 log.warn("AccessTokenChange 未找到 Request 参数")
-        return value
-
+        return value 
     return _function

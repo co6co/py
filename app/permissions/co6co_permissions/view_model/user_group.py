@@ -6,69 +6,59 @@ from co6co_sanic_ext.model.res.result import Result
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from sqlalchemy.sql import Select, Delete
-from co6co_db_ext.db_utils import db_tools
-from co6co_web_db.model.params import associationParam
+from co6co_db_ext.db_utils import db_tools 
+from co6co_db_ext.session import transactional
 
-from .base_view import AuthMethodView
-from .aop import exist, ObjectExistRoute
+ 
+from .biz_view import AbsExistView,AbsAssociationView,AbsAuthClsView,AbsPkView
 from ..model.pos.right import UserGroupPO, RolePO, UserGroupRolePO
 from ..model.filters.user_group_filter import user_group_filter
 from co6co.utils import log
 from .aop.api_auth import userRoleChanged
 
+ 
+class user_group_exist_view(AbsExistView):
+    @property
+    def column(self):
+        return UserGroupPO.id
+    @property 
+    def exist_condition(self)  :
+        return  UserGroupPO.code == self.param_code, UserGroupPO.id != self.param_pk 
 
-class user_group_exist_view(AuthMethodView):
-    routePath = ObjectExistRoute
-
-    async def get(self, request: Request, code: str, pk: int = 0):
-        result = await self.exist(request, UserGroupPO.code == code,
-                                  UserGroupPO.id != pk, column=UserGroupPO.id)
-        return exist(result, "用户组编辑", code)
 
 
-class user_group_ass_view(AuthMethodView):
-    routePath = "/association/<userGroupId:int>"
-
-    async def post(self, request: Request, userGroupId: int):
-        """
-        获取用户组关联的角色
-        """
+class user_group_ass_view(AbsAssociationView):
+    routePath = "/association/<userGroupId:int>" 
+    @property 
+    def association_sql(self)->Select :
         subSelect = Select(UserGroupRolePO.roleId, UserGroupRolePO.userGroupId).filter(
-            UserGroupRolePO.userGroupId == userGroupId).subquery()
+            UserGroupRolePO.userGroupId == self.routeValue).subquery()
         select = (
             Select(RolePO.id, RolePO.name, RolePO.code,
                    subSelect.c.roleId.label("associatedValue"))
             .outerjoin_from(RolePO, subSelect, onclause=subSelect.c.roleId == RolePO.id, full=False)
             .order_by(RolePO.name.asc())
         )
-        return await self.query_list(request, select, isPO=False)
+        return select 
+    @property 
+    def delete_sql(self) -> Delete:
+        param = self.get_associationParam()
+        return   Delete(UserGroupRolePO).filter(UserGroupRolePO.userGroupId ==
+                                           self.routePath, UserGroupRolePO.roleId .in_(param.remove))
+    async def create_association_po(self,session:AsyncSession,associationed_id:int,*args,**kwargs)  :
+        po = UserGroupRolePO()
+        po.roleId = associationed_id
+        po.userGroupId = self.routeValue
+        return po
 
     @userRoleChanged
-    async def put(self, request: Request, userGroupId: int):
-        """
-        保存角色关联菜单
-        """
-        param = associationParam()
-        param.__dict__.update(request.json)
-        userId = self.getUserId(request)
-
-        sml = (
-            Delete(UserGroupRolePO).filter(UserGroupRolePO.userGroupId ==
-                                           userGroupId, UserGroupRolePO.roleId .in_(param.remove))
-        )
-
-        async def createPo(_, roleId: int):
-            po = UserGroupRolePO()
-            po.roleId = roleId
-            po.userGroupId = userGroupId
-            return po
-        return await self.save_association(request, userId, sml, createPo)
-
-
-class user_groups_tree_view(AuthMethodView):
-    routePath = "/tree"
-
-    async def get(self, request: Request, rootValue: int = None):
+    @transactional
+    async def put(self):
+        return await super().put()
+ 
+class user_groups_tree_view(AbsAuthClsView):
+    routePath = "/tree" 
+    async def get(self, parendId:int=None ):
         """
         树形选择下拉框数据
         selectTree :  el-Tree
@@ -78,33 +68,35 @@ class user_groups_tree_view(AuthMethodView):
                    UserGroupPO.code, UserGroupPO.parentId)
             .order_by(UserGroupPO.parentId.asc())
         )
-        return await self.query_tree(request, select, rootValue=rootValue, pid_field='parentId', id_field="id", isPO=False)
-
-    async def post(self, request: Request):
+        return await self.query_tree( select, rootValue=parendId,  pid_field='parentId', id_field="id", isPO=False)
+    @transactional
+    async def post(self ):
         """
         树形 table数据
         tree 形状 table
         """
         param = user_group_filter()
-        param.__dict__.update(request.json)
+        param.__dict__.update(self.json)
         if len(param.filter()) > 0:
-            return await self.query_page(request, param)
-        return await self.query_tree(request, param.create_List_select(), rootValue=0, pid_field='parentId', id_field="id")
+            return await self.query_page( param)
+        return await self.query_tree( param.create_List_select(), rootValue=0, pid_field='parentId', id_field="id")
 
 
 class user_groups_sub_tree_view(user_groups_tree_view):
     routePath = "/tree/<parendId:int>"
-
-    async def get(self, request: Request, parendId: int):
+    @property
+    def parendId(self):
+        return self.match_info.get("parendId")
+     
+    async def get(self ):
         """
         返回子 树形选择下拉框数据
         """
-        return await super().get(request, parendId)
+        return await super().get(self.parendId)
 
 
-class user_groups_view(AuthMethodView):
-
-    async def get(self, request: Request):
+class user_groups_view(AbsAuthClsView): 
+    async def get(self ):
         """
         树形选择下拉框数据
         selectTree :  el-Tree
@@ -114,38 +106,35 @@ class user_groups_view(AuthMethodView):
                    UserGroupPO.code, UserGroupPO.parentId)
             .order_by(UserGroupPO.parentId.asc())
         )
-        return await self.query_list(request, select,  isPO=False)
+        return await self.query_list( select,  isPO=False)
 
-    async def post(self, request: Request):
+    
+    async def post(self ):
         """
         树形 table数据
         tree 形状 table
         """
         param = user_group_filter()
-        param.__dict__.update(request.json)
-        return await self.query_list(request, param.list_select)
+        param.__dict__.update(self.json)
+        return await self.query_list( param.list_select)
 
-    async def put(self, request: Request):
+    async def put(self ):
         """
         增加
         """
         po = UserGroupPO()
-        userId = self.getUserId(request)
+        userId = self.userId
 
         async def before(po: UserGroupPO, session: AsyncSession, request):
             exist = await db_tools.exist(session,  UserGroupPO.code.__eq__(po.code), column=UserGroupPO.id)
             if exist:
                 return JSON_util.response(Result.fail(message=f"'{po.code}'已存在！"))
-        return await self.add(request, po, userId=userId, beforeFun=before)
-
-    def patch(self, request: Request):
-        return text("I am patch method")
+        return await self.add( po, userId=userId, beforeFun=before) 
 
 
-class user_group_view(AuthMethodView):
-    routePath = "/<pk:int>"
-
-    async def put(self, request: Request, pk: int):
+class user_group_view(AbsPkView):
+   
+    async def put(self ):
         """
         编辑
         """
@@ -156,9 +145,9 @@ class user_group_view(AuthMethodView):
             if po.parentId == oldPo.id:
                 return JSON_util.response(Result.fail(message=f"'父节点选择错误！"))
 
-        return await self.edit(request, pk, UserGroupPO, userId=self.getUserId(request), fun=before)
+        return await self.edit( self.routeValue, UserGroupPO, userId=self.userId, fun=before)
 
-    async def delete(self, request: Request, pk: int):
+    async def delete(self ):
         """
         删除
         """
@@ -166,4 +155,4 @@ class user_group_view(AuthMethodView):
             count = await db_tools.count(session, UserGroupPO.parentId == po.id, column=UserGroupPO.id)
             if count > 0:
                 return JSON_util.response(Result.fail(message=f"该'{po.name}'节点下有‘{count}’节点，不能删除！"))
-        return await self.remove(request, pk, UserGroupPO, beforeFun=before)
+        return await self.remove(  self.routeValue, UserGroupPO, beforeFun=before)
