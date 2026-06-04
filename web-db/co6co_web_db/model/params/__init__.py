@@ -7,3 +7,6 @@ class associationParam:
     """ 
     add: List[int]
     remove: List[int]
+    def __init__(self, add: List[int] = [], remove: List[int] = []):
+        self.add = add
+        self.remove = remove

@@ -2,9 +2,7 @@ from co6co_db_ext.actuator import Actuator
 from sanic import Request
 from co6co_db_ext.db_utils import db_tools, QueryPagedByFilterCallable
 from co6co_db_ext.db_filter import absFilterItems
-
-
-from co6co_sanic_ext.utils import JSON_util
+ 
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import scoped_session
 from typing import TypeVar,TypeAlias, Dict, List, Any, Tuple, Optional, Callable,Awaitable 
@@ -242,7 +240,7 @@ class BaseDbClsView(BaseClsView):
                 if afterFun is not None:
                     actuator.session.flush()
                     await afterFun(poList, actuator.session, self.request)
-                return JSON_util.response(Result.success())
+                return self.response_json(Result.success())
 
             callable = DbCallable(self.db_session)
             return await callable(exec)
@@ -277,7 +275,7 @@ class BaseDbClsView(BaseClsView):
                 if afterFun is not None:
                     actuator. session.flush()
                     await afterFun(po, actuator.session, self.request)
-                return JSON_util.response(Result.success())
+                return self.response_json(Result.success())
 
             callable = DbCallable(self.db_session)
             return await callable(exec)
@@ -311,7 +309,7 @@ class BaseDbClsView(BaseClsView):
                 else:
                     oldPo: BasePO = await actuator.session.get_one(poType, pkOrSelect)
                 if oldPo is None:
-                    return JSON_util.response(Result.fail(message=f"未查到‘{pkOrSelect}’对应的信息!"))
+                    return self.response_json(Result.fail(message=f"未查到‘{pkOrSelect}’对应的信息!"))
                 oldPo.edit_assignment(userId)
                 if json2Po:
                     oldPo.update(po)
@@ -320,7 +318,7 @@ class BaseDbClsView(BaseClsView):
                     if result is not None:
                         await actuator.session.rollback()
                         return result
-                return JSON_util.response(Result.success())
+                return self.response_json(Result.success())
             return await call(exec)
         except Exception as e:
             return self.response_error( e)
@@ -339,7 +337,7 @@ class BaseDbClsView(BaseClsView):
             async with self.db_session as session, session.begin():
                 oldPo: BasePO = await session.get_one(poType, pk)
                 if oldPo == None:
-                    return JSON_util.response(Result.fail(message=f"未找到‘{pk}’对应的信息!"))
+                    return self.response_json(Result.fail(message=f"未找到‘{pk}’对应的信息!"))
                 if beforeFun != None:
                     result = await beforeFun(oldPo, session,self.request)
                     if result != None:
@@ -349,11 +347,11 @@ class BaseDbClsView(BaseClsView):
                 if afterFun != None:
                     result = await afterFun(oldPo, session, self.request)
                     if isinstance(result, Result):
-                        return JSON_util.response(result)
+                        return self.response_json(result)
                     elif result != None:
                         await session.rollback()
                         return result
-                return JSON_util.response(Result.success())
+                return self.response_json(Result.success())
         except Exception as e:
             await session.rollback()
             return self.response_error( e)
@@ -392,9 +390,9 @@ class BaseDbClsView(BaseClsView):
                         isChanged = True
                         actuator.add_all(*addpoList)
                 if isChanged:
-                    return JSON_util.response(Result.success())
+                    return self.response_json(Result.success())
                 else:
-                    return JSON_util.response(Result.fail(message="未改变"))
+                    return self.response_json(Result.fail(message="未改变"))
             except Exception as e:
                 await actuator.session.rollback()
                 return self.response_error( e)

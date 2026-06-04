@@ -21,7 +21,7 @@ def get_db_session(request: Request) -> AsyncSession | scoped_session:
         return session
     raise Exception("未实现DbSession")
 
-def injectDbSessionFactory(app: Sanic, settings: dict = {}, engineUrl: str = None, sessionApi: list = ["/api"]):
+def injectDbSessionFactory(app: Sanic, settings: dict = {}, engineUrl: str = None, sessionApi: list = ["/api"],init_tables: bool = True):
     """
     挂在 DBSession_factory
     """
@@ -29,10 +29,13 @@ def injectDbSessionFactory(app: Sanic, settings: dict = {}, engineUrl: str = Non
     # sanic_session 包使用了 cockie 未能满足使用需求 已修改其他方式的 session 实现
     # session_interface = InMemorySessionInterface(session_name="mem_session", cookie_name=app.name, prefix=app.name)
     # Session(app, interface=session_interface)
-    if settings is not None or engineUrl is not None:
+    #  settings 与 settings is not None 结果不同
+   
+    if settings or engineUrl is not None: 
         service = db_service(settings, engineUrl)
         app.ctx.service = service
-        service.sync_init_tables()
+        if init_tables:
+            service.sync_init_tables() 
 
     @app.main_process_start
     async def inject_session_factory(app: Sanic): 

@@ -5,7 +5,7 @@ from co6co_web_db.services import get_db_service, get_cache, get_db_session
 class appHelper:
     @staticmethod
     def current_user( request: Request):
-        f"""
+        """
         获取当前用户信息
         :return: 当前用户信息
         :rtype: {"id": int, "user_name": str, "group_id": int}
