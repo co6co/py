@@ -39,3 +39,5 @@
     1. 增加BaseDbView 基础类，请迁移到 BaseMethodView类，将来可能废除
 0.0.20
     1. 增加app_config 属性 
+0.1.0 2026-06-04
+    1. 不在使用BaseMethodView, 方法已移动到BaseDbView中，将来可能废除

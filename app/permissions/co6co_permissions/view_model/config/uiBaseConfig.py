@@ -1,37 +1,22 @@
-from sanic.response import text
-from sanic import Request
-from co6co_sanic_ext.utils import JSON_util
-from co6co_sanic_ext.model.res.result import Result
-from sqlalchemy.ext.asyncio import AsyncSession
-
-from sqlalchemy.sql import Select, Delete
-
-from co6co_db_ext.db_utils import db_tools, DbCallable
-from co6co_web_db.model.params import associationParam
-
+from co6co.data.result import Result 
 from co6co.utils import log
-from ..base_view import BaseMethodView
- 
-from ...model.filters.config_filter import Filter
-from ...model.pos.other import sysConfigPO
-from ..aop.config_aop import ConfigEntry
+from ..base_view import AbsClsView
 from ...services .configCache import ConfigCache
 
-
-class UI_Config_View(BaseMethodView):
+class UI_Config_View(AbsClsView):
     """
     不需要认证
     获取UI基础配置
     """
     routePath = "/ui" 
-    async def post(self, request: Request):
+    async def post(self ):
         """ 
         获取配置
         code: 配置代码
 
         return str,配置值
         """
-        cache = ConfigCache(request)
+        cache = ConfigCache(self.request)
         code="SYS_CONFIG_BASE_UI"
         config = cache.getConfig(code)
         if not config:

@@ -4,12 +4,12 @@ from sanic.request import Request
 from sqlalchemy import insert
 from ...model.pos.right import LoginLogPO
 
-from co6co_sanic_ext.utils import JSON_util
+from co6co_sanic_ext.view_model import response_json
 from datetime import datetime
 from sanic.response import JSONResponse
 
 from co6co.utils import log
-from co6co_sanic_ext.model.res.result import Result
+from co6co.data.result import Result
 from co6co_web_db.view_model import peraseRequest
 
 from co6co_db_ext.db_utils import  InsertCallable
@@ -54,8 +54,7 @@ def loginLog(f):
         """
         response = await f(*args, **kwargs)
         await _loginLog(response, request)
-        return response
-
+        return response 
     return decorated_function
 
 
@@ -114,7 +113,6 @@ def verifyCode(f):
         result, msg = _checkVerifycode(request)
         if not result:
             log.warn(msg, result)
-            return JSON_util.response(Result.fail(message=msg))
+            return response_json(Result.fail(message=msg))
         return await f(*args, **kwargs)
-
     return _function

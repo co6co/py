@@ -5,6 +5,7 @@ chcp 65001
 echo 执行测试...
 python -m pytest tests/ -rA
 echo 测试完成.
-echo resetup and reinstall 重新新版本:0.1.3,并准备安装...
+echo resetup and reinstall 重新新版本:0.1.4,并准备安装...
+pip index versions co6co.task
 pause
-python setup.py sdist & pip uninstall co6co.task & pip install dist\co6co_task-0.1.3.tar.gz
+python setup.py sdist & pip uninstall co6co.task & pip install dist\co6co_task-0.1.4.tar.gz

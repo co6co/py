@@ -1,3 +1,5 @@
+#-- coding: utf-8 --
+# 未经严格测试，暂不使用
 from co6co.task.eventDispatcher import EventHandler, Event, EventType
 from typing import Optional
 import time

@@ -7,34 +7,7 @@ from ..services import getCurrentUserId, getCurrentUserName
 from ..model.pos.right import UserPO
 from typing import Optional
 from co6co_db_ext.jwt_service import JwtService
-
-
-class _view:
-    def getUserId(self, request: Request):
-        """
-        获取用户ID
-        """
-        return getCurrentUserId(request)
-
-    def getUserName(self, request: Request):
-        """
-        获取当前用户名
-        """
-        return getCurrentUserName(request)
-
-
-class CtxMethodView(BaseMethodView, _view):
-    decorators = [ctx]
-
-
-class AuthMethodView(BaseMethodView, _view):
-    """
-    token 校验
-    api 校验
-    """
-
-    decorators = [authorized]
-
+from ..services.utils import appHelper
 
 class AbsClsView(BaseDbClsView):
     """
@@ -75,13 +48,10 @@ class AbsClsView(BaseDbClsView):
             return data
 
 
-class AbsAuthClsView(AbsClsView):
+class _authView(AbsClsView):
     """
     基础类视图
     """
-
-    decorators = [authorized]
-
     @property
     def current_user(self):
         f"""
@@ -89,19 +59,14 @@ class AbsAuthClsView(AbsClsView):
         :return: 当前用户信息
         :rtype: {"id": int, "user_name": str, "group_id": int}
         """
-        if "current_user" in self.request.ctx.__dict__.keys():
-            return self.request.ctx.current_user
-        else:
-            raise Exception("当前用户信息不存在")
+        return appHelper.current_user(self.request)
 
     @property
     def userId(self):
         """
         获取用户ID
         """
-        if self.current_user:
-            userId = int(self.current_user["id"])
-            return userId
+        return appHelper.current_user_id(self.request) 
 
     @property
     def userName(self):
@@ -109,14 +74,22 @@ class AbsAuthClsView(AbsClsView):
         获取用户ID
         """
 
-        userName = int(self.current_user["user_name"])
-        return userName
+        return appHelper.current_user_name(self.request) 
 
     @property
     def groupId(self):
         """
         获取用户ID
         """
-        group_id = int(self.current_user["group_id"])
-        return group_id
+        return appHelper.current_user_group_id(self.request) 
+
+class CtxMethodView(_authView):
+    decorators = [ctx]
+
+class AuthMethodView(_authView):
+    """
+    基础类视图
+    """ 
+    decorators = [authorized]
+    
 

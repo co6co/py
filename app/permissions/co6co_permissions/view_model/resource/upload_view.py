@@ -6,7 +6,7 @@ from sqlalchemy.orm import selectinload
 from co6co.utils import log
 from . import resource_baseView, FileResult
 from ...services.configCache import get_upload_path
-from co6co_sanic_ext.model.res.result import Result
+from co6co.data.result import Result
 from ...model.pos.resource import resourcePO, userResourcePO
 from ...model.enum import resource_category
 
@@ -15,9 +15,7 @@ from datetime import datetime
 from co6co_db_ext.db_utils import DbCallable, db_tools
 
 from sqlalchemy.sql import Select
-from sqlalchemy.ext.asyncio import AsyncSession
-from co6co_web_db.view_model import errorLog
-from co6co.utils.tool_util import get_current_function_name
+from sqlalchemy.ext.asyncio import AsyncSession 
 
 
 class Upload_View(resource_baseView):
@@ -52,7 +50,7 @@ class Upload_View(resource_baseView):
             userPo.name = param.name
             resourceId = None
             # 数据库中已经存在
-            if dbPo != None:
+            if dbPo is not None:
                 basePath = await get_upload_path(request)
                 oldPath = os.path.join(basePath, dbPo.url[1:])
                 if os.path.exists(oldPath) and os.path.exists(param.fullPath):
@@ -71,36 +69,35 @@ class Upload_View(resource_baseView):
             return resourceId
         return await call(exec)
 
-    async def putFile(self, request: Request, category: resource_category):
+    async def putFile(self,  category: resource_category):
         """
         上传文件
         """
         try:
-            result = await self.saveFile(request)
-            if type(result) != FileResult:
-                return result
+            result = await self.saveFile()
+            if isinstance(result, Result):
+                return self.response_json(result)
             result: FileResult = result
-            resourceId = await self.saveDb(request, result, category)
+            resourceId = await self.saveDb( result, category)
             return self.response_json(Result.success(data={"resourceId": resourceId, "path": result.path}))
-        except Exception as e:
-            errorLog(request, self.__class__, get_current_function_name())
-            return self.response_json(Result.fail(message="上传失败:{}".format(e)))
+        except Exception as e: 
+            return self.response_error(e,"上传失败") 
 
-    async def put(self, request: Request):
+    async def put(self ):
         """
         上传文件
         """
-        return await self.putFile(request, resource_category.file)
+        return await self.putFile(  resource_category.file)
 
 
 class Image_View(Upload_View):
     routePath = "/img"
 
-    async def put(self, request: Request):
+    async def put(self ):
         """
         上传图片
         """
-        return await self.putFile(request, resource_category.image)
+        return await self.putFile(  resource_category.image)
 
 
 class Video_View(Upload_View):

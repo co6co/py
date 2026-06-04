@@ -38,6 +38,9 @@
 0.0.15 2026-05-29
     1. 去除 EventDispatcherProcess 的通信方式
     2. 新增： 增加 BaseClsView 类
+0.0.16
+	1. 移除model 模块
+	2. 移除JSON_util
 
 ```
 

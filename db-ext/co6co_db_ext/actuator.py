@@ -129,7 +129,7 @@ class Actuator:
         return d
 
     @staticmethod
-    def one2Dict(fetchone: Row | RowMapping | dict) -> Dict:
+    def one2Dict(fetchone: Row | RowMapping | dict|None) -> Dict:
         """
         Row:        execute.fetchmany() | execute.fetchone()
         RowMapping: execute.mappings().fetchall()|execute.mappings().fetchone()

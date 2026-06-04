@@ -1,16 +1,11 @@
-from sanic.response import text
-from sanic import Request
-from co6co_sanic_ext.utils import JSON_util
-from co6co_sanic_ext.model.res.result import Result
-from sqlalchemy.ext.asyncio import AsyncSession
 
-from sqlalchemy.sql import Select, Update
+from sanic import Request 
+from co6co.data.result import Result 
+
+from sqlalchemy.sql import Select 
 from co6co_db_ext.db_utils import db_tools
-from co6co_permissions.view_model.base_view import AuthMethodView
-from co6co_web_db.view_model import get_one
-from ...model.pos.tables import DynamicCodePO, SysTaskPO
-from datetime import datetime
-from co6co_permissions.model.enum import dict_state
+from co6co_permissions.view_model.base_view import AuthMethodView 
+from ...model.pos.tables import DynamicCodePO, SysTaskPO 
 from co6co.utils import log, DATA
 
 from multiprocessing.connection import PipeConnection
@@ -22,18 +17,21 @@ from co6co.task.pools import timeout
 
 class schedView(_codeView, AuthMethodView):
     routePath = "/sched/<pk:int>"
+    @property
+    def pk(self):
+        return self.match_info.get("pk")
 
-    async def read_data(self, pk: int, request: Request):
+    async def read_data(self ):
         """
         从数据库中读取 code ,sourceCode,cron
         """
         select = (
             Select(SysTaskPO.code, SysTaskPO.category, SysTaskPO.cron, DynamicCodePO.sourceCode, SysTaskPO.data)
             .outerjoin(DynamicCodePO, DynamicCodePO.id == SysTaskPO.data)
-            .filter(SysTaskPO.id.__eq__(pk))
+            .filter(SysTaskPO.id.__eq__(self.pk))
         )
 
-        poDict: dict = await db_tools.execForMappings(self.get_db_session(request), select, queryOne=True)
+        poDict: dict = await db_tools.execForMappings(self.db_session, select, queryOne=True)
         code = poDict.get("code")
         sourceCode = poDict.get("sourceCode")
         data = poDict.get("data")
@@ -45,13 +43,13 @@ class schedView(_codeView, AuthMethodView):
     def getPipConn(request: Request) -> PipeConnection:
         return request.app.ctx.child_conn
 
-    async def post(self, request: Request, pk: int):
+    async def post(self ):
         """
         调度
         周期性执行的可以执行完成的代码
         """
-        code,  cron, sourceCode, data = await self.read_data(pk, request)
-        conn = schedView.getPipConn(request)
+        code,  cron, sourceCode, data = await self.read_data( )
+        conn = schedView.getPipConn(self.request)
         conn.send(CommandCategory.createOption(CommandCategory.Exist, code=code))
         result: DATA = conn.recv()
         param = {"code": code, "sourceCode": sourceCode, "sourceForm": data, "cron": cron}
@@ -81,35 +79,35 @@ class schedView(_codeView, AuthMethodView):
         else:
             return False, result.data
 
-    async def patch(self, request: Request, pk: int):
+    async def patch(self ):
         """
         查询下一次运行时间
         """
-        select = Select(SysTaskPO).filter(SysTaskPO.id.__eq__(pk))
-        po: SysTaskPO = await get_one(request, select)
-        success, data = await schedView.execCommand(request, po.code, CommandCategory.GETNextTime)
+        select = Select(SysTaskPO).filter(SysTaskPO.id.__eq__(self.pk))
+        po: SysTaskPO = await self.get_one( select)
+        success, data = await schedView.execCommand(self.request, po.code, CommandCategory.GETNextTime)
         if success:
             return self.response_json(Result.success(data, message="获取成功"))
         else:
             return self.response_json(Result.fail(message="获取失败:"+data))
 
-    async def delete(self, request: Request, pk: int):
+    async def delete(self ):
         """
         停止调度
         """
-        select = Select(SysTaskPO).filter(SysTaskPO.id.__eq__(pk))
-        po: SysTaskPO = await get_one(request, select)
-        success, msg = await schedView.execCommand(request, po.code, CommandCategory.STOP)
+        select = Select(SysTaskPO).filter(SysTaskPO.id.__eq__(self.pk))
+        po: SysTaskPO = await self.get_one( select)
+        success, msg = await schedView.execCommand(self.request, po.code, CommandCategory.STOP)
         if success:
             return self.response_json(Result.success(message="停止成功"))
         else:
             return self.response_json(Result.fail(message="停止失败:"+msg))
 
-    async def put(self, request: Request, pk: int):
+    async def put(self ):
         """
         执行一次
         """
-        _,  _, sourceCode, data = await self.read_data(pk, request)
+        _,  _, sourceCode, data = await self.read_data( )
         isTimeout = False
         secounds = 4
         result = Result.success()

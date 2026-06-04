@@ -2,8 +2,7 @@
 from ...services.configCache import get_upload_path
 from .utils import resize_image, screenshot, getTempFileName
 from co6co .utils import log
-from ..base_view import AuthMethodView
-import json
+from ..base_view import AuthMethodView 
 import io
 import os
 from PIL import Image
@@ -19,7 +18,7 @@ from co6co.utils import hash, getDateFolder
 from ...model.enum import resource_category
 from datetime import datetime
 import uuid
-from co6co_sanic_ext.model.res.result import Result
+from co6co.data.result import Result
 
 
 class FileResult:
@@ -43,7 +42,7 @@ class FileResult:
 
 
 class resource_baseView(AuthMethodView):
-    async def getRersourcePath(self, request: Request, path):
+    async def getRersourcePath(self,   path):
         """
         获取资源路径
 
@@ -52,29 +51,29 @@ class resource_baseView(AuthMethodView):
 
         return fullPath
         """
-        uploadRoot = await get_upload_path(request)
+        uploadRoot = await get_upload_path(self.request)
         fullPath = os.path.join(uploadRoot, path[1:])
         return os.path.abspath(fullPath)
 
-    async def getLocalPathById(self, request: Request, pk: int) -> str:
+    async def getLocalPathById(self,  pk: int) -> str:
         """
         通过 id 获取本地路径
         return fullPath
         """
-        call = QueryOneCallable(self.get_db_session(request))
+        call = QueryOneCallable(self.db_session)
         data = await call(Select(resourcePO.url).filter(resourcePO.id == pk), isPO=False)
-        if data != None:
-            return await self.getRersourcePath(request, data["url"])
+        if data is not None:
+            return await self.getRersourcePath( data["url"])
         return None
 
-    async def getLocalPath(self, request: Request) -> str:
+    async def getLocalPath(self ) -> str:
         path = ""
-        for k, v in request.query_args:
+        for k, v in self.request.query_args:
             if k == "path":
                 path = v
         if path.startswith("http"):
             return path
-        return await self.getRersourcePath(request, path)
+        return await self.getRersourcePath(path)
 
     async def screenshot(self, fullPath: str, w: int = 208, h: int = 117, isFile: bool = True):
         """
@@ -84,7 +83,7 @@ class resource_baseView(AuthMethodView):
         if fullPath.startswith('http') or os.path.exists(fullPath):
             isFile = not fullPath.startswith('http')
             tempPath = await screenshot(fullPath, w, h, isFile=isFile, useBytes=True)
-            if tempPath == None:
+            if tempPath is None:
                 return empty(status=404)
             return raw(tempPath,  status=200, headers=None,  content_type="image/jpeg")
         return empty(status=404)
@@ -106,11 +105,11 @@ class resource_baseView(AuthMethodView):
             return im
         return None
 
-    async def response_local_file(self, request: Request, fullPath: str):
+    async def response_local_file(self,  fullPath: str):
         """
         响应本地文件
         """
-        filePath = await self.getRersourcePath(request, fullPath)
+        filePath = await self.getRersourcePath( fullPath)
         if os.path.exists(filePath):
             return await file(filePath)
 
@@ -125,17 +124,17 @@ class resource_baseView(AuthMethodView):
                 im = await self.readHttpImage(fullPath)
             elif os.path.exists(fullPath):
                 im = await self.readLocalImage(fullPath)
-            if im != None:
+            if im is not None:
                 bytes = io.BytesIO()
                 im.thumbnail((w, h))
                 im.save(bytes, "PNG")
                 return raw(bytes.getvalue(),  status=200, headers=None,  content_type="image/jpeg")
             return empty(status=404)
         finally:
-            if im != None:
+            if im is not None:
                 im.close()
 
-    async def saveFile(self, request: Request):
+    async def saveFile(self ):
         """
         保存文件到本地
         @param request  request.files.get("file") 
@@ -143,10 +142,10 @@ class resource_baseView(AuthMethodView):
         """
         try:
             fullPath = None
-            basePath = await get_upload_path(request)
-            if "file" not in request.files:
-                return self.response_json(Result.fail("No file part in the request"))
-            file: File = request.files.get("file")
+            basePath = await get_upload_path(self.request)
+            if "file" not in self.request.files:
+                return Result.fail("No file part in the request")
+            file: File = self.request.files.get("file")
 
             size = len(file.body)  # await self. readFileSize(file)
             _, file_extension = os.path.splitext(file.name)
@@ -162,4 +161,4 @@ class resource_baseView(AuthMethodView):
             return result
         except Exception as e:
             log.warn("保存文件失败：", fullPath, e)
-            return self.response_json(Result.fail(message=e))
+            return  Result.fail(message=str(e))

@@ -2,7 +2,7 @@
 from functools import wraps
 from co6co.utils import log
 from sanic.request import Request
-from ...services.baseCache import AccessTokenCache
+from ...services.authCache import AuthonCacheManage
 from typing import Callable
 
 
@@ -16,7 +16,7 @@ def AccessTokenChange(f: Callable[[Request, str], dict]):
     async def _function(*args, **kwargs):
         for arg in args:
             if isinstance(arg, Request):
-                cacheManage = AccessTokenCache(arg)
+                cacheManage = AuthonCacheManage(arg)
                 break
         token = kwargs.get("token", None)
         value = await f(*args, **kwargs)

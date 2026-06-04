@@ -1,7 +1,7 @@
 
 from sanic import Request
-from co6co_sanic_ext.utils import JSON_util
-from co6co_sanic_ext.model.res.result import Result
+from co6co_sanic_ext.view_model import response_json
+from co6co.data.result import Result
 from ..base_view import AuthMethodView
 from ...model.filters.file_param import FileParam
 import os
@@ -38,12 +38,12 @@ def merge_chunks(savePath: str, file_name: str, total_chunks: int):
 class UploadQueryView(AuthMethodView):
     routePath = "/upload/query"
 
-    async def post(self, request: Request):
+    async def post(self ):
         """
         查询已上传的文件块
         {fileName:xxx.xx,totalChunks:1000}
         """
-        params: dict = request.json
+        params: dict = self.json
         fileName: str = params.get("fileName", None)
         totalChunks = params.get("totalChunks", None)
         uploadPath = params.get("uploadPath", None)
@@ -69,17 +69,17 @@ class UploadQueryView(AuthMethodView):
 class UploadView(AuthMethodView):
     routePath = "/upload"
 
-    async def put(self, request: Request):
+    async def put(self ):
         """
         上传 chunk
         index: 从1开始
         """
         try:
-            file: File = request.files.get('file')
-            index = int(request.form.get('index'))
-            total_chunks = int(request.form.get('totalChunks'))
-            file_name = request.form.get('fileName')
-            uploadPath = request.form.get('uploadPath')
+            file: File = self.request.files.get('file')
+            index = int(self.request.form.get('index'))
+            total_chunks = int(self.request.form.get('totalChunks'))
+            file_name = self.request.form.get('fileName')
+            uploadPath = self.request.form.get('uploadPath')
             if not file or not file_name:
                 return self.response_json(Result.fail(message="缺少文件名"))
             tempFileName = getTempFileName(uploadPath, file_name)

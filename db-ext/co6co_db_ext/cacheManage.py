@@ -1,44 +1,35 @@
 from multiprocessing.managers import DictProxy
-from sanic import Sanic, Request
 from co6co_db_ext.db_session import db_service
 from sqlalchemy.ext.asyncio import AsyncSession
-from co6co.utils.modules import deprecated
 
-@deprecated("已过期，请使用，co6co_db_ext>=0.1.2")
+
 class CacheManage:
-    app: Sanic = None
-
-    @staticmethod
-    def getApp():
-        app = Sanic.get_app()
-        return app
-   
-    @staticmethod
-    def session(request: Request) -> AsyncSession:
-        """
-        从Request中获取Session
-        """
-        request.app.ctx.session
-        return request.ctx.session
-   
     @property
-    def dbservice(self) -> db_service:
-        return self.app.ctx.service
-    
-    @property
-    def session(self):
+    def dbSession(self):
         """
-        创建Session 
+        创建Session
         请自行管理
         """
-        if self._session is None:
-            self._session = self.dbservice.createAsyncSession()
         return self._session
-        # return CacheManage.session(self.request)
 
-    def __init__(self, app: Sanic = None) -> None:
-        self.app = app if app else CacheManage.getApp()
-        self._session: AsyncSession = None
+    @property
+    def DbSessionFactory(self):
+        """
+        创建Session
+        请自行管理
+        """
+        return self.dbService.Session
+
+    def __init__(
+        self,
+        cache: DictProxy,
+        *,
+        session: AsyncSession = None,
+        db_service: db_service = None,
+    ) -> None:
+        self._cache=cache
+        self.dbService = db_service
+        self._session: AsyncSession = session
         pass
 
     @property
@@ -46,7 +37,7 @@ class CacheManage:
         """
         缓存
         """
-        return self.app.shared_ctx.cache
+        return self._cache
 
     def setCache(self, key: str, value: any):
         """
@@ -77,7 +68,7 @@ class CacheManage:
     def remove(self, key: str):
         """
         移除缓存 key
-        return key对应的值,没有返回空 
+        return key对应的值,没有返回空
         """
         # del my_dict['b']  key 可以必须存在， KeyError 异常
         return self.cache.pop(key, None)

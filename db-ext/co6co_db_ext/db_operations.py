@@ -13,7 +13,7 @@ from sqlalchemy.orm.query import Query
 from sqlalchemy.orm.attributes import InstrumentedAttribute
 from sqlalchemy.engine.row import  Row
 
-from  sqlalchemy.engine.result import ScalarResult,ChunkedIteratorResult
+
 from sqlalchemy.sql.elements import ColumnElement
 from sqlalchemy.sql import Select
 from .db_filter import absFilterItems,Page_param
@@ -23,8 +23,9 @@ from .db_utils import db_tools
 #from sqlalchemy.orm import selectinload # 紧急装载器 在该表主键又外键的基础上使用 select(UserTable).options(selectinload(UserTable.LoginLog))
  
 from co6co.utils import log 
+from co6co.utils.modules import deprecated
 
-
+@deprecated("请使用其他封装的类，比如 Actuator")
 class DbOperations:
 	# 实体类存在字段
 	"""

@@ -1,4 +1,4 @@
-from sanic import Sanic, Blueprint, Request
+from sanic import  Blueprint
 from co6co_sanic_ext .api import add_routes
 from ..view_model.resource.path_view import Video_View, Image_View, Poster_View, thumbnail_View
 from ..view_model.resource.resource_view import Res_Image_View, Res_Video_View, Res_thumbnail_View, Res_Poster_View

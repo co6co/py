@@ -1,29 +1,16 @@
 
-from functools import wraps
-from sanic import Blueprint, Sanic
-from sanic.response import json
+from functools import wraps 
 from sanic.request import Request
-
-from co6co_web_db.services.jwt_service import validToken, JWT_service
-from co6co_sanic_ext.model.res.result import Result
-from co6co_sanic_ext.utils import JSON_util
-from sqlalchemy.sql import Select
-from sqlalchemy.ext.asyncio import AsyncSession
-from co6co_db_ext.db_utils import db_tools, DbCallable
-from co6co.utils import log
-
-from ...model.pos.right import UserPO, UserRolePO, UserGroupRolePO, menuPO, MenuRolePO
-from ...model.enum import menu_type
-from .api_check import apiPermissionCheck
-from .authonCache import AuthonCacheManage
-from ...services.baseCache import AccessTokenCache
-
-
+ 
+from co6co.data.result import Result
+from co6co_sanic_ext.view_model import response_json 
+from ...services.authService import AuthService,PermissionValid
+ 
 async def checkApi(request: Request):
     """
     查询当前用户的对当前API是否有权限
     """
-    check = apiPermissionCheck(request)
+    check = PermissionValid(request)
     await check.init()
     return check.check()
 
@@ -35,27 +22,16 @@ def authorized(f):
     """
     @wraps(f)
     async def decorated_function(request: Request, *args, **kwargs):
-        secret = request.app.config.SECRET
-        token = request.token
-        valid = False
-        # 使用 accessToken 认证
-        if token and '.' not in token:
-            accessToken = AccessTokenCache(request)
-            valid = await accessToken.validAccessToken(token)
-        elif token:
-            valid = await validToken(request, secret)
+        valid=await AuthService(request).validToken()
         if not valid:
-            return JSON_util.response(Result.fail(message="token invalid or expire"), status=403)
-        # //dodo debug
+            return response_json(Result.fail(message="token invalid or expire"), status=401) 
         valid = await checkApi(request)
-        if valid:
-            # the user is authorized.
-            # run the handler method and return the response
+        if valid: 
             response = await f(request, *args, **kwargs)
             return response
         else:
             # the user is not authorized.
-            return JSON_util.response(Result.fail(message="not_authorized"), status=403)
+            return response_json(Result.fail(message="not_authorized"), status=401)
     return decorated_function
 
 
@@ -63,48 +39,15 @@ def ctx(f):
     """
     设置请求上下文
     有token 将可以再上下文中获取 用户Id等信息 
+    authorized 少api检查权限
     """
     @wraps(f)
     async def decorated_function(request: Request, *args, **kwargs):
-        await validToken(request, request.app.config.SECRET)
+        valid=await AuthService(request).validToken()
+        if not valid:
+            return response_json(Result.fail(message="token invalid or expire"), status=401)
         response = await f(request, *args, **kwargs)
         return response
 
     return decorated_function
 
-
-def menuChanged(f):
-    """
-    设置请求上下文
-    有token 将可以再上下文中获取 用户Id等信息 
-    """
-    @wraps(f)
-    async def decorated_function(*args, **kwargs):
-        log.err("需要重写")
-        for a in args:
-            if isinstance(a, Request):
-                cacheManage = AuthonCacheManage(a)
-                cacheManage.setMenuDataInvalid()
-        return await f(*args, **kwargs)
-
-    return decorated_function
-
-
-def userRoleChanged(f):
-    """
-    设置请求上下文
-    有token 将可以再上下文中获取 用户Id等信息 
-    """
-    @wraps(f)
-    async def decorated_function(*args, **kwargs):
-        log.err("//该方法需要重写，请注意")
-        for a in args:
-            if isinstance(a, Request):
-                
-                cacheManage = AuthonCacheManage(a)
-                cacheManage.setRolesInvalid()
-                cacheManage.setMenuDataInvalid()
-        response = await f(*args, **kwargs)
-        return response
-
-    return decorated_function

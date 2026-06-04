@@ -1,4 +1,4 @@
-from sanic import Sanic, Blueprint, Request
+from sanic import Blueprint
 from .menu import menu_api
 from .userGroup import userGroup_api
 from .role import role_api

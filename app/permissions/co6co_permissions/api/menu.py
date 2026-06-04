@@ -1,7 +1,7 @@
 
 
-from co6co_sanic_ext.model.res.result import Result
-from co6co_sanic_ext.utils import JSON_util
+from co6co.data.result import Result
+from co6co_sanic_ext.view_model import response_json
 from ..model.enum import menu_type, menu_state 
 from ..view_model.aop.api_auth import authorized
 from sanic import  Blueprint, Request
@@ -23,7 +23,7 @@ async def getMenuStatus(request: Request):
     菜单状态
     """
     states = menu_state.to_dict_list()
-    return JSON_util.response(Result.success(data=states))
+    return response_json(Result.success(data=states))
 
 
 @menu_api.route("/category", methods=["GET", "POST"])
@@ -33,4 +33,4 @@ async def getMenuCategory(request: Request):
     菜单类别
     """
     states = menu_type.to_dict_list()
-    return JSON_util.response(Result.success(data=states))
+    return response_json(Result.success(data=states))

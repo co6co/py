@@ -3,7 +3,7 @@ from typing import TypeVar, Type, Generic, Tuple
 from co6co.data.result import Result, Page_Result
 from co6co_db_ext.db_filter import absFilterItems
 from co6co_db_ext.session import AsyncSession
-from .base_view import AbsAuthClsView
+from .base_view import AuthMethodView
 from sqlalchemy import Select, Delete
 from abc import ABC, abstractmethod
 from co6co_db_ext.po import BasePO
@@ -14,7 +14,7 @@ FilterType = TypeVar("FilterType", bound=absFilterItems)
 FilterClass = Type[FilterType]
 
 
-class AbsQueryView(AbsAuthClsView, Generic[FilterType]):
+class AbsQueryView(AuthMethodView, Generic[FilterType]):
     """
     基础查询视图
     需要传入absFilterItems 子类及类属性cls
@@ -54,7 +54,7 @@ class AbsQueryView(AbsAuthClsView, Generic[FilterType]):
             return self.response_json(Page_Result.success(data, total=total))
 
 
-class AbsSelectView(AbsAuthClsView, ABC):
+class AbsSelectView(AuthMethodView, ABC):
     """
     基础select视图
 
@@ -77,7 +77,7 @@ class AbsSelectView(AbsAuthClsView, ABC):
         return self.response_json(Result.success(data))
 
 
-class AbsExistView(AbsAuthClsView, ABC):
+class AbsExistView(AuthMethodView, ABC):
     """
     PO的的某个属性值在数据库中是否存在
     """
@@ -126,7 +126,7 @@ class AbsExistView(AbsAuthClsView, ABC):
     
 
 
-class AbsAssociationView(AbsAuthClsView, ABC):
+class AbsAssociationView(AuthMethodView, ABC):
     routePath = "/association/<projectId:int>/<pk:int>"
 
     @property
@@ -258,7 +258,7 @@ class AbsAssociationView(AbsAuthClsView, ABC):
         )
 
 
-class AbsAddView(AbsAuthClsView, ABC):
+class AbsAddView(AuthMethodView, ABC):
     routePath = "/add"
     @property
     @abstractmethod
@@ -274,7 +274,7 @@ class AbsAddView(AbsAuthClsView, ABC):
         return await self.actuator.add(self.add_option)
 
 
-class AbsPkView(AbsAuthClsView, ABC):
+class AbsPkView(AuthMethodView, ABC):
     """
     可实现编辑和删除操作
     """

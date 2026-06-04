@@ -1,19 +1,15 @@
 
-import multiprocessing.managers
 from sanic.request import Request
 from sqlalchemy.sql import Select
-
-from co6co_db_ext.db_utils import db_tools, DbCallable
-
-from ...model.enum import menu_type
-from ...model.pos.right import UserPO, UserRolePO, UserGroupRolePO, menuPO, MenuRolePO
-from multiprocessing.managers import DictProxy
-from co6co_web_db .services.cacheManage import CacheManage
+from co6co_db_ext.db_utils import DbCallable
+from ..model.enum import menu_type
+from ..model.pos.right import UserPO, UserRolePO, UserGroupRolePO, menuPO, MenuRolePO 
 from co6co.utils import log
-from ...services.baseCache import BaseCache
+from .baseCache import CustomSanicCache
+from co6co_db_ext.actuator import Actuator 
 
 
-class AuthonCacheManage(BaseCache):
+class AuthonCacheManage(CustomSanicCache):
 
     def __init__(self, request: Request) -> None:
         super().__init__(request)
@@ -53,16 +49,15 @@ class AuthonCacheManage(BaseCache):
         查询当前用户的所拥有的角色
         结果放置在cache中
         """
-        callable = DbCallable(self.session)
-
-        async def exe(session):
+        callable = DbCallable(self.dbService.Session()) 
+        async def exe(actuator:Actuator):
             userRolesSelect = (
                 Select(UserRolePO.roleId).filter(UserRolePO.userId == UserPO.id, UserPO.id == self.userId)
             )
             userGroupRolesSelect = (
                 Select(UserGroupRolePO.roleId).filter(UserGroupRolePO.userGroupId == UserPO.userGroupId, UserPO.id == self.userId)
             )
-            ruleList = await db_tools.execForMappings(session, userRolesSelect.union(userGroupRolesSelect))
+            ruleList = await actuator.query_all_mappings(userRolesSelect.union(userGroupRolesSelect)) 
             roleList = [d.get("role_id") for d in ruleList]
             self.cache[self._currentRoleKey] = roleList
             self.cache[self._currentRolevalieKey] = True
@@ -97,16 +92,18 @@ class AuthonCacheManage(BaseCache):
         """
         所有菜单存在在缓存
         """
-        callable = DbCallable(self.session)
-
-        async def exe(session):
+        callable = DbCallable(self.dbService.Session()) 
+        async def exe(actuator:Actuator):
             select = (
                 Select(menuPO.id,  menuPO.name,   menuPO.url, menuPO.methods, MenuRolePO.roleId)
                 .join(MenuRolePO, onclause=MenuRolePO.menuId == menuPO.id)
                 .filter(menuPO.category.__eq__(menu_type.api.val))
                 .order_by(menuPO.parentId.asc(), menuPO.order.asc())
-            )
-            menuList = await db_tools.execForMappings(self.session, select)
+            ) 
+            menuList = await actuator.query_all_mappings(select) 
             self.cache[self._menuCacheKey] = menuList
             self.cache[self._menuCacheValueKey] = True
         await callable(exe)
+
+
+

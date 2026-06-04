@@ -24,34 +24,41 @@ from co6co_web_session.base import SessionDict
 from typing import Tuple
 from co6co.utils import tool_util as utils
 from co6co.utils.modules import deprecated
-import json as sys_json
+import json as sys_json 
+
+def response_json(data: Result | Page_Result, status: int = 200):
+    return json(sys_json.loads(JSONEncoder.dumps(data)), status=status)
+
 
 class _baseView(HTTPMethodView):
     """
     视图基类： 约定 增删改查，其他未约定方法可根据实际情况具体使用
     views.POST  : --> query list
     """
+
     routePath: str = "/"
 
     def __init__(self, *class_args: any, **class_kwargs: any) -> None:
         super().__init__(*class_args, **class_kwargs)
-    
-    def response_json(self, data: Result | Page_Result,status: int = 200): 
-        return json(sys_json.loads(JSONEncoder.dumps(data)), status=status)
+
+    def response_json(self, data: Result | Page_Result, status: int = 200):
+        return response_json(data, status=status)
+
     @staticmethod
-    def is_integer( s: str | bytes | bytearray):
+    def is_integer(s: str | bytes | bytearray):
         try:
             int(s)
             return True
         except ValueError:
             return False
+
     @staticmethod
-    def get_Session( request: Request) -> Tuple[Session, SessionDict]:
+    def get_Session(request: Request) -> Tuple[Session, SessionDict]:
         """
-        获取 mem_session 
+        获取 mem_session
         """
         sDict = request.ctx.Session
-        session = request.app.ctx.extensions['Session']
+        session = request.app.ctx.extensions["Session"]
         return session, sDict
 
     @staticmethod
@@ -63,16 +70,19 @@ class _baseView(HTTPMethodView):
         @param valueNone 当request.json key不存在时,返回{ ... ,key:None,...}
         """
         data = request.json
-        return utils.choose(data, kyes, valueNone) 
+        return utils.choose(data, kyes, valueNone)
+
     def createContentDisposition(self, fileName):
         """
         创建内容描述header
         Content-Disposition:"attachment;filename*=UTF-8....."
         """
-        encoded_filename = quote(fileName, encoding='utf-8')
-        content_disposition = f'attachment;filename*=UTF-8\'\'{encoded_filename}'
-        headers = {'Content-Disposition': content_disposition,
-                   "Access-Control-Expose-Headers": "Content-Disposition"}
+        encoded_filename = quote(fileName, encoding="utf-8")
+        content_disposition = f"attachment;filename*=UTF-8''{encoded_filename}"
+        headers = {
+            "Content-Disposition": content_disposition,
+            "Access-Control-Expose-Headers": "Content-Disposition",
+        }
         return headers
 
     async def zip_directory(self, folder_path, output_zip):
@@ -82,7 +92,7 @@ class _baseView(HTTPMethodView):
         :param folder_path: 要压缩的文件夹路径
         :param output_zip: 输出的ZIP文件路径
         """
-        with zipfile.ZipFile(output_zip, 'w', zipfile.ZIP_DEFLATED) as zipf:
+        with zipfile.ZipFile(output_zip, "w", zipfile.ZIP_DEFLATED) as zipf:
             for root, dirs, files in os.walk(folder_path):
                 for file in files:
                     # 计算文件的完整路径
@@ -94,14 +104,17 @@ class _baseView(HTTPMethodView):
     def get_folder_size(self, folder_path):
         """Return the total size of a folder in bytes using pathlib."""
         total_size = 0
-        for path in Path(folder_path).rglob('*'):
+        for path in Path(folder_path).rglob("*"):
             if path.is_file():
                 total_size += path.stat().st_size
         return total_size
 
-    async def getSize(self,  filePath: str):
-        size = os.path.getsize(filePath) if os.path.isfile(
-            filePath) else self.get_folder_size(filePath)
+    async def getSize(self, filePath: str):
+        size = (
+            os.path.getsize(filePath)
+            if os.path.isfile(filePath)
+            else self.get_folder_size(filePath)
+        )
         return size
 
     async def response_head(self, size: int, fileName: str = None):
@@ -112,26 +125,34 @@ class _baseView(HTTPMethodView):
         """
         response = json({})
         response.headers.update(
-            {"Accept-Ranges": "bytes", "Content-Length": size, "Content-Type": "application/octet-stream"})
+            {
+                "Accept-Ranges": "bytes",
+                "Content-Length": size,
+                "Content-Type": "application/octet-stream",
+            }
+        )
         if fileName:
             headers = self.createContentDisposition(fileName)
             response.headers.update(headers)
         return response
 
-    async def response_size(self,   fullPath: str):
+    async def response_size(self, fullPath: str):
         """
         文件或目录大小
         如果是文件包括文件名
         """
-        size = os.path.getsize(fullPath) if os.path.isfile(
-            fullPath) else self.get_folder_size(fullPath)
+        size = (
+            os.path.getsize(fullPath)
+            if os.path.isfile(fullPath)
+            else self.get_folder_size(fullPath)
+        )
         fileName = None
         if os.path.isfile(fullPath):
             fileName = os.path.basename(fullPath)
         return await self.response_head(size, fileName)
 
     @staticmethod
-    def parseRange( request: Request, *, filePath: str = None, fileSize: int = None):
+    def parseRange(request: Request, *, filePath: str = None, fileSize: int = None):
         """
         解析 HTTP.HEADER.Range 参数
         @param request 请求参数
@@ -142,34 +163,35 @@ class _baseView(HTTPMethodView):
         """
         params = [param for param in (filePath, fileSize) if param is not None]
         if len(params) > 1:
-            raise ValueError(
-                "Exactly one of filePath or fileSize must be provided.")
+            raise ValueError("Exactly one of filePath or fileSize must be provided.")
 
         if fileSize is None:
             fileSize = os.path.getsize(filePath)
-        range_header = request.headers.get('Range')
+        range_header = request.headers.get("Range")
         if range_header:
-            unit, ranges = range_header.split('=')
-            if unit != 'bytes':
+            unit, ranges = range_header.split("=")
+            if unit != "bytes":
                 raise Exception("Only byte ranges are supported")
 
-            start, end = map(lambda x: int(
-                x) if x else None, ranges.split('-'))
+            start, end = map(lambda x: int(x) if x else None, ranges.split("-"))
             if start is None:
                 start = fileSize - end
                 end = fileSize - 1
             elif end is None or end >= fileSize:
                 end = fileSize - 1
         return start, end, fileSize
-        
-  
+
     async def get_file_partial(self, request: Request, filePath: str):
         if os.path.isfile(filePath):
             fileName = os.path.basename(filePath)
         headers = self.createContentDisposition(fileName)
         file_size = os.path.getsize(filePath)
-        headers.update({'Content-Length': str(file_size),
-                       'Accept-Ranges': 'bytes', })
+        headers.update(
+            {
+                "Content-Length": str(file_size),
+                "Accept-Ranges": "bytes",
+            }
+        )
         start, end, _ = self.parseRange(request, fileSize=file_size)
         # return await file_stream(filePath,status=206, headers=headers )  # 未执行完 finally 就开始执行
         # return await file(filePath, headers=headers)  # 使用 file 适用于较小的文件 传送完整文件
@@ -177,14 +199,14 @@ class _baseView(HTTPMethodView):
         # 返回二进制数据
         # 读取文件内容为二进制数据
         data: bytes = None
-        with open(filePath, 'rb') as f:
+        with open(filePath, "rb") as f:
             f.seek(start)
-            size = end-start+1
+            size = end - start + 1
             data = f.read(size)
         return raw(data, status=206, headers=headers)
 
     @staticmethod
-    def usable_args( request: Request) -> dict:
+    def usable_args(request: Request) -> dict:
         """
         去除列表
         request.args={name:['123'],groups:["a","b"]}
@@ -201,19 +223,22 @@ class _baseView(HTTPMethodView):
         return data_result
 
     @staticmethod
-    async def save_body( request: Request, root: str):
+    async def save_body(request: Request, root: str):
         # 保存上传的内容
-        subDir = getDateFolder(format='%Y-%m-%d-%H-%M-%S')
+        subDir = getDateFolder(format="%Y-%m-%d-%H-%M-%S")
         filePath = os.path.join(root, getDateFolder(), f"{subDir}.data")
         filePath = os.path.abspath(filePath)  # 转换为 os 所在系统路径
         folder = os.path.dirname(filePath)
         if not os.path.exists(folder):
             os.makedirs(folder)
-        async with aiofiles.open(filePath, 'wb') as f:
+        async with aiofiles.open(filePath, "wb") as f:
             await f.write(request.body)
         # end 保存上传的内容
+
     @staticmethod
-    async def parser_multipart_body(  request: Request) -> Tuple[Dict[str, tuple | Any], Dict[str, multipart.MultipartPart]]:
+    async def parser_multipart_body(
+        request: Request,
+    ) -> Tuple[Dict[str, tuple | Any], Dict[str, multipart.MultipartPart]]:
         """
         解析内容: multipart/form-data; boundary=------------------------XXXXX,
         的内容
@@ -222,7 +247,7 @@ class _baseView(HTTPMethodView):
             "REQUEST_METHOD": "POST",
             "CONTENT_LENGTH": request.headers.get("content-length"),
             "CONTENT_TYPE": request.headers.get("content-type"),
-            "wsgi.input": BytesIO(request.body)
+            "wsgi.input": BytesIO(request.body),
         }
         data, file = multipart.parse_form_data(env)
         data_result = {}
@@ -246,11 +271,12 @@ class _baseView(HTTPMethodView):
             os.makedirs(dir)
         if os.path.exists(path):
             raise Exception("{} Exists".format(path))
-        async with aiofiles.open(path, 'wb') as f:
+        async with aiofiles.open(path, "wb") as f:
             await f.write(file.body)
-            
-    
-    async def _save_file(self, request: Request, *savePath: str, fileFieldName: str = None):
+
+    async def _save_file(
+        self, request: Request, *savePath: str, fileFieldName: str = None
+    ):
         """
         保存上传的文件
         """
@@ -261,7 +287,7 @@ class _baseView(HTTPMethodView):
         elif p_len == len(request.files):
             i: int = 0
             for file in request.files:
-                file = request.files.get('file')
+                file = request.files.get("file")
                 await self.save_file(file, savePath[i])
                 i += 1
 
@@ -279,21 +305,24 @@ class BaseClsView(_baseView):
     def __init__(self, request: Request, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         self._request = request
+
     @property
     def request(self):
         """
         请求对象
         """
         return self._request
+
     @property
     def match_info(self):
         """url 模板参数"""
-        return self. request.match_info
+        return self.request.match_info
+
     @property
     def json(self):
         """json 参数"""
         return self.request.json
-    
+
     @property
     def config(self):
         """
@@ -301,14 +330,14 @@ class BaseClsView(_baseView):
         """
         return self.request.app.config
 
-    
     @property
     def app(self):
         """
         应用对象
         """
         return self.request.app
-    '''
+
+    """
     async def get(self):
         raise NotImplementedError(f"get '{self.routePath}' not implemented")
 
@@ -320,7 +349,8 @@ class BaseClsView(_baseView):
 
     async def delete(self):
         raise NotImplementedError(f"delete '{self.routePath}' not implemented")
-    '''
+    """
+
     @classmethod
     def as_view(cls, *class_args: any, **class_kwargs: any):
         """
@@ -328,9 +358,11 @@ class BaseClsView(_baseView):
         class_args: 类的参数  现在不支持
         class_kwargs: 类的参数参数字典  现在不支持
         """
+
         def view(*args, **kwargs):
             self = view.view_class(*args, **kwargs)
             return self()
+
         if cls.decorators:
             view.__module__ = cls.__module__
             for decorator in cls.decorators:
@@ -349,15 +381,17 @@ class BaseClsView(_baseView):
             raise NotImplementedError(f"Method {method} not implemented")
         return await handler()
 
+
 @deprecated("该类已废弃，请使用 BaseClsView 类替代")
 class BaseView(_baseView):
     """
     视图基类： 约定 增删改查，其他未约定方法可根据实际情况具体使用
     views.POST  : --> query list
-    views.PUT   :---> Add 
+    views.PUT   :---> Add
     view.PATCH    :---> Edit
     view.DELETE :---> del
     """
+
     """
     类属性：
     路由使用路径

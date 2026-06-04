@@ -1,5 +1,5 @@
 from sanic import Request
-from co6co_sanic_ext.model.res.result import Result
+from co6co.data.result import Result
 from ..base_view import AuthMethodView
 import os
 from sanic.response import file_stream, json
@@ -9,13 +9,13 @@ import mimetypes
 class RenameView(AuthMethodView):
     routePath = "/rename"
 
-    async def post(self, request: Request):
+    async def post(self ):
         """
         重命名 文件或者目录
         @param {path:D:\\abcc\\xxx.xx,name:xxx.txt}
         """
-        path_param = request.json.get("path", None)
-        name = request.json.get("name", None)
+        path_param =self.json.get("path", None)
+        name = self.json.get("name", None)
         if path_param is None or name is None:
             return self.response_json(Result.fail(message="path和name参数是必须的"))
         try:
@@ -28,13 +28,13 @@ class RenameView(AuthMethodView):
 class NewFolderView(AuthMethodView):
     routePath = "/new"
 
-    async def post(self, request: Request):
+    async def post(self ):
         """
         新建文件夹
         @param {path:D:\\abcc\\xxx.xx,name:xxx.txt}
         """
-        path_param = request.json.get("path", None)
-        name = request.json.get("name", None)
+        path_param =self.json.get("path", None)
+        name = self.json.get("name", None)
         if path_param is None or name is None:
             return self.response_json(Result.fail(message="path和name参数是必须的"))
         try:
@@ -47,15 +47,15 @@ class NewFolderView(AuthMethodView):
 class FileContentView(AuthMethodView):
     routePath = "/file"
 
-    async def post(self, request: Request):
+    async def post(self ):
         """
         获取文件内容
         @param {path:D:\\abcc\\xxx.xx }
         """
         try: 
             path_param=None
-            log.warn(request.json)
-            path_param = request.json.get("path", None)
+            log.warn(self.json)
+            path_param = self.json.get("path", None)
             if path_param is None:
                 return self.response_json(Result.fail(message="path参数是必须的"))
             if os.path.exists(path_param) and os.path.isfile(path_param):

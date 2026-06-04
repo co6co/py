@@ -1,5 +1,5 @@
 from sanic import Request
-from co6co_sanic_ext.model.res.result import Result
+from co6co.data.result import Result
 from ..base_view import AuthMethodView
 from ...services import fileService
 
@@ -7,8 +7,8 @@ from ...services import fileService
 class batchDelView(AuthMethodView):
     routePath = "/batch/del"
 
-    async def post(self, request: Request):
-        paths = request.json.get("paths", [])
+    async def post(self ):
+        paths =self.json.get("paths", [])
         try:
             flag = 0
             for path in paths:

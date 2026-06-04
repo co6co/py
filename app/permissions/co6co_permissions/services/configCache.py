@@ -2,12 +2,12 @@
 from sanic import Request
 from sqlalchemy.sql import Select
 from co6co.utils import log
-from sqlalchemy.ext.asyncio import AsyncSession
-from .baseCache import BaseCache
-from co6co_db_ext.db_utils import DbCallable, db_tools
+from co6co_db_ext.actuator import Actuator
+from .baseCache import CustomSanicCache
+from co6co_db_ext.db_utils import DbCallable
 from ..model.pos.other import sysConfigPO
 import json as sysJson
-from typing import TypedDict
+from typing import   TypedDict
 
 
 async def get_config(request: Request, code: str, *, useDist=False, default: any = None) -> str | dict | None:
@@ -17,18 +17,18 @@ async def get_config(request: Request, code: str, *, useDist=False, default: any
     try:
         cache = ConfigCache(request)
         result = cache.getConfig(code)
-        if result == None:
+        if result is None:
             await cache.queryConfig(code)
             result = cache.getConfig(code)
         if result and useDist:
-            result = sysJson.loads(result) if type(result) == str else result
+            result = sysJson.loads(result) if isinstance(result, str) else result
             # 　如果default是dict,则合并，
             merge_dict = {}
             if default and isinstance(default, dict):
                 merge_dict.update(default)
             merge_dict.update(result)
             result = merge_dict
-        if result == None:
+        if result is None:
             log.warn("未找到'{}'的相关配置,使用默认配置：{}".format(code, default))
             result = default
         return result
@@ -69,7 +69,7 @@ async def get_user_config(request: Request) -> UserConfig:
     return config
 
 
-class ConfigCache(BaseCache):
+class ConfigCache(CustomSanicCache):
 
     def __init__(self, request: Request) -> None:
         super().__init__(request)
@@ -91,8 +91,8 @@ class ConfigCache(BaseCache):
         if "{" in value and "}" in value:
             try:
                 value = sysJson.loads(value)
-            except:
-                log.err("load json config error:{}".format(value))
+            except Exception as e:
+                log.err("load json config {} error:{}".format(value, e))
                 raise Exception("load json config error,check value  :{}".format(value)) 
         return value
     async def queryConfig(self, code: str) -> str | None:
@@ -100,15 +100,16 @@ class ConfigCache(BaseCache):
         查询当前用户的所拥有的角色
         结果放置在cache中
         """
-        callable = DbCallable(self.session)
+        callable = DbCallable(self.dbService.Session())
 
-        async def exe(session) -> str | None:
+        async def exe(actuator:Actuator) -> str | None:
             select = (
                 Select(sysConfigPO.name, sysConfigPO.code,
                        sysConfigPO.value, sysConfigPO.remark)
                 .filter(sysConfigPO.code.__eq__(code))
             )
-            data: dict | None = await db_tools.execForMappings(session, select, queryOne=True)
+            data  = await actuator.query_one_mappings(select)
+            
             result = None
             if data is None:
                 log.warn("query {} config is NULL".format(code))
@@ -122,14 +123,14 @@ class ConfigCache(BaseCache):
         return await callable(exe)
 
     def setConfig(self, code: str, value: str):
-        if code != None:
+        if code is not None:
             result=self._convertValue(value)
             self.setCache(self.getKey(code), result)
 
     def getConfig(self, code: str) -> str | None:
-        if code != None:
+        if code is not None:
             return self.getCache(self.getKey(code))
 
     def clear(self, code: str) -> str | None:
-        if code != None:
+        if code is not None:
             return self.remove(self.getKey(code))

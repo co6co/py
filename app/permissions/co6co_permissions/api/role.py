@@ -1,4 +1,4 @@
-from sanic import Sanic, Blueprint,Request
+from sanic import  Blueprint
 from co6co_sanic_ext .api import add_routes
 from ..view_model.role_view import role_view,roles_view,roles_ass_view,roles_query_view
 

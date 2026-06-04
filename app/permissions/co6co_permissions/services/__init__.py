@@ -5,7 +5,7 @@ from co6co_web_db.view_model import BaseMethodView
 from sanic.response import text
 from sanic import Request
 from co6co_sanic_ext.utils import JSON_util
-from co6co_sanic_ext.model.res.result import Result
+from co6co.data.result import Result
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from sqlalchemy.sql import Select, Delete
@@ -46,7 +46,7 @@ def getCtxData(user: UserPO):
     """
     通过user获取 dict 保存在 request.ctx.current_user 中 
     """
-    return user.to_jwt_dict()
+    return user.jwt_data
 
 @deprecated("方法过期，代码迁移完后将删除")
 async def generatePageToken(SECRET: str, user: UserPO, expire_seconds: int = 86400, **kvarg):

@@ -2,17 +2,17 @@
 from numpy import insert
 from sanic.response import text
 from sanic import Request
-from co6co_sanic_ext.utils import JSON_util
-from co6co_sanic_ext.model.res.result import Result
+from co6co_sanic_ext.view_model import response_json
+from co6co.data.result import Result
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from sqlalchemy.sql import Select
 from co6co_db_ext.db_utils import db_tools 
-from .biz_view import AbsExistView,AbsAuthClsView, AbsPkView
+from .biz_view import AbsExistView,AuthMethodView, AbsPkView
  
 from ..model.pos.right import menuPO
 from ..model.filters.menu_filter import menu_filter
-from .aop.api_auth import menuChanged
+from .aop.right_aop import menuChanged
  
 class menu_exist_view(AbsExistView):
     @property
@@ -22,7 +22,7 @@ class menu_exist_view(AbsExistView):
     def exist_condition(self)  :
         return  menuPO.code == self.param_code, menuPO.id != self.param_pk 
 
-class menu_tree_view(AbsAuthClsView):
+class menu_tree_view(AuthMethodView):
     routePath = "/tree"
 
     async def get(self ):
@@ -50,7 +50,7 @@ class menu_tree_view(AbsAuthClsView):
         return await self.query_tree( param.create_List_select().order_by(menuPO.order.asc()), rootValue=0, pid_field='parentId', id_field="id")
 
 
-class menus_view(AbsAuthClsView):
+class menus_view(AuthMethodView):
     async def get(self):
         """
         树形选择下拉框数据
@@ -73,7 +73,7 @@ class menus_view(AbsAuthClsView):
         return await self.query_list( param.list_select)
 
     @menuChanged
-    async def put(self ):
+    async def put(self):
         """
         增加
         """
@@ -86,7 +86,7 @@ class menus_view(AbsAuthClsView):
         async def before(po: menuPO, session: AsyncSession, request):
             exist = await db_tools.exist(session,  menuPO.code.__eq__(po.code), column=menuPO.id)
             if exist:
-                return JSON_util.response(Result.fail(message=f"'{po.code}'已存在！"))
+                return response_json(Result.fail(message=f"'{po.code}'已存在！"))
 
         return await self.add( po, json2Po=False, userId=userId, beforeFun=before) 
 
@@ -113,9 +113,9 @@ class menu_view(AbsPkView):
         async def before(oldPo: menuPO, po: menuPO, session: AsyncSession, request):
             exist = await db_tools.exist(session, menuPO.id != oldPo.id, menuPO.code.__eq__(po.code), column=menuPO.id)
             if exist:
-                return JSON_util.response(Result.fail(message=f"'{po.code}'已存在！"))
+                return response_json(Result.fail(message=f"'{po.code}'已存在！"))
             if po.parentId == oldPo.id:
-                return JSON_util.response(Result.fail(message=f"'父节点选择错误！"))
+                return response_json(Result.fail(message=f"'父节点选择错误！"))
         return await self.edit(self.routeValue, menuPO, po=po, userId=self.userId, fun=before)
 
     @menuChanged
@@ -126,11 +126,11 @@ class menu_view(AbsPkView):
         async def before(po: menuPO, session: AsyncSession):
             count = await db_tools.count(session, menuPO.parentId == po.id, column=menuPO.id)
             if count > 0:
-                return JSON_util.response(Result.fail(message=f"该'{po.name}'节点下有‘{count}’节点，不能删除！"))
+                return response_json(Result.fail(message=f"该'{po.name}'节点下有‘{count}’节点，不能删除！"))
         return await self.remove( self.routeValue, menuPO, beforeFun=before)
 
 
-class menu_batch_view(AbsAuthClsView):
+class menu_batch_view(AuthMethodView):
     routePath = "/batch"
 
     @menuChanged
@@ -138,12 +138,11 @@ class menu_batch_view(AbsAuthClsView):
         """
         批量增加
         """
-        data = self.json
-
+        data = self.json 
         async def before(po: menuPO, session: AsyncSession, request):
             exist = await db_tools.exist(session,  menuPO.code.__eq__(po.code), column=menuPO.id)
             if exist:
-                return JSON_util.response(Result.fail(message=f"'{po.code}'已存在！"))
+                return response_json(Result.fail(message=f"'{po.code}'已存在！"))
         if isinstance(data, list):
             polist = []
             userId = self.userId

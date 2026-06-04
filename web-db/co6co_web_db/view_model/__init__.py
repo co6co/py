@@ -27,22 +27,14 @@ from co6co.utils import log
 from ..model.params import associationParam 
 from co6co.utils.modules import deprecated
 from co6co_db_ext.appconfig import AppConfig
+from ..services import get_db_session
 
 TypeOneFun:TypeAlias =  Callable[[BasePO,AsyncSession, Request], Awaitable[None | Any]]
 TypeTwoFun:TypeAlias =  Callable[[BasePO, BasePO,AsyncSession, Request], Awaitable[None | Any]]
 TypeListFun:TypeAlias =Callable[[List[BasePO], AsyncSession, Request], Awaitable[None | Any]]
 TypeCreateFun:TypeAlias =Callable[[AsyncSession, int|str ], Awaitable[BasePO]] 
 
-def get_db_session(request: Request) -> AsyncSession | scoped_session:
-    """
-    获取db session
-    """
-    session = request.ctx.session
-    if isinstance(session, AsyncSession):
-        return session
-    elif isinstance(session, scoped_session):
-        return session
-    raise Exception("未实现DbSession")
+ 
 
 
 async def get_one(request: Request, select: Select, isPO: bool = True):
@@ -88,18 +80,18 @@ class BaseDbClsView(BaseClsView):
         self._actuator = Actuator( self.db_session )
         return self._actuator
      
-    def response_error0(self, e: Exception):
+    def response_error0(self,msg: str,  e: Exception):
         """
         响应错误 message
-        """
+        """ 
         errorLog(self.request, self.__class__, get_current_function_name())
-        return Result.fail(message=f"处理出错:{e}")
+        return Result.fail(message=f"{msg}:{e}")
 
-    def response_error(self,   e: Exception):
+    def response_error(self,  e: Exception,msg="处理出错"):
         """
         响应错误 message
         """
-        return self.response_json(self.response_error0(self.request, e))
+        return self.response_json(self.response_error0(msg, e))
 
     async def get_one(self, select: Select, isPO: bool = True, remove_db_instance: bool = True, resultHanlder: Callable[[Any], Any] = None):
         """

@@ -1,8 +1,8 @@
 
 from sanic.response import text
 from sanic import Request
-from co6co_sanic_ext.utils import JSON_util
-from co6co_sanic_ext.model.res.result import Result
+from co6co_sanic_ext.view_model import response_json
+from co6co.data.result import Result
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from sqlalchemy.sql import Select, Delete
@@ -10,11 +10,11 @@ from co6co_db_ext.db_utils import db_tools
 from co6co_db_ext.session import transactional
 
  
-from .biz_view import AbsExistView,AbsAssociationView,AbsAuthClsView,AbsPkView
+from .biz_view import AbsExistView,AbsAssociationView,AuthMethodView,AbsPkView
 from ..model.pos.right import UserGroupPO, RolePO, UserGroupRolePO
 from ..model.filters.user_group_filter import user_group_filter
 from co6co.utils import log
-from .aop.api_auth import userRoleChanged
+from .aop.right_aop import userRoleChanged
 
  
 class user_group_exist_view(AbsExistView):
@@ -56,7 +56,7 @@ class user_group_ass_view(AbsAssociationView):
     async def put(self):
         return await super().put()
  
-class user_groups_tree_view(AbsAuthClsView):
+class user_groups_tree_view(AuthMethodView):
     routePath = "/tree" 
     async def get(self, parendId:int=None ):
         """
@@ -95,7 +95,7 @@ class user_groups_sub_tree_view(user_groups_tree_view):
         return await super().get(self.parendId)
 
 
-class user_groups_view(AbsAuthClsView): 
+class user_groups_view(AuthMethodView): 
     async def get(self ):
         """
         树形选择下拉框数据
@@ -128,7 +128,7 @@ class user_groups_view(AbsAuthClsView):
         async def before(po: UserGroupPO, session: AsyncSession, request):
             exist = await db_tools.exist(session,  UserGroupPO.code.__eq__(po.code), column=UserGroupPO.id)
             if exist:
-                return JSON_util.response(Result.fail(message=f"'{po.code}'已存在！"))
+                return response_json(Result.fail(message=f"'{po.code}'已存在！"))
         return await self.add( po, userId=userId, beforeFun=before) 
 
 
@@ -141,9 +141,9 @@ class user_group_view(AbsPkView):
         async def before(oldPo: UserGroupPO, po: UserGroupPO, session: AsyncSession, request):
             exist = await db_tools.exist(session, UserGroupPO.id != oldPo.id, UserGroupPO.code.__eq__(po.code), column=UserGroupPO.id)
             if exist:
-                return JSON_util.response(Result.fail(message=f"'{po.code}'已存在！"))
+                return response_json(Result.fail(message=f"'{po.code}'已存在！"))
             if po.parentId == oldPo.id:
-                return JSON_util.response(Result.fail(message=f"'父节点选择错误！"))
+                return response_json(Result.fail(message=f"'父节点选择错误！"))
 
         return await self.edit( self.routeValue, UserGroupPO, userId=self.userId, fun=before)
 
@@ -154,5 +154,5 @@ class user_group_view(AbsPkView):
         async def before(po: UserGroupPO, session: AsyncSession):
             count = await db_tools.count(session, UserGroupPO.parentId == po.id, column=UserGroupPO.id)
             if count > 0:
-                return JSON_util.response(Result.fail(message=f"该'{po.name}'节点下有‘{count}’节点，不能删除！"))
+                return response_json(Result.fail(message=f"该'{po.name}'节点下有‘{count}’节点，不能删除！"))
         return await self.remove(  self.routeValue, UserGroupPO, beforeFun=before)

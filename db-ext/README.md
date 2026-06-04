@@ -36,8 +36,9 @@ db_session.py  72 z
     增加 actuator，jwt_service
 0.1.1 2026-05-23
     修复已知BUG
-0.1.2 2026-06-01 未发布
+0.1.2 2026-06-01
     修复已知BUG
+    cacheManage 缓存管理类 从其他项目中迁移过来做了关联调整
 
 ```
 

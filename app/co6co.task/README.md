@@ -19,7 +19,16 @@
       co6co.db-ext==0.0.17
       co6co.web-db==0.0.18
       co6co.permissions==0.1.0
-0.1.3 2026-4-2 未提交
+0.1.3 2026-4-2
   service 模块
   co6co>=0.0.36
+0.1.4 2026-6-4 重要更新
+  service 模块
+  co6co>=0.1.3
+  co6co.db-ext==0.1.2
+  co6co.sanic-ext==0.0.16
+  co6co.web-db==0.0.20
+  co6co.permissions==0.2.0
+  使用视图类
+  View_Class
 ```

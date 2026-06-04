@@ -1,9 +1,9 @@
 
 from sanic.response import text, raw
 from sanic import Request
-from co6co_sanic_ext.utils import JSON_util
-from co6co_sanic_ext.model.res.result import Result
-from co6co_permissions.view_model.base_view import BaseMethodView
+from co6co_sanic_ext.view_model import response_json
+from co6co.data.result import Result
+from co6co_web_db.view_model import BaseDbClsView
 from PIL import Image, ImageDraw, ImageFont
 import os
 from time import time
@@ -67,10 +67,10 @@ def generate_captcha():
         return None, None
 
 
-class CaptchaView(BaseMethodView):
+class CaptchaView(BaseDbClsView):
     routePath = "/captcha"
 
-    async def get(self, request: Request):
+    async def get(self ):
         """
         获取验证码图片
         """
@@ -79,7 +79,7 @@ class CaptchaView(BaseMethodView):
             return raw(b"Error generating captcha", status=500)
 
         # 存储验证码到会话，包含过期时间戳
-        _, session = self.get_Session(request)
+        _, session = self.get_Session(self.request)
         session["captcha_code"] = code
         session["captcha_timestamp"] = int(time())  # 记录生成时间
         #log.info(f"验证码已生成: {code}")
@@ -92,7 +92,7 @@ class CaptchaView(BaseMethodView):
         # 返回图片响应
         return raw(image_bytes, content_type="image/png")
 
-    async def post(self, request: Request):
+    async def post(self ):
         """
         校验验证码 
         
@@ -100,13 +100,13 @@ class CaptchaView(BaseMethodView):
         例如登录时需要校验验证码，及用户名密码等。
         不建议单独调用该方法，建议在登录方法中实现相关逻辑。
         """
-        data: dict = request.json
+        data: dict = self.json
         code:str = data.get("code", "").strip()
         
         if not code:
             return self.response_json(Result.fail(message="验证码不能为空！"))
 
-        _, session = self.get_Session(request)
+        _, session = self.get_Session(self.request)
         stored_code:str = session.pop('captcha_code', '')  # 使用pop移除会话中的验证码
         stored_timestamp = session.pop('captcha_timestamp', 0)
 

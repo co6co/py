@@ -49,5 +49,5 @@ def auto_import_models(*package_names):
         for _, module_name, _ in pkgutil.iter_modules(package.__path__):
             importlib.import_module(f"{package_name}.{module_name}")
         
-__version_info = (0, 1,1)
+__version_info = (0, 1,2)
 __version__ = ".".join([str(x) for x in __version_info])

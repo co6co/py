@@ -5,8 +5,8 @@ from ..view_model.currentUser import changePwd_view, user_info_view, user_avatar
 from ..view_model.login import login_view
 from ..view_model.aop.api_auth import authorized
 from ..model.enum import user_state, user_category 
-from co6co_sanic_ext.model.res.result import Result
-from co6co_sanic_ext.utils import JSON_util
+from co6co.data.result import Result
+from co6co_sanic_ext.view_model import response_json
  
 import random
 import string
@@ -25,7 +25,7 @@ async def getUserStatus(request: Request):
     用户状态
     """
     states = user_state.to_dict_list()
-    return JSON_util.response(Result.success(data=states))
+    return response_json(Result.success(data=states))
 
 
 @user_api.route("/category", methods=["GET", "POST"])
@@ -35,7 +35,7 @@ async def getUserCategory(request: Request):
     用户类别
     """
     states = user_category.to_dict_list()
-    return JSON_util.response(Result.success(data=states)) 
+    return response_json(Result.success(data=states)) 
  
 
 
@@ -47,7 +47,7 @@ async def generatePwd2(request: Request, length: int = 256):
     """
     all_characters = string.ascii_letters + string.digits  # + string.punctuation
     password = ''.join(random.choice(all_characters) for _ in range(length))
-    return JSON_util.response(Result.success(data=password))
+    return response_json(Result.success(data=password))
 
 
 @user_api.route("/generatePwd", methods=["GET", "POST"])

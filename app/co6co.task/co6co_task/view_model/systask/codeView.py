@@ -1,8 +1,6 @@
 
-
-from sanic.response import text
-from sanic import Request
-from co6co_sanic_ext.model.res.result import Result
+ 
+from co6co.data.result import Result
 from co6co_permissions.view_model.base_view import AuthMethodView
 from datetime import datetime
 from ...service import Scheduler, CuntomCronTrigger
@@ -23,21 +21,21 @@ class cronViews(AuthMethodView):
             except Exception as e:
                 return self.response_json(Result.success(data=False, message="解析'{}'出错:'{}'".format(cron, e)))
 
-    async def get(self, request: Request):
+    async def get(self):
         """
         cron 表达式 合法性检测
         ?cron=0 0 0 12 12 *
         """
-        data = self.usable_args(request)
+        data = self.usable_args(self.request)
         cron = data.get("cron", None)
         return await self._post(cron)
 
-    async def post(self, request: Request):
+    async def post(self ):
         """
         cron 表达式 合法性检测
         json:{cron:'0 0 0 12 12 *'}
         """
-        json: dict = request.json
+        json: dict = self.json
         cron = json.get("cron", None)
         return await self._post(cron)
 
@@ -61,26 +59,26 @@ class _codeView:
 class codeView(_codeView, AuthMethodView):
     routePath = "/test"
 
-    async def post(self, request: Request):
+    async def post(self ):
         """
         检查代码 python 代码
 
         params: {code:'python 代码'}
         return {data:False|True,...}
         """
-        json: dict = request.json
+        json: dict = self.json
         code = json.get("code", None)
         res, _e = Scheduler.parseCode(code)
         if res:
             return self.response_json(Result.success(data=True))
         return self.response_json(Result.success(data=False, message="解析代码出错:'{}'".format(_e)))
 
-    async def put(self, request: Request):
+    async def put(self ):
         """
         执行代码
         params: {code:'python 代码'}
         return {data:False|True,...}
         """
-        json: dict = request.json
+        json: dict = self.json
         code = json.get("code", None)
         return self.response_json(self.exec_py_code(code))

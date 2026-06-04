@@ -1,8 +1,8 @@
 
 from sanic.response import text
 from sanic import Request
-from co6co_sanic_ext.utils import JSON_util
-from co6co_sanic_ext.model.res.result import Result
+from co6co_sanic_ext.view_model import response_json
+from co6co.data.result import Result
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from sqlalchemy.sql import Select, or_, and_, text as sqlText
@@ -17,9 +17,8 @@ from co6co.utils import log
 
 
 class ui_tree_view(CtxMethodView):
-    routePath = "/tree/"
-
-    async def get(self, request: Request):
+    routePath = "/tree/" 
+    async def get(self ):
         """
         树形选择下拉框数据
         selectTree :  el-Tree
@@ -37,7 +36,7 @@ class ui_tree_view(CtxMethodView):
             where u.id=:userId)
             """
         )
-        currentId = getCurrentUserId(request)
+        currentId =self.userId
         userRolesSelect = (
             Select(UserRolePO.roleId).filter(UserRolePO.userId == UserPO.id, UserPO.id == currentId)
         )
@@ -47,7 +46,7 @@ class ui_tree_view(CtxMethodView):
         # roleList=await self._query(request,queryRoleSml,isPO=False,param={"userId":1})
         queryRoleSelect =  userRolesSelect.union(userGroupRolesSelect)
         #roleList=await self._query(request,queryRoleSml,isPO=False,param={"userId":1}) 
-        session=self.get_db_session(request) 
+        session=self.db_session
         from co6co_db_ext.session import session_context
         roleList=[]
         async with session_context(session) () as session:#  为什么开启事务后 session 还能继续使用
@@ -61,15 +60,15 @@ class ui_tree_view(CtxMethodView):
             .order_by(menuPO.parentId.asc(), menuPO.order.asc())
         ).distinct(menuPO.id)
 
-        return await self.query_tree(request, select, rootValue=0, pid_field='parentId', id_field="id", isPO=False)
+        return await self.query_tree( select, rootValue=0, pid_field='parentId', id_field="id", isPO=False)
 
-    async def post(self, request: Request):
+    async def post(self ):
         """
         树形 table数据
         tree 形状 table
         """
         param = menu_filter()
-        param.__dict__.update(request.json)
+        param.__dict__.update(self.json)
         if len(param.filter()) > 0:
-            return await self.query_page(request, param)
-        return await self.query_tree(request, param.create_List_select(), rootValue=0, pid_field='parentId', id_field="id")
+            return await self.query_page( param)
+        return await self.query_tree( param.create_List_select(), rootValue=0, pid_field='parentId', id_field="id")

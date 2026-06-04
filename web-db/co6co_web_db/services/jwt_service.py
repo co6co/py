@@ -3,8 +3,10 @@ import datetime
 from sanic.request import Request
 from typing import Any
 from co6co.utils import log
+from co6co.utils.modules import deprecated
 
 
+@deprecated("JWT_service is deprecated, please use ‘from co6co_db_ext.jwt_service import JwtService’")
 class JWT_service:
     def __init__(self, secret: str, issuer: str = "JWT+SERVICE") -> None:
         self._secret = secret

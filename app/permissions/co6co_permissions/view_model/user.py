@@ -2,8 +2,8 @@
 from typing import Optional
 from sanic.response import text
 from sanic import Request
-from co6co_sanic_ext.utils import JSON_util
-from co6co_sanic_ext.model.res.result import Result
+from co6co_sanic_ext.view_model import response_json
+from co6co.data.result import Result
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from sqlalchemy.sql import Select, Delete
@@ -11,20 +11,19 @@ from co6co_db_ext.db_utils import db_tools
 
 from co6co.utils import getRandomStr 
 from .base_view import AuthMethodView, BaseMethodView
-from .biz_view import AbsAddView, AbsAssociationView, AbsQueryView, AbsPkView, AbsExistView,AbsAuthClsView
+from .biz_view import AbsAddView, AbsAssociationView, AbsQueryView, AbsPkView, AbsExistView,AuthMethodView
 
 from ..model.pos.right import UserPO, RolePO, UserRolePO, AccountPO
 from ..model.enum import user_category
 from ..model.filters.user_filter import user_filter
-from .aop.api_auth import userRoleChanged
-from ..services import generatePageToken, queryUer, getSecret, decodeCode
+from .aop.right_aop import userRoleChanged 
 from .aop.user_aop import AccessTokenChange
 from co6co_db_ext.session import transactional
 
 
 @AccessTokenChange
-def accessTokenChange(self, token: str, userPo: UserPO = None):
-    return userPo.to_jwt_dict()
+def accessTokenChange(request: Request, token: str, userPo: UserPO = None):
+    return userPo.jwt_data
 
 
 class user_ass_view(AbsAssociationView):
@@ -127,7 +126,7 @@ class users_view(AbsAddView):
                 session, UserPO.userName.__eq__(po.userName), column=UserPO.id
             )
             if exist:
-                return JSON_util.response(
+                return response_json(
                     Result.fail(message=f"'{po.userName}'已存在！")
                 )
             if po.salt is None:
@@ -138,7 +137,7 @@ class users_view(AbsAddView):
             ):
                 po.password = po.encrypt(po.password)
             else:
-                accessTokenChange(po.password, po)
+                accessTokenChange(self.request, po.password, po)
 
         return await self.add( po, userId=userId, beforeFun=before)
 
@@ -157,7 +156,7 @@ class user_view(AbsPkView):
                 column=UserPO.id,
             )
             if exist:
-                return JSON_util.response( Result.fail(message=f"'{po.userName}'已存在！") ) 
+                return response_json( Result.fail(message=f"'{po.userName}'已存在！") ) 
         return await self.edit(  self.pkValue, UserPO, userId=self.userId, fun=before )
     @transactional
     async def delete(self):
@@ -165,7 +164,7 @@ class user_view(AbsPkView):
         删除
         """
         if self.pkValue == 1:
-            return JSON_util.response(Result.fail(message="不能删除系统默认用户！"))
+            return response_json(Result.fail(message="不能删除系统默认用户！"))
 
         async def before(po: UserPO, session: AsyncSession):
             # 用户角色关联
@@ -173,7 +172,7 @@ class user_view(AbsPkView):
                 session, UserRolePO.userId == po.id, column=UserRolePO.userId
             )
             if count > 0:
-                return JSON_util.response(
+                return response_json(
                     Result.fail(
                         message=f"该'{po.userName}'用户关联有‘{count}’角色，不能删除！"
                     )
@@ -182,7 +181,7 @@ class user_view(AbsPkView):
                 session, AccountPO.userId == po.id, column=AccountPO.uid
             )
             if count > 0:
-                return JSON_util.response(
+                return response_json(
                     Result.fail(
                         message=f"该'{po.userName}'用户关联有‘{count}’账号，不能删除！"
                     )
@@ -191,7 +190,7 @@ class user_view(AbsPkView):
         return await self.remove(  self.pkValue, UserPO, beforeFun=before)
 
 
-class sys_users_view(AbsAuthClsView):
+class sys_users_view(AuthMethodView):
     routePath = "/reset"
     @transactional
     async def post(self ):
@@ -203,12 +202,12 @@ class sys_users_view(AbsAuthClsView):
         password = data["password"]
         select = Select(UserPO).filter(UserPO.userName == userName)
         if userName == None or password == None or len(password) < 6:
-            return JSON_util.response(Result.fail(message="请检查提交的用户和密码！"))
+            return response_json(Result.fail(message="请检查提交的用户和密码！"))
 
         async def edit(_, one: Optional[UserPO]):
             if one is not None:
                 if one.salt is None:
-                    return JSON_util.response(
+                    return response_json(
                         Result.fail(
                             message=f"用户[{userName}],通过关联创建的用户，完善信息才能重置密码"
                         )
@@ -220,10 +219,10 @@ class sys_users_view(AbsAuthClsView):
                     one.password = one.encrypt(password)
                 else:
                     one.password = password
-                    accessTokenChange(password, one)
-                return JSON_util.response(Result.success())
+                    accessTokenChange(self.request, password, one)
+                return response_json(Result.success())
             else:
-                return JSON_util.response(
+                return response_json(
                     Result.fail(
                         message=f"所提供的用户名[{userName}]不存在，请刷新重试！"
                     )
@@ -232,7 +231,7 @@ class sys_users_view(AbsAuthClsView):
         return await self.update_one( select, edit)
 
 
-class ticketView(AbsAuthClsView ):
+class ticketView(AuthMethodView ):
     routePath = "/ticket/<code:str>"
     @transactional
     async def get(self):
@@ -245,13 +244,13 @@ class ticketView(AbsAuthClsView ):
         
         userId=data["id"]
         if userId is  None:
-            return JSON_util.response(Result.fail(message="code 无效或已过期"))
+            return response_json(Result.fail(message="code 无效或已过期"))
         select = Select(UserPO).filter(UserPO.id.__eq__(userId))
         user: Optional[UserPO] = await self.actuator.query_one_entity(select)  
         if user is not None:
             token = await self.jwtService.create_token(user.jwt_data, user.crate_jwt_refresh_data("deviceId",self.request.headers.get("user-agent")))
-            return JSON_util.response(
+            return response_json(
                 Result.success(data=token, message="票据登录成功")
             )
         else:
-            return JSON_util.response(Result.fail(message="未找到所属用户"))
+            return response_json(Result.fail(message="未找到所属用户"))
