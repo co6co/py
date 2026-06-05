@@ -96,7 +96,7 @@ class user_exist_post_view(AbsExistView):
         return self._response(userName, result)
 
 
-class user_query_view(AbsQueryView[user_filter]):
+class user_query_view(AbsQueryView):
     routePath = "/"
     cls = user_filter
 

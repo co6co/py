@@ -19,7 +19,7 @@ def ConfigEntry(f):
             log.warn("code参数是必须的,当前请求参数:",self.match_info)
         elif "SYS_CONFIG" in code:
             if cacheManage is not None:
-                value = await f(*args, **kwargs)
+                value = await f(self,*args, **kwargs)
                 cacheManage.setConfig(code, value)
             else:
                 log.warn("cacheManage 未找到 Request 参数")

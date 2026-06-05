@@ -61,7 +61,7 @@ class user_avatar_view(resource_baseView):
         """
         userName = self.userName
         select = Select(UserPO.avatar).filter(UserPO.userName == userName)
-        dicts = await self.get_one(select, isPO=False)
+        dicts = await self.actuator.query_one_mappings(select)
 
         avatar = dicts.get("avatar")
         if avatar:

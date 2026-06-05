@@ -1,7 +1,7 @@
 
 from sanic.response import text, json
 from sanic import Request
-from co6co_sanic_ext.model.res.result import Result
+from co6co.data.result import Result
 from co6co_permissions.view_model.base_view import BaseMethodView
 
 import requests
@@ -12,14 +12,14 @@ from co6co_db_ext.db_utils import QueryOneCallable
 from urllib.parse import unquote
 import json as sysJson
 from co6co.enums import Base_Enum
-from co6co_sanic_ext.utils import JSON_util
+
 import threading
 import time
 import asyncio
 import copy
 from co6co_permissions.services.bllConfig import config_bll
 from co6co.task.thread import ThreadEvent
-
+from co6co.utils.json_util import JSONEncoder
 
 class _dbView(BaseMethodView):
     async def query_config_value(self, request: Request, key: str, parseDict: bool = False) -> str | dict:
@@ -67,7 +67,8 @@ class DeepseekView(_dbView):
             try:
                 data = t.runTask(self.query, request)
                 sessionDict = t.runTask(sess.interface.open, request)
-                sessionDict.setdefault(self.sessionKey,  JSON_util(ensure_ascii=False).encode(data))
+
+                sessionDict.setdefault(self.sessionKey,  JSONEncoder.dumps(data))
                 t.runTask(sess.interface.save, request, {})
             finally:
                 # loop.close()

@@ -6,7 +6,7 @@ from sqlalchemy.sql import Select, Update
 from co6co_db_ext.db_utils import db_tools, QueryListCallable
 from typing import List
 from co6co.utils import log, DATA
-from co6co_web_db.services.db_service import BaseBll
+from co6co_web_db.services.bll_service import BaseBll
 from co6co_permissions.model.enum import dict_state
 from multiprocessing.connection import PipeConnection
 from co6co.utils import try_except
@@ -17,6 +17,7 @@ from abc import ABC, abstractmethod
 from ..model.pos.tables import DynamicCodePO, SysTaskPO
 from ..model.enum import CommandCategory
 from ..service import Scheduler, CustomTask as custom
+from co6co_db_ext.appconfig import AppConfig
 
 
 class HandlerCommand(ABC):
@@ -214,7 +215,7 @@ class TasksMgr(sanics.Worker):
 
     def __init__(self, app: Sanic, event: asyncio.Event, conn: PipeConnection):
         # BaseBll.__init__(self, app=app)
-        self.bll = BaseBll(app=app)
+        self.bll = BaseBll(app=app, db_settings=AppConfig.get_db_config(app.config))
         self.session = self.bll.session
         sanics.Worker.__init__(self, event, conn)
         # super(sanics.Worker, self).__init__(event, conn)

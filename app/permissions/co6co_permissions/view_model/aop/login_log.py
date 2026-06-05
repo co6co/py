@@ -17,58 +17,56 @@ from ...services import getCurrentUserId
 import json
 import time
 from ...configs.captcha import CaptchaConfig
+from co6co_web_session.base import SessionDict
+from ..base_view import AbsClsView
+from ...services.utils import appHelper
 
 
-async def _loginLog(response: JSONResponse, request: Request):
+async def _loginLog(response: JSONResponse, self: AbsClsView):
     try:
         po = LoginLogPO()
-        po.ipAddress = request.client_ip  # p.ip=self.forwarded['for']
+        po.ipAddress =self. request.client_ip  # p.ip=self.forwarded['for']
         po.createTime = datetime.now()
         res = json.loads(str(response.body, encoding="utf-8"))
         result = Result.success()
         result.__dict__.update(res)
-        po.name = request.json.get("userName")
+        po.name =self. request.json.get("userName")
         if result.code == 0:
-            po.createUser = getCurrentUserId(request)
+            po.createUser = appHelper.getCurrentUserId(self.request)
             po.state = "成功"
         else:
             po.state = "失败"
-        # log.warn(po.__dict__)
-        insert = InsertCallable(request.ctx.session)
-        await insert(po)
+        # log.warn(po.__dict__) 
+        self.actuator.add_all(po)
+        
     except Exception as e:
-        log.err("写登录日志失败")
+        log.err("写登录日志失败",e)
 
 
 def loginLog(f):
     @wraps(f)
-    async def decorated_function(*args, **kwargs):
-        request: Request = None
-        for a in args:
-            if isinstance(a, Request):
-                request = a
-            # log.warn("第一个参数",type(a))
+    async def decorated_function(self,*args, **kwargs):
+        if not isinstance(self, AbsClsView):
+            raise Exception("登录日志装饰器只能用于AbsClsView类")
         """
         for a,v in kwargs:
             log.warn("第er个参数",type(a),type(v))
         """
-        response = await f(*args, **kwargs)
-        await _loginLog(response, request)
+        response = await f(self,*args, **kwargs)
+        await _loginLog(response,self)
         return response 
     return decorated_function
 
 
-def _checkVerifycode(request: Request):
+def _checkVerifycode(sessionDict:SessionDict,verifyCode: str=None,):
     """
     检查验证码
     """
-    verifyCode: str = request.json.get("verifyCode", "")
-    if verifyCode == "":
+    
+    if verifyCode == "" or verifyCode is None:
         log.warn("验证码不能为空！")
-        return False, "验证码不能为空！"
-    _, sessionDict, _ = peraseRequest(request)
-    # 方案1 拖拉方式验证
-
+        return False, "验证码不能为空！" 
+    # 方案1 拖拉方式验证 
     memCode = sessionDict.get("verifyCode", None)
     if memCode:
         # 如果没有 key
@@ -105,14 +103,15 @@ def verifyCode(f):
     验证码装饰器
     """ 
     @wraps(f)
-    async def _function(*args, **kwargs):
-        request: Request = None
-        for a in args:
-            if isinstance(a, Request):
-                request = a
-        result, msg = _checkVerifycode(request)
-        if not result:
-            log.warn(msg, result)
-            return response_json(Result.fail(message=msg))
-        return await f(*args, **kwargs)
+    async def _function(self,*args, **kwargs): 
+        if isinstance(self, AbsClsView): 
+            dict=self.json.get("verifyCode")
+            _, sessionDict = self.get_Session(self.request)
+            result, msg = _checkVerifycode(sessionDict,dict)
+            if not result:
+                log.warn(msg, result)
+                return response_json(Result.fail(message=msg))
+        else:
+            raise Exception("验证码装饰器只能用于AbsClsView类")
+        return await f(self,*args, **kwargs)
     return _function

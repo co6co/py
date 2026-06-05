@@ -12,7 +12,7 @@ from co6co_web_db.model.params import associationParam
 
 from datetime import datetime
 from ..base_view import AuthMethodView 
-from ..biz_view import AbsPkView,AbsExistView,AbsQueryView
+from ..biz_view import AbsPkView,AbsExistView 
 from ...model.filters.dict_type_filter import Filter
 from ...model.filters.dict_filter import DictFilter
 

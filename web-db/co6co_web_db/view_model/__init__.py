@@ -125,7 +125,7 @@ class BaseDbClsView(BaseClsView):
             else:
                 return Result.fail(message="更新失败")
         except Exception as e:
-            return self.response_error0(e)
+            return self.response_error(e)
 
     async def query_mapping(self, select: Select, oneRecord: bool = False):
         """
@@ -156,7 +156,7 @@ class BaseDbClsView(BaseClsView):
             result = db_tools.list2Dict(data)
             return result
         except Exception as e:
-            self.response_error0(  e)
+            self.response_error(   e)
             return None
 
     async def exist(self,   *filters: ColumnElement[bool], column: InstrumentedAttribute = "*"):
@@ -422,13 +422,13 @@ class BaseMethodView(BaseView):
         """
         响应错误 message
         """
-        return BaseDbClsView(request).response_error0(e)
+        return BaseDbClsView(request).response_error(e)
 
     def response_error(self, request: Request, e: Exception):
         """
         响应错误 message
         """
-        return BaseDbClsView(request).response_error0(e)
+        return BaseDbClsView(request).response_error(e)
 
 
     async def get_one(self, request: Request, select: Select, isPO: bool = True, remove_db_instance: bool = True, resultHanlder: Callable[[Any], Any] = None):

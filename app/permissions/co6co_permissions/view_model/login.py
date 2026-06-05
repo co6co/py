@@ -44,7 +44,7 @@ class login_view(AbsClsView):
                 UserPO.userName.__eq__(where.userName), UserPO.state.in_(status)
             )
             user:Optional[UserPO] = await self.actuator.query_one_entity(select)
-            _, sessionDict = self.get_Session(self.request.session)
+            _, sessionDict = self.get_Session(self.request)
 
             if user is not None:
                 lockTime: datetime | None = user.lockTime

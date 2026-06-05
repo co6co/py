@@ -4,18 +4,16 @@ from co6co.utils import log
 from sanic.config import Config
 from co6co_sanic_ext.utils.cors_utils import attach_cors
 from co6co_sanic_ext import sanics
-from co6co_sanic_ext import session
-from co6co_web_db.services.db_service import injectDbSessionFactory
+from co6co_web_db.services import injectDbSessionFactory
 from cacheout import Cache
 import time
 from co6co_task.service.RouterService import dynamicRouter
 from co6co_task.service.Tasks import TasksMgr
 #from co6co_task.service.Services import Service
-from co6co_task.service.handler.task_handler import TaskManager
+#from co6co_task.service.handler.task_handler import TaskManager
 from services.rtspService import RtspService
 import asyncio
-from co6co_web_session import Session
-
+from co6co_web_session import Session 
 
 def appendRoute(app: Sanic):
     try:
@@ -27,14 +25,14 @@ def appendRoute(app: Sanic):
         log.err("动态模块失败", e)
 
 
-def init(app: Sanic, _: dict):
+def init(app: Sanic, config: dict):
     """
     初始化
-    """
+    """ 
     # log.warn("APP:",   id(app))
     attach_cors(app)
-    from api import api
-    injectDbSessionFactory(app, app.config.db_settings)
+    from api import api 
+    injectDbSessionFactory(app,config.get("db_settings"))
     '''
     @app.main_process_start
     async def setup(app: Sanic, _: Config):
@@ -63,7 +61,8 @@ def init(app: Sanic, _: dict):
 
 def createService(app:Sanic,event , conn ):
     try: 
-        worker=TaskManager(app)
+        worker=TasksMgr(app,event,conn)
+		#worker=TaskManager(app)
         print("createService ed")
         return worker
     except Exception as e:
@@ -84,6 +83,5 @@ if __name__ == "__main__":
     # print("当前工作目录：", current_directory)
     # print("当前dir：", os.path.curdir)
     log.succ("##", __name__)
-    config = sanics.getConfig(sanics.getConfigFilder(__file__))
-    log.warn(config)
+    config = sanics.getConfig(sanics.getConfigFilder(__file__)) 
     main(config)

@@ -23,10 +23,10 @@ class TestPermissionValid:
         
         # 使用源代码中的 PermissionValid 类
         permission_valid = PermissionValid(mock_request)
-        permission_valid.inited = False
+        
         
         # 测试源代码中的 check 方法
-        result = permission_valid.check()
+        result = permission_valid.inited
         assert result is False
 
     def test_check_exact_url_match(self):
@@ -39,8 +39,8 @@ class TestPermissionValid:
         
         # 使用源代码中的 PermissionValid 类
         permission_valid = PermissionValid(mock_request)
-        permission_valid.currentUserMenus = [{"url": "/api/users", "methods": "GET"}]
-        permission_valid.inited = True
+        permission_valid._inited = True
+        permission_valid.currentUserMenus = [{"url": "/api/users", "methods": "GET"}] 
         
         # 测试源代码中的 check 方法
         result = permission_valid.check()
@@ -57,7 +57,7 @@ class TestPermissionValid:
         # 使用源代码中的 PermissionValid 类
         permission_valid = PermissionValid(mock_request)
         permission_valid.currentUserMenus = [{"url": "/api/users", "methods": "GET"}]
-        permission_valid.inited = True
+        permission_valid._inited = True
         
         # 测试源代码中的 check 方法
         result = permission_valid.check()
@@ -74,7 +74,7 @@ class TestPermissionValid:
         # 使用源代码中的 PermissionValid 类
         permission_valid = PermissionValid(mock_request)
         permission_valid.currentUserMenus = [{"url": "/api/users", "methods": "GET"}]
-        permission_valid.inited = True
+        permission_valid._inited = True
         
         # 测试源代码中的 check 方法
         result = permission_valid.check()
@@ -91,7 +91,7 @@ class TestPermissionValid:
         # 使用源代码中的 PermissionValid 类
         permission_valid = PermissionValid(mock_request)
         permission_valid.currentUserMenus = [{"url": "/api/users", "methods": "ALL"}]
-        permission_valid.inited = True
+        permission_valid._inited = True
         
         # 测试源代码中的 check 方法
         result = permission_valid.check()
@@ -108,7 +108,7 @@ class TestPermissionValid:
         # 使用源代码中的 PermissionValid 类
         permission_valid = PermissionValid(mock_request)
         permission_valid.currentUserMenus = [{"url": "/api/users/*", "methods": "GET"}]
-        permission_valid.inited = True
+        permission_valid._inited = True
         
         # 测试源代码中的 check 方法
         result = permission_valid.check()
@@ -125,7 +125,7 @@ class TestPermissionValid:
         # 使用源代码中的 PermissionValid 类
         permission_valid = PermissionValid(mock_request)
         permission_valid.currentUserMenus = [{"url": "/api/users/**", "methods": "GET"}]
-        permission_valid.inited = True
+        permission_valid._inited = True
         
         # 测试源代码中的 check 方法
         result = permission_valid.check()
@@ -142,7 +142,7 @@ class TestPermissionValid:
         # 使用源代码中的 PermissionValid 类
         permission_valid = PermissionValid(mock_request)
         permission_valid.currentUserMenus = [{"url": "/api/users", "methods": "GET,POST,DELETE"}]
-        permission_valid.inited = True
+        permission_valid._inited = True
         
         # 测试源代码中的 check 方法
         result = permission_valid.check()
@@ -162,7 +162,7 @@ class TestPermissionValid:
             {"url": "/api/users", "methods": "GET"},
             {"url": "/api/orders", "methods": "GET"}
         ]
-        permission_valid.inited = True
+        permission_valid._inited = True
         
         # 测试源代码中的 check 方法
         result = permission_valid.check()
@@ -182,7 +182,7 @@ class TestPermissionValid:
             {"url": "/api/users", "methods": "GET"},
             {"url": "/api/orders", "methods": "GET"}
         ]
-        permission_valid.inited = True
+        permission_valid._inited = True
         
         # 测试源代码中的 check 方法
         result = permission_valid.check()

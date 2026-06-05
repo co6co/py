@@ -1,6 +1,6 @@
 
 from sanic import Request
-from co6co_sanic_ext.model.res.result import Result
+from co6co.data.result import Result
 import re
 from sqlalchemy.sql import Select
 from co6co_db_ext.db_utils import QueryOneCallable

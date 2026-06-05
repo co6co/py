@@ -34,12 +34,16 @@ class _baseView(HTTPMethodView):
     """
     视图基类： 约定 增删改查，其他未约定方法可根据实际情况具体使用
     views.POST  : --> query list
+    
+    
+     __init_subclass__如果不调 super().__init_subclass__()，就会阻断 Generic 的设置流程
+     python 3.12 的 typing 中，_generic_class_getitem（即 XXXView[Something]的 __class_getitem__）会访问 cls.__parameters__，
+     如果 __init_subclass__链断了，__parameters__就不存在
+     
+    HTTPMethodView __init_subclass__阻断了 Generic的初始化链。导致 __parameters__没被写入
     """
 
-    routePath: str = "/"
-
-    def __init__(self, *class_args: any, **class_kwargs: any) -> None:
-        super().__init__(*class_args, **class_kwargs)
+    routePath: str = "/" 
 
     def response_json(self, data: Result | Page_Result, status: int = 200):
         return response_json(data, status=status)
@@ -303,7 +307,8 @@ class _baseView(HTTPMethodView):
 
 class BaseClsView(_baseView):
     def __init__(self, request: Request, *args, **kwargs) -> None:
-        super().__init__(*args, **kwargs)
+        self.args=args
+        self.kwargs=kwargs
         self._request = request
 
     @property
@@ -373,13 +378,16 @@ class BaseClsView(_baseView):
         view.__module__ = cls.__module__
         view.__name__ = cls.__name__
         return view
-
     async def __call__(self) -> BaseHTTPResponse:
-        method = self.request.method
-        handler = getattr(self, method.lower(), None)
-        if handler is None:
-            raise NotImplementedError(f"Method {method} not implemented")
-        return await handler()
+        try:
+            method = self.request.method
+            handler = getattr(self, method.lower(), None)
+            if handler is None:
+                raise NotImplementedError(f"Method {method} not implemented")
+            return await handler()
+        except Exception as e:
+            log.err("执行方法异常",e) 
+            return self.response_json(e, status=500) 
 
 
 @deprecated("该类已废弃，请使用 BaseClsView 类替代")

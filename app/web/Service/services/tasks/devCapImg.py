@@ -6,7 +6,7 @@ from model.pos.tables import DevicePO
 import cv2
 from co6co_permissions.services.bllConfig import config_bll
 from co6co_db_ext .session import dbBll
-from co6co_web_db.services.db_service import BaseBll
+from co6co_web_db.services.bll_service import BaseBll
 from co6co_db_ext.db_utils import QueryListCallable, db_tools
 from co6co.utils import log
 from co6co_permissions.model.enum import dict_state
@@ -23,7 +23,8 @@ import time
 from model.enum import DeviceCategory, DeviceCheckState, DeviceVender
 from co6co.utils import network
 from datetime import datetime
-from co6co_web_db.services.cacheManage import CacheManage
+
+from co6co_db_ext.cacheManage import CacheManage 
 from sqlalchemy.ext.asyncio import AsyncSession
 
 

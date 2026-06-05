@@ -1,6 +1,6 @@
 
 from sanic import Request
-from co6co_sanic_ext.model.res.result import Result 
+from co6co.data.result import Result 
 
 from co6co_web_db.view_model import BaseMethodView 
 

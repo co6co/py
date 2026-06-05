@@ -57,7 +57,7 @@ class roles_ass_view(AbsAssociationView):
     async def put(self):
         return await super().put()
 
-class roles_query_view(AbsQueryView[role_filter]):
+class roles_query_view(AbsQueryView):
     """
      table数据 
     """

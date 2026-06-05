@@ -40,11 +40,11 @@ class TestAbsClsView:
         from co6co_db_ext.appconfig import AppConfig
         import os
         # 获取当前文件所在目录
-        current_dir = os.path.dirname(os.path.abspath(__file__))
-
+     
+        current_dir = os.path.dirname(os.path.abspath(__file__)) 
         # 拼接 config.json 的完整路径
-        config_path = os.path.join(current_dir, "test_config.json")
-        mock_request.app.config=AppConfig.get_config(config_path)
+        config_path = os.path.join(current_dir, "test_config.json") 
+        mock_request.app.config=AppConfig.get_config(config_path).raw
 
         
         
@@ -250,17 +250,13 @@ class TestAuthServiceImport:
         # 验证类存在
         assert AuthService is not None
 
-    def test_auth_service_properties(self):
+    def test_auth_service_properties(self, mock_request):
         """
         测试AuthService的属性
         """
         from co6co_permissions.services.authService import AuthService
         
-        mock_request = MagicMock()
-        mock_request.app.config = MagicMock()
-        mock_request.app.config.raw = {"SECRET": "test_secret"}
-        mock_request.token = "test_token"
-        
+        mock_request.token="test_token"
         # 使用源代码中的 AuthService 类
         service = AuthService(mock_request)
         

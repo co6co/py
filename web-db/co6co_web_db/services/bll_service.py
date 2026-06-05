@@ -5,7 +5,6 @@ from co6co_db_ext.db_session import connectSetting
 from co6co_db_ext.session import dbBll
 from co6co_db_ext.appconfig import AppConfig
 
-
 class BaseBll(dbBll):
     def __init__(
         self, *, db_settings: Optional[connectSetting] = {}, app: Sanic = None

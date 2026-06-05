@@ -2,8 +2,8 @@
 
 from sanic.response import text, file, raw, json
 from sanic import Request
-from co6co_sanic_ext.utils import JSON_util
-from co6co_sanic_ext.model.res.result import Result
+
+from co6co.data.result import Result
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from sqlalchemy.sql import Select, Update, Insert
@@ -11,7 +11,7 @@ from co6co_db_ext.db_utils import db_tools
 from co6co_permissions.view_model.base_view import AuthMethodView
 from model.pos.tables import DevicePO
 from view_model._filters.device import Filter
-from co6co_permissions.view_model.aop import exist, ObjectExistRoute
+
 
 import pandas as pd
 from co6co_permissions.model.enum import dict_state
@@ -24,6 +24,7 @@ from co6co.utils import try2int
 from typing import TypedDict
 from view_model import ImportView
 from services.tasks.devCapImg import DeviceCuptureImage
+from co6co_permissions.view_model.biz_view import AbsExistView
 
 
 class columnsMap(TypedDict):
@@ -38,13 +39,15 @@ class columnsMap(TypedDict):
     password: str
 
 
-class ExistView(AuthMethodView):
-    routePath = ObjectExistRoute
+class ExistView(AbsExistView): 
+    @property
+    def column(self):
+        return DevicePO.id
 
-    async def get(self, request: Request, code: str, pk: int = 0):
-        result = await self.exist(request, DevicePO.code == code, DevicePO.id != pk)
-        return exist(result, "编码编码", code)
-
+    @property 
+    def exist_condition(self)  :
+        return  DevicePO.code == self.param_code, DevicePO.id != self.param_code
+    
 
 class DeviceCategoryView(AuthMethodView):
     routePath = "/category"
@@ -53,7 +56,7 @@ class DeviceCategoryView(AuthMethodView):
         """
         树形选择下拉框数据
         """
-        return JSON_util.response(Result.success(DeviceCategory.to_dict_list()))
+        return self.response_json(Result.success(DeviceCategory.to_dict_list()))
 
 
 class Views(AuthMethodView):
@@ -87,7 +90,7 @@ class Views(AuthMethodView):
         async def before(po: DevicePO, session: AsyncSession, request):
             exist = await db_tools.exist(session,  DevicePO.code.__eq__(po.code), column=DevicePO.id)
             if exist:
-                return JSON_util.response(Result.fail(message=f"'{po.code}'已存在！"))
+                return self.response_json(Result.fail(message=f"'{po.code}'已存在！"))
 
         return await self.add(request, po, json2Po=False, userId=userId, beforeFun=before)
 
@@ -136,7 +139,7 @@ class View(AuthMethodView):
         async def before(oldPo: DevicePO, po: DevicePO, session: AsyncSession, request):
             exist = await db_tools.exist(session, DevicePO.id != oldPo.id, DevicePO.code.__eq__(po.code), column=DevicePO.id)
             if exist:
-                return JSON_util.response(Result.fail(message=f"'{po.code}'已存在！"))
+                return self.response_json(Result.fail(message=f"'{po.code}'已存在！"))
         return await self.edit(request, pk, DevicePO,  userId=self.getUserId(request), fun=before)
 
     async def delete(self, request: Request, pk: int):

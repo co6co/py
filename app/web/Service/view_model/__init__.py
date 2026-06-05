@@ -6,7 +6,7 @@ from sanic.views import HTTPMethodView
 from typing import Callable, Any
 from sanic.response import text, file, raw, json
 from sanic import Request
-from co6co_sanic_ext.model.res.result import Result
+from co6co.data.result import Result
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from co6co_permissions.view_model.base_view import AuthMethodView

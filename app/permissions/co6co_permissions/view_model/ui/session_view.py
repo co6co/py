@@ -9,10 +9,10 @@ import uuid
 class Session_View(BaseDbClsView):
     routePath = "/"
 
-    async def post(self, request: Request):
+    async def post(self):
         """
         获取用户Session
         """
-        session, _ = self.get_Session(request)
+        session, _ = self.get_Session(self.request)
         # data = await jwt_service.createToken(getSecret(request), str(uuid.uuid4()),  session.expiry)
         return self.response_json(Result.success(data={"data":  str(uuid.uuid4()), "expiry": session.expiry}))

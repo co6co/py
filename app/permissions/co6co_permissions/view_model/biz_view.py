@@ -14,11 +14,14 @@ FilterType = TypeVar("FilterType", bound=absFilterItems)
 FilterClass = Type[FilterType]
 
 
-class AbsQueryView(AuthMethodView, Generic[FilterType]):
+class AbsQueryView(AuthMethodView):
     """
     基础查询视图
     需要传入absFilterItems 子类及类属性cls
+    HTTPMethodView 阻断了阻断 Generic 的设置流程，导致 __parameters__不存在 
+    所有不能使用 AbsQueryView(AuthMethodView, Generic[FilterType]):
 
+    现在不用泛型继承,[感觉 Generic[FilterType]，也没意义,以为它也需要 cls 属性，所有只用类属性] 
     使用示例：
     class ProjectQueryView(AbsQueryView[Filter]):
         route = "/query"
@@ -27,7 +30,7 @@ class AbsQueryView(AuthMethodView, Generic[FilterType]):
 
     routePath = "/query"
     cls: Type[FilterType]  # 类属性，由子类提供
-
+    
     async def create_filter(
         self, *, cls: Type[FilterType] = None, filter: absFilterItems = None
     ):

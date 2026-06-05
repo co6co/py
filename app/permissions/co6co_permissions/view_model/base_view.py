@@ -54,10 +54,10 @@ class _authView(AbsClsView):
     """
     @property
     def current_user(self):
-        f"""
+        """
         获取当前用户信息
         :return: 当前用户信息
-        :rtype: {"id": int, "user_name": str, "group_id": int}
+        :return_type: dict[ "id": int, "user_name": str, "group_id": int]
         """
         return appHelper.current_user(self.request)
 
