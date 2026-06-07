@@ -1,17 +1,13 @@
 from typing import Optional
-
-from sanic.response import text
-from sanic import Request
 from co6co_sanic_ext.view_model import response_json
 from co6co.data.result import Result
 
 from sqlalchemy.sql import Select, Update
-from co6co_db_ext.db_utils import db_tools
-from co6co_web_db.services.jwt_service import createToken, setCurrentUser
-from co6co.utils import log
+from co6co_db_ext.db_utils import db_tools 
 
-from co6co_web_db.view_model import get_one
+from co6co.utils import log
 from .base_view import AbsClsView
+from ..services.utils import appHelper
 
 from ..model.pos.right import UserPO
 from .aop.login_log import loginLog, verifyCode
@@ -72,8 +68,7 @@ class login_view(AbsClsView):
                     # log.warn("用户状态", user.state)
                     if user.state == user_state.locked.val:
                         isLock = 0
-
-                    await setCurrentUser(self.request, user.jwt_data)
+                    appHelper.set_current_user(self.request, user.jwt_data)
                     return response_json(
                         Result.success(data=tokenData, message="登录成功")
                     )

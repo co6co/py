@@ -4,7 +4,7 @@ from pathlib import Path
 from sanic.response import text, file, raw, json
 from sanic.exceptions import NotFound
 from sanic import Request
-from co6co_sanic_ext.model.res.result import Result, Page_Result
+from co6co.data.result import Result, Page_Result
 from co6co_permissions.view_model.base_view import AuthMethodView, BaseMethodView
 from co6co.utils import log
 from services.tasks.devCapImg import DeviceCuptureImage

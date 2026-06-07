@@ -9,14 +9,13 @@ from sanic import Request
 from co6co.data.result import Result
 
 from co6co_db_ext.db_utils import QueryOneCallable
-from model.enum import account_category
+from model.enum import  Account_category as   account_category
 from co6co_permissions.model.pos.right import AccountPO
 from co6co_permissions.services import getSecret, generateCode
 from sqlalchemy.orm import joinedload
 from sqlalchemy.sql import Select
 from co6co.utils import log
-from sqlalchemy.ext.asyncio import AsyncSession
-from model.pos.wx import tbl_WX_OpenID
+from sqlalchemy.ext.asyncio import AsyncSession 
 
 
 async def createTicketCode(request: Result, userOpenId: str):
@@ -62,20 +61,4 @@ async def getAccountName(session: AsyncSession, userId: int):
         log.warn(f"获取账号名失败 error:{e}")
     return accountName
 
-
-async def getAppid(session: AsyncSession, userOpenId: str):
-    """
-    通过 微信用户的 OpenId 获取账号的 公众号 appid
-    """
-    appid = None
-    try:
-        queryOne = QueryOneCallable(session)
-        select = Select(tbl_WX_OpenID).filter(tbl_WX_OpenID.openid == userOpenId)
-        a: tbl_WX_OpenID = await queryOne(select)
-        if a is not None:
-            appid = a.appid
-        return appid
-
-    except Exception as e:
-        log.warn(f"获取公众号appid error:{e}")
-    return appid
+ 

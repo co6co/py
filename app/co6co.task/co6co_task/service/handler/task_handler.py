@@ -8,8 +8,8 @@ from sanic import Sanic
 from co6co.utils import log
 from .. import Scheduler
 from ..CustomTask import ICustomTask
-from co6co_web_db.services.db_service import BaseBll
-from co6co_db_ext.db_utils import db_tools
+from co6co_web_db.services.bll_service import BaseBll
+from co6co_db_ext.db_utils import db_tools,QueryListCallable 
 from ...model.pos.tables import DynamicCodePO, SysTaskPO
 from co6co_permissions.model.enum import dict_state
 from sqlalchemy.sql import Select, Update
@@ -288,7 +288,7 @@ class TaskManager(IWorker):
         获取源码
         """
         try:
-            from co6co_db_ext.db_utils import QueryListCallable
+          
             call = QueryListCallable(self.session)
             select = (
                 Select(SysTaskPO.data, SysTaskPO.code, SysTaskPO.category, SysTaskPO.cron, DynamicCodePO.sourceCode)

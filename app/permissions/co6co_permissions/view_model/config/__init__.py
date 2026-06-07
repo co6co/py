@@ -6,7 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from sqlalchemy.sql import Select, Delete
 
-from co6co_db_ext.db_utils import db_tools, DbCallable
+from co6co_db_ext.db_utils import db_tools 
 from co6co_web_db.model.params import associationParam
 
 from datetime import datetime

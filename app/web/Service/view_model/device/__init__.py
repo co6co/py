@@ -13,7 +13,7 @@ from model.pos.tables import DevicePO
 from view_model._filters.device import Filter
 
 
-import pandas as pd
+
 from co6co_permissions.model.enum import dict_state
 from co6co.utils import log
 from io import BytesIO

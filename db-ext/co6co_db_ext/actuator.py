@@ -296,6 +296,11 @@ class Actuator:
     def add_all(self, *pos: BasePO):
         self.session.add_all(pos)
 
+    async def _query_list(self, select: Select, params: Dict | List | Tuple = None):
+        if self.is_entity_select(select):
+            return await self.query_all_entity_mappings(select, params)
+        else:
+            return await self.query_all_mappings(select, params) 
     async def query_tree(
         self,
         select: Select,
@@ -308,10 +313,7 @@ class Actuator:
         执行查询: tree列表
         """
         try:
-            if self.is_entity_select(select):
-                result = await self.query_all_entity_mappings(select, param)
-            else:
-                result = await self.query_all_mappings(select, param)
+            result = await self._query_list(select, param)
             if result is None:
                 treeList = []
             else:
@@ -329,10 +331,7 @@ class Actuator:
         try:
             # filter.count_select, filter.list_select
             total = await self.execute(filter.count_select)
-            if self.is_entity_select(filter.list_select):
-                result = self.query_all_entity_mappings(filter.list_select)
-            else:
-                result = await self.query_all_entity_mappings(filter.list_select)
+            result = await self._query_list(filter.list_select)
             return total, result
         except Exception as e:
             log.err(f"查询失败{e}", e)

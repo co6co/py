@@ -11,7 +11,7 @@ import requests
 from sanic import Request
 from sanic.response import text, raw, empty, file, file_stream, ResponseStream
 from ...model.pos.resource import resourcePO
-from co6co_db_ext.db_utils import QueryOneCallable
+
 from sqlalchemy.sql import Select
 from sanic.request.form import File
 from co6co.utils import hash, getDateFolder
@@ -59,9 +59,10 @@ class resource_baseView(AuthMethodView):
         """
         通过 id 获取本地路径
         return fullPath
-        """
-        call = QueryOneCallable(self.db_session)
-        data = await call(Select(resourcePO.url).filter(resourcePO.id == pk), isPO=False)
+        """ 
+        select=Select(resourcePO.url).filter(resourcePO.id == pk)
+        data = await self.actuator.query_one_mappings(select)
+     
         if data is not None:
             return await self.getRersourcePath( data["url"])
         return None

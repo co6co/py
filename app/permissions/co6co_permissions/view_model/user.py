@@ -1,6 +1,5 @@
 
 from typing import Optional
-from sanic.response import text
 from sanic import Request
 from co6co_sanic_ext.view_model import response_json
 from co6co.data.result import Result
@@ -65,7 +64,6 @@ class user_ass_view(AbsAssociationView):
         po.userId = self.routeValue
         return po
 
-    @transactional
     @userRoleChanged 
     async def put(self):
         return await super().put()
@@ -88,7 +86,6 @@ class user_exist_post_view(AbsExistView):
     def message(self, result: bool) -> str:
         return f"用户名{self.routeValue}已存在" if result else "用户不存在"
 
-    @transactional 
     async def post(self):
         id = self.json.get("id")
         userName = self.json.get("userName") 
@@ -102,7 +99,7 @@ class user_query_view(AbsQueryView):
 
 
 class users_view(AbsAddView):
-    @transactional
+    
     async def get(self ):
         """
         用户下拉框数据
@@ -113,7 +110,6 @@ class users_view(AbsAddView):
         )
         return await self.query_list(  select, isPO=False)
 
-    @transactional
     async def put(self ):
         """
         增加
@@ -143,7 +139,6 @@ class users_view(AbsAddView):
 
 
 class user_view(AbsPkView):
-    @transactional
     async def put(self ):
         """
         编辑
@@ -158,7 +153,7 @@ class user_view(AbsPkView):
             if exist:
                 return response_json( Result.fail(message=f"'{po.userName}'已存在！") ) 
         return await self.edit(  self.pkValue, UserPO, userId=self.userId, fun=before )
-    @transactional
+
     async def delete(self):
         """
         删除
@@ -192,7 +187,7 @@ class user_view(AbsPkView):
 
 class sys_users_view(AuthMethodView):
     routePath = "/reset"
-    @transactional
+    
     async def post(self ):
         """
         重置密码
@@ -233,7 +228,7 @@ class sys_users_view(AuthMethodView):
 
 class ticketView(AuthMethodView ):
     routePath = "/ticket/<code:str>"
-    @transactional
+    
     async def get(self):
         """
         通过 code 换取 token

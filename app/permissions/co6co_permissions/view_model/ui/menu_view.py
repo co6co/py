@@ -1,19 +1,12 @@
 
-from sanic.response import text
-from sanic import Request
-from co6co_sanic_ext.view_model import response_json
-from co6co.data.result import Result
-from sqlalchemy.ext.asyncio import AsyncSession
+from sanic.response import text 
 
 from sqlalchemy.sql import Select, or_, and_, text as sqlText
-from co6co_db_ext.db_utils import db_tools
-from co6co_web_db.view_model import BaseMethodView, Request
+from co6co_db_ext.db_utils import db_tools 
 from ..base_view import CtxMethodView
 from ...model.enum import menu_type
 from ...model.pos.right import menuPO, MenuRolePO, UserPO, UserGroupRolePO, UserRolePO
-from ...model.filters.menu_filter import menu_filter
-from ...services import getCurrentUserId
-from co6co.utils import log
+from ...model.filters.menu_filter import menu_filter 
 
 
 class ui_tree_view(CtxMethodView):
@@ -49,8 +42,7 @@ class ui_tree_view(CtxMethodView):
         session=self.db_session
         from co6co_db_ext.session import session_context
         roleList=[]
-        async with session_context(session) () as session:#  为什么开启事务后 session 还能继续使用
-           roleList = await db_tools.execForMappings(session,queryRoleSelect ,queryOne=False) 
+        roleList = await db_tools.execForMappings(session,queryRoleSelect ,queryOne=False) 
         #log.warn(roleList)
         roleList = [d.get("role_id") for d in roleList]
         select = (

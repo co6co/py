@@ -51,7 +51,7 @@ def decodeToken(token: str, SECRET: str):
     解密 token
     """
     svc = JWT_service(SECRET)
-    if token == None:
+    if token == None or token == "":
         log.warn("token is None")
         return None
     result = svc.decode(token)

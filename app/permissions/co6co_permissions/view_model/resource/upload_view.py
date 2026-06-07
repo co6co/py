@@ -12,7 +12,7 @@ from ...model.enum import resource_category
 
 import os
 from datetime import datetime
-from co6co_db_ext.db_utils import DbCallable, db_tools
+from co6co_db_ext.db_utils import  db_tools
 
 from sqlalchemy.sql import Select
 from sqlalchemy.ext.asyncio import AsyncSession 
@@ -35,39 +35,38 @@ class Upload_View(resource_baseView):
         file.body.seek(0)
         return file_size
 
-    async def saveDb(self, request: Request,  param: FileResult, category: resource_category) -> int:
-        call = DbCallable(self.get_db_session(request))
+    async def saveDb(self, request: Request,  param: FileResult, category: resource_category) -> int: 
 
-        async def exec(session: AsyncSession):
-            select = (Select(resourcePO).filter(resourcePO.hash.__eq__(param.hash)) .options(
-                selectinload(resourcePO.userResourceList)
-            ))
+         
+        select = (Select(resourcePO).filter(resourcePO.hash.__eq__(param.hash)) .options(
+            selectinload(resourcePO.userResourceList)
+        ))
 
-            dbPo: resourcePO = await db_tools.execForPo(session, select, remove_db_instance_state=False)
-            userPo = userResourcePO()
-            userPo.ownUserId = self.getUserId(request)
-            userPo.createTime = datetime.now()
-            userPo.name = param.name
-            resourceId = None
-            # 数据库中已经存在
-            if dbPo is not None:
-                basePath = await get_upload_path(request)
-                oldPath = os.path.join(basePath, dbPo.url[1:])
-                if os.path.exists(oldPath) and os.path.exists(param.fullPath):
-                    os.remove(param.fullPath)
-                if not os.path.exists(oldPath):
-                    dbPo.url = param.path
+        dbPo: resourcePO = await db_tools.execForPo(self.db_session,  select, remove_db_instance_state=False)
+        userPo = userResourcePO()
+        userPo.ownUserId = self.userId
+        userPo.createTime = datetime.now()
+        userPo.name = param.name
+        resourceId = None
+        # 数据库中已经存在
+        if dbPo is not None:
+            basePath = await get_upload_path(request)
+            oldPath = os.path.join(basePath, dbPo.url[1:])
+            if os.path.exists(oldPath) and os.path.exists(param.fullPath):
+                os.remove(param.fullPath)
+            if not os.path.exists(oldPath):
+                dbPo.url = param.path
 
-                dbPo.userResourceList.append(userPo)
-                resourceId = dbPo.id
-            else:
-                po = param.toPo(category)
-                po.userResourceList = [userPo]
-                session.add(po)
-                await session.flush()
-                resourceId = po.id
-            return resourceId
-        return await call(exec)
+            dbPo.userResourceList.append(userPo)
+            resourceId = dbPo.id
+        else:
+            po = param.toPo(category)
+            po.userResourceList = [userPo]
+            self.db_session.add(po)
+            await self.db_session.flush()
+            resourceId = po.id
+        return resourceId
+       
 
     async def putFile(self,  category: resource_category):
         """

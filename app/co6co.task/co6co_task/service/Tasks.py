@@ -327,9 +327,9 @@ class TasksMgr(sanics.Worker):
         fall_result = 0
         if len(success) > 0:
             print(*success)
-            succ_result = self.update_status( success, 1)
+            succ_result =await self.update_status( success, 1)
         if len(faile) > 0:
-            fall_result =  self.update_status( faile, 0)
+            fall_result = await self.update_status( faile, 0)
         exeStatue = self.bll.run(self.update_status__2)
         log.warn("状态更新,成功->{},失败->{},意外的状态：{}".format(succ_result, fall_result, exeStatue))
 

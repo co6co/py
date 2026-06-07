@@ -52,7 +52,6 @@ class user_group_ass_view(AbsAssociationView):
         return po
 
     @userRoleChanged
-    @transactional
     async def put(self):
         return await super().put()
  
@@ -69,7 +68,7 @@ class user_groups_tree_view(AuthMethodView):
             .order_by(UserGroupPO.parentId.asc())
         )
         return await self.query_tree( select, rootValue=parendId,  pid_field='parentId', id_field="id", isPO=False)
-    @transactional
+    
     async def post(self ):
         """
         树形 table数据

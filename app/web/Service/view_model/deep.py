@@ -20,6 +20,7 @@ import copy
 from co6co_permissions.services.bllConfig import config_bll
 from co6co.task.thread import ThreadEvent
 from co6co.utils.json_util import JSONEncoder
+from co6co_db_ext.db_utils import db_tools
 
 class _dbView(BaseMethodView):
     async def query_config_value(self, request: Request, key: str, parseDict: bool = False) -> str | dict:

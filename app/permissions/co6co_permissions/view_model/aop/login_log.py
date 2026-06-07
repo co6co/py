@@ -12,7 +12,7 @@ from co6co.utils import log
 from co6co.data.result import Result
 from co6co_web_db.view_model import peraseRequest
 
-from co6co_db_ext.db_utils import  InsertCallable
+
 from ...services import getCurrentUserId
 import json
 import time

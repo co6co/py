@@ -1,7 +1,7 @@
 from __future__ import annotations 
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncEngine
 
-from contextvars import ContextVar
+from contextvars import ContextVar, Token
 
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import scoped_session, sessionmaker, Session
@@ -62,7 +62,6 @@ class db_service:
             "max_overflow": self.settings.get("max_overflow"),
         }
         setting.update(kwargs)
-        print(url)
         return create_async_engine(url, **setting) #,
 
     def _session_factory(self, engine: Engine = None, **kv):
@@ -120,8 +119,21 @@ class db_service:
             self.async_session_factory = self._async_session_factory(self.engine)
 
         self.base_model_session_ctx = ContextVar("session")
-        pass
 
+        pass
+    @property
+    def context_var(self):
+        '''
+        上下文变量
+        使用方法
+        token=context_var.set(session)  # 存入当前协程上下文
+        session = context_var.get()  # 直接取出使用
+        context_var.reset(token) #用户后重置防止全局污染 
+        '''
+        return self.base_model_session_ctx
+    
+     
+    
     def __init__(self, config: connectSetting, engineUrl: str = None) -> None:
         """
         如果需使用新event_loop

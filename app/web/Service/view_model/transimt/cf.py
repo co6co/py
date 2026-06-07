@@ -1,8 +1,8 @@
 
 from sanic.response import text
 from sanic import Request
-from co6co_sanic_ext.model.res.result import Result
-from co6co_sanic_ext.utils import JSON_util
+from co6co.data.result import Result
+
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from sqlalchemy.sql import Select
