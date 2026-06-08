@@ -266,13 +266,14 @@ class AbsAssociationView(AuthMethodView, ABC):
 class AbsAddView(AuthMethodView, ABC):
     routePath = "/add"
 
+    cls: Type[BasePO]  # 类属性，由子类提供
+    
     @property
-    @abstractmethod
     def add_option(self) -> OperationOption:
         """
         获取添加选项
         """
-        return OperationOption.create_add(self.json)
+        return OperationOption.create_add(self.json, poType=self.cls, userId=self.userId)
 
     async def post(self):
         """
@@ -306,6 +307,8 @@ class AbsPkView(AuthMethodView, ABC):
         获取编辑选项
         如果需要其他参数，需要在子类中实现
         """
+        if self.cls is None:
+            raise ValueError("cls must be implemented")
 
         return OperationOption.create_edit(
             self.json, poType=self.cls, userId=self.userId
@@ -316,6 +319,8 @@ class AbsPkView(AuthMethodView, ABC):
         """
         获取编辑选项
         """
+        if self.cls is None:
+            raise ValueError("cls must be implemented")
         return OperationOption.create_del(pk=self.routeValue, poType=self.cls)
 
     async def put(self):

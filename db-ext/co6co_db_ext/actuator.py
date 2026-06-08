@@ -202,6 +202,7 @@ class Actuator:
             在同步上下文中，Session.execute()-> CursorResult
         """
         data: CursorResult = await self.session.execute(sql, params)
+        
         return data.rowcount
 
     async def execute(
@@ -218,6 +219,8 @@ class Actuator:
         """
         result = await self._execute(select, params)
         # print(type(result))
+        
+        log.warn(f"execute:{type(result)}")
         if isinstance(result, CursorResult):
             # return result.scalar() #1 select 1,2
             # return result.scalars().fetchall() #[1]

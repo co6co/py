@@ -165,8 +165,8 @@ CREATE TABLE `sys_user` (
   `create_time` datetime DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
   `create_user` bigint(20) DEFAULT NULL,
   `update_time` datetime DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
-  `update_user` bigint(20) DEFAULT NULL,
-  `version` int(11) DEFAULT '0'
+  `update_user` bigint(20) DEFAULT NULL, 
+  `version` int(11) DEFAULT '0',
   
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=36 DEFAULT CHARSET=utf8;

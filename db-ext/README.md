@@ -3,6 +3,59 @@
 SQLAlchemy 原始 使用起来总是有些不方便，该项目对其进行了部分封装为两个类：
 DbOperations 和 DbPagedOperations 以方便业务使用；
 
+ChunkedIteratorResult
+✅ stream_results=True（语句 / 连接 / 引擎级）
+✅ yield_per=N（语句 / ORM 级）
+✅ session.stream(stmt)
+
+1.  引擎级
+engine = create_async_engine(
+    "postgresql+asyncpg://...",
+    execution_options={"stream_results": True}
+)
+2.  语句 / ORM 级
+query = session.query(User).yield_per(500)
+result = await session.execute(query)
+3.  session.stream(stmt)
+result = await session.stream(select(User))
+# result 是 AsyncResult，内部包装 ChunkedIteratorResult
+async for row in result:
+    ...
+4. stmt = select(User).execution_options(yield_per=200)
+    result = await session.execute(stmt)
+         
+ 1）「取单行」系列
+.fetchone() → Row / None（底层游标取一行）
+.first() → Row / None（结果集第一条，自动 LIMIT 1）
+.one() → Row（必须唯一，无 / 多条抛异常）
+.one_or_none() → Row / None（唯一或空，多条抛异常）
+.scalar_one() → 单个值（第一行第一列，必须唯一）
+
+2）「取多行」系列
+.fetchall() → List [Row]（全量）
+.fetchmany(size=N) → List [Row]（分批 N 条）
+.all() → List [Row]（同 fetchall，ORM 常用别名）
+.partitions(size=N) → 迭代器 [List [Row]]（分块迭代）
+
+3）「剥 Row、取纯值」系列（重点）
+.scalars() → ScalarResult（只保留第一列）
+.scalars().fetchone() → 单个值 / 对象
+.scalars().fetchall() → List [值 / 对象]
+.scalars().one() / .one_or_none() → 同上
+.scalar() → 单个值（第一行第一列，无则 None）
+
+4）「字典化 / 列映射」系列
+.mappings() → MappingResult（Row→dict）
+.mappings().fetchone() → dict/None
+.mappings().fetchall() → List[dict]
+.keys() → 列名列表（如 ['id','name']）
+
+5）「ORM / 异步特有」
+.unique() → 去重（针对多列 / 关联查询）
+.yield_per(N) → 流式缓冲 N 条（异步大结果必备）
+.freeze() → 冻结结果（可重复遍历）
+
+
 # (SQLALchemy Demo)[https://github.com/eastossifrage/sql_to_sqlalchemy/]
 
 # 历史记录
