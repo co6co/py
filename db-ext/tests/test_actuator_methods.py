@@ -179,24 +179,20 @@ class TestActuatorStaticMethods:
 
     def test_is_entity_select_true(self):
         """测试实体查询判断 - 真"""
-        from sqlalchemy.orm import Mapper
-
-        mock_mapper = MagicMock(spec=Mapper)
-        mock_select = MagicMock()
-        mock_select._raw_columns = [mock_mapper]
-
-        result = Actuator.is_entity_select(mock_select)
+        from .right import UserPO
+        from sqlalchemy import Select 
+        select=Select(UserPO).filter(UserPO.id>0)
+        
+        result = Actuator.is_entity_select(select)
 
         assert result is True
 
     def test_is_entity_select_false(self):
         """测试实体查询判断 - 假"""
-        from sqlalchemy import Column
-
-        mock_column = MagicMock(spec=Column)
-        mock_select = MagicMock()
-        mock_select._raw_columns = [mock_column]
-
-        result = Actuator.is_entity_select(mock_select)
+        
+        from .right import UserPO
+        from sqlalchemy import Select 
+        select=Select(UserPO.id,UserPO.userName).filter(UserPO.id>0) 
+        result = Actuator.is_entity_select(select)
 
         assert result is False

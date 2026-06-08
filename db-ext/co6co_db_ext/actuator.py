@@ -21,7 +21,17 @@ from sqlalchemy import func, text, and_
 from sqlalchemy.sql.elements import ColumnElement
 from sqlalchemy.orm.attributes import InstrumentedAttribute
 
-from typing import TypeVar, Iterator, Dict, List, Any, Tuple, Optional, Callable,TypeAlias
+from typing import (
+    TypeVar,
+    Iterator,
+    Dict,
+    List,
+    Any,
+    Tuple,
+    Optional,
+    Callable,
+    TypeAlias,
+)
 from typing import TypeAlias
 
 
@@ -129,7 +139,7 @@ class Actuator:
         return d
 
     @staticmethod
-    def one2Dict(fetchone: Row | RowMapping | dict|None) -> Dict:
+    def one2Dict(fetchone: Row | RowMapping | dict | None) -> Dict:
         """
         Row:        execute.fetchmany() | execute.fetchone()
         RowMapping: execute.mappings().fetchall()|execute.mappings().fetchone()
@@ -162,11 +172,16 @@ class Actuator:
         return "mappings"
 
     @staticmethod
-    def is_entity_select(stmt):
+    def is_entity_select(stmt: Select):
         """判断 Select 是否查询 ORM 实体"""
+        # from sqlalchemy.sql.annotation import AnnotatedColumn
         for col in stmt._raw_columns:
-            if isinstance(col, Mapper):
+            # log.warn(f"col:{col}",type(col))
+            if "AnnotatedTable" in str(
+                type(col)
+            ):  # <class 'sqlalchemy.sql.annotation.AnnotatedTable'>
                 return True
+            # <class 'sqlalchemy.sql.annotation.AnnotatedColumn'>
         return False
 
     async def _execute(
@@ -296,11 +311,14 @@ class Actuator:
     def add_all(self, *pos: BasePO):
         self.session.add_all(pos)
 
-    async def _query_list(self, select: Select, params: Dict | List | Tuple = None):
+    async def _query_list_mappings(
+        self, select: Select, params: Dict | List | Tuple = None
+    ):
         if self.is_entity_select(select):
             return await self.query_all_entity_mappings(select, params)
         else:
-            return await self.query_all_mappings(select, params) 
+            return await self.query_all_mappings(select, params)
+
     async def query_tree(
         self,
         select: Select,
@@ -313,7 +331,7 @@ class Actuator:
         执行查询: tree列表
         """
         try:
-            result = await self._query_list(select, param)
+            result = await self._query_list_mappings(select, param)
             if result is None:
                 treeList = []
             else:
@@ -331,7 +349,7 @@ class Actuator:
         try:
             # filter.count_select, filter.list_select
             total = await self.execute(filter.count_select)
-            result = await self._query_list(filter.list_select)
+            result = await self._query_list_mappings(filter.list_select)
             return total, result
         except Exception as e:
             log.err(f"查询失败{e}", e)
@@ -350,12 +368,17 @@ class Actuator:
                 result = None
                 if checkFun is not None:
                     result = await checkFun(po, self.session)
+                    result = self._check_backResult(result)
+                    if result is not None:
+                        return result
 
             self.add_all(poList)
             if afterFun is not None:
                 self.session.flush()
-                await afterFun(poList, self.session, result)
-            return True
+                result = self._check_backResult(result)
+                if result is not None:
+                    return result
+            return Result.success()
 
         except Exception as e:
             log.err(f"批量增加失败{e}", e)
@@ -432,7 +455,7 @@ class Actuator:
             if option.json is not None:
                 oldPo.update(newPO)
             if option.beforeFun:
-                result= await option.beforeFun(oldPo, self)
+                result = await option.beforeFun(oldPo, self)
                 result = self._check_backResult(result)
                 if result is not None:
                     return result
@@ -474,17 +497,20 @@ class Actuator:
                 break
             if oldPo is None:
                 return Result.fail(message="未能找到实体对象或主键值")
-           
+
             if option.beforeFun is not None:
                 result = await option.beforeFun(oldPo, self)
                 result = self._check_backResult(result)
                 if result is not None:
                     return result
-                    
+
             await self.delete(oldPo)
             self.session.flush()
             if option.afterFun is not None:
-                return await option.afterFun(oldPo, self) 
+                result= await option.afterFun(oldPo, self)
+                result = self._check_backResult(result)
+                if result is not None:
+                    return result
             return Result.success()
         except Exception as e:
             await self.session.rollback()
@@ -504,8 +530,7 @@ class Actuator:
             return await self.query(option)
 
 
-
-TypeCheckBack: TypeAlias = Callable[[BasePO, Actuator], Awaitable[Result|bool|None]]
+TypeCheckBack: TypeAlias = Callable[[BasePO, Actuator], Awaitable[Result | bool | None]]
 TypeCallBack: TypeAlias = Callable[[BasePO, Actuator], Awaitable[Result]]
 
 

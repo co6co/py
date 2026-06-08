@@ -13,30 +13,31 @@ from co6co_permissions.model.pos.other import sysDictPO
 class View(AuthMethodView):
     # 类别为字典Id
     routePath = "/<category:int>"
-
-    async def get(self, request: Request, category: int):
+    def category(self):
+        return self.match_info.get("category") 
+    async def get(self ):
+        category = self.category()
+        from co6co.log import log
+        log.warn( "category 测试<category:int> ", type( category))
         select = (
             Select(sysDictPO.flag, sysDictPO.id)
             .filter(sysDictPO.id.__eq__(category))
         )
-        db = QueryOneCallable(self.get_db_session(request))
-        dictOne: dict = await db(select=select, isPO=False)
-        # dictOne: dict = await db_tools.execForMappings(self.get_db_session(request), select, True)
+        dictOne: dict = await self.actuator.query_one_mappings(select)
+         
         value = dictOne.get("flag", "")
         return self.response_json(Result.success(data.toDesc(value)))
 
-    async def post(self, request: Request, category: int):
+    async def post(self ):
         try:
-            json: dict = request.json
+            json: dict = self.json
             lst = json.get("list")
             danList: list = json.get("dans", [])
             select = (
                 Select(sysDictPO.desc)
-                .filter(sysDictPO.id.__eq__(category))
+                .filter(sysDictPO.id.__eq__(self.category))
             )
-            # dictOne: dict = await db_tools.execForMappings(self.get_db_session(request), select, True)
-            db = QueryOneCallable(self.get_db_session(request))
-            dictOne: dict = await db(select=select, isPO=False)
+            dictOne: dict = await self.actuator.query_one_mappings(select) 
             desc: str = dictOne.get("desc", "")
             arr = re.split(r'\r\n|\r|\n', desc)
             arr = [a.replace(' ', '').split(',') for a in arr]

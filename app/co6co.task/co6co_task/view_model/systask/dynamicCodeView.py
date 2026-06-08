@@ -56,7 +56,7 @@ class Views(AuthMethodView):
         async def before(po: DynamicCodePO, session: AsyncSession, request):
             exist = await db_tools.exist(session,  DynamicCodePO.code.__eq__(po.code), column=DynamicCodePO.id)
             if exist:
-                return self.response_json(Result.fail(message=f"'{po.code}'已存在！"))
+                return Result.fail(message=f"'{po.code}'已存在！")
 
         return await self.add( po, json2Po=False, userId=userId, beforeFun=before)
 
@@ -75,7 +75,7 @@ class View(AuthMethodView):
         async def before(oldPo: DynamicCodePO, po: DynamicCodePO, session: AsyncSession, request):
             exist = await db_tools.exist(session, DynamicCodePO.id != oldPo.id, DynamicCodePO.code.__eq__(po.code), column=DynamicCodePO.id)
             if exist:
-                return self.response_json(Result.fail(message=f"'{po.code}'已存在！"))
+                return Result.fail(message=f"'{po.code}'已存在！")
         return await self.edit( self.pk, DynamicCodePO,  userId=self.userId, fun=before)
 
     async def delete(self, request: Request, pk: int):

@@ -13,7 +13,7 @@ def menuChanged(f):
         if isinstance(self, AuthMethodView):
             cacheManage = AuthonCacheManage(self.request)
             cacheManage.setMenuDataInvalid() 
-        return await f(*args, **kwargs)
+        return await f(self,*args, **kwargs)
 
     return decorated_function
 
@@ -29,7 +29,7 @@ def userRoleChanged(f):
             cacheManage = AuthonCacheManage(self.request)
             cacheManage.setRolesInvalid()
             cacheManage.setMenuDataInvalid() 
-        response = await f(*args, **kwargs)
+        response = await f(self,*args, **kwargs)
         return response
 
     return decorated_function

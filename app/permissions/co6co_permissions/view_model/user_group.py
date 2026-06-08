@@ -44,7 +44,7 @@ class user_group_ass_view(AbsAssociationView):
     def delete_sql(self) -> Delete:
         param = self.get_associationParam()
         return   Delete(UserGroupRolePO).filter(UserGroupRolePO.userGroupId ==
-                                           self.routePath, UserGroupRolePO.roleId .in_(param.remove))
+                                           self.routeValue, UserGroupRolePO.roleId .in_(param.remove))
     async def create_association_po(self,session:AsyncSession,associationed_id:int,*args,**kwargs)  :
         po = UserGroupRolePO()
         po.roleId = associationed_id
@@ -127,7 +127,7 @@ class user_groups_view(AuthMethodView):
         async def before(po: UserGroupPO, session: AsyncSession, request):
             exist = await db_tools.exist(session,  UserGroupPO.code.__eq__(po.code), column=UserGroupPO.id)
             if exist:
-                return response_json(Result.fail(message=f"'{po.code}'已存在！"))
+                return Result.fail(message=f"'{po.code}'已存在！")
         return await self.add( po, userId=userId, beforeFun=before) 
 
 
@@ -137,12 +137,12 @@ class user_group_view(AbsPkView):
         """
         编辑
         """
-        async def before(oldPo: UserGroupPO, po: UserGroupPO, session: AsyncSession, request):
+        async def before(oldPo: UserGroupPO, po: UserGroupPO, session: AsyncSession,*args,**kwargs):
             exist = await db_tools.exist(session, UserGroupPO.id != oldPo.id, UserGroupPO.code.__eq__(po.code), column=UserGroupPO.id)
             if exist:
-                return response_json(Result.fail(message=f"'{po.code}'已存在！"))
+                return Result.fail(message=f"'{po.code}'已存在！")
             if po.parentId == oldPo.id:
-                return response_json(Result.fail(message=f"'父节点选择错误！"))
+                return Result.fail(message="父节点选择错误！")
 
         return await self.edit( self.routeValue, UserGroupPO, userId=self.userId, fun=before)
 
@@ -150,8 +150,8 @@ class user_group_view(AbsPkView):
         """
         删除
         """
-        async def before(po: UserGroupPO, session: AsyncSession):
-            count = await db_tools.count(session, UserGroupPO.parentId == po.id, column=UserGroupPO.id)
+        async def before(po: UserGroupPO, session: AsyncSession,*args,**kwargs):
+            count = await db_tools.count(session, UserGroupRolePO.userGroupId == po.id, column=UserGroupRolePO.roleId)
             if count > 0:
-                return response_json(Result.fail(message=f"该'{po.name}'节点下有‘{count}’节点，不能删除！"))
+                return Result.fail(message=f"该'{po.name}'用户组关联了‘{count}’个用户角色,请先解关联后才能删除！")
         return await self.remove(  self.routeValue, UserGroupPO, beforeFun=before)

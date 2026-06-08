@@ -73,7 +73,7 @@ class Views(AuthMethodView):
         async def before(po: sysDictPO, session: AsyncSession, request):
             exist = await db_tools.exist(session, sysDictPO.dictTypeId == po.dictTypeId, sysDictPO.value == po.value,   column=sysDictPO.id)
             if exist:
-                return response_json(Result.fail(message=f"'{po.value}'在该字典中已存在！"))
+                return Result.fail(message=f"值'{po.value}'在该字典中已存在！")
         return await self.add( po, userId=userId, beforeFun=before)
 
 
@@ -82,14 +82,14 @@ class View(AbsPkView):
         """
         编辑
         """
-        async def before(oldPo: sysDictPO, po: sysDictPO, session: AsyncSession, request):
+        async def before(oldPo: sysDictPO, po: sysDictPO, session: AsyncSession,*args,**kwargs):
             exist = await db_tools.exist(session, sysDictPO.dictTypeId == po.dictTypeId, sysDictPO.value == po.value, sysDictPO.id != oldPo.id, column=sysDictPO.id)
             if exist:
-                return response_json(Result.fail(message=f"'{po.value}'在该字典中已存在！"))
+                return Result.fail(message=f"'{po.value}'在该字典中已存在！")
 
         return await self.edit(self.routeValue, sysDictPO, userId=self.userId, fun=before)
 
-    async def delete(self, request: Request, pk: int):
+    async def delete(self):
         """
         删除
         """

@@ -76,7 +76,7 @@ class Views(AuthMethodView):
         async def before(po: SysTaskPO, session: AsyncSession, request):
             exist = await db_tools.exist(session,  SysTaskPO.code.__eq__(po.code), column=SysTaskPO.id)
             if exist:
-                return self.response_json(Result.fail(message=f"'{po.code}'已存在！"))
+                return Result.fail(message=f"'{po.code}'已存在！")
 
         return await self.add( po, json2Po=False, userId=userId, beforeFun=before)
 
@@ -91,9 +91,9 @@ class View(AuthMethodView):
         async def before(oldPo: SysTaskPO, po: SysTaskPO, session: AsyncSession, request):
             exist = await db_tools.exist(session, SysTaskPO.id != oldPo.id, SysTaskPO.code.__eq__(po.code), column=SysTaskPO.id)
             if exist:
-                return self.response_json(Result.fail(message=f"'{po.code}'已存在！"))
+                return Result.fail(message=f"'{po.code}'已存在！")
             if oldPo.execStatus == 1:
-                return self.response_json(Result.fail(message="任务正在运行中请先停止，后再进行编辑！"))
+                return Result.fail(message="任务正在运行中请先停止，后再进行编辑！")
 
         return await self.edit(request, pk, SysTaskPO,  userId=self.userId, fun=before)
 

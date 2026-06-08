@@ -61,7 +61,7 @@ class DictTypeViews(AuthMethodView):
         async def before(po: sysDictTypePO, session: AsyncSession, request):
             exist = await db_tools.exist(session,  sysDictTypePO.code.__eq__(po.code), column=sysDictTypePO.id)
             if exist:
-                return response_json(Result.fail(message=f"'{po.code}'已存在！"))
+                return Result.fail(message=f"'{po.code}'已存在！")
         return await self.add( po, userId=userId, beforeFun=before)
 
 
@@ -92,10 +92,10 @@ class DictTypeView(AbsPkView):
         """
         编辑
         """
-        async def before(oldPo: sysDictTypePO, po: sysDictTypePO, session: AsyncSession, request):
+        async def before(oldPo: sysDictTypePO, po: sysDictTypePO, session: AsyncSession,*args,**kwargs):
             exist = await db_tools.exist(session, sysDictTypePO.id != oldPo.id, sysDictTypePO.code.__eq__(po.code), column=sysDictTypePO.id)
             if exist:
-                return response_json(Result.fail(message=f"'{po.code}'已存在！"))
+                return Result.fail(message=f"'{po.code}'已存在！")
 
         return await self.edit( self.routeValue, sysDictTypePO, userId=self.userId, fun=before)
 
@@ -103,9 +103,9 @@ class DictTypeView(AbsPkView):
         """
         删除
         """
-        async def before(po: sysDictTypePO, session: AsyncSession):
+        async def before(po: sysDictTypePO, session: AsyncSession,*args,**kwargs):
             count = await db_tools.count(session, sysDictPO.dictTypeId == po.id, column=sysDictTypePO.id)
             if count > 0:
-                return response_json(Result.fail(message=f"该'{po.name}'关联了字典不能删除！"))
+                return Result.fail(message=f"该'{po.name}'关联了字典不能删除！")
 
         return await self.remove( self.routeValue, sysDictTypePO, beforeFun=before)

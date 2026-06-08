@@ -30,9 +30,14 @@ class CfService():
             jsonStr = await config.query_config_value(KEY)
             key2 = "CF_CONFIG_ONE"
             item = await config.query_config_value(key2, parseDict=True)
+            config.close()
             del config
             pass
-        result = sysJson.loads(jsonStr)
+        
+        if isinstance(jsonStr, str):
+            result = sysJson.loads(jsonStr)
+        else:
+            result = jsonStr
         api_token = result.get("api_token", None)
         zone_id = result.get("zone_id", None)
         if not api_token or not zone_id:

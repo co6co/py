@@ -7,12 +7,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from sqlalchemy.sql import Select, Delete
 
-from co6co_db_ext.db_utils import db_tools 
-from co6co_web_db.model.params import associationParam
-
-from datetime import datetime
-from .base_view import AuthMethodView,AuthMethodView
-from .biz_view import AbsExistView,AbsAssociationView,AbsSelectView,AbsPkView,AbsQueryView,AbsAddView
+from co6co_db_ext.db_utils import db_tools  
+from .base_view import AuthMethodView 
+from .biz_view import AbsExistView,AbsAssociationView,AbsPkView,AbsQueryView
 
 from ..model.pos.right import RolePO, MenuRolePO, UserRolePO, UserGroupRolePO, menuPO
 from ..model.filters.role_filter import role_filter
@@ -59,15 +56,17 @@ class roles_ass_view(AbsAssociationView):
 
 class roles_query_view(AbsQueryView):
     """
-     table数据 
+    table数据 
+    过滤器需要特殊参数需要处理
     """
-    routePath = "/" # 未兼容UI
-
-    cls = role_filter
+    routePath = "/" 
+    def create_filter(self):
+        filter = role_filter(self.request)
+        return super().create_filter(filter)
 
 
 class roles_view(AuthMethodView):
-    async def get(self, request: Request):
+    async def get(self):
         """
         树形选择下拉框数据
         selectTree :  el-Tree
@@ -83,10 +82,10 @@ class roles_view(AuthMethodView):
         """
         po = RolePO()
         userId =self.userId 
-        async def before(po: RolePO, session: AsyncSession, request):
+        async def before(po: RolePO, session: AsyncSession, *args, **kwargs):
             exist = await db_tools.exist(session,  RolePO.code.__eq__(po.code), column=RolePO.id)
             if exist:
-                return response_json(Result.fail(message=f"'{po.code}'已存在！"))
+                return Result.fail(message=f"'{po.code}'已存在！")
         return await self.add( po, userId=userId, beforeFun=before) 
 
 
@@ -96,10 +95,10 @@ class role_view(AbsPkView):
         """
         编辑
         """
-        async def before(oldPo: RolePO, po: RolePO, session: AsyncSession, request):
+        async def before(oldPo: RolePO, po: RolePO, session: AsyncSession,  *args, **kwargs):
             exist = await db_tools.exist(session, RolePO.id != oldPo.id, RolePO.code.__eq__(po.code), column=RolePO.id)
             if exist:
-                return response_json(Result.fail(message=f"'{po.code}'已存在！"))
+                return  Result.fail(message=f"'{po.code}'已存在！")
 
         return await self.edit( self.routeValue, RolePO, userId=self.userId, fun=before)
 
@@ -107,15 +106,15 @@ class role_view(AbsPkView):
         """
         删除
         """
-        async def before(po: RolePO, session: AsyncSession):
+        async def before(po: RolePO, session: AsyncSession, *args, **kwargs):
             count = await db_tools.count(session, MenuRolePO.roleId == po.id, column=RolePO.id)
             if count > 0:
-                return response_json(Result.fail(message=f"该'{po.name}'角色关联了‘{count}’个菜单，不能删除！"))
+                return Result.fail(message=f"该'{po.name}'角色关联了‘{count}’个菜单，不能删除！")
             count = await db_tools.count(session, UserGroupRolePO.roleId == po.id, column=RolePO.id)
             if count > 0:
-                return response_json(Result.fail(message=f"该'{po.name}'角色关联了‘{count}’个用户组，不能删除！"))
+                return Result.fail(message=f"该'{po.name}'角色关联了‘{count}’个用户组，不能删除！")
             count = await db_tools.count(session, UserRolePO.roleId == po.id, column=RolePO.id)
             if count > 0:
-                return response_json(Result.fail(message=f"该'{po.name}'角色关联了‘{count}’个用户，不能删除！"))
+                return Result.fail(message=f"该'{po.name}'角色关联了‘{count}’个用户，不能删除！")
 
         return await self.remove( self.routeValue, RolePO, beforeFun=before)

@@ -36,7 +36,7 @@ class changePwd_view(AuthMethodView):
         remark = data["remark"]
         select = Select(UserPO).filter(UserPO.userName == userName)
 
-        async def edit(_, one: UserPO):
+        async def edit( one: UserPO):
             if one is not None:
                 if one.password != one.encrypt(oldPassword):
                     return response_json(Result.fail(message="输入的旧密码不正确！"))
@@ -89,13 +89,12 @@ class user_avatar_view(resource_baseView):
         userName = self.userName
         select = Select(UserPO).filter(UserPO.userName == userName)
         result = await self.saveFile()
-        if isinstance(result, FileResult):
-
-            async def edit(_, one: UserPO):
+        if isinstance(result, FileResult): 
+            async def edit( one: UserPO):
                 if one is not None:
                     if result.path:
                         one.avatar = result.path
-                return response_json(Result.success(data=result.path))
+                return Result.success(data=result.path)
 
             return await self.update_one(select, edit)
         else:

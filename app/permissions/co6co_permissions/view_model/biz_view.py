@@ -18,10 +18,10 @@ class AbsQueryView(AuthMethodView):
     """
     基础查询视图
     需要传入absFilterItems 子类及类属性cls
-    HTTPMethodView 阻断了阻断 Generic 的设置流程，导致 __parameters__不存在 
+    HTTPMethodView 阻断了阻断 Generic 的设置流程，导致 __parameters__不存在
     所有不能使用 AbsQueryView(AuthMethodView, Generic[FilterType]):
 
-    现在不用泛型继承,[感觉 Generic[FilterType]，也没意义,以为它也需要 cls 属性，所有只用类属性] 
+    现在不用泛型继承,[感觉 Generic[FilterType]，也没意义,以为它也需要 cls 属性，所有只用类属性]
     使用示例：
     class ProjectQueryView(AbsQueryView[Filter]):
         route = "/query"
@@ -31,13 +31,12 @@ class AbsQueryView(AuthMethodView):
     routePath = "/query"
     cls: Type[FilterType]  # 类属性，由子类提供
     
-    async def create_filter(
-        self, *, cls: Type[FilterType] = None, filter: absFilterItems = None
-    ):
-        if filter is None and cls is not None:
-            filter = cls()
-        if filter is None:
-            raise ValueError("filter is None")
+    def create_filter(self,filter:absFilterItems = None): 
+        if filter is None and not hasattr(self, "cls"):
+            errmsg = f"Subclass {self.__class__.__name__} must define 'cls' attribute, or override create_filter method"
+            raise ValueError(errmsg)
+        if filter is None: 
+            filter = self.cls()  
         filter.__dict__.update(self.request.json)
         return filter
 
@@ -45,11 +44,9 @@ class AbsQueryView(AuthMethodView):
         """
         获取分页列表
         """
-        if not hasattr(self, "cls"):
-            errmsg = f"Subclass {self.__class__.__name__} must define 'cls' attribute"
-            raise ValueError(errmsg)
-        filter = self.cls()
-        flt = await self.create_filter(filter=filter)
+        
+       
+        flt = self.create_filter()
         total, data = await self.actuator.query_page(flt)
         if total is None or data is None:
             return self.response_json(Result.fail("查询失败"))
@@ -104,7 +101,7 @@ class AbsExistView(AuthMethodView, ABC):
         # return  sysConfigPO.code == self.param_code, sysConfigPO.id != self.param_pk, sysConfigPO.id != 0
         raise NotImplementedError("get_sql method must be implemented")
 
-    def message(self,code:str, exist: bool):
+    def message(self, code: str, exist: bool):
         return f"编码'{code}'{'已存在' if exist else '不存在'}。"
 
     @property
@@ -117,7 +114,8 @@ class AbsExistView(AuthMethodView, ABC):
         主键 当增加时 为 0
         """
         return self.match_info["pk"]
-    def _response(self,code,result:bool):
+
+    def _response(self, code, result: bool):
         return self.response_json(
             Result.success(data=result, message=self.message(code, result))
         )
@@ -125,8 +123,6 @@ class AbsExistView(AuthMethodView, ABC):
     async def get(self):
         result = await self.actuator.exist(*self.exist_condition, column=self.column)
         return self._response(self.param_code, result)
-        
-    
 
 
 class AbsAssociationView(AuthMethodView, ABC):
@@ -174,7 +170,13 @@ class AbsAssociationView(AuthMethodView, ABC):
         """
         是否是树结构
         """
-        return False
+        if not hasattr(self, "_is_tree"):
+            self._is_tree = True
+        return self._is_tree
+
+    @is_tree.setter
+    def is_tree(self, value: bool):
+        self._is_tree = value
 
     @property
     def pid_field(self):
@@ -263,6 +265,7 @@ class AbsAssociationView(AuthMethodView, ABC):
 
 class AbsAddView(AuthMethodView, ABC):
     routePath = "/add"
+
     @property
     @abstractmethod
     def add_option(self) -> OperationOption:
@@ -270,6 +273,7 @@ class AbsAddView(AuthMethodView, ABC):
         获取添加选项
         """
         return OperationOption.create_add(self.json)
+
     async def post(self):
         """
         添加
@@ -281,6 +285,8 @@ class AbsPkView(AuthMethodView, ABC):
     """
     可实现编辑和删除操作
     """
+
+    cls: Type[BasePO]  # 类属性，由子类提供
 
     routePath = "/<pk:int>"
 
@@ -295,21 +301,22 @@ class AbsPkView(AuthMethodView, ABC):
         return self.match_info[self.routePathKey]
 
     @property
-    @abstractmethod
     def edit_option(self) -> OperationOption:
         """
         获取编辑选项
+        如果需要其他参数，需要在子类中实现
         """
-       
-        return OperationOption.create_edit(self.json,BasePO,userId=self.userId)
+
+        return OperationOption.create_edit(
+            self.json, poType=self.cls, userId=self.userId
+        )
 
     @property
-    @abstractmethod
     def delete_option(self) -> OperationOption:
         """
         获取编辑选项
         """
-        return OperationOption.create_del()
+        return OperationOption.create_del(pk=self.routeValue, poType=self.cls)
 
     async def put(self):
         """

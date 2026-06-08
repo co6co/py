@@ -12,11 +12,11 @@ class User_category(Base_Enum):
     unbind = "unbind", 1  # 未绑定用户信息，即没有用户和密码等信息
 
 
-class Account_category(Base_Enum):
+class Account_category(Base_EC_Enum):
     """
     账号类别
     """
-    wx = "wx", 1  # 微信账号
+    wx = "wx", "微信账号", 100  # 微信账号
 
 
 class TaskStatue(Base_Enum):

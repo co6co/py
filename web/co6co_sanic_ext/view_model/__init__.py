@@ -386,7 +386,7 @@ class BaseClsView(_baseView):
                 raise NotImplementedError(f"Method {method} not implemented")
             return await handler()
         except Exception as e:
-            log.err("执行方法异常",e) 
+            log.err(f"执行方法{method},{self.request.path}异常",e) 
             return self.response_json(e, status=500) 
 
 

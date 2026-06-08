@@ -143,7 +143,7 @@ class user_view(AbsPkView):
         """
         编辑
         """ 
-        async def before(oldPo: UserPO, po: UserPO, session: AsyncSession, request):
+        async def before(oldPo: UserPO, po: UserPO, session: AsyncSession,*args,**kwargs):
             exist = await db_tools.exist(
                 session,
                 UserPO.id != oldPo.id,
@@ -161,7 +161,7 @@ class user_view(AbsPkView):
         if self.pkValue == 1:
             return response_json(Result.fail(message="不能删除系统默认用户！"))
 
-        async def before(po: UserPO, session: AsyncSession):
+        async def before(po: UserPO, session: AsyncSession,*args,**kwargs):
             # 用户角色关联
             count = await db_tools.count(
                 session, UserRolePO.userId == po.id, column=UserRolePO.userId
@@ -199,7 +199,7 @@ class sys_users_view(AuthMethodView):
         if userName == None or password == None or len(password) < 6:
             return response_json(Result.fail(message="请检查提交的用户和密码！"))
 
-        async def edit(_, one: Optional[UserPO]):
+        async def edit(one: Optional[UserPO]):
             if one is not None:
                 if one.salt is None:
                     return response_json(

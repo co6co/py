@@ -24,7 +24,8 @@ from model.enum import DeviceCategory, DeviceCheckState, DeviceVender
 from co6co.utils import network
 from datetime import datetime
 
-from co6co_db_ext.cacheManage import CacheManage 
+
+from co6co_web_db.services.cache_service import SanicCache
 from sqlalchemy.ext.asyncio import AsyncSession
 
 
@@ -162,12 +163,12 @@ class DeviceCuptureImage(ICustomTask):
 
     @staticmethod
     def setCapImgRootCache(value: str):
-        cache = CacheManage()
+        cache = SanicCache()
         cache.setCache(DeviceCuptureImage.root_cache_key, value)
 
     @staticmethod
     def getCapImgRootCache():
-        cache = CacheManage()
+        cache = SanicCache()
         return cache.get(DeviceCuptureImage.root_cache_key)
 
     def createDbBll(self):

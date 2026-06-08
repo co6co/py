@@ -83,10 +83,10 @@ class menus_view(AuthMethodView):
         if isinstance(po.methods, list):
             po.methods = ",".join(po.methods)
 
-        async def before(po: menuPO, session: AsyncSession, request):
+        async def before(po: menuPO, session: AsyncSession, *args, **kwargs):
             exist = await db_tools.exist(session,  menuPO.code.__eq__(po.code), column=menuPO.id)
             if exist:
-                return response_json(Result.fail(message=f"'{po.code}'已存在！"))
+                return Result.fail(message=f"'{po.code}'已存在！")
 
         return await self.add( po, json2Po=False, userId=userId, beforeFun=before) 
 
@@ -110,12 +110,12 @@ class menu_view(AbsPkView):
         if isinstance(po.methods, list):
             po.methods = ",".join(po.methods)
 
-        async def before(oldPo: menuPO, po: menuPO, session: AsyncSession, request):
+        async def before(oldPo: menuPO, po: menuPO, session: AsyncSession, *args, **kwargs):
             exist = await db_tools.exist(session, menuPO.id != oldPo.id, menuPO.code.__eq__(po.code), column=menuPO.id)
             if exist:
-                return response_json(Result.fail(message=f"'{po.code}'已存在！"))
+                return Result.fail(message=f"'{po.code}'已存在！")
             if po.parentId == oldPo.id:
-                return response_json(Result.fail(message=f"'父节点选择错误！"))
+                return Result.fail(message="'父节点选择错误！")
         return await self.edit(self.routeValue, menuPO, po=po, userId=self.userId, fun=before)
 
     @menuChanged
@@ -123,10 +123,10 @@ class menu_view(AbsPkView):
         """
         删除
         """
-        async def before(po: menuPO, session: AsyncSession):
+        async def before(po: menuPO, session: AsyncSession,*args, **kwargs):
             count = await db_tools.count(session, menuPO.parentId == po.id, column=menuPO.id)
             if count > 0:
-                return response_json(Result.fail(message=f"该'{po.name}'节点下有‘{count}’节点，不能删除！"))
+                return Result.fail(message=f"该'{po.name}'节点下有‘{count}’节点，不能删除！")
         return await self.remove( self.routeValue, menuPO, beforeFun=before)
 
 
@@ -139,10 +139,10 @@ class menu_batch_view(AuthMethodView):
         批量增加
         """
         data = self.json 
-        async def before(po: menuPO, session: AsyncSession, request):
+        async def before(po: menuPO, session: AsyncSession, *args, **kwargs):
             exist = await db_tools.exist(session,  menuPO.code.__eq__(po.code), column=menuPO.id)
             if exist:
-                return response_json(Result.fail(message=f"'{po.code}'已存在！"))
+                return Result.fail(message=f"'{po.code}'已存在！")
         if isinstance(data, list):
             polist = []
             userId = self.userId

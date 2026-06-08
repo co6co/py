@@ -52,7 +52,7 @@ class ExistView(AbsExistView):
 class DeviceCategoryView(AuthMethodView):
     routePath = "/category"
 
-    async def get(self, request: Request):
+    async def get(self):
         """
         树形选择下拉框数据
         """
@@ -60,7 +60,7 @@ class DeviceCategoryView(AuthMethodView):
 
 
 class Views(AuthMethodView):
-    async def get(self, request: Request):
+    async def get(self):
         """
         树形选择下拉框数据
         selectTree :  el-Tree
@@ -69,30 +69,30 @@ class Views(AuthMethodView):
             Select(DevicePO.id, DevicePO.name, DevicePO.code, DevicePO.state)
             .order_by(DevicePO.code.asc())
         )
-        return await self.query_list(request, select,  isPO=False)
+        return await self.query_list( select,  isPO=False)
 
-    async def post(self, request: Request):
+    async def post(self ):
         """
         树形 table数据
         tree 形状 table
         """
         param = Filter() 
-        return await self.query_page(request, param)
+        return await self.query_page( param)
 
-    async def put(self, request: Request):
+    async def put(self ):
         """
         增加
         """
         po = DevicePO()
-        userId = self.getUserId(request)
-        po.__dict__.update(request.json)
+        userId = self.userId
+        po.__dict__.update(self.request.json)
 
         async def before(po: DevicePO, session: AsyncSession, request):
             exist = await db_tools.exist(session,  DevicePO.code.__eq__(po.code), column=DevicePO.id)
             if exist:
                 return self.response_json(Result.fail(message=f"'{po.code}'已存在！"))
 
-        return await self.add(request, po, json2Po=False, userId=userId, beforeFun=before)
+        return await self.add( po, json2Po=False, userId=userId, beforeFun=before)
 
 
 class columnsMap:
@@ -131,8 +131,10 @@ class columnsCheckTableMap:
 
 class View(AuthMethodView):
     routePath = "/<pk:int>"
-
-    async def put(self, request: Request, pk: int):
+    @property
+    def pk(self):
+        return self.match_info.get("pk") 
+    async def put(self ):
         """
         编辑
         """
@@ -140,13 +142,13 @@ class View(AuthMethodView):
             exist = await db_tools.exist(session, DevicePO.id != oldPo.id, DevicePO.code.__eq__(po.code), column=DevicePO.id)
             if exist:
                 return self.response_json(Result.fail(message=f"'{po.code}'已存在！"))
-        return await self.edit(request, pk, DevicePO,  userId=self.getUserId(request), fun=before)
+        return await self.edit(self.pk, DevicePO,  userId=self.userId, fun=before)
 
-    async def delete(self, request: Request, pk: int):
+    async def delete(self ):
         """
         删除
         """
-        return await self.remove(request, pk, DevicePO)
+        return await self.remove(self.pk, DevicePO)
 
 
 class DeviceDownView(ImportView):
@@ -192,7 +194,7 @@ class DeviceDownView(ImportView):
         self.columnsMap = columnsCheckTableMap(**col_dict)
         return columns
 
-    async def _get_before(self, request: Request):
+    async def _get_before(self):
         """
         下载设备检测结果
         """
@@ -201,7 +203,7 @@ class DeviceDownView(ImportView):
             .filter(DevicePO.state == dict_state.enabled.val)
             .order_by(DevicePO.checkState.asc())
         )
-        result = await self._query(request, select,   isPO=False)
+        result = await self._query( select,   isPO=False)
         result = self._handler_output(result)
         return result
 
@@ -335,6 +337,6 @@ class DeviceImportView(ImportView):
                 return -1
         return 0
 
-    async def post(self, request: Request):
+    async def post(self ):
         ccc = self.columns()  # for self.columnsMap
-        return await self._post(request, "split")
+        return await self._post( "split")

@@ -28,14 +28,16 @@ from co6co_db_ext.appconfig import AppConfig
 from ..services import get_db_session, set_rollback, get_cache
 
 
+
+
 TypeOneFun: TypeAlias = Callable[[
     BasePO, AsyncSession, Request], Awaitable[None | Any]]
 TypeTwoFun: TypeAlias = Callable[[
     BasePO, BasePO, AsyncSession, Request], Awaitable[None | Any]]
 TypeListFun: TypeAlias = Callable[[
     List[BasePO], AsyncSession, Request], Awaitable[None | Any]]
-TypeCreateFun: TypeAlias = Callable[[
-    AsyncSession, int | str], Awaitable[BasePO]]
+# 关联的创建
+TypeCreateFun: TypeAlias = Callable[[  AsyncSession, int | str], Awaitable[BasePO]]
 
 
 async def get_one(request: Request, select: Select, isPO: bool = True):
@@ -102,6 +104,21 @@ class BaseDbClsView(BaseClsView):
         """
         return self.response_json(self.response_error0(msg, e))
 
+    async def update_one(self, select:Select, edit:Callable[[BasePO], Result|None]):
+        """
+        更新一条记录
+        """
+        try:
+            po = await self.actuator.query_one_entity(select)
+            if po is None:
+                return self.response_json(Result.fail(message="未查询到数据"))
+            result = edit(  po)
+            if result is not None: 
+                return self.response_json(result)
+            return self.response_json(Result.success(result))
+        except Exception as e:
+            self.set_rollback()
+            return self.response_error(e)
     async def get_one(self, select: Select, isPO: bool = True, remove_db_instance: bool = True, resultHanlder: Callable[[Any], Any] = None):
         """
         从数据库中获取一个对象
@@ -128,28 +145,7 @@ class BaseDbClsView(BaseClsView):
         """
         set_rollback(self.request, True)
 
-    async def update_one(self,  select: Select, editFn: TypeOneFun = None):
-        """
-        更新 PO
-        editFn(session,basePO): 对select 的第一条记录赋值,没有赋值或者没有更改->不执行update
-                                返回一个对象:http 应答， None:滚数据请求失败
-
-        """
-        try:
-            # call = UpdateOneCallable(self.db_session)
-            # result = await call(select, editFn)
-            po = await self.actuator.query_one_entity(select)
-            if editFn is not None:
-                result = await editFn(po, self.db_session, self.request)
-                if result is None:
-                    self.set_rollback()
-                    return Result.fail(message="更新失败")
-                return result
-            else:
-                return Result.fail(message="更新失败")
-        except Exception as e:
-            self.set_rollback()
-            return self.response_error(e)
+    
 
     async def query_mapping(self, select: Select, oneRecord: bool = False):
         """
@@ -226,6 +222,8 @@ class BaseDbClsView(BaseClsView):
         """
         filter.__dict__.update(self.request.json)
         try:
+            from co6co.utils import log
+            log.warn(f"query_page,filter  isPO:{isPO},remove_db_instance:{remove_db_instance}")
             total, result = await self.actuator.query_page(filter)
             #query = QueryPagedByFilterCallable(self.db_session)
             #total, result = await query(filter, isPO, remove_db_instance)
@@ -252,20 +250,31 @@ class BaseDbClsView(BaseClsView):
             self.set_rollback()
             return self.response_error(e)
                 
-
+    def check_backResult(self, result: Result|bool):
+       reslt=self.actuator._check_backResult(result)
+       if reslt is not None:
+           return self.response_json(reslt)
+       return None
+    
     async def batchAdd(self, poList: List[BasePO], userId=None, beforeFun: TypeOneFun = None, afterFun: TypeListFun = None):
         try: 
             for po in poList:
                 po.add_assignment(userId)
                 if beforeFun is not None:
                     result = await beforeFun(po, self.actuator.session, self.request)
+                    result=self.check_backResult(result) 
                     if result is not None:
                         self.set_rollback()
                         return result
             self.actuator.add_all(*poList)
             if afterFun is not None:
                 self.actuator.session.flush()
-                await afterFun(poList, self.actuator.session, self.request)
+                result=await afterFun(poList, self.actuator.session, self.request)
+                result=self.actuator._check_backResult(result) 
+                result=self.check_backResult(result) 
+                if result is not None:
+                    self.set_rollback()
+                    return result
             return self.response_json(Result.success()) 
         except Exception as e:
             self.set_rollback()
@@ -290,13 +299,18 @@ class BaseDbClsView(BaseClsView):
 
             if beforeFun is not None:
                 result = await beforeFun(po,self.actuator. session, self.request)
+                result=self.check_backResult(result) 
                 if result is not None:
                     self.set_rollback()
                     return result
             self.actuator.add_all(po)
             if afterFun is not None:
                 self.actuator.session.flush()
-                await afterFun(po, self.actuator.session, self.request)
+                result=await afterFun(po, self.actuator.session, self.request)
+                result=self.check_backResult(result) 
+                if result is not None:
+                    self.set_rollback()
+                    return result
             return self.response_json(Result.success()) 
         except Exception as e:
             self.set_rollback()
@@ -331,6 +345,7 @@ class BaseDbClsView(BaseClsView):
                 oldPo.update(po)
             if fun is not None:
                 result = await fun(oldPo, po, self.actuator.session, self.request)
+                result=self.check_backResult(result) 
                 if result is not None:
                     self.set_rollback()
                     return result
@@ -357,15 +372,15 @@ class BaseDbClsView(BaseClsView):
                 return self.response_json(Result.fail(message=f"未找到‘{pk}’对应的信息!"))
             if beforeFun != None:
                 result = await beforeFun(oldPo,self.actuator.session, self.request)
-                if result != None:
+                result=self.check_backResult(result) 
+                if result is not None:
                     self.set_rollback()
                     return result
-            self.actuator.session.delete(oldPo)
+            await self.actuator.session.delete(oldPo)
             if afterFun != None:
                 result = await afterFun(oldPo, self.actuator.session, self.request)
-                if isinstance(result, Result):
-                    return self.response_json(result)
-                elif result != None:
+                result=self.check_backResult(result) 
+                if result is not None:
                     self.set_rollback()
                     return result
             return self.response_json(Result.success())
@@ -379,7 +394,7 @@ class BaseDbClsView(BaseClsView):
         return param
 
     async def save_association(self, currentUser: int, delSml: Delete, createPo: TypeCreateFun = None, param: associationParam = None, delSmlParam: Dict | List | Tuple = None):
-        """
+        """(
         保存关联菜单
         delSml:Delete 删除语句
         createPo:(session,id)=>basePO
@@ -453,16 +468,7 @@ class BaseMethodView(BaseView):
         view = BaseDbClsView(request)
         return await view.get_one(select, isPO, remove_db_instance, resultHanlder)
 
-    async def update_one(self,  request: Request, select: Select, editFn: None):
-        """
-        更新 PO
-        editFn(session,basePO): 对select 的第一条记录赋值,没有赋值或者没有更改->不执行update
-                                返回一个对象:http 应答，
-                                        None:滚数据请求失败
-
-        """
-        view = BaseDbClsView(request)
-        return await view.update_one(select, editFn)
+ 
 
     async def query_mapping(self, request: Request, select: Select, oneRecord: bool = False):
         """

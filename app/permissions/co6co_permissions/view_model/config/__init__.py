@@ -27,7 +27,7 @@ class ConfigView(AuthMethodView):
     routePath = "/<code:str>"
 
     def get_sql(self) -> Select:
-        code=self.mapping.get("code")
+        code=self.match_info.get("code")
         select = Select(
             sysConfigPO.name, sysConfigPO.code, sysConfigPO.value, sysConfigPO.remark
         ).filter(sysConfigPO.code.__eq__(code))
@@ -57,7 +57,7 @@ class ConfigByCacheView(AuthMethodView):
 
         return str,配置值
         """
-        code=self.mapping.get("code")
+        code=self.match_info.get("code")
         cache = ConfigCache(self.request)
         config = cache.getConfig(code)
         if not config:
@@ -106,7 +106,7 @@ class Views(AuthMethodView):
                 session, sysConfigPO.code.__eq__(po.code), column=sysConfigPO.id
             )
             if exist:
-                return response_json(Result.fail(message=f"'{po.code}'已存在！"))
+                return Result.fail(message=f"'{po.code}'已存在！")
 
         async def after(po: sysConfigPO, session, request):
             await configValueChange(self, po.code, po.value)
@@ -136,7 +136,7 @@ class View(AuthMethodView):
                 column=sysConfigPO.id,
             )
             if exist:
-                return response_json(Result.fail(message=f"'{po.code}'已存在！"))
+                return Result.fail(message=f"'{po.code}'已存在！")
             await configValueChange(request, po.code, po.value)
 
         return await self.edit(self.pk, sysConfigPO, userId=self.userId, fun=before )

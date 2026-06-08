@@ -101,11 +101,11 @@ class db_service:
         return factory()
 
     @property
-    def Session(self):
+    def Session(self)-> Callable[[], AsyncSession]:
         """
         创建AsyncSession 类
         """
-        return self._async_session_factory()
+        return self.async_session_factory
 
     def _createEngine(self, url: str):
         self.useAsync = True
