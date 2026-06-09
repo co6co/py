@@ -13,13 +13,14 @@ from sqlalchemy.orm import Mapper
 from typing import Callable, Any, Dict, List, Tuple, Awaitable
 from functools import wraps
 
-from co6co.data.result import Result, Page_Result
+from co6co.data.result import Result, Page_Result,gen_error_code
 from co6co.utils import log
 from co6co.utils.tool_util import list_to_tree, get_current_function_name
 
 from sqlalchemy import func, text, and_
 from sqlalchemy.sql.elements import ColumnElement
 from sqlalchemy.orm.attributes import InstrumentedAttribute
+
 
 from typing import (
     TypeVar,
@@ -50,14 +51,17 @@ def errorLog(module: str, method: str, errorCode: str, e: Exception):
 
 
 class Actuator:
-    def _error0(self, e: Exception):
+    def error(self, e: Exception,messageFormat:str="执行不成功,错误码：{}"):
         """
         响应错误 message
-        """
-        # debug()
-        errorCode = hex(e.__hash__())
+
+        :param e: 异常
+        :param messageFormat: 错误消息格式
+        :return: Result
+        """ 
+        errorCode=gen_error_code(e)
         errorLog(self.__class__, get_current_function_name(), errorCode, e)
-        return Result.fail(message=f"执行不成功，{errorCode}")
+        return Result.fail(message=messageFormat.format(errorCode))
 
     def __init__(self, session: AsyncSession):
         """
@@ -343,7 +347,7 @@ class Actuator:
                 return []
             return treeList
         except Exception as e:
-            log.err(f"查询失败{e}", e)
+            self.error(e,"查询失败,错误码：{}") 
 
     async def query_page(self, filter: absFilterItems):
         """
@@ -355,7 +359,7 @@ class Actuator:
             result = await self._query_list_mappings(filter.list_select)
             return total, result
         except Exception as e:
-            log.err(f"查询失败{e}", e)
+            self.error(e,"分页查询,错误码：{}") 
             return None, None
 
     async def batchAdd(
@@ -384,7 +388,7 @@ class Actuator:
             return Result.success()
 
         except Exception as e:
-            log.err(f"批量增加失败{e}", e)
+            self.error(e,"批量增加失败,错误码：{}") 
             return None
 
     def _check_backResult(self, result: bool | Result | None):
@@ -425,34 +429,39 @@ class Actuator:
                 if result is not None:
                     return result
             self.session.add(po)
+            await self.session.flush()
             if option.afterFun is not None:
-                self.session.flush()
                 result = await option.afterFun(po, self)
                 result = self._check_backResult(result)
                 if result is not None:
                     return result
+                
             return Result.success()
         except Exception as e:
-            log.err(f"执行add err {e}", e)
-            return Result.fail(message=f"增加失败{e}")
+            return self.error(e,"增加失败,错误码：{}") 
+    async def _getEntity(self,option: OperationOption): 
+        if option.po is not None:
+            return option.po
+        elif option.select is not None:
+            return await self.query_one_entity(option.select) 
+        elif option.poType is not None and option.pk is not None:
+            return await self.session.get_one(option.poType, option.pk)
+        return None
+               
 
     async def edit(self, option: OperationOption):
         """
         编辑
         option.select 和 option.po 优先使用 select
         """
-        try:
-            if option.select is None and option.po is None:
-                return Result.fail(message="未能找到实体对象")
+        try: 
             if option.json is None:
                 return Result.fail(message="json 不能为空")
-            oldPo: Optional[BasePO] = (
-                await self.query_one_entity(option.select)
-                if option.select is not None
-                else option.po
-            )
+            if option.poType is None:
+                return Result.fail(message="实体类型不能为空")
+            oldPo=await self._getEntity(option)
             if oldPo is None:
-                return Result.fail(message=f"未找到‘{option.select}’对应的信息!")
+                return Result.fail(message="未能找到要编辑的记录")
             oldPo.edit_assignment(option.userId)
             newPO = option.poType(**option.json)
             if option.json is not None:
@@ -465,8 +474,7 @@ class Actuator:
             return Result.success()
 
         except Exception as e:
-            log.err(f"执行edit失败{e}", e)
-            return Result.fail(message=f"编辑失败{e}")
+            return self.error(e,"编辑失败,错误码：{}")
 
     async def delete(self, po: POType):
         await self.session.delete(po)
@@ -486,21 +494,9 @@ class Actuator:
         return Result
         """
         try:
-            oldPo: Optional[BasePO] = None
-            while True:
-                if option.po is not None:
-                    oldPo = option.po
-                    break
-                if option.select is not None:
-                    oldPo = await self.query_one_entity(option.select)
-                    break
-                if option.pk is not None and option.poType is not None:
-                    oldPo = await self.session.get_one(option.poType, option.pk)
-                    break
-                break
+            oldPo: Optional[BasePO] = await self._getEntity(option) 
             if oldPo is None:
-                return Result.fail(message="未能找到实体对象或主键值")
-
+                return Result.fail(message="未能找到要删除的记录") 
             if option.beforeFun is not None:
                 result = await option.beforeFun(oldPo, self)
                 result = self._check_backResult(result)
@@ -517,7 +513,7 @@ class Actuator:
             return Result.success()
         except Exception as e:
             await self.session.rollback()
-            return self._error0(e)
+            return self.error(e,"删除失败,错误码：{}")
 
     async def operation(self, option: OperationOption):
         """
@@ -579,14 +575,16 @@ class OperationOption:
         *,
         select: Select = None,
         po: BasePO = None,
+        pk: Any = None,
         userId: int = None,
         beforeFun: TypeCheckBack = None,
     ):
         option = cls()
         option.type = OperationType.UPDATE
-        option.poType = poType
+        option.poType = poType # 为创建新的临时对象
         option.po = po
         option.select = select
+        option.pk = pk
         option.json = json
         option.userId = userId
         option.beforeFun = beforeFun

@@ -61,12 +61,25 @@ async def test_text_func(db_service_param):
     assert isinstance(result, CursorResult)
 
 async def test_text_stream_func(db_service_param):
+    """
+    百万级数据导出
+    需要使用 流式
+    """
     cfg, Session, actuator = db_service_param
     actuator2: Actuator = actuator
-    stmt = text("select id from sys_user").execution_options(stream_results=True)
-    result=await actuator2.session.stream(stmt) 
+    stmt = text("select id,user_name from sys_user").execution_options(stream_results=True)
+    #result=await actuator2.session.stream(stmt) 
+    #rows = result.all()   # ✅ 必须读完 否则触发 Previous unbuffered result was left incomplete warnings.warn
+    #print("rows", rows[0]) 
+    result = await actuator2.session.stream(stmt)   
+    async  for row in result:  #AsyncResult并不是一个异步上下文管理器
+        print("row->id", row._mapping["id"], "row->userName", row._mapping["user_name"])
+        if row._mapping["id"] > 100:
+            break
     log.warn("text_stream result",  type(result))
+    await result.close()
     assert isinstance(result, AsyncResult)
+
 async def test_text_select_func(db_service_param):
     cfg, Session, actuator = db_service_param
     actuator2: Actuator = actuator

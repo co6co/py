@@ -3,7 +3,7 @@ from .aop.api_auth import authorized, ctx
 
 from co6co_db_ext.db_operations import DbOperations
 from co6co_db_ext.db_utils import db_tools
-from ..services import getCurrentUserId, getCurrentUserName
+
 from ..model.pos.right import UserPO
 from typing import Optional
 from co6co_db_ext.jwt_service import JwtService

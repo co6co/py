@@ -131,6 +131,6 @@ class ConfigCache(CustomSanicCache):
         if code is not None:
             return self.getCache(self.getKey(code))
 
-    def clear(self, code: str) -> str | None:
+    def removeConfig(self, code: str) -> str | None:
         if code is not None:
             return self.remove(self.getKey(code))

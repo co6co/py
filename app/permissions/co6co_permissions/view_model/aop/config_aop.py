@@ -14,13 +14,15 @@ def ConfigEntry(f):
         if isinstance(self, AuthMethodView):
             cacheManage = ConfigCache(self.request) 
         code = self.match_info.get("code") 
-        value = await f(*args, **kwargs)
+        value = await f(self,*args, **kwargs)
         if code is None:
             log.warn("code参数是必须的,当前请求参数:",self.match_info)
         elif "SYS_CONFIG" in code:
             if cacheManage is not None:
-                value = await f(self,*args, **kwargs)
-                cacheManage.setConfig(code, value)
+                if value is None:
+                    cacheManage.removeConfig(code)
+                else:
+                    cacheManage.setConfig(code, value)
             else:
                 log.warn("cacheManage 未找到 Request 参数")
         return value

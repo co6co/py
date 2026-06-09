@@ -23,3 +23,17 @@ def test_fibonacci():
 def test_primes_fast(): 
     print(list(take(primes_fast(), 10000)))
     assert list(take(primes_fast(), 10)) == [2, 3, 5, 7, 11, 13, 17, 19, 23, 29]
+
+
+def test_gen_error_code():
+    from co6co.data.result import gen_error_code
+    x=gen_error_code('error')
+    print(hex(abs( "error".__hash__())).replace("0x","") .upper() )
+    print("error".__hash__())
+    print(x) 
+def test_xx():
+    import hashlib
+
+    s = "error"
+    h = hashlib.md5(s.encode()).hexdigest()[6:15].upper()
+    print(h)

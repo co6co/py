@@ -139,12 +139,12 @@ class TestPoAddAssignment:
         """测试 UserTimeStampedModelPO 的 add_assignment"""
         from sqlalchemy import Column, String, BigInteger
 
-        class UserTimestampedTestPO(UserTimeStampedModelPO):
+        class UserTimestampedTestAddPO(UserTimeStampedModelPO):
             __tablename__ = "test_add_assignment"
             id = Column("id", BigInteger, primary_key=True)
             name = Column("name", String(64))
 
-        po = UserTimestampedTestPO()
+        po = UserTimestampedTestAddPO()
         po.add_assignment(userId=100)
 
         assert po.createUser == 100
@@ -155,12 +155,12 @@ class TestPoAddAssignment:
         """测试 UserTimeStampedModelPO 的 edit_assignment"""
         from sqlalchemy import Column, String, BigInteger
 
-        class UserTimestampedTestPO(UserTimeStampedModelPO):
+        class UserTimestampedTestEditPO(UserTimeStampedModelPO):
             __tablename__ = "test_edit_assignment"
             id = Column("id", BigInteger, primary_key=True)
             name = Column("name", String(64))
 
-        po = UserTimestampedTestPO()
+        po = UserTimestampedTestEditPO()
         po.edit_assignment(userId=200)
 
         assert po.updateUser == 200
@@ -171,12 +171,12 @@ class TestPoAddAssignment:
         """测试 TimeStampedModelPO 的 add_assignment"""
         from sqlalchemy import Column, String, BigInteger
 
-        class TimestampedTestPO(TimeStampedModelPO):
+        class TimestampedTestAddAssPO(TimeStampedModelPO):
             __tablename__ = "test_ts_add_assignment"
             id = Column("id", BigInteger, primary_key=True)
             name = Column("name", String(64))
 
-        po = TimestampedTestPO()
+        po = TimestampedTestAddAssPO()
         po.add_assignment()
 
         assert po.createTime is not None
@@ -186,12 +186,12 @@ class TestPoAddAssignment:
         """测试 TimeStampedModelPO 的 edit_assignment"""
         from sqlalchemy import Column, String, BigInteger
 
-        class TimestampedTestPO(TimeStampedModelPO):
+        class TimestampedTestEditAssPO(TimeStampedModelPO):
             __tablename__ = "test_ts_edit_assignment"
             id = Column("id", BigInteger, primary_key=True)
             name = Column("name", String(64))
 
-        po = TimestampedTestPO()
+        po = TimestampedTestEditAssPO()
         po.edit_assignment()
 
         assert po.updateTime is not None

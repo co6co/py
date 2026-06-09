@@ -1,7 +1,4 @@
-from enum import Flag
 from functools import wraps
-from sanic.request import Request
-from sqlalchemy import insert
 from ...model.pos.right import LoginLogPO
 
 from co6co_sanic_ext.view_model import response_json
@@ -10,10 +7,6 @@ from sanic.response import JSONResponse
 
 from co6co.utils import log
 from co6co.data.result import Result
-from co6co_web_db.view_model import peraseRequest
-
-
-from ...services import getCurrentUserId
 import json
 import time
 from ...configs.captcha import CaptchaConfig
@@ -32,7 +25,7 @@ async def _loginLog(response: JSONResponse, self: AbsClsView):
         result.__dict__.update(res)
         po.name =self. request.json.get("userName")
         if result.code == 0:
-            po.createUser = appHelper.getCurrentUserId(self.request)
+            po.createUser = appHelper.current_user_id(self.request)
             po.state = "成功"
         else:
             po.state = "失败"
@@ -61,8 +54,7 @@ def loginLog(f):
 def _checkVerifycode(sessionDict:SessionDict,verifyCode: str=None,):
     """
     检查验证码
-    """
-    
+    """ 
     if verifyCode == "" or verifyCode is None:
         log.warn("验证码不能为空！")
         return False, "验证码不能为空！" 

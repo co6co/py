@@ -9,6 +9,7 @@ from abc import ABC, abstractmethod
 from co6co_db_ext.po import BasePO
 from sqlalchemy.sql.elements import ColumnElement
 from co6co_db_ext.actuator import OperationOption
+from .aop.response_apo import response
 
 FilterType = TypeVar("FilterType", bound=absFilterItems)
 FilterClass = Type[FilterType]
@@ -39,20 +40,44 @@ class AbsQueryView(AuthMethodView):
             filter = self.cls()  
         filter.__dict__.update(self.request.json)
         return filter
-
+    @response
     async def post(self):
         """
         获取分页列表
         """
-        
-       
         flt = self.create_filter()
         total, data = await self.actuator.query_page(flt)
         if total is None or data is None:
-            return self.response_json(Result.fail("查询失败"))
+            return Result.fail("查询失败")
         else:
-            return self.response_json(Page_Result.success(data, total=total))
+            return Page_Result.success(data, total=total)
 
+class AbsQueryAndAddView(AbsQueryView):
+    """
+    基础查询和增加视图
+
+    以前很多UI是 post 为查询，put 为增加
+    做这个超类一座兼容
+    """
+    routePath = "/"
+    
+    poCls:Type[BasePO]
+    @property
+    def add_option(self) -> OperationOption:
+        """
+        获取添加选项
+        """
+        if self.poCls is None:
+            raise ValueError("unoverride add_option , poCls must be defined")
+        return OperationOption.create_add(self.json, poType=self.poCls, userId=self.userId)
+
+    @response
+    async def put(self):
+        """
+        添加
+        """
+        return await self.actuator.add(self.add_option)
+        
 
 class AbsSelectView(AuthMethodView, ABC):
     """
@@ -68,13 +93,14 @@ class AbsSelectView(AuthMethodView, ABC):
     def get_sql(self) -> Select:
         raise NotImplementedError("get_sql method must be implemented")
 
+    @response
     async def post(self):
         """
         获取select列表
         """
         select = self.get_sql()
         data = await self.actuator.query_all_mappings(select)
-        return self.response_json(Result.success(data))
+        return Result.success(data)
 
 
 class AbsExistView(AuthMethodView, ABC):
@@ -121,12 +147,15 @@ class AbsExistView(AuthMethodView, ABC):
         )
 
     async def get(self):
+        """
+        是否存在
+        """
         result = await self.actuator.exist(*self.exist_condition, column=self.column)
         return self._response(self.param_code, result)
 
 
 class AbsAssociationView(AuthMethodView, ABC):
-    routePath = "/association/<projectId:int>/<pk:int>"
+    routePath = "/association/<userId:int>"
 
     @property
     def routePathKey(self):
@@ -136,6 +165,7 @@ class AbsAssociationView(AuthMethodView, ABC):
 
     @property
     def routeValue(self):
+        """routePath 参数里面的值"""
         return self.match_info[self.routePathKey]
 
     @property
@@ -196,7 +226,7 @@ class AbsAssociationView(AuthMethodView, ABC):
 
     async def post(self):
         """
-        获取用户组关联的角色
+        获取关联列表
         """
         selectTotal = None
         total = None
@@ -254,6 +284,10 @@ class AbsAssociationView(AuthMethodView, ABC):
     async def put(self):
         """
         保存关联
+        {
+            add:[],
+            remove:[]
+        }
         """
         userId = self.userId
         param = self.get_associationParam()
@@ -275,6 +309,7 @@ class AbsAddView(AuthMethodView, ABC):
         """
         return OperationOption.create_add(self.json, poType=self.cls, userId=self.userId)
 
+    @response
     async def post(self):
         """
         添加
@@ -287,8 +322,7 @@ class AbsPkView(AuthMethodView, ABC):
     可实现编辑和删除操作
     """
 
-    cls: Type[BasePO]  # 类属性，由子类提供
-
+    cls: Type[BasePO]  # 类属性，由子类提供 
     routePath = "/<pk:int>"
 
     @property
@@ -311,7 +345,7 @@ class AbsPkView(AuthMethodView, ABC):
             raise ValueError("cls must be implemented")
 
         return OperationOption.create_edit(
-            self.json, poType=self.cls, userId=self.userId
+            self.json, self.cls,pk=self.routeValue, userId=self.userId
         )
 
     @property
@@ -323,12 +357,14 @@ class AbsPkView(AuthMethodView, ABC):
             raise ValueError("cls must be implemented")
         return OperationOption.create_del(pk=self.routeValue, poType=self.cls)
 
+    @response
     async def put(self):
         """
         编辑
         """
-        return await self.actuator.edit(self.edit_option)
+        return  await self.actuator.edit(self.edit_option)
 
+    @response
     async def delete(self):
         """
         删除

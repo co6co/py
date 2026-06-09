@@ -72,9 +72,10 @@ def __getMessage(*msg: str):
 
 
 def __log(*msg: str, type: int = 0, foregroundColor: int = 37, bg=40, e=None, hasPrefix: bool = True):
-    t = threading.currentThread()
+    # t = threading.currentThread() # 弃用
+    t =threading.current_thread()
     time = datetime.datetime.now()
-    err = e.__traceback__.tb_lineno if e != None else ""
+    err = e.__traceback__.tb_lineno if e is not None else ""
     prefix = f"['{time.strftime('%Y-%m-%d %H:%M:%S')}'] [{t.ident}|{t.name}]\t"
     if not hasPrefix:
         prefix = ""
@@ -84,16 +85,7 @@ def __log(*msg: str, type: int = 0, foregroundColor: int = 37, bg=40, e=None, ha
 
 def log(*msg: str): __log(*msg)
 
-
-def generateCode(data: any):
-    """
-    通过 对象 转字符串 
-    生成  大小  hash值
-    """
-    s = str(data)
-    return hex(s.__hash__()).upper()
-
-
+ 
 def start_mark(msg: str, f: str = "--", start: str = "\r\n", end: str = ">", num: int = 36):
     """
     标记开始

@@ -4,7 +4,7 @@ from .page_param import Page_param
 from typing import TypeVar,Tuple,List,Dict,Any,Union,Iterator
 from sqlalchemy .orm.attributes import InstrumentedAttribute
 from sqlalchemy.sql.elements import ColumnElement
-from sqlalchemy import func,or_,and_,Select  
+from sqlalchemy import func,or_,and_,Select  ,true
 
 class absFilterItems(ABC, Page_param): 
 	"""
@@ -59,7 +59,8 @@ class absFilterItems(ABC, Page_param):
 		
 		"""
 		orderList= self._getOrderby()  
-		if len(orderList)==0: return self.getDefaultOrderBy()
+		if len(orderList)==0:
+			return self.getDefaultOrderBy()
 		# () 获取的结果不能重复 取*
         # []  获取的结果能重复 取* 
 		else: return [ self. po_type.__dict__[key].desc() if it[key] and it[key].lower()=="desc" else  self. po_type.__dict__[key].asc() for it in orderList for key in it.keys() if key in self.po_type.__dict__]
@@ -87,12 +88,12 @@ class absFilterItems(ABC, Page_param):
 		if self.listSelectFields is not None and len(self.listSelectFields)>0: 
 			select=(
 				Select(*self.listSelectFields)#.join(device.deviceCategoryPO,isouter=True)
-				.filter(and_(*self.filter()))  
+				.filter(and_(true(),*self.filter()))  
 			)
 		else :
 			select=(
 				Select(self.po_type)#.join(device.deviceCategoryPO,isouter=True)
-				.filter(and_(*self.filter()))  
+				.filter(and_(true(),*self.filter()))  
 			) 
 		return select
 	
@@ -102,5 +103,6 @@ class absFilterItems(ABC, Page_param):
 			return self.create_List_select().limit(self.limit).offset(self.offset).order_by(*self.getOrderBy_Fields())
 		return self.create_List_select().limit(self.limit).offset(self.offset).order_by(*self.getOrderBy())
 	@property
-	def count_select(self): 
-		return Select( func.count( )).select_from(self.create_List_select())
+	def count_select(self):
+		# .subquery() 子查询
+		return Select( func.count( )).select_from(self.create_List_select().subquery()) 

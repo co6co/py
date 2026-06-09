@@ -30,7 +30,7 @@ async def test_actuator_add_all(db_service_param):
         await actuator2.session.commit()
     actuator2.add_all(*[po])
     await actuator2.session.commit()
-    await actuator2.session.close_all()
+    await actuator2.session.close() # actuator2.session.close_all() 弃用
     pass
 
 
@@ -58,7 +58,7 @@ async def test_actuator_query_all(db_service_param):
     print("userGroupPO", mp)
     assert len(mp) == count
     await actuator2.session.rollback()
-    await actuator2.session.close_all()
+    await actuator2.session.close()
 
 
 async def test_actuator_query_all_entity(db_service_param):
@@ -74,7 +74,7 @@ async def test_actuator_query_all_entity(db_service_param):
         assert isinstance(m, BasePO)
         print(m.name)
     await actuator2.session.rollback()
-    await actuator2.session.close_all()
+    await actuator2.session.close()
 
 
 async def test_actuator_query_one_entity(db_service_param):
@@ -88,7 +88,7 @@ async def test_actuator_query_one_entity(db_service_param):
 
     assert isinstance(mp, BasePO)
     await actuator2.session.rollback()
-    await actuator2.session.close_all()
+    await actuator2.session.close()
 
 
 async def test_actuator_query_one_entity_mapping(db_service_param):
@@ -102,7 +102,7 @@ async def test_actuator_query_one_entity_mapping(db_service_param):
 
     assert isinstance(mp, dict)
     await actuator2.session.rollback()
-    await actuator2.session.close_all()
+    await actuator2.session.close()
 
 
 async def test_actuator_select_manay(db_service_param):
@@ -118,7 +118,7 @@ async def test_actuator_select_manay(db_service_param):
         assert isinstance(m, dict)
 
     await actuator2.session.rollback()
-    await actuator2.session.close_all()
+    await actuator2.session.close()  
 
 
 async def test_actuator_select_one(db_service_param):
@@ -131,7 +131,7 @@ async def test_actuator_select_one(db_service_param):
     print("userGroupPO mapping", mp)
     assert isinstance(mp, dict)
     await actuator2.session.rollback()
-    await actuator2.session.close_all()
+    await actuator2.session.close() # actuator2.session.close_all() 弃用
 async def test_actuator_select_one_rows(db_service_param):
     cfg, Session, actuator = db_service_param
     actuator2: Actuator = actuator
@@ -145,7 +145,7 @@ async def test_actuator_select_one_rows(db_service_param):
         print("userGroupPO mapping", m)
     
     await actuator2.session.rollback()
-    await actuator2.session.close_all()
+    await actuator2.session.close() # actuator2.session.close_all() 弃用
 
  
 async def test_dddd(db_service_param):

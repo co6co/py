@@ -1,17 +1,14 @@
-from sanic.response import text
-from sanic import Request
-from co6co_sanic_ext.view_model import response_json
+
 from co6co.data.result import Result
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from sqlalchemy.sql import Select, Delete
+from sqlalchemy.sql import Select
 
-from co6co_db_ext.db_utils import db_tools 
-from co6co_web_db.model.params import associationParam
+from co6co_db_ext.db_utils import db_tools  
 
-from datetime import datetime
+from co6co_db_ext .actuator import Actuator 
 from ..base_view import AuthMethodView
-from ..biz_view import AbsExistView, AbsSelectView
+from ..biz_view import AbsExistView,AbsQueryAndAddView, AbsPkView
 
 from ...model.filters.config_filter import Filter
 from ...model.pos.other import sysConfigPO
@@ -22,8 +19,7 @@ from ...services.configCache import ConfigCache
 class ConfigView(AuthMethodView):
     """
     通过代码获取配置
-    """
-
+    """ 
     routePath = "/<code:str>"
 
     def get_sql(self) -> Select:
@@ -48,7 +44,6 @@ class ConfigByCacheView(AuthMethodView):
     """
 
     routePath = "/Cache/<code:str>"
-    
 
     async def post(self ):
         """
@@ -81,68 +76,52 @@ class ExistView(AbsExistView):
     @property
     def exist_condition(self):
         return sysConfigPO.code == self.param_code, sysConfigPO.id != self.param_pk
-
-
+        
 @ConfigEntry
-async def configValueChange(self: AuthMethodView, code: str, value: str):
+async def configValueChange(self: AuthMethodView, code: str, value: str|None):
     return value 
-class Views(AuthMethodView):
-    async def post(self ):
-        """
-        table数据
-        """
-        param = Filter()
-        return await self.query_page( param)
-
-    async def put(self ):
-        """
-        增加
-        """
-        po = sysConfigPO()
-        userId = self.userId
-
-        async def before(po: sysConfigPO, session: AsyncSession, request):
-            exist = await db_tools.exist(
-                session, sysConfigPO.code.__eq__(po.code), column=sysConfigPO.id
-            )
-            if exist:
-                return Result.fail(message=f"'{po.code}'已存在！")
-
-        async def after(po: sysConfigPO, session, request):
-            await configValueChange(self, po.code, po.value)
-
-        return await self.add(
-             po, userId=userId, beforeFun=before, afterFun=after
-        )
 
 
-class View(AuthMethodView):
-    routePath = "/<pk:int>"
-    def pk(self)->int:
-        return self.match_info.get("pk")
+class Views(AbsQueryAndAddView):
+    routePath='/'
+    cls=Filter 
+    poCls=sysConfigPO 
+    async def add_before(self,po,actuator: Actuator):
+        exist=await actuator.exist( sysConfigPO.code.__eq__(po.code), column=sysConfigPO.id)
+        if exist:
+            return Result.fail(message=f"'{po.code}'已存在！")
+    async def add_after(self,po,actuator: Actuator):
+        await configValueChange(self, po.code, po.value)
 
-    async def put(self ):
-        """
-        编辑
-        """
+    @property       
+    def add_option(self):
+        option=super().add_option
+        option.beforeFun=self.add_before
+        option.afterFun=self.add_after
+        return option
+        
+class View(AbsPkView):
+    cls=sysConfigPO
 
-        async def before(
-            oldPo: sysConfigPO, po: sysConfigPO, session: AsyncSession, request
-        ):
-            exist = await db_tools.exist(
-                session,
-                sysConfigPO.id != oldPo.id,
+    async def edit_check_data(self,po: sysConfigPO, actuator: Actuator):
+        exist= await actuator.exist( sysConfigPO.id != po.id,
                 sysConfigPO.code.__eq__(po.code),
-                column=sysConfigPO.id,
-            )
-            if exist:
+                column=sysConfigPO.id,)
+        if exist:
                 return Result.fail(message=f"'{po.code}'已存在！")
-            await configValueChange(request, po.code, po.value)
-
-        return await self.edit(self.pk, sysConfigPO, userId=self.userId, fun=before )
-
-    async def delete(self ):
-        """
-        删除
-        """
-        return await self.remove(self.pk, sysConfigPO)
+        await configValueChange(self, po.code, po.value)
+        pass
+    @property
+    def edit_option(self): 
+        option=super().edit_option
+        option.beforeFun=self.edit_check_data 
+        return option 
+    async def delete_after_data(self,po: sysConfigPO, actuator: Actuator): 
+        await configValueChange(self, po.code, None)
+        pass
+    @property
+    def delete_option(self): 
+        option=super().delete_option
+        option.afterFun=self.delete_after_data
+        return option 
+     

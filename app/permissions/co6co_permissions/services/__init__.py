@@ -3,10 +3,10 @@ from sanic import Request
 from co6co.data.result import Result
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from sqlalchemy.sql import Select, Delete
+from sqlalchemy.sql import Select
 from co6co_db_ext.db_utils import db_tools
 from co6co_web_db.services.jwt_service import createToken, decodeToken
-from co6co.utils import log
+
  
 from ..model.pos.right import UserPO 
 from ..model.enum import user_state

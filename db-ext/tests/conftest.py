@@ -27,7 +27,8 @@ async def db_service_param():
     actuator = Actuator(service.Session())
     yield cfg, service.Session, actuator
     # 清理：关闭 session
-    await actuator.session.close()
+    await actuator.session.close()   
+    await service.engine.dispose()
 
 
 @pytest.fixture
@@ -48,6 +49,7 @@ async def db_service_param2():
     service = db_service(cfg)
     await service.init_tables()
     #service.sync_init_tables().
-    logging.getLogger("sqlalchemy").setLevel(logging.WARNING)
-
-    return service
+    logging.getLogger("sqlalchemy").setLevel(logging.WARNING) 
+  
+    yield  service
+    await service.engine.dispose()

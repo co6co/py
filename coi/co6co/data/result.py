@@ -1,6 +1,9 @@
 # -*- encoding:utf-8 -*-
 # Result 在 db_ext 中已经存在，是否应删除，需要验证正式使用的是那个模块
 from __future__ import annotations
+import time
+import random
+import hashlib
 
 
 class dictType:
@@ -21,7 +24,20 @@ class dictType:
         return self._dict.get(key, None)
 
 
-class Result:
+
+def gen_error_code(e:any=None,prefix="0x" ):  
+    
+    """生成形如 E250609001 的错误码"""
+    date = time.strftime("%y%m%d")          # 25 06 09
+    if e is None:
+        seq = random.randint(1000, 9999)        # 4 位随机
+    else: 
+        s = str(e)
+        seq = hashlib.md5(s.encode()).hexdigest()[6:11].upper() 
+        #seq =hex(abs( str(e).__hash__()>>32)).replace("0x","") .upper()    # __hash__ 总总在变
+    return f"{prefix}{date}{seq}"
+
+class Result: 
     code: int
     message: str
     data: any
