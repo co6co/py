@@ -6,6 +6,14 @@ type ModelValueType = string | number | undefined;
 export default defineComponent({
 	name: 'EnumSelect',
 	props: {
+		valueUseFiled: {
+			type: String,
+			default: 'value',
+		},
+		isNumber: {
+			type: Boolean,
+			default: true,
+		},
 		data: {
 			type: Array<IEnumSelect>,
 			required: true,
@@ -35,6 +43,10 @@ export default defineComponent({
 		//	}
 		//);
 		const { localValue, onChange } = useModelWrapper(prop, context);
+		const valueUse = (d: IEnumSelect) => { 
+			const value = d[prop.valueUseFiled]; 
+			return prop.isNumber ? Number(value) : value;
+		};
 		return () => {
 			//可以写某些代码
 			return (
@@ -47,7 +59,7 @@ export default defineComponent({
 					placeholder={prop.placeholder}>
 					{prop.data.map((d) => {
 						return (
-							<ElOption key={d.key} label={d.label} value={d.value}></ElOption>
+							<ElOption key={d.key} label={d.label} value={valueUse(d)}></ElOption>
 						);
 					})}
 				</ElSelect>

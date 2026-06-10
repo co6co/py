@@ -31,15 +31,16 @@ class AbsQueryView(AuthMethodView):
 
     routePath = "/query"
     cls: Type[FilterType]  # 类属性，由子类提供
-    
-    def create_filter(self,filter:absFilterItems = None): 
+
+    def create_filter(self, filter: absFilterItems = None):
         if filter is None and not hasattr(self, "cls"):
             errmsg = f"Subclass {self.__class__.__name__} must define 'cls' attribute, or override create_filter method"
             raise ValueError(errmsg)
-        if filter is None: 
-            filter = self.cls()  
+        if filter is None:
+            filter = self.cls()
         filter.__dict__.update(self.request.json)
         return filter
+
     @response
     async def post(self):
         """
@@ -52,6 +53,7 @@ class AbsQueryView(AuthMethodView):
         else:
             return Page_Result.success(data, total=total)
 
+
 class AbsQueryAndAddView(AbsQueryView):
     """
     基础查询和增加视图
@@ -60,8 +62,9 @@ class AbsQueryAndAddView(AbsQueryView):
     做这个超类一座兼容
     """
     routePath = "/"
-    
-    poCls:Type[BasePO]
+
+    poCls: Type[BasePO]
+
     @property
     def add_option(self) -> OperationOption:
         """
@@ -77,7 +80,7 @@ class AbsQueryAndAddView(AbsQueryView):
         添加
         """
         return await self.actuator.add(self.add_option)
-        
+
 
 class AbsSelectView(AuthMethodView, ABC):
     """
@@ -161,7 +164,7 @@ class AbsAssociationView(AuthMethodView, ABC):
     def routePathKey(self):
         result = self.routePath.split(":")[0]
         index = result.find("<")
-        return result[index + 1 :]
+        return result[index + 1:]
 
     @property
     def routeValue(self):
@@ -214,7 +217,13 @@ class AbsAssociationView(AuthMethodView, ABC):
         查询树形结构使用
         父字段
         """
-        return "parentId"
+        if not hasattr(self, "_pid_field"):
+            self._pid_field = "parentId"
+        return self._pid_field
+
+    @pid_field.setter
+    def pid_field(self, value: str):
+        self._pid_field = value
 
     @property
     def id_field(self):
@@ -222,35 +231,60 @@ class AbsAssociationView(AuthMethodView, ABC):
         查询树形结构使用
         主键字段
         """
-        return "id"
+        if not hasattr(self, "_id_field"):
+            self._id_field = "id"
+        return self._id_field
+
+    @id_field.setter
+    def id_field(self, value: str):
+        self._id_field = value
+
+    @property
+    def root_value(self):
+        """
+        查询树形结构使用
+        根节点值
+        """
+        if not hasattr(self, "_root_value"):
+            self._root_value = 0
+        return self._root_value
+
+    @root_value.setter
+    def root_value(self, value: int):
+        self._root_value = value
+
+    async def _query_tree(self, select: Select):
+        data = await self.actuator.query_tree(
+            select,
+            rootValue=self.root_value,
+            pid_field=self.pid_field,
+            id_field=self.id_field,
+        )
+        return self.response_json(Result.success(data))
+
+    async def _query_list(self,  select: Select, totalSelect: Select = None):
+        total = None
+        if totalSelect is not None:
+            total = await self.actuator.count(totalSelect)
+        data = await self.actuator.query_all_mappings(select)
+        if total is None:
+            return self.response_json(Result.success(data))
+        return self.response_json(Page_Result.success(data, total=total))
 
     async def post(self):
         """
         获取关联列表
         """
         selectTotal = None
-        total = None
         select = self.association_sql
         if isinstance(select, Tuple) and len(select) == 2:
             selectTotal, select = select
         elif isinstance(select, Tuple) and len(select) != 2:
             raise ValueError("association_sql must be Tuple[Select,Select] or Select")
-        if selectTotal is not None:
-            total = await self.actuator.count(selectTotal)
         if self.is_tree:
-            data = await self.actuator.query_all_mappings(select)
+            return await self._query_tree(select)
         else:
-            data = await self.actuator.query_tree(
-                select,
-                rootValue=0,
-                pid_field=self.pid_field,
-                id_field=self.id_field,
-                isPO=False,
-            )
-        if total is None:
-            return self.response_json(Result.success(data))
-        else:
-            return self.response_json(Page_Result.success(data, total=total))
+            return await self._query_list(select, selectTotal)
 
     @property
     @abstractmethod
@@ -301,7 +335,7 @@ class AbsAddView(AuthMethodView, ABC):
     routePath = "/add"
 
     cls: Type[BasePO]  # 类属性，由子类提供
-    
+
     @property
     def add_option(self) -> OperationOption:
         """
@@ -314,7 +348,7 @@ class AbsAddView(AuthMethodView, ABC):
         """
         添加
         """
-        return await self.actuator.add(self.add_option)
+        return await self.actuator.operation(self.add_option) 
 
 
 class AbsPkView(AuthMethodView, ABC):
@@ -322,14 +356,14 @@ class AbsPkView(AuthMethodView, ABC):
     可实现编辑和删除操作
     """
 
-    cls: Type[BasePO]  # 类属性，由子类提供 
+    cls: Type[BasePO]  # 类属性，由子类提供
     routePath = "/<pk:int>"
 
     @property
     def routePathKey(self):
         result = self.routePath.split(":")[0]
         index = result.find("<")
-        return result[index + 1 :]
+        return result[index + 1:]
 
     @property
     def routeValue(self):
@@ -345,7 +379,7 @@ class AbsPkView(AuthMethodView, ABC):
             raise ValueError("cls must be implemented")
 
         return OperationOption.create_edit(
-            self.json, self.cls,pk=self.routeValue, userId=self.userId
+            self.json, self.cls, pk=self.routeValue, userId=self.userId
         )
 
     @property
@@ -362,11 +396,11 @@ class AbsPkView(AuthMethodView, ABC):
         """
         编辑
         """
-        return  await self.actuator.edit(self.edit_option)
+        return await self.actuator.operation(self.edit_option)
 
     @response
     async def delete(self):
         """
         删除
         """
-        return await self.actuator.remove(self.delete_option)
+        return await self.actuator.operation(self.delete_option)

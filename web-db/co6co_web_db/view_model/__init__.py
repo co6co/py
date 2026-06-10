@@ -49,14 +49,11 @@ async def get_one(request: Request, select: Select, isPO: bool = True):
 
     actuator = Actuator(get_db_session(request))
     if isPO:
-        return await actuator.query_one_mappings(select)
-    else:
         return await actuator.query_one_entity(select)
+    else:
+        return await actuator._query_list_mappings(select)
 
-
-def errorLog(request: Request, module: str, method: str):
-    log.err(f"执行[{request.method}]{request.path} 所属模块:{module}.{method} Error")
-
+ 
 
 def peraseRequest(request: Request) -> Tuple[AsyncSession, SessionDict, DictProxy]:
 
@@ -91,18 +88,12 @@ class BaseDbClsView(BaseClsView):
         self._actuator = Actuator(self.db_session)
         return self._actuator
 
-    def response_error0(self, msg: str,  e: Exception):
+    
+    def response_error(self,  e: Exception, msg="执行不成功,错误码：{}"):
         """
         响应错误 message
-        """
-        errorLog(self.request, self.__class__, get_current_function_name())
-        return Result.fail(message=f"{msg}:{e}")
-
-    def response_error(self,  e: Exception, msg="处理出错"):
-        """
-        响应错误 message
-        """
-        return self.response_json(self.response_error0(msg, e))
+        """ 
+        return self.response_json(self.actuator.error(e,msg))
 
     async def update_one(self, select:Select, edit:Callable[[BasePO], Result|None]):
         """
@@ -118,7 +109,7 @@ class BaseDbClsView(BaseClsView):
             return self.response_json(Result.success(result))
         except Exception as e:
             self.set_rollback()
-            return self.response_error(e)
+            return self.response_error(e, msg="更新失败{}")
     async def get_one(self, select: Select, isPO: bool = True, remove_db_instance: bool = True, resultHanlder: Callable[[Any], Any] = None):
         """
         从数据库中获取一个对象
@@ -160,7 +151,7 @@ class BaseDbClsView(BaseClsView):
                 return self.response_json(Result.success(result))
         except Exception as e:
             self.set_rollback()
-            return self.response_error(e)
+            return self.response_error(e, msg="查询失败{}")
 
     async def _query(self,  select: Select, isPO: bool = True, remove_db_instance: bool = True, param: Dict | List | Tuple = None):
         """
@@ -173,15 +164,10 @@ class BaseDbClsView(BaseClsView):
                 result = await self.actuator.query_all_mappings(select)
             if remove_db_instance:
                 result = Actuator.remove_db_instance_state(result)
-            return result
-            # self.actuator()
-            # query = QueryListCallable(self.db_session)
-            # data = await query(select, isPO, remove_db_instance, param)
-            # result = db_tools.list2Dict(data)
-            # return result
+            return result 
         except Exception as e:
             self.set_rollback()
-            self.response_error(e)
+            self.response_error(e, msg="_query 失败{}")
             return None
 
     async def exist(self,   *filters: ColumnElement[bool], column: InstrumentedAttribute = "*"):
@@ -214,7 +200,7 @@ class BaseDbClsView(BaseClsView):
             return self.response_json(Result.success(data=treeList))
         except Exception as e:
             self.set_rollback()
-            return self.response_error(e)
+            return self.response_error(e, msg="查询失败{}")
 
     async def query_page(self,   filter: absFilterItems, isPO: bool = True, remove_db_instance=True):
         """
@@ -231,7 +217,7 @@ class BaseDbClsView(BaseClsView):
             return self.response_json(pageList)
         except Exception as e:
             self.set_rollback()
-            return self.response_error(e)
+            return self.response_error(e, msg="查询失败{}")
 
     async def execSqls(self,   *sml: Update | Delete | Insert, callBck=None, smlParamList: List[Dict | Tuple | List] = None): 
         try:
@@ -267,8 +253,9 @@ class BaseDbClsView(BaseClsView):
                         self.set_rollback()
                         return result
             self.actuator.add_all(*poList)
+            await self.actuator.session.flush()
             if afterFun is not None:
-                self.actuator.session.flush()
+                
                 result=await afterFun(poList, self.actuator.session, self.request)
                 result=self.actuator._check_backResult(result) 
                 result=self.check_backResult(result) 
@@ -278,7 +265,7 @@ class BaseDbClsView(BaseClsView):
             return self.response_json(Result.success()) 
         except Exception as e:
             self.set_rollback()
-            return self.response_error(e)
+            return self.response_error(e, msg="批量增加失败{}")
 
     async def add(self,   po: BasePO, json2Po: bool = True, userId=None, beforeFun: TypeOneFun = None, afterFun: TypeOneFun = None):
         """
@@ -304,8 +291,8 @@ class BaseDbClsView(BaseClsView):
                     self.set_rollback()
                     return result
             self.actuator.add_all(po)
-            if afterFun is not None:
-                self.actuator.session.flush()
+            await self.actuator.session.flush()
+            if afterFun is not None: 
                 result=await afterFun(po, self.actuator.session, self.request)
                 result=self.check_backResult(result) 
                 if result is not None:
@@ -314,7 +301,7 @@ class BaseDbClsView(BaseClsView):
             return self.response_json(Result.success()) 
         except Exception as e:
             self.set_rollback()
-            return self.response_error(e)
+            return self.response_error(e, msg="增加失败{}")
 
     async def edit(self,   pkOrSelect:  int | str | Select, poType: TypeVar, po: Optional[BasePO] = None, userId=None, fun: TypeOneFun = None, json2Po: bool = True):
         """
@@ -353,7 +340,7 @@ class BaseDbClsView(BaseClsView):
            
         except Exception as e:
             self.set_rollback()
-            return self.response_error(e)
+            return self.response_error(e, msg="更新失败{}")
 
     async def remove(self,   pk: any, poType: TypeVar,  beforeFun: TypeOneFun = None, afterFun: TypeOneFun = None):
         """
@@ -386,7 +373,7 @@ class BaseDbClsView(BaseClsView):
             return self.response_json(Result.success())
         except Exception as e:
             self.set_rollback()
-            return self.response_error(e)
+            return self.response_error(e, msg="删除失败{}")
 
     def get_associationParam(self):
         param = associationParam()
@@ -425,7 +412,7 @@ class BaseDbClsView(BaseClsView):
                 return self.response_json(Result.fail(message="未改变"))
         except Exception as e:
             self.set_rollback()
-            return self.response_error(e) 
+            return self.response_error(e, msg="保存失败{}") 
 
 
 @deprecated("该类已废弃，请使用 BaseDbView 类替代")
@@ -446,13 +433,7 @@ class BaseMethodView(BaseView):
 
     def get_shared_Cache(self, request: Request) -> DictProxy:
         return BaseDbClsView(request).shared_cache
-
-    def response_error0(self, request: Request, e: Exception):
-        """
-        响应错误 message
-        """
-        return BaseDbClsView(request).response_error(e)
-
+        
     def response_error(self, request: Request, e: Exception):
         """
         响应错误 message

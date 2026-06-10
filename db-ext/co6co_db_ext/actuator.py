@@ -13,7 +13,7 @@ from sqlalchemy.orm import Mapper
 from typing import Callable, Any, Dict, List, Tuple, Awaitable
 from functools import wraps
 
-from co6co.data.result import Result, Page_Result,gen_error_code
+from co6co.data.result import Result, Page_Result, gen_error_code
 from co6co.utils import log
 from co6co.utils.tool_util import list_to_tree, get_current_function_name
 
@@ -51,15 +51,28 @@ def errorLog(module: str, method: str, errorCode: str, e: Exception):
 
 
 class Actuator:
-    def error(self, e: Exception,messageFormat:str="执行不成功,错误码：{}"):
+    """
+    数据库操作类
+    提供数据库操作方法，如增加、删除、更新、查询等
+    
+    注意：未提交或者回滚数据，请在上层决定提交或回滚
+    """
+    def error(self, e: Exception, messageFormat: str = "执行不成功,错误码：{}"):
         """
         响应错误 message
 
         :param e: 异常
         :param messageFormat: 错误消息格式
         :return: Result
-        """ 
-        errorCode=gen_error_code(e)
+        """
+        try:
+            data = e
+            if isinstance(e, Exception):
+                data = e.args[0]
+        except Exception as ee:
+            log.warn("不太可能的情况", ee)
+            data = e
+        errorCode = gen_error_code(data)
         errorLog(self.__class__, get_current_function_name(), errorCode, e)
         return Result.fail(message=messageFormat.format(errorCode))
 
@@ -179,6 +192,9 @@ class Actuator:
     def is_entity_select(stmt: Select):
         """判断 Select 是否查询 ORM 实体"""
         # from sqlalchemy.sql.annotation import AnnotatedColumn
+        if not hasattr(stmt, "_raw_columns"):  # text('selelct * from userPO')
+            return False
+        # 检查是否有 AnnotatedTable 类型的列
         for col in stmt._raw_columns:
             # log.warn(f"col:{col}",type(col))
             if "AnnotatedTable" in str(
@@ -191,23 +207,29 @@ class Actuator:
     async def _execute(
         self, select: Select | Update | Delete | Insert, params: Dict[str, Any] = None
     ):
-        exec: ChunkedIteratorResult | CursorResult = await self.session.execute(
+        result: ChunkedIteratorResult | CursorResult = await self.session.execute(
             select, params
         )
-        return exec
+        return result
+
+    async def stream(
+        self, select: Select | Update | Delete | Insert, params: Dict[str, Any] = None
+    ):
+        result = await self.session.stream(select, params)
+        return result
 
     async def execSQL(
         self, sql: Update | Insert | Delete, params: Dict | List | Tuple = None
     ):
         """
-        执行简单SQL语句
-        SQLAlchemy 2.0 中:
-            在异步上下文中，AsyncSession.execute()->ChunkedIteratorResult
-            在同步上下文中，Session.execute()-> CursorResult
+        执行简单SQL语句 
+        返回影响的行数
         """
-        data: CursorResult = await self.session.execute(sql, params)
-        
-        return data.rowcount
+        data = await self._execute(sql, params)
+        if isinstance(data, CursorResult):
+            return data.rowcount
+        else:
+            raise Exception(f"execSQL:{sql} 未返回CursorResult")
 
     async def execute(
         self, select: Select | Update | Delete | Insert, params: Dict[str, Any] = None
@@ -215,21 +237,20 @@ class Actuator:
         """
         执行sql
 
-        返回影响的行数，或者一个对象
+        返回影响,返回第一行第一列结果
         @example
         execute(Select(po.id,po.name).where(po.id==1))->id|None
         execute(Select(po).where(po.id==1))->po|None
-        execute(Update(po).where(po.id==1).values(name="new"))->影响的行数
+        execute(Update(po).where(po.id==1).values(name="new"))->影响的行数 
         """
         result = await self._execute(select, params)
-        # print(type(result))
-        
-        log.warn(f"execute:{type(result)}")
-        if isinstance(result, CursorResult):
-            # return result.scalar() #1 select 1,2
-            # return result.scalars().fetchall() #[1]
-            # return result.all() #[(1,2)] 1 select 1,2
-            return result.rowcount
+        # print(type(result)) 
+        #log.warn(f"execute:{type(result)}")
+        #if isinstance(result, CursorResult):
+        #    # return result.scalar() #1 select 1,2
+        #    # return result.scalars().fetchall() #[1]
+        #    # return result.all() #[(1,2)] 1 select 1,2
+        #    return result.rowcount
         return result.scalar()
 
     async def count(
@@ -258,6 +279,8 @@ class Actuator:
         select:Select
         return dict
         """
+        if self.is_entity_select(select):
+            return await self.query_one_entity_mapping(select, params)
         executer = await self._execute(select, params)
         result = executer.mappings().fetchone()
         return Actuator.one2Dict(result)
@@ -269,6 +292,8 @@ class Actuator:
         select:Select
         return List[dict]
         """
+        if self.is_entity_select(select):
+            return await self.query_all_entity_mappings(select, params)
         executer = await self._execute(select, params)
         result = executer.mappings().all()
         return Actuator.list2Dict(result)
@@ -318,14 +343,6 @@ class Actuator:
     def add_all(self, *pos: BasePO):
         self.session.add_all(pos)
 
-    async def _query_list_mappings(
-        self, select: Select, params: Dict | List | Tuple = None
-    ):
-        if self.is_entity_select(select):
-            return await self.query_all_entity_mappings(select, params)
-        else:
-            return await self.query_all_mappings(select, params)
-
     async def query_tree(
         self,
         select: Select,
@@ -338,7 +355,7 @@ class Actuator:
         执行查询: tree列表
         """
         try:
-            result = await self._query_list_mappings(select, param)
+            result = await self.query_all_mappings(select, param)
             if result is None:
                 treeList = []
             else:
@@ -347,7 +364,7 @@ class Actuator:
                 return []
             return treeList
         except Exception as e:
-            self.error(e,"查询失败,错误码：{}") 
+            self.error(e, "查询失败,错误码：{}")
 
     async def query_page(self, filter: absFilterItems):
         """
@@ -356,10 +373,10 @@ class Actuator:
         try:
             # filter.count_select, filter.list_select
             total = await self.execute(filter.count_select)
-            result = await self._query_list_mappings(filter.list_select)
+            result = await self.query_all_mappings(filter.list_select)
             return total, result
         except Exception as e:
-            self.error(e,"分页查询,错误码：{}") 
+            self.error(e, "分页查询,错误码：{}")
             return None, None
 
     async def batchAdd(
@@ -380,15 +397,15 @@ class Actuator:
                         return result
 
             self.add_all(poList)
+            await self.session.flush()
             if afterFun is not None:
-                self.session.flush()
                 result = self._check_backResult(result)
                 if result is not None:
                     return result
             return Result.success()
 
         except Exception as e:
-            self.error(e,"批量增加失败,错误码：{}") 
+            self.error(e, "批量增加失败,错误码：{}")
             return None
 
     def _check_backResult(self, result: bool | Result | None):
@@ -407,13 +424,7 @@ class Actuator:
     async def add(self, option: OperationOption):
         """
         增加
-
-        request: Request,
-        po: BasePO,      #实体类对象
-        userId=None, # 用户ID
-        beforeFun(po, session ),    # 执行一些其他操作，返回值将直接返回客户端，回滚数据库操作
-        afterFun(po, session ),     # 可在实体中获取 自增id
-
+        未提交或者回滚数据，请在上层决定提交或回滚
         return Result
         """
         try:
@@ -435,31 +446,31 @@ class Actuator:
                 result = self._check_backResult(result)
                 if result is not None:
                     return result
-                
+
             return Result.success()
         except Exception as e:
-            return self.error(e,"增加失败,错误码：{}") 
-    async def _getEntity(self,option: OperationOption): 
+            return self.error(e, "增加失败,错误码：{}")
+
+    async def _getEntity(self, option: OperationOption):
         if option.po is not None:
             return option.po
         elif option.select is not None:
-            return await self.query_one_entity(option.select) 
+            return await self.query_one_entity(option.select)
         elif option.poType is not None and option.pk is not None:
             return await self.session.get_one(option.poType, option.pk)
         return None
-               
 
     async def edit(self, option: OperationOption):
         """
         编辑
         option.select 和 option.po 优先使用 select
         """
-        try: 
+        try:
             if option.json is None:
                 return Result.fail(message="json 不能为空")
             if option.poType is None:
                 return Result.fail(message="实体类型不能为空")
-            oldPo=await self._getEntity(option)
+            oldPo = await self._getEntity(option)
             if oldPo is None:
                 return Result.fail(message="未能找到要编辑的记录")
             oldPo.edit_assignment(option.userId)
@@ -474,7 +485,7 @@ class Actuator:
             return Result.success()
 
         except Exception as e:
-            return self.error(e,"编辑失败,错误码：{}")
+            return self.error(e, "编辑失败,错误码：{}")
 
     async def delete(self, po: POType):
         await self.session.delete(po)
@@ -494,9 +505,9 @@ class Actuator:
         return Result
         """
         try:
-            oldPo: Optional[BasePO] = await self._getEntity(option) 
+            oldPo: Optional[BasePO] = await self._getEntity(option)
             if oldPo is None:
-                return Result.fail(message="未能找到要删除的记录") 
+                return Result.fail(message="未能找到要删除的记录")
             if option.beforeFun is not None:
                 result = await option.beforeFun(oldPo, self)
                 result = self._check_backResult(result)
@@ -504,20 +515,22 @@ class Actuator:
                     return result
 
             await self.delete(oldPo)
-            self.session.flush()
+            await self.session.flush()
             if option.afterFun is not None:
-                result= await option.afterFun(oldPo, self)
+                result = await option.afterFun(oldPo, self)
                 result = self._check_backResult(result)
                 if result is not None:
                     return result
             return Result.success()
         except Exception as e:
             await self.session.rollback()
-            return self.error(e,"删除失败,错误码：{}")
+            return self.error(e, "删除失败,错误码：{}")
 
     async def operation(self, option: OperationOption):
         """
         执行操作
+        option.type 和 option.json 优先使用 type
+        未提交数据 请使用返回值 判断是否成功
         """
         if option.type == OperationType.INSERT:
             return await self.add(option)
@@ -525,8 +538,7 @@ class Actuator:
             return await self.edit(option)
         if option.type == OperationType.DELETE:
             return await self.remove(option)
-        if option.type == OperationType.QUERY:
-            return await self.query(option)
+        raise ValueError(f"不支持的操作类型:{option.type}")
 
 
 TypeCheckBack: TypeAlias = Callable[[BasePO, Actuator], Awaitable[Result | bool | None]]
@@ -581,7 +593,7 @@ class OperationOption:
     ):
         option = cls()
         option.type = OperationType.UPDATE
-        option.poType = poType # 为创建新的临时对象
+        option.poType = poType  # 为创建新的临时对象
         option.po = po
         option.select = select
         option.pk = pk

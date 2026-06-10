@@ -98,7 +98,7 @@ def injectDbSessionFactory(app: Sanic, settings: dict = {}, engineUrl: str = Non
             else:
                 await session.rollback()
         except Exception as e:
-            logger.error("commit_or_rollback",e)
+            logger.error("commit_or_rollback,error",exc_info=e)
             await session.rollback()
         finally:
             await session.close()

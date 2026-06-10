@@ -73,8 +73,9 @@ export default defineComponent({
 					break;
 				case FormOperation.edit:
 					if (!item) return false;
-					DATA.id = item.id;
-					Object.assign(DATA.fromData, item);
+					const { id, ...rest } = item;
+					DATA.id =id;
+					Object.assign(DATA.fromData, rest);
 					//可以在这里写一些use 获取其他的数据
 					break;
 			}

@@ -96,9 +96,9 @@ export default defineComponent({
 					break;
 				case FormOperation.edit:
 					if (!item) return false;
-					DATA.id = item.id;
-					// 解构赋值排除不需要的属性，只复制FormItem中定义的属性
 					const { id, createUser, updateUser, createTime, updateTime, ...rest } = item;
+					DATA.id = id;
+					// 解构赋值排除不需要的属性，只复制FormItem中定义的属性 
 					Object.assign(DATA.fromData, rest);
 					//可以在这里写一些use 获取其他的数据
 					break;

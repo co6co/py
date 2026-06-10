@@ -79,6 +79,7 @@ async def test_current_connect(db_service_param2):
         actuator = Actuator(session)
         result = await actuator.query_one_mappings(select)
         print(result)
+        
 async def test_current_connect_by_begin(db_service_param2): 
     await exec_connect2_num(db_service_param2,30)
      
