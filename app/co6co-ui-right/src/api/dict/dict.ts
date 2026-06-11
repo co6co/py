@@ -12,14 +12,17 @@ export const get_dict_state_svc = (): Promise<IResponse<IEnumSelect[]>> => {
 	return createServiceInstance().get(`${base_URL}`);
 };
 
+export interface IQueryDictSelectParam {
+	dictTypeCode?: string; // 字典类型编码
+	dictTypeId?: number; // 字典类型id  两属性不能同时为空
+	category: DictShowCategory;
+	parentId?: number;
+}
 /**
  * 获取字典的选择
  * @param dictTypeCode
  * @returns
  */
-export const get_dict_select_svc = (
-	dictTypeCode: string,
-	category: DictShowCategory
-): Promise<IResponse<DictSelectType[]>> => {
-	return createServiceInstance().get(`${base_URL}/${dictTypeCode}/${category}`);
+export const get_dict_select_svc = ( data :IQueryDictSelectParam): Promise<IResponse<DictSelectType[]>> => { 
+	return createServiceInstance().post(`${base_URL}/select`,data);
 };

@@ -97,10 +97,11 @@ export default defineComponent({
 				<TableView
 					dataApi={api.get_tree_table_svc}
 					highlightCurrentRow={true}
+					onCurrentChange={onCurrentChange}
 					ref={viewRef}
 					query={DATA.query}
 					row-key="id"
-					onCurrentChange={onCurrentChange}
+					
 					treeProps={{ children: 'children' }}>
 					{{
 						header: () => (

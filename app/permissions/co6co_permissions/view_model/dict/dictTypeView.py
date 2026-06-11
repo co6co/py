@@ -1,16 +1,10 @@
 
-from sanic.response import text
-from sanic import Request
-from co6co_sanic_ext.view_model import response_json
 from co6co.data.result import Result
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from sqlalchemy.sql import Select, Delete
+from sqlalchemy.sql import Select 
 
-from co6co_db_ext.db_utils import db_tools 
-from co6co_web_db.model.params import associationParam
-
-from datetime import datetime
+from co6co_db_ext.db_utils import db_tools  
 from ..base_view import AuthMethodView 
 from ..biz_view import AbsPkView,AbsExistView 
 from ...model.filters.dict_type_filter import Filter
@@ -30,8 +24,7 @@ class DictTypeExistView(AbsExistView):
         return sysDictTypePO.code == self.param_code, sysDictTypePO.id != self.param_pk 
 
 
-class DictTypeViews(AuthMethodView):
-    routePath = "/type"
+class DictTypeViews(AuthMethodView): 
 
     async def get(self ):
         """
@@ -66,8 +59,7 @@ class DictTypeViews(AuthMethodView):
 
 
 class DictTypeView(AbsPkView):
-    routePath = "/type/<pk:int>"
-
+   
     async def get(self ):
         """
         获取字典选择

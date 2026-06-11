@@ -47,13 +47,8 @@ class AbsQueryView(AuthMethodView):
         获取分页列表
         """
         flt = self.create_filter()
-        total, data = await self.actuator.query_page(flt)
-        if total is None or data is None:
-            return Result.fail("查询失败")
-        else:
-            return Page_Result.success(data, total=total)
-
-
+        return await self.actuator.query_page(flt)
+        
 class AbsQueryAndAddView(AbsQueryView):
     """
     基础查询和增加视图
@@ -111,8 +106,7 @@ class AbsExistView(AuthMethodView, ABC):
     PO的的某个属性值在数据库中是否存在
     """
 
-    routePath = "/exist/<code:str>/<pk:int>"
-
+    routePath = "/exist/<code:str>/<pk:int>" 
     @property
     def column(self):
         return "*"
@@ -125,13 +119,15 @@ class AbsExistView(AuthMethodView, ABC):
         返回一个元组，查询条件
 
         return (sysConfigPO.code == self.param_code, sysConfigPO.id != self.param_pk)
-        """
-
+        """ 
         # return  sysConfigPO.code == self.param_code, sysConfigPO.id != self.param_pk, sysConfigPO.id != 0
         raise NotImplementedError("get_sql method must be implemented")
 
-    def message(self, code: str, exist: bool):
-        return f"编码'{code}'{'已存在' if exist else '不存在'}。"
+    def message(self,exist: bool):
+        """
+        发表大签到message 提供修改机会
+        """
+        return f"编码'{self.param_code}'{'已存在' if exist else '不存在'}。"
 
     @property
     def param_code(self):
@@ -140,21 +136,17 @@ class AbsExistView(AuthMethodView, ABC):
     @property
     def param_pk(self):
         """
-        主键 当增加时 为 0
+        主键 当增加时为 0
         """
-        return self.match_info["pk"]
-
-    def _response(self, code, result: bool):
-        return self.response_json(
-            Result.success(data=result, message=self.message(code, result))
-        )
-
+        return self.match_info["pk"] 
+        
     async def get(self):
         """
         是否存在
         """
-        result = await self.actuator.exist(*self.exist_condition, column=self.column)
-        return self._response(self.param_code, result)
+        exist = await self.actuator.exist(*self.exist_condition, column=self.column)
+        result= Result.success(data=exist, message=self.message(exist))
+        return self.response_json(result ) 
 
 
 class AbsAssociationView(AuthMethodView, ABC):

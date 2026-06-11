@@ -12,6 +12,9 @@ import {
 import * as api_type from 'co6co';
 import { dictSvc as svc } from '@/api/dict';
 
+
+
+
 import {
 	ElRow,
 	ElCol,
@@ -23,10 +26,11 @@ import {
 	ElInputNumber,
 } from 'element-plus';
 
-import { StateSelect } from '@/components/dictSelect';
+import { StateSelect,DictSelect } from '@/components/dictSelect';
 export interface Item extends api_type.FormItemBase {
 	id: number;
 	dictTypeId?: number;
+	parentId?:number;
 	name?: string;
 	value?: string;
 	flag?: string;
@@ -55,7 +59,7 @@ export default defineComponent({
 	},
 	setup(prop, ctx) {
 		const diaglogForm = ref<DialogFormInstance>();
-		const DATA = reactive<FormData<number, FormItem>>({
+		const DATA = reactive<FormData<number, FormItem>&{parentId?:number}>({
 			operation: FormOperation.add,
 			id: 0,
 			fromData: { order: 0 },
@@ -69,18 +73,20 @@ export default defineComponent({
 			dictTypeId: number,
 			item?: Item
 		) => {
-			DATA.operation = oper;
-			switch (oper) {
+			DATA.operation = oper; 
+			DATA.parentId = item?.parentId;  
+			switch (oper) { 
 				case FormOperation.add:
 					DATA.id = 0;
 					DATA.fromData.dictTypeId = dictTypeId;
+					DATA.fromData.parentId = item?.id;  
+
 					DATA.fromData.name = item?.name;
 					DATA.fromData.state = item?.state;
 					DATA.fromData.value = item?.value;
 					DATA.fromData.flag = item?.flag;
 					DATA.fromData.desc = item?.desc;
-					DATA.fromData.order = item?.order ? item.order : 0;
-
+					DATA.fromData.order = item?.order ? item.order : 0; 
 					break;
 				case FormOperation.edit:
 					if (!item) return false;
@@ -152,6 +158,14 @@ export default defineComponent({
 						</ElCol>
 					</ElRow>
 					<ElRow>
+						<ElCol span={24}>
+							<ElFormItem label="父级" prop="parentId">
+								<DictSelect value-use-filed="id"  dict-type-id={DATA.fromData.dictTypeId} parentId={DATA.parentId} v-model={DATA.fromData.parentId} placeholder="请选择，可以为空" />
+							</ElFormItem>
+						</ElCol>
+						 
+					</ElRow>
+					<ElRow>
 						<ElCol span={12}>
 							<ElFormItem label="标志" prop="flag">
 								<ElInput
@@ -196,10 +210,10 @@ export default defineComponent({
 		const rander = (): VNode => {
 			return (
 				<DialogForm
-					closeOnClickModal={false}
+					close-on-click-modal={false}
 					draggable
 					title={prop.title}
-					labelWidth={prop.labelWidth}
+					label-width={prop.labelWidth}
 					style={ctx.attrs}
 					rules={rules}
 					ref={diaglogForm}

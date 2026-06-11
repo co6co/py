@@ -39,6 +39,7 @@ class sysDictTypePO(UserTimeStampedModelPO):
     """
     __tablename__ = "sys_dict_type"
     id = Column("id", Integer, autoincrement=True, primary_key=True)
+    
     name = Column("name", String(64))
     code = Column("code", String(64),  unique=True)
     desc = Column("desc", String(1024))
@@ -55,6 +56,7 @@ class sysDictTypePO(UserTimeStampedModelPO):
         self.sysFlag = po.sysFlag
         self.state = po.state
         self.order = po.order
+        
 
 
 class sysDictPO(UserTimeStampedModelPO):
@@ -63,6 +65,7 @@ class sysDictPO(UserTimeStampedModelPO):
     """
     __tablename__ = "sys_dict"
     id = Column("id", Integer, autoincrement=True, primary_key=True)
+    parentId = Column("parent_id", Integer, default=None)
     dictTypeId = Column("dict_type_id", Integer, comment="字典类型ID")
     name = Column("name", String(64))
     flag = Column("flag", String(64))
@@ -82,3 +85,4 @@ class sysDictPO(UserTimeStampedModelPO):
 
         self.state = po.state
         self.order = po.order
+        self.parentId = po.parentId

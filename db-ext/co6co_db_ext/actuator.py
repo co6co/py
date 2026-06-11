@@ -374,10 +374,9 @@ class Actuator:
             # filter.count_select, filter.list_select
             total = await self.execute(filter.count_select)
             result = await self.query_all_mappings(filter.list_select)
-            return total, result
+            return Page_Result.success(result, total=total)
         except Exception as e:
-            self.error(e, "分页查询,错误码：{}")
-            return None, None
+            return self.error(e, "分页查询,错误码：{}")
 
     async def batchAdd(
         self,

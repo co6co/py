@@ -38,6 +38,8 @@ class UserPO(UserTimeStampedModelPO):
         self.userGroupId = po.userGroupId
         self.state = po.state
         self.remark = po.remark
+        if self.version is None: # version 虽设置了默认值，但还是可能为None
+            self.version = 1
         self.version += 1
 
     @staticmethod

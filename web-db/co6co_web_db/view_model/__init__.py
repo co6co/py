@@ -208,12 +208,12 @@ class BaseDbClsView(BaseClsView):
         """
         filter.__dict__.update(self.request.json)
         try:
-            from co6co.utils import log
-            log.warn(f"query_page,filter  isPO:{isPO},remove_db_instance:{remove_db_instance}")
-            total, result = await self.actuator.query_page(filter)
+            #from co6co.utils import log
+            #log.warn(f"query_page,filter  isPO:{isPO},remove_db_instance:{remove_db_instance}")
+            pageList = await self.actuator.query_page(filter)
             #query = QueryPagedByFilterCallable(self.db_session)
             #total, result = await query(filter, isPO, remove_db_instance)
-            pageList = Page_Result.success(result, total=total)
+            #pageList = Page_Result.success(result, total=total)
             return self.response_json(pageList)
         except Exception as e:
             self.set_rollback()

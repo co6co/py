@@ -76,21 +76,37 @@ class user_exist_view(AbsExistView):
 
     @property
     def exist_condition(self):
-        return UserPO.userName == self.routeValue, UserPO.id != self.pkValue
+        return UserPO.userName == self.param_code, UserPO.id != self.param_pk
 
 
-class user_exist_post_view(AbsExistView):
+class user_exist_post_view(AbsExistView):    
     routePath = "/exist"
+    
+    @property
+    def column(self):
+        return UserPO.id 
+    @property
+    def exist_condition(self):
+        return UserPO.userName == self.param_code, UserPO.id != self.param_pk
+    @property
+    def param_pk(self):
+        return self.json.get("id")
 
     @property
-    def message(self, result: bool) -> str:
-        return f"用户名{self.routeValue}已存在" if result else "用户不存在"
+    def param_code(self):
+        return self.json.get("userName")
+    @property
+    def message(self,  result: bool) -> str:
+        return f"用户名{self.param_code}已存在" if result else "不存在"
+    async def get(self):
+        """
+        不提供此方法
+        """
+        raise NotImplementedError("Method not implemented.no params")
 
     async def post(self):
-        id = self.json.get("id")
-        userName = self.json.get("userName") 
-        result = await self.actuator.exist(UserPO.userName == userName, UserPO.id != id)
-        return self._response(userName, result)
+        return super().get()
+        
 
 
 class user_query_view(AbsQueryView):
@@ -152,13 +168,15 @@ class user_view(AbsPkView):
             )
             if exist:
                 return response_json( Result.fail(message=f"'{po.userName}'已存在！") ) 
-        return await self.edit(  self.pkValue, UserPO, userId=self.userId, fun=before )
+        return await self.edit(  self.routeValue, UserPO, userId=self.userId, fun=before )
 
     async def delete(self):
         """
         删除
         """
-        if self.pkValue == 1:
+        
+        
+        if self.routeValue == 1:
             return response_json(Result.fail(message="不能删除系统默认用户！"))
 
         async def before(po: UserPO, session: AsyncSession,*args,**kwargs):
@@ -182,7 +200,7 @@ class user_view(AbsPkView):
                     )
                 )
 
-        return await self.remove(  self.pkValue, UserPO, beforeFun=before)
+        return await self.remove(  self.routeValue, UserPO, beforeFun=before)
 
 
 class sys_users_view(AuthMethodView):

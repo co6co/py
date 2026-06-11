@@ -30,14 +30,14 @@ export const ViewFeatures = {
 	edit: ViewFeature.edit,
 	del: ViewFeature.del,
 };
+interface IQueryItem {
+	dictTypeId: number;
+	name?: string;
+	code?: string;
+}
 export default defineComponent({
 	setup(prop, ctx) {
-		//:define
-		interface IQueryItem {
-			dictTypeId: number;
-			name?: string;
-			code?: string;
-		}
+		//:define 
 		const DATA = reactive<{
 			title?: string;
 			query: IQueryItem;
@@ -59,12 +59,17 @@ export default defineComponent({
 		const diaglogRef = ref<DiaglogInstance>();
 
 		const onOpenDialog = (row?: Item) => {
-			DATA.title = row ? `编辑[${row?.name}]字典` : '增加字典';
-			DATA.currentItem = row;
+			DATA.title = row ? `编辑[${row?.name}]字典` : '增加字典';  
+			const operation=row ? FormOperation.edit : FormOperation.add
+			if (!row&&DATA.currentItem) // 创建节点需要 设备父级为当前节点需要包选择的id传入
+				row = {id:DATA.currentItem.id,parentId:DATA.currentItem.parentId} as Item; 
+				
+			DATA.currentItem = row; 
+
 			diaglogRef.value?.openDialog(
-				row ? FormOperation.edit : FormOperation.add,
-				DATA.query.dictTypeId,
-				row
+				operation,
+				DATA.query.dictTypeId, 
+				row 
 			);
 		};
 		const onSearch = () => {
@@ -73,7 +78,9 @@ export default defineComponent({
 		const onRefesh = () => {
 			viewRef.value?.refesh();
 		};
-
+		const onCurrentChange = (currentRow: Item, oldCurrentRow: Item) => {
+			DATA.currentItem = currentRow;
+		};
 		const { deleteSvc } = useDelete(api.del_svc, onRefesh);
 		const onDelete = (_: number, row: Item) => {
 			deleteSvc(row.id, row.name);
@@ -93,7 +100,14 @@ export default defineComponent({
 		//:page reader
 		const rander = (): VNodeChild => {
 			return (
-				<TableView dataApi={api.get_table_svc} ref={viewRef} query={DATA.query}>
+				<TableView
+					dataApi={api.get_table_svc}
+					ref={viewRef} query={DATA.query}
+					highlightCurrentRow={true}
+					onCurrentChange={onCurrentChange}
+					row-key="id"
+					treeProps={{ children: 'children' }}
+				>
 					{{
 						header: () => (
 							<>

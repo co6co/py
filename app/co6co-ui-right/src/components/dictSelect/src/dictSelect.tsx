@@ -1,4 +1,4 @@
-import { defineComponent, PropType, onMounted, VNode } from 'vue';
+import { defineComponent, PropType, onMounted, VNode, watch } from 'vue';
 import { ElSelect, ElOption } from 'element-plus';
 import { useDictHook } from '@/hooks';
 type ModelValueType = string | number | null | undefined;
@@ -15,7 +15,15 @@ export default defineComponent({
 		},
 		dictTypeCode: {
 			type: String as PropType<string>,
-			required: true,
+			required: false,
+		},
+		dictTypeId: {
+			type: Number as PropType<number>,
+			required: false,
+		},
+		parentId: {
+			type: Number as PropType<number>,
+			required: false,
 		},
 		modelValue: {
 			type: [String, Number, Object] as PropType<ModelValueType>, // 和下面没有任何区别
@@ -53,12 +61,12 @@ export default defineComponent({
 		'update:modelValue': (data: ModelValueType) => true,
 		//change: (data: ModelValueType) => true,
 	},
-	setup(prop, ctx) {
-		const { localValue, onChange } = useModelWrapper(prop, ctx);
-
+	 
+	setup(prop, ctx) { 
+		const { localValue, onChange } = useModelWrapper(prop, ctx); 
 		const stateHook = useDictHook.useDictSelect();
 		onMounted(async () => {
-			await stateHook.queryByCode(prop.dictTypeCode, prop.queryCategory);
+			await stateHook.queryByCode({dictTypeCode:prop.dictTypeCode, dictTypeId:prop.dictTypeId, category:prop.queryCategory, parentId:prop.parentId});
 		});
 		const getName = (v) => {
 			return stateHook.getName(String(v));
@@ -66,6 +74,10 @@ export default defineComponent({
 		const flagIs = (value: string, flag: string) => {
 			return stateHook.getFlag(value) == flag;
 		};
+		watch(() =>{ prop.dictTypeCode,prop.dictTypeId,prop.parentId}, async (_, __) => {
+			console.info(prop.dictTypeCode,prop.dictTypeId,prop.parentId)
+			await stateHook.queryByCode({dictTypeCode:prop.dictTypeCode, dictTypeId:prop.dictTypeId, category:prop.queryCategory, parentId:prop.parentId});
+		});
 		const valueUse = (d: DictSelectType) => {
 			let value: number | string | bigint = '';
 			switch (prop.valueUseFiled) {
@@ -96,7 +108,7 @@ export default defineComponent({
 					clearable={prop.clearable}
 					v-model={localValue.value}
 					placeholder={prop.placeholder}
-					onChange={onChange}>
+					on-change={onChange}>
 					{stateHook.selectData.value.map((d, index) => {
 						return <ElOption key={index} label={d.name} value={valueUse(d)} />;
 					})}
