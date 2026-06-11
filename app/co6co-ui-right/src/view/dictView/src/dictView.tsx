@@ -73,6 +73,7 @@ export default defineComponent({
 			);
 		};
 		const onSearch = () => {
+			console.log("搜索",DATA.query);
 			viewRef.value?.search();
 		};
 		const onRefesh = () => {
@@ -125,7 +126,7 @@ export default defineComponent({
 										placeholder="字典编码"
 									/>
 
-									<ElButton type="primary" icon={Search} onClick={onSearch}>
+									<ElButton type="primary" icon={Search} onClick={()=>onSearch()}>
 										搜索
 									</ElButton>
 									<ElButton
@@ -142,7 +143,7 @@ export default defineComponent({
 						),
 						default: () => (
 							<>
-								<ElTableColumn label="序号" width={55} align="center">
+								<ElTableColumn label="序号" width={100} align="center">
 									{{
 										default: (scope: tableScope) =>
 											viewRef.value?.rowIndex(scope.$index),

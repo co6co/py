@@ -1,4 +1,4 @@
-import { defineComponent, PropType, onMounted, VNode, watch,SetupContext } from 'vue';
+import { defineComponent, PropType, onMounted, VNode, watch, useAttrs } from 'vue';
 import { ElSelect, ElOption } from 'element-plus';
 import { useDictHook } from '@/hooks';
 type ModelValueType = string | number | null | undefined;
@@ -6,14 +6,14 @@ type ValueUseField = 'id' | 'name' | 'flag' | 'value' | 'desc';
 import { type DictSelectType } from '@/api/dict/dictType';
 import { useModelWrapper } from 'co6co';
 
-import { DictShowCategory } from '@/constants'; 
+import { DictShowCategory } from '@/constants';
 /**
  *  组件的封装
  *  1. 属性和事件的互传
  *  2. 插槽
  *  3. ref
  */
-export default defineComponent({
+export default defineComponent({ 
 	props: {
 		placeholder: {
 			type: String,
@@ -67,20 +67,14 @@ export default defineComponent({
 		'update:modelValue': (data: ModelValueType) => true,
 		//change: (data: ModelValueType) => true,
 	},
-
-	setup(prop, ctx:SetupContext) {
-		//const { localValue, onChange } = useModelWrapper(prop, ctx);
+	 
+	setup(prop, ctx) { 
+		const { localValue, onChange } = useModelWrapper(prop, ctx); 
 		const stateHook = useDictHook.useDictSelect();
-		// 声明 props
-		//const props = defineProps(['name'])
-		// 剩余透传属性 
-		 
-		const { attrs} = ctx //,slots,emit ,expose
-		 
-		//const attrs = useAttrs()
-		//const slots = useSlots()
-		onMounted(async () => { 
-			await stateHook.queryByCode({ dictTypeCode: prop.dictTypeCode, dictTypeId: prop.dictTypeId, category: prop.queryCategory, parentId: prop.parentId });
+		const attrs = useAttrs()
+		onMounted(async () => {
+			console.info(attrs);
+			await stateHook.queryByCode({dictTypeCode:prop.dictTypeCode, dictTypeId:prop.dictTypeId, category:prop.queryCategory, parentId:prop.parentId});
 		});
 		const getName = (v) => {
 			return stateHook.getName(String(v));
@@ -88,9 +82,9 @@ export default defineComponent({
 		const flagIs = (value: string, flag: string) => {
 			return stateHook.getFlag(value) == flag;
 		};
-		watch(() => { prop.dictTypeCode, prop.dictTypeId, prop.parentId }, async (_, __) => {
-			console.info(prop.dictTypeCode, prop.dictTypeId, prop.parentId)
-			await stateHook.queryByCode({ dictTypeCode: prop.dictTypeCode, dictTypeId: prop.dictTypeId, category: prop.queryCategory, parentId: prop.parentId });
+		watch(() =>{ prop.dictTypeCode,prop.dictTypeId,prop.parentId}, async (_, __) => {
+			console.info(prop.dictTypeCode,prop.dictTypeId,prop.parentId)
+			await stateHook.queryByCode({dictTypeCode:prop.dictTypeCode, dictTypeId:prop.dictTypeId, category:prop.queryCategory, parentId:prop.parentId});
 		});
 		const valueUse = (d: DictSelectType) => {
 			let value: number | string | bigint = '';
@@ -114,28 +108,26 @@ export default defineComponent({
 			}
 			return prop.isNumber ? Number(value) : value;
 		};
-		const { localValue, onChange } = useModelWrapper(prop, ctx); 
 		const rander = (): VNode => {
-			return ( 
-				<ElSelect {...attrs} v-model={localValue.value}  onChange={onChange}>
+			return (
+				<ElSelect 
+					v-bind={attrs} >
 					{stateHook.selectData.value.map((d, index) => {
 						return <ElOption key={index} label={d.name} value={valueUse(d)} />;
 					})}
-					 
 				</ElSelect>
 			);
 		};
-		//真是方法 defineExpose 编译宏用于<script setup> 中的组件
-		const exposedObj ={
+		//真是方法
+		ctx.expose({
 			stateHook,
 			getName,
 			flagIs,
-		}
-		ctx.expose(exposedObj);
+		});
 		//.d.ts 中的定义
-		//rander.stateHook = stateHook;
-		//rander.getName = getName;
-		//rander.flagIs = flagIs;
-		return rander; // 顶层还有render方法，在这里返回 顶层【与seup同级就不行，不然这里应返回挂在在this对象上的对象】
+		rander.stateHook = stateHook;
+		rander.getName = getName;
+		rander.flagIs = flagIs;
+		return rander;
 	}, //end setup
 });
