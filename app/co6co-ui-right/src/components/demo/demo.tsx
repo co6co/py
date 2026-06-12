@@ -1,10 +1,11 @@
-import { defineComponent, ref, onMounted,  getCurrentInstance } from 'vue'
+import { defineComponent, ref, onMounted } from 'vue'
+//import {  getCurrentInstance} from 'vue'
 import { ElInput } from 'element-plus'
 
 export default defineComponent({
     components: { ElInput },
     // 直接根节点 TSX render
-    setup(props, { attrs, slots  }) {
+    setup(_, { attrs, slots  }) {
         // 原有逻辑不变...
         //const attrs = useAttrs()
         //const slots = useSlots()

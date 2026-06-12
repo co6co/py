@@ -34,6 +34,7 @@ interface IQueryItem {
 	dictTypeId: number;
 	name?: string;
 	code?: string;
+	desc?:string
 }
 export default defineComponent({
 	setup(prop, ctx) {
@@ -72,8 +73,7 @@ export default defineComponent({
 				row 
 			);
 		};
-		const onSearch = () => {
-			console.log("搜索",DATA.query);
+		const onSearch = () => { 
 			viewRef.value?.search();
 		};
 		const onRefesh = () => {
@@ -123,7 +123,13 @@ export default defineComponent({
 										style={DATA.headItemWidth}
 										clearable
 										v-model={DATA.query.code}
-										placeholder="字典编码"
+										placeholder="字典值"
+									/>
+									<ElInput
+										style={DATA.headItemWidth}
+										clearable
+										v-model={DATA.query.desc}
+										placeholder="描述"
 									/>
 
 									<ElButton type="primary" icon={Search} onClick={()=>onSearch()}>
@@ -166,7 +172,7 @@ export default defineComponent({
 								/>
 								<ElTableColumn
 									prop="value"
-									label="配置"
+									label="是否启用"
 									sortable="custom"
 									showOverflowTooltip={true}>
 									{{
@@ -177,7 +183,13 @@ export default defineComponent({
 										),
 									}}
 								</ElTableColumn>
-
+								<ElTableColumn
+									prop="desc"
+									label="描述"
+									align="center"
+									sortable="custom"
+									showOverflowTooltip={true}
+								/>
 								<ElTableColumn
 									prop="createTime"
 									label="创建时间"

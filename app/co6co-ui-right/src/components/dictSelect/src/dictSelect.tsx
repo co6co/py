@@ -1,12 +1,14 @@
-import { defineComponent, PropType, onMounted, VNode, watch,SetupContext } from 'vue';
+import { defineComponent, PropType, onMounted, VNode, watch, SetupContext } from 'vue';
 import { ElSelect, ElOption } from 'element-plus';
 import { useDictHook } from '@/hooks';
 type ModelValueType = string | number | null | undefined;
 type ValueUseField = 'id' | 'name' | 'flag' | 'value' | 'desc';
+
 import { type DictSelectType } from '@/api/dict/dictType';
+import { type IQueryDictSelectParam } from '@/api/dict/dict';
 import { useModelWrapper } from 'co6co';
 
-import { DictShowCategory } from '@/constants'; 
+import { DictShowCategory } from '@/constants';
 /**
  *  组件的封装
  *  1. 属性和事件的互传
@@ -19,25 +21,19 @@ export default defineComponent({
 			type: String,
 			default: '请选择',
 		},
-		dictTypeCode: {
-			type: String as PropType<string>,
+
+		queryParam: {
+			type: Object as PropType<IQueryDictSelectParam>,
 			required: false,
 		},
-		dictTypeId: {
-			type: Number as PropType<number>,
-			required: false,
-		},
-		parentId: {
-			type: Number as PropType<number>,
-			required: false,
-		},
+
 		modelValue: {
 			type: [String, Number, Object] as PropType<ModelValueType>, // 和下面没有任何区别
 			//type: Object as PropType<ModelValueType>,
 			//required: true,
 			default: '',
 		},
-		valueUseFiled: {
+		valueUseField: {
 			type: String as PropType<ValueUseField>,
 			default: 'value',
 		},
@@ -57,10 +53,6 @@ export default defineComponent({
 			type: Boolean as PropType<Boolean>,
 			default: true,
 		},
-		queryCategory: {
-			type: Number as PropType<DictShowCategory>,
-			default: DictShowCategory.NameValueFlag,
-		},
 	},
 	emits: {
 		//@ts-ignore
@@ -68,19 +60,28 @@ export default defineComponent({
 		//change: (data: ModelValueType) => true,
 	},
 
-	setup(prop, ctx:SetupContext) {
+	setup(prop, ctx: SetupContext) {
 		//const { localValue, onChange } = useModelWrapper(prop, ctx);
 		const stateHook = useDictHook.useDictSelect();
 		// 声明 props
 		//const props = defineProps(['name'])
 		// 剩余透传属性 
-		 
-		const { attrs} = ctx //,slots,emit ,expose
-		 
+
+		const { attrs } = ctx //,slots,emit ,expose
+
 		//const attrs = useAttrs()
 		//const slots = useSlots()
-		onMounted(async () => { 
-			await stateHook.queryByCode({ dictTypeCode: prop.dictTypeCode, dictTypeId: prop.dictTypeId, category: prop.queryCategory, parentId: prop.parentId });
+		const queryData = async (param: IQueryDictSelectParam) => {
+			if (!param.dictTypeCode && !param.dictTypeId) {
+				console.warn("dictTypeCode 或 dictTypeId 不能为空同时为空");
+				return
+			}
+			if (param.category == undefined) param.category = DictShowCategory.NameValueFlag;
+			await stateHook.queryByCode(param);
+		}
+		onMounted(async () => {
+			if (prop.queryParam)
+				await queryData(prop.queryParam)
 		});
 		const getName = (v) => {
 			return stateHook.getName(String(v));
@@ -88,13 +89,13 @@ export default defineComponent({
 		const flagIs = (value: string, flag: string) => {
 			return stateHook.getFlag(value) == flag;
 		};
-		watch(() => { prop.dictTypeCode, prop.dictTypeId, prop.parentId }, async (_, __) => {
-			console.info(prop.dictTypeCode, prop.dictTypeId, prop.parentId)
-			await stateHook.queryByCode({ dictTypeCode: prop.dictTypeCode, dictTypeId: prop.dictTypeId, category: prop.queryCategory, parentId: prop.parentId });
-		});
+		watch(() => prop.queryParam, async (newVal, __) => {
+			if (!newVal) return;
+			await queryData(newVal)
+		}, { deep: true });
 		const valueUse = (d: DictSelectType) => {
 			let value: number | string | bigint = '';
-			switch (prop.valueUseFiled) {
+			switch (prop.valueUseField) {
 				case 'id':
 					value = d.id;
 					break;
@@ -114,28 +115,31 @@ export default defineComponent({
 			}
 			return prop.isNumber ? Number(value) : value;
 		};
-		const { localValue, onChange } = useModelWrapper(prop, ctx); 
+		const { localValue, onChange } = useModelWrapper(prop, ctx);
 		const rander = (): VNode => {
-			return ( 
-				<ElSelect {...attrs} v-model={localValue.value}  onChange={onChange}>
+			return (
+				<ElSelect {...attrs} v-model={localValue.value} onChange={onChange}
+					placeholder={prop.placeholder} disabled={prop.disabled}
+					clearable={prop.clearable} filterable={prop.filterable}
+				>
 					{stateHook.selectData.value.map((d, index) => {
 						return <ElOption key={index} label={d.name} value={valueUse(d)} />;
 					})}
-					 
+
 				</ElSelect>
 			);
 		};
 		//真是方法 defineExpose 编译宏用于<script setup> 中的组件
-		const exposedObj ={
+		const exposedObj = {
 			stateHook,
 			getName,
 			flagIs,
 		}
 		ctx.expose(exposedObj);
 		//.d.ts 中的定义
-		//rander.stateHook = stateHook;
-		//rander.getName = getName;
-		//rander.flagIs = flagIs;
+		rander.stateHook = stateHook;
+		rander.getName = getName;
+		rander.flagIs = flagIs;
 		return rander; // 顶层还有render方法，在这里返回 顶层【与seup同级就不行，不然这里应返回挂在在this对象上的对象】
 	}, //end setup
 });

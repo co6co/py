@@ -31,7 +31,7 @@ class DictFilter(absFilterItems):
         if self.checkFieldValue(self.name):
             filters_arr.append(sysDictPO.name.like(f"%{self.name}%"))
         if self.checkFieldValue(self.code):
-            filters_arr.append(sysDictPO.code.like(f"%{self.code}%"))
+            filters_arr.append(sysDictPO.value.like(f"%{self.code}%"))
         if self.checkFieldValue(self.desc):
             filters_arr.append(sysDictPO.desc.like(f"%{self.desc}%"))
 

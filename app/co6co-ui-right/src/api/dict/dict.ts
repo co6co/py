@@ -11,18 +11,34 @@ export { add_svc, edit_svc, del_svc, get_table_svc };
 export const get_dict_state_svc = (): Promise<IResponse<IEnumSelect[]>> => {
 	return createServiceInstance().get(`${base_URL}`);
 };
-
+ 
 export interface IQueryDictSelectParam {
 	dictTypeCode?: string; // 字典类型编码
 	dictTypeId?: number; // 字典类型id  两属性不能同时为空
-	category: DictShowCategory;
+	category?: DictShowCategory; 
+	parentId?:number
+}
+import  { FormItemBase} from 'co6co';
+export interface Item extends FormItemBase {
+	id: number;
+	dictTypeId?: number;
 	parentId?: number;
+	name?: string;
+	value?: string;
+	flag?: string;
+	state?: number;
+	desc?: string;
+	order: number;
 }
 /**
  * 获取字典的选择
  * @param dictTypeCode
  * @returns
  */
-export const get_dict_select_svc = ( data :IQueryDictSelectParam): Promise<IResponse<DictSelectType[]>> => { 
-	return createServiceInstance().post(`${base_URL}/select`,data);
+export const get_dict_select_svc = (data: IQueryDictSelectParam): Promise<IResponse<DictSelectType[]>> => {
+	return createServiceInstance().post(`${base_URL}/select`, data);
+};
+
+export const get_dict_select_one_svc = (id: number): Promise<IResponse<Item>> => {
+	return createServiceInstance().get(`${base_URL}/one/${id}`);
 };

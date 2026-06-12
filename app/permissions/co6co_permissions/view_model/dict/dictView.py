@@ -1,5 +1,7 @@
 
 
+from typing import Optional
+
 from sanic import Request
 from co6co.data.result import Result
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -24,9 +26,16 @@ class DictSelectView(AuthMethodView):
     @property
     def parentId(self):
         return self.json.get("parentId")
+     
     @property
     def category(self):
-        return self.json.get("category")
+        return self.json.get("category") 
+    async def getParentCondition(self):  
+        if self.parentId is None or not isinstance(self.parentId, int): 
+            return  sysDictPO.parentId==None
+        return sysDictPO.parentId.__eq__(self.parentId)
+        
+                
     async def post(self ):
         """ 
         获取字典选择
@@ -43,14 +52,9 @@ class DictSelectView(AuthMethodView):
         }
         DEFAULT_FIELDS = [sysDictPO.id, sysDictPO.name, sysDictPO.flag, sysDictPO.value]
 
-        fields = FIELD_MAP.get(self.category, DEFAULT_FIELDS)
-
+        fields = FIELD_MAP.get(self.category, DEFAULT_FIELDS) 
         # 2. 统一构建 where 条件
-        where = [sysDictPO.state.__eq__(dict_state.enabled.val)]
-
-        if self.parentId:
-            where.append(sysDictPO.parentId.__eq__(self.parentId))
-
+        where = [sysDictPO.state.__eq__(dict_state.enabled.val),await self.getParentCondition()]  
         # 3. 根据 dictTypeId 直接决定查询方式 
         if self.dictTypeId:
             where.append(sysDictPO.dictTypeId.__eq__(self.dictTypeId))
@@ -80,6 +84,7 @@ class Views(AuthMethodView):
         table数据 
         """
         param = DictFilter()
+        param.__dict__.update(self.json)
         return await self.query_tree(param.create_List_select(),pid_field='parentId')
 
     async def put(self  ):
@@ -95,7 +100,21 @@ class Views(AuthMethodView):
                 return Result.fail(message=f"值'{po.value}'在该字典中已存在！")
         return await self.add( po, userId=userId, beforeFun=before)
 
-
+class DictOneView(AuthMethodView):
+    routePath = "/one/<pk:int>"
+    async def get(self ):
+        """
+        获取字典详情
+        """
+        id=self.match_info.get("pk")
+       
+        select=Select(sysDictPO).where(sysDictPO.id.__eq__(id))
+        poDict =await   self.actuator.query_one_mappings(select)
+        if poDict is None:
+            return self.response_json(Result.fail(message=f"字典不存在！"))
+        else:
+            return self.response_json( Result.success(data=poDict) )
+            
 class View(AbsPkView): 
     async def put(self ):
         """

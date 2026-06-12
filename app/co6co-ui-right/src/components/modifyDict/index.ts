@@ -1,5 +1,6 @@
 import modifyDict from './src/modifyDict';
-export type { Item as DictItem } from './src/modifyDict';
+export type{Item as DictItem } from '@/api/dict/dict'
+//export type { Item as DictItem } from './src/modifyDict';
 export default modifyDict;
 /*
 import { withInstall } from 'co6co';

@@ -1,4 +1,4 @@
-import { defineComponent, PropType, onMounted, VNode, watch, useAttrs } from 'vue';
+import { defineComponent, PropType, onMounted, VNode, watch } from 'vue';
 import { ElSelect, ElOption } from 'element-plus';
 import { useDictHook } from '@/hooks';
 type ModelValueType = string | number | null | undefined;
@@ -7,13 +7,14 @@ import { type DictSelectType } from '@/api/dict/dictType';
 import { useModelWrapper } from 'co6co';
 
 import { DictShowCategory } from '@/constants';
+import { type IQueryDictSelectParam } from '@/api/dict/dict';
 /**
  *  组件的封装
  *  1. 属性和事件的互传
  *  2. 插槽
  *  3. ref
  */
-export default defineComponent({ 
+export default defineComponent({
 	props: {
 		placeholder: {
 			type: String,
@@ -23,13 +24,13 @@ export default defineComponent({
 			type: String as PropType<string>,
 			required: false,
 		},
-		dictTypeId: {
-			type: Number as PropType<number>,
-			required: false,
+		queryCategory: {
+			type: Number as PropType<DictShowCategory>,
+			default: DictShowCategory.NameValueFlag,
 		},
 		parentId: {
 			type: Number as PropType<number>,
-			required: false,
+			default: undefined,
 		},
 		modelValue: {
 			type: [String, Number, Object] as PropType<ModelValueType>, // 和下面没有任何区别
@@ -41,6 +42,7 @@ export default defineComponent({
 			type: String as PropType<ValueUseField>,
 			default: 'value',
 		},
+		
 		isNumber: {
 			type: Boolean as PropType<Boolean>,
 			default: false,
@@ -57,24 +59,32 @@ export default defineComponent({
 			type: Boolean as PropType<Boolean>,
 			default: true,
 		},
-		queryCategory: {
-			type: Number as PropType<DictShowCategory>,
-			default: DictShowCategory.NameValueFlag,
-		},
+		
 	},
 	emits: {
 		//@ts-ignore
 		'update:modelValue': (data: ModelValueType) => true,
 		//change: (data: ModelValueType) => true,
 	},
-	 
-	setup(prop, ctx) { 
-		const { localValue, onChange } = useModelWrapper(prop, ctx); 
+
+	setup(prop, ctx) {
+		const { localValue, onChange } = useModelWrapper(prop, ctx);
 		const stateHook = useDictHook.useDictSelect();
-		const attrs = useAttrs()
+		
+		const queryData = async ( dictTypeCode,parentId,queryCategory) => {
+			if (!dictTypeCode) {
+				console.warn("dictTypeCode 或 dictTypeId 不能为空同时为空");
+				return
+			}
+			const param: IQueryDictSelectParam = {
+				dictTypeCode: dictTypeCode,
+				category: queryCategory,
+				parentId: parentId,
+			} 
+			await stateHook.queryByCode(param);
+		}
 		onMounted(async () => {
-			console.info(attrs);
-			await stateHook.queryByCode({dictTypeCode:prop.dictTypeCode, dictTypeId:prop.dictTypeId, category:prop.queryCategory, parentId:prop.parentId});
+			await queryData(prop.dictTypeCode,prop.parentId,prop.queryCategory)
 		});
 		const getName = (v) => {
 			return stateHook.getName(String(v));
@@ -82,9 +92,8 @@ export default defineComponent({
 		const flagIs = (value: string, flag: string) => {
 			return stateHook.getFlag(value) == flag;
 		};
-		watch(() =>{ prop.dictTypeCode,prop.dictTypeId,prop.parentId}, async (_, __) => {
-			console.info(prop.dictTypeCode,prop.dictTypeId,prop.parentId)
-			await stateHook.queryByCode({dictTypeCode:prop.dictTypeCode, dictTypeId:prop.dictTypeId, category:prop.queryCategory, parentId:prop.parentId});
+		watch([() => prop.dictTypeCode,() => prop.parentId,() => prop.queryCategory], async (newValue, __) => {
+			await await queryData(newValue[0],newValue[1],newValue[2])
 		});
 		const valueUse = (d: DictSelectType) => {
 			let value: number | string | bigint = '';
@@ -110,8 +119,9 @@ export default defineComponent({
 		};
 		const rander = (): VNode => {
 			return (
-				<ElSelect 
-					v-bind={attrs} >
+				<ElSelect v-model={localValue.value} onChange={onChange}
+					placeholder={prop.placeholder} disabled={prop.disabled}
+					clearable={prop.clearable} filterable={prop.filterable}>
 					{stateHook.selectData.value.map((d, index) => {
 						return <ElOption key={index} label={d.name} value={valueUse(d)} />;
 					})}

@@ -11,8 +11,7 @@ import {
 
 import * as api_type from 'co6co';
 import { dictSvc as svc } from '@/api/dict';
-
-
+import { type IQueryDictSelectParam } from '@/api/dict/dict';
 
 
 import {
@@ -26,21 +25,11 @@ import {
 	ElInputNumber,
 } from 'element-plus';
 
-import { StateSelect,DictSelect } from '@/components/dictSelect';
-export interface Item extends api_type.FormItemBase {
-	id: number;
-	dictTypeId?: number;
-	parentId?:number;
-	name?: string;
-	value?: string;
-	flag?: string;
-	state?: number;
-	desc?: string;
-	order: number;
-}
+import { StateSelect, DictSelect } from '@/components/dictSelect';
+
 //Omit、Pick、Partial、Required
 export type FormItem = Omit<
-	Item,
+	svc.Item,
 	'id' | 'createUser' | 'updateUser' | 'createTime' | 'updateTime'
 >;
 export default defineComponent({
@@ -59,11 +48,13 @@ export default defineComponent({
 	},
 	setup(prop, ctx) {
 		const diaglogForm = ref<DialogFormInstance>();
-		const DATA = reactive<FormData<number, FormItem>&{parentId?:number}>({
+		const DATA = reactive<FormData<number, FormItem>>({
 			operation: FormOperation.add,
 			id: 0,
 			fromData: { order: 0 },
 		});
+
+		const queryParam = reactive<IQueryDictSelectParam>({});
 		//@ts-ignore
 		const key = Symbol('formData') as InjectionKey<FormItem>; //'formData'
 		provide('formData', DATA.fromData);
@@ -71,27 +62,35 @@ export default defineComponent({
 		const init_data = (
 			oper: FormOperation,
 			dictTypeId: number,
-			item?: Item
+			item?: svc.Item 
 		) => {
-			DATA.operation = oper; 
-			DATA.parentId = item?.parentId;  
-			switch (oper) { 
+			DATA.operation = oper;
+
+			queryParam.dictTypeId = dictTypeId;
+			switch (oper) {
 				case FormOperation.add:
 					DATA.id = 0;
+					queryParam.parentId = item?.parentId;
 					DATA.fromData.dictTypeId = dictTypeId;
-					DATA.fromData.parentId = item?.id;  
+					DATA.fromData.parentId = item?.id;
 
 					DATA.fromData.name = item?.name;
 					DATA.fromData.state = item?.state;
 					DATA.fromData.value = item?.value;
 					DATA.fromData.flag = item?.flag;
 					DATA.fromData.desc = item?.desc;
-					DATA.fromData.order = item?.order ? item.order : 0; 
+					DATA.fromData.order = item?.order ? item.order : 0;
 					break;
 				case FormOperation.edit:
 					if (!item) return false;
+					queryParam.parentId = item?.parentId;
 					DATA.id = item.id;
 					DATA.fromData.dictTypeId = dictTypeId;
+					if (item.parentId)
+						svc.get_dict_select_one_svc(item.parentId).then((res) => {
+							queryParam.parentId = res.data.parentId;
+						})
+
 					// 解构赋值排除不需要的属性，只复制FormItem中定义的属性
 					const { id, createUser, updateUser, createTime, updateTime, ...rest } = item;
 					Object.assign(DATA.fromData, rest);
@@ -160,10 +159,10 @@ export default defineComponent({
 					<ElRow>
 						<ElCol span={24}>
 							<ElFormItem label="父级" prop="parentId">
-								<DictSelect value-use-filed="id"  dict-type-id={DATA.fromData.dictTypeId} parentId={DATA.parentId} v-model={DATA.fromData.parentId} placeholder="请选择，可以为空" />
+								<DictSelect valueUseField="id" queryParam={queryParam} v-model={DATA.fromData.parentId} placeholder="请选择，可以为空,需要多级列表才设置" />
 							</ElFormItem>
 						</ElCol>
-						 
+
 					</ElRow>
 					<ElRow>
 						<ElCol span={12}>
@@ -224,7 +223,7 @@ export default defineComponent({
 		const openDialog = (
 			oper: FormOperation,
 			dictTypeId: number,
-			item?: Item
+			item?: svc.Item
 		) => {
 			init_data(oper, dictTypeId, item);
 			diaglogForm.value?.openDialog();

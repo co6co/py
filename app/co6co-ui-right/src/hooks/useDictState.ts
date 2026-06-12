@@ -77,6 +77,12 @@ export const useDictSelect = () => {
 	const _checkSelectDataValid = () => {
 		return selectData.value && selectData.value.length > 0;
 	};
+	const getId = (value: string) => {
+		//selectData.value.filter((m) => m.value == value);
+		//console.info('dictType', selectData.value);
+		if (_checkSelectDataValid())
+			return selectData.value.find((m) => m.value == value)?.id;
+	};
 	const getName = (value: string) => {
 		//selectData.value.filter((m) => m.value == value);
 		//console.info('dictType', selectData.value);
@@ -93,5 +99,5 @@ export const useDictSelect = () => {
 		if (_checkSelectDataValid())
 			return selectData.value.find((m) => m.value == value)?.desc;
 	};
-	return { selectData, query, queryByCode, getName, getFlag, getDesc };
+	return { selectData, query, queryByCode, getName, getFlag, getDesc,getId };
 };

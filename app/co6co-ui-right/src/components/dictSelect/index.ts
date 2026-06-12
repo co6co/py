@@ -1,7 +1,10 @@
 import { withInstall } from 'co6co';
 
 import dictSelect from './src/dictSelect';
+import dictSelectSimple from './src/dictSelectSimple';
 import stateSelect from './src/stateSelect';
+
+export const DictSelectSimple = withInstall(dictSelectSimple);
 
 export const DictSelect = withInstall(dictSelect);
 export default DictSelect;
