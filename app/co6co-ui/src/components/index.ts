@@ -11,3 +11,4 @@ export * from './dialogDetail';
 export * from './associated';
 export * from './viewSelect';
 export * from './pagination';
+export * from './intInput';

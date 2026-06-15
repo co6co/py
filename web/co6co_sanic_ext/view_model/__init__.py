@@ -324,7 +324,7 @@ class BaseClsView(_baseView):
         return self.request.match_info
 
     @property
-    def json(self):
+    def json(self)->dict:
         """json 参数"""
         return self.request.json
 
