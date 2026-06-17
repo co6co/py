@@ -31,6 +31,7 @@ class user_group_ass_view(AbsAssociationView):
     routePath = "/association/<userGroupId:int>" 
     @property 
     def association_sql(self)->Select :
+        self.is_tree = False
         subSelect = Select(UserGroupRolePO.roleId, UserGroupRolePO.userGroupId).filter(
             UserGroupRolePO.userGroupId == self.routeValue).subquery()
         select = (

@@ -51,7 +51,7 @@ async def get_one(request: Request, select: Select, isPO: bool = True):
     if isPO:
         return await actuator.query_one_entity(select)
     else:
-        return await actuator._query_list_mappings(select)
+        return await actuator.query_one_mappings(select)
 
  
 
