@@ -30,6 +30,7 @@ class user_ass_view(AbsAssociationView):
 
     @property
     def association_sql(self) -> Select:
+        self.is_tree=False
         subSelect = (
             Select(UserRolePO.roleId, UserRolePO.userId)
             .filter(UserRolePO.userId == self.routeValue)
@@ -62,6 +63,7 @@ class user_ass_view(AbsAssociationView):
         po = UserRolePO()
         po.roleId = associationed_id
         po.userId = self.routeValue
+        po.add_assignment(self.userId)
         return po
 
     @userRoleChanged 

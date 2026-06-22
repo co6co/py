@@ -90,7 +90,7 @@ class NATService:
         self,
         subject: str,
         callback: Callable[[BaseMessage, NATService], Awaitable[None]],
-        message_type: Type[BaseMessage] = BaseMessage,
+        message_type: Type[BaseMessage] = ResponseMessage,
         queue_group: Optional[str] = None,
     ) -> int:
         """订阅主题
