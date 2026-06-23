@@ -252,6 +252,17 @@ class Actuator:
         #    # return result.all() #[(1,2)] 1 select 1,2
         #    return result.rowcount
         return result.scalar()
+    async def executes(
+        self, select: Select , params: Dict[str, Any] = None
+    ):
+        """
+        执行sql
+        execute(Select(po.id).where(po.id>1)) ->[] or [1,2,3]
+
+        返回列表 
+        """
+        result = await self._execute(select, params) 
+        return result.scalars().fetchall()
 
     async def count(
         self, *filters: ColumnElement[bool], column: InstrumentedAttribute = "*"

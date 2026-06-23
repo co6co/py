@@ -85,6 +85,11 @@ class NATService:
         except Exception as e:
             logger.error(f"Request to {subject} failed: {e}")
             raise
+    async def reply(self,query: BaseMessage,replyMsg: BaseMessage):
+        if query.nats_reply is None:
+            logger.error("Reply subject is None")
+            return
+        await self.publish(query.nats_reply,replyMsg ) 
 
     async def subscribe(
         self,

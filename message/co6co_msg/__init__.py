@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-
 
-from .msg import BaseMessage, ResponseMessage, MessageType, CommandMessage, EventMessage, QueryMessage
+from .msg import BaseMessage, ResponseMessage, CallMessage,MessageType, CommandMessage, EventMessage, QueryMessage
 from .services import NATService
 
 
@@ -12,4 +12,5 @@ __all__ = [
     "CommandMessage",
     "EventMessage",
     "QueryMessage", 
+    "CallMessage",
 ]

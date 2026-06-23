@@ -3,8 +3,11 @@ from dataclasses import dataclass, field, asdict
 from typing import Any, Dict,  Optional, Type, TypeVar
 from datetime import datetime
 import json
-import uuid
+from co6co.utils.json_util import JSONEncoder
+import json
 from enum import Enum
+import uuid
+
 import logging
 
 logger = logging.getLogger(__name__)
@@ -15,6 +18,7 @@ class MessageType(Enum):
     """预定义的消息类型枚举"""
     COMMAND = "command"
     EVENT = "event"
+    CALL = "call"
     QUERY = "query"
     RESPONSE = "response"
 
@@ -28,6 +32,19 @@ class BaseMessage:
     source: str = "unknown"
     correlation_id: Optional[str] = None
     metadata: Dict[str, Any] = field(default_factory=dict)
+
+    @property
+    def nats_subject(self) -> str:
+        """获取 NATS 主题"""
+        return self.metadata.get("nats_subject", None)
+    @property
+    def nats_reply(self) -> str:
+        """获取 NATS 主题"""
+        return self.metadata.get("nats_reply", None)
+    @property
+    def nats_headers(self) -> str:
+        """获取 NATS 头信息"""
+        return self.metadata.get("nats_headers", None)
 
     
     
@@ -55,12 +72,14 @@ class BaseMessage:
     
     def to_json(self) -> str:
         """将消息转换为 JSON 字符串"""
-        return json.dumps(self.to_dict())
+        return JSONEncoder.dumps(self.to_dict())
+        #return json.dumps(self.to_dict())
     
     @classmethod
     def from_json(cls: Type[T], json_str: str) -> T:
         """从 JSON 字符串创建消息实例"""
-        return cls.from_dict(json.loads(json_str))
+        return cls.from_dict(JSONEncoder.loads(json_str))
+        #return cls.from_dict(json.loads(json_str))
 
 
 @dataclass
@@ -86,7 +105,12 @@ class QueryMessage(BaseMessage):
     query_name: str = ""
     parameters: Dict[str, Any] = field(default_factory=dict)
 
-
+@dataclass
+class CallMessage(BaseMessage):
+    """调用消息基类"""
+    type: MessageType = MessageType.CALL
+    call_name: str = ""
+    parameters: Dict[str, Any] = field(default_factory=dict)
 @dataclass
 class ResponseMessage(BaseMessage):
     """响应消息基类"""
