@@ -143,7 +143,7 @@ class DbCallable:
     def __init__(self, session: AsyncSession):
         self.session = session
 
-    async def __call__(self, func: Callable[[Actuator], Any]):
+    async def __call__(self, func: Callable[[Actuator], Any], *args, **kwargs):
         """
         with self.session, self.session.begin():
             这会创建一个显式的事务块
@@ -163,7 +163,7 @@ class DbCallable:
             if func is not None: 
                 try:
                     actuator= Actuator(session)
-                    return await func(actuator)
+                    return await func(actuator,*args, **kwargs)
                 except Exception as e:
                     #await actuator.session.rollback() # 是否需要回滚
                     log.err(f"执行'DBCallable'异常:{e}",e)

@@ -83,10 +83,12 @@ class ConfigCache(CustomSanicCache):
         获取Key
         """
         return "{}_{}".format(self.configKeyPrefix, code)
-
-    def _convertValue(self, value: str) -> str | dict:
+    @staticmethod
+    def _convertValue(value: str) -> str | dict:
         """
         转换配置值
+        如果是json字符串,则转换为dict
+        否则,则返回原值
         """
         if "{" in value and "}" in value:
             try:
@@ -95,32 +97,33 @@ class ConfigCache(CustomSanicCache):
                 log.err("load json config {} error:{}".format(value, e))
                 raise Exception("load json config error,check value  :{}".format(value)) 
         return value
+    @staticmethod
+    async def QueryConfigValue(actuator:Actuator, code: str) -> str | None:
+        """
+        查询配置值
+        """
+        select = (
+                Select(sysConfigPO.value)
+                .filter(sysConfigPO.code.__eq__(code))
+            )
+        data  = await actuator.query_one_mappings(select)
+        result = None
+        if data is None:
+            log.warn("query {} config is NULL".format(code))
+        else:
+            result = data.get("value")
+            # 配置的是否时json字符串
+            result=ConfigCache._convertValue(result)
+        return result
+
+
     async def queryConfig(self, code: str) -> str | None:
         """
         查询当前用户的所拥有的角色
         结果放置在cache中
         """
-        callable = DbCallable(self.dbService.Session())
-
-        async def exe(actuator:Actuator) -> str | None:
-            select = (
-                Select(sysConfigPO.name, sysConfigPO.code,
-                       sysConfigPO.value, sysConfigPO.remark)
-                .filter(sysConfigPO.code.__eq__(code))
-            )
-            data  = await actuator.query_one_mappings(select)
-            
-            result = None
-            if data is None:
-                log.warn("query {} config is NULL".format(code))
-            else:
-                result = data.get("value")
-                # 配置的是否时json字符串
-                result=self._convertValue(result)
-                self.setConfig(code, result)
-            return result
-
-        return await callable(exe)
+        callable = DbCallable(self.dbService.Session()) 
+        return await callable(ConfigCache.QueryConfigValue, code=code)
 
     def setConfig(self, code: str, value: str):
         if code is not None:

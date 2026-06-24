@@ -20,6 +20,7 @@ class MessageType(Enum):
     EVENT = "event"
     CALL = "call"
     QUERY = "query"
+    POST = "post"
     RESPONSE = "response"
 
 
@@ -104,7 +105,12 @@ class QueryMessage(BaseMessage):
     type: MessageType = MessageType.QUERY
     query_name: str = ""
     parameters: Dict[str, Any] = field(default_factory=dict)
-
+@dataclass
+class PostMessage(BaseMessage):
+    """查询消息基类"""
+    type: MessageType = MessageType.QUERY
+    query_name: str = ""
+    parameters: Dict[str, Any] = field(default_factory=dict)
 @dataclass
 class CallMessage(BaseMessage):
     """调用消息基类"""

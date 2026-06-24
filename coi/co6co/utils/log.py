@@ -76,7 +76,7 @@ def __log(*msg: str, type: int = 0, foregroundColor: int = 37, bg=40, e=None, ha
     t =threading.current_thread()
     time = datetime.datetime.now()
     err = e.__traceback__.tb_lineno if e is not None else ""
-    prefix = f"['{time.strftime('%Y-%m-%d %H:%M:%S')}'] [{t.ident}|{t.name}]\t"
+    prefix = f"[{time.strftime('%Y-%m-%d %H:%M:%S')}] [{t.ident}|{t.name}]\t"
     if not hasPrefix:
         prefix = ""
     # __getMessage(*msg).encode("utf-8") 以前为什么不显示乱码
