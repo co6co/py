@@ -159,14 +159,14 @@ class NATService:
 
         if sid is None:
             # 取消该主题的所有订阅
-            for sub_id in self.subscriptions[subject]:
-                await self.nc.unsubscribe(sub_id)
+            for sub_id in self.subscriptions[subject]: 
+                self.nc._remove_sub(sub_id)
             del self.subscriptions[subject]
             logger.info(f"Unsubscribed all from {subject}")
-        else:
+        else: 
             # 取消特定订阅
             if sid in self.subscriptions[subject]:
-                await self.nc.unsubscribe(sid)
+                self.nc._remove_sub(sid)
                 self.subscriptions[subject].remove(sid)
                 logger.info(f"Unsubscribed sid {sid} from {subject}")
 
