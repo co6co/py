@@ -21,7 +21,7 @@ import {
 	EnumSelect,
 } from 'co6co';
 
-import { DictSelect, DictSelectInstance, validatorBack } from 'co6co-right';
+import { DictSelectSimple, DictSelectInstance, validatorBack } from 'co6co-right';
 import {
 	ElRow,
 	ElCol,
@@ -234,7 +234,7 @@ export default defineComponent({
 						</ElCol>
 						<ElCol span={12}>
 							<ElFormItem label="任务类别" prop="category">
-								<DictSelect
+								<DictSelectSimple
 									ref={taskCategoryRef}
 									onChange={onLoadTaskData}
 									dictTypeCode={DictTypeCodes.TaskCategory}
@@ -246,7 +246,7 @@ export default defineComponent({
 						</ElCol>
 						<ElCol span={12}>
 							<ElFormItem label="状态" prop="state">
-								<DictSelect
+								<DictSelectSimple
 									dictTypeCode={DictTypeCodes.TaskState}
 									v-model={DATA.fromData.state}
 									isNumber={true}
@@ -281,12 +281,13 @@ export default defineComponent({
 								<EnumSelect
 									v-model={DATA.fromData.data}
 									data={selectValue.value}
+									isNumber={false} 
 								/>
 							</ElFormItem>
 						</ElCol>
 						<ElCol span={12}>
 							<ElFormItem label="运行状态" prop="execStatus">
-								<DictSelect
+								<DictSelectSimple
 									disabled={true}
 									dictTypeCode={DictTypeCodes.TaskStatus}
 									v-model={DATA.fromData.execStatus}

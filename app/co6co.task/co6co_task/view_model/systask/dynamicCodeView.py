@@ -1,8 +1,4 @@
-
-from sanic.response import text
-from sanic import Request 
 from sqlalchemy.ext.asyncio import AsyncSession
-
 from sqlalchemy.sql import Select
 from co6co.data.result import Result
 from co6co_db_ext.db_utils import db_tools
@@ -78,11 +74,11 @@ class View(AuthMethodView):
                 return Result.fail(message=f"'{po.code}'已存在！")
         return await self.edit( self.pk, DynamicCodePO,  userId=self.userId, fun=before)
 
-    async def delete(self, request: Request, pk: int):
+    async def delete(self ):
         """
         删除
         """
-        return await self.remove(request, pk, DynamicCodePO)
+        return await self.remove(self. pk, DynamicCodePO)
 
 
 class RunView(_codeView, AuthMethodView):
@@ -90,10 +86,10 @@ class RunView(_codeView, AuthMethodView):
     @property
     def pk(self):
         return self.match_info.get("pk")
-    async def put(self, request: Request, pk: int):
+    async def put(self ):
         """
         执行一次
         """
         select = Select(DynamicCodePO).filter(DynamicCodePO.id.__eq__(self.pk))
-        po: DynamicCodePO = await self.get_one( select)
+        po: DynamicCodePO = await self.actuator.query_one_entity(select)
         return self.response_json(self.exec_py_code(po.sourceCode))

@@ -1,5 +1,6 @@
 #-- coding: utf-8 --
 # 未经严格测试，暂不使用
+# 未使用
 from co6co.task.eventDispatcher import EventHandler, Event, EventType
 from typing import Optional
 import time
@@ -275,7 +276,11 @@ class UnknownHandler(BaseTaskHandler):
 
 
 class TaskManager(IWorker):
-    """任务管理器"""
+    """
+    任务管理器
+
+    未使用 代码已经不同步了，
+    """
 
     def __init__(self, app: Sanic):
         self.app = app
@@ -319,6 +324,8 @@ class TaskManager(IWorker):
     def startTimeTask(self):
         """
         运行在数据库中的代码任务
+
+        
         """
         taskArr = self.bll.run(self.getData)
         success = []

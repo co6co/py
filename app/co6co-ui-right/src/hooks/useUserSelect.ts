@@ -3,6 +3,7 @@ import { useEnum } from './base';
 import { get_user_avatar } from '@/api/sys/user';
 import { create_URL_resource } from '@/api/download';
 import { ref } from 'vue';
+
 export const useState = () => {
 	const { loadData, selectData, refresh, getName } = useEnum(get_state_svc);
 	const getTagType = (value?: number) => {

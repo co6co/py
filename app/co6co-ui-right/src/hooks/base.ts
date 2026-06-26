@@ -17,3 +17,4 @@ export const useEnum = (svc: IEnumSvc) => {
 	const loadData = refresh;
 	return { loadData, selectData, refresh, getName };
 };
+

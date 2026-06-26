@@ -280,8 +280,8 @@ class TasksMgr(sanics.Worker):
             log.err("执行 ERROR", e)
             return None
 
-    def addTaskByCode(self, code: str, cron: str):
-        task = custom.ICustomTask.createInstance(code)
+    def addTaskByCode(self, code: str,name, cron: str):
+        task = custom.ICustomTask.createInstance(name)
         if task:
             self.scheduler.addTask(code, task.main, cron, task.stop)
         else:
@@ -315,7 +315,7 @@ class TasksMgr(sanics.Worker):
             item = po.get("data")  # 代码Id，或者 类code属性
             log.info("加载任务:{}...".format(code))
             if category == 0:
-                result = self.addTaskByCode(code,  cron)
+                result = self.addTaskByCode(code,item,  cron)
                 success.append(code) if result else faile.append(code)
                 continue
             # 任务在表中，已经关联表读取完成

@@ -157,6 +157,11 @@ export default defineComponent({
 		const rowIndex = ($index: number) => {
 			return getTableIndex(DATA.query, $index);
 		};
+
+		
+
+
+
 		//:page reader
 		const rander = (): VNodeChild => {
 			return (

@@ -20,7 +20,7 @@ import {
 	type FormData,
 } from 'co6co';
 
-import { DictSelect, DictSelectInstance, validatorBack } from 'co6co-right';
+import { DictSelectSimple, DictSelectSimpleInstance, validatorBack } from 'co6co-right';
 import {
 	ElRow,
 	ElCol,
@@ -183,7 +183,7 @@ export default defineComponent({
 					closeLoading();
 				});
 		};
-		const codeCategoryRef = ref<DictSelectInstance>();
+		const codeCategoryRef = ref<DictSelectSimpleInstance>();
 		const isPythonCode = computed(() => {
 			return codeCategoryRef.value?.flagIs(
 				String(DATA.fromData.category),
@@ -268,7 +268,7 @@ export default defineComponent({
 						</ElCol>
 						<ElCol span={12}>
 							<ElFormItem label="类别" prop="category">
-								<DictSelect
+								<DictSelectSimple
 									ref={codeCategoryRef}
 									dictTypeCode={DictTypeCodes.CodeType}
 									v-model={DATA.fromData.category}
@@ -308,7 +308,7 @@ export default defineComponent({
 					<ElRow>
 						<ElCol span={12}>
 							<ElFormItem label="状态" prop="state">
-								<DictSelect
+								<DictSelectSimple
 									dictTypeCode={DictTypeCodes.CodeState}
 									v-model={DATA.fromData.state}
 									isNumber={true}

@@ -7,8 +7,8 @@ import { FormOperation, showLoading, closeLoading } from 'co6co';
 import {
 	routeHook,
 	ViewFeature,
-	DictSelect,
-	DictSelectInstance,
+	DictSelectSimple,
+	DictSelectSimpleInstance,
 	tableScope,
 	TableView,
 	deleteHook,
@@ -54,8 +54,8 @@ export default defineComponent({
 		const viewRef = ref<TableViewInstance>();
 		const diaglogRef = ref<InstanceType<typeof Diaglog>>();
 		const showCodeRef = ref<InstanceType<typeof ShowCode>>();
-		const categoryDictRef = ref<DictSelectInstance>();
-		const stateDictRef = ref<DictSelectInstance>();
+		const categoryDictRef = ref<DictSelectSimpleInstance>();
+		const stateDictRef = ref<DictSelectSimpleInstance>();
 		const isPythonCode = (category: number) => {
 			const result = categoryDictRef.value?.flagIs(String(category), 'python');
 			if (result == undefined) {
@@ -119,14 +119,14 @@ export default defineComponent({
 										placeholder="模板标题"
 										class="handle-input"
 									/>
-									<DictSelect
+									<DictSelectSimple
 										ref={categoryDictRef}
 										style={DATA.headItemWidth}
 										dictTypeCode={DictTypeCodes.CodeType}
 										v-model={DATA.query.category}
 										placeholder="类别"
 									/>
-									<DictSelect
+									<DictSelectSimple
 										ref={stateDictRef}
 										style={DATA.headItemWidth}
 										dictTypeCode={DictTypeCodes.CodeState}

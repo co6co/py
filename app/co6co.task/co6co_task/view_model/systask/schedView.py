@@ -84,7 +84,7 @@ class schedView(_codeView, AuthMethodView):
         查询下一次运行时间
         """
         select = Select(SysTaskPO).filter(SysTaskPO.id.__eq__(self.pk))
-        po: SysTaskPO = await self.get_one( select)
+        po: SysTaskPO = await self.actuator.query_one_entity( select)
         success, data = await schedView.execCommand(self.request, po.code, CommandCategory.GETNextTime)
         if success:
             return self.response_json(Result.success(data, message="获取成功"))
@@ -96,7 +96,7 @@ class schedView(_codeView, AuthMethodView):
         停止调度
         """
         select = Select(SysTaskPO).filter(SysTaskPO.id.__eq__(self.pk))
-        po: SysTaskPO = await self.get_one( select)
+        po: SysTaskPO = await self.actuator.query_one_entity( select)
         success, msg = await schedView.execCommand(self.request, po.code, CommandCategory.STOP)
         if success:
             return self.response_json(Result.success(message="停止成功"))

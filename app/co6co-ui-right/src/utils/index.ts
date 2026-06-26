@@ -1,6 +1,7 @@
 export * from './route';
 import { nextTick } from 'vue';
 import { ElScrollbar, ElTable } from 'element-plus';
+export * as utils from './other';
 /**
  * 滚动Table到指定行
  * @param rowIndex  table 行

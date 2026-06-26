@@ -17,8 +17,8 @@ import { FormOperation, showLoading, closeLoading, IResponse } from 'co6co';
 import {
 	routeHook,
 	ViewFeature,
-	DictSelect,
-	DictSelectInstance,
+	DictSelectSimple,
+	DictSelectSimpleInstance,
 	tableScope,
 	TableView,
 	deleteHook,
@@ -65,9 +65,9 @@ export default defineComponent({
 		const viewRef = ref<TableViewInstance>();
 		const diaglogRef = ref<InstanceType<typeof Diaglog>>();
 		const showCodeRef = ref<InstanceType<typeof ShowCode>>();
-		const categoryDictRef = ref<DictSelectInstance>();
-		const stateDictRef = ref<DictSelectInstance>();
-		const statusDictRef = ref<DictSelectInstance>();
+		const categoryDictRef = ref<DictSelectSimpleInstance>();
+		const stateDictRef = ref<DictSelectSimpleInstance>();
+		const statusDictRef = ref<DictSelectSimpleInstance>();
 
 		const onOpenDialog = (row?: Item) => {
 			DATA.title = row ? `编辑[${row?.name}]` : '增加';
@@ -168,21 +168,21 @@ export default defineComponent({
 										placeholder="模板标题"
 										class="handle-input"
 									/>
-									<DictSelect
+									<DictSelectSimple
 										ref={categoryDictRef}
 										style={DATA.headItemWidth}
 										dictTypeCode={DictTypeCodes.TaskCategory}
 										v-model={DATA.query.category}
 										placeholder="类别"
 									/>
-									<DictSelect
+									<DictSelectSimple
 										ref={stateDictRef}
 										style={DATA.headItemWidth}
 										dictTypeCode={DictTypeCodes.TaskState}
 										v-model={DATA.query.category}
 										placeholder="任务状态"
 									/>
-									<DictSelect
+									<DictSelectSimple
 										ref={statusDictRef}
 										style={DATA.headItemWidth}
 										dictTypeCode={DictTypeCodes.TaskStatus}
@@ -216,7 +216,7 @@ export default defineComponent({
 									label="编号"
 									prop="code"
 									align="center"
-									width={180}
+									width={150}
 									sortable="custom"
 									showOverflowTooltip={true}
 								/>
@@ -225,6 +225,7 @@ export default defineComponent({
 									prop="name"
 									align="center"
 									sortable="custom"
+									width={180}
 									showOverflowTooltip={true}
 								/>
 								<ElTableColumn
