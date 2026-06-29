@@ -113,9 +113,9 @@ class schedView(_codeView, AuthMethodView):
         result = Result.success()
         if not sourceCode:
             try:
-                task = custom.ICustomTask.createInstance(data)
+                task = custom.ICustomTask.createInstance(data) 
                 isTimeout, _ = timeout(secounds, task.main)
-                log.warn("执行成功", isTimeout)
+                log.warn(f"执行任务是否超时：{isTimeout}")
             except Exception as e:
                 log.err("执行失败", e)
                 return self.response_json(Result.fail(e, message="执行失败"))
