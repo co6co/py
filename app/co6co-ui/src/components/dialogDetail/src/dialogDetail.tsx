@@ -35,7 +35,7 @@ export default defineComponent({
 			return (
 				<Dialog
 					title={prop.title}
-					style={ctx.attrs}
+					{...ctx.attrs}
 					ref={dialogRef}
 					v-slots={slots}></Dialog>
 			);

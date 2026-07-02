@@ -1,11 +1,11 @@
 import { get_state_svc, get_category_svc } from '@/api/sys/user';
-import { useEnum } from './base';
+import { useEnumSelect } from './useSelect';
 import { get_user_avatar } from '@/api/sys/user';
 import { create_URL_resource } from '@/api/download';
 import { ref } from 'vue';
 
 export const useState = () => {
-	const { loadData, selectData, refresh, getName } = useEnum(get_state_svc);
+	const { loadData, selectData, refresh, getName } = useEnumSelect(get_state_svc);
 	const getTagType = (value?: number) => {
 		if (value != undefined) {
 			switch (value) {
@@ -24,7 +24,7 @@ export const useState = () => {
 };
 
 export const useCategory = () => {
-	const { loadData, selectData, refresh, getName } = useEnum(get_category_svc);
+	const { loadData, selectData, refresh, getName } = useEnumSelect(get_category_svc);
 	return { loadData, selectData, refresh, getName };
 };
 

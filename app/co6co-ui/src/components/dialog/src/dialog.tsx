@@ -76,7 +76,9 @@ export default defineComponent({
 					class={style['diaglog-box']}
 					title={prop.title}
 					v-model={diaglogData.visible}
+					 {...ctx.attrs} 
 					v-slots={dialogSlots}>
+						
 					<ElScrollbar>
 						<>{ctx.slots.default ? ctx.slots.default() : null}</>
 					</ElScrollbar>

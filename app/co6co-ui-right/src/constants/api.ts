@@ -1,2 +1,6 @@
-import { IResponse, IEnumSelect } from 'co6co';
-export type IEnumSvc = () => Promise<IResponse<IEnumSelect[]>>;
+import {  IEnumSelect } from 'co6co';
+ 
+export interface IEnumsResonse {
+  [key: string]: IEnumSelect[]
+}
+ 

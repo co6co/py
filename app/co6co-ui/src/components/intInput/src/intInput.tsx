@@ -10,7 +10,7 @@ export default defineComponent({
     }
   },
   emits: ['update:modelValue'],
-  setup(props, { emit }) {
+  setup(props, { emit ,attrs}) {
     const handleInput = (val: string) => {
       const num = parseFloat(val)
       emit('update:modelValue', isNaN(num) ? 0 : num)
@@ -18,6 +18,7 @@ export default defineComponent({
 
     return () => (
       <ElInput
+        {...attrs} 
         modelValue={String(props.modelValue)}
         onInput={handleInput}
         {...{ onChange: handleInput }} // 防止中文输入法问题

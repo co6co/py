@@ -70,7 +70,7 @@ export default defineComponent({
 			return (
 				<Dialog
 					title={prop.title}
-					style={ctx.attrs}
+					{...ctx.attrs} 
 					ref={dialogRef}
 					v-slots={ctx.slots.buttons ? { buttons: ctx.slots.buttons } : slots}>
 					<Form
@@ -79,6 +79,7 @@ export default defineComponent({
 						v-slots={ctx.slots.default}
 						ref={formInstance}
 						rules={prop.rules}
+						
 						model={data}
 						onSubmit={() => ctx.emit('submit')}
 						onError={(e) => ctx.emit('error', e)}

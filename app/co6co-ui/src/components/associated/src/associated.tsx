@@ -312,7 +312,7 @@ export default defineComponent({
 				<DialogForm
 					title={prop.title}
 					labelWidth={prop.labelWidth}
-					style={ctx.attrs}
+					{...ctx.attrs}
 					rules={rules.value}
 					ref={diaglogForm}
 					v-slots={fromSlots}

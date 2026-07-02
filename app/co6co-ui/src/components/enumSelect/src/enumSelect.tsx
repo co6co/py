@@ -42,6 +42,7 @@ export default defineComponent({
 		//		localValue.value = v;
 		//	}
 		//);
+		const { attrs } = context;
 		const { localValue, onChange } = useModelWrapper(prop, context);
 		const valueUse = (d: IEnumSelect) => { 
 			const value = d[prop.valueUseFiled]; 
@@ -52,7 +53,7 @@ export default defineComponent({
 			return (
 				<ElSelect
 					clearable
-					style={context.attrs}
+					{...attrs} 
 					class="mr10"
 					v-model={localValue.value}
 					onChange={onChange}

@@ -56,7 +56,7 @@ export default defineComponent({
 		sizeChage: (value: number) => true,
 		currentPageChange: (value: number) => true,
 	},
-	setup(prop, { emit }) {
+	setup(prop, { emit ,attrs}) {
 		//:define
 
 		//:use
@@ -97,6 +97,7 @@ export default defineComponent({
 						pageSize={DATA.query.pageSize}
 						pageSizes={prop.pageSizes}
 						total={prop.total}
+						{...attrs} 
 						currentPage={DATA.query.pageIndex}
 						onSizeChange={onSizeChage}
 						onCurrentChange={onCurrentChange}

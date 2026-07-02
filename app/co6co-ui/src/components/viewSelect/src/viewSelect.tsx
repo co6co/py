@@ -41,8 +41,9 @@ export default defineComponent({
 			return (
 				<ElSelect
 					clearable
-					filterable={true}
-					style={context.attrs}
+					filterable={true} 
+
+					{...context.attrs} 
 					class="iconList"
 					v-model={localValue.value}
 					onChange={onChange2}

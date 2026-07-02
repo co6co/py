@@ -72,7 +72,7 @@ export default defineComponent({
 			//可以写某些代码
 			return (
 				<ElForm
-					style={attrs}
+					{...attrs} 
 					labelWidth={prop.labelWidth}
 					ref={formRef}
 					rules={prop.rules}
