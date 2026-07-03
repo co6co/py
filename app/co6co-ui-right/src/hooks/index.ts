@@ -13,4 +13,5 @@ export * from './useDrag';
 
 export * from './useKey';
 export * from './useSelect';
+export {useViewData} from './useView'
 

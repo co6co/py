@@ -11,7 +11,7 @@ export const useSelect = <T extends any = void>(api: (data: T) => Promise<IRespo
         selectData.value = [];
         const res = await api(data);
         selectData.value = res.data;
-    }; 
+    };
     const getName = (value?: number) => {
         if (value != undefined) return selectData.value.find((m) => m.id == value)?.name;
         return '';
@@ -45,7 +45,7 @@ export const useEnumSelect = <T extends any = void>(api: (data: T) => Promise<IR
     return { loadData, selectData, refresh, getName, getTagType };
 };
 
-export const useEnumsSelect = <T extends any = void>(api: (data: T) => Promise<IResponse<IEnumsResonse>>, nameChecked?: (item: IEnumSelect) => boolean) => {
+export const useEnumsSelect = <T extends any = void>(api: (data: T) => Promise<IResponse<IEnumsResonse>>) => {
     const selectData = ref<{ [key: string]: IEnumSelect[] }>();
     const refresh = async (data: T) => {
         selectData.value = {};
@@ -53,11 +53,12 @@ export const useEnumsSelect = <T extends any = void>(api: (data: T) => Promise<I
         selectData.value = res.data;
     };
 
-    const getName = (key: string, value?: number | string) => {
-        if (value != undefined)
+    const getName = (key: string, value?: number | string, nameChecked?: (item: IEnumSelect) => boolean) => {
+        if (value == undefined) {
             if (!nameChecked) nameChecked = (m) => m.value == value;
-        if (selectData.value && key in selectData.value)
-            return selectData.value[key].find(nameChecked!)?.label;
+            if (selectData.value && key in selectData.value)
+                return selectData.value[key].find(nameChecked)?.label;
+        }
         return '';
     };
 
