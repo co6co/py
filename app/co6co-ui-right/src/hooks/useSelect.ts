@@ -20,7 +20,8 @@ export const useSelect = <T extends any = void>(api: (data: T) => Promise<IRespo
     return { loadData, selectData, refresh, getName };
 }
 
-export const useEnumSelect = <T extends any = void>(api: (data: T) => Promise<IResponse<IEnumSelect[]>>, nameChecked?: (item: IEnumSelect) => boolean) => {
+// , nameChecked?: (item: IEnumSelect) => boolean 不该把nameChecked 提出来，因为 value 变化的,赋值后 m=>m.value==1 固定了不能再变化
+export const useEnumSelect = <T extends any = void>(api: (data: T) => Promise<IResponse<IEnumSelect[]>>) => {
     const selectData = ref<IEnumSelect[]>([]);
     const refresh = async (data: T) => {
         selectData.value = [];
@@ -31,10 +32,8 @@ export const useEnumSelect = <T extends any = void>(api: (data: T) => Promise<IR
     };
 
     const getName = (value?: number | string) => {
-        if (value != undefined)
-            if (!nameChecked) nameChecked = (m) => m.value == value;
-        return selectData.value.find(nameChecked!)?.label;
-        return '';
+        const nameChecked = (m) => m.value == value;
+        return selectData.value.find(nameChecked!)?.label; 
     };
 
     const getTagType = (value?: number | string, checked?: (item: IEnumSelect) => boolean) => {
