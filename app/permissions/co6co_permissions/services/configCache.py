@@ -123,7 +123,9 @@ class ConfigCache(CustomSanicCache):
         结果放置在cache中
         """
         callable = DbCallable(self.dbService.Session()) 
-        return await callable(ConfigCache.QueryConfigValue, code=code)
+        result = await callable(ConfigCache.QueryConfigValue, code=code)
+        self.setConfig(code, result)
+        return result
 
     def setConfig(self, code: str, value: str):
         if code is not None:

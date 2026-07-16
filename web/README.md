@@ -42,6 +42,8 @@
 	1. 移除model 模块
 	2. 移除JSON_util
 0.1.0
+0.1.1
+ 增加view 中 iter_files 方法
 
 ```
 

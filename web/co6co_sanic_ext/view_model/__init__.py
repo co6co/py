@@ -24,7 +24,8 @@ from co6co_web_session.base import SessionDict
 from typing import Tuple
 from co6co.utils import tool_util as utils
 from co6co.utils.modules import deprecated
-import json as sys_json 
+import json as sys_json
+
 
 def response_json(data: Result | Page_Result, status: int = 200):
     return json(sys_json.loads(JSONEncoder.dumps(data)), status=status)
@@ -34,16 +35,16 @@ class _baseView(HTTPMethodView):
     """
     视图基类： 约定 增删改查，其他未约定方法可根据实际情况具体使用
     views.POST  : --> query list
-    
-    
+
+
      __init_subclass__如果不调 super().__init_subclass__()，就会阻断 Generic 的设置流程
      python 3.12 的 typing 中，_generic_class_getitem（即 XXXView[Something]的 __class_getitem__）会访问 cls.__parameters__，
      如果 __init_subclass__链断了，__parameters__就不存在
-     
+
     HTTPMethodView __init_subclass__阻断了 Generic的初始化链。导致 __parameters__没被写入
     """
 
-    routePath: str = "/" 
+    routePath: str = "/"
 
     def response_json(self, data: Result | Page_Result, status: int = 200):
         return response_json(data, status=status)
@@ -278,22 +279,54 @@ class _baseView(HTTPMethodView):
         async with aiofiles.open(path, "wb") as f:
             await f.write(file.body)
 
+    def iter_files(self, request: Request, fileFieldName: str = None):
+        """
+        获取文件：
+        return field_name, file, filename, ext, size
+        """
+        if fileFieldName is None:
+            for field_name, file_list in request.files.items():
+                for file in file_list:
+                    filename = file.name
+                    import os 
+                    _, ext = os.path.splitext(filename)
+                    ext = ext.lower()
+                    size = len(file.body)
+                    yield field_name, file, filename, ext, size
+        else:
+            fileList= request.files.getlist(fileFieldName)
+            for file in fileList:
+                filename = file.name
+                import os
+                _, ext = os.path.splitext(filename)
+                ext = ext.lower()
+                size = len(file.body)
+                yield fileFieldName,file, filename, ext, size
+
     async def _save_file(
         self, request: Request, *savePath: str, fileFieldName: str = None
     ):
         """
         保存上传的文件
+        @fileFieldName:files  eg. <input type="file" name="files" multiple>
         """
         p_len = len(savePath)
         if fileFieldName is not None and p_len == 1:
             file = request.files.get(fileFieldName)
             await self.save_file(file, *savePath)
-        elif p_len == len(request.files):
-            i: int = 0
-            for file in request.files:
-                file = request.files.get("file")
+        elif fileFieldName is not None:
+            file_list = request.files.getlist(fileFieldName)
+            i = 0
+            for file in file_list:
                 await self.save_file(file, savePath[i])
                 i += 1
+            return
+        elif fileFieldName is None:
+            i: int = 0
+            for _, file_list in request.files.items(): 
+                for file in file_list: 
+                    await self.save_file(file, savePath[i])
+                    i += 1
 
     def getFullPath(self, root, fileName: str) -> Tuple[str, str]:
         """
@@ -307,8 +340,8 @@ class _baseView(HTTPMethodView):
 
 class BaseClsView(_baseView):
     def __init__(self, request: Request, *args, **kwargs) -> None:
-        self.args=args
-        self.kwargs=kwargs
+        self.args = args
+        self.kwargs = kwargs
         self._request = request
 
     @property
@@ -324,7 +357,7 @@ class BaseClsView(_baseView):
         return self.request.match_info
 
     @property
-    def json(self)->dict:
+    def json(self) -> dict:
         """json 参数"""
         return self.request.json
 
@@ -378,6 +411,7 @@ class BaseClsView(_baseView):
         view.__module__ = cls.__module__
         view.__name__ = cls.__name__
         return view
+
     async def __call__(self) -> BaseHTTPResponse:
         try:
             method = self.request.method
@@ -386,8 +420,8 @@ class BaseClsView(_baseView):
                 raise NotImplementedError(f"Method {method} not implemented")
             return await handler()
         except Exception as e:
-            log.err(f"执行方法{method},{self.request.path}异常",e) 
-            return self.response_json(e, status=500) 
+            log.err(f"执行方法{method},{self.request.path}异常", e)
+            return self.response_json(e, status=500)
 
 
 @deprecated("该类已废弃，请使用 BaseClsView 类替代")
