@@ -45,6 +45,14 @@ class _baseView(HTTPMethodView):
     """
 
     routePath: str = "/"
+    """ 
+    <name:str>  默认，不含 /
+    <id:int>    正整数
+    <n:number>  浮点
+    <word:alpha> 大小字母
+    <uid:uuid> #8-4-4-4-12 大小写不敏感  - 不可少
+    <path:path>  包含/​
+    """
 
     def response_json(self, data: Result | Page_Result, status: int = 200):
         return response_json(data, status=status)
