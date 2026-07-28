@@ -17,11 +17,10 @@ from ..model.enum import user_category
 from ..model.filters.user_filter import user_filter
 from .aop.right_aop import userRoleChanged 
 from .aop.user_aop import AccessTokenChange
-from co6co_db_ext.session import transactional
 
 
 @AccessTokenChange
-def accessTokenChange(request: Request, token: str, userPo: UserPO = None):
+async def accessTokenChange(request: Request, token: str, userPo: UserPO = None):
     return userPo.jwt_data
 
 
@@ -151,7 +150,7 @@ class users_view(AbsAddView):
             ):
                 po.password = po.encrypt(po.password)
             else:
-                accessTokenChange(self.request, po.password, po)
+                await accessTokenChange(self.request, po.password, po)
 
         return await self.add( po, userId=userId, beforeFun=before)
 
@@ -211,38 +210,27 @@ class sys_users_view(AuthMethodView):
     async def post(self ):
         """
         重置密码
-        """
+        """ 
         data = self.json
         userName = data["userName"]
         password = data["password"]
         select = Select(UserPO).filter(UserPO.userName == userName)
         if userName == None or password == None or len(password) < 6:
             return response_json(Result.fail(message="请检查提交的用户和密码！"))
-
-        async def edit(one: Optional[UserPO]):
-            if one is not None:
-                if one.salt is None:
-                    return response_json(
-                        Result.fail(
-                            message=f"用户[{userName}],通过关联创建的用户，完善信息才能重置密码"
-                        )
-                    )
+        async def edit(one:Optional[UserPO]): 
+            if one is not None: 
+                if one.salt is None: 
+                    Result.fail( message=f"用户[{userName}],通过关联创建的用户，完善信息才能重置密码") 
                 if (
                     one.category == user_category.normal.val
                     or one.category == user_category.system.val
-                ):
+                ): 
                     one.password = one.encrypt(password)
                 else:
                     one.password = password
-                    accessTokenChange(self.request, password, one)
-                return response_json(Result.success())
+                    await accessTokenChange(self.request, password, one)
             else:
-                return response_json(
-                    Result.fail(
-                        message=f"所提供的用户名[{userName}]不存在，请刷新重试！"
-                    )
-                )
-
+                Result.fail( message=f"所提供的用户名[{userName}]不存在，请刷新重试！" ) 
         return await self.update_one( select, edit)
 
 

@@ -95,7 +95,7 @@ class BaseDbClsView(BaseClsView):
         """ 
         return self.response_json(self.actuator.error(e,msg))
 
-    async def update_one(self, select:Select, edit:Callable[[BasePO], Result|None]):
+    async def update_one(self, select:Select, edit:Callable[[BasePO],  Awaitable[Result|None]]):
         """
         更新一条记录
         """
@@ -103,7 +103,7 @@ class BaseDbClsView(BaseClsView):
             po = await self.actuator.query_one_entity(select)
             if po is None:
                 return self.response_json(Result.fail(message="未查询到数据"))
-            result = edit(  po)
+            result =await edit(  po)
             if result is not None: 
                 return self.response_json(result)
             return self.response_json(Result.success(result))
