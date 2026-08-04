@@ -31,8 +31,9 @@ export const useViewData = (viewName: string, moduleName?: string) => {
 		if(!d.component){
 			return false
 		}
-		
-		return d.component.indexOf(componentName)>-1;
+		// 可能会出现 一个组件 有多个路由的情况，有的路由需要参数，有的不需要，
+		// 查找带参数的路由项
+		return d.component.indexOf(componentName)>-1 && d.url.indexOf(":")>-1;
 		//return componentName.includes(d.component);
 	});
 	if (routeItem) {
