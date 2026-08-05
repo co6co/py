@@ -23,13 +23,15 @@ pip install greenlet==3.2.5 --only-binary :all:
 pip install SQLAlchemy==2.0.28
 
 ```
-co6co==0.0.37
-co6co.web_session=0.0.1
-co6co.sanic-ext==0.0.14
-co6co.db-ext==0.0.18
-co6co.web-db==0.0.18
-co6co.permissions==0.1.4
-co6co.task==0.1.3 
+co6co==0.1.601
+co6co.web_session==0.1.0
+co6co.sanic-ext==0.1.1
+co6co.db-ext==0.1.601
+co6co.web-db==0.1.1
+co6co.permissions==0.1.728
+co6co.task==0.1.601
+co6co.msg==0.1.0
+co6co.wx_ext==0.0.1
 
 ```
 

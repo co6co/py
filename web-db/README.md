@@ -41,5 +41,5 @@
     1. 增加app_config 属性 
 0.1.0 2026-06-04
     1. 不在使用BaseMethodView, 方法已移动到BaseDbView中，将来可能废除
-0.1.1 未发布
+0.1.1 2026-08-05
     1. BaseDbClsView.update_one bug
