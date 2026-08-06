@@ -8,7 +8,11 @@ from typing import List
 from co6co.utils import log, DATA
 from co6co_web_db.services.bll_service import BaseBll
 from co6co_permissions.model.enum import dict_state
-from multiprocessing.connection import PipeConnection
+try:
+    from multiprocessing.connection import PipeConnection
+except ImportError:
+    # linux
+    from multiprocessing.connection import Connection as PipeConnection 
 from co6co.utils import try_except
 import asyncio
 from typing import Tuple

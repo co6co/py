@@ -8,7 +8,11 @@ from co6co_permissions.view_model.base_view import AuthMethodView
 from ...model.pos.tables import DynamicCodePO, SysTaskPO 
 from co6co.utils import log, DATA
 
-from multiprocessing.connection import PipeConnection
+try:
+    from multiprocessing.connection import PipeConnection
+except ImportError:
+    # linux
+    from multiprocessing.connection import Connection as PipeConnection 
 from ...model.enum import CommandCategory
 from .codeView import _codeView
 from ...service import CustomTask as custom

@@ -93,6 +93,9 @@ db_session.py  72 z
     修复已知BUG
     cacheManage 缓存管理类 从其他项目中迁移过来做了关联调整
 0.1.0601
+0.1.602
+	Actuator.executes
+	DbCallable.__call(*)
 
 
 ```
