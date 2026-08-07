@@ -5,8 +5,7 @@
 
 import hashlib
 import hmac
-import json
-from re import T
+import json 
 import sys
 import time
 from datetime import datetime
@@ -206,27 +205,38 @@ class TencentCloudDNS:
             print(err)
 
 
-def handler_record(
-    dns: TencentCloudDNS, domain: str, recordName: str, sleepTime: int = 60 * 5
-):
-    while True:
-        try:
-            ip = get_public_ip()
-            if ip:
-                record_id, value = dns.find_record_id(domain, recordName)
-                if record_id and value != ip:
-                    print("修改记录:",dns.modify_record(domain, "A", recordName, record_id, ip),ip)
-                elif record_id and value == ip:
-                    print("记录值与IP地址相同")
-                else:
-                    print("未找到记录ID")
+def handler_record( dns: TencentCloudDNS, domain: str, recordName: str ): 
+    try:
+        ip = get_public_ip()
+        if ip:
+            record_id, value = dns.find_record_id(domain, recordName)
+            if record_id and value != ip:
+                print("修改记录:",dns.modify_record(domain, "A", recordName, record_id, ip),ip)
+            elif record_id and value == ip:
+                print("记录值与IP地址相同")
             else:
-                print("获取公共IP地址失败")
-        except Exception as err:
-            print("处理记录时出错:",err)
+                print("未找到记录ID")
+        else:
+            print("获取公共IP地址失败")
+    except Exception as err:
+        print("处理记录时出错:",err)
+      
+
+def task_(dns: TencentCloudDNS, domain: str, recordName: str, sleepTime: int = 60 * 5):
+    """
+    处理记录任务
+    :param dns: TencentCloudDNS实例
+    :param domain: 域名
+    :param recordName: 记录名称
+    :param sleepTime: 间隔时间，默认5分钟, <=0 只执行一次
+    :return:
+    """
+    if sleepTime <= 0:
+        handler_record(dns, domain, recordName)
+    while sleepTime > 0:
+        handler_record(dns, domain, recordName)
         time.sleep(sleepTime)
-
-
+    
 if __name__ == "__main__":
     import argparse
 
@@ -235,7 +245,7 @@ if __name__ == "__main__":
     parser.add_argument("--recordName", type=str, default="asset")
     parser.add_argument("--id", type=str, required=True)
     parser.add_argument("--key", type=str, required=True)
-    parser.add_argument("--sleepTime", type=int, default=60 * 5)
+    parser.add_argument("--sleepTime", type=int, default=60 * 5, help="间隔时间，默认5分钟, <=0 只执行一次")
     
 
     args = parser.parse_args()
@@ -244,7 +254,7 @@ if __name__ == "__main__":
     sleepTime = args.sleepTime
 
     dns = TencentCloudDNS(secret_id, secret_key)
-    handler_record(dns, args.domain, args.recordName, sleepTime)
+    task_(dns, args.domain, args.recordName, sleepTime)
 
     # network.get_local_ip()
     # print(record_id)
