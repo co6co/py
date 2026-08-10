@@ -171,7 +171,7 @@ export default defineComponent({
 			let promist: Promise<api_type.IResponse>;
 			switch (DATA.operation) {
 				case FormOperation.add:
-					promist = api.add_svc(DATA.fromData);
+					promist = api.add_post_svc(DATA.fromData);
 					break;
 				case FormOperation.edit:
 					promist = api.edit_svc(DATA.id, DATA.fromData);

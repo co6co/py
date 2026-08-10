@@ -114,9 +114,6 @@ class user_query_view(AbsQueryView):
     routePath = "/"
     cls = user_filter
 
-
-class users_view(AbsAddView):
-    
     async def get(self ):
         """
         用户下拉框数据
@@ -127,7 +124,12 @@ class users_view(AbsAddView):
         )
         return await self.query_list(  select, isPO=False)
 
-    async def put(self ):
+
+
+
+class users_view(AbsAddView): 
+
+    async def post(self ):
         """
         增加
         """

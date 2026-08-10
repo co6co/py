@@ -43,6 +43,9 @@ export const create_svc = (baseUrl: string) => {
 	const add_svc = (data: any): Promise<api_type.IResponse> => {
 		return createServiceInstance().put(`${baseUrl}`, data);
 	};
+	 const add_post_svc = (data: any): Promise<api_type.IResponse> => {
+		return createServiceInstance().post(`${baseUrl}/add`, data);
+	};
 	const edit_svc = (id: number, data: any): Promise<api_type.IResponse> => {
 		return createServiceInstance().put(`${baseUrl}/${id}`, data);
 	};
@@ -58,7 +61,8 @@ export const create_svc = (baseUrl: string) => {
 		get_select_svc,
 		get_table_svc,
 		exist_svc,
-		add_svc,
+		add_svc, // 渐渐的全部移除
+		add_post_svc,
 		edit_svc,
 		del_svc,
 	};
