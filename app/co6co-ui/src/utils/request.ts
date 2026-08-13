@@ -11,6 +11,7 @@ import { getToken, removeToken, getSession } from './auth';
 import { getStoreInstance } from '@/hooks';
 import { IResponse, HttpContentType } from '@/constants';
 
+const TIMEOUT = 15 * 1000;
 /**
  * 获取 apiBaseURL
  * @returns string
@@ -121,7 +122,7 @@ export const createAxios = (config?: CreateAxiosDefaults<any> | undefined) => {
  * @returns
  */
 export const createServiceInstance = (
-	timeout: number = 5000,
+	timeout: number = TIMEOUT,
 	tip: boolean = true,
 	contentType: HttpContentType = HttpContentType.json
 ) => {
@@ -172,7 +173,7 @@ export const createServiceInstance = (
  */
 export const createAxiosInstance = (
 	baseUrl?: string,
-	timeout: number = 5000,
+	timeout: number =TIMEOUT,
 	requestContentType: HttpContentType = HttpContentType.json,
 	responseContentType: HttpContentType = HttpContentType.json
 ) => {
