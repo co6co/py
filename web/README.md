@@ -44,6 +44,8 @@
 0.1.0
 0.1.1
  增加view 中 iter_files 方法
+0.1.2
+  linux
 
 ```
 
