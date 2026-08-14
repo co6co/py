@@ -52,7 +52,7 @@ url = input("请输入YouTube视频URL: ").strip()
 
 # 创建下载目录
 os.makedirs("downloads", exist_ok=True)
-
+proxys = {"http": "http://127.0.0.1:10809", "https": "http://127.0.0.1:10809"}
 if simple_audio_download(url, max_retries=5):
     print("\n音频下载完成！")
 else:
