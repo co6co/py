@@ -1,3 +1,16 @@
+# SQLALchemy deubg
+
+//sqlalchemy\dialects\mysql\aiomysql.py
+class MySQLDialect_aiomysql(MySQLDialect_pymysql):
+    .....
+    
+    def do_ping(self, dbapi_connection):
+        dbapi_connection.ping(reconnect=False)
+        return True
+    .....
+		
+		
+		
 # 扩展 SQLAlchemy
 
 SQLAlchemy 原始 使用起来总是有些不方便，该项目对其进行了部分封装为两个类：
