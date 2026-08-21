@@ -2,6 +2,10 @@ import re
 from types import FunctionType, MethodType  # 对象的叫方法[method]，其他未函数[Function]
 
 import inspect
+import os
+import sys
+from pathlib import Path
+
 
 
 def get_current_function_name():
@@ -71,3 +75,32 @@ def list_to_tree(data_list: list, root: any, pid_field: str, id_field: str):
     for i in data_list:
         i['children'] = [j for j in data_list if i.get(id_field) == j.get(pid_field)]
     return resp_list
+
+
+def find_font_directories():
+    """跨平台查找字体目录"""
+    paths = []
+    
+    # 通用环境变量（部分系统支持）
+    if "FONTCONFIG_PATH" in os.environ:
+        paths.append(os.environ["FONTCONFIG_PATH"])
+    
+    # 平台特定路径
+    if sys.platform == "win32":
+        paths.append(Path(os.environ.get("WINDIR", "C:/Windows")) / "Fonts")
+    elif sys.platform == "darwin":
+        paths.extend([
+            Path("/System/Library/Fonts"),
+            Path("/Library/Fonts"),
+            Path.home() / "Library/Fonts"
+        ])
+    else:
+        paths.extend([
+            Path("/usr/share/fonts"),
+            Path("/usr/local/share/fonts"),
+            Path.home() / ".fonts",
+            Path.home() / ".local/share/fonts"
+        ])
+    
+    # 返回存在的路径
+    return [str(p) for p in paths if p.exists()]
