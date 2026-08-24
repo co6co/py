@@ -4,6 +4,7 @@ from .db_session import db_service, connectSetting
 from co6co.task.thread import ThreadEvent
 import functools
 from contextlib import asynccontextmanager
+from typing import Callable, Awaitable, Any
   
 
 class session_context:
@@ -58,7 +59,7 @@ class dbBll:
         self.session: AsyncSession = _service.async_session_factory()
         self.service = _service
 
-    def run(self, task, *args, **argkv):
+    def run(self, task:Callable[..., Awaitable[Any]], *args, **argkv):
         data = self.t.runTask(task, *args, **argkv)
         return data
 

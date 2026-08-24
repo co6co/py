@@ -29,7 +29,7 @@ co6co.sanic-ext==0.1.2
 co6co.db-ext==0.1.602
 co6co.web-db==0.1.1
 co6co.permissions==0.1.728
-co6co.task==0.1.602
+co6co.task==0.1.603
 co6co.msg==0.1.0
 co6co.wx_ext==0.0.1
 

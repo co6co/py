@@ -1,8 +1,11 @@
 from __future__ import annotations
 
 
+
+from co6co_db_ext.actuator import Actuator
 from sanic import Sanic
 from sqlalchemy.sql import Select, Update
+from sqlalchemy.ext.asyncio import AsyncSession
 from co6co_db_ext.db_utils import db_tools, QueryListCallable
 from typing import List
 from co6co.utils import log, DATA
@@ -22,6 +25,7 @@ from ..model.pos.tables import DynamicCodePO, SysTaskPO
 from ..model.enum import CommandCategory
 from ..service import Scheduler, CustomTask as custom
 from co6co_db_ext.appconfig import AppConfig
+from typing import Callable, Awaitable, Any
 
 
 class HandlerCommand(ABC):
@@ -131,7 +135,7 @@ class StartHandler(HandlerCommand):
                 return
             if not self._taskisExist():
                 result, message = self.scheduler.addTask(self.taskCode, sourceCode, self. data.cron, stop)
-                fall_result = self.taskMgr.bll.run(self.taskMgr.update_status, [self.taskCode], 1)
+                fall_result = self.taskMgr.exec_update([self.taskCode], 1)
             else:
                 result = False
                 message = f"任务{self.taskCode}，已存在"
@@ -175,11 +179,11 @@ class RemoveHandler(HandlerCommand):
             if not self._taskisExist():
                 result = False
                 message = f"任务{self.taskCode}，不存在!"
-                fall_result = self.taskMgr.bll.run(self.taskMgr.update_status, [self. taskCode], 0)
+                fall_result = self.taskMgr.exec_update(  [self. taskCode], 0)
             else:
                 result = self.scheduler.removeTask(self. taskCode)
                 if result:
-                    fall_result = self.taskMgr.bll.run(self.taskMgr.update_status, [self. taskCode], 0)
+                    fall_result =  self.taskMgr.exec_update(  [self. taskCode], 0)
                     log.warn(f"任务{self.taskCode}，删除成功，更新状态：{fall_result}")
                     message = f"任务{self.taskCode}，删除成功"
                 else:
@@ -217,15 +221,44 @@ class TasksMgr(sanics.Worker):
         worker = TasksMgr(app, envent, conn)
         return worker
 
+
     def __init__(self, app: Sanic, event: asyncio.Event, conn: PipeConnection):
         # BaseBll.__init__(self, app=app)
-        self.bll = BaseBll(app=app, db_settings=AppConfig.get_db_config(app.config))
-        self.session = self.bll.session
-        sanics.Worker.__init__(self, event, conn)
-        # super(sanics.Worker, self).__init__(event, conn)
+        # 不能长时间持有数据库连接，否则会导致连接池，mysql可能会在 超时时关闭连接导致连接不可用
+        #self.bll = BaseBll(app=app, db_settings=AppConfig.get_db_config(app.config))
+        #self.session = self.bll.session
+        self._db_config = AppConfig.get_db_config(app.config)
+
+        sanics.Worker.__init__(self, event, conn)  
         app.ctx.taskMgr = self
+
         self.scheduler: Scheduler = Scheduler()
         self.handlerChain = ExistHandler(StartHandler(ModifyHandler(RemoveHandler(GetNextRunTimeHandler(UnknownHandler(taskMgr=self))))))
+    def exec_(self, execExec : Callable[...,  Awaitable[Any]],  *args,**kwargs): 
+        """
+        execExec 必须有session参数
+        """
+        try:
+            
+            bll = BaseBll( db_settings=self._db_config)
+            #self.session = self.bll.session
+            return bll.run(execExec,bll.session,  *args,**kwargs)
+        except Exception as e:
+            log.err("exec_ error:", e)
+            return None
+        finally:
+            #log.warn("关闭任务session")
+            bll.close()
+
+
+    def exec_update(self, codeList: List[str] = None, status: int = 0):
+        """
+        更新状态
+        codeList: 任务编码 [,,,]--> 更新指定
+        status: 状态 0: 停止 1:运行
+        """
+        return self.exec_(self.update_status, codeList,status)
+        
 
     @try_except
     def handler(self, data: str | DATA, conn: PipeConnection):
@@ -235,35 +268,39 @@ class TasksMgr(sanics.Worker):
         data: DATA = data
         self.handlerChain.handle_request(data, conn)
 
-    async def getData(self):
+    async def getData(self,session: AsyncSession):
         """
         获取源码
         """
         try:
-            call = QueryListCallable(self.session)
+            actuator = Actuator(session)
+           # call = QueryListCallable(session)
             select = (
                 Select(SysTaskPO.data, SysTaskPO.code, SysTaskPO.category, SysTaskPO.cron, DynamicCodePO.sourceCode)
                 .outerjoin(DynamicCodePO, DynamicCodePO.id == SysTaskPO.data)
                 .filter(SysTaskPO.state == dict_state.enabled.val)
             )
-            return await call(select, isPO=False)
+            data = await actuator.query_all_mappings(select)
+            return data
+                
+            #return await call(select, isPO=False)
 
         except Exception as e:
             log.err("执行 ERROR", e)
             return []
 
-    async def update_status__2(self):
+    async def update_status__2(self, session: AsyncSession):
         """
         意外状态更新
         """
         # 防止万一的代码
         ccc = Update(SysTaskPO).where(SysTaskPO.state == dict_state.disabled.val, SysTaskPO.execStatus == 1).values({SysTaskPO.execStatus: 0})
-        result2 = await db_tools.execSQL(self.session, ccc)
+        result2 = await db_tools.execSQL(session, ccc)
         log.info("更新状态不正确的任务：{}【应该为0】".format(result2))
-        await self.session.commit()
+        await session.commit()
         return result2
 
-    async def update_status(self, codeList: List[str] = None, status: int = 0) -> int:
+    async def update_status(self, session: AsyncSession,  codeList: List[str] = None, status: int = 0) -> int:
         """
         更新状态
         codeList: 任务编码 None -->所有，[] --> 不更新，[,,,]--> 更新指定
@@ -276,10 +313,9 @@ class TasksMgr(sanics.Worker):
                 ccc = Update(SysTaskPO).where(SysTaskPO.state == dict_state.enabled.val).values({SysTaskPO.execStatus: status})
             else:
                 ccc = Update(SysTaskPO).where(SysTaskPO.state == dict_state.enabled.val, SysTaskPO.code.in_(codeList)).values({SysTaskPO.execStatus: status})
-            result = await db_tools.execSQL(self.session, ccc)
-            await self.session.commit()
-            return result
-
+            result = await db_tools.execSQL(session, ccc)
+            await session.commit()
+            return result 
         except Exception as e:
             log.err("执行 ERROR", e)
             return None
@@ -305,7 +341,7 @@ class TasksMgr(sanics.Worker):
         """
         运行在数据库中的代码任务
         """
-        taskArr = self.bll.run(self.getData)
+        taskArr = self.exec_(self.getData) 
         # data = asyncio.run(self.getData())
         # result = asyncio.run(self.check_session_closed())
         # log.warn(data)
@@ -331,10 +367,10 @@ class TasksMgr(sanics.Worker):
         fall_result = 0
         if len(success) > 0:
             print(*success)
-            succ_result = self.bll.run(self.update_status, success, 1)
+            succ_result = self.exec_(self.update_status, success, 1)
         if len(faile) > 0:
-            fall_result = self.bll.run(self.update_status, faile, 0)    
-        exeStatue = self.bll.run(self.update_status__2)
+            fall_result = self.exec_(self.update_status, faile, 0)    
+        exeStatue = self.exec_(self.update_status__2)
         log.warn("状态更新,成功->{},失败->{},意外的状态：{}".format(succ_result, fall_result, exeStatue))
 
     def start(self):
@@ -347,7 +383,7 @@ class TasksMgr(sanics.Worker):
 
     def stop(self):
         super().stop()
-        result = self.bll.run(self.update_status)
+        result = self.exec_update(  None, 0)
         self.scheduler.stop()
         log.warn("状态更新,成功->{}".format(result))
         log.info("等待其他任务退出..")
