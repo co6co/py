@@ -35,12 +35,13 @@ class db_service:
     def createEngine(self, url, **kwargs) -> Engine:
         setting = {
             "ping": self.settings.get("pool_pre_ping"),
-            "echo": True if isinstance(self.settings.get("echo"), bool) else self.settings.get("echo"),
+            "echo": self.settings.get("echo"),  # bool
             "pool_size": self.settings.get("pool_size"),
             "max_overflow": self.settings.get("max_overflow"),
             "poolclass": NullPool,
         }
-        setting.update(kwargs)
+        setting.update(kwargs) # 把其他属性也增加上去 
+       
         return create_engine(url, **setting)
 
     def createAsyncEngine(self, url, **kwargs):
@@ -55,13 +56,12 @@ class db_service:
         """
         setting = {
             "pool_pre_ping": self.settings.get("pool_pre_ping"),
-            "echo": True
-            if isinstance(self.settings.get("echo"), bool)
-            else self.settings.get("echo"),
+            "echo": self.settings.get("echo"),  # bool
             "pool_size": self.settings.get("pool_size"),
+            "echo_pool": self.settings.get("echo_pool"), # bool
             "max_overflow": self.settings.get("max_overflow"),
         }
-        setting.update(kwargs)
+        setting.update(kwargs)  
         return create_async_engine(url, **setting) #,
 
     def _session_factory(self, engine: Engine = None, **kv):
