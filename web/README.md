@@ -46,6 +46,8 @@
  增加view 中 iter_files 方法
 0.1.2
 	for linux
+0.1.3
+    取消中文unicode 编码问题
 
 ```
 

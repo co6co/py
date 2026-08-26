@@ -24,11 +24,13 @@ from co6co_web_session.base import SessionDict
 from typing import Tuple
 from co6co.utils import tool_util as utils
 from co6co.utils.modules import deprecated
-import json as sys_json
+
 
 
 def response_json(data: Result | Page_Result, status: int = 200):
-    return json(sys_json.loads(JSONEncoder.dumps(data)), status=status)
+    #import json as sys_json
+    #return json(sys_json.loads(JSONEncoder.dumps(data)), status=status)
+    return json( data, status=status,dumps=JSONEncoder.dumps)
 
 
 class _baseView(HTTPMethodView):
