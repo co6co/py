@@ -92,7 +92,7 @@
     优化 DataProperty 类
 0.1.601
     ..
-0.1.602 未发布
+0.1.602
 	字体目录
 	优化jsonEncoder
 	
