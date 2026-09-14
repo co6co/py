@@ -16,7 +16,9 @@
     修复已知bug
 0.1.6
     修复已知bug
-0.1.7 未发布
+0.1.7
     useViewData 优化
+    扩展 useSelect
+    修复已知bug
 
 ```

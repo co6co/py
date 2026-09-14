@@ -102,8 +102,9 @@ export default defineComponent({
 		watch(
 			[() => DATA.fromData.parentId, () => DATA.fromData.category],
 			(newVal) => {
-				if (newVal && newVal[0] && newVal[1] == MenuCateCategory.VIEW) {
-					DATA.fromData.methods = [];
+				//console.log("watch",newVal);
+				if (newVal && newVal[0] && newVal[1] == MenuCateCategory.Button) {
+					//DATA.fromData.methods = [];
 					get_one_svc(newVal[0]).then((res) => {
 						Object.assign(DATA.parentItem, res.data);
 						queryViewFeature(DATA.parentItem.component!, newVal[1]).then(
@@ -118,6 +119,8 @@ export default defineComponent({
 		const featureSelect = computed(() => {
 			return useFeatureSelect(FeaturesRef.value);
 		});
+
+		
 		const init_data = (oper: FormOperation, item?: Item) => {
 			DATA.operation = oper;
 

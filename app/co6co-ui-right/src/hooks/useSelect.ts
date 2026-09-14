@@ -1,19 +1,22 @@
 
 
-import { ref } from 'vue';
+import { ref  } from 'vue';
 import { ISelect, IEnumSelect, IResponse } from 'co6co';
 import { getTagTypeStr } from '@/utils/other';
 import { IEnumsResonse } from '@/constants/api';
-export const useSelect = <T extends any = void>(api: (data: T) => Promise<IResponse<ISelect[]>>) => {
-    const selectData = ref<ISelect[]>([]);
+
+ 
+
+export const useSelect = <T = void, R extends ISelect = ISelect>(api: (data?: T) => Promise<IResponse<R[]>>) => {
+    const selectData = ref<R[]>();
     // 使用条件类型定义 refresh 函数 
-    const refresh = async (data: T) => {
+    const refresh = async (data?: T) => {
         selectData.value = [];
         const res = await api(data);
         selectData.value = res.data;
     };
     const getName = (value?: number) => {
-        if (value != undefined) return selectData.value.find((m) => m.id == value)?.name;
+        if (value != undefined) return selectData.value?.find((m) => m.id == value)?.name;
         return '';
     };
     const loadData = refresh;
@@ -33,7 +36,7 @@ export const useEnumSelect = <T extends any = void>(api: (data: T) => Promise<IR
 
     const getName = (value?: number | string) => {
         const nameChecked = (m) => m.value == value;
-        return selectData.value.find(nameChecked!)?.label; 
+        return selectData.value.find(nameChecked!)?.label;
     };
 
     const getTagType = (value?: number | string, checked?: (item: IEnumSelect) => boolean) => {
