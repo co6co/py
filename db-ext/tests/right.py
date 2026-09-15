@@ -91,4 +91,18 @@ class UserRolePO(UserTimeStampedModelPO):
     __tablename__ = "sys_user_role" 
     user= Column("user_id",ForeignKey(f"{UserPO.__tablename__}.{UserPO.id.name}",ondelete="CASCADE"),   comment="主键id",primary_key=True )
     role = Column("role_id",ForeignKey(f"{RolePO.__tablename__}.{RolePO.id.name}",ondelete="CASCADE"),   comment="主键id",primary_key=True )
-      
+
+
+class RecordPO(BasePO):
+    """
+    记录表
+    """
+    __tablename__ = "sys_record"
+    id = Column("id", Integer, comment="主键", autoincrement=True, primary_key=True)
+    name = Column("name", String(64), comment="名称")
+    state = Column("state", String(64),   comment="状态")
+    previousStatus = Column("previous_status", String(64))
+    ipAddress = Column("ip_address", String(64))
+    webBrowser=Column[str]("web_browser",String(255))
+    message = Column("message", String(255))
+   

@@ -1,5 +1,5 @@
 class TestDemo:
-     
+    
     def get_2(i: int | str):
         """
         2. 转换为字典
